@@ -379,6 +379,8 @@ type Msg
     | RemoveItem String String
     | RemoveItemConfirm
     | RemoveItemCancel
+    | MoveItemUp String String
+    | MoveItemDown String String
     | OpenIntegrationWidget String String
     | GotIntegrationWidgetValue E.Value
     | SetLabels String (List String)
@@ -521,6 +523,57 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         RemoveItemCancel ->
             wrap <| { model | removeItem = Nothing }
+
+        MoveItemUp path itemUuid ->
+            let
+                itemUuids =
+                    Dict.get path model.questionnaire.replies
+                        |> Maybe.unwrap [] (.value >> ReplyValue.getItemUuids)
+
+                index =
+                    Maybe.withDefault -1 (List.elemIndex itemUuid itemUuids)
+
+                newItemUuids =
+                    if index > 0 then
+                        List.swapAt index (index - 1) itemUuids
+
+                    else
+                        itemUuids
+
+                replyValue =
+                    createReply appState (ItemListReply newItemUuids)
+
+                setReplyMsg =
+                    SetReply path replyValue
+            in
+            withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
+
+        MoveItemDown path itemUuid ->
+            let
+                itemUuids =
+                    Dict.get path model.questionnaire.replies
+                        |> Maybe.unwrap [] (.value >> ReplyValue.getItemUuids)
+
+                itemCount =
+                    List.length itemUuids
+
+                index =
+                    Maybe.withDefault (List.length itemUuids) (List.elemIndex itemUuid itemUuids)
+
+                newItemUuids =
+                    if index < itemCount - 1 then
+                        List.swapAt index (index + 1) itemUuids
+
+                    else
+                        itemUuids
+
+                replyValue =
+                    createReply appState (ItemListReply newItemUuids)
+
+                setReplyMsg =
+                    SetReply path replyValue
+            in
+            withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
 
         OpenIntegrationWidget path requestUrl ->
             let
@@ -2206,7 +2259,7 @@ viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> 
 viewQuestionList appState cfg ctx model path humanIdentifiers question =
     let
         viewItem =
-            viewQuestionListItem appState cfg ctx model question path humanIdentifiers
+            viewQuestionListItem appState cfg ctx model question path humanIdentifiers (List.length itemUuids)
 
         itemUuids =
             Dict.get (pathToString path) model.questionnaire.replies
@@ -2241,8 +2294,8 @@ viewQuestionListAdd appState cfg itemUuids path =
             ]
 
 
-viewQuestionListItem : AppState -> Config msg -> Context -> Model -> Question -> List String -> List String -> Int -> String -> Html Msg
-viewQuestionListItem appState cfg ctx model question path humanIdentifiers index uuid =
+viewQuestionListItem : AppState -> Config msg -> Context -> Model -> Question -> List String -> List String -> Int -> Int -> String -> Html Msg
+viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemCount index uuid =
     let
         itemPath =
             path ++ [ uuid ]
@@ -2267,16 +2320,45 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers index
                 in
                 List.indexedMap (viewQuestion appState cfg ctx model itemPath newHumanIdentifiers) questions
 
-        deleteButton =
+        buttons =
             if cfg.features.readonly then
-                emptyNode
+                []
 
             else
-                a
-                    [ class "btn-link text-danger"
-                    , onClick (RemoveItem (pathToString path) uuid)
-                    ]
-                    [ faSet "_global.delete" appState ]
+                let
+                    deleteButton =
+                        a
+                            (class "btn-link text-danger"
+                                :: onClick (RemoveItem (pathToString path) uuid)
+                                :: tooltip (l_ "list.delete" appState)
+                            )
+                            [ faSet "_global.delete" appState ]
+
+                    moveUpButton =
+                        if index == 0 then
+                            emptyNode
+
+                        else
+                            a
+                                (class "btn-link me-2"
+                                    :: onClick (MoveItemUp (pathToString path) uuid)
+                                    :: tooltip (l_ "list.moveUp" appState)
+                                )
+                                [ faSet "questionnaire.item.moveUp" appState ]
+
+                    moveDownButton =
+                        if index == itemCount - 1 then
+                            emptyNode
+
+                        else
+                            a
+                                (class "btn-link me-2"
+                                    :: onClick (MoveItemDown (pathToString path) uuid)
+                                    :: tooltip (l_ "list.moveDown" appState)
+                                )
+                                [ faSet "questionnaire.item.moveDown" appState ]
+                in
+                [ moveUpButton, moveDownButton, deleteButton ]
 
         itemTitle =
             if isCollapsed then
@@ -2290,15 +2372,15 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers index
 
         collapseButton =
             if isCollapsed then
-                a [ onClick (ExpandItem itemPathString) ] [ faSet "questionnaire.itemExpand" appState ]
+                a [ onClick (ExpandItem itemPathString) ] [ faSet "questionnaire.item.expand" appState ]
 
             else
-                a [ onClick (CollapseItem itemPathString) ] [ faSet "questionnaire.itemCollapse" appState ]
+                a [ onClick (CollapseItem itemPathString) ] [ faSet "questionnaire.item.collapse" appState ]
 
         itemHeader =
             div [ class "item-header d-flex justify-content-between" ]
                 [ div [] [ collapseButton, itemTitle ]
-                , div [] [ deleteButton ]
+                , div [] buttons
                 ]
     in
     div [ class "item mb-3", classList [ ( "item-collapsed", isCollapsed ) ] ]
