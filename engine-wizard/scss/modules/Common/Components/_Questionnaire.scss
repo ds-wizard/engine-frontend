@@ -720,12 +720,14 @@ $toolbar-height: 40px;
                 margin-right: -$card-spacer-x;
                 margin-bottom: $card-spacer-y;
                 padding: ($card-spacer-y * 0.5) $card-spacer-x;
+                @include border-radius-top($card-border-radius);
             }
 
             &-collapsed {
                 .item-header {
                     margin-top: 0;
                     margin-bottom: 0;
+                    @include border-radius-bottom($card-border-radius);
                 }
 
                 .card {
@@ -739,7 +741,6 @@ $toolbar-height: 40px;
             .card {
                 background: $gray-100 !important;
                 flex-grow: 1;
-                overflow: hidden;
             }
 
             .radio {
