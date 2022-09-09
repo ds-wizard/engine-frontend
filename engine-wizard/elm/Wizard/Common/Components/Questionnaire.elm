@@ -2186,7 +2186,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
             List.find (.uuid >> Just >> (==) selectedAnswerUuid) answers
 
         clearReplyButton =
-            viewQuestionClearButton appState cfg path mbSelectedAnswer
+            viewQuestionClearButton appState cfg path (Maybe.isJust mbSelectedAnswer)
 
         advice =
             Maybe.unwrap emptyNode cfg.renderer.renderAnswerAdvice mbSelectedAnswer
@@ -2204,9 +2204,9 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
     )
 
 
-viewQuestionClearButton : AppState -> Config msg -> List String -> Maybe a -> Html Msg
-viewQuestionClearButton appState cfg path mbSelectedAnswer =
-    if cfg.features.readonly || Maybe.isNothing mbSelectedAnswer then
+viewQuestionClearButton : AppState -> Config msg -> List String -> Bool -> Html Msg
+viewQuestionClearButton appState cfg path hasAnswer =
+    if cfg.features.readonly || not hasAnswer then
         emptyNode
 
     else
@@ -2251,8 +2251,11 @@ viewQuestionMultiChoice appState cfg model path question =
         selectedChoicesUuids =
             Dict.get (pathToString path) model.questionnaire.replies
                 |> Maybe.unwrap [] (.value >> ReplyValue.getChoiceUuid)
+
+        clearReplyButton =
+            viewQuestionClearButton appState cfg path (not (List.isEmpty selectedChoicesUuids))
     in
-    div [] (List.indexedMap (viewChoice appState cfg path selectedChoicesUuids) choices)
+    div [] (List.indexedMap (viewChoice appState cfg path selectedChoicesUuids) choices ++ [ clearReplyButton ])
 
 
 viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
@@ -2401,9 +2404,12 @@ viewQuestionValue appState cfg model path question =
             else
                 ""
 
-        answer =
+        mbAnswer =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap defaultValue (.value >> ReplyValue.getStringReply)
+                |> Maybe.map (.value >> ReplyValue.getStringReply)
+
+        answer =
+            Maybe.withDefault defaultValue mbAnswer
 
         defaultAttrs =
             [ class "form-control", value answer ]
@@ -2469,8 +2475,11 @@ viewQuestionValue appState cfg model path question =
 
                 _ ->
                     defaultInput
+
+        clearReplyButton =
+            viewQuestionClearButton appState cfg path (Maybe.isJust mbAnswer)
     in
-    div [] inputView
+    div [] (inputView ++ [ clearReplyButton ])
 
 
 viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg
@@ -2490,7 +2499,7 @@ viewQuestionIntegrationWidget appState cfg model path commonIntegrationData widg
     in
     div [ class "question-integration-answer" ]
         [ questionInput
-        , viewQuestionClearButton appState cfg path mbReplyValue
+        , viewQuestionClearButton appState cfg path (Maybe.isJust mbReplyValue)
         ]
 
 
@@ -2561,7 +2570,7 @@ viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiInte
     div [ class "question-integration-answer" ]
         [ questionInput
         , viewTypeHints
-        , viewQuestionClearButton appState cfg path mbReplyValue
+        , viewQuestionClearButton appState cfg path (Maybe.isJust mbReplyValue)
         ]
 
 
