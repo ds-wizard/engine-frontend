@@ -9,7 +9,7 @@ import String.Extra as String
 
 getToken : String -> Maybe String -> Maybe String -> AbstractAppState a -> ToMsg Token msg -> Cmd msg
 getToken id mbError mbCode =
-    httpGet ("/auth/" ++ id ++ "/callback?error=" ++ String.fromMaybe mbError ++ "&code=" ++ String.fromMaybe mbCode) Token.decoder
+    httpGet ("/auth/" ++ id ++ "/callback?error=" ++ String.fromMaybe mbError ++ "&code=" ++ String.fromMaybe mbCode ++ "&nonce=FtEIbRdfFc7z2bNjCTaZKDcWNeUKUelvs13K21VL") Token.decoder
 
 
 authRedirectUrl : OpenIDServiceConfig -> AbstractAppState a -> String
