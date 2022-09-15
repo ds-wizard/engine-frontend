@@ -4,6 +4,7 @@ module Shared.Html exposing
     , faKey
     , faKeyClass
     , faSet
+    , faSetFw
     )
 
 import Dict
@@ -30,6 +31,13 @@ faSet : String -> { a | provisioning : Provisioning } -> Html msg
 faSet iconKey appState =
     faKey iconKey appState
         |> Maybe.map fa
+        |> Maybe.withDefault emptyNode
+
+
+faSetFw : String -> { a | provisioning : Provisioning } -> Html msg
+faSetFw iconKey appState =
+    faKey iconKey appState
+        |> Maybe.map (fa << (++) " fa-fw ")
         |> Maybe.withDefault emptyNode
 
 

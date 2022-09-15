@@ -6,20 +6,17 @@ module Wizard.Common.View.Layout exposing
     )
 
 import Browser exposing (Document)
-import Html exposing (Html, a, div, li, nav, span, text, ul)
-import Html.Attributes exposing (class, classList, href, target)
+import Html exposing (Html, div, li, nav, text, ul)
+import Html.Attributes exposing (class, classList)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
-import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Html exposing (emptyNode)
 import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
-import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.Common.Html.Events exposing (onLinkClick)
-import Wizard.Common.Menu.View exposing (viewAboutModal, viewDevMenu, viewHelpMenu, viewProfileMenu, viewReportIssueModal, viewSettingsMenu)
+import Wizard.Common.Menu.View as Menu exposing (viewAboutModal, viewReportIssueModal)
 import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
@@ -156,7 +153,7 @@ app model content =
                     , ( "app-fullscreen", AppState.isFullscreen model.appState )
                     ]
                 ]
-                [ menu model
+                [ Menu.view model
                 , div [ class "page row justify-content-center" ]
                     [ content ]
                 , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
@@ -166,163 +163,3 @@ app model content =
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
     , body = [ html, CookieConsent.view model.appState ]
     }
-
-
-menu : Model -> Html Msg
-menu model =
-    div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
-        [ logo model
-        , ul [ class "menu" ]
-            (createMenu model)
-        , profileInfo model
-        ]
-
-
-logo : Model -> Html Msg
-logo model =
-    let
-        logoImg =
-            span [ class "logo-full", dataCy "nav_app-title-short" ]
-                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
-    in
-    linkTo model.appState Routes.appHome [ class "logo" ] [ logoImg ]
-
-
-type MenuItem msg
-    = MenuItem String (Html msg) Routes.Route (Routes.Route -> Bool) (AppState -> Bool) String
-
-
-createMenu : Model -> List (Html Msg)
-createMenu model =
-    let
-        defaultMenuItems =
-            menuItems model.appState
-                |> List.filter (\(MenuItem _ _ _ _ featureEnabled _) -> featureEnabled model.appState)
-                |> List.map (menuItem model)
-
-        customMenuItems =
-            List.map customMenuItem model.appState.config.lookAndFeel.customMenuLinks
-    in
-    defaultMenuItems ++ customMenuItems
-
-
-menuItems : AppState -> List (MenuItem msg)
-menuItems appState =
-    [ MenuItem
-        (l_ "menu.apps" appState)
-        (faSet "menu.apps" appState)
-        Routes.appsIndex
-        Routes.isAppIndex
-        Feature.apps
-        "apps-link"
-    , MenuItem
-        (l_ "menu.users" appState)
-        (faSet "menu.users" appState)
-        Routes.usersIndex
-        Routes.isUsersIndex
-        Feature.usersView
-        "users-link"
-    , MenuItem
-        (l_ "menu.kmEditor" appState)
-        (faSet "menu.kmEditor" appState)
-        Routes.kmEditorIndex
-        Routes.isKmEditorIndex
-        Feature.knowledgeModelEditorsView
-        "km-editor-link"
-    , MenuItem
-        (l_ "menu.knowledgeModels" appState)
-        (faSet "menu.knowledgeModels" appState)
-        Routes.knowledgeModelsIndex
-        Routes.isKnowledgeModelsIndex
-        Feature.knowledgeModelsImport
-        "km-link"
-    , MenuItem
-        (l_ "menu.projects" appState)
-        (faSet "menu.projects" appState)
-        (Routes.projectsIndex appState)
-        Routes.isProjectsIndex
-        Feature.projectsView
-        "projects-link"
-    , MenuItem
-        (l_ "menu.projectImporters" appState)
-        (faSet "menu.projectImporters" appState)
-        Routes.projectImportersIndex
-        Routes.isProjectImportersIndex
-        Feature.projectImporters
-        "project-importers-link"
-    , MenuItem
-        (l_ "menu.documents" appState)
-        (faSet "menu.documents" appState)
-        Routes.documentsIndex
-        Routes.isDocumentsIndex
-        Feature.documentsView
-        "documents-link"
-    , MenuItem
-        (l_ "menu.templates" appState)
-        (faSet "menu.templates" appState)
-        Routes.templatesIndex
-        Routes.isTemplateIndex
-        Feature.templatesView
-        "templates-link"
-    ]
-
-
-menuItem : Model -> MenuItem msg -> Html msg
-menuItem model (MenuItem label icon route isActive _ cy) =
-    let
-        activeClass =
-            if isActive model.appState.route then
-                "active"
-
-            else
-                ""
-    in
-    li []
-        [ linkTo model.appState
-            route
-            [ class activeClass, dataCy ("menu_" ++ cy) ]
-            [ icon
-            , span [ class "sidebar-link" ] [ text label ]
-            ]
-        ]
-
-
-customMenuItem : CustomMenuLink -> Html msg
-customMenuItem link =
-    let
-        targetArg =
-            if link.newWindow then
-                [ target "_blank" ]
-
-            else
-                []
-    in
-    li []
-        [ a ([ href link.url, dataCy "menu_custom-link" ] ++ targetArg)
-            [ fa link.icon
-            , span [ class "sidebar-link" ] [ text link.title ]
-            ]
-        ]
-
-
-profileInfo : Model -> Html Msg
-profileInfo model =
-    let
-        collapseLink =
-            if model.appState.session.sidebarCollapsed then
-                a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed False), class "collapse" ]
-                    [ faSet "menu.open" model.appState ]
-
-            else
-                a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed True), class "collapse" ]
-                    [ faSet "menu.collapse" model.appState
-                    , lx_ "sidebar.collapse" model.appState
-                    ]
-    in
-    div [ class "profile-info" ]
-        [ viewSettingsMenu model.appState
-        , viewDevMenu model.appState model.menuModel.devMenuDropdownState
-        , viewHelpMenu model.appState model.menuModel.helpMenuDropdownState
-        , viewProfileMenu model.appState model.menuModel.profileMenuDropdownState
-        , collapseLink
-        ]

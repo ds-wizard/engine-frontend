@@ -34,20 +34,23 @@
         background-size: 35px;
         background-position: left center;
         padding-left: 45px;
+        font-weight: 500;
     }
 
     .navbar-expand-sm {
         background: $side-navigation-bg;
+        border-bottom: 1px solid $side-navigation-border-color;
         z-index: 900;
 
         .navbar-nav {
             & > li {
                 a {
                     @include border-radius($border-radius);
-                    color: $side-navigation-title-color;
+                    color: $side-navigation-text-color;
                     margin-left: 0.5rem;
                     padding-left: 1rem;
                     padding-right: 1rem;
+                    font-weight: 500;
                 }
 
                 a:focus {
@@ -56,6 +59,7 @@
 
                 a:hover {
                     background-color: $side-navigation-link-hover-bg;
+                    color: $side-navigation-link-hover-color;
                 }
             }
         }
