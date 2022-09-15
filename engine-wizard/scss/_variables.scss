@@ -17,20 +17,32 @@ $public-header-height: 50px !default;
 
 
 // side navigation
-$side-navigation-logo-url: url(../img/logo.svg) !default;
-$side-navigation-logo-width: 35px !default;
-$side-navigation-logo-height: 35px !default;
+$side-navigation-bg: $gray-100 !default;
+$side-navigation-border-color: $gray-400 !default;
 $side-navigation-width: 240px !default;
 $side-navigation-width-collapsed: 50px !default;
-$side-navigation-bg: $primary !default;
-$side-navigation-text-color: $white !default;
+$side-navigation-logo-url: url(../img/logo.svg) !default;
+$side-navigation-gap: 20px !default;
+$side-navigation-submenu-max-width: 220px !default;
+$side-navigation-icon-spacing: 10px !default;
+$side-navigation-link-transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+
+$side-navigation-logo-width: 30px !default;
+$side-navigation-logo-height: 30px !default;
+$side-navigation-text-color: $gray-700 !default;
 $side-navigation-title-color: $side-navigation-text-color !default;
 $side-navigation-icon-color: $side-navigation-text-color !default;
 $side-navigation-link-color: $side-navigation-text-color !default;
-$side-navigation-link-active-bg: darken($side-navigation-bg, 10%) !default;
-$side-navigation-link-hover-bg: darken($side-navigation-bg, 15%) !default;
+$side-navigation-icon-hover-color: $primary !default;
+$side-navigation-link-hover-color: $primary !default;
+$side-navigation-link-hover-bg: mix($primary, $white, 10%) !default;
+$side-navigation-link-hover-bg2: mix($primary, $white, 20%) !default;
+$side-navigation-icon-active-color: $side-navigation-icon-hover-color !default;
+$side-navigation-link-active-color: $side-navigation-link-hover-color !default;
+$side-navigation-link-active-bg: $side-navigation-link-hover-bg !default;
+$side-navigation-link-active-bg2: $side-navigation-link-hover-bg2 !default;
 $side-navigation-border-color: darken($side-navigation-bg, 10%) !default;
-$side-navigation-collapse-hover: darken($side-navigation-bg, 5%) !default;
+$side-navigation-floating-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
 
 // top-header

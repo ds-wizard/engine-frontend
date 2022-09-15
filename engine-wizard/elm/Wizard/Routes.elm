@@ -9,13 +9,20 @@ module Wizard.Routes exposing
     , documentsIndex
     , documentsIndexWithFilters
     , isAppIndex
+    , isDevOperations
+    , isDevSubroute
     , isDocumentsIndex
+    , isDocumentsSubroute
     , isKmEditorEditor
     , isKmEditorIndex
     , isKnowledgeModelsIndex
+    , isKnowledgeModelsSubroute
+    , isPersistentCommandsIndex
     , isProjectImportersIndex
+    , isProjectSubroute
     , isProjectsDetail
     , isProjectsIndex
+    , isSettingsRoute
     , isTemplateIndex
     , isUsersIndex
     , kmEditorCreate
@@ -53,6 +60,7 @@ module Wizard.Routes exposing
     , publicLogin
     , publicSignup
     , settingsAuthentication
+    , settingsDefault
     , settingsLookAndFeel
     , settingsOrganization
     , settingsRegistry
@@ -164,9 +172,24 @@ devOperations =
     DevRoute Wizard.Dev.Routes.OperationsRoute
 
 
+isDevOperations : Route -> Bool
+isDevOperations =
+    (==) (DevRoute Wizard.Dev.Routes.OperationsRoute)
+
+
 persistentCommandsIndex : Route
 persistentCommandsIndex =
     DevRoute (Wizard.Dev.Routes.PersistentCommandsIndex PaginationQueryString.empty Nothing)
+
+
+isPersistentCommandsIndex : Route -> Bool
+isPersistentCommandsIndex route =
+    case route of
+        DevRoute (Wizard.Dev.Routes.PersistentCommandsIndex _ _) ->
+            True
+
+        _ ->
+            False
 
 
 persistentCommandsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
@@ -180,6 +203,16 @@ persistentCommandsIndexWithFilters filters pagination =
 persistentCommandsDetail : Uuid -> Route
 persistentCommandsDetail =
     DevRoute << Wizard.Dev.Routes.PersistentCommandsDetail
+
+
+isDevSubroute : Route -> Bool
+isDevSubroute route =
+    case route of
+        DevRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -200,6 +233,19 @@ isDocumentsIndex : Route -> Bool
 isDocumentsIndex route =
     case route of
         DocumentsRoute (Wizard.Documents.Routes.IndexRoute _ _) ->
+            True
+
+        _ ->
+            False
+
+
+isDocumentsSubroute : Route -> Bool
+isDocumentsSubroute route =
+    case route of
+        DocumentsRoute _ ->
+            True
+
+        TemplatesRoute _ ->
             True
 
         _ ->
@@ -312,6 +358,19 @@ isKnowledgeModelsIndex route =
 knowledgeModelsPreview : String -> Maybe String -> Route
 knowledgeModelsPreview packageId mbQuestionUuid =
     KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.PreviewRoute packageId mbQuestionUuid
+
+
+isKnowledgeModelsSubroute : Route -> Bool
+isKnowledgeModelsSubroute route =
+    case route of
+        KnowledgeModelsRoute _ ->
+            True
+
+        KMEditorRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -432,6 +491,19 @@ projectImport uuid importerId =
     ProjectsRoute <| Wizard.Projects.Routes.ImportRoute uuid importerId
 
 
+isProjectSubroute : Route -> Bool
+isProjectSubroute route =
+    case route of
+        ProjectsRoute _ ->
+            True
+
+        ProjectImportersRoute _ ->
+            True
+
+        _ ->
+            False
+
+
 
 -- Public
 
@@ -453,6 +525,21 @@ publicSignup =
 
 
 -- Settings
+
+
+settingsDefault : Route
+settingsDefault =
+    SettingsRoute Wizard.Settings.Routes.defaultRoute
+
+
+isSettingsRoute : Route -> Bool
+isSettingsRoute route =
+    case route of
+        SettingsRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 settingsAuthentication : Route
