@@ -21,6 +21,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Templates as TemplatesApi
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Pagination exposing (Pagination)
@@ -50,6 +51,7 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
+import Wizard.Common.View.Tag as Tag
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
@@ -304,6 +306,7 @@ type alias ViewConfig =
     , package : Package
     , packageVersions : List Version
     , templateState : Maybe TemplateState
+    , tags : List Tag
     }
 
 
@@ -480,13 +483,22 @@ projectTagInput appState model =
 
 knowledgeModel : AppState -> ViewConfig -> Html Msg
 knowledgeModel appState cfg =
+    let
+        tagList =
+            if List.isEmpty cfg.tags then
+                emptyNode
+
+            else
+                Tag.viewList cfg.tags
+    in
     div []
         [ h2 [] [ lx_ "knowledgeModel.title" appState ]
         , linkTo appState
             (Routes.knowledgeModelsDetail cfg.package.id)
-            [ class "package-link" ]
+            [ class "package-link mb-2" ]
             [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package cfg.packageVersions) ]
-        , div [ class "text-end mt-3" ]
+        , tagList
+        , div [ class "text-end" ]
             [ linkTo appState
                 (Routes.projectsCreateMigration cfg.questionnaire.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]
