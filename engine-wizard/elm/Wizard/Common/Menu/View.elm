@@ -271,14 +271,17 @@ defaultMenuItem model item =
                     else
                         "submenu-floating submenu-floating-group"
 
+                menuItemId =
+                    "menu_" ++ menuGroup.id
+
                 mouseenter =
-                    onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement menuGroup.id))
+                    onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement menuItemId))
 
                 mouseleave =
-                    onMouseLeave (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.HideElement menuGroup.id))
+                    onMouseLeave (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.HideElement menuItemId))
 
                 ( submenuStyle, submenuExtraClass ) =
-                    case Dict.get menuGroup.id model.menuModel.submenuPositions of
+                    case Dict.get menuItemId model.menuModel.submenuPositions of
                         Just element ->
                             ( [ style "top" (String.fromFloat element.element.y ++ "px") ], "show" )
 
@@ -292,7 +295,7 @@ defaultMenuItem model item =
                     else
                         emptyNode
             in
-            li [ id menuGroup.id, classList [ ( "active", menuGroup.isActive model.appState.route ) ], mouseenter, mouseleave ]
+            li [ id menuItemId, classList [ ( "active", menuGroup.isActive model.appState.route ) ], mouseenter, mouseleave ]
                 [ linkTo model.appState
                     menuGroup.route
                     []
@@ -340,14 +343,17 @@ menuLinkSimple :
     -> Html Wizard.Msgs.Msg
 menuLinkSimple model link itemId itemIcon itemTitle isActive =
     let
+        menuItemId =
+            "menu_" ++ itemId
+
         mouseenter =
-            onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement itemId))
+            onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement menuItemId))
 
         mouseleave =
-            onMouseLeave (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.HideElement itemId))
+            onMouseLeave (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.HideElement menuItemId))
 
         ( submenuStyle, submenuClass ) =
-            case ( model.appState.session.sidebarCollapsed, Dict.get itemId model.menuModel.submenuPositions ) of
+            case ( model.appState.session.sidebarCollapsed, Dict.get menuItemId model.menuModel.submenuPositions ) of
                 ( True, Just element ) ->
                     let
                         top =
@@ -358,7 +364,7 @@ menuLinkSimple model link itemId itemIcon itemTitle isActive =
                 _ ->
                     ( [], "" )
     in
-    li [ id itemId, classList [ ( "active", isActive ) ], mouseenter, mouseleave ]
+    li [ id menuItemId, classList [ ( "active", isActive ) ], mouseenter, mouseleave ]
         [ link
             [ itemIcon
             , span [ class "sidebar-link" ] [ text itemTitle ]
@@ -375,7 +381,7 @@ viewProfileMenu : Model -> Html Wizard.Msgs.Msg
 viewProfileMenu model =
     let
         itemId =
-            "profile"
+            "menu_profile"
 
         mouseenter =
             onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement itemId))
@@ -428,25 +434,34 @@ viewProfileMenu model =
                 , li []
                     [ linkTo model.appState
                         Routes.usersEditCurrent
-                        []
+                        [ dataCy "menu_profile" ]
                         [ faSetFw "menu.profile" model.appState
                         , lx_ "profileMenu.edit" model.appState
                         ]
                     ]
                 , li []
-                    [ a [ onClick (Wizard.Msgs.AuthMsg Wizard.Auth.Msgs.Logout) ]
+                    [ a
+                        [ onClick (Wizard.Msgs.AuthMsg Wizard.Auth.Msgs.Logout)
+                        , dataCy "menu_logout"
+                        ]
                         [ faSetFw "menu.logout" model.appState
                         , lx_ "profileMenu.logout" model.appState
                         ]
                     ]
                 , li [ class "dark dark-border" ]
-                    [ a [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True) ]
+                    [ a
+                        [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True)
+                        , dataCy "menu_about"
+                        ]
                         [ faSetFw "menu.about" model.appState
                         , lx_ "profileMenu.about" model.appState
                         ]
                     ]
                 , li [ class "dark dark-last" ]
-                    [ a [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetReportIssueOpen True) ]
+                    [ a
+                        [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetReportIssueOpen True)
+                        , dataCy "menu_report-issue"
+                        ]
                         [ faSetFw "menu.reportIssue" model.appState
                         , lx_ "profileMenu.reportIssue" model.appState
                         ]
