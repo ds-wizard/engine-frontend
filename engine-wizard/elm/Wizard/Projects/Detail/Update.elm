@@ -264,6 +264,9 @@ update wrapMsg msg appState model =
                                 threadUuid =
                                     Maybe.withDefault newThreadUuid mbThreadUuid
 
+                                newThread =
+                                    Maybe.isNothing mbThreadUuid
+
                                 comment =
                                     { uuid = commentUuid
                                     , text = text
@@ -281,6 +284,7 @@ update wrapMsg msg appState model =
                                         { uuid = uuid
                                         , path = path
                                         , threadUuid = threadUuid
+                                        , newThread = newThread
                                         , commentUuid = commentUuid
                                         , text = text
                                         , private = private
