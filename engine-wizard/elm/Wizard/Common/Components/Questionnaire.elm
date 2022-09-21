@@ -2333,6 +2333,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                         a
                             (class "btn-link text-danger"
                                 :: onClick (RemoveItem (pathToString path) uuid)
+                                :: dataCy "item-delete"
                                 :: tooltip (l_ "list.delete" appState)
                             )
                             [ faSet "_global.delete" appState ]
@@ -2345,6 +2346,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                             a
                                 (class "btn-link me-2"
                                     :: onClick (MoveItemUp (pathToString path) uuid)
+                                    :: dataCy "item-move-up"
                                     :: tooltip (l_ "list.moveUp" appState)
                                 )
                                 [ faSet "questionnaire.item.moveUp" appState ]
@@ -2357,6 +2359,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                             a
                                 (class "btn-link me-2"
                                     :: onClick (MoveItemDown (pathToString path) uuid)
+                                    :: dataCy "item-move-down"
                                     :: tooltip (l_ "list.moveDown" appState)
                                 )
                                 [ faSet "questionnaire.item.moveDown" appState ]
@@ -2375,10 +2378,10 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
 
         collapseButton =
             if isCollapsed then
-                a [ onClick (ExpandItem itemPathString) ] [ faSet "questionnaire.item.expand" appState ]
+                a [ onClick (ExpandItem itemPathString), dataCy "item-expand" ] [ faSet "questionnaire.item.expand" appState ]
 
             else
-                a [ onClick (CollapseItem itemPathString) ] [ faSet "questionnaire.item.collapse" appState ]
+                a [ onClick (CollapseItem itemPathString), dataCy "item-collapse" ] [ faSet "questionnaire.item.collapse" appState ]
 
         itemHeader =
             div [ class "item-header d-flex justify-content-between" ]
