@@ -64,8 +64,8 @@ $toolbar-height: 40px;
             }
 
             &.selected {
-                background: $gray-500;
-                color: $white !important;
+                background: $primary-bg;
+                color: $primary !important;
             }
         }
 
@@ -75,7 +75,7 @@ $toolbar-height: 40px;
             align-items: center;
 
             .item-group {
-                margin-right: 32px;
+                margin-right: $spacer-2;
             }
         }
 
@@ -85,7 +85,7 @@ $toolbar-height: 40px;
             align-items: center;
 
             .item-group {
-                margin-left: 32px;
+                margin-left: $spacer-2;
             }
         }
 
