@@ -82,6 +82,7 @@ $migration-header-height: 100px;
             height: 100%;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
 
             .change-view {
                 flex: 0 0 50px;
