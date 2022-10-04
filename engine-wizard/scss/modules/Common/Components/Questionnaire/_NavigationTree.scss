@@ -16,6 +16,12 @@
         .nav-link {
             @include transition(none);
             position: relative;
+            color: $gray-700;
+            font-weight: 500;
+
+            &:hover, &.active {
+                color: $primary;
+            }
 
             &:not(.active) {
                 &:after {
@@ -34,7 +40,7 @@
                 &:hover {
                     &:after {
                         opacity: 1;
-                        background-color: $gray-200;
+                        background-color: $primary-bg;
                     }
                 }
             }

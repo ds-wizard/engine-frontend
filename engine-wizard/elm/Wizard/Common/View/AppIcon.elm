@@ -1,21 +1,13 @@
 module Wizard.Common.View.AppIcon exposing (view)
 
 import Html exposing (Html, div, img)
-import Html.Attributes exposing (class, classList, src, style)
+import Html.Attributes exposing (class, classList, src)
 import Maybe.Extra as Maybe
 
 
 view : { a | logoUrl : Maybe String, primaryColor : Maybe String } -> Html msg
 view app =
     let
-        styleAttributes =
-            case app.primaryColor of
-                Just primaryColor ->
-                    [ style "background-color" primaryColor ]
-
-                Nothing ->
-                    []
-
         content =
             case app.logoUrl of
                 Just logoUrl ->
@@ -25,9 +17,7 @@ view app =
                     []
     in
     div
-        ([ class "ItemIcon ItemIcon--App"
-         , classList [ ( "ItemIcon--App--DefaultLogo", Maybe.isNothing app.logoUrl ) ]
-         ]
-            ++ styleAttributes
-        )
+        [ class "ItemIcon ItemIcon--App"
+        , classList [ ( "ItemIcon--App--DefaultLogo", Maybe.isNothing app.logoUrl ) ]
+        ]
         content

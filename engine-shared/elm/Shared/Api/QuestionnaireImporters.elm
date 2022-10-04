@@ -43,8 +43,12 @@ putQuestionnaireImporter questionnaireImporter =
 getQuestionnaireImportersFor : Uuid -> AbstractAppState a -> ToMsg (List QuestionnaireImporter) msg -> Cmd msg
 getQuestionnaireImportersFor questionnaireUuid =
     let
+        paginationQueryString =
+            PaginationQueryString.empty
+                |> PaginationQueryString.withSort (Just "name") PaginationQueryString.SortASC
+
         queryString =
-            PaginationQueryString.toApiUrlWith [ ( "questionnaireUuid", Uuid.toString questionnaireUuid ), ( "enabled", "true" ) ] PaginationQueryString.empty
+            PaginationQueryString.toApiUrlWith [ ( "questionnaireUuid", Uuid.toString questionnaireUuid ), ( "enabled", "true" ) ] paginationQueryString
 
         url =
             "/questionnaire-importers/suggestions" ++ queryString

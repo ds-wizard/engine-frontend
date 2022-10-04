@@ -23,8 +23,6 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Locale exposing (lf, lgx)
-import Shared.Markdown as Markdown
-import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -126,7 +124,7 @@ viewChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html msg
 viewChapterIndication appState questionnaire chapter =
     let
         unanswered =
-            QuestionnaireDetail.calculateUnansweredQuestionsForChapter appState questionnaire chapter
+            QuestionnaireDetail.calculateUnansweredQuestionsForChapter questionnaire chapter
     in
     if unanswered > 0 then
         Badge.light [ class "rounded-pill" ] [ text <| String.fromInt unanswered ]
@@ -248,22 +246,14 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
         firstQuestionUuid =
             Maybe.unwrap "" Question.getUuid (List.head itemTemplateQuestions)
 
+        mbItemTitle =
+            QuestionnaireDetail.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
+
+        defaultItemTitle =
+            i [] [ text (lf_ "defaultItem" [ String.fromInt (index + 1) ] appState) ]
+
         itemTitle =
-            let
-                defaultItemTitle =
-                    i [] [ text (lf_ "defaultItem" [ String.fromInt (index + 1) ] appState) ]
-
-                titleFromMarkdown value =
-                    Markdown.toString value
-                        |> String.split "\n"
-                        |> List.find (not << String.isEmpty)
-
-                mbAnswer =
-                    Dict.get (pathToString (currentPath ++ [ itemUuid, firstQuestionUuid ])) cfg.questionnaire.replies
-                        |> Maybe.andThen (.value >> ReplyValue.getStringReply >> titleFromMarkdown)
-                        |> Maybe.andThen String.toMaybe
-            in
-            Maybe.unwrap defaultItemTitle text mbAnswer
+            Maybe.unwrap defaultItemTitle text mbItemTitle
 
         itemCaret =
             viewCaret appState

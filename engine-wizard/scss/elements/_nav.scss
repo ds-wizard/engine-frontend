@@ -19,8 +19,15 @@
 
 .nav-pills {
     .nav-link {
-        &.active, &.active:hover {
-            color: $white;
+        color: $gray-700 !important;
+        font-weight: 500;
+
+        &.active, &.active:hover, &:hover {
+            color: $primary !important;
+            background: $primary-bg;
+        }
+
+        &.active {
             cursor: default;
         }
     }

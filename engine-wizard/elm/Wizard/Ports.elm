@@ -11,6 +11,9 @@ port module Wizard.Ports exposing
     , fileSelected
     , gotImporterData
     , gotIntegrationWidgetValue
+    , localStorageData
+    , localStorageGet
+    , localStorageSet
     , openImporter
     , openIntegrationWidget
     , refresh
@@ -118,3 +121,16 @@ port gotImporterData : (E.Value -> msg) -> Sub msg
 
 
 port downloadFile : String -> Cmd msg
+
+
+
+-- Local Storage
+
+
+port localStorageGet : String -> Cmd msg
+
+
+port localStorageSet : E.Value -> Cmd msg
+
+
+port localStorageData : (E.Value -> msg) -> Sub msg

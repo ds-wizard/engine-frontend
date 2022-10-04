@@ -7,9 +7,11 @@ import Random exposing (Seed)
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
+import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
@@ -198,6 +200,12 @@ update wrapMsg msg appState model =
                 createdBy =
                     Maybe.map UserInfo.toUserSuggestion appState.session.user
 
+                indications =
+                    ActionResult.unwrap
+                        AnsweredIndicationData.empty
+                        (QuestionnaireDetail.calculatePhasesAnsweredIndications << .questionnaire)
+                        newQuestionnaireModel
+
                 ( newSeed, newModel, newCmd ) =
                     case questionnaireMsg of
                         Questionnaire.SetPhase phaseUuid ->
@@ -208,6 +216,7 @@ update wrapMsg msg appState model =
                                         , phaseUuid = Uuid.fromString phaseUuid
                                         , createdAt = createdAt
                                         , createdBy = createdBy
+                                        , phasesAnsweredIndication = indications
                                         }
 
                         Questionnaire.SetReply path reply ->
@@ -219,6 +228,7 @@ update wrapMsg msg appState model =
                                         , value = reply.value
                                         , createdAt = createdAt
                                         , createdBy = createdBy
+                                        , phasesAnsweredIndication = indications
                                         }
 
                         Questionnaire.ClearReply path ->
@@ -229,6 +239,7 @@ update wrapMsg msg appState model =
                                         , path = path
                                         , createdAt = createdAt
                                         , createdBy = createdBy
+                                        , phasesAnsweredIndication = indications
                                         }
 
                         Questionnaire.SetLabels path value ->
@@ -253,6 +264,9 @@ update wrapMsg msg appState model =
                                 threadUuid =
                                     Maybe.withDefault newThreadUuid mbThreadUuid
 
+                                newThread =
+                                    Maybe.isNothing mbThreadUuid
+
                                 comment =
                                     { uuid = commentUuid
                                     , text = text
@@ -270,6 +284,7 @@ update wrapMsg msg appState model =
                                         { uuid = uuid
                                         , path = path
                                         , threadUuid = threadUuid
+                                        , newThread = newThread
                                         , commentUuid = commentUuid
                                         , text = text
                                         , private = private
@@ -430,7 +445,7 @@ update wrapMsg msg appState model =
             case result of
                 Ok questionnaire ->
                     let
-                        questionnaireModel =
+                        ( questionnaireModel, questionnaireCmd ) =
                             Questionnaire.init appState questionnaire
 
                         questionnaireModelWithImporters =
@@ -451,6 +466,7 @@ update wrapMsg msg appState model =
                         , Cmd.batch
                             [ WebSocket.open model.websocket
                             , fetchCmd
+                            , Cmd.map (wrapMsg << QuestionnaireMsg) questionnaireCmd
                             ]
                         )
 

@@ -8,6 +8,7 @@ const {componentSource, defaultIconSetPath} = utils.getComponentData()
 const iconSetKeys = loadIconSetKeys()
 
 const regexFaSet = /[\s+\(]faSet "([^"]*)"/g
+const regexFaSetFw = /[\s+\(]faSetFw "([^"]*)"/g
 const regexFaKeyClass = /[\s+\(]faKeyClass "([^"]*)"/g
 
 const ignored = [
@@ -57,6 +58,7 @@ function testFile(file) {
     const moduleContent = fs.readFileSync(file, 'utf8')
 
     testIconSet(moduleName, moduleContent, regexFaSet)
+    testIconSet(moduleName, moduleContent, regexFaSetFw)
     testIconSet(moduleName, moduleContent, regexFaKeyClass)
 }
 

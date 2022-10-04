@@ -33,15 +33,12 @@ locale appState { withAffix } tense distanceId =
                     str
     in
     (case distanceId of
-        LessThanXSeconds i ->
-            if i == 1 then
-                l_ "lessThan1Second" appState
-
-            else
-                lf_ "lessThanXSeconds" [ toStr i ] appState
+        -- We don't need that much granularity here
+        LessThanXSeconds _ ->
+            l_ "lessThan1Minute" appState
 
         HalfAMinute ->
-            l_ "halfAMinute" appState
+            l_ "lessThan1Minute" appState
 
         LessThanXMinutes i ->
             if i == 1 then

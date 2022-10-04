@@ -25,7 +25,8 @@
     }
 
     &--App {
-        background: $primary;
+        background: $side-navigation-bg;
+        border: 1px solid $side-navigation-border-color;
         overflow: hidden;
 
         img {

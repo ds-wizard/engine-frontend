@@ -19,6 +19,7 @@ type alias AddCommentData =
     { uuid : Uuid
     , path : String
     , threadUuid : Uuid
+    , newThread : Bool
     , commentUuid : Uuid
     , text : String
     , private : Bool
@@ -34,6 +35,7 @@ encode data =
         , ( "uuid", Uuid.encode data.uuid )
         , ( "path", E.string data.path )
         , ( "threadUuid", Uuid.encode data.threadUuid )
+        , ( "newThread", E.bool data.newThread )
         , ( "commentUuid", Uuid.encode data.commentUuid )
         , ( "text", E.string data.text )
         , ( "private", E.bool data.private )
@@ -46,6 +48,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "path" D.string
         |> D.required "threadUuid" Uuid.decoder
+        |> D.hardcoded False
         |> D.required "commentUuid" Uuid.decoder
         |> D.required "text" D.string
         |> D.required "private" D.bool

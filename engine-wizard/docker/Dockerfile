@@ -6,8 +6,8 @@ RUN wget https://github.com/sgerrand/alpine-pkg-glibc/releases/download/2.34-r0/
 RUN apk add glibc-2.34-r0.apk
 
 # Install dart-sass
-RUN wget https://github.com/sass/dart-sass/releases/download/1.54.5/dart-sass-1.54.5-linux-x64.tar.gz
-RUN tar -xvzf ./dart-sass-1.54.5-linux-x64.tar.gz -C /opt/
+RUN wget https://github.com/sass/dart-sass/releases/download/1.55.0/dart-sass-1.55.0-linux-x64.tar.gz
+RUN tar -xvzf ./dart-sass-1.55.0-linux-x64.tar.gz -C /opt/
 
 # Dependencies needed to rebuild styles
 COPY node_modules/bootstrap src/~bootstrap

@@ -258,6 +258,11 @@
 
                         vertical-align: text-top;
                     }
+
+                    .progress {
+                        display: inline-flex;
+                        width: 100px;
+                    }
                 }
             }
         }

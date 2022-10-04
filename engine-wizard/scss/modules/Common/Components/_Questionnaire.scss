@@ -64,8 +64,8 @@ $toolbar-height: 40px;
             }
 
             &.selected {
-                background: $gray-500;
-                color: $white !important;
+                background: $primary-bg;
+                color: $primary !important;
             }
         }
 
@@ -75,7 +75,7 @@ $toolbar-height: 40px;
             align-items: center;
 
             .item-group {
-                margin-right: 32px;
+                margin-right: $spacer-2;
             }
         }
 
@@ -85,7 +85,7 @@ $toolbar-height: 40px;
             align-items: center;
 
             .item-group {
-                margin-left: 32px;
+                margin-left: $spacer-2;
             }
         }
 
@@ -713,17 +713,34 @@ $toolbar-height: 40px;
         }
 
         .item {
-            position: relative;
-            display: flex;
-            align-items: flex-start;
+            &-header {
+                background: $gray-200;
+                margin-top: -$card-spacer-y;
+                margin-left: -$card-spacer-x;
+                margin-right: -$card-spacer-x;
+                margin-bottom: $card-spacer-y;
+                padding: ($card-spacer-y * 0.5) $card-spacer-x;
+                @include border-radius-top($card-border-radius);
+            }
+
+            &-collapsed {
+                .item-header {
+                    margin-top: 0;
+                    margin-bottom: 0;
+                    @include border-radius-bottom($card-border-radius);
+                }
+
+                .card {
+                    .card-body {
+                        padding-top: 0;
+                        padding-bottom: 0;
+                    }
+                }
+            }
 
             .card {
                 background: $gray-100 !important;
                 flex-grow: 1;
-            }
-
-            .btn-item-delete {
-                margin-left: $spacer-2;
             }
 
             .radio {
@@ -879,14 +896,14 @@ $toolbar-height: 40px;
         a.clear-answer {
             color: $gray-600;
             display: inline-block;
-            padding: 5px 15px;
+            padding: $spacer-1 0;
 
             &:hover {
                 text-decoration: none;
             }
 
             .fa {
-                margin-right: 10px;
+                margin-right: $spacer-1;
             }
         }
 
@@ -939,7 +956,7 @@ $toolbar-height: 40px;
             border: 1px solid $gray-400;
             z-index: 10;
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            max-height: 200px;
+            max-height: 350px;
             overflow: auto;
 
             .loading {

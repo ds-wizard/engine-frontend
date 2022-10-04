@@ -3,7 +3,7 @@ module Wizard.Projects.Index.View exposing (view)
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, a, code, div, img, input, span, text)
-import Html.Attributes exposing (class, classList, href, placeholder, src, title, type_, value)
+import Html.Attributes exposing (class, classList, href, placeholder, src, style, title, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
 import List.Extra as List
@@ -13,7 +13,7 @@ import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
+import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
@@ -476,16 +476,22 @@ listingDescription appState questionnaire =
                 , text ")"
                 ]
 
-        toAnsweredIndication ( answeredQuestions, unansweredQuestions ) =
-            span [ class "fragment", classList [ ( "text-success", unansweredQuestions == 0 ) ] ]
-                [ text ("Answered " ++ String.fromInt answeredQuestions ++ "/" ++ String.fromInt (answeredQuestions + unansweredQuestions)) ]
+        projectProgressView =
+            if questionnaire.answeredQuestions == 0 && questionnaire.unansweredQuestions == 0 then
+                emptyNode
 
-        answered =
-            Questionnaire.getAnsweredIndication questionnaire
-                |> Maybe.unwrap emptyNode toAnsweredIndication
+            else
+                let
+                    pctg =
+                        (toFloat questionnaire.answeredQuestions / toFloat (questionnaire.answeredQuestions + questionnaire.unansweredQuestions)) * 100
+                in
+                span [ class "fragment flex-grow-1" ]
+                    [ span [ class "progress", style "height" "7px" ]
+                        [ span [ class "progress-bar bg-info", style "width" (String.fromFloat pctg ++ "%") ] [] ]
+                    ]
     in
     span []
-        [ collaborators, kmLink, answered ]
+        [ collaborators, kmLink, projectProgressView ]
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)

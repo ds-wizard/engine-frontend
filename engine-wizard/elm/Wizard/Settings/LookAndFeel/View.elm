@@ -10,7 +10,7 @@ import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
@@ -148,7 +148,7 @@ formView appState form =
                     ]
                 , div [ class "row mt-5" ]
                     [ div [ class "col-12" ]
-                        [ formWrap <| viewAppPreview form
+                        [ formWrap <| viewAppPreview appState form
                         ]
                     ]
                 ]
@@ -211,8 +211,8 @@ formView appState form =
         )
 
 
-viewAppPreview : Form FormError EditableLookAndFeelConfig -> Html Form.Msg
-viewAppPreview form =
+viewAppPreview : AppState -> Form FormError EditableLookAndFeelConfig -> Html Form.Msg
+viewAppPreview appState form =
     let
         toBackgroundColorStyle color =
             "background-color: " ++ color
@@ -232,6 +232,11 @@ viewAppPreview form =
             (Form.getFieldAsString "stylePrimaryColor" form).value
                 |> Maybe.andThen String.toMaybe
 
+        primaryColorStyle =
+            stylePrimaryColorValue
+                |> Maybe.unwrap "" toColorStyle
+                |> attribute "style"
+
         primaryColorBackgroundStyle =
             stylePrimaryColorValue
                 |> Maybe.unwrap "" toBackgroundColorStyle
@@ -249,8 +254,13 @@ viewAppPreview form =
                 |> attribute "style"
     in
     div [ class "AppPreview" ]
-        [ div [ class "AppPreview__Panel", primaryColorBackgroundStyle ]
+        [ div [ class "AppPreview__Panel" ]
             [ a [ class "logo" ] [ span [ class "logo-full" ] [ text appTitleValue ] ]
+            , div [ class "menu-button", primaryColorStyle ]
+                [ div [ class "menu-button-color", primaryColorBackgroundStyle ] []
+                , faSetFw "menu.projects" appState
+                , text "Projects"
+                ]
             ]
         , div [ class "AppPreview__Content" ]
             [ Undraw.teachingWithAttrs [ illustrationsColorStyle ]

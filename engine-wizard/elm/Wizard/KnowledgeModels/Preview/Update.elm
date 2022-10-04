@@ -21,6 +21,7 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Error.ApiError as ApiError
 import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setKnowledgeModel, setPackage)
@@ -109,6 +110,7 @@ update msg wrapMsg appState model =
                                                 , value = reply.value
                                                 , createdAt = reply.createdAt
                                                 , createdBy = reply.createdBy
+                                                , phasesAnsweredIndication = AnsweredIndicationData.empty
                                                 }
                                     in
                                     ( nextSeed, event :: list )
@@ -163,7 +165,7 @@ initQuestionnaireModel appState ( model, cmd ) =
                         _ ->
                             ( ( appState.seed, Nothing, questionnaire ), Cmd.none )
 
-                questionnaireModel =
+                ( questionnaireModel, _ ) =
                     Questionnaire.init appState questionnaireWithReplies
 
                 questionnaireModelWithChapter =
