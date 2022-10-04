@@ -17,7 +17,6 @@ module.exports = function (app) {
                 if (event.origin !== widgetOrigin) {
                     return
                 }
-                console.log(event.data)
 
                 app.ports.gotImporterData.send(event.data.events)
             }
@@ -45,8 +44,8 @@ function getWidgetOrigin(url) {
 }
 
 function getWindowFeatures() {
-    var width = Math.min(400, window.screen.width - 300)
-    var height = Math.min(250, window.screen.height - 200)
+    var width = Math.min(660, window.screen.width - 300)
+    var height = Math.min(360, window.screen.height - 200)
     var left = (window.screen.width - width) / 2
     var top = (window.screen.height - height) / 2
     return 'width=' + width + ",height=" + height + ",top=" + top + ",left=" + left
