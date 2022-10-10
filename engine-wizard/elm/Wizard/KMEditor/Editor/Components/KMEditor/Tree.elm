@@ -10,7 +10,7 @@ import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Expert as Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
@@ -275,7 +275,7 @@ treeNodeExperts props appState editorBranch expert =
         config =
             { uuid = expert.uuid
             , icon = faSet "km.expert" appState
-            , label = expert.name
+            , label = Expert.getVisibleName expert
             , children = []
             , untitledLabel = lg "expert.untitled" appState
             }

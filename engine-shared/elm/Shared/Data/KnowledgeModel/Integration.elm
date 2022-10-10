@@ -82,8 +82,16 @@ getId =
 
 
 getName : Integration -> String
-getName =
-    .name << getCommonIntegrationData
+getName integration =
+    let
+        name =
+            (getCommonIntegrationData integration).name
+    in
+    if String.isEmpty name then
+        getId integration
+
+    else
+        name
 
 
 getProps : Integration -> List String

@@ -1,4 +1,4 @@
-module Shared.Data.KnowledgeModel.Expert exposing (Expert, decoder)
+module Shared.Data.KnowledgeModel.Expert exposing (Expert, decoder, getVisibleName)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -20,3 +20,12 @@ decoder =
         |> D.required "name" D.string
         |> D.required "email" D.string
         |> D.required "annotations" (D.list Annotation.decoder)
+
+
+getVisibleName : Expert -> String
+getVisibleName expert =
+    if String.isEmpty expert.name then
+        expert.email
+
+    else
+        expert.name

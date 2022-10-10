@@ -152,8 +152,6 @@ viewKMEditorNavigationNav appState route editorBranch =
         branchUuid =
             editorBranch.branch.uuid
 
-        --editorRoute subroute =
-        --    Wizard.Routes.KMEditorRoute (KMEditorRoutes.EditorRoute editorBranch.branch.uuid subroute)
         isEditorRoute =
             case route of
                 Edit _ ->
