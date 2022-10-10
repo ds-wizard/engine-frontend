@@ -1,6 +1,7 @@
 module Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing
     ( URLReferenceData
     , decoder
+    , toLabel
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -23,3 +24,12 @@ decoder =
         |> D.required "url" D.string
         |> D.required "label" D.string
         |> D.required "annotations" (D.list Annotation.decoder)
+
+
+toLabel : URLReferenceData -> String
+toLabel data =
+    if String.isEmpty data.label then
+        data.url
+
+    else
+        data.label

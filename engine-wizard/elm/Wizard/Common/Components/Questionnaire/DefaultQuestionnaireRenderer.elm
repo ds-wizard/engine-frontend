@@ -256,9 +256,15 @@ viewExperts appState =
 
 viewExpert : Expert -> Html msg
 viewExpert expert =
-    span []
-        [ text expert.name
-        , text " ("
-        , a [ href <| "mailto:" ++ expert.email ] [ text expert.email ]
-        , text ")"
-        ]
+    if String.isEmpty expert.name then
+        span []
+            [ a [ href <| "mailto:" ++ expert.email ] [ text expert.email ]
+            ]
+
+    else
+        span []
+            [ text expert.name
+            , text " ("
+            , a [ href <| "mailto:" ++ expert.email ] [ text expert.email ]
+            , text ")"
+            ]

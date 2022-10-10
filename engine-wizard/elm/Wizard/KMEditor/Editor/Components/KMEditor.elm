@@ -13,12 +13,13 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
 
 import Dict exposing (Dict)
 import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
-import Html.Attributes exposing (class, disabled, id, src)
+import Html.Attributes exposing (class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
+import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
 import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
@@ -108,6 +109,7 @@ type alias Model =
     , reorderableStates : Dict String Reorderable.State
     , deleteModalState : DeleteModalState
     , moveModalState : Maybe MoveModalState
+    , warningsPanelOpen : Bool
     }
 
 
@@ -139,6 +141,7 @@ initialModel =
     , reorderableStates = Dict.empty
     , deleteModalState = Closed
     , moveModalState = Nothing
+    , warningsPanelOpen = False
     }
 
 
@@ -164,6 +167,7 @@ type Msg
     | OpenMoveModal TreeInput.MovingEntity String
     | MoveModalMsg TreeInput.Msg
     | CloseMoveModal
+    | SetWarningPanelsOpen Bool
 
 
 update : (Bool -> msg) -> Msg -> Model -> EditorBranch -> ( EditorBranch, Model, Cmd msg )
@@ -239,6 +243,9 @@ update setFullscreenMsg msg model editorBranch =
         CloseMoveModal ->
             ( editorBranch, { model | moveModalState = Nothing }, Cmd.none )
 
+        SetWarningPanelsOpen open ->
+            ( editorBranch, { model | warningsPanelOpen = open }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -293,19 +300,65 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                 { toMsg = wrapMsg << SplitPaneMsg
                 , customSplitter = Nothing
                 }
+
+        warningsCount =
+            List.length editorBranch.warnings
+
+        warningsButton =
+            if warningsCount > 0 || model.warningsPanelOpen then
+                a
+                    [ class "item"
+                    , classList [ ( "selected", model.warningsPanelOpen ) ]
+                    , onClick (wrapMsg (SetWarningPanelsOpen (not model.warningsPanelOpen)))
+                    ]
+                    [ lx_ "navbar.warnings" appState
+                    , Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsCount) ]
+                    ]
+
+            else
+                emptyNode
+
+        warningsPanel =
+            if model.warningsPanelOpen then
+                Html.map wrapMsg <|
+                    viewWarningsPanel appState editorBranch
+
+            else
+                emptyNode
     in
     div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
             [ Breadcrumbs.view appState editorBranch
+            , warningsButton
             , a [ class "breadcrumb-button", onClick expandMsg ] [ expandIcon ]
             ]
-        , SplitPane.view splitPaneConfig
-            (Tree.view treeViewProps appState editorBranch)
-            (viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch)
-            model.splitPane
+        , div [ class "editor-body" ]
+            [ SplitPane.view splitPaneConfig
+                (Tree.view treeViewProps appState editorBranch)
+                (viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch)
+                model.splitPane
+            , warningsPanel
+            ]
         , deleteModal appState wrapMsg eventMsg editorBranch model.deleteModalState
         , moveModal appState wrapMsg eventMsg editorBranch model.moveModalState
         ]
+
+
+viewWarningsPanel : AppState -> EditorBranch -> Html Msg
+viewWarningsPanel appState editorBranch =
+    let
+        viewWarning warning =
+            li [] [ linkTo appState (editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
+
+        warnings =
+            if List.isEmpty editorBranch.warnings then
+                Flash.info appState (l_ "warnings.empty" appState)
+
+            else
+                ul [] (List.map viewWarning editorBranch.warnings)
+    in
+    div [ class "right-panel" ]
+        [ warnings ]
 
 
 type alias EditorConfig msg =

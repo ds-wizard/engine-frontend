@@ -124,7 +124,7 @@ update wrapMsg msg appState model =
                                 fetchSubrouteDataFromAfter wrapMsg
                                     appState
                                     { model
-                                        | branchModel = Success (EditorBranch.init branch model.mbEditorUuid)
+                                        | branchModel = Success (EditorBranch.init appState branch model.mbEditorUuid)
                                         , settingsModel = Settings.setBranchDetail branch model.settingsModel
                                     }
                         in
@@ -249,7 +249,7 @@ update wrapMsg msg appState model =
                         |> WebSocket.send model.websocket
 
                 newBranchModel =
-                    ActionResult.map (EditorBranch.applyEvent True event) model.branchModel
+                    ActionResult.map (EditorBranch.applyEvent appState True event) model.branchModel
 
                 setUnloadMessageCmd =
                     Ports.setUnloadMessage (l_ "unloadMessage" appState)
@@ -276,7 +276,7 @@ handleWebSocketMsg websocketMsg appState model =
 
                 newModel2 =
                     if not removed then
-                        { newModel | branchModel = ActionResult.map (EditorBranch.applyEvent False eventData.event) newModel.branchModel }
+                        { newModel | branchModel = ActionResult.map (EditorBranch.applyEvent appState False eventData.event) newModel.branchModel }
 
                     else
                         newModel

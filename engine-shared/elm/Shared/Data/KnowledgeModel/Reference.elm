@@ -85,7 +85,7 @@ getUuid =
 
 getVisibleName : Reference -> String
 getVisibleName =
-    map .shortUuid .label .targetUuid
+    map .shortUuid URLReferenceData.toLabel .targetUuid
 
 
 getAnnotations : Reference -> List Annotation
@@ -105,7 +105,7 @@ getUrl =
 
 getLabel : Reference -> Maybe String
 getLabel =
-    map (always Nothing) (Just << .label) (always Nothing)
+    map (always Nothing) (Just << URLReferenceData.toLabel) (always Nothing)
 
 
 getTargetUuid : Reference -> Maybe String

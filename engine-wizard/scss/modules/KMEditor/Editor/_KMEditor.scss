@@ -51,6 +51,42 @@ $breadcrumbs-height: 40px;
             content: '〉';
             padding: 0;
         }
+
+        .item {
+            @include border-radius($border-radius);
+            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+            padding: 8px;
+            color: $gray-900 !important;
+            text-decoration: none !important;
+            display: flex;
+            align-items: center;
+            margin-right: 0.5rem;
+
+            &:hover, &:focus {
+                background: $gray-200;
+                box-shadow: none;
+            }
+
+            &.selected {
+                background: $primary-bg;
+                color: $primary !important;
+            }
+
+            .badge {
+                margin-left: 0.5rem;
+            }
+        }
+    }
+
+    .editor-body {
+        display: flex;
+
+        .right-panel {
+            flex: 0 0 20rem;
+            overflow: auto;
+            padding: 1rem;
+            border-left: 1px solid $gray-400;
+        }
     }
 
     .tree-col {
