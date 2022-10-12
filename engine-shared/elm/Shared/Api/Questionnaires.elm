@@ -54,6 +54,8 @@ type alias GetQuestionnairesFilters =
     , userUuidsOp : Maybe FilterOperator
     , projectTags : Maybe String
     , projectTagsOp : Maybe FilterOperator
+    , packageIds : Maybe String
+    , packageIdsOp : Maybe FilterOperator
     }
 
 
@@ -67,6 +69,8 @@ getQuestionnaires filters qs =
                 , ( "userUuidsOp", Maybe.map FilterOperator.toString filters.userUuidsOp )
                 , ( "projectTags", filters.projectTags )
                 , ( "projectTagsOp", Maybe.map FilterOperator.toString filters.projectTagsOp )
+                , ( "packageIds", filters.packageIds )
+                , ( "packageIdsOp", Maybe.map FilterOperator.toString filters.packageIdsOp )
                 ]
 
         queryString =

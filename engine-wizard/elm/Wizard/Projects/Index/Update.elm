@@ -7,6 +7,7 @@ import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debouncer
 import Dict
 import Maybe.Extra as Maybe
+import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Users as UsersApi
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
@@ -26,7 +27,7 @@ import Wizard.Projects.Common.CloneProjectModal.Update as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -46,12 +47,27 @@ fetchData appState model =
 
                 Nothing ->
                     Cmd.none
+
+        selectedPackagesCmd =
+            case Dict.get indexRoutePackagesFilterId model.questionnaires.filters.values of
+                Just packageIds ->
+                    PackagesApi.getPackagesSuggestionsWithOptions
+                        PaginationQueryString.empty
+                        (String.split "," packageIds)
+                        []
+                        appState
+                        PackagesFilterGetValuesComplete
+
+                Nothing ->
+                    Cmd.none
     in
     Cmd.batch
         [ Cmd.map ListingMsg Listing.fetchData
         , dispatch (ProjectTagsFilterSearch "")
         , dispatch (UsersFilterSearch "")
+        , dispatch (PackagesFilterSearch "")
         , selectedUsersCmd
+        , selectedPackagesCmd
         ]
 
 
@@ -184,6 +200,44 @@ update wrapMsg msg appState model =
                 , result = result
                 }
 
+        PackagesFilterGetValuesComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | packagesFilterSelectedPackages = r }
+                , defaultError = lg "apiError.packages.getListError" appState
+                , model = model
+                , result = result
+                }
+
+        PackagesFilterInput value ->
+            ( { model | packagesFilterSearchValue = value }
+            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| PackagesFilterSearch value)
+            )
+
+        PackagesFilterSearch value ->
+            let
+                queryString =
+                    PaginationQueryString.fromQ value
+                        |> PaginationQueryString.withSize (Just 10)
+
+                selectedKMs =
+                    model.questionnaires.filters.values
+                        |> Dict.get indexRoutePackagesFilterId
+                        |> Maybe.unwrap [] (String.split ",")
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        PackagesApi.getPackagesSuggestionsWithOptions queryString [] selectedKMs appState PackagesFilterSearchComplete
+            in
+            ( model, cmd )
+
+        PackagesFilterSearchComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | packagesFilterPackages = r }
+                , defaultError = lg "apiError.packages.getListError" appState
+                , model = model
+                , result = result
+                }
+
         DebouncerMsg debounceMsg ->
             let
                 updateConfig =
@@ -262,6 +316,12 @@ listingUpdateConfig wrapMsg appState model =
 
         projectTagsOp =
             PaginationQueryFilters.getOp indexRouteProjectTagsFilterId model.questionnaires.filters
+
+        packageIds =
+            PaginationQueryFilters.getValue indexRoutePackagesFilterId model.questionnaires.filters
+
+        packageIdsOp =
+            PaginationQueryFilters.getOp indexRoutePackagesFilterId model.questionnaires.filters
     in
     { getRequest =
         QuestionnairesApi.getQuestionnaires
@@ -270,6 +330,8 @@ listingUpdateConfig wrapMsg appState model =
             , userUuidsOp = usersOp
             , projectTags = projectTags
             , projectTagsOp = projectTagsOp
+            , packageIds = packageIds
+            , packageIdsOp = packageIdsOp
             }
     , getError = lg "apiError.questionnaires.getListError" appState
     , wrapMsg = wrapMsg << ListingMsg

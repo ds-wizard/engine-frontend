@@ -5,6 +5,7 @@ module Shared.Api.Packages exposing
     , getPackage
     , getPackages
     , getPackagesSuggestions
+    , getPackagesSuggestionsWithOptions
     , importFromOwl
     , importPackage
     , pullPackage
@@ -38,6 +39,22 @@ getPackagesSuggestions qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
+
+        url =
+            "/packages/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "packages" PackageSuggestion.decoder)
+
+
+getPackagesSuggestionsWithOptions : PaginationQueryString -> List String -> List String -> AbstractAppState a -> ToMsg (Pagination PackageSuggestion) msg -> Cmd msg
+getPackagesSuggestionsWithOptions qs select exclude =
+    let
+        queryString =
+            PaginationQueryString.toApiUrlWith
+                [ ( "select", String.join "," select )
+                , ( "exclude", String.join "," exclude )
+                ]
+                qs
 
         url =
             "/packages/suggestions" ++ queryString

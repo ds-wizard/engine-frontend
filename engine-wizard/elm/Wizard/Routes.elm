@@ -456,7 +456,7 @@ projectsIndex appState =
         mbUserUuid =
             Session.getUserUuid appState.session
     in
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing)
+    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
 
 
 projectsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
@@ -468,13 +468,15 @@ projectsIndexWithFilters filters pagination =
             (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRouteUsersFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
             (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRoutePackagesFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRoutePackagesFilterId filters)
         )
 
 
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _ _ _ _) ->
+        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _) ->
             True
 
         _ ->

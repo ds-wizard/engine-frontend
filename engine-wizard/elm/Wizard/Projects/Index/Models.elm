@@ -5,6 +5,7 @@ module Wizard.Projects.Index.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debounce exposing (Debouncer)
+import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
@@ -15,7 +16,7 @@ import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal
 import Wizard.Projects.Index.Msgs exposing (Msg)
-import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 
 
 type alias Model =
@@ -30,6 +31,9 @@ type alias Model =
     , userFilterSearchValue : String
     , userFilterSelectedUsers : ActionResult (Pagination UserSuggestion)
     , userFilterUsers : ActionResult (Pagination UserSuggestion)
+    , packagesFilterSearchValue : String
+    , packagesFilterSelectedPackages : ActionResult (Pagination PackageSuggestion)
+    , packagesFilterPackages : ActionResult (Pagination PackageSuggestion)
     }
 
 
@@ -40,19 +44,23 @@ initialModel :
     -> Maybe FilterOperator
     -> Maybe String
     -> Maybe FilterOperator
+    -> Maybe String
+    -> Maybe FilterOperator
     -> Maybe Model
     -> Model
-initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbOldModel =
+initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp mbOldModel =
     let
         values =
             [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
             , ( indexRouteUsersFilterId, mbUser )
             , ( indexRouteProjectTagsFilterId, mbProjectTags )
+            , ( indexRoutePackagesFilterId, mbPackages )
             ]
 
         operators =
             [ ( indexRouteUsersFilterId, mbUserOp )
             , ( indexRouteProjectTagsFilterId, mbProjectTagsOp )
+            , ( indexRoutePackagesFilterId, mbPackagesOp )
             ]
 
         paginationQueryFilters =
@@ -69,4 +77,7 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
     , userFilterSearchValue = ""
     , userFilterSelectedUsers = ActionResult.Loading
     , userFilterUsers = ActionResult.Loading
+    , packagesFilterSearchValue = ""
+    , packagesFilterSelectedPackages = ActionResult.Loading
+    , packagesFilterPackages = ActionResult.Loading
     }
