@@ -9,6 +9,7 @@ import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
+import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
@@ -39,7 +40,7 @@ import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Projects.Common.View exposing (visibilityIcons)
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
@@ -107,6 +108,9 @@ listingConfig appState model =
             PaginationQueryFilter.isFilterActive indexRouteProjectTagsFilterId model.questionnaires.filters
                 || ActionResult.withDefault False model.projectTagsExist
 
+        kmsFilter =
+            listingKMsFilter appState model
+
         usersFilter =
             listingUsersFilter appState model
 
@@ -114,6 +118,7 @@ listingConfig appState model =
             []
                 |> listInsertIf templateFilter (Features.projectTemplatesCreate appState)
                 |> listInsertIf tagsFilter (Features.projectTagging appState && tagsFilterVisible)
+                |> listInsertIf kmsFilter True
                 |> listInsertIf usersFilter True
     in
     { title = listingTitle appState
@@ -257,6 +262,107 @@ listingProjectTagsFilter appState model =
     Listing.CustomFilter indexRouteProjectTagsFilterId
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
         , items = searchInputItem ++ selectedTagsItems ++ foundTagsItems
+        }
+
+
+listingKMsFilter : AppState -> Model -> Listing.Filter Msg
+listingKMsFilter appState model =
+    let
+        linkWithIds packageIds =
+            Routing.toUrl appState <|
+                Routes.projectsIndexWithFilters
+                    (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
+                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
+
+        removePackageLink packageId =
+            linkWithIds <| List.filter ((/=) (PackageSuggestion.packageIdAll packageId)) selectedPackageIds
+
+        addPackageLink packageId =
+            linkWithIds <| PackageSuggestion.packageIdAll packageId :: selectedPackageIds
+
+        viewPackageItem link icon package =
+            Dropdown.anchorItem
+                [ href (link package.id)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_packages_option"
+                , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                ]
+                [ icon
+                , text package.name
+                ]
+
+        selectedPackageItem =
+            viewPackageItem removePackageLink (faSet "listing.filter.multi.selected" appState)
+
+        foundSelectedPackages =
+            ActionResult.unwrap [] .items model.packagesFilterSelectedPackages
+                |> List.sortBy .name
+
+        selectedPackageIds =
+            model.questionnaires.filters
+                |> PaginationQueryFilter.getValue indexRoutePackagesFilterId
+                |> Maybe.unwrap [] (String.split ",")
+
+        selectedPackages =
+            selectedPackageIds
+                |> List.map (\a -> List.find (PackageSuggestion.isSamePackage a << .id) foundSelectedPackages)
+                |> listFilterJust
+                |> List.sortBy .name
+
+        foundPackages =
+            model.packagesFilterPackages
+                |> ActionResult.unwrap [] (List.sortBy .name << .items)
+
+        badge =
+            filterBadge selectedPackages
+
+        searchInputItem =
+            [ Dropdown.customItem <|
+                div [ class "dropdown-item-search" ]
+                    [ input
+                        [ type_ "text"
+                        , class "form-control"
+                        , placeholder (l_ "filter.packages.searchPlaceholder" appState)
+                        , alwaysStopPropagationOn "click" (D.succeed (PackagesFilterInput model.packagesFilterSearchValue))
+                        , onInput PackagesFilterInput
+                        , value model.packagesFilterSearchValue
+                        ]
+                        []
+                    ]
+            , Dropdown.divider
+            ]
+
+        selectedPackagesItems =
+            List.map selectedPackageItem selectedPackages
+
+        foundPackagesItems =
+            if not (List.isEmpty foundPackages) then
+                let
+                    addPackageItem =
+                        viewPackageItem addPackageLink (faSet "listing.filter.multi.notSelected" appState)
+                in
+                List.map addPackageItem foundPackages
+
+            else if not (String.isEmpty model.packagesFilterSearchValue) then
+                [ Dropdown.customItem <|
+                    div [ class "dropdown-item-empty" ]
+                        [ lx_ "filter.packages.empty" appState ]
+                ]
+
+            else
+                []
+
+        label =
+            case List.head selectedPackages of
+                Just selectedPackage ->
+                    selectedPackage.name
+
+                Nothing ->
+                    l_ "filter.packages.title" appState
+    in
+    Listing.CustomFilter indexRoutePackagesFilterId
+        { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
+        , items = searchInputItem ++ selectedPackagesItems ++ foundPackagesItems
         }
 
 

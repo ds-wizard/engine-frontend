@@ -53,6 +53,8 @@ fetchData appState =
         , userUuidsOp = Nothing
         , projectTags = Nothing
         , projectTagsOp = Nothing
+        , packageIds = Nothing
+        , packageIdsOp = Nothing
         }
         pagination
         appState

@@ -1,6 +1,7 @@
 module Wizard.Projects.Index.Msgs exposing (Msg(..))
 
 import Debouncer.Extra as Debouncer
+import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
@@ -24,5 +25,9 @@ type Msg
     | UsersFilterInput String
     | UsersFilterSearch String
     | UsersFilterSearchComplete (Result ApiError (Pagination UserSuggestion))
+    | PackagesFilterGetValuesComplete (Result ApiError (Pagination PackageSuggestion))
+    | PackagesFilterInput String
+    | PackagesFilterSearch String
+    | PackagesFilterSearchComplete (Result ApiError (Pagination PackageSuggestion))
     | DebouncerMsg (Debouncer.Msg Msg)
     | NoOp

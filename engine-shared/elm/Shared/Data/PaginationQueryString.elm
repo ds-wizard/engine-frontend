@@ -6,7 +6,7 @@ module Shared.Data.PaginationQueryString exposing
     , fromQ
     , parser
     , parser1
-    , parser5
+    , parser7
     , resetPage
     , setPage
     , toApiUrl
@@ -17,7 +17,7 @@ module Shared.Data.PaginationQueryString exposing
     , withSort
     , wrapRoute
     , wrapRoute1
-    , wrapRoute5
+    , wrapRoute7
     )
 
 import List.Extra as List
@@ -93,8 +93,8 @@ wrapRoute1 route defaultSortBy page q sort =
     route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
 
 
-wrapRoute5 : (PaginationQueryString -> f -> e -> d -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (f -> e -> d -> c -> b -> a)
-wrapRoute5 route defaultSortBy page q sort =
+wrapRoute7 : (PaginationQueryString -> h -> g -> f -> e -> d -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (h -> g -> f -> e -> d -> c -> b -> a)
+wrapRoute7 route defaultSortBy page q sort =
     let
         ( sortBy, sortDirection ) =
             parseSort defaultSortBy sort
@@ -112,9 +112,28 @@ parser1 p qs =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs
 
 
-parser5 : Parser a (Maybe Int -> Maybe String -> Maybe String -> g -> f -> e -> d -> c -> b) -> Query.Parser g -> Query.Parser f -> Query.Parser e -> Query.Parser d -> Query.Parser c -> Parser a b
-parser5 p qs1 qs2 qs3 qs4 qs5 =
-    p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs1 <?> qs2 <?> qs3 <?> qs4 <?> qs5
+parser7 :
+    Parser a (Maybe Int -> Maybe String -> Maybe String -> i -> h -> g -> f -> e -> d -> c -> b)
+    -> Query.Parser i
+    -> Query.Parser h
+    -> Query.Parser g
+    -> Query.Parser f
+    -> Query.Parser e
+    -> Query.Parser d
+    -> Query.Parser c
+    -> Parser a b
+parser7 p qs1 qs2 qs3 qs4 qs5 qs6 qs7 =
+    p
+        <?> Query.int "page"
+        <?> Query.string "q"
+        <?> Query.string "sort"
+        <?> qs1
+        <?> qs2
+        <?> qs3
+        <?> qs4
+        <?> qs5
+        <?> qs6
+        <?> qs7
 
 
 toUrl : PaginationQueryString -> String
