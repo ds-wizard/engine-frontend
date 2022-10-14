@@ -171,14 +171,14 @@ viewProjectNavigationActions appState model questionnaire =
     if QuestionnaireDetail.isAnonymousProject questionnaire && Session.exists appState.session then
         DetailNavigation.sectionActions
             [ ActionResultView.error model.addingToMyProjects
-            , ActionButton.buttonExtra appState
+            , ActionButton.buttonCustom appState
                 { content =
                     [ fa "fas fa-plus"
                     , lx_ "actions.add" appState
                     ]
                 , result = model.addingToMyProjects
                 , msg = AddToMyProjects
-                , dangerous = False
+                , btnClass = "btn-primary with-icon"
                 }
             ]
 
