@@ -84,7 +84,7 @@ publicApp model content =
                 , classList [ ( "app-fullscreen", AppState.isFullscreen model.appState ) ]
                 ]
                 [ publicHeader True model
-                , div [ class "container-fluid" ] [ content ]
+                , div [ class "container-fluid d-flex justify-content-center" ] [ content ]
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
