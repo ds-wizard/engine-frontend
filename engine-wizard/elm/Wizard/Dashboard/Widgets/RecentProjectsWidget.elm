@@ -45,7 +45,7 @@ viewRecentProjects : AppState -> List Questionnaire -> List (Html msg)
 viewRecentProjects appState questionnaires =
     [ div [ class "RecentProjectsWidget d-flex flex-column h-100" ]
         [ h2 [ class "fs-4 fw-bold mb-4" ] [ lx_ "heading" appState ]
-        , div [ class "RecentProjectsWidget__ProjectList flex-grow-1" ] (List.map (viewProject appState) questionnaires)
+        , div [ class "Dashboard__ItemList flex-grow-1" ] (List.map (viewProject appState) questionnaires)
         , div [ class "mt-4" ]
             [ linkTo appState (Routes.projectsIndex appState) [] [ lx_ "viewAll" appState ] ]
         ]

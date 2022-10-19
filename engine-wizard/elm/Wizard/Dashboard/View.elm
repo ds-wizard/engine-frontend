@@ -26,7 +26,7 @@ view appState model =
                     ResearcherDashboard.view appState model.researcherDashboardModel
 
                 DataStewardDashboard ->
-                    DataStewardDashboard.view appState
+                    DataStewardDashboard.view appState model.dataStewardDashboardModel
 
                 AdminDashboard ->
                     AdminDashboard.view appState model.adminDashboardModel
