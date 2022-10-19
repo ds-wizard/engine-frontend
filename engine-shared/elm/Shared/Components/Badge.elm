@@ -6,6 +6,7 @@ module Shared.Components.Badge exposing
     , light
     , secondary
     , success
+    , warning
     , warningClass
     )
 
@@ -41,6 +42,11 @@ danger =
 dangerClass : String
 dangerClass =
     badgeClass "bg-danger"
+
+
+warning : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+warning =
+    render warningClass
 
 
 warningClass : String

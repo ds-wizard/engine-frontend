@@ -5,6 +5,7 @@ module Wizard.Dashboard.Update exposing
 
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
+import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
 import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
 import Wizard.Dashboard.Models exposing (CurrentDashboard(..), Model)
 import Wizard.Dashboard.Msgs exposing (Msg(..))
@@ -17,6 +18,10 @@ fetchData appState model =
         ResearcherDashboard ->
             Cmd.map ResearcherDashboardMsg <|
                 ResearcherDashboard.fetchData appState
+
+        DataStewardDashboard ->
+            Cmd.map DataStewardDashboardMsg <|
+                DataStewardDashboard.fetchData appState
 
         AdminDashboard ->
             Cmd.map AdminDashboardMsg <|
@@ -31,6 +36,11 @@ update msg appState model =
     case msg of
         ResearcherDashboardMsg researcherDashboardMsg ->
             ( { model | researcherDashboardModel = ResearcherDashboard.update researcherDashboardMsg appState model.researcherDashboardModel }
+            , Cmd.none
+            )
+
+        DataStewardDashboardMsg dataStewardDashboardMsg ->
+            ( { model | dataStewardDashboardModel = DataStewardDashboard.update dataStewardDashboardMsg appState model.dataStewardDashboardModel }
             , Cmd.none
             )
 

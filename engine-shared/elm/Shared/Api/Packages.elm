@@ -2,6 +2,7 @@ module Shared.Api.Packages exposing
     ( deletePackage
     , deletePackageVersion
     , exportPackageUrl
+    , getOutdatedPackages
     , getPackage
     , getPackages
     , getPackagesSuggestions
@@ -27,6 +28,20 @@ getPackages qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
+
+        url =
+            "/packages" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "packages" Package.decoder)
+
+
+getOutdatedPackages : AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
+getOutdatedPackages =
+    let
+        queryString =
+            PaginationQueryString.empty
+                |> PaginationQueryString.withSize (Just 5)
+                |> PaginationQueryString.toApiUrlWith [ ( "state", "OutdatedPackageState" ) ]
 
         url =
             "/packages" ++ queryString
