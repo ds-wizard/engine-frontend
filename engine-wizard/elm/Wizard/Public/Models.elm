@@ -37,7 +37,7 @@ initialModel appState =
 initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
-        AuthCallback _ _ _ ->
+        AuthCallback _ _ _ _ ->
             { model | authModel = Wizard.Public.Auth.Models.initialModel }
 
         BookReferenceRoute _ ->

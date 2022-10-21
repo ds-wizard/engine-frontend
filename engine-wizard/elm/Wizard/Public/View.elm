@@ -17,7 +17,7 @@ import Wizard.Public.SignupConfirmation.View
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        AuthCallback _ _ _ ->
+        AuthCallback _ _ _ _ ->
             Html.map AuthMsg <|
                 Wizard.Public.Auth.View.view appState model.authModel
 

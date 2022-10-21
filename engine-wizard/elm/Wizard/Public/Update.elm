@@ -17,9 +17,9 @@ import Wizard.Public.SignupConfirmation.Update
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        AuthCallback id error code ->
+        AuthCallback id error code sessionState ->
             Cmd.map AuthMsg <|
-                Wizard.Public.Auth.Update.fetchData id error code appState
+                Wizard.Public.Auth.Update.fetchData id error code sessionState appState
 
         BookReferenceRoute uuid ->
             Cmd.map BookReferenceMsg <|

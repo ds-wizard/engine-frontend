@@ -11,9 +11,9 @@ import Wizard.Public.Auth.Models exposing (Model)
 import Wizard.Public.Auth.Msgs exposing (Msg(..))
 
 
-fetchData : String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
-fetchData id error code appState =
-    AuthApi.getToken id error code appState AuthenticationCompleted
+fetchData : String -> Maybe String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
+fetchData id error code appState sessionState =
+    AuthApi.getToken id error code appState sessionState AuthenticationCompleted
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
