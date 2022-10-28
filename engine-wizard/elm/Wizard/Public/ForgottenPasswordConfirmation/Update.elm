@@ -2,10 +2,10 @@ module Wizard.Public.ForgottenPasswordConfirmation.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Common.PasswordForm as PasswordForm
@@ -57,6 +57,6 @@ handlePutUserPasswordCompleted appState result model =
                     setFormErrors appState error model.form
 
                 errorMessage =
-                    ApiError.toActionResult appState (lg "apiError.actionKey.passwordRecoveryError" appState) error
+                    ApiError.toActionResult appState (gettext "Forgotten password recovery failed." appState.locale) error
             in
             ( { model | submitting = errorMessage, form = form }, Cmd.none )

@@ -2,10 +2,10 @@ module Wizard.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Dict
+import Gettext exposing (gettext)
 import Shared.Api.Users as UsersApi
 import Shared.Data.User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -63,7 +63,7 @@ deleteUserCompleted appState model result =
             )
 
         Err error ->
-            ( { model | deletingUser = ApiError.toActionResult appState (lg "apiError.users.deleteError" appState) error }
+            ( { model | deletingUser = ApiError.toActionResult appState (gettext "User could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -86,7 +86,7 @@ listingUpdateConfig wrapMsg appState model =
             Dict.get indexRouteRoleFilterId model.users.filters.values
     in
     { getRequest = UsersApi.getUsers { role = role }
-    , getError = lg "apiError.users.getListError" appState
+    , getError = gettext "Unable to get users." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.usersIndexWithFilters model.users.filters
     }

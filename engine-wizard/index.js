@@ -99,25 +99,30 @@ function getApiUrl(config) {
     return apiUrl()
 }
 
-function loadApp(config, provisioning) {
+function loadApp(config, locale, provisioning) {
     setStyles(config, function () {
+        const flags = {
+            seed: Math.floor(Math.random() * 0xFFFFFFFF),
+            session: JSON.parse(localStorage.session || null),
+            apiUrl: getApiUrl(config),
+            clientUrl: clientUrl(),
+            config: config,
+            provisioning: provisioning,
+            localProvisioning: localProvisioning(),
+            navigator: {
+                pdf: getPdfSupport()
+            },
+            gaEnabled: cookies.getGaEnabled(),
+            cookieConsent: cookies.getCookieConsent(),
+        }
+
+        if (Object.keys(locale).length >  0) {
+            flags.locale = locale
+        }
 
         const app = program.Elm.Wizard.init({
             node: document.body,
-            flags: {
-                seed: Math.floor(Math.random() * 0xFFFFFFFF),
-                session: JSON.parse(localStorage.session || null),
-                apiUrl: getApiUrl(config),
-                clientUrl: clientUrl(),
-                config: config,
-                provisioning: provisioning,
-                localProvisioning: localProvisioning(),
-                navigator: {
-                    pdf: getPdfSupport()
-                },
-                gaEnabled: cookies.getGaEnabled(),
-                cookieConsent: cookies.getCookieConsent()
-            }
+            flags: flags,
         })
 
         registerConsolePorts(app)
@@ -143,7 +148,10 @@ window.onload = function () {
     defaultStyleUrl = style.getAttribute('href')
     style.remove()
 
-    const promises = [axios.get(configUrl())]
+    const promises = [
+        axios.get(configUrl()),
+        axios.get(apiUrl() + '/configs/locales/' + navigator.language)
+    ]
     const hasProvisioning = !!provisioningUrl()
     if (hasProvisioning) {
         promises.push(axios.get(provisioningUrl()))
@@ -152,8 +160,9 @@ window.onload = function () {
     axios.all(promises)
         .then(function (results) {
             const config = results[0].data
-            const provisioning = hasProvisioning ? results[1].data : null
-            loadApp(config, provisioning)
+            const locale = results[1].data
+            const provisioning = hasProvisioning ? results[2].data : null
+            loadApp(config, locale, provisioning)
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null

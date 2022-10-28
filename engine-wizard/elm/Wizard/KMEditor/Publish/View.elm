@@ -3,13 +3,14 @@ module Wizard.KMEditor.Publish.View exposing (view)
 import Form exposing (Form)
 import Form.Field exposing (FieldValue(..))
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, label, p, text)
 import Html.Attributes exposing (class, href, id, name, target)
 import Html.Events exposing (onClick)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lh, lx)
 import Shared.Utils exposing (flip)
+import String.Format as String
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
@@ -28,21 +29,6 @@ import Wizard.KMEditor.Routes as KMEditorRoutes
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Publish.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.KMEditor.Publish.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Publish.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (contentView appState model) model.branch
@@ -51,14 +37,14 @@ view appState model =
 contentView : AppState -> Model -> BranchDetail -> Html Msg
 contentView appState model branch =
     div [ wideDetailClass "KMEditor__Publish" ]
-        [ Page.header (l_ "header" appState) []
+        [ Page.header (gettext "Publish new version" appState.locale) []
         , div []
             [ FormResult.view appState model.publishingBranch
             , formView appState model.form branch
             , FormActions.viewCustomButton appState
                 (Routes.KMEditorRoute (KMEditorRoutes.EditorRoute branch.uuid (KMEditorRoute.Edit Nothing)))
                 (ActionButton.buttonWithAttrs appState
-                    (ActionButton.ButtonWithAttrsConfig (l_ "action" appState)
+                    (ActionButton.ButtonWithAttrsConfig (gettext "Publish" appState.locale)
                         model.publishingBranch
                         (FormMsg Form.Submit)
                         False
@@ -76,16 +62,21 @@ formView appState form branch =
             BranchUtils.lastVersion appState branch
     in
     div []
-        [ Html.map FormMsg <| FormGroup.textView "name" branch.name <| l_ "form.name" appState
-        , Html.map FormMsg <| FormGroup.codeView branch.kmId <| l_ "form.kmId" appState
+        [ Html.map FormMsg <| FormGroup.textView "name" branch.name <| gettext "Knowledge Model" appState.locale
+        , Html.map FormMsg <| FormGroup.codeView branch.kmId <| gettext "Knowledge Model ID" appState.locale
         , lastVersion appState mbVersion
         , versionInputGroup appState form mbVersion
-        , Html.map FormMsg <| FormGroup.input appState form "license" <| l_ "form.license" appState
-        , FormExtra.blockAfter <| lh_ "form.license.description" [ a [ href "https://spdx.org/licenses/", target "_blank" ] [ text (l_ "form.license.description.license" appState) ] ] appState
-        , Html.map FormMsg <| FormGroup.input appState form "description" <| l_ "form.description" appState
-        , FormExtra.textAfter <| l_ "form.description.description" appState
-        , Html.map FormMsg <| FormGroup.markdownEditor appState form "readme" <| l_ "form.readme" appState
-        , FormExtra.textAfter <| l_ "form.readme.description" appState
+        , Html.map FormMsg <| FormGroup.input appState form "license" <| gettext "License" appState.locale
+        , FormExtra.blockAfter <|
+            String.formatHtml
+                (gettext "Choose a %s so others can use your Knowledge Model." appState.locale)
+                [ a [ href "https://spdx.org/licenses/", target "_blank" ]
+                    [ text (gettext "license" appState.locale) ]
+                ]
+        , Html.map FormMsg <| FormGroup.input appState form "description" <| gettext "Description" appState.locale
+        , FormExtra.textAfter <| gettext "Short description of the Knowledge Model." appState.locale
+        , Html.map FormMsg <| FormGroup.markdownEditor appState form "readme" <| gettext "Readme" appState.locale
+        , FormExtra.textAfter <| gettext "Describe the Knowledge Model, you can use markdown." appState.locale
         ]
 
 
@@ -93,8 +84,8 @@ lastVersion : AppState -> Maybe Version -> Html msg
 lastVersion appState mbVersion =
     mbVersion
         |> Maybe.map Version.toString
-        |> Maybe.withDefault (l_ "form.lastVersion.empty" appState)
-        |> flip (FormGroup.textView "last-version") (l_ "form.lastVersion" appState)
+        |> Maybe.withDefault (gettext "No version of this package has been published yet." appState.locale)
+        |> flip (FormGroup.textView "last-version") (gettext "Last version" appState.locale)
 
 
 versionInputGroup : AppState -> Form FormError BranchPublishForm -> Maybe Version -> Html Msg
@@ -133,7 +124,7 @@ versionInputGroup appState form mbVersion =
                 |> Maybe.withDefault (Version.create 0 0 1)
     in
     div [ class "form-group" ]
-        [ label [ class "control-label" ] [ lx_ "form.newVersion" appState ]
+        [ label [ class "control-label" ] [ text (gettext "New version" appState.locale) ]
         , div [ class "version-inputs" ]
             [ Html.map FormMsg <| Input.baseInput "number" String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-major", id "version-major" ]
             , text "."
@@ -142,10 +133,10 @@ versionInputGroup appState form mbVersion =
             , Html.map FormMsg <| Input.baseInput "number" String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-patch", id "version-patch" ]
             ]
         , p [ class "form-text text-muted version-suggestions" ]
-            [ lx_ "form.newVersion.suggestions" appState
+            [ text (gettext "Suggestions: " appState.locale)
             , a [ onClick <| FormSetVersion nextMajor ] [ text <| Version.toString nextMajor ]
             , a [ onClick <| FormSetVersion nextMinor ] [ text <| Version.toString nextMinor ]
             , a [ onClick <| FormSetVersion nextPatch ] [ text <| Version.toString nextPatch ]
             ]
-        , FormExtra.text <| l_ "form.newVersion.description" appState
+        , FormExtra.text <| gettext "The version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes, and number X indicates a major change." appState.locale
         ]

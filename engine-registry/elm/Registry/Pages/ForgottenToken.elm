@@ -10,7 +10,8 @@ module Registry.Pages.ForgottenToken exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
-import Html exposing (Html, div, form, p)
+import Gettext exposing (gettext)
+import Html exposing (Html, div, form, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
@@ -22,18 +23,7 @@ import Registry.Common.View.Page as Page
 import Result exposing (Result)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.ForgottenToken"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry.Pages.ForgottenToken"
 
 
 init : Model
@@ -125,22 +115,22 @@ successView : AppState -> Html Msg
 successView appState =
     Page.illustratedMessage
         { image = Undraw.confirmation
-        , heading = l_ "success.heading" appState
-        , msg = l_ "success.msg" appState
+        , heading = gettext "Token recovery successful!" appState.locale
+        , msg = gettext "Check your email address for the recovery link." appState.locale
         }
 
 
 formView : AppState -> Model -> Html Msg
 formView appState model =
     div [ class "card card-form bg-light" ]
-        [ div [ class "card-header" ] [ lx_ "formView.header" appState ]
+        [ div [ class "card-header" ] [ text (gettext "Forgotten Token" appState.locale) ]
         , div [ class "card-body" ]
             [ form [ onSubmit <| FormMsg Form.Submit ]
                 [ FormResult.errorOnlyView model.submitting
-                , Html.map FormMsg <| FormGroup.input appState model.form "email" <| l_ "formView.email.label" appState
+                , Html.map FormMsg <| FormGroup.input appState model.form "email" <| gettext "Email" appState.locale
                 , p [ class "text-muted" ]
-                    [ lx_ "formView.email.help" appState ]
-                , ActionButton.submit ( l_ "formView.submit" appState, model.submitting )
+                    [ text (gettext "Enter the email you used to register your organization." appState.locale) ]
+                , ActionButton.submit ( gettext "Submit" appState.locale, model.submitting )
                 ]
             ]
         ]

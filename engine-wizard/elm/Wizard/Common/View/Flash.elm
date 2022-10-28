@@ -6,17 +6,12 @@ module Wizard.Common.View.Flash exposing
     , warning
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.View.Flash"
 
 
 error : AppState -> String -> Html msg
@@ -43,7 +38,7 @@ loader : AppState -> Html msg
 loader appState =
     flashView "alert-inline-loader"
         (faSet "_global.spinner" appState)
-        (l_ "loader.loading" appState)
+        (gettext "Loading..." appState.locale)
 
 
 flashView : String -> Html msg -> String -> Html msg

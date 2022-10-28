@@ -3,6 +3,7 @@ module Wizard.Common.Components.PlansList exposing
     , view
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
@@ -10,20 +11,9 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.Plan exposing (Plan)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lgx, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.PlansList"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.PlansList"
 
 
 type alias ViewConfig msg =
@@ -35,7 +25,7 @@ view appState cfg plans =
     let
         viewTrialBadge plan =
             if plan.test then
-                Badge.secondary [ class "ms-2" ] [ lx_ "badge.trial" appState ]
+                Badge.secondary [ class "ms-2" ] [ text (gettext "Trial" appState.locale) ]
 
             else
                 emptyNode
@@ -57,7 +47,7 @@ view appState cfg plans =
                             True
             in
             if active then
-                Badge.success [ class "ms-2" ] [ lx_ "badge.active" appState ]
+                Badge.success [ class "ms-2" ] [ text (gettext "Active" appState.locale) ]
 
             else
                 emptyNode
@@ -89,7 +79,7 @@ view appState cfg plans =
                 ]
     in
     if List.isEmpty plans then
-        Flash.info appState (l_ "noPlans" appState)
+        Flash.info appState (gettext "There are no plans for this instance." appState.locale)
 
     else
         let
@@ -103,10 +93,10 @@ view appState cfg plans =
         table [ class "table table-striped table-hover" ]
             [ thead []
                 [ tr []
-                    [ th [] [ lx_ "table.plan" appState ]
-                    , th [] [ lgx "appPlan.users" appState ]
-                    , th [] [ lgx "appPlan.from" appState ]
-                    , th [] [ lgx "appPlan.to" appState ]
+                    [ th [] [ text (gettext "Plan" appState.locale) ]
+                    , th [] [ text (gettext "Users" appState.locale) ]
+                    , th [] [ text (gettext "From" appState.locale) ]
+                    , th [] [ text (gettext "To" appState.locale) ]
                     , headerActions
                     ]
                 ]

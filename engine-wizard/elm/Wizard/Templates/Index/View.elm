@@ -1,13 +1,14 @@
 module Wizard.Templates.Index.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Utils exposing (listInsertIf)
+import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
@@ -23,25 +24,10 @@ import Wizard.Templates.Index.Msgs exposing (Msg(..))
 import Wizard.Templates.Routes exposing (Route(..))
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Templates.Index.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Templates.Index.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Templates.Index.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "KnowledgeModels__Index" ]
-        [ Page.header (l_ "header.title" appState) []
+        [ Page.header (gettext "Document Templates" appState.locale) []
         , FormResult.successOnlyView appState model.deletingTemplate
         , Listing.view appState (listingConfig appState) model.templates
         , deleteModal appState model
@@ -55,7 +41,7 @@ importButton appState =
             (Routes.templatesImport Nothing)
             [ class "btn btn-primary with-icon" ]
             [ faSet "kms.upload" appState
-            , lx_ "header.import" appState
+            , text (gettext "Import" appState.locale)
             ]
 
     else
@@ -69,7 +55,7 @@ listingConfig appState =
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText = gettext "Click \"Import\" button to import a new document template." appState.locale
     , updated =
         Just
             { getTime = .createdAt
@@ -77,9 +63,9 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
-    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
+    , searchPlaceholderText = Just (gettext "Search..." appState.locale)
     , sortOptions =
-        [ ( "name", lg "template.name" appState )
+        [ ( "name", gettext "Name" appState.locale )
         ]
     , filters = []
     , toRoute = \_ -> Routes.TemplatesRoute << IndexRoute
@@ -92,7 +78,7 @@ listingTitle appState template =
     span []
         [ linkTo appState (Routes.templatesDetail template.id) [] [ text template.name ]
         , Badge.light
-            (tooltip (lg "package.latestVersion" appState))
+            (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString template.version ]
         , listingTitleOutdatedBadge appState template
         , listingTitleUnsupportedBadge appState template
@@ -109,7 +95,7 @@ listingTitleOutdatedBadge appState template =
         linkTo appState
             (Routes.templatesImport templateId)
             [ class Badge.warningClass ]
-            [ lx_ "badge.outdated" appState ]
+            [ text (gettext "update available" appState.locale) ]
 
     else
         emptyNode
@@ -118,7 +104,7 @@ listingTitleOutdatedBadge appState template =
 listingTitleUnsupportedBadge : AppState -> Template -> Html Msg
 listingTitleUnsupportedBadge appState template =
     if template.state == TemplateState.UnsupportedMetamodelVersion then
-        Badge.danger [] [ lx_ "badge.unsupported" appState ]
+        Badge.danger [] [ text (gettext "unsupported metamodel" appState.locale) ]
 
     else
         emptyNode
@@ -139,7 +125,7 @@ listingDescription appState template =
                                 Nothing ->
                                     emptyNode
                     in
-                    span [ class "fragment", title <| lg "package.publishedBy" appState ]
+                    span [ class "fragment", title <| gettext "Published by" appState.locale ]
                         [ logo
                         , text organization.name
                         ]
@@ -161,7 +147,7 @@ listingActions appState template =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.view" appState
-                , label = l_ "action.viewDetail" appState
+                , label = gettext "View detail" appState.locale
                 , msg = ListingActionLink (Routes.templatesDetail template.id)
                 , dataCy = "view"
                 }
@@ -173,7 +159,7 @@ listingActions appState template =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.export" appState
-                , label = l_ "action.export" appState
+                , label = gettext "Export" appState.locale
                 , msg = ListingActionMsg (ExportTemplate template)
                 , dataCy = "export"
                 }
@@ -185,7 +171,7 @@ listingActions appState template =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
-                , label = l_ "action.delete" appState
+                , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg <| ShowHideDeleteTemplate <| Just template
                 , dataCy = "delete"
                 }
@@ -213,15 +199,18 @@ deleteModal appState model =
 
         modalContent =
             [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text templateName ] ] appState)
+                (String.formatHtml
+                    (gettext "Are you sure you want to permanently delete %s and all its versions?" appState.locale)
+                    [ strong [] [ text templateName ] ]
+                )
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete document template" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingTemplate
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeleteTemplate
             , cancelMsg = Just <| ShowHideDeleteTemplate Nothing
             , dangerous = True

@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.Documents.View exposing (ViewConfig, view)
 
 import ActionResult
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
@@ -16,9 +17,9 @@ import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listInsertIf)
+import String.Format as String
 import Time.Distance as TimeDistance
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -39,26 +40,6 @@ import Wizard.Projects.Detail.Documents.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes exposing (Route(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Documents.View"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Projects.Detail.Documents.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.Documents.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Projects.Detail.Documents.View"
 
 
 type alias ViewConfig msg =
@@ -92,7 +73,7 @@ listingConfig cfg appState =
 
             else
                 Just <|
-                    [ strong [] [ lx_ "submissions.title" appState ]
+                    [ strong [] [ text (gettext "Submissions" appState.locale) ]
                     , table [ class "table table-sm" ]
                         [ tbody []
                             (List.map (viewSubmission cfg appState) (List.sortWith Submission.compare document.submissions))
@@ -106,10 +87,10 @@ listingConfig cfg appState =
     , textTitle = .name
     , emptyText =
         if Session.exists appState.session then
-            l_ "listing.empty" appState
+            gettext "Click \"New document\" button to add a new document." appState.locale
 
         else
-            l_ "listing.emptyAnonymous" appState
+            gettext "Log in to add a new document." appState.locale
     , updated =
         Just
             { getTime = .createdAt
@@ -119,8 +100,8 @@ listingConfig cfg appState =
     , iconView = Nothing
     , searchPlaceholderText = Nothing
     , sortOptions =
-        [ ( "name", lg "document.name" appState )
-        , ( "createdAt", lg "document.createdAt" appState )
+        [ ( "name", gettext "Name" appState.locale )
+        , ( "createdAt", gettext "Created" appState.locale )
         ]
     , filters = []
     , toRoute = \_ -> Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
@@ -130,7 +111,7 @@ listingConfig cfg appState =
                 linkTo appState
                     (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid Nothing)
                     [ class "btn btn-primary" ]
-                    [ lx_ "newDocument" appState ]
+                    [ text (gettext "New document" appState.locale) ]
 
         else
             Nothing
@@ -145,7 +126,7 @@ listingTitle cfg appState document =
                 ( a
                     [ onClick (cfg.wrapMsg <| DownloadDocument document) ]
                     [ text document.name ]
-                , tooltipCustom "with-tooltip-right with-tooltip-align-left" (l_ "listing.name.title" appState)
+                , tooltipCustom "with-tooltip-right with-tooltip-align-left" (gettext "Click to download the document" appState.locale)
                 )
 
             else
@@ -204,7 +185,7 @@ listingActions appState cfg document =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
-                , label = l_ "action.download" appState
+                , label = gettext "Download" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| DownloadDocument document)
                 , dataCy = "download"
                 }
@@ -216,7 +197,7 @@ listingActions appState cfg document =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.submit" appState
-                , label = l_ "action.submit" appState
+                , label = gettext "Submit" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideSubmitDocument <| Just document)
                 , dataCy = "submit"
                 }
@@ -227,7 +208,7 @@ listingActions appState cfg document =
                     ( Listing.dropdownAction
                         { extraClass = Nothing
                         , icon = faSet "_global.questionnaire" appState
-                        , label = l_ "action.viewQuestionnaire" appState
+                        , label = gettext "View questionnaire" appState.locale
                         , msg = ListingActionMsg (previewQuestionnaireEventMsg questionnaireEventUuid)
                         , dataCy = "view-questionnaire"
                         }
@@ -256,7 +237,7 @@ listingActions appState cfg document =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
-                , label = l_ "action.delete" appState
+                , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
@@ -277,20 +258,20 @@ stateBadge appState state =
         QueuedDocumentState ->
             Badge.info []
                 [ faSet "_global.spinner" appState
-                , lx_ "badge.queued" appState
+                , text (gettext "Queued" appState.locale)
                 ]
 
         InProgressDocumentState ->
             Badge.info []
                 [ faSet "_global.spinner" appState
-                , lx_ "badge.inProgress" appState
+                , text (gettext "In Progress" appState.locale)
                 ]
 
         DoneDocumentState ->
             emptyNode
 
         ErrorDocumentState ->
-            Badge.danger [] [ lx_ "badge.error" appState ]
+            Badge.danger [] [ text (gettext "Error" appState.locale) ]
 
 
 viewSubmission : ViewConfig msg -> AppState -> Submission -> Html msg
@@ -301,14 +282,14 @@ viewSubmission cfg appState submission =
                 SubmissionState.InProgress ->
                     Badge.info []
                         [ faSet "_global.spinner" appState
-                        , lgx "submissionState.inProgress" appState
+                        , text (gettext "Submitting" appState.locale)
                         ]
 
                 SubmissionState.Done ->
-                    Badge.success [] [ lgx "submissionState.done" appState ]
+                    Badge.success [] [ text (gettext "Submitted" appState.locale) ]
 
                 SubmissionState.Error ->
-                    Badge.danger [] [ lgx "submissionState.error" appState ]
+                    Badge.danger [] [ text (gettext "Error" appState.locale) ]
 
         readableTime =
             TimeUtils.toReadableDateTime appState.timeZone submission.updatedAt
@@ -320,13 +301,13 @@ viewSubmission cfg appState submission =
             case ( submission.state, submission.location, submission.returnedData ) of
                 ( SubmissionState.Done, Just location, _ ) ->
                     a [ href location, class "with-icon-after", target "_blank" ]
-                        [ lx_ "submissions.viewLink" appState
+                        [ text (gettext "View submission" appState.locale)
                         , faSet "_global.externalLink" appState
                         ]
 
                 ( SubmissionState.Error, _, Just _ ) ->
                     a [ onClick (cfg.wrapMsg <| SetSubmissionErrorModal (Just (Submission.getReturnedData submission))) ]
-                        [ lx_ "submissions.errorLink" appState ]
+                        [ text (gettext "View error" appState.locale) ]
 
                 _ ->
                     emptyNode
@@ -358,15 +339,18 @@ deleteModal cfg appState model =
 
         modalContent =
             [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text name ] ] appState)
+                (String.formatHtml
+                    (gettext "Are you sure you want to permanently delete %s?" appState.locale)
+                    [ strong [] [ text name ] ]
+                )
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete document" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingDocument
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = cfg.wrapMsg <| DeleteDocument
             , cancelMsg = Just <| cfg.wrapMsg <| ShowHideDeleteDocument Nothing
             , dangerous = True
@@ -390,11 +374,11 @@ submitModal cfg appState model =
         submitButton =
             if ActionResult.isSuccess model.submittingDocument then
                 button [ class "btn btn-primary", onClick <| cfg.wrapMsg <| ShowHideSubmitDocument Nothing ]
-                    [ lx_ "submitModal.button.done" appState ]
+                    [ text (gettext "Done" appState.locale) ]
 
             else if ActionResult.isSuccess model.submissionServices && Maybe.isJust model.selectedSubmissionServiceId then
                 ActionButton.button appState
-                    { label = l_ "submitModal.button.submit" appState
+                    { label = gettext "Submit" appState.locale
                     , result = model.submittingDocument
                     , msg = cfg.wrapMsg <| SubmitDocument
                     , dangerous = False
@@ -402,11 +386,11 @@ submitModal cfg appState model =
 
             else
                 button [ class "btn btn-primary", disabled True ]
-                    [ lx_ "submitModal.button.submit" appState ]
+                    [ text (gettext "Submit" appState.locale) ]
 
         cancelButton =
             button [ onClick <| cfg.wrapMsg <| ShowHideSubmitDocument Nothing, class "btn btn-secondary", disabled <| ActionResult.isLoading model.submittingDocument ]
-                [ lx_ "submitModal.button.cancel" appState ]
+                [ text (gettext "Cancel" appState.locale) ]
 
         viewOption submissionService =
             div [ class "form-check", classList [ ( "form-check-selected", model.selectedSubmissionServiceId == Just submissionService.id ) ] ]
@@ -431,7 +415,7 @@ submitModal cfg appState model =
                     (List.map viewOption submissionServices)
 
             else
-                Flash.info appState <| l_ "submitModal.noSubmission" appState
+                Flash.info appState <| gettext "There are no submission services configured for this type of document." appState.locale
 
         submissionBody submissionServices =
             div []
@@ -447,7 +431,7 @@ submitModal cfg appState model =
                             case submission.location of
                                 Just location ->
                                     div [ class "mt-2" ]
-                                        [ lx_ "submitModal.success.link" appState
+                                        [ text (gettext "You can find it here: " appState.locale)
                                         , a [ href location, target "_blank" ]
                                             [ text location ]
                                         ]
@@ -457,14 +441,14 @@ submitModal cfg appState model =
                     in
                     div [ class "alert alert-success" ]
                         [ faSet "_global.success" appState
-                        , lx_ "submitModal.success.message" appState
+                        , text (gettext "The document was successfully submitted." appState.locale)
                         , link
                         ]
 
                 SubmissionState.Error ->
                     div [ class "alert alert-danger" ]
                         [ faSet "_global.error" appState
-                        , lx_ "submitModal.error.message" appState
+                        , text (gettext "The document submission failed." appState.locale)
                         ]
 
                 _ ->
@@ -479,7 +463,7 @@ submitModal cfg appState model =
 
         content =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text <| lf_ "submitModal.title" [ name ] appState ]
+                [ h5 [ class "modal-title" ] [ text <| String.format (gettext "Submit %s" appState.locale) [ name ] ]
                 ]
             , div [ class "modal-body" ]
                 [ body
@@ -511,7 +495,7 @@ documentErrorModal cfg appState model =
                     ( False, "" )
 
         modalConfig =
-            { title = l_ "documentErrorModal.title" appState
+            { title = gettext "Document error" appState.locale
             , message = message
             , visible = visible
             , actionMsg = cfg.wrapMsg (SetDocumentErrorModal Nothing)
@@ -533,7 +517,7 @@ submissionErrorModal cfg appState model =
                     ( False, "" )
 
         modalConfig =
-            { title = l_ "submissionErrorModal.title" appState
+            { title = gettext "Submission error" appState.locale
             , message = message
             , visible = visible
             , actionMsg = cfg.wrapMsg (SetSubmissionErrorModal Nothing)

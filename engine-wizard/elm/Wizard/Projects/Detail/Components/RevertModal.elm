@@ -9,28 +9,19 @@ module Wizard.Projects.Detail.Components.RevertModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, br, p, strong, text)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lh)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
 import Wizard.Ports as Ports
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.RevertModal"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Projects.Detail.Components.RevertModal"
 
 
 
@@ -115,17 +106,20 @@ view appState model =
             Maybe.unwrap "" (QuestionnaireEvent.getCreatedAt >> TimeUtils.toReadableDateTime appState.timeZone) model.mbEvent
 
         content =
-            [ Flash.warning appState (l_ "warning" appState)
+            [ Flash.warning appState (gettext "Heads up! This action cannot be undone." appState.locale)
             , p []
-                (lh_ "message" [ strong [] [ br [] [], text datetime ] ] appState)
+                (String.formatHtml
+                    (gettext "Are you sure you want to revert the projects to its state from %s?" appState.locale)
+                    [ strong [] [ br [] [], text datetime ] ]
+                )
             ]
     in
     Modal.confirm appState
-        { modalTitle = l_ "title" appState
+        { modalTitle = gettext "Revert questionnaire" appState.locale
         , modalContent = content
         , visible = Maybe.isJust model.mbEvent
         , actionResult = ActionResult.map (always "") model.revertResult
-        , actionName = l_ "action" appState
+        , actionName = gettext "Revert" appState.locale
         , actionMsg = Revert
         , cancelMsg = Just Close
         , dangerous = True

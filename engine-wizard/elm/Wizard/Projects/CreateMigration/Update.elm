@@ -3,6 +3,7 @@ module Wizard.Projects.CreateMigration.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
+import Gettext exposing (gettext)
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -11,7 +12,6 @@ import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSugge
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setQuestionnaire, setSelected)
 import Shared.Utils exposing (withNoCmd)
 import Uuid exposing (Uuid)
@@ -80,7 +80,7 @@ handleGetQuestionnaireCompleted appState model result =
     preselectKnowledgeModel <|
         applyResult appState
             { setResult = setQuestionnaire
-            , defaultError = lg "apiError.questionnaires.getError" appState
+            , defaultError = gettext "Unable to get the project." appState.locale
             , model = model
             , result = result
             }
@@ -147,7 +147,7 @@ handlePostMigrationCompleted appState model result =
             ( model, cmdNavigate appState <| Routes.projectsMigration migration.newQuestionnaire.uuid )
 
         Err error ->
-            ( { model | savingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.postError" appState) error }
+            ( { model | savingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be created." appState.locale) error }
             , getResultCmd result
             )
 
@@ -161,7 +161,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = ApiError.toActionResult appState (lg "apiError.knowledgeModels.tags.getError" appState) error }
+                    { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the Knowledge Model." appState.locale) error }
 
         cmd =
             getResultCmd result
@@ -175,7 +175,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
         cfg =
             { wrapMsg = wrapMsg << PackageTypeHintInputMsg
             , getTypeHints = PackagesApi.getPackagesSuggestions
-            , getError = lg "apiError.packages.getListError" appState
+            , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = wrapMsg << SelectPackage
             , clearReply = Nothing
             , filterResults = Nothing

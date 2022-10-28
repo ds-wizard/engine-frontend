@@ -2,10 +2,10 @@ module Wizard.Templates.Import.FileImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import File
+import Gettext exposing (gettext)
 import Json.Decode exposing (decodeValue)
 import Shared.Api.Templates as TemplatesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -68,6 +68,6 @@ importTemplateCompleted appState model result =
             ( model, cmdNavigate appState Routes.templatesIndex )
 
         Err error ->
-            ( { model | importing = ApiError.toActionResult appState (lg "apiError.templates.importError" appState) error }
+            ( { model | importing = ApiError.toActionResult appState (gettext "Importing the document template failed." appState.locale) error }
             , getResultCmd result
             )

@@ -9,23 +9,14 @@ module Wizard.KMEditor.Common.DeleteModal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Shared.Api.Branches as BranchesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lg, lh)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Common.DeleteModal"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.KMEditor.Common.DeleteModal"
 
 
 type alias Model =
@@ -81,7 +72,7 @@ update cfg appState msg model =
                     ( { model | branch = Nothing }, cfg.cmdDeleted )
 
                 Err error ->
-                    ( { model | deletingBranch = ApiError.toActionResult appState (lg "apiError.branches.deleteError" appState) error }
+                    ( { model | deletingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be deleted." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -102,15 +93,15 @@ view appState model =
 
         content =
             [ p []
-                (lh_ "text" [ strong [] [ text name ] ] appState)
+                (String.formatHtml (gettext "Are you sure you want to permanently delete %s?" appState.locale) [ strong [] [ text name ] ])
             ]
 
         modalConfig =
-            { modalTitle = l_ "title" appState
+            { modalTitle = gettext "Delete knowledge model editor" appState.locale
             , modalContent = content
             , visible = visible
             , actionResult = model.deletingBranch
-            , actionName = "Delete"
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = Delete
             , cancelMsg = Just Close
             , dangerous = True

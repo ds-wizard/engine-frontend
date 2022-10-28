@@ -10,7 +10,8 @@ module Registry.Pages.Login exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
-import Html exposing (Html, a, div, form)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, form, text)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
@@ -22,17 +23,6 @@ import Registry.Common.View.FormResult as FormResult
 import Registry.Routing as Routing
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.Login"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry.Pages.Login"
 
 
 init : Model
@@ -98,7 +88,7 @@ update { tagger, loginCmd } msg appState model =
                     ( model, loginCmd loginForm )
 
                 _ ->
-                    ( { model | loggingIn = Error <| l_ "update.error" appState }
+                    ( { model | loggingIn = Error <| gettext "Login failed." appState.locale }
                     , Cmd.none
                     )
 
@@ -125,15 +115,15 @@ handleFormMsg tagger formMsg appState model =
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ class "card card-form bg-light" ]
-        [ div [ class "card-header" ] [ lx_ "view.header" appState ]
+        [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
         , div [ class "card-body" ]
             [ form [ onSubmit <| FormMsg Form.Submit ]
                 [ FormResult.errorOnlyView model.loggingIn
-                , Html.map FormMsg <| FormGroup.input appState model.form "organizationId" <| l_ "view.organizationId" appState
-                , Html.map FormMsg <| FormGroup.password appState model.form "token" <| l_ "view.token" appState
+                , Html.map FormMsg <| FormGroup.input appState model.form "organizationId" <| gettext "Organization ID" appState.locale
+                , Html.map FormMsg <| FormGroup.password appState model.form "token" <| gettext "Token" appState.locale
                 , div [ class "d-flex justify-content-between align-items-center" ]
-                    [ ActionButton.submit ( l_ "view.logIn" appState, model.loggingIn )
-                    , a [ href <| Routing.toString Routing.ForgottenToken ] [ lx_ "view.forgottenToken" appState ]
+                    [ ActionButton.submit ( gettext "Log In" appState.locale, model.loggingIn )
+                    , a [ href <| Routing.toString Routing.ForgottenToken ] [ text (gettext "Forgot your token?" appState.locale) ]
                     ]
                 ]
             ]

@@ -1,11 +1,11 @@
 module Wizard.Projects.Import.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Error.ApiError as ApiError
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setQuestionnaire, setQuestionnaireImporter)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -38,7 +38,7 @@ update wrapMsg msg appState model =
             withSeed <|
                 applyResult appState
                     { setResult = setQuestionnaire
-                    , defaultError = lg "apiError.questionnaires.getError" appState
+                    , defaultError = gettext "Unable to get the project." appState.locale
                     , model = model
                     , result = result
                     }
@@ -53,7 +53,7 @@ update wrapMsg msg appState model =
 
                 Err error ->
                     withSeed <|
-                        ( setQuestionnaireImporter (ApiError.toActionResult appState (lg "apiError.questionnaireImporters.getError" appState) error) model
+                        ( setQuestionnaireImporter (ApiError.toActionResult appState (gettext "Unable to get importer." appState.locale) error) model
                         , getResultCmd result
                         )
 
@@ -93,6 +93,6 @@ update wrapMsg msg appState model =
 
                 Err error ->
                     withSeed
-                        ( { model | importing = ApiError.toActionResult appState (lg "apiError.questionnaires.putContentError" appState) error }
+                        ( { model | importing = ApiError.toActionResult appState (gettext "Questionnaire changes could not be saved." appState.locale) error }
                         , Cmd.none
                         )

@@ -1,11 +1,11 @@
 module Wizard.KMEditor.Editor.View exposing (view)
 
 import ActionResult
+import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
@@ -23,16 +23,6 @@ import Wizard.KMEditor.Editor.Models exposing (Model)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.View"
 
 
 view : KMEditorRoute -> AppState -> Model -> Html Msg
@@ -55,10 +45,10 @@ viewOffline : AppState -> Html Msg
 viewOffline appState =
     Page.illustratedMessageHtml
         { image = Undraw.warning
-        , heading = l_ "offline.heading" appState
+        , heading = gettext "Disconnected" appState.locale
         , content =
-            [ p [] [ lx_ "offline.text" appState ]
-            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ lx_ "offline.refresh" appState ] ]
+            [ p [] [ text (gettext "You have been disconnected, try to refresh the page." appState.locale) ]
+            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ text (gettext "Refresh" appState.locale) ] ]
             ]
         , cy = "offline"
         }
@@ -68,10 +58,10 @@ viewError : AppState -> Html Msg
 viewError appState =
     Page.illustratedMessageHtml
         { image = Undraw.warning
-        , heading = l_ "error.heading" appState
+        , heading = gettext "Oops!" appState.locale
         , content =
-            [ p [] [ lx_ "error.text" appState ]
-            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ lx_ "error.refresh" appState ] ]
+            [ p [] [ text (gettext "Something went wrong, try to refresh the page." appState.locale) ]
+            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ text (gettext "Refresh" appState.locale) ] ]
             ]
         , cy = "error"
         }
@@ -129,7 +119,7 @@ viewKMEditorNavigationTitleRow appState model branch =
                     , dataCy "km-editor_publish-button"
                     ]
                     [ faSet "kmEditorList.publish" appState
-                    , lx_ "header.publish" appState
+                    , text (gettext "Publish" appState.locale)
                     ]
                 ]
             ]
@@ -169,7 +159,7 @@ viewKMEditorNavigationNav appState route editorBranch =
 
         editorLink =
             { route = Routes.kmEditorEditor branchUuid editUuid
-            , label = l_ "nav.knowledgeModel" appState
+            , label = gettext "Knowledge Model" appState.locale
             , icon = faSet "kmEditor.knowledgeModel" appState
             , isActive = isEditorRoute
             , isVisible = True
@@ -178,7 +168,7 @@ viewKMEditorNavigationNav appState route editorBranch =
 
         questionTagsLink =
             { route = Routes.kmEditorEditorQuestionTags branchUuid
-            , label = l_ "nav.tags" appState
+            , label = gettext "Question Tags" appState.locale
             , icon = faSet "kmEditor.tags" appState
             , isActive = route == KMEditorRoute.QuestionTags
             , isVisible = True
@@ -187,7 +177,7 @@ viewKMEditorNavigationNav appState route editorBranch =
 
         previewLink =
             { route = Routes.kmEditorEditorPreview branchUuid
-            , label = l_ "nav.preview" appState
+            , label = gettext "Preview" appState.locale
             , icon = faSet "kmEditor.preview" appState
             , isActive = route == KMEditorRoute.Preview
             , isVisible = True
@@ -196,7 +186,7 @@ viewKMEditorNavigationNav appState route editorBranch =
 
         settingsLink =
             { route = Routes.kmEditorEditorSettings branchUuid
-            , label = l_ "nav.settings" appState
+            , label = gettext "Settings" appState.locale
             , icon = faSet "kmEditor.settings" appState
             , isActive = route == KMEditorRoute.Settings
             , isVisible = True

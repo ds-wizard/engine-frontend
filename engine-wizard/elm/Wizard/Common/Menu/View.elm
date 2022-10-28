@@ -2,6 +2,7 @@ module Wizard.Common.Menu.View exposing (view, viewAboutModal, viewReportIssueMo
 
 import ActionResult exposing (ActionResult(..))
 import Dict
+import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, em, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
@@ -12,7 +13,7 @@ import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportC
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet, faSetFw)
-import Shared.Locale exposing (l, lh, lx)
+import String.Format as String
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
@@ -25,21 +26,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model)
 import Wizard.Msgs
 import Wizard.Routes as Routes exposing (Route)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Menu.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Common.Menu.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Menu.View"
 
 
 type MenuItem
@@ -79,7 +65,7 @@ type alias GroupItemData =
 menuItems : AppState -> List MenuItem
 menuItems appState =
     [ MenuItem
-        { title = l_ "menu.apps" appState
+        { title = gettext "Apps" appState.locale
         , icon = faSetFw "menu.apps" appState
         , id = "apps"
         , route = Routes.appsIndex
@@ -87,7 +73,7 @@ menuItems appState =
         , isVisible = Feature.apps
         }
     , MenuItem
-        { title = l_ "menu.users" appState
+        { title = gettext "Users" appState.locale
         , icon = faSetFw "menu.users" appState
         , id = "users"
         , route = Routes.usersIndex
@@ -95,19 +81,19 @@ menuItems appState =
         , isVisible = Feature.usersView
         }
     , MenuGroup
-        { title = l_ "menu.knowledgeModels" appState
+        { title = gettext "Knowledge Models" appState.locale
         , icon = faSetFw "menu.knowledgeModels" appState
         , id = "knowledge-models"
         , route = Routes.knowledgeModelsIndex
         , isActive = Routes.isKnowledgeModelsSubroute
         , isVisible = Feature.knowledgeModelsImport
         , items =
-            [ { title = l_ "menu.knowledgeModels.list" appState
+            [ { title = gettext "List" appState.locale
               , id = "knowledge-models-list"
               , route = Routes.knowledgeModelsIndex
               , isActive = Routes.isKnowledgeModelsIndex
               }
-            , { title = l_ "menu.knowledgeModels.editors" appState
+            , { title = gettext "Editors" appState.locale
               , id = "knowledge-models-editors"
               , route = Routes.kmEditorIndex
               , isActive = Routes.isKmEditorIndex
@@ -115,7 +101,7 @@ menuItems appState =
             ]
         }
     , MenuItem
-        { title = l_ "menu.projects" appState
+        { title = gettext "Projects" appState.locale
         , icon = faSetFw "menu.projects" appState
         , id = "projects"
         , route = Routes.projectsIndex appState
@@ -123,19 +109,19 @@ menuItems appState =
         , isVisible = \a -> Feature.projectsView a && not (Feature.projectImporters a)
         }
     , MenuGroup
-        { title = l_ "menu.projects" appState
+        { title = gettext "Projects" appState.locale
         , icon = faSetFw "menu.projects" appState
         , id = "projects"
         , route = Routes.projectsIndex appState
         , isActive = Routes.isProjectSubroute
         , isVisible = \a -> Feature.projectsView a && Feature.projectImporters a
         , items =
-            [ { title = l_ "menu.projects.list" appState
+            [ { title = gettext "List" appState.locale
               , id = "projects-list"
               , route = Routes.projectsIndex appState
               , isActive = Routes.isProjectsIndex
               }
-            , { title = l_ "menu.projects.importers" appState
+            , { title = gettext "Importers" appState.locale
               , id = "projects-importers"
               , route = Routes.projectImportersIndex
               , isActive = Routes.isProjectImportersIndex
@@ -143,19 +129,19 @@ menuItems appState =
             ]
         }
     , MenuGroup
-        { title = l_ "menu.documents" appState
+        { title = gettext "Documents" appState.locale
         , icon = faSetFw "menu.documents" appState
         , id = "documents"
         , route = Routes.documentsIndex
         , isActive = Routes.isDocumentsSubroute
         , isVisible = Feature.documentsView
         , items =
-            [ { title = l_ "menu.documents.list" appState
+            [ { title = gettext "List" appState.locale
               , id = "documents-list"
               , route = Routes.documentsIndex
               , isActive = Routes.isDocumentsIndex
               }
-            , { title = l_ "menu.documents.templates" appState
+            , { title = gettext "Templates" appState.locale
               , id = "document-templates"
               , route = Routes.templatesIndex
               , isActive = Routes.isTemplateIndex
@@ -163,7 +149,7 @@ menuItems appState =
             ]
         }
     , MenuItem
-        { title = l_ "menu.documentTemplates" appState
+        { title = gettext "Document Templates" appState.locale
         , icon = faSetFw "menu.templates" appState
         , id = "document-templates"
         , route = Routes.templatesIndex
@@ -171,19 +157,19 @@ menuItems appState =
         , isVisible = \a -> Feature.templatesView a && not (Feature.documentsView a)
         }
     , MenuGroup
-        { title = l_ "menu.dev" appState
+        { title = gettext "Dev" appState.locale
         , icon = faSetFw "menu.dev" appState
         , id = "dev"
         , route = Routes.devOperations
         , isActive = Routes.isDevSubroute
         , isVisible = Feature.dev
         , items =
-            [ { title = l_ "menu.dev.operations" appState
+            [ { title = gettext "Operations" appState.locale
               , id = "dev-operations"
               , route = Routes.devOperations
               , isActive = Routes.isDevOperations
               }
-            , { title = l_ "menu.dev.persistentCommands" appState
+            , { title = gettext "Persistent Commands" appState.locale
               , id = "dev-persistent-commands"
               , route = Routes.persistentCommandsIndex
               , isActive = Routes.isPersistentCommandsIndex
@@ -191,7 +177,7 @@ menuItems appState =
             ]
         }
     , MenuItem
-        { title = l_ "menu.settings" appState
+        { title = gettext "Settings" appState.locale
         , icon = faSetFw "menu.settings" appState
         , id = "settings"
         , route = Routes.settingsDefault
@@ -436,7 +422,7 @@ viewProfileMenu model =
                         Routes.usersEditCurrent
                         [ dataCy "menu_profile" ]
                         [ faSetFw "menu.profile" model.appState
-                        , lx_ "profileMenu.edit" model.appState
+                        , text (gettext "Edit profile" model.appState.locale)
                         ]
                     ]
                 , li []
@@ -445,7 +431,7 @@ viewProfileMenu model =
                         , dataCy "menu_logout"
                         ]
                         [ faSetFw "menu.logout" model.appState
-                        , lx_ "profileMenu.logout" model.appState
+                        , text (gettext "Log out" model.appState.locale)
                         ]
                     ]
                 , li [ class "dark dark-border" ]
@@ -454,7 +440,7 @@ viewProfileMenu model =
                         , dataCy "menu_about"
                         ]
                         [ faSetFw "menu.about" model.appState
-                        , lx_ "profileMenu.about" model.appState
+                        , text (gettext "About" model.appState.locale)
                         ]
                     ]
                 , li [ class "dark dark-last" ]
@@ -463,7 +449,7 @@ viewProfileMenu model =
                         , dataCy "menu_report-issue"
                         ]
                         [ faSetFw "menu.reportIssue" model.appState
-                        , lx_ "profileMenu.reportIssue" model.appState
+                        , text (gettext "Report issue" model.appState.locale)
                         ]
                     ]
                 ]
@@ -480,7 +466,7 @@ viewCollapseLink model =
     else
         a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed True), class "collapse-link" ]
             [ faSet "menu.collapse" model.appState
-            , lx_ "sidebar.collapse" model.appState
+            , text (gettext "Collapse sidebar" model.appState.locale)
             ]
 
 
@@ -495,7 +481,7 @@ viewReportIssueModal appState isOpen =
                 [ text <| PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
 
         modalContent =
-            [ p [] [ lx_ "reportModal.info" appState ]
+            [ p [] [ text (gettext "If you find any problem, the best way to report it is to open an issue in our GitHub repository." appState.locale) ]
             , p []
                 [ a
                     [ dataCy "report-modal_link_repository"
@@ -507,15 +493,15 @@ viewReportIssueModal appState isOpen =
                     , text <| PrivacyAndSupportConfig.getSupportRepositoryName appState.config.privacyAndSupport
                     ]
                 ]
-            , p [] (lh_ "reportModal.writeUs" [ supportMailLink ] appState)
+            , p [] (String.formatHtml (gettext "You can also write us an email to %s." appState.locale) [ supportMailLink ])
             ]
 
         modalConfig =
-            { modalTitle = l_ "reportModal.title" appState
+            { modalTitle = gettext "Report issue" appState.locale
             , modalContent = modalContent
             , visible = isOpen
             , actionResult = Unset
-            , actionName = l_ "reportModal.action" appState
+            , actionName = gettext "OK" appState.locale
             , actionMsg = Wizard.Msgs.MenuMsg <| SetReportIssueOpen False
             , cancelMsg = Nothing
             , dangerous = False
@@ -532,11 +518,11 @@ viewAboutModal appState isOpen serverBuildInfoActionResult =
             Page.actionResultView appState (viewAboutModalContent appState) serverBuildInfoActionResult
 
         modalConfig =
-            { modalTitle = l_ "about.title" appState
+            { modalTitle = gettext "About" appState.locale
             , modalContent = [ modalContent ]
             , visible = isOpen
             , actionResult = Unset
-            , actionName = l_ "about.action" appState
+            , actionName = gettext "OK" appState.locale
             , actionMsg = Wizard.Msgs.MenuMsg <| SetAboutOpen False
             , cancelMsg = Nothing
             , dangerous = False
@@ -553,17 +539,17 @@ viewAboutModalContent appState serverBuildInfo =
             appState.apiUrl ++ "/swagger-ui/"
 
         extraClientInfo =
-            [ ( l_ "about.styleVersion" appState, code [ id "client-style-version" ] [] )
+            [ ( gettext "Style Version" appState.locale, code [ id "client-style-version" ] [] )
             ]
 
         extraServerInfo =
-            [ ( l_ "about.apiUrl" appState, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
-            , ( l_ "about.apiDocs" appState, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
+            [ ( gettext "API URL" appState.locale, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
+            , ( gettext "API Docs" appState.locale, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
             ]
     in
     div []
-        [ viewBuildInfo appState (l_ "about.client" appState) BuildInfo.client extraClientInfo
-        , viewBuildInfo appState (l_ "about.server" appState) serverBuildInfo extraServerInfo
+        [ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client extraClientInfo
+        , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
         ]
 
 
@@ -583,11 +569,11 @@ viewBuildInfo appState name buildInfo extra =
             ]
         , tbody []
             ([ tr []
-                [ td [] [ lx_ "about.version" appState ]
+                [ td [] [ text (gettext "Version" appState.locale) ]
                 , td [] [ code [] [ text buildInfo.version ] ]
                 ]
              , tr []
-                [ td [] [ lx_ "about.builtAt" appState ]
+                [ td [] [ text (gettext "Built at" appState.locale) ]
                 , td [] [ em [] [ text buildInfo.builtAt ] ]
                 ]
              ]

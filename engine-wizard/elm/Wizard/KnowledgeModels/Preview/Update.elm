@@ -6,6 +6,7 @@ module Wizard.KnowledgeModels.Preview.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
 import Dict.Extra as Dict
+import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
@@ -23,7 +24,6 @@ import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Error.ApiError as ApiError
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setKnowledgeModel, setPackage)
 import Shared.Utils exposing (getUuid, getUuidString)
 import Wizard.Common.Api exposing (applyResult)
@@ -52,7 +52,7 @@ update msg wrapMsg appState model =
             initQuestionnaireModel appState <|
                 applyResult appState
                     { setResult = setKnowledgeModel
-                    , defaultError = lg "apiError.knowledgeModels.preview.fetchError" appState
+                    , defaultError = gettext "Unable to get the Knowledge Model." appState.locale
                     , model = model
                     , result = result
                     }
@@ -61,7 +61,7 @@ update msg wrapMsg appState model =
             initQuestionnaireModel appState <|
                 applyResult appState
                     { setResult = setPackage
-                    , defaultError = lg "apiError.packages.getListError" appState
+                    , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                     , model = model
                     , result = result
                     }
@@ -131,7 +131,7 @@ update msg wrapMsg appState model =
 
                 Err error ->
                     ( appState.seed
-                    , { model | creatingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.postError" appState) error }
+                    , { model | creatingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be created." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -142,7 +142,7 @@ update msg wrapMsg appState model =
 
                 Err error ->
                     ( appState.seed
-                    , { model | creatingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }
+                    , { model | creatingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
                     , Cmd.none
                     )
 

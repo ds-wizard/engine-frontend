@@ -1,11 +1,11 @@
 module Wizard.Templates.Import.View exposing (view)
 
-import Html exposing (Html, a, div, li, ul)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
@@ -13,16 +13,6 @@ import Wizard.Templates.Import.FileImport.View as FileImportView
 import Wizard.Templates.Import.Models exposing (ImportModel(..), Model)
 import Wizard.Templates.Import.Msgs exposing (Msg(..))
 import Wizard.Templates.Import.RegistryImport.View as RegistryImportView
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Templates.Import.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Templates.Import.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -51,7 +41,7 @@ view appState model =
                     emptyNode
     in
     div [ detailClass "KnowledgeModels__Import" ]
-        [ Page.header (l_ "header" appState) []
+        [ Page.header (gettext "Import Document Template" appState.locale) []
         , navbar
         , content
         ]
@@ -68,7 +58,7 @@ viewNavbar appState registryActive =
                 , dataCy "template_import_nav_registry"
                 ]
                 [ faSet "kmImport.fromRegistry" appState
-                , lx_ "navbar.fromRegistry" appState
+                , text (gettext "From DSW Registry" appState.locale)
                 ]
             ]
         , li [ class "nav-item" ]
@@ -79,7 +69,7 @@ viewNavbar appState registryActive =
                 , dataCy "template_import_nav_file"
                 ]
                 [ faSet "kmImport.fromFile" appState
-                , lx_ "navbar.fromFile" appState
+                , text (gettext "From file" appState.locale)
                 ]
             ]
         ]

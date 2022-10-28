@@ -2,10 +2,10 @@ module Wizard.Public.Signup.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Common.SignupForm as SignupForm
@@ -61,6 +61,6 @@ handlePostSignupCompleted appState result model =
                     setFormErrors appState error model.form
 
                 errorMessage =
-                    ApiError.toActionResult appState (lg "apiError.users.public.postError" appState) error
+                    ApiError.toActionResult appState (gettext "Sign up process failed." appState.locale) error
             in
             ( { model | signingUp = errorMessage, form = form }, Cmd.none )

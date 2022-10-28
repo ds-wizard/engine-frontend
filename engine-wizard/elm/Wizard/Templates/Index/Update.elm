@@ -4,10 +4,10 @@ module Wizard.Templates.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.Template exposing (Template)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models as Listing
@@ -68,7 +68,7 @@ deletePackageCompleted appState model result =
             )
 
         Err error ->
-            ( { model | deletingTemplate = ApiError.toActionResult appState (lg "apiError.templates.deleteError" appState) error }
+            ( { model | deletingTemplate = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -91,7 +91,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Template
 listingUpdateConfig wrapMsg appState =
     { getRequest = TemplatesApi.getTemplates
-    , getError = lg "apiError.templates.getListError" appState
+    , getError = gettext "Unable to get document templates." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.TemplatesRoute << IndexRoute
     }

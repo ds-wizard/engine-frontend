@@ -4,6 +4,7 @@ module Wizard.Projects.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
@@ -11,7 +12,6 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (getUuid)
 import Time
 import Uuid exposing (Uuid)
@@ -80,7 +80,7 @@ handleGetQuestionnaireMigrationCompleted appState model result =
         ( modelWithMigration, cmd ) =
             applyResult appState
                 { setResult = setResult appState
-                , defaultError = lg "apiError.questionnaires.migrations.getError" appState
+                , defaultError = gettext "Unable to get the Questionnaire migration." appState.locale
                 , result = result
                 , model = model
                 }
@@ -95,7 +95,7 @@ handlePutQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError 
 handlePutQuestionnaireMigrationCompleted appState model result =
     applyResult appState
         { setResult = \_ _ -> model
-        , defaultError = lg "apiError.questionnaires.migrations.putError" appState
+        , defaultError = gettext "Unable to save migration." appState.locale
         , result = result
         , model = model
         }

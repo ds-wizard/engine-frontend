@@ -2,13 +2,13 @@ module Wizard.Settings.Registry.View exposing (view)
 
 import ActionResult
 import Form exposing (Form)
-import Html exposing (Html, button, div, h5)
+import Gettext exposing (gettext)
+import Html exposing (Html, button, div, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick)
 import Shared.Data.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -24,16 +24,6 @@ import Wizard.Settings.Registry.Models exposing (Model)
 import Wizard.Settings.Registry.Msgs exposing (Msg(..))
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.Registry.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Registry.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (viewForm appState model) model.genericModel.config
@@ -42,13 +32,13 @@ view appState model =
 viewForm : AppState -> Model -> config -> Html Msg
 viewForm appState model _ =
     div [ wideDetailClass "" ]
-        [ Page.header (l_ "title" appState) []
+        [ Page.header (gettext "DSW Registry" appState.locale) []
         , div []
             [ FormResult.errorOnlyView appState model.genericModel.savingConfig
             , formView appState model.genericModel.form
             , div [ class "mt-5" ]
                 [ ActionButton.buttonWithAttrs appState
-                    (ActionButton.ButtonWithAttrsConfig (l_ "save" appState)
+                    (ActionButton.ButtonWithAttrsConfig (gettext "Save" appState.locale)
                         model.genericModel.savingConfig
                         (GenericMsg <| GenericMsgs.FormMsg Form.Submit)
                         False
@@ -83,11 +73,11 @@ formView appState form =
 
                         else
                             button [ class "btn btn-outline-primary", onClick <| ToggleRegistrySignup True ]
-                                [ lx_ "form.signUp" appState ]
+                                [ text (gettext "Sign Up" appState.locale) ]
                 in
                 div [ class "nested-group" ]
-                    [ formWrap <| FormGroup.textarea appState form "token" (l_ "form.token" appState)
-                    , FormExtra.mdAfter (l_ "form.token.desc" appState)
+                    [ formWrap <| FormGroup.textarea appState form "token" (gettext "Token" appState.locale)
+                    , FormExtra.mdAfter (gettext "Fill in your DSW Registry token. If you don't have one, you need sign up first." appState.locale)
                     , signupButton
                     ]
 
@@ -95,8 +85,8 @@ formView appState form =
                 emptyNode
     in
     div []
-        [ formWrap <| FormGroup.toggle form "enabled" (l_ "form.enabled" appState)
-        , FormExtra.mdAfter (l_ "form.enabled.desc" appState)
+        [ formWrap <| FormGroup.toggle form "enabled" (gettext "Enabled" appState.locale)
+        , FormExtra.mdAfter (gettext "If enabled, you can import Knowledge Models and Document Templates directly from [DSW Registry](https://registry.ds-wizard.org)." appState.locale)
         , tokenInput
         ]
 
@@ -107,15 +97,15 @@ registrySignupModal appState model =
         submitButton =
             if ActionResult.isSuccess model.registrySigningUp then
                 button [ class "btn btn-primary", onClick <| ToggleRegistrySignup False ]
-                    [ lx_ "registryModal.button.done" appState ]
+                    [ text (gettext "Done" appState.locale) ]
 
             else if List.length (Form.getErrors model.registrySignupForm) > 0 then
                 button [ class "btn btn-primary", disabled True ]
-                    [ lx_ "registryModal.button.signUp" appState ]
+                    [ text (gettext "Sign Up" appState.locale) ]
 
             else
                 ActionButton.button appState
-                    { label = l_ "registryModal.button.signUp" appState
+                    { label = gettext "Sign Up" appState.locale
                     , result = model.registrySigningUp
                     , msg = FormMsg Form.Submit
                     , dangerous = False
@@ -127,7 +117,7 @@ registrySignupModal appState model =
                 , class "btn btn-secondary"
                 , disabled <| ActionResult.isLoading model.registrySigningUp
                 ]
-                [ lx_ "registryModal.button.cancel" appState ]
+                [ text (gettext "Cancel" appState.locale) ]
 
         resultBody resultText =
             Flash.success appState resultText
@@ -144,16 +134,16 @@ registrySignupModal appState model =
                 Html.map FormMsg <|
                     div []
                         [ FormResult.errorOnlyView appState model.registrySigningUp
-                        , FormGroup.inputAttrs [ readonly True ] appState form "organizationId" (l_ "registryModal.form.organizationId" appState)
-                        , FormGroup.inputAttrs [ readonly True ] appState form "name" (l_ "registryModal.form.organizationName" appState)
-                        , FormGroup.textareaAttrs [ readonly True ] appState form "description" (l_ "registryModal.form.organizationDescription" appState)
-                        , FormGroup.input appState form "email" (l_ "registryModal.form.email" appState)
-                        , FormExtra.textAfter (l_ "registryModal.form.email.desc" appState)
+                        , FormGroup.inputAttrs [ readonly True ] appState form "organizationId" (gettext "Organization ID" appState.locale)
+                        , FormGroup.inputAttrs [ readonly True ] appState form "name" (gettext "Organization Name" appState.locale)
+                        , FormGroup.textareaAttrs [ readonly True ] appState form "description" (gettext "Organization Description" appState.locale)
+                        , FormGroup.input appState form "email" (gettext "Email" appState.locale)
+                        , FormExtra.textAfter (gettext "The email will be used for a confirmation link and an eventual token recovery." appState.locale)
                         ]
 
         content =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ lx_ "registryModal.title" appState ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Registry Sign Up" appState.locale) ]
                 ]
             , div [ class "modal-body" ]
                 [ body

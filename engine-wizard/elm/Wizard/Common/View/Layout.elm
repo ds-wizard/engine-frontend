@@ -6,11 +6,11 @@ module Wizard.Common.View.Layout exposing
     )
 
 import Browser exposing (Document)
+import Gettext exposing (gettext)
 import Html exposing (Html, div, li, nav, text, ul)
 import Html.Attributes exposing (class, classList)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
@@ -23,31 +23,21 @@ import Wizard.Msgs exposing (Msg)
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.View.Layout"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.View.Layout"
-
-
 misconfigured : AppState -> Document Msg
 misconfigured appState =
     let
         html =
             Page.illustratedMessage
                 { image = Undraw.bugFixing
-                , heading = l_ "misconfigured.configurationError" appState
+                , heading = gettext "Configuration Error" appState.locale
                 , lines =
-                    [ l_ "misconfigured.appNotConfigured" appState
-                    , l_ "misconfigured.contactAdmin" appState
+                    [ gettext "Application is not configured correctly and cannot run." appState.locale
+                    , gettext "Please, contact the administrator." appState.locale
                     ]
                 , cy = "misconfigured"
                 }
     in
-    { title = l_ "misconfigured.configurationError" appState
+    { title = gettext "Configuration Error" appState.locale
     , body = [ html ]
     }
 
@@ -101,7 +91,7 @@ publicHeader fluid model =
                     [ linkTo model.appState
                         Routes.appHome
                         [ class "nav-link", dataCy "public_nav_go-to-app" ]
-                        [ lx_ "header.goToApp" model.appState ]
+                        [ text (gettext "Go to App" model.appState.locale) ]
                     ]
                 ]
 
@@ -113,7 +103,7 @@ publicHeader fluid model =
                                 [ linkTo model.appState
                                     Routes.publicSignup
                                     [ class "nav-link", dataCy "public_nav_sign-up" ]
-                                    [ lx_ "header.signUp" model.appState ]
+                                    [ text (gettext "Sign Up" model.appState.locale) ]
                                 ]
 
                         else
@@ -123,7 +113,7 @@ publicHeader fluid model =
                     [ linkTo model.appState
                         (Routes.publicLogin Nothing)
                         [ class "nav-link", dataCy "public_nav_login" ]
-                        [ lx_ "header.logIn" model.appState ]
+                        [ text (gettext "Log In" model.appState.locale) ]
                     ]
                 , signUpLink
                 ]

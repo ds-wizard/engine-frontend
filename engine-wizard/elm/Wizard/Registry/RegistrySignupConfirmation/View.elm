@@ -1,25 +1,16 @@
 module Wizard.Registry.RegistrySignupConfirmation.View exposing (view)
 
-import Html exposing (Html, div, h1, p)
+import Gettext exposing (gettext)
+import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (lh, lx)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.Page as Page
 import Wizard.Registry.RegistrySignupConfirmation.Models exposing (Model)
 import Wizard.Registry.RegistrySignupConfirmation.Msgs exposing (Msg)
 import Wizard.Routes as Routes
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Registry.RegistrySignupConfirmation.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Registry.RegistrySignupConfirmation.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -33,9 +24,12 @@ successView appState _ =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
-            (lh_ "confirmation"
-                [ linkTo appState Routes.settingsRegistry [] [ lx_ "settings" appState ]
+            (String.formatHtml
+                (gettext "Your email was successfuly confirmed, you can go back to %s." appState.locale)
+                [ linkTo appState
+                    Routes.settingsRegistry
+                    []
+                    [ text (gettext "Settings" appState.locale) ]
                 ]
-                appState
             )
         ]

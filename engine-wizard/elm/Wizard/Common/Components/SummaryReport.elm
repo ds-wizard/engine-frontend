@@ -11,6 +11,7 @@ module Wizard.Common.Components.SummaryReport exposing
 
 import ActionResult exposing (ActionResult(..))
 import ChartJS
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, colspan, id, style)
 import Html.Events exposing (onClick)
@@ -24,23 +25,13 @@ import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.SummaryReport exposing (ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
 import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lf, lg, lgx, lx)
 import Shared.Markdown as Markdown
 import String exposing (fromFloat, fromInt)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Ports as Ports
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.SummaryReport"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.SummaryReport"
 
 
 
@@ -87,7 +78,7 @@ update msg appState model =
                     )
 
                 Err error ->
-                    ( { model | summaryReport = ApiError.toActionResult appState (lg "apiError.questionnaires.summaryReport.fetchError" appState) error }
+                    ( { model | summaryReport = ApiError.toActionResult appState (gettext "Unable to get the summary report." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -110,7 +101,7 @@ viewContent : AppState -> Context -> SummaryReport -> Html Msg
 viewContent appState ctx summaryReport =
     let
         title =
-            [ h2 [] [ lgx "questionnaire.summaryReport" appState ] ]
+            [ h2 [] [ text (gettext "Summary Report" appState.locale) ] ]
 
         chartData =
             createTotalChartData metrics summaryReport.totalReport
@@ -195,14 +186,14 @@ viewIndication : AppState -> IndicationReport -> Html msg
 viewIndication appState indicationReport =
     case indicationReport of
         AnsweredIndication data ->
-            viewAnsweredIndication appState (lf_ "answeredIndication.label") data
+            viewAnsweredIndication (String.format (gettext "Answered: %s/%s" appState.locale)) data
 
         PhasesAnsweredIndication data ->
-            viewAnsweredIndication appState (lf_ "phasesAnsweredIndication.label") data
+            viewAnsweredIndication (String.format (gettext "Answered (current phase): %s/%s" appState.locale)) data
 
 
-viewAnsweredIndication : AppState -> (List String -> AppState -> String) -> AnsweredIndicationData -> Html msg
-viewAnsweredIndication appState title data =
+viewAnsweredIndication : (List String -> String) -> AnsweredIndicationData -> Html msg
+viewAnsweredIndication title data =
     let
         progress =
             toFloat data.answeredQuestions / (toFloat <| data.answeredQuestions + data.unansweredQuestions)
@@ -214,7 +205,7 @@ viewAnsweredIndication appState title data =
             fromInt <| data.answeredQuestions + data.unansweredQuestions
     in
     tr [ class "indication" ]
-        [ td [] [ text <| title [ answered, all ] appState ]
+        [ td [] [ text <| title [ answered, all ] ]
         , td [] [ viewProgressBar "bg-info" progress ]
         ]
 
@@ -228,8 +219,8 @@ viewMetricsTable appState ctx metricReports =
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []
-                [ th [] [ lgx "metric" appState ]
-                , th [ colspan 2 ] [ lgx "metric.measure" appState ]
+                [ th [] [ text (gettext "Metrics" appState.locale) ]
+                , th [ colspan 2 ] [ text (gettext "Measure" appState.locale) ]
                 ]
             ]
         , tbody []
@@ -284,7 +275,7 @@ getTitleByUuid items uuid =
 viewMetricsDescriptions : AppState -> List Metric -> Html msg
 viewMetricsDescriptions appState metrics =
     div []
-        (h3 [] [ lx_ "metricsDescriptions.metricsExplanation" appState ]
+        (h3 [] [ text (gettext "Metrics explanation" appState.locale) ]
             :: List.map viewMetricDescription metrics
         )
 

@@ -3,6 +3,7 @@ module Wizard.Settings.LookAndFeel.View exposing (view)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src, style)
 import Html.Events exposing (onClick)
@@ -11,7 +12,6 @@ import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet, faSetFw)
-import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import String.Extra as String
@@ -28,16 +28,6 @@ import Wizard.Settings.LookAndFeel.Models exposing (Model)
 import Wizard.Settings.LookAndFeel.Msgs exposing (Msg(..))
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.LookAndFeel.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.LookAndFeel.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (viewForm appState model) model.genericModel.config
@@ -46,13 +36,13 @@ view appState model =
 viewForm : AppState -> Model -> config -> Html Msg
 viewForm appState model _ =
     div [ wideDetailClass "LookAndFeel" ]
-        [ Page.header (l_ "title" appState) []
+        [ Page.header (gettext "Look & Feel" appState.locale) []
         , div []
             [ FormResult.errorOnlyView appState model.genericModel.savingConfig
             , formView appState model.genericModel.form
             , div [ class "mt-5" ]
                 [ ActionButton.buttonWithAttrs appState
-                    (ActionButton.ButtonWithAttrsConfig (l_ "save" appState)
+                    (ActionButton.ButtonWithAttrsConfig (gettext "Save" appState.locale)
                         model.genericModel.savingConfig
                         (GenericMsg <| GenericMsgs.FormMsg Form.Submit)
                         False
@@ -159,8 +149,8 @@ formView appState form =
     div []
         ([ div [ class "row" ]
             [ div [ class "col-8" ]
-                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (l_ "form.appTitle" appState)
-                , FormExtra.mdAfter (l_ "form.appTitle.desc" appState)
+                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (gettext "Application Title" appState.locale)
+                , FormExtra.mdAfter (gettext "Full name of the DSW instance (displayed, for example, in the browser tab title or before login)." appState.locale)
                 ]
             , div
                 [ class "col-4" ]
@@ -169,8 +159,8 @@ formView appState form =
             ]
          , div [ class "row mt-5" ]
             [ div [ class "col-8" ]
-                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitleShort ] appState form "appTitleShort" (l_ "form.appTitleShort" appState)
-                , FormExtra.mdAfter (l_ "form.appTitleShort.desc" appState)
+                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitleShort ] appState form "appTitleShort" (gettext "Short Application Title" appState.locale)
+                , FormExtra.mdAfter (gettext "Short name of the DSW instance (displayed, for example, on top of the navigation bar). Short title can be the same as the application title if it is short enough." appState.locale)
                 ]
             , div [ class "col-4" ]
                 [ img [ class "settings-img", src "/img/settings/app-title-short.png" ] []
@@ -182,8 +172,8 @@ formView appState form =
                , div [ class "input-table mt-5" ]
                     [ div [ class "row" ]
                         [ div [ class "col-8" ]
-                            [ label [] [ lx_ "form.customMenuLinks" appState ]
-                            , Markdown.toHtml [ class "form-text text-muted" ] (l_ "form.customMenuLinks.desc" appState)
+                            [ label [] [ text (gettext "Custom Menu Links" appState.locale) ]
+                            , Markdown.toHtml [ class "form-text text-muted" ] (gettext "Configure additional links in the menu. Choose any free icon from the [Font Awesome](https://fontawesome.com/icons?d=gallery&m=free), e.g. *fas fa-magic*. Check *New window* if you want to open the link in a new window." appState.locale)
                             ]
                         , div [ class "col-4" ]
                             [ img [ class "settings-img", src "/img/settings/custom-menu-links.png" ] [] ]
@@ -198,10 +188,10 @@ formView appState form =
                , hr [] []
                , div [ class "row mt-5" ]
                     [ div [ class "col-12" ]
-                        [ label [] [ lx_ "form.loginInfo" appState ] ]
+                        [ label [] [ text (gettext "Login Info" appState.locale) ] ]
                     , div [ class "col-8" ]
                         [ formWrap <| FormGroup.markdownEditor appState form "loginInfo" ""
-                        , FormExtra.mdAfter (l_ "form.loginInfo.desc" appState)
+                        , FormExtra.mdAfter (gettext "Additional information displayed at the login screen." appState.locale)
                         ]
                     , div [ class "col-4" ]
                         [ img [ class "settings-img", src "/img/settings/login-info-text.png" ] []
@@ -282,13 +272,13 @@ customMenuLinksHeader appState form =
     else
         div [ class "row input-table-header" ]
             [ div [ class "col-2" ]
-                [ lx_ "form.customMenuLinks.icon" appState ]
+                [ text (gettext "Icon" appState.locale) ]
             , div [ class "col-3" ]
-                [ lx_ "form.customMenuLinks.title" appState ]
+                [ text (gettext "Title" appState.locale) ]
             , div [ class "col-4" ]
-                [ lx_ "form.customMenuLinks.url" appState ]
+                [ text (gettext "URL" appState.locale) ]
             , div [ class "col-3" ]
-                [ lx_ "form.customMenuLinks.newWindow" appState ]
+                [ text (gettext "New window" appState.locale) ]
             ]
 
 
