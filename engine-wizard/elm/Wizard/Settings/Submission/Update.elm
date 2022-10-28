@@ -3,10 +3,10 @@ module Wizard.Settings.Submission.Update exposing
     , update
     )
 
+import Gettext exposing (gettext)
 import Shared.Api.Templates as TemplatesApi
 import Shared.Data.EditableConfig as EditableConfig
 import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setTemplates)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -37,7 +37,7 @@ update wrapMsg msg appState model =
         GetTemplatesCompleted result ->
             applyResult appState
                 { setResult = setTemplates
-                , defaultError = lg "apiError.templates.getListError" appState
+                , defaultError = gettext "Unable to get document templates." appState.locale
                 , model = model
                 , result = result
                 }

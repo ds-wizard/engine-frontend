@@ -4,6 +4,7 @@ module Registry.Common.AppState exposing
     , setCredentials
     )
 
+import Gettext
 import Json.Decode as D
 import Registry.Common.Credentials exposing (Credentials)
 import Registry.Common.Flags as Flags
@@ -17,6 +18,7 @@ type alias AppState =
     , valid : Bool
     , credentials : Maybe Credentials
     , provisioning : Provisioning
+    , locale : Gettext.Locale
     }
 
 
@@ -41,10 +43,10 @@ init flagsValue =
                         , flags.provisioning
                         ]
             in
-            AppState flags.apiUrl True flags.credentials provisioning
+            AppState flags.apiUrl True flags.credentials provisioning Gettext.defaultLocale
 
         Err _ ->
-            AppState "" False Nothing defaultProvisioning
+            AppState "" False Nothing defaultProvisioning Gettext.defaultLocale
 
 
 setCredentials : Maybe Credentials -> AppState -> AppState

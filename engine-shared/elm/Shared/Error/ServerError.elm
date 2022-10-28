@@ -9,10 +9,10 @@ module Shared.Error.ServerError exposing
     )
 
 import Dict exposing (Dict)
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Locale exposing (lg, lgf)
-import Shared.Provisioning exposing (Provisioning)
+import String.Format as String
 
 
 type ServerError
@@ -96,100 +96,100 @@ systemLogErrorDataDecoder =
         |> D.required "params" (D.list D.string)
 
 
-forbiddenMessage : { a | provisioning : Provisioning } -> String
+forbiddenMessage : { a | locale : Gettext.Locale } -> String
 forbiddenMessage appState =
-    lg "apiError.forbidden" appState
+    gettext "You do not have permission to view this page." appState.locale
 
 
-messageToReadable : { a | provisioning : Provisioning } -> Message -> Maybe String
+messageToReadable : { a | locale : Gettext.Locale } -> Message -> Maybe String
 messageToReadable appState message =
     case message.code of
         -- Shared
         "error.validation.km_id_uniqueness" ->
-            Just <| lg "apiError.validation.km_id_uniqueness" appState
+            Just <| gettext "Knowledge Model ID is already used." appState.locale
 
         "error.validation.pkg_id_uniqueness" ->
-            Just <| lg "apiError.validation.pkg_id_uniqueness" appState
+            Just <| gettext "Knowledge Model already exists." appState.locale
 
         "error.validation.tml_id_uniqueness" ->
-            Just <| lg "apiError.validation.tml_id_uniqueness" appState
+            Just <| gettext "Template already exists." appState.locale
 
         "error.validation.user_email_uniqueness" ->
-            Just <| lg "apiError.validation.user_email_uniqueness" appState
+            Just <| gettext "Email is already used." appState.locale
 
         "error.service.pkg.highest_number_in_new_version" ->
-            Just <| lg "apiError.service.pkg.highest_number_in_new_version" appState
+            Just <| gettext "New version has to be higher than the previous one." appState.locale
 
         "error.service.tb.missing_template_json" ->
-            Just <| lg "apiError.service.tb.missing_template_json" appState
+            Just <| gettext "\"template.json\" was not found in archive." appState.locale
 
         "error.service.tb.unable_to_decode_template_json" ->
-            Just <| lgf "apiError.service.tb.unable_to_decode_template_json" message.params appState
+            Just <| String.format (gettext "Error while parsing template.json: \"%s\"." appState.locale) message.params
 
         "error.service.tb.missing_asset" ->
-            Just <| lgf "apiError.service.tb.missing_asset" message.params appState
+            Just <| String.format (gettext "Asset \"%s\" was not found in archive." appState.locale) message.params
 
         -- Registry
         "error.validation.email_uniqueness" ->
-            Just <| lg "apiError.validation.email_uniqueness" appState
+            Just <| gettext "Email is already used." appState.locale
 
         "error.validation.hash_absence" ->
-            Just <| lg "apiError.validation.hash_absence" appState
+            Just <| gettext "Link is not valid." appState.locale
 
         "error.validation.organization_email_absence" ->
-            Just <| lg "apiError.validation.organization_email_absence" appState
+            Just <| gettext "This email is not connected to any organization." appState.locale
 
         "error.validation.organization_email_uniqueness" ->
-            Just <| lg "apiError.validation.organization_email_uniqueness" appState
+            Just <| gettext "Organization email is already used." appState.locale
 
         "error.validation.organization_id_uniqueness" ->
-            Just <| lg "apiError.validation.organization_id_uniqueness" appState
+            Just <| gettext "Organization ID is already used." appState.locale
 
         "error.service.organization.required_hash_in_query_params" ->
-            Just <| lg "apiError.service.organization.required_hash_in_query_params" appState
+            Just <| gettext "A hash query param has to be provided." appState.locale
 
         -- Wizard
         "error.validation.app_id_uniqueness" ->
-            Just <| lg "apiError.validation.app_id_uniqueness" appState
+            Just <| gettext "App ID is already used." appState.locale
 
         "error.validation.openid_code_absence" ->
-            Just <| lg "apiError.validation.openid_code_absence" appState
+            Just <| gettext "Authentication Code is not provided." appState.locale
 
         "error.validation.openid_profile_info_absence" ->
-            Just <| lg "apiError.validation.openid_profile_info_absence" appState
+            Just <| gettext "Profile Information from OpenID service is missing." appState.locale
 
         "error.validation.tml_deletation" ->
-            Just <| lg "apiError.validation.tml_deletation" appState
+            Just <| gettext "Template cannot be deleted because it is used in some Projects or documents." appState.locale
 
         "error.validation.tml_unsupported_version" ->
-            Just <| lg "apiError.validation.tml_unsupported_version" appState
+            Just <| gettext "Template version is not supported." appState.locale
 
         "error.service.app.limit_exceeded" ->
-            Just <| lgf "apiError.service.app.limit_exceeded" message.params appState
+            Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
 
         "error.service.pkg.pkg_cant_be_deleted_because_it_is_used_by_some_other_entity" ->
-            Just <| lg "apiError.service.pkg.pkg_cant_be_deleted_because_it_is_used_by_some_other_entity" appState
+            Just <| gettext "Knowledge Model cannot be deleted because it is used in some Projects or Knowledge Model Editors." appState.locale
 
         "error.service.pb.pull_non_existing_pkg" ->
-            Just <| lg "apiError.service.pb.pull_non_existing_pkg" appState
+            Just <| gettext "The Knowledge Model was not found in the Registry." appState.locale
 
         "error.service.qtn.qtn_cant_be_deleted_because_it_is_used_in_migration" ->
-            Just <| lg "apiError.service.qtn.qtn_cant_be_deleted_because_it_is_used_in_migration" appState
+            Just <| gettext "Project cannot be deleted because it is used in some project migration." appState.locale
 
         "error.service.tb.pull_non_existing_tml" ->
-            Just <| lg "apiError.service.tb.pull_non_existing_tml" appState
+            Just <| gettext "The template was not found in the Registry." appState.locale
 
         "error.service.token.Incorrect_email_or_password" ->
-            Just <| lg "apiError.service.token.Incorrect_email_or_password" appState
+            Just <| gettext "Incorrect email or password" appState.locale
 
         "error.service.token.account_is_not_activated" ->
-            Just <| lg "apiError.service.token.account_is_not_activated" appState
+            Just <| gettext "The account is not activated." appState.locale
 
         "error.service.user.required_admin_role_or_hash_in_query_params" ->
-            Just <| lg "apiError.service.user.required_admin_role_or_hash_in_query_params" appState
+            Just <| gettext "A hash query param has to be provided." appState.locale
 
         "error.service.user.required_hash_in_query_params" ->
-            Just <| lg "apiError.service.user.required_hash_in_query_params" appState
+            Just <| gettext "A hash query param has to be provided." appState.locale
 
         _ ->
             Nothing

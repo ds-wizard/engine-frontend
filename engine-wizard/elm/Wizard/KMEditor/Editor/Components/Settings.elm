@@ -10,7 +10,8 @@ module Wizard.KMEditor.Editor.Components.Settings exposing
 
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
-import Html exposing (Html, br, button, div, h2, hr, p, strong)
+import Gettext exposing (gettext)
+import Html exposing (Html, br, button, div, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Api.Branches as BranchesApi
@@ -21,7 +22,6 @@ import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lx)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -37,16 +37,6 @@ import Wizard.KMEditor.Common.DeleteModal as DeleteModal
 import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.Components.Settings"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.Components.Settings"
 
 
 type alias Model =
@@ -109,7 +99,7 @@ update cfg appState msg model =
                     )
 
                 Err error ->
-                    ( { model | savingBranch = ApiError.toActionResult appState (lg "apiError.branches.putError" appState) error }
+                    ( { model | savingBranch = ApiError.toActionResult appState (gettext "Knowledge Model could not be saved." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -153,13 +143,13 @@ view appState branchDetail model =
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]
         [ div [ detailClass "" ]
-            ([ Page.header (l_ "title" appState) []
+            ([ Page.header (gettext "Settings" appState.locale) []
              , div []
                 [ FormResult.errorOnlyView appState model.savingBranch
-                , Html.map FormMsg <| FormGroup.input appState model.form "name" (l_ "form.name" appState)
-                , Html.map FormMsg <| FormGroup.input appState model.form "kmId" (l_ "form.kmId" appState)
+                , Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)
+                , Html.map FormMsg <| FormGroup.input appState model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
                 , FormActions.viewActionOnly appState
-                    (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingBranch (FormMsg Form.Submit) False)
+                    (ActionButton.ButtonConfig (gettext "Save" appState.locale) model.savingBranch (FormMsg Form.Submit) False)
                 ]
              ]
                 ++ parentKnowledgeModelView
@@ -179,19 +169,19 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
             case branchState of
                 BranchState.Outdated ->
                     div [ class "alert alert-warning mt-2 d-flex justify-content-between align-items-center" ]
-                        [ div [] [ lx_ "parent.warning" appState ]
+                        [ div [] [ text (gettext "This is not the latest version of the parent knowledge model." appState.locale) ]
                         , button
                             [ class "btn btn-warning"
                             , onClick (UpgradeModalMsg (UpgradeModal.open branchDetail.uuid branchDetail.name forkOfPackage.id))
                             ]
-                            [ lx_ "parent.upgrade" appState ]
+                            [ text (gettext "Upgrade" appState.locale) ]
                         ]
 
                 _ ->
                     emptyNode
     in
     div []
-        [ h2 [] [ lx_ "parent.title" appState ]
+        [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
         , linkTo appState
             (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
@@ -203,19 +193,19 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
 dangerZone : AppState -> BranchDetail -> Html Msg
 dangerZone appState branchDetail =
     div []
-        [ h2 [] [ lx_ "dangerZone.title" appState ]
+        [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger mt-3" ]
             [ div [ class "card-body d-flex justify-content-between align-items-center" ]
                 [ p [ class "card-text" ]
-                    [ strong [] [ lx_ "dangerZone.deleteText" appState ]
+                    [ strong [] [ text (gettext "Delete this knowledge model editor" appState.locale) ]
                     , br [] []
-                    , lx_ "dangerZone.deleteWarning" appState
+                    , text (gettext "Deleted knowledge model editors cannot be recovered." appState.locale)
                     ]
                 , button
                     [ class "btn btn-outline-danger"
                     , onClick (DeleteModalMsg (DeleteModal.open branchDetail.uuid branchDetail.name))
                     ]
-                    [ lx_ "dangerZone.delete" appState ]
+                    [ text (gettext "Delete" appState.locale) ]
                 ]
             ]
         ]

@@ -1,9 +1,9 @@
 module Wizard.Projects.Common.DeleteProjectModal.Update exposing (UpdateConfig, update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Projects.Common.DeleteProjectModal.Models exposing (Model)
@@ -64,13 +64,13 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
     case result of
         Ok _ ->
             ( { model
-                | deletingQuestionnaire = Success <| lg "apiSuccess.questionnaires.delete" appState
+                | deletingQuestionnaire = Success <| gettext "Questionnaire was successfully deleted." appState.locale
                 , questionnaireToBeDeleted = Nothing
               }
             , cfg.deleteCompleteCmd
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.deleteError" appState) error }
+            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be deleted." appState.locale) error }
             , Cmd.none
             )

@@ -3,8 +3,8 @@ module Wizard.Public.BookReference.Update exposing
     , update
     )
 
+import Gettext exposing (gettext)
 import Shared.Api.BookReferences as BookReferencesApi
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setBookReference)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -24,7 +24,7 @@ update msg appState model =
         GetBookReferenceCompleted result ->
             applyResult appState
                 { setResult = setBookReference
-                , defaultError = lg "apiError.bookReferences.getError" appState
+                , defaultError = gettext "Unable to get a book reference." appState.locale
                 , model = model
                 , result = result
                 }

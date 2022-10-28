@@ -10,6 +10,7 @@ module Wizard.Projects.Detail.Components.Preview exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Http
@@ -21,7 +22,6 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (l, lg, lx)
 import Shared.Undraw as Undraw
 import String.Format as String
 import Task
@@ -31,16 +31,6 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.Preview"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.Components.Preview"
 
 
 
@@ -109,6 +99,9 @@ handleHeadDocumentPreviewComplete appState model result =
 
         Err apiError ->
             let
+                previewError =
+                    Preview (Error (gettext "Unable to get the document preview." appState.locale))
+
                 previewState =
                     case ApiError.toServerError apiError of
                         Just (ServerError.SystemLogError data) ->
@@ -119,10 +112,10 @@ handleHeadDocumentPreviewComplete appState model result =
                                 TemplateUnsupported
 
                             else
-                                Preview (Error (lg "apiError.questionnaires.headDocumentPreview" appState))
+                                previewError
 
                         _ ->
-                            Preview (Error (lg "apiError.questionnaires.headDocumentPreview" appState))
+                            previewError
             in
             ( { model | previewState = previewState }, Cmd.none )
 
@@ -169,13 +162,13 @@ viewNotSupported : AppState -> String -> Html msg
 viewNotSupported appState documentUrl =
     Page.illustratedMessageHtml
         { image = Undraw.downloadFiles
-        , heading = l_ "notSupported.title" appState
+        , heading = gettext "Download preview" appState.locale
         , content =
-            [ p [] [ lx_ "notSupported.text" appState ]
+            [ p [] [ text (gettext "The document format cannot be displayed in the web browser. You can still download and view it." appState.locale) ]
             , p []
                 [ a [ class "btn btn-primary btn-lg with-icon", href documentUrl, target "_blank" ]
                     [ faSet "_global.download" appState
-                    , lx_ "notSupported.download" appState
+                    , text (gettext "Download" appState.locale)
                     ]
                 ]
             ]
@@ -188,28 +181,28 @@ viewTemplateNotSet appState questionnaire =
     let
         content =
             if not (Session.exists appState.session) then
-                [ p [] [ lx_ "templateNotSet.textAnonymous" appState ]
+                [ p [] [ text (gettext "Log in to set a default document template and format." appState.locale) ]
                 ]
 
             else if QuestionnaireDetail.isOwner appState questionnaire then
-                [ p [] [ lx_ "templateNotSet.textOwner" appState ]
+                [ p [] [ text (gettext "Before you can use preview you need to set a default document template and format." appState.locale) ]
                 , p []
                     [ linkTo appState
                         (Routes.projectsDetailSettings questionnaire.uuid)
                         [ class "btn btn-primary btn-lg with-icon-after" ]
-                        [ lx_ "templateNotSet.link" appState
+                        [ text (gettext "Go to settings" appState.locale)
                         , faSet "_global.arrowRight" appState
                         ]
                     ]
                 ]
 
             else
-                [ p [] [ lx_ "templateNotSet.textNotOwner" appState ]
+                [ p [] [ text (gettext "Ask the Project owner to set a default document template and format." appState.locale) ]
                 ]
     in
     Page.illustratedMessageHtml
         { image = Undraw.websiteBuilder
-        , heading = l_ "templateNotSet.heading" appState
+        , heading = gettext "Default document template is not set." appState.locale
         , content = content
         , cy = "template-not-set"
         }
@@ -220,28 +213,28 @@ viewTemplateUnsupported appState questionnaire =
     let
         content =
             if not (Session.exists appState.session) then
-                [ p [] [ lx_ "templateUnsupported.textAnonymous" appState ]
+                [ p [] [ text (gettext "Log in to update the default document template." appState.locale) ]
                 ]
 
             else if QuestionnaireDetail.isOwner appState questionnaire then
-                [ p [] [ lx_ "templateUnsupported.textOwner" appState ]
+                [ p [] [ text (gettext "Before you can use preview you need to update the default document template." appState.locale) ]
                 , p []
                     [ linkTo appState
                         (Routes.projectsDetailSettings questionnaire.uuid)
                         [ class "btn btn-primary btn-lg with-icon-after" ]
-                        [ lx_ "templateUnsupported.link" appState
+                        [ text (gettext "Go to settings" appState.locale)
                         , faSet "_global.arrowRight" appState
                         ]
                     ]
                 ]
 
             else
-                [ p [] [ lx_ "templateUnsupported.textNotOwner" appState ]
+                [ p [] [ text (gettext "Ask the Project owner to update the default document template." appState.locale) ]
                 ]
     in
     Page.illustratedMessageHtml
         { image = Undraw.warning
-        , heading = l_ "templateUnsupported.heading" appState
+        , heading = gettext "Default document template is no longer supported." appState.locale
         , content = content
         , cy = "template-not-set"
         }

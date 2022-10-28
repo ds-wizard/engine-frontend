@@ -2,12 +2,12 @@ module Wizard.Settings.KnowledgeModels.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, button, div, hr, span)
+import Gettext exposing (gettext)
+import Html exposing (Html, button, div, hr, span, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
@@ -18,16 +18,6 @@ import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.KnowledgeModels.Models exposing (Model)
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.KnowledgeModels.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.KnowledgeModels.View"
-
-
 view : AppState -> Model -> Html Msg
 view =
     GenericView.view viewProps
@@ -35,8 +25,8 @@ view =
 
 viewProps : GenericView.ViewProps EditableKnowledgeModelConfigForm Msg
 viewProps =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Knowledge Models"
+    , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
     , wrapMsg = FormMsg
     }
@@ -53,25 +43,25 @@ formView appState form =
                 let
                     allowedInputHeader =
                         div [ class "form-list-header mb-2" ]
-                            [ span [] [ lx_ "form.allowedPackages.orgId" appState ]
-                            , span [] [ lx_ "form.allowedPackages.kmId" appState ]
-                            , span [] [ lx_ "form.allowedPackages.minVersion" appState ]
-                            , span [] [ lx_ "form.allowedPackages.maxVersion" appState ]
+                            [ span [] [ text (gettext "Organization ID" appState.locale) ]
+                            , span [] [ text (gettext "Knowledge Model ID" appState.locale) ]
+                            , span [] [ text (gettext "Min Version" appState.locale) ]
+                            , span [] [ text (gettext "Max Version" appState.locale) ]
                             ]
                 in
                 div [ class "nested-group" ]
-                    [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) form "publicPackages" (l_ "form.allowedPackages" appState)
+                    [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) form "publicPackages" (gettext "Allowed Packages" appState.locale)
                     ]
 
             else
                 emptyNode
     in
     div []
-        [ FormGroup.toggle form "publicEnabled" (l_ "form.public" appState)
-        , FormExtra.mdAfter (l_ "form.public.desc" appState)
+        [ FormGroup.toggle form "publicEnabled" (gettext "Public Knowledge Models" appState.locale)
+        , FormExtra.mdAfter (gettext "If enabled you can define knowledge models that are publicly available for reading." appState.locale)
         , allowedInput
         , hr [] []
-        , FormGroup.resizableTextarea appState form "integrationConfig" (l_ "form.integrationConfig" appState)
+        , FormGroup.resizableTextarea appState form "integrationConfig" (gettext "Integration Config" appState.locale)
         ]
 
 

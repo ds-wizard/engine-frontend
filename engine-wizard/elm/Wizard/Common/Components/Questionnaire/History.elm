@@ -11,6 +11,7 @@ module Wizard.Common.Components.Questionnaire.History exposing
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
 import Dict exposing (Dict)
+import Gettext exposing (gettext)
 import Html exposing (Html, a, br, div, em, h5, img, input, label, li, span, strong, text, ul)
 import Html.Attributes exposing (class, src, type_)
 import Html.Events exposing (onCheck, onClick)
@@ -31,8 +32,8 @@ import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (lg, lh, lx)
 import Shared.Utils exposing (flip)
+import String.Format as String
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -41,16 +42,6 @@ import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionT
 import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Common.Components.Questionnaire.History"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.Questionnaire.History"
 
 
 
@@ -174,7 +165,7 @@ viewHistory appState cfg model questionnaireEvents =
             div [ class "form-check" ]
                 [ label [ class "form-check-label form-check-toggle" ]
                     [ input [ type_ "checkbox", class "form-check-input", onCheck (cfg.wrapMsg << SetNamedOnly) ] []
-                    , span [] [ lx_ "nameOnly.label" appState ]
+                    , span [] [ text (gettext "Named versions only" appState.locale) ]
                     ]
                 ]
     in
@@ -300,18 +291,18 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
                     Just version ->
                         [ Dropdown.anchorItem [ onClick (cfg.renameVersionMsg version) ]
                             [ faSet "_global.edit" appState
-                            , lx_ "action.rename" appState
+                            , text (gettext "Rename this version" appState.locale)
                             ]
                         , Dropdown.anchorItem [ onClick (cfg.deleteVersionMsg version), class "text-danger" ]
                             [ faSet "_global.delete" appState
-                            , lx_ "action.delete" appState
+                            , text (gettext "Delete this version" appState.locale)
                             ]
                         ]
 
                     Nothing ->
                         [ Dropdown.anchorItem [ onClick (cfg.createVersionMsg eventUuid) ]
                             [ faSet "_global.edit" appState
-                            , lx_ "action.name" appState
+                            , text (gettext "Name this version" appState.locale)
                             ]
                         ]
 
@@ -325,7 +316,7 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
                         viewQuestionnaireAction =
                             [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
                                 [ faSet "_global.questionnaire" appState
-                                , lx_ "action.viewQuestionnaire" appState
+                                , text (gettext "View questionnaire" appState.locale)
                                 ]
                             ]
 
@@ -340,7 +331,7 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
                                 in
                                 [ Dropdown.anchorItem createDocumentAttributes
                                     [ faSet "questionnaire.history.createDocument" appState
-                                    , lx_ "action.createDocument" appState
+                                    , text (gettext "Create document" appState.locale)
                                     ]
                                 ]
 
@@ -361,7 +352,7 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
                     divider previewAction
                         ++ [ Dropdown.anchorItem [ onClick (revertMsg event), class "text-danger" ]
                                 [ faSet "questionnaire.history.revert" appState
-                                , lx_ "action.revert" appState
+                                , text (gettext "Revert to this version" appState.locale)
                                 ]
                            ]
 
@@ -486,7 +477,7 @@ viewEventDetailSetReply appState cfg data question =
 viewEventDetailClearReply : AppState -> ViewConfig msg -> ClearReplyData -> Question -> Html msg
 viewEventDetailClearReply appState cfg data question =
     div [ class "event-detail" ]
-        [ em [] [ lx_ "event.cleared" appState, br [] [], linkToQuestion cfg question data.path ] ]
+        [ em [] [ text (gettext "Cleared reply of" appState.locale), br [] [], linkToQuestion cfg question data.path ] ]
 
 
 viewEventDetailSetLevel : AppState -> ViewConfig msg -> SetPhaseData -> Html msg
@@ -499,7 +490,7 @@ viewEventDetailSetLevel appState cfg data =
             Maybe.unwrap "" .title mbLevel
     in
     div [ class "event-detail" ]
-        [ em [] (lh_ "event.phase" [ strong [] [ text levelName ] ] appState) ]
+        [ em [] (String.formatHtml (gettext "Set phase to %s" appState.locale) [ strong [] [ text levelName ] ]) ]
 
 
 viewEventUser : AppState -> Maybe UserSuggestion -> Html msg
@@ -511,7 +502,7 @@ viewEventUser appState mbUser =
                     ( User.imageUrlOrGravatar user, User.fullName user )
 
                 Nothing ->
-                    ( User.defaultGravatar, lg "user.anonymous" appState )
+                    ( User.defaultGravatar, gettext "Anonymous user" appState.locale )
     in
     div [ class "user" ]
         [ img [ src imageUrl, class "user-icon user-icon-small" ] []

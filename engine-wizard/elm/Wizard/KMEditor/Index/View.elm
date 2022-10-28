@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Index.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
@@ -7,7 +8,6 @@ import Shared.Components.Badge as Badge
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lx)
 import Shared.Utils exposing (listInsertIf, packageIdToComponents)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -27,20 +27,10 @@ import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Index.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Index.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "KMEditor__Index" ]
-        [ Page.header (l_ "header.title" appState) []
+        [ Page.header (gettext "Knowledge Model Editors" appState.locale) []
         , FormResult.view appState model.deletingMigration
         , Listing.view appState (listingConfig appState) model.branches
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModal
@@ -55,7 +45,7 @@ createButton appState =
         [ class "btn btn-primary"
         , dataCy "km-editor_create-button"
         ]
-        [ lx_ "header.create" appState ]
+        [ text (gettext "Create" appState.locale) ]
 
 
 listingConfig : AppState -> ViewConfig Branch Msg
@@ -65,7 +55,7 @@ listingConfig appState =
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText = gettext "Click \"Create\" button to add a new Knowledge Model Editor." appState.locale
     , updated =
         Just
             { getTime = .updatedAt
@@ -73,11 +63,11 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
-    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
+    , searchPlaceholderText = Just (gettext "Search KM editors..." appState.locale)
     , sortOptions =
-        [ ( "name", lg "branch.name" appState )
-        , ( "createdAt", lg "branch.createdAt" appState )
-        , ( "updatedAt", lg "branch.updatedAt" appState )
+        [ ( "name", gettext "Name" appState.locale )
+        , ( "createdAt", gettext "Created" appState.locale )
+        , ( "updatedAt", gettext "Updated" appState.locale )
         ]
     , filters = []
     , toRoute = \_ -> Routes.KMEditorRoute << IndexRoute
@@ -119,7 +109,7 @@ listingTitleLastPublishedVersionBadge : AppState -> Branch -> Html msg
 listingTitleLastPublishedVersionBadge appState branch =
     let
         badge version =
-            Badge.light (tooltip <| l_ "badge.lastPublishedVersion.title" appState)
+            Badge.light (tooltip <| gettext "Last published version" appState.locale)
                 [ text <| Version.toString version ]
     in
     BranchUtils.lastVersion appState branch
@@ -136,22 +126,22 @@ listingTitleBadge appState branch =
                  , onClick (UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId)))
                  , dataCy "km-editor_list_outdated-badge"
                  ]
-                    ++ tooltip (l_ "badge.outdated.title" appState)
+                    ++ tooltip (gettext "There is a new version of parent Knowledge Model." appState.locale)
                 )
-                [ lx_ "badge.outdated" appState ]
+                [ text (gettext "update available" appState.locale) ]
 
         BranchState.Migrating ->
             Badge.info
-                (tooltip <| l_ "badge.migrating.title" appState)
-                [ lx_ "badge.migrating" appState ]
+                (tooltip <| gettext "This Editor is in the process of migration to a new parent Knowledge Model." appState.locale)
+                [ text (gettext "migrating" appState.locale) ]
 
         BranchState.Migrated ->
             Badge.success
-                (tooltip <| l_ "badge.migrated.title" appState)
-                [ lx_ "badge.migrated" appState ]
+                (tooltip <| gettext "This Editor has been migrated to a new parent Knowledge Model, you can publish it now." appState.locale)
+                [ text (gettext "migrated" appState.locale) ]
 
         BranchState.Edited ->
-            span (tooltip (l_ "badge.edited.title" appState))
+            span (tooltip (gettext "This Editor contains unpublished changes." appState.locale))
                 [ faSet "kmEditorList.edited" appState ]
 
         _ ->
@@ -173,7 +163,7 @@ listingDescription appState branch =
                                 _ ->
                                     span
                     in
-                    elem [ class "fragment", title <| lg "package.parentKM" appState ]
+                    elem [ class "fragment", title <| gettext "Parent Knowledge Model" appState.locale ]
                         [ faSet "km.fork" appState
                         , text forkOfPackageId
                         ]
@@ -194,7 +184,7 @@ listingActions appState branch =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.edit" appState
-                , label = l_ "action.openEditor" appState
+                , label = gettext "Open Editor" appState.locale
                 , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid (KMEditorRoute.Edit Nothing))
                 , dataCy = "open-editor"
                 }
@@ -203,7 +193,7 @@ listingActions appState branch =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.publish" appState
-                , label = l_ "action.publish" appState
+                , label = gettext "Publish" appState.locale
                 , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute branch.uuid
                 , dataCy = "publish"
                 }
@@ -212,7 +202,7 @@ listingActions appState branch =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.upgrade" appState
-                , label = l_ "action.upgrade" appState
+                , label = gettext "Upgrade" appState.locale
                 , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId))
                 , dataCy = "upgrade"
                 }
@@ -221,7 +211,7 @@ listingActions appState branch =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.continueMigration" appState
-                , label = l_ "action.continueMigration" appState
+                , label = gettext "Continue migration" appState.locale
                 , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute branch.uuid
                 , dataCy = "continue-migration"
                 }
@@ -230,7 +220,7 @@ listingActions appState branch =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.cancel" appState
-                , label = l_ "action.cancelMigration" appState
+                , label = gettext "Cancel migration" appState.locale
                 , msg = ListingActionMsg <| DeleteMigration branch.uuid
                 , dataCy = "cancel-migration"
                 }
@@ -239,7 +229,7 @@ listingActions appState branch =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
-                , label = l_ "action.delete" appState
+                , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg <| DeleteModalMsg (DeleteModal.open branch.uuid branch.name)
                 , dataCy = "delete-migration"
                 }

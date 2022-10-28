@@ -1,11 +1,11 @@
 module Wizard.Apps.Index.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Shared.Components.Badge as Badge
 import Shared.Data.App exposing (App)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lx)
 import Wizard.Apps.Index.Models exposing (Model)
 import Wizard.Apps.Index.Msgs exposing (Msg(..))
 import Wizard.Apps.Routes exposing (indexRouteEnabledFilterId)
@@ -18,20 +18,10 @@ import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Apps.Index.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Apps.Index.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Apps__Index" ]
-        [ Page.header (lg "apps" appState) []
+        [ Page.header (gettext "Apps" appState.locale) []
         , Listing.view appState (listingConfig appState) model.apps
         ]
 
@@ -41,10 +31,10 @@ listingConfig appState =
     let
         enabledFilter =
             Listing.SimpleFilter indexRouteEnabledFilterId
-                { name = l_ "filter.enabled.name" appState
+                { name = gettext "Enabled" appState.locale
                 , options =
-                    [ ( "true", l_ "filter.enabled.enabledOnly" appState )
-                    , ( "false", l_ "filter.enabled.disabledOnly" appState )
+                    [ ( "true", gettext "Enabled only" appState.locale )
+                    , ( "false", gettext "Disabled only" appState.locale )
                     ]
                 }
     in
@@ -53,7 +43,7 @@ listingConfig appState =
     , itemAdditionalData = always Nothing
     , dropdownItems = always []
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText = gettext "Click \"Create\" button to add a new App." appState.locale
     , updated =
         Just
             { getTime = .updatedAt
@@ -61,12 +51,12 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Just AppIcon.view
-    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
+    , searchPlaceholderText = Just (gettext "Search apps..." appState.locale)
     , sortOptions =
-        [ ( "name", lg "app.name" appState )
-        , ( "appId", lg "app.appId" appState )
-        , ( "createdAt", lg "app.createdAt" appState )
-        , ( "updatedAt", lg "app.updatedAt" appState )
+        [ ( "name", gettext "Name" appState.locale )
+        , ( "appId", gettext "App ID" appState.locale )
+        , ( "createdAt", gettext "Created at" appState.locale )
+        , ( "updatedAt", gettext "Updated at" appState.locale )
         ]
     , filters =
         [ enabledFilter
@@ -81,7 +71,7 @@ listingTitle appState app =
     let
         disabledBadge =
             if not app.enabled then
-                Badge.danger [] [ lx_ "badge.disabled" appState ]
+                Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
 
             else
                 emptyNode
@@ -109,4 +99,4 @@ createButton appState =
         Routes.appsCreate
         [ class "btn btn-primary"
         ]
-        [ lx_ "header.create" appState ]
+        [ text (gettext "Create" appState.locale) ]

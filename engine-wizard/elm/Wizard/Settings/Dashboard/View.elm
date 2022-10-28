@@ -1,10 +1,10 @@
 module Wizard.Settings.Dashboard.View exposing (view)
 
 import Form exposing (Form)
-import Html exposing (Html, div, img, label, p, strong)
+import Gettext exposing (gettext)
+import Html exposing (Html, div, img, label, p, strong, text)
 import Html.Attributes exposing (class, src)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
@@ -15,16 +15,6 @@ import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 import Wizard.Settings.Generic.View as GenericView
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.Dashboard.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Dashboard.View"
-
-
 view : AppState -> Model -> Html Msg
 view =
     GenericView.view viewProps
@@ -32,8 +22,8 @@ view =
 
 viewProps : GenericView.ViewProps DashboardConfigForm Msg
 viewProps =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Dashboard"
+    , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
     , wrapMsg = FormMsg
     }
@@ -45,29 +35,29 @@ formView appState form =
         opts =
             [ ( DashboardConfigForm.dashboardWelcome
               , div []
-                    [ strong [] [ lx_ "dashboardOptions.welcome" appState ]
-                    , p [ class "text-muted" ] [ lx_ "dashboardOptions.welcome.desc" appState ]
+                    [ strong [] [ text (gettext "Welcome" appState.locale) ]
+                    , p [ class "text-muted" ] [ text (gettext "Standard welcome screen." appState.locale) ]
                     , img [ class "settings-img", src "/img/settings/dashboard-welcome.png" ] []
                     ]
               )
             , ( DashboardConfigForm.dashboardRoleBased
               , div []
-                    [ strong [] [ lx_ "dashboardOptions.roleBased" appState ]
-                    , p [ class "text-muted" ] [ lx_ "dashboardOptions.roleBased.desc" appState ]
+                    [ strong [] [ text (gettext "Role-Based" appState.locale) ]
+                    , p [ class "text-muted" ] [ text (gettext "Relevant content based on user's role." appState.locale) ]
                     , img [ class "settings-img", src "/img/settings/dashboard-rolebased.png" ] []
                     ]
               )
             ]
     in
     div [ class "Dashboard" ]
-        [ FormGroup.htmlRadioGroup appState opts form "dashboardType" (l_ "form.dashboardStyle" appState)
+        [ FormGroup.htmlRadioGroup appState opts form "dashboardType" (gettext "Dashboard Style" appState.locale)
         , div [ class "row mt-5" ]
             [ div [ class "col-12" ]
-                [ label [] [ lx_ "form.welcomeInfo" appState ]
+                [ label [] [ text (gettext "Welcome Info" appState.locale) ]
                 ]
             , div [ class "col-8" ]
                 [ FormGroup.markdownEditor appState form "welcomeInfo" ""
-                , FormExtra.mdAfter (l_ "form.welcomeInfo.desc" appState)
+                , FormExtra.mdAfter (gettext "Welcome info is visible at the dashboard after login as a blue box." appState.locale)
                 ]
             , div [ class "col-4" ]
                 [ img [ class "settings-img", src "/img/settings/welcome-info.png" ] []
@@ -75,11 +65,11 @@ formView appState form =
             ]
         , div [ class "row mt-5" ]
             [ div [ class "col-12" ]
-                [ label [] [ lx_ "form.welcomeWarning" appState ]
+                [ label [] [ text (gettext "Welcome Warning" appState.locale) ]
                 ]
             , div [ class "col-8" ]
                 [ FormGroup.markdownEditor appState form "welcomeWarning" ""
-                , FormExtra.mdAfter (l_ "form.welcomeWarning.desc" appState)
+                , FormExtra.mdAfter (gettext "Welcome warning is visible at the dashboard after login as a yellow box." appState.locale)
                 ]
             , div [ class "col-4" ]
                 [ img [ class "settings-img", src "/img/settings/welcome-warning.png" ] []

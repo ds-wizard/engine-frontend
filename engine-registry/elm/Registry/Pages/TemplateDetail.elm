@@ -7,6 +7,7 @@ module Registry.Pages.TemplateDetail exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, a, br, code, div, h5, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target, title)
 import Html.Events exposing (onClick)
@@ -20,19 +21,8 @@ import Registry.Routing as Routing
 import Shared.Copy as Copy
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
 import Version
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.TemplateDetail"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry.Pages.TemplateDetail"
 
 
 init : AppState -> String -> ( Model, Cmd Msg )
@@ -72,7 +62,7 @@ update : Msg -> AppState -> Model -> ( Model, Cmd msg )
 update msg appState model =
     case msg of
         GetTemplateCompleted result ->
-            ( ActionResult.apply setTemplate (ApiError.toActionResult appState (l_ "update.getError" appState)) result model
+            ( ActionResult.apply setTemplate (ApiError.toActionResult appState (gettext "Unable to get the template." appState.locale)) result model
             , Cmd.none
             )
 
@@ -94,17 +84,17 @@ viewDetail appState model template =
     let
         viewTemplateIdCopied =
             if model.copied then
-                span [ class "ms-2 text-muted" ] [ lx_ "view.templateId.copied" appState ]
+                span [ class "ms-2 text-muted" ] [ text (gettext "Copied!" appState.locale) ]
 
             else
                 emptyNode
 
         viewTemplateId =
-            [ h5 [] [ lx_ "view.templateId" appState ]
+            [ h5 [] [ text (gettext "Template ID" appState.locale) ]
             , p []
                 [ code
                     [ onClick (CopyTemplateId template.id)
-                    , title (l_ "view.templateId.copy" appState)
+                    , title (gettext "Click to copy Template ID" appState.locale)
                     , class "entity-id"
                     ]
                     [ text template.id ]
@@ -113,12 +103,12 @@ viewDetail appState model template =
             ]
 
         viewPublishedBy =
-            [ h5 [] [ lx_ "view.publishedBy" appState ]
+            [ h5 [] [ text (gettext "Published by" appState.locale) ]
             , viewOrganization template.organization
             ]
 
         viewLicense =
-            [ h5 [] [ lx_ "view.license" appState ]
+            [ h5 [] [ text (gettext "License" appState.locale) ]
             , p []
                 [ a [ href <| "https://spdx.org/licenses/" ++ template.license ++ ".html", target "_blank" ]
                     [ text template.license ]
@@ -126,7 +116,7 @@ viewDetail appState model template =
             ]
 
         viewCurrentVersion =
-            [ h5 [] [ lx_ "view.version" appState ]
+            [ h5 [] [ text (gettext "Version" appState.locale) ]
             , p [] [ text <| Version.toString template.version ]
             ]
 
@@ -142,7 +132,7 @@ viewDetail appState model template =
                     []
 
                 versions ->
-                    [ h5 [] [ lx_ "view.otherVersions" appState ]
+                    [ h5 [] [ text (gettext "Other versions" appState.locale) ]
                     , ul []
                         (List.map viewVersion versions)
                     ]
@@ -154,7 +144,7 @@ viewDetail appState model template =
                 ]
 
         viewSupportedMetamodel =
-            [ h5 [] [ lx_ "view.metamodelVersion" appState ]
+            [ h5 [] [ text (gettext "Metamodel version" appState.locale) ]
             , p [] [ text <| String.fromInt template.metamodelVersion ]
             ]
     in

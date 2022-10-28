@@ -1,11 +1,11 @@
 module Wizard.Settings.PrivacyAndSupport.View exposing (view)
 
 import Form exposing (Form)
-import Html exposing (Html, div, h3)
+import Gettext exposing (gettext)
+import Html exposing (Html, div, h3, text)
 import Html.Attributes exposing (placeholder)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
@@ -15,16 +15,6 @@ import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.PrivacyAndSupport.Models exposing (Model)
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.PrivacyAndSupport.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.PrivacyAndSupport.View"
-
-
 view : AppState -> Model -> Html Msg
 view =
     GenericView.view viewProps
@@ -32,8 +22,8 @@ view =
 
 viewProps : GenericView.ViewProps PrivacyAndSupportConfig Msg
 viewProps =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Privacy & Support"
+    , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
     , wrapMsg = FormMsg
     }
@@ -42,15 +32,15 @@ viewProps =
 formView : AppState -> Form FormError PrivacyAndSupportConfig -> Html Form.Msg
 formView appState form =
     div []
-        [ FormGroup.inputAttrs [] appState form "privacyUrl" (l_ "form.privacyUrl" appState)
-        , FormExtra.mdAfter (l_ "form.privacyUrl.desc" appState)
-        , FormGroup.inputAttrs [] appState form "termsOfServiceUrl" (l_ "form.termsOfServiceUrl" appState)
-        , FormExtra.mdAfter (l_ "form.termsOfServiceUrl.desc" appState)
-        , h3 [] [ lx_ "section.support" appState ]
-        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportEmail ] appState form "supportEmail" (l_ "form.supportEmail" appState)
-        , FormExtra.mdAfter (l_ "form.supportEmail.desc" appState)
-        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportRepositoryName ] appState form "supportRepositoryName" (l_ "form.supportRepositoryName" appState)
-        , FormExtra.mdAfter (l_ "form.supportRepositoryName.desc" appState)
-        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportRepositoryUrl ] appState form "supportRepositoryUrl" (l_ "form.supportRepositoryUrl" appState)
-        , FormExtra.mdAfter (l_ "form.supportRepositoryUrl.desc" appState)
+        [ FormGroup.inputAttrs [] appState form "privacyUrl" (gettext "Privacy URL" appState.locale)
+        , FormExtra.mdAfter (gettext "URL to page with the privacy policy of the service." appState.locale)
+        , FormGroup.inputAttrs [] appState form "termsOfServiceUrl" (gettext "Terms of Service URL" appState.locale)
+        , FormExtra.mdAfter (gettext "URL to page with the terms of the service." appState.locale)
+        , h3 [] [ text (gettext "Support" appState.locale) ]
+        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportEmail ] appState form "supportEmail" (gettext "Support Email" appState.locale)
+        , FormExtra.mdAfter (gettext "Support email displayed in the help modal." appState.locale)
+        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportRepositoryName ] appState form "supportRepositoryName" (gettext "Support Repository Name" appState.locale)
+        , FormExtra.mdAfter (gettext "Name of the repository where users can report issues related to the service." appState.locale)
+        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportRepositoryUrl ] appState form "supportRepositoryUrl" (gettext "Support Repository URL" appState.locale)
+        , FormExtra.mdAfter (gettext "URL of the repository where users can report issues related to the service." appState.locale)
         ]

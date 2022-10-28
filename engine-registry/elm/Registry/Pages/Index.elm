@@ -7,6 +7,7 @@ module Registry.Pages.Index exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h5, p, small, text)
 import Html.Attributes exposing (class, href)
 import Registry.Common.AppState exposing (AppState)
@@ -15,12 +16,6 @@ import Registry.Common.Requests as Requests
 import Registry.Common.View.Page as Page
 import Registry.Routing as Routing
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.Index"
 
 
 init : AppState -> ( Model, Cmd Msg )
@@ -55,7 +50,7 @@ update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
         GetPackagesCompleted result ->
-            ActionResult.apply setPackages (ApiError.toActionResult appState (l_ "update.getError" appState)) result
+            ActionResult.apply setPackages (ApiError.toActionResult appState (gettext "Unable to get the packages." appState.locale)) result
 
 
 

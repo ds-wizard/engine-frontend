@@ -2,10 +2,10 @@ module Wizard.Projects.Create.CustomCreate.View exposing (view)
 
 import ActionResult
 import Form
+import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (disabled)
 import Html.Events exposing (onSubmit)
-import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -20,16 +20,11 @@ import Wizard.Projects.Create.CustomCreate.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Create.CustomCreate.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     let
         buttonConfig =
-            { label = l_ "form.save" appState
+            { label = gettext "Save" appState.locale
             , result = model.savingQuestionnaire
             , msg = FormMsg Form.Submit
             , dangerous = False
@@ -72,8 +67,8 @@ formView appState model =
                     FormGroup.formGroupCustom typeHintInput appState model.form "packageId"
     in
     div []
-        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-        , parentInput <| lg "knowledgeModel" appState
+        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
+        , parentInput <| gettext "Knowledge Model" appState.locale
         ]
 
 

@@ -9,6 +9,7 @@ module Wizard.Settings.LookAndFeel.LogoUploadModal exposing
 import ActionResult exposing (ActionResult(..))
 import File exposing (File)
 import File.Select as Select
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, hr, p, span, text)
 import Html.Attributes exposing (class, classList, disabled, style)
 import Html.Events exposing (onClick)
@@ -18,23 +19,12 @@ import Shared.Api.Configs as ConfigsApi
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lx)
 import Task
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.LookAndFeel.LogoUploadModal"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.LookAndFeel.LogoUploadModal"
 
 
 type alias Model =
@@ -130,7 +120,7 @@ update wrapMsg reloadCmd msg appState model =
                     ( model, reloadCmd )
 
                 Err error ->
-                    ( { model | submitting = ApiError.toActionResult appState (lg "apiError.config.app.uploadLogoError" appState) error }, Cmd.none )
+                    ( { model | submitting = ApiError.toActionResult appState (gettext "Unable to upload logo." appState.locale) error }, Cmd.none )
 
 
 view : AppState -> Model -> Html Msg
@@ -148,7 +138,7 @@ view appState model =
 
         submitButton =
             ActionButton.buttonWithAttrs appState
-                { label = l_ "save" appState
+                { label = gettext "Save" appState.locale
                 , result = model.submitting
                 , msg = submitButtonMsg
                 , dangerous = False
@@ -157,7 +147,7 @@ view appState model =
 
         cancelButton =
             button [ class "btn btn-secondary", onClick (SetOpen False), disabled (ActionResult.isLoading model.submitting) ]
-                [ lx_ "cancel" appState ]
+                [ text (gettext "Cancel" appState.locale) ]
 
         viewPreview url =
             div
@@ -175,7 +165,7 @@ view appState model =
 
         content =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ lx_ "title" appState ] ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Change logo" appState.locale) ] ]
             , div [ class "modal-body logo-upload" ]
                 [ FormResult.errorOnlyView appState model.submitting
                 , div
@@ -186,12 +176,12 @@ view appState model =
                     , alwaysPreventDefaultOn "dragleave" (D.succeed DragLeave)
                     , alwaysPreventDefaultOn "drop" dropDecoder
                     ]
-                    [ button [ onClick Pick, class "btn btn-secondary" ] [ lx_ "chooseLogo" appState ]
-                    , p [] [ lx_ "dropHere" appState ]
+                    [ button [ onClick Pick, class "btn btn-secondary" ] [ text (gettext "Choose logo" appState.locale) ]
+                    , p [] [ text (gettext "Or just drop it here" appState.locale) ]
                     ]
                 , hr [] []
                 , p [ class "text-center" ]
-                    [ a [ onClick UseDefault ] [ lx_ "useDefault" appState ]
+                    [ a [ onClick UseDefault ] [ text (gettext "Use default logo" appState.locale) ]
                     ]
                 , preview
                 ]

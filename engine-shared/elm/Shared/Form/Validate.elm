@@ -16,18 +16,12 @@ module Shared.Form.Validate exposing
 import Dict exposing (Dict)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation)
+import Gettext exposing (gettext)
 import Regex exposing (Regex)
 import Rumkin
 import Shared.Form.FormError as FormError exposing (FormError(..))
-import Shared.Locale exposing (l)
-import Shared.Provisioning exposing (Provisioning)
 import Shared.RegexPatterns as RegexPatterns
 import Uuid exposing (Uuid)
-
-
-l_ : String -> { a | provisioning : Provisioning } -> String
-l_ =
-    l "Shared.Form.Validate"
 
 
 confirmation : String -> Validation FormError String -> Validation FormError String
@@ -49,17 +43,17 @@ confirmation confirmationField =
     V.andThen validate
 
 
-password : { a | provisioning : Provisioning } -> Validation FormError String
+password : { a | locale : Gettext.Locale } -> Validation FormError String
 password appState =
     V.string
         |> V.andThen
             (\value ->
                 case (Rumkin.getStats value).strength of
                     Rumkin.VeryWeak ->
-                        V.fail (V.customError (FormError.Error (l_ "passwordVeryWeak" appState)))
+                        V.fail (V.customError (FormError.Error (gettext "This is a very weak password." appState.locale)))
 
                     Rumkin.Weak ->
-                        V.fail (V.customError (FormError.Error (l_ "passwordWeak" appState)))
+                        V.fail (V.customError (FormError.Error (gettext "This is a weak password." appState.locale)))
 
                     _ ->
                         V.succeed value
@@ -130,14 +124,14 @@ kmId =
     regex RegexPatterns.kmId
 
 
-projectTag : { a | provisioning : Provisioning } -> Validation FormError String
+projectTag : { a | locale : Gettext.Locale } -> Validation FormError String
 projectTag appState =
-    validateRegexWithCustomError RegexPatterns.projectTag (FormError.Error (l_ "projectTagError" appState))
+    validateRegexWithCustomError RegexPatterns.projectTag (FormError.Error (gettext "Comma (,) is not allowed in project tags." appState.locale))
 
 
-projectTags : { a | provisioning : Provisioning } -> Validation FormError (Maybe String)
+projectTags : { a | locale : Gettext.Locale } -> Validation FormError (Maybe String)
 projectTags appState =
-    maybeRegex RegexPatterns.projectTag (l_ "projectTagError" appState)
+    maybeRegex RegexPatterns.projectTag (gettext "Comma (,) is not allowed in project tags." appState.locale)
 
 
 validateRegexWithCustomError : Regex -> e -> Validation e String

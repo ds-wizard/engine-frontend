@@ -1,11 +1,11 @@
 module Wizard.Public.Login.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Json.Encode as E
 import Shared.Api.Tokens as TokensApi
 import Shared.Data.Token exposing (Token)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
@@ -49,4 +49,4 @@ loginCompleted appState model result =
             ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token model.originalUrl) )
 
         Err error ->
-            ( { model | loggingIn = ApiError.toActionResult appState (lg "apiError.tokens.fetchTokenError" appState) error }, Cmd.none )
+            ( { model | loggingIn = ApiError.toActionResult appState (gettext "Login failed." appState.locale) error }, Cmd.none )

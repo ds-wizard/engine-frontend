@@ -7,11 +7,11 @@ module Wizard.Settings.Generic.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate exposing (Validation)
+import Gettext exposing (gettext)
 import Shared.Api.Configs as ConfigsApi
 import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -65,7 +65,7 @@ handleGetConfigCompleted props appState model result =
                     { model | form = props.initForm config, config = Success config }
 
                 Err error ->
-                    { model | config = ApiError.toActionResult appState (lg "apiError.config.app.getError" appState) error }
+                    { model | config = ApiError.toActionResult appState (gettext "Unable to load settings." appState.locale) error }
 
         cmd =
             getResultCmd result
@@ -89,7 +89,7 @@ handlePutConfigCompleted _ appState model result =
                     )
 
                 Err error ->
-                    ( ApiError.toActionResult appState (lg "apiError.config.app.putError" appState) error
+                    ( ApiError.toActionResult appState (gettext "Settings could not be saved." appState.locale) error
                     , getResultCmd result
                     )
     in
