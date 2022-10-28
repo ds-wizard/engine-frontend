@@ -6,6 +6,7 @@ module Wizard.Projects.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debouncer
 import Dict
+import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -14,7 +15,6 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch, stringToBool)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -158,14 +158,14 @@ update wrapMsg msg appState model =
                             else
                                 model
                     in
-                    ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState) err }
+                    ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (gettext "Unable to get project tags." appState.locale) err }
                     , getResultCmd result
                     )
 
         UsersFilterGetValuesComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | userFilterSelectedUsers = r }
-                , defaultError = lg "apiError.users.getListError" appState
+                , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
                 }
@@ -195,7 +195,7 @@ update wrapMsg msg appState model =
         UsersFilterSearchComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | userFilterUsers = r }
-                , defaultError = lg "apiError.users.getListError" appState
+                , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
                 }
@@ -203,7 +203,7 @@ update wrapMsg msg appState model =
         PackagesFilterGetValuesComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | packagesFilterSelectedPackages = r }
-                , defaultError = lg "apiError.packages.getListError" appState
+                , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
                 }
@@ -233,7 +233,7 @@ update wrapMsg msg appState model =
         PackagesFilterSearchComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | packagesFilterPackages = r }
-                , defaultError = lg "apiError.packages.getListError" appState
+                , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
                 }
@@ -271,14 +271,14 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
                     Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.questionnaires
             in
             ( { model
-                | deletingMigration = Success <| lg "apiSuccess.questionnaires.migration.delete" appState
+                | deletingMigration = Success <| gettext "Questionnaire migration was successfully canceled." appState.locale
                 , questionnaires = questionnaires
               }
             , cmd
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.deleteError" appState) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -333,7 +333,7 @@ listingUpdateConfig wrapMsg appState model =
             , packageIds = packageIds
             , packageIdsOp = packageIdsOp
             }
-    , getError = lg "apiError.questionnaires.getListError" appState
+    , getError = gettext "Unable to get projects." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectsIndexWithFilters model.questionnaires.filters
     }

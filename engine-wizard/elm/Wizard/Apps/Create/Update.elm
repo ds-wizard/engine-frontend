@@ -2,10 +2,10 @@ module Wizard.Apps.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Shared.Api.Apps as AppsApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
-import Shared.Locale exposing (lg)
 import Wizard.Apps.Common.AppCreateForm as AppCreateForm
 import Wizard.Apps.Create.Models exposing (Model)
 import Wizard.Apps.Create.Msgs exposing (Msg(..))
@@ -56,7 +56,7 @@ postAppCompleted appState model result =
 
         Err error ->
             ( { model
-                | savingApp = ApiError.toActionResult appState (lg "apiError.apps.postError" appState) error
+                | savingApp = ApiError.toActionResult appState (gettext "App could not be created." appState.locale) error
                 , form = setFormErrors appState error model.form
               }
             , getResultCmd result

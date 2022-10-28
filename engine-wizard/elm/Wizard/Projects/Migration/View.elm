@@ -1,5 +1,6 @@
 module Wizard.Projects.Migration.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
 import Html.Attributes exposing (class, classList, style, target)
 import Html.Events exposing (onClick)
@@ -7,9 +8,9 @@ import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.Package exposing (Package)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lf, lx)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (boolToInt, flip)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer
@@ -19,21 +20,6 @@ import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (Questio
 import Wizard.Projects.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
 import Wizard.Projects.Migration.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Migration.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Migration.View"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Projects.Migration.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -47,7 +33,7 @@ contentView appState model migration =
         finalizeAction =
             if allResolved model migration then
                 button [ class "btn btn-primary", onClick FinalizeMigration ]
-                    [ lx_ "navbar.finalize" appState ]
+                    [ text (gettext "Finalize migration" appState.locale) ]
 
             else
                 emptyNode
@@ -57,10 +43,10 @@ contentView appState model migration =
                 div [ class "content" ]
                     [ Page.illustratedMessage
                         { image = Undraw.happyFeeling
-                        , heading = l_ "noChanges.heading" appState
+                        , heading = gettext "No changes to review" appState.locale
                         , lines =
-                            [ l_ "noChanges.line1" appState
-                            , l_ "noChanges.line2" appState
+                            [ gettext "There are no changes affecting your answers." appState.locale
+                            , gettext "You can safely finalize the migration." appState.locale
                             ]
                         , cy = "no-changes"
                         }
@@ -97,11 +83,11 @@ migrationInfo appState migration =
         [ strong [] [ text migration.newQuestionnaire.name ]
         , table []
             [ tr []
-                [ th [] [ lx_ "navbar.sourceKM" appState ]
+                [ th [] [ text (gettext "Source KM" appState.locale) ]
                 , td [] [ packageInfo appState migration.oldQuestionnaire.package ]
                 ]
             , tr []
-                [ th [] [ lx_ "navbar.targetKM" appState ]
+                [ th [] [ text (gettext "Target KM" appState.locale) ]
                 , td [] [ packageInfo appState migration.newQuestionnaire.package ]
                 ]
             ]
@@ -133,14 +119,14 @@ changeView appState model migration =
         resolveAction =
             if isSelectedChangeResolved model then
                 div []
-                    [ lx_ "changeView.resolved" appState
+                    [ text (gettext "Change already resolved" appState.locale)
                     , button [ class "btn btn-outline-secondary with-icon", onClick UndoResolveCurrentChange ]
-                        [ faSet "questionnaireMigration.undo" appState, lx_ "changeView.undo" appState ]
+                        [ faSet "questionnaireMigration.undo" appState, text (gettext "Undo" appState.locale) ]
                     ]
 
             else
                 button [ class "btn btn-outline-primary with-icon", onClick ResolveCurrentChange ]
-                    [ faSet "questionnaireMigration.resolve" appState, lx_ "changeView.resolve" appState ]
+                    [ faSet "questionnaireMigration.resolve" appState, text (gettext "Resolve" appState.locale) ]
 
         resolveAllAction =
             if allResolved model migration then
@@ -148,11 +134,11 @@ changeView appState model migration =
 
             else
                 button [ class "btn btn-outline-primary with-icon", onClick ResolveAllChanges ]
-                    [ faSet "questionnaireMigration.resolveAll" appState, lx_ "changeView.resolveAll" appState ]
+                    [ faSet "questionnaireMigration.resolveAll" appState, text (gettext "Resolve all" appState.locale) ]
     in
     div [ class "change-view" ]
         [ div [ class "progress-view" ]
-            [ text <| lf_ "changeView.resolvedChanges" [ String.fromInt resolvedCount, String.fromInt changesCount ] appState
+            [ text <| String.format (gettext "Resolved changes %s/%s" appState.locale) [ String.fromInt resolvedCount, String.fromInt changesCount ]
             , div [ class "progress" ]
                 [ div [ class "progress-bar", classList [ ( "bg-success", resolvedCount == changesCount ) ], style "width" (progress ++ "%") ] [] ]
             ]
@@ -198,17 +184,17 @@ viewChange appState model migration change =
         ( eventLabel, question ) =
             case change of
                 QuestionAdd data ->
-                    ( l_ "change.questionAdd" appState, data.question )
+                    ( gettext "New Question" appState.locale, data.question )
 
                 QuestionChange data ->
-                    ( l_ "change.questionChange" appState, data.question )
+                    ( gettext "Question Changed" appState.locale, data.question )
 
                 QuestionMove data ->
-                    ( l_ "change.questionMove" appState, data.question )
+                    ( gettext "Moved Question" appState.locale, data.question )
 
         resolvedLabel =
             if isQuestionChangeResolved migration change then
-                small [] [ lx_ "change.resolved" appState ]
+                small [] [ text (gettext "Resolved" appState.locale) ]
 
             else
                 emptyNode

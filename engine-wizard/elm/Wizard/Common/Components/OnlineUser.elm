@@ -1,12 +1,12 @@
 module Wizard.Common.Components.OnlineUser exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
 import List.Extra as List
 import Shared.Data.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, OnlineUserInfo)
 import Shared.Data.User as User
 import Shared.Html exposing (fa, faKeyClass)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltip)
 
@@ -41,7 +41,7 @@ viewAnonymous appState avatarNumber colorNumber =
 
         ( avatarIcon, avatarName ) =
             List.getAt (modBy (List.length avatars) avatarNumber) avatars
-                |> Maybe.withDefault ( faKeyClass "avatar.0" appState, lg "avatar.0" appState )
+                |> Maybe.withDefault ( faKeyClass "avatar.0" appState, gettext "Anonymous Cat" appState.locale )
     in
     ( avatarName
     , "color-" ++ String.fromInt colorNumber
@@ -51,24 +51,24 @@ viewAnonymous appState avatarNumber colorNumber =
 
 getAvatars : AppState -> List ( String, String )
 getAvatars appState =
-    [ ( faKeyClass "avatar.0" appState, lg "avatar.0" appState )
-    , ( faKeyClass "avatar.1" appState, lg "avatar.1" appState )
-    , ( faKeyClass "avatar.2" appState, lg "avatar.2" appState )
-    , ( faKeyClass "avatar.3" appState, lg "avatar.3" appState )
-    , ( faKeyClass "avatar.4" appState, lg "avatar.4" appState )
-    , ( faKeyClass "avatar.5" appState, lg "avatar.5" appState )
-    , ( faKeyClass "avatar.6" appState, lg "avatar.6" appState )
-    , ( faKeyClass "avatar.7" appState, lg "avatar.7" appState )
-    , ( faKeyClass "avatar.8" appState, lg "avatar.8" appState )
-    , ( faKeyClass "avatar.9" appState, lg "avatar.9" appState )
-    , ( faKeyClass "avatar.10" appState, lg "avatar.10" appState )
-    , ( faKeyClass "avatar.11" appState, lg "avatar.11" appState )
-    , ( faKeyClass "avatar.12" appState, lg "avatar.12" appState )
-    , ( faKeyClass "avatar.13" appState, lg "avatar.13" appState )
-    , ( faKeyClass "avatar.14" appState, lg "avatar.14" appState )
-    , ( faKeyClass "avatar.15" appState, lg "avatar.15" appState )
-    , ( faKeyClass "avatar.16" appState, lg "avatar.16" appState )
-    , ( faKeyClass "avatar.17" appState, lg "avatar.17" appState )
-    , ( faKeyClass "avatar.18" appState, lg "avatar.18" appState )
-    , ( faKeyClass "avatar.19" appState, lg "avatar.19" appState )
+    [ ( faKeyClass "avatar.0" appState, gettext "Anonymous Cat" appState.locale )
+    , ( faKeyClass "avatar.1" appState, gettext "Anonymous Crow" appState.locale )
+    , ( faKeyClass "avatar.2" appState, gettext "Anonymous Dog" appState.locale )
+    , ( faKeyClass "avatar.3" appState, gettext "Anonymous Dove" appState.locale )
+    , ( faKeyClass "avatar.4" appState, gettext "Anonymous Dragon" appState.locale )
+    , ( faKeyClass "avatar.5" appState, gettext "Anonymous Fish" appState.locale )
+    , ( faKeyClass "avatar.6" appState, gettext "Anonymous Frog" appState.locale )
+    , ( faKeyClass "avatar.7" appState, gettext "Anonymous Hippo" appState.locale )
+    , ( faKeyClass "avatar.8" appState, gettext "Anonymous Horse" appState.locale )
+    , ( faKeyClass "avatar.9" appState, gettext "Anonymous Kiwi" appState.locale )
+    , ( faKeyClass "avatar.10" appState, gettext "Anonymous Otter" appState.locale )
+    , ( faKeyClass "avatar.11" appState, gettext "Anonymous Spider" appState.locale )
+    , ( faKeyClass "avatar.12" appState, gettext "Anonymous Pig" appState.locale )
+    , ( faKeyClass "avatar.13" appState, gettext "Anonymous Bug" appState.locale )
+    , ( faKeyClass "avatar.14" appState, gettext "Anonymous Wizard" appState.locale )
+    , ( faKeyClass "avatar.15" appState, gettext "Anonymous Ghost" appState.locale )
+    , ( faKeyClass "avatar.16" appState, gettext "Anonymous Robot" appState.locale )
+    , ( faKeyClass "avatar.17" appState, gettext "Anonymous Snowman" appState.locale )
+    , ( faKeyClass "avatar.18" appState, gettext "Anonymous Tree" appState.locale )
+    , ( faKeyClass "avatar.19" appState, gettext "Anonymous Cowboy" appState.locale )
     ]

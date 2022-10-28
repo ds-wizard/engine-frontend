@@ -27,12 +27,15 @@ module Wizard.Common.Components.Questionnaire exposing
     , view
     )
 
+--import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
+
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
+import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
@@ -75,13 +78,13 @@ import Shared.Data.User as User
 import Shared.Data.UserInfo as UserInfo
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
-import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import SplitPane
 import String
+import String.Format as String
 import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
@@ -108,27 +111,25 @@ import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Questionnaire"
 
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Common.Components.Questionnaire"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.Questionnaire"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.Questionnaire"
-
-
-
+--l_ : String -> AppState -> String
+--l_ =
+--    l "Wizard.Common.Components.Questionnaire"
+--
+--
+--lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
+--lh_ =
+--    lh "Wizard.Common.Components.Questionnaire"
+--
+--
+--lx_ : String -> AppState -> Html msg
+--lx_ =
+--    lx "Wizard.Common.Components.Questionnaire"
+--
+--
+--lf_ : String -> List String -> AppState -> String
+--lf_ =
+--    lf "Wizard.Common.Components.Questionnaire"
 -- MODEL
 
 
@@ -613,7 +614,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         { model | questionnaireEvents = Success questionnaireHistory }
 
                     Err _ ->
-                        { model | questionnaireEvents = Error (lg "apiError.questionnaires.events.getListError" appState) }
+                        { model | questionnaireEvents = Error (gettext "Unable to get version history." appState.locale) }
 
         HistoryMsg historyMsg ->
             wrap { model | historyModel = History.update historyMsg model.historyModel }
@@ -910,7 +911,7 @@ handleTypeHintsLoaded appState model path result =
                         { model | typeHints = Just { typeHints | hints = Success hints } }
 
                     Err _ ->
-                        { model | typeHints = Just { typeHints | hints = Error <| lg "apiError.typeHints.getListError" appState } }
+                        { model | typeHints = Just { typeHints | hints = Error <| gettext "Unable to get type hints." appState.locale } }
 
             else
                 model
@@ -1023,13 +1024,16 @@ view appState cfg ctx model =
         ( migrationWarning, migrationWarningEnabled ) =
             case model.questionnaire.migrationUuid of
                 Just migrationUuid ->
+                    let
+                        warningLink =
+                            linkTo appState (Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
+
+                        warning =
+                            gettext "There is an ongoing %s. Finish it before you can continue editing this project." appState.locale
+                                |> flip String.formatHtml [ warningLink ]
+                    in
                     ( div [ class "questionnaire__warning" ]
-                        [ div [ class "alert alert-warning" ]
-                            (lh_ "migrationWarning"
-                                [ linkTo appState (Routes.projectsMigration migrationUuid) [] [ lx_ "migrationWarning.migration" appState ] ]
-                                appState
-                            )
-                        ]
+                        [ div [ class "alert alert-warning" ] warning ]
                     , True
                     )
 
@@ -1082,28 +1086,28 @@ viewQuestionnaireToolbar appState model =
                     , toggleMsg = ViewSettingsDropdownMsg
                     , toggleButton =
                         Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                            [ lx_ "toolbar.view" appState ]
+                            [ text (gettext "View" appState.locale) ]
                     , items =
                         [ Dropdown.anchorItem
                             [ onClick (SetViewSettings QuestionnaireViewSettings.all) ]
-                            [ lx_ "toolbar.view.showAll" appState ]
+                            [ text (gettext "Show all" appState.locale) ]
                         , Dropdown.anchorItem
                             [ onClick (SetViewSettings QuestionnaireViewSettings.none) ]
-                            [ lx_ "toolbar.view.hideAll" appState ]
+                            [ text (gettext "Hide all" appState.locale) ]
                         , Dropdown.divider
                         , Dropdown.anchorItem
                             [ class "dropdown-item-icon", onClick (SetViewSettings (QuestionnaireViewSettings.toggleAnsweredBy viewSettings)) ]
-                            [ settingsIcon viewSettings.answeredBy, lx_ "toolbar.view.answeredBy" appState ]
+                            [ settingsIcon viewSettings.answeredBy, text (gettext "Answered by" appState.locale) ]
                         , Dropdown.anchorItem
                             [ class "dropdown-item-icon"
                             , onClick (SetViewSettings (QuestionnaireViewSettings.togglePhases viewSettings))
                             ]
-                            [ settingsIcon viewSettings.phases, lx_ "toolbar.view.phases" appState ]
+                            [ settingsIcon viewSettings.phases, text (gettext "Phases" appState.locale) ]
                         , Dropdown.anchorItem
                             [ class "dropdown-item-icon"
                             , onClick (SetViewSettings (QuestionnaireViewSettings.toggleTags viewSettings))
                             ]
-                            [ settingsIcon viewSettings.tags, lx_ "toolbar.view.tags" appState ]
+                            [ settingsIcon viewSettings.tags, text (gettext "Question tags" appState.locale) ]
                         ]
                     }
                 ]
@@ -1184,7 +1188,7 @@ viewQuestionnaireToolbar appState model =
         todosButton =
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", todosOpen ) ], onClick (SetRightPanel todosPanel) ]
-                    [ lx_ "toolbar.todos" appState
+                    [ text (gettext "TODOs" appState.locale)
                     , todosBadge
                     ]
                 ]
@@ -1205,7 +1209,7 @@ viewQuestionnaireToolbar appState model =
         commentsOverviewButton =
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", commentsOverviewOpen ) ], onClick (SetRightPanel commentsOverviewPanel) ]
-                    [ lx_ "toolbar.comments" appState
+                    [ text (gettext "Comments" appState.locale)
                     , commentsBadge
                     ]
                 ]
@@ -1216,7 +1220,7 @@ viewQuestionnaireToolbar appState model =
         warningsButton =
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", warningsOpen ) ], onClick (SetRightPanel warningsPanel) ]
-                    [ lx_ "toolbar.warnings" appState
+                    [ text (gettext "Warnings" appState.locale)
                     , Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsLength) ]
                     ]
                 ]
@@ -1230,7 +1234,7 @@ viewQuestionnaireToolbar appState model =
         versionHistoryButton =
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", versionsOpen ) ], onClick (SetRightPanel versionsPanel) ]
-                    [ lx_ "toolbar.versionHistory" appState ]
+                    [ text (gettext "Version history" appState.locale) ]
                 ]
 
         ( expandIcon, expandMsg ) =
@@ -1289,7 +1293,7 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
                     [ onInput SetPhase ]
         in
         div [ class "questionnaire__left-panel__phase" ]
-            [ label [] [ lgx "questionnaire.currentPhase" appState ]
+            [ label [] [ text (gettext "Current Phase" appState.locale) ]
             , select (class "form-select" :: selectAttrs)
                 (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.phaseUuid) phases)
             ]
@@ -1408,7 +1412,7 @@ viewQuestionnaireRightPanelTodos appState model =
     in
     if List.isEmpty todos then
         div [ class "todos todos-empty" ] <|
-            [ illustratedMessage Undraw.feelingHappy (l_ "todos.completed" appState) ]
+            [ illustratedMessage Undraw.feelingHappy (gettext "All TODOs have been completed." appState.locale) ]
 
     else
         div [ class "todos" ] <|
@@ -1439,7 +1443,7 @@ viewQuestionnaireRightPanelWarnings appState model =
     in
     if List.isEmpty warnings then
         div [ class "todos todos-empty" ] <|
-            [ illustratedMessage Undraw.feelingHappy (l_ "warnings.noWarnings" appState) ]
+            [ illustratedMessage Undraw.feelingHappy (gettext "There are no more warnings." appState.locale) ]
 
     else
         div [ class "todos" ] <|
@@ -1496,7 +1500,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                 [ div [ class "alert alert-info" ]
                     [ p
                         []
-                        (lh_ "commentsOverview.empty" [ faSet "questionnaire.comments" appState ] appState)
+                        (String.formatHtml (gettext "Click the %s icon to add new comments to a question." appState.locale) [ faSet "questionnaire.comments" appState ])
                     ]
                 ]
 
@@ -1528,7 +1532,7 @@ viewQuestionnaireRightPanelComments appState model path =
             if model.commentsViewPrivate then
                 div [ class "alert alert-editor-notes" ]
                     [ i [ class "fa fas fa-lock" ] []
-                    , span [] [ lx_ "comments.editorNotes.description" appState ]
+                    , span [] [ text (gettext "Editor notes are only visible to project Editors and Owners." appState.locale) ]
                     ]
 
             else
@@ -1544,7 +1548,7 @@ viewQuestionnaireRightPanelComments appState model path =
             div [ class "form-check" ]
                 [ label [ class "form-check-label form-check-toggle" ]
                     [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved ] []
-                    , span [] [ lx_ "comments.viewResolved" appState ]
+                    , span [] [ text (gettext "View resolved comments" appState.locale) ]
                     ]
                 ]
 
@@ -1560,8 +1564,8 @@ viewQuestionnaireRightPanelComments appState model path =
 
         newThreadForm =
             viewCommentReplyForm appState
-                { submitText = l_ "comments.newThread.submit" appState
-                , placeholderText = l_ "comments.newThread.placeholder" appState
+                { submitText = gettext "Comment" appState.locale
+                , placeholderText = gettext "Create a new comment..." appState.locale
                 , model = model
                 , path = path
                 , mbThreadUuid = Nothing
@@ -1608,8 +1612,8 @@ viewCommentsNavigation appState model commentThreads =
                 , onClick (CommentsViewPrivate False)
                 , dataCy "comments_nav_comments"
                 ]
-                [ span [ attribute "data-content" (l_ "comments.nav.comments" appState) ]
-                    [ lx_ "comments.nav.comments" appState ]
+                [ span [ attribute "data-content" (gettext "Comments" appState.locale) ]
+                    [ text (gettext "Comments" appState.locale) ]
                 , toBadge publicThreadsCount
                 ]
             ]
@@ -1620,8 +1624,8 @@ viewCommentsNavigation appState model commentThreads =
                 , onClick (CommentsViewPrivate True)
                 , dataCy "comments_nav_private-notes"
                 ]
-                [ span [ attribute "data-content" (l_ "comments.nav.editorNotes" appState) ]
-                    [ lx_ "comments.nav.editorNotes" appState ]
+                [ span [ attribute "data-content" (gettext "Editor notes" appState.locale) ]
+                    [ text (gettext "Editor notes" appState.locale) ]
                 , toBadge privateThreadsCount
                 ]
             ]
@@ -1635,7 +1639,7 @@ viewCommentThread appState model path commentThread =
             if model.commentDeleting == Maybe.map .uuid (List.head commentThread.comments) then
                 viewCommentDeleteOverlay appState
                     { deleteMsg = CommentThreadDelete path commentThread.uuid commentThread.private
-                    , deleteText = l_ "comments.commentThread.delete" appState
+                    , deleteText = gettext "Delete this comment thread?" appState.locale
                     , extraClass = "CommentDeleteOverlay--Thread"
                     }
 
@@ -1648,8 +1652,8 @@ viewCommentThread appState model path commentThread =
 
             else
                 viewCommentReplyForm appState
-                    { submitText = l_ "comments.reply.submit" appState
-                    , placeholderText = l_ "comments.reply.placeholder" appState
+                    { submitText = gettext "Reply" appState.locale
+                    , placeholderText = gettext "Reply..." appState.locale
                     , model = model
                     , path = path
                     , mbThreadUuid = Just commentThread.uuid
@@ -1691,12 +1695,12 @@ viewComment appState model path commentThread index comment =
                                 , disabled (String.isEmpty editValue)
                                 , onClick (CommentEditSubmit path commentThread.uuid comment.uuid editValue commentThread.private)
                                 ]
-                                [ lx_ "comments.edit.submit" appState ]
+                                [ text (gettext "Edit" appState.locale) ]
                             , button
                                 [ class "btn btn-outline-secondary btn-sm"
                                 , onClick (CommentEditCancel comment.uuid)
                                 ]
-                                [ lx_ "comments.form.cancel" appState ]
+                                [ text (gettext "Cancel" appState.locale) ]
                             ]
                         ]
 
@@ -1707,7 +1711,7 @@ viewComment appState model path commentThread index comment =
             if index /= 0 && model.commentDeleting == Just comment.uuid then
                 viewCommentDeleteOverlay appState
                     { deleteMsg = CommentDeleteSubmit path commentThread.uuid comment.uuid commentThread.private
-                    , deleteText = l_ "comments.comment.delete" appState
+                    , deleteText = gettext "Delete this comment?" appState.locale
                     , extraClass = "CommentDeleteOverlay--Comment"
                     }
 
@@ -1731,7 +1735,7 @@ viewCommentHeader appState model path commentThread index comment =
                      , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
                      , dataCy "comments_comment_resolve"
                      ]
-                        ++ tooltipLeft (l_ "comments.comment.action.resolveTitle" appState)
+                        ++ tooltipLeft (gettext "Resolve comment thread" appState.locale)
                     )
                     [ faSet "questionnaire.commentsResolve" appState ]
 
@@ -1741,7 +1745,7 @@ viewCommentHeader appState model path commentThread index comment =
         reopenAction =
             Dropdown.anchorItem
                 [ onClick (CommentThreadReopen path commentThread.uuid commentThread.private) ]
-                [ lx_ "comments.comment.action.reopen" appState ]
+                [ text (gettext "Reopen" appState.locale) ]
 
         reopenActionVisible =
             index == 0 && Feature.projectCommentThreadReopen appState model.questionnaire commentThread
@@ -1749,7 +1753,7 @@ viewCommentHeader appState model path commentThread index comment =
         editAction =
             Dropdown.anchorItem
                 [ onClick (CommentEditInput comment.uuid comment.text) ]
-                [ lx_ "comments.comment.action.edit" appState ]
+                [ text (gettext "Edit" appState.locale) ]
 
         editActionVisible =
             Feature.projectCommentEdit appState model.questionnaire commentThread comment
@@ -1759,7 +1763,7 @@ viewCommentHeader appState model path commentThread index comment =
                 [ onClick (CommentDelete (Just comment.uuid))
                 , dataCy "comments_comment_menu_delete"
                 ]
-                [ lx_ "comments.comment.action.delete" appState ]
+                [ text (gettext "Delete" appState.locale) ]
 
         deleteActionVisible =
             (index == 0 && Feature.projectCommentThreadDelete appState model.questionnaire commentThread)
@@ -1796,7 +1800,7 @@ viewCommentHeader appState model path commentThread index comment =
         editedLabel =
             if comment.createdAt /= comment.updatedAt then
                 span (tooltip (TimeUtils.toReadableDateTime appState.timeZone comment.updatedAt))
-                    [ text <| " (" ++ l_ "comments.comment.editedLabel" appState ++ ")" ]
+                    [ text <| " (" ++ gettext "edited" appState.locale ++ ")" ]
 
             else
                 emptyNode
@@ -1817,7 +1821,7 @@ viewCommentHeader appState model path commentThread index comment =
         [ UserIcon.view userForIcon
         , div [ class "Comment__Header__User" ]
             [ strong [ class "Comment__Header__User__Name" ]
-                [ text (Maybe.unwrap (lg "user.anonymous" appState) User.fullName comment.createdBy)
+                [ text (Maybe.unwrap (gettext "Anonymous user" appState.locale) User.fullName comment.createdBy)
                 ]
             , span [ class "Comment__Header__User__Time" ] [ text createdLabel, editedLabel ]
             ]
@@ -1877,7 +1881,7 @@ viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThre
                         , onClick (CommentInput path mbThreadUuid "")
                         , dataCy (cyFormType "comments_reply-form_cancel")
                         ]
-                        [ lx_ "comments.form.cancel" appState ]
+                        [ text (gettext "Cancel" appState.locale) ]
                     ]
     in
     div [ class "CommentReplyForm", classList [ ( "CommentReplyForm--Private", private ) ] ]
@@ -1903,8 +1907,8 @@ viewCommentDeleteOverlay appState { deleteMsg, deleteText, extraClass } =
                 , onClick deleteMsg
                 , dataCy "comments_delete-modal_delete"
                 ]
-                [ lx_ "comments.deleteOverlay.delete" appState ]
-            , button [ class "btn btn-secondary btn-sm", onClick (CommentDelete Nothing) ] [ lx_ "comments.form.cancel" appState ]
+                [ text (gettext "Delete" appState.locale) ]
+            , button [ class "btn btn-secondary btn-sm", onClick (CommentDelete Nothing) ] [ text (gettext "Cancel" appState.locale) ]
             ]
         ]
 
@@ -2000,12 +2004,12 @@ viewPrevAndNextChapterLinks appState chapters currentChapter =
 
         viewPrevChapterLink =
             viewChapterLink "chapter-link-prev"
-                (l_ "chapterLinks.prev" appState)
+                (gettext "Previous Chapter" appState.locale)
                 (faSet "_global.chevronLeft" appState)
 
         viewNextChapterLink =
             viewChapterLink "chapter-link-next"
-                (l_ "chapterLinks.next" appState)
+                (gettext "Next Chapter" appState.locale)
                 (faSet "_global.chevronRight" appState)
 
         prevChapterLink =
@@ -2091,7 +2095,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                                     User.fullName userInfo
 
                                 Nothing ->
-                                    l_ "question.answeredBy.anonymous" appState
+                                    gettext "anonymous user" appState.locale
 
                         readableTime =
                             TimeUtils.toReadableDateTime appState.timeZone reply.createdAt
@@ -2103,7 +2107,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             span (tooltip readableTime) [ text timeDiff ]
                     in
                     div [ class "mt-2", dataCy "questionnaire_answered-by" ]
-                        (lh_ "question.answeredBy" [ time, text userName ] appState)
+                        (String.formatHtml (gettext "Answered %s by %s." appState.locale) [ time, text userName ])
 
                 _ ->
                     emptyNode
@@ -2212,7 +2216,7 @@ viewQuestionClearButton appState cfg path hasAnswer =
     else
         a [ class "clear-answer", onClick (ClearReply (pathToString path)) ]
             [ faSet "questionnaire.clearAnswer" appState
-            , lx_ "answer.clear" appState
+            , text (gettext "Clear answer" appState.locale)
             ]
 
 
@@ -2270,7 +2274,7 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
 
         noAnswersInfo =
             if cfg.features.readonly && List.isEmpty itemUuids then
-                i [] [ lx_ "list.noAnswers" appState ]
+                i [] [ text (gettext "There are no answers yet." appState.locale) ]
 
             else
                 emptyNode
@@ -2293,7 +2297,7 @@ viewQuestionListAdd appState cfg itemUuids path =
             , onClick (AddItem (pathToString path) itemUuids)
             ]
             [ faSet "_global.add" appState
-            , lx_ "list.add" appState
+            , text (gettext "Add" appState.locale)
             ]
 
 
@@ -2334,7 +2338,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                             (class "btn-link text-danger"
                                 :: onClick (RemoveItem (pathToString path) uuid)
                                 :: dataCy "item-delete"
-                                :: tooltip (l_ "list.delete" appState)
+                                :: tooltip (gettext "Delete" appState.locale)
                             )
                             [ faSet "_global.delete" appState ]
 
@@ -2347,7 +2351,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                 (class "btn-link me-2"
                                     :: onClick (MoveItemUp (pathToString path) uuid)
                                     :: dataCy "item-move-up"
-                                    :: tooltip (l_ "list.moveUp" appState)
+                                    :: tooltip (gettext "Move Up" appState.locale)
                                 )
                                 [ faSet "questionnaire.item.moveUp" appState ]
 
@@ -2360,7 +2364,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                 (class "btn-link me-2"
                                     :: onClick (MoveItemDown (pathToString path) uuid)
                                     :: dataCy "item-move-down"
-                                    :: tooltip (l_ "list.moveDown" appState)
+                                    :: tooltip (gettext "Move Down" appState.locale)
                                 )
                                 [ faSet "questionnaire.item.moveDown" appState ]
                 in
@@ -2369,7 +2373,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
         itemTitle =
             if isCollapsed then
                 Maybe.unwrap
-                    (i [ class "ms-2" ] [ text (lf_ "list.defaultItem" [ String.fromInt (index + 1) ] appState) ])
+                    (i [ class "ms-2" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
                     (strong [ class "ms-2" ] << List.singleton << text)
                     (QuestionnaireDetail.getItemTitle model.questionnaire itemPath questions)
 
@@ -2460,12 +2464,12 @@ viewQuestionValue appState cfg model path question =
 
                 Just EmailQuestionValueType ->
                     [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
-                    , warningView RegexPatterns.email (l_ "value.invalidEmail" appState)
+                    , warningView RegexPatterns.email (gettext "This is not a valid email address." appState.locale)
                     ]
 
                 Just UrlQuestionValueType ->
                     [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
-                    , warningView RegexPatterns.url (l_ "value.invalidUrl" appState)
+                    , warningView RegexPatterns.url (gettext "This is not a valid URL." appState.locale)
                     ]
 
                 Just TextQuestionValueType ->
@@ -2473,7 +2477,7 @@ viewQuestionValue appState cfg model path question =
 
                 Just ColorQuestionValueType ->
                     [ input (type_ "color" :: defaultAttrs ++ extraAttrs) []
-                    , warningView RegexPatterns.color (l_ "value.invalidColor" appState)
+                    , warningView RegexPatterns.color (gettext "This is not a valid color." appState.locale)
                     ]
 
                 _ ->
@@ -2514,7 +2518,7 @@ viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationDat
                 [ onClick (OpenIntegrationWidget (pathToString path) widgetIntegrationData.widgetUrl)
                 , class "btn btn-secondary"
                 ]
-                [ lx_ "integrationWidget.select" appState ]
+                [ text (gettext "Select" appState.locale) ]
 
         _ ->
             emptyNode
@@ -2585,7 +2589,7 @@ viewQuestionIntegrationTypeHints appState cfg model path =
                 Success [] ->
                     div [ class "info" ]
                         [ faSet "_global.info" appState
-                        , lx_ "typeHints.empty" appState
+                        , text (gettext "There are no results for your search." appState.locale)
                         ]
 
                 Success hints ->
@@ -2594,7 +2598,7 @@ viewQuestionIntegrationTypeHints appState cfg model path =
                 Loading ->
                     div [ class "loading" ]
                         [ faSet "_global.spinner" appState
-                        , lx_ "typeHints.loading" appState
+                        , text (gettext "Loading..." appState.locale)
                         ]
 
                 Error err ->
@@ -2710,7 +2714,7 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
                 emptyNode
 
             else
-                span (class "ms-3 text-muted" :: tooltipRight (l_ "answer.followUpTitle" appState))
+                span (class "ms-3 text-muted" :: tooltipRight (gettext "This option leads to some follow up questions." appState.locale))
                     [ i
                         [ class (faKeyClass "questionnaire.followUpsIndication" appState)
                         ]
@@ -2767,7 +2771,7 @@ viewCommentAction appState cfg model path =
                 , dataCy "questionnaire_question-action_comment"
                 ]
                 [ faSet "questionnaire.comments" appState
-                , text <| String.fromInt commentCount ++ " comments"
+                , text <| String.format (ngettext ( "1 comment", "%s comments" ) commentCount appState.locale) [ String.fromInt commentCount ]
                 ]
 
         else
@@ -2797,10 +2801,10 @@ viewTodoAction appState cfg model path =
         in
         if hasTodo then
             span [ class "action action-todo" ]
-                [ span [] [ lx_ "todoAction.todo" appState ]
+                [ span [] [ text (gettext "TODO" appState.locale) ]
                 , a
                     ((onClick <| SetLabels currentPath [])
-                        :: tooltip (l_ "todoAction.remove" appState)
+                        :: tooltip (gettext "Remove TODO" appState.locale)
                     )
                     [ faSet "_global.remove" appState ]
                 ]
@@ -2811,7 +2815,7 @@ viewTodoAction appState cfg model path =
                 , onClick <| SetLabels currentPath [ QuestionnaireDetail.todoUuid ]
                 ]
                 [ faSet "_global.add" appState
-                , span [] [ span [] [ lx_ "todoAction.add" appState ] ]
+                , span [] [ span [] [ text (gettext "Add TODO" appState.locale) ] ]
                 ]
 
     else
@@ -2844,11 +2848,11 @@ viewRemoveItemModal : AppState -> Model -> Html Msg
 viewRemoveItemModal appState model =
     let
         cfg =
-            { modalTitle = l_ "removeItemModal.title" appState
-            , modalContent = [ lx_ "removeItemModal.text" appState ]
+            { modalTitle = gettext "Remove Item" appState.locale
+            , modalContent = [ text (gettext "Are you sure you want to remove this item?" appState.locale) ]
             , visible = Maybe.isJust model.removeItem
             , actionResult = Unset
-            , actionName = l_ "removeItemModal.action" appState
+            , actionName = gettext "Remove" appState.locale
             , actionMsg = RemoveItemConfirm
             , cancelMsg = Just RemoveItemCancel
             , dangerous = True

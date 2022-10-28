@@ -2,7 +2,8 @@ module Wizard.Settings.Submission.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
-import Html exposing (Html, a, button, div, label, p, strong)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, button, div, label, p, strong, text)
 import Html.Attributes exposing (class, placeholder)
 import Html.Events exposing (onClick)
 import List.Extra as List
@@ -10,7 +11,6 @@ import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSub
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
@@ -25,16 +25,6 @@ import Wizard.Settings.Submission.Models exposing (Model)
 import Wizard.Settings.Submission.Msgs exposing (Msg(..))
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.Submission.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Submission.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (viewConfig appState model) model.templates
@@ -47,8 +37,8 @@ viewConfig appState model templates =
 
 viewProps : List TemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig Msg
 viewProps templates =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Document Submission"
+    , locSave = gettext "Save"
     , formView = formView templates
     , wrapMsg = GenericMsg << GenericMsgs.FormMsg
     }
@@ -62,15 +52,15 @@ formView templates appState form =
 
         servicesInput =
             if enabled then
-                FormGroup.list appState (serviceFormView appState templates) form "services" (l_ "form.services" appState)
+                FormGroup.list appState (serviceFormView appState templates) form "services" (gettext "Services" appState.locale)
 
             else
                 emptyNode
     in
     Html.map (GenericMsg << GenericMsgs.FormMsg) <|
         div []
-            [ FormGroup.toggle form "enabled" (l_ "form.enabled" appState)
-            , FormExtra.mdAfter (l_ "form.enabled.desc" appState)
+            [ FormGroup.toggle form "enabled" (gettext "Enabled" appState.locale)
+            , FormExtra.mdAfter (gettext "If enabled, you can configure external services for uploading documents from the instance." appState.locale)
             , servicesInput
             ]
 
@@ -103,24 +93,24 @@ serviceFormView appState templates form i =
         [ div [ class "card-body" ]
             [ div [ class "row" ]
                 [ div [ class "col" ]
-                    [ FormGroup.input appState form idField (l_ "form.id" appState) ]
+                    [ FormGroup.input appState form idField (gettext "ID" appState.locale) ]
                 , div [ class "col text-end" ]
                     [ a [ class "btn btn-danger with-icon", onClick (Form.RemoveItem "services" i) ]
                         [ faSet "_global.delete" appState
-                        , lx_ "form.service.remove" appState
+                        , text (gettext "Remove" appState.locale)
                         ]
                     ]
                 ]
-            , FormGroup.input appState form nameField (l_ "form.name" appState)
-            , FormGroup.markdownEditor appState form descriptionField (l_ "form.description" appState)
+            , FormGroup.input appState form nameField (gettext "Name" appState.locale)
+            , FormGroup.markdownEditor appState form descriptionField (gettext "Description" appState.locale)
             , div [ class "input-table" ]
-                [ label [] [ lx_ "form.supportedFormats" appState ]
-                , p [ class "text-muted" ] [ lx_ "form.supportedFormats.desc" appState ]
+                [ label [] [ text (gettext "Supported Formats" appState.locale) ]
+                , p [ class "text-muted" ] [ text (gettext "Select document templates and formats that can be submitted using this submission service." appState.locale) ]
                 , FormGroup.list appState (supportedFormatFormView appState templates supportedFormatsField) form supportedFormatsField ""
                 ]
             , div [ class "input-table" ]
-                [ label [] [ lx_ "form.props" appState ]
-                , Markdown.toHtml [ class "text-muted text-justify" ] (l_ "form.props.desc" appState)
+                [ label [] [ text (gettext "User Properties" appState.locale) ]
+                , Markdown.toHtml [ class "text-muted text-justify" ] (gettext "You can create properties that can be set by each user in their profile. Then, you can use these properties in the request settings. For example, if you want each user to use their own authorization token, you can create a property called `Token` and use it in request headers as `${Token}`. Users will be able to set the token in their profile settings." appState.locale)
                 , FormGroup.list appState (propFormView appState propsField) form propsField ""
                 ]
             , requestFormView appState form requestField
@@ -144,10 +134,10 @@ supportedFormatFormView appState templates prefix form index =
             Form.getFieldAsString (field "formatUuid") form
 
         ( templateIdError, templateIdErrorClass ) =
-            FormGroup.getErrors appState templateIdField (l_ "form.template" appState)
+            FormGroup.getErrors appState templateIdField (gettext "Document Template" appState.locale)
 
         ( formatUuidError, formatUuidErrorClass ) =
-            FormGroup.getErrors appState formatUuidField (l_ "form.format" appState)
+            FormGroup.getErrors appState formatUuidField (gettext "Format" appState.locale)
 
         defaultOption =
             ( "", "--" )
@@ -225,20 +215,20 @@ requestFormView appState form prefix =
                         field "multipart.fileName"
                 in
                 div [ class "nested-group" ]
-                    [ FormGroup.input appState form multipartFileName (l_ "form.multipartFileName" appState)
+                    [ FormGroup.input appState form multipartFileName (gettext "Multipart File Name" appState.locale)
                     ]
 
             else
                 emptyNode
     in
     div []
-        [ strong [] [ lx_ "form.request" appState ]
+        [ strong [] [ text (gettext "Request" appState.locale) ]
         , div [ class "nested-group mt-2" ]
-            [ FormGroup.select appState httpMethodOptions form methodField (l_ "form.method" appState)
-            , FormGroup.input appState form urlField (l_ "form.url" appState)
-            , FormGroup.list appState (headerFormView appState headersField) form headersField (l_ "form.headers" appState)
-            , FormGroup.toggle form multipartEnabledField (l_ "form.multipart" appState)
-            , FormExtra.mdAfter (l_ "form.multipart.desc" appState)
+            [ FormGroup.select appState httpMethodOptions form methodField (gettext "Method" appState.locale)
+            , FormGroup.input appState form urlField (gettext "URL" appState.locale)
+            , FormGroup.list appState (headerFormView appState headersField) form headersField (gettext "Headers" appState.locale)
+            , FormGroup.toggle form multipartEnabledField (gettext "Multipart" appState.locale)
+            , FormExtra.mdAfter (gettext "If enabled, file will be sent using multipart request. Otherwise, it will be directly in the request body." appState.locale)
             , multipartFileNameInput
             ]
         ]
@@ -257,14 +247,14 @@ headerFormView appState prefix form index =
             Form.getFieldAsString (field "value") form
 
         ( headerError, headerErrorClass ) =
-            FormGroup.getErrors appState headerField (l_ "form.header" appState)
+            FormGroup.getErrors appState headerField (gettext "Header" appState.locale)
 
         ( valueError, valueErrorClass ) =
-            FormGroup.getErrors appState valueField (l_ "form.value" appState)
+            FormGroup.getErrors appState valueField (gettext "Value" appState.locale)
     in
     div [ class "input-group mb-2" ]
-        [ Input.textInput headerField [ placeholder (l_ "form.header" appState), class "form-control", class headerErrorClass ]
-        , Input.textInput valueField [ placeholder (l_ "form.value" appState), class "form-control", class valueErrorClass ]
+        [ Input.textInput headerField [ placeholder (gettext "Header" appState.locale), class "form-control", class headerErrorClass ]
+        , Input.textInput valueField [ placeholder (gettext "Value" appState.locale), class "form-control", class valueErrorClass ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
             [ faSet "_global.delete" appState ]
         , headerError

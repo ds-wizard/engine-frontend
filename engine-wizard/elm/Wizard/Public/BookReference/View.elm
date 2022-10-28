@@ -1,24 +1,15 @@
 module Wizard.Public.BookReference.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, text)
 import Html.Attributes exposing (alt, class, href, src, target)
 import Shared.Data.BookReference exposing (BookReference)
-import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Public.BookReference.Models exposing (Model)
 import Wizard.Public.BookReference.Msgs exposing (Msg)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Public.BookReference.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Public.BookReference.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -43,12 +34,12 @@ viewBookReference appState bookReference =
             [ div [ class "book-name" ]
                 [ a [ href bookUrl, target "_blank" ]
                     [ img [ src "/img/book-preview.png", alt "Data Stewardship for Open Science Book Cover" ] []
-                    , lx_ "bookName" appState
+                    , text (gettext "Data Stewardship for Open Science" appState.locale)
                     ]
-                , text <| ": " ++ l_ "bookChapter" appState ++ " " ++ bookReference.bookChapter
+                , text <| ": " ++ String.format (gettext "Chapter %s" appState.locale) [ bookReference.bookChapter ]
                 ]
             , div [ class "book-crc" ]
-                [ div [] [ lx_ "permission" appState ]
+                [ div [] [ text (gettext "With kind permission of" appState.locale) ]
                 , a [ href crcUrl, target "_blank" ]
                     [ img [ src "/img/crc-logo.png", alt "CRC Press" ] []
                     ]

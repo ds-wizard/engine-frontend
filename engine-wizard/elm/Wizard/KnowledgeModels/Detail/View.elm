@@ -1,5 +1,6 @@
 module Wizard.KnowledgeModels.Detail.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
@@ -8,9 +9,9 @@ import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust, listInsertIf)
+import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
@@ -23,21 +24,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KnowledgeModels.Detail.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.KnowledgeModels.Detail.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KnowledgeModels.Detail.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -64,7 +50,7 @@ header appState package =
                 [ dataCy "km-detail_preview-link"
                 ]
                 [ faSet "kmDetail.preview" appState
-                , lgx "km.action.preview" appState
+                , text (gettext "Preview" appState.locale)
                 ]
 
         previewActionVisible =
@@ -76,7 +62,7 @@ header appState package =
                 [ dataCy "km-detail_create-editor-link"
                 ]
                 [ faSet "kmDetail.createKMEditor" appState
-                , lgx "km.action.kmEditor" appState
+                , text (gettext "Create KM editor" appState.locale)
                 ]
 
         createEditorActionVisible =
@@ -88,7 +74,7 @@ header appState package =
                 [ dataCy "km-detail_fork-link"
                 ]
                 [ faSet "kmDetail.fork" appState
-                , lgx "km.action.fork" appState
+                , text (gettext "Fork KM" appState.locale)
                 ]
 
         forkActionVisible =
@@ -101,7 +87,7 @@ header appState package =
                 , dataCy "km-detail_create-project-link"
                 ]
                 [ faSet "kmDetail.createQuestionnaire" appState
-                , lgx "km.action.project" appState
+                , text (gettext "Create project" appState.locale)
                 ]
 
         createProjectActionVisible =
@@ -113,7 +99,7 @@ header appState package =
                 , dataCy "km-detail_export-link"
                 ]
                 [ faSet "_global.export" appState
-                , lgx "km.action.export" appState
+                , text (gettext "Export" appState.locale)
                 ]
 
         exportActionVisible =
@@ -126,7 +112,7 @@ header appState package =
                 , dataCy "km-detail_delete-link"
                 ]
                 [ faSet "_global.delete" appState
-                , lgx "km.action.delete" appState
+                , text (gettext "Delete" appState.locale)
                 ]
 
         deleteActionVisible =
@@ -153,7 +139,7 @@ readme appState package =
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
-                    [ lx_ "readme.versionWarning" appState ]
+                    [ text (gettext "This is not the latest available version of this Knowledge Model." appState.locale) ]
 
             else
                 newVersionInRegistryWarning appState package
@@ -174,13 +160,14 @@ newVersionInRegistryWarning appState package =
             in
             div [ class "alert alert-warning" ]
                 (faSet "_global.warning" appState
-                    :: lh_ "registryVersion.warning"
+                    :: String.formatHtml (gettext "There is a newer version (%s) available." appState.locale)
                         [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                        appState
                     ++ [ linkTo appState
                             (Routes.templatesImport (Just latestPackageId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                            [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                            [ faSet "kmImport.fromRegistry" appState
+                            , text (gettext "Import" appState.locale)
+                            ]
                        ]
                 )
 
@@ -206,16 +193,16 @@ sidePanelKmInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg 
 sidePanelKmInfo appState package =
     let
         kmInfoList =
-            [ ( lg "package.id" appState, "id", text package.id )
-            , ( lg "package.version" appState, "version", text <| Version.toString package.version )
-            , ( lg "package.metamodel" appState, "metamodel", text <| String.fromInt package.metamodelVersion )
-            , ( lg "package.license" appState, "license", text package.license )
+            [ ( gettext "ID" appState.locale, "id", text package.id )
+            , ( gettext "Version" appState.locale, "version", text <| Version.toString package.version )
+            , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt package.metamodelVersion )
+            , ( gettext "License" appState.locale, "license", text package.license )
             ]
 
         parentInfo =
             case package.forkOfPackageId of
                 Just parentPackageId ->
-                    [ ( lg "package.forkOf" appState
+                    [ ( gettext "Fork of" appState.locale
                       , "fork-of"
                       , linkTo appState (Routes.knowledgeModelsDetail parentPackageId) [] [ text parentPackageId ]
                       )
@@ -224,7 +211,7 @@ sidePanelKmInfo appState package =
                 Nothing ->
                     []
     in
-    Just ( lg "package" appState, "package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
+    Just ( gettext "Knowledge Model" appState.locale, "package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
 
 
 sidePanelOtherVersions : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
@@ -246,7 +233,7 @@ sidePanelOtherVersions appState package =
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then
-        Just ( lg "package.otherVersions" appState, "other-versions", ul [] versionLinks )
+        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
 
     else
         Nothing
@@ -256,7 +243,7 @@ sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, String,
 sidePanelOrganizationInfo appState package =
     let
         toOrganizationInfo organization =
-            ( lg "package.publishedBy" appState, "published-by", viewOrganization organization )
+            ( gettext "Published by" appState.locale, "published-by", viewOrganization organization )
     in
     Maybe.map toOrganizationInfo package.organization
 
@@ -265,11 +252,11 @@ sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, String, Htm
 sidePanelRegistryLink appState package =
     let
         toRegistryLinkInfo registryLink =
-            ( lg "package.registryLink" appState
+            ( gettext "Registry Link" appState.locale
             , "registry-link"
             , a [ href registryLink, target "_blank", class "with-icon" ]
                 [ faSet "kmDetail.registryLink" appState
-                , lx_ "registryLinkLabel" appState
+                , text (gettext "View in registry" appState.locale)
                 ]
             )
     in
@@ -288,15 +275,18 @@ deleteVersionModal appState model package =
     let
         modalContent =
             [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text package.id ] ] appState)
+                (String.formatHtml
+                    (gettext "Are you sure you want to permanently delete %s?" appState.locale)
+                    [ strong [] [ text package.id ] ]
+                )
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete version" appState.locale
             , modalContent = modalContent
             , visible = model.showDeleteDialog
             , actionResult = model.deletingVersion
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeleteVersion
             , cancelMsg = Just <| ShowDeleteDialog False
             , dangerous = True

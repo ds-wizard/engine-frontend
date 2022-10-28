@@ -10,7 +10,8 @@ module Wizard.KMEditor.Editor.Components.Preview exposing
     , view
     )
 
-import Html exposing (Html, a, div, strong)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
@@ -20,7 +21,6 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.Package as Package
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (lgx, lx)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire exposing (ActivePage(..))
@@ -28,11 +28,6 @@ import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as De
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Tag as Tag
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.Components.Preview"
 
 
 type alias Model =
@@ -209,9 +204,9 @@ tagSelection appState selected knowledgeModel =
         in
         div [ class "tag-selection" ]
             [ div [ class "tag-selection-header" ]
-                [ strong [] [ lgx "tags" appState ]
-                , a [ onClick SelectAllTags, dataCy "km-editor_preview_tags_select-all" ] [ lx_ "tags.selectAll" appState ]
-                , a [ onClick SelectNoneTags, dataCy "km-editor_preview_tags_select-none" ] [ lx_ "tags.selectNone" appState ]
+                [ strong [] [ text (gettext "Tags" appState.locale) ]
+                , a [ onClick SelectAllTags, dataCy "km-editor_preview_tags_select-all" ] [ text (gettext "Select all" appState.locale) ]
+                , a [ onClick SelectNoneTags, dataCy "km-editor_preview_tags_select-none" ] [ text (gettext "Select none" appState.locale) ]
                 ]
             , Tag.list appState tagListConfig tags
             ]

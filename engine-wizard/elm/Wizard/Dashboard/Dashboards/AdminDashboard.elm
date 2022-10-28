@@ -8,6 +8,7 @@ module Wizard.Dashboard.Dashboards.AdminDashboard exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
@@ -20,7 +21,6 @@ import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Usage exposing (Usage)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.AddOpenIDWidget as AddOpenIDWidget
@@ -78,7 +78,7 @@ update msg appState model =
                     { model | usage = ActionResult.Success data }
 
                 Err error ->
-                    { model | usage = ApiError.toActionResult appState (lg "apiError.usage.getError" appState) error }
+                    { model | usage = ApiError.toActionResult appState (gettext "Unable to get usage." appState.locale) error }
 
         GetPackagesComplete result ->
             case result of
@@ -86,7 +86,7 @@ update msg appState model =
                     { model | packages = ActionResult.Success data.items }
 
                 Err error ->
-                    { model | packages = ApiError.toActionResult appState (lg "apiError.packages.getListError" appState) error }
+                    { model | packages = ApiError.toActionResult appState (gettext "Unable to get Knowledge Models." appState.locale) error }
 
         GetTemplatesComplete result ->
             case result of
@@ -94,7 +94,7 @@ update msg appState model =
                     { model | templates = ActionResult.Success data.items }
 
                 Err error ->
-                    { model | templates = ApiError.toActionResult appState (lg "apiError.templates.getListError" appState) error }
+                    { model | templates = ApiError.toActionResult appState (gettext "Unable to get document templates." appState.locale) error }
 
 
 view : AppState -> Model -> Html msg

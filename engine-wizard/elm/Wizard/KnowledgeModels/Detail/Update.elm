@@ -4,9 +4,9 @@ module Wizard.KnowledgeModels.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Packages as PackagesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPackage)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -29,7 +29,7 @@ update msg wrapMsg appState model =
         GetPackageCompleted result ->
             applyResult appState
                 { setResult = setPackage
-                , defaultError = lg "apiError.packages.getError" appState
+                , defaultError = gettext "Unable to get the Knowledge Model." appState.locale
                 , model = model
                 , result = result
                 }
@@ -66,6 +66,6 @@ deleteVersionCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | deletingVersion = ApiError.toActionResult appState (lg "apiError.packages.deleteError" appState) error }
+            ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
             , getResultCmd result
             )

@@ -1,12 +1,14 @@
 module Wizard.Projects.Import.View exposing (view)
 
 import ActionResult
+import Gettext exposing (gettext)
 import Html exposing (Html, div, form, hr, li, p, strong, text, ul)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.Html exposing (emptyNode)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.Importer exposing (ImporterResult)
 import Wizard.Common.Html.Attribute exposing (detailClass)
@@ -38,10 +40,10 @@ viewContent appState model ( questionnaire, _ ) =
                     viewImportResult appState model result
 
                 Nothing ->
-                    Flash.info appState "Follow the instructions in the importer window."
+                    Flash.info appState (gettext "Follow the instructions in the importer window." appState.locale)
     in
     div [ detailClass "" ]
-        [ Page.header "Import answers" []
+        [ Page.header (gettext "Import answers" appState.locale) []
         , div [ class "" ]
             [ strong [] [ text questionnaire.name ]
             , p [] [ text (Maybe.withDefault "" questionnaire.description) ]
@@ -56,11 +58,13 @@ viewImportResult appState model result =
     let
         importMessage =
             li []
-                [ strong []
-                    [ text (String.fromInt (List.length result.questionnaireEvents))
+                (String.formatHtml
+                    (gettext "%s questionnaire changes will be imported." appState.locale)
+                    [ strong []
+                        [ text (String.fromInt (List.length result.questionnaireEvents))
+                        ]
                     ]
-                , text " questionnaire changes will be imported."
-                ]
+                )
 
         errorMessages =
             if List.isEmpty result.errors then
@@ -72,12 +76,14 @@ viewImportResult appState model result =
                         li [ class "text-danger" ] [ text errorText ]
                 in
                 li [ class "text-danger" ]
-                    [ strong []
-                        [ text (String.fromInt (List.length result.errors))
+                    (String.formatHtml
+                        (gettext "%s errors encountered:" appState.locale)
+                        [ strong []
+                            [ text (String.fromInt (List.length result.errors))
+                            ]
                         ]
-                    , text " errors encountered:"
-                    , ul [] (List.map viewError result.errors)
-                    ]
+                        ++ [ ul [] (List.map viewError result.errors) ]
+                    )
 
         messages =
             ul [] [ importMessage, errorMessages ]
@@ -85,10 +91,10 @@ viewImportResult appState model result =
     form [ onSubmit PutImportData ]
         [ FormResult.errorOnlyView appState model.importing
         , div []
-            [ strong [] [ text "Import status" ]
+            [ strong [] [ text (gettext "Import status" appState.locale) ]
             , messages
             ]
         , FormActions.viewSubmit appState
             (Routes.projectsDetailQuestionnaire model.uuid)
-            (ActionButton.SubmitConfig "Import" model.importing)
+            (ActionButton.SubmitConfig (gettext "Import" appState.locale) model.importing)
         ]

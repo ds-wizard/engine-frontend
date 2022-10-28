@@ -2,6 +2,7 @@ module Wizard.Projects.Detail.Update exposing (fetchData, isGuarded, onUnload, u
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
@@ -17,7 +18,6 @@ import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAc
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Locale exposing (l, lg)
 import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
@@ -42,11 +42,6 @@ import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Update"
 
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
@@ -111,7 +106,7 @@ isGuarded appState nextRoute model =
         Nothing
 
     else
-        Just (l_ "unloadMessage" appState)
+        Just (gettext "Some changes are still saving." appState.locale)
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
@@ -190,7 +185,7 @@ update wrapMsg msg appState model =
                                 |> WebSocket.send model.websocket
 
                         setUnloadMessageCmd =
-                            Ports.setUnloadMessage (l_ "unloadMessage" appState)
+                            Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
                     in
                     ( applyActionSeed, updatedModel, Cmd.batch [ wsCmd, setUnloadMessageCmd ] )
 
@@ -485,7 +480,7 @@ update wrapMsg msg appState model =
 
                         _ ->
                             withSeed <|
-                                ( { model | questionnaireModel = ApiError.toActionResult appState (lg "apiError.questionnaires.getError" appState) error }
+                                ( { model | questionnaireModel = ApiError.toActionResult appState (gettext "Unable to get the project." appState.locale) error }
                                 , Cmd.none
                                 )
 
@@ -654,7 +649,7 @@ update wrapMsg msg appState model =
                     ( appState.seed, model, Ports.refresh () )
 
                 Err error ->
-                    ( appState.seed, { model | addingToMyProjects = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }, Cmd.none )
+                    ( appState.seed, { model | addingToMyProjects = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }, Cmd.none )
 
 
 handleWebsocketMsg : WebSocket.RawMsg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

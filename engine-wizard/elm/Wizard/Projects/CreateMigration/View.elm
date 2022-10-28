@@ -1,13 +1,13 @@
 module Wizard.Projects.CreateMigration.View exposing (view)
 
 import Form
+import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (l, lg, lx)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -23,16 +23,6 @@ import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.CreateMigration.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.CreateMigration.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -63,7 +53,7 @@ createMigrationView appState model questionnaire =
 
         originalTagList =
             div [ class "form-group form-group-tags" ]
-                [ label [] [ lx_ "form.originalTags" appState ]
+                [ label [] [ text (gettext "Original question tags" appState.locale) ]
                 , div [] [ Tag.readOnlyList appState questionnaire.selectedQuestionTagUuids tags ]
                 ]
 
@@ -83,34 +73,34 @@ createMigrationView appState model questionnaire =
                     FormGroup.select appState (createOptions package) model.form "packageId"
 
                 Nothing ->
-                    FormGroup.textView "km" <| l_ "form.selectKMFirst" appState
+                    FormGroup.textView "km" <| gettext "Select Knowledge Model first" appState.locale
     in
     div [ listClass "Questionnaires__CreateMigration" ]
-        [ Page.header (l_ "header.title" appState) []
-        , Flash.info appState <| l_ "header.info" appState
+        [ Page.header (gettext "Create Migration" appState.locale) []
+        , Flash.info appState <| gettext "A new Project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
         , FormResult.view appState model.savingMigration
-        , FormGroup.textView "project" questionnaire.name <| lg "project" appState
+        , FormGroup.textView "project" questionnaire.name <| gettext "Project" appState.locale
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
                     (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package questionnaire.packageVersions))
-                    (l_ "form.originalKM" appState)
-                , FormGroup.codeView (Version.toString questionnaire.package.version) <| l_ "form.originalVersion" appState
+                    (gettext "Original Knowledge Model" appState.locale)
+                , FormGroup.codeView (Version.toString questionnaire.package.version) <| gettext "Original version" appState.locale
                 , originalTagList
                 ]
             , faSet "_global.arrowRight" appState
             , div []
                 [ div [ class "form-group" ]
-                    [ label [] [ lx_ "form.newKM" appState ]
+                    [ label [] [ text (gettext "New Knowledge Model" appState.locale) ]
                     , typeHintInput False
                     ]
-                , Html.map FormMsg <| versionSelect <| l_ "form.newVersion" appState
+                , Html.map FormMsg <| versionSelect <| gettext "New version" appState.locale
                 , tagsView appState model
                 ]
             ]
         , FormActions.view appState
             (Routes.projectsIndex appState)
-            (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingMigration (FormMsg Form.Submit) False)
+            (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingMigration (FormMsg Form.Submit) False)
         ]
 
 

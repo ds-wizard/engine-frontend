@@ -48,7 +48,7 @@ glob(`${componentSource}/**/*.elm`, (err, files) => {
 function loadLocaleKeys() {
     const fileContent = fs.readFileSync(defaultLocalePath, 'utf8')
     const localeKeys = {}
-    const regex = /\( "(.*)", ".*" \)/g
+    const regex = /\s*[^(--)],? \( "(.*)", ".*" \)/g
 
     let result
     while ((result = regex.exec(fileContent)) !== null) {

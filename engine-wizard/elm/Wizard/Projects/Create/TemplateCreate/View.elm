@@ -2,10 +2,10 @@ module Wizard.Projects.Create.TemplateCreate.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Events exposing (onSubmit)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -17,11 +17,6 @@ import Wizard.Common.View.Page as ActionResult
 import Wizard.Projects.Create.TemplateCreate.Models exposing (Model)
 import Wizard.Projects.Create.TemplateCreate.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Create.TemplateCreate.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -44,7 +39,7 @@ viewContent appState model mbQuestionnaire =
         , formView appState model mbQuestionnaire
         , FormActions.view appState
             (Routes.projectsIndex appState)
-            (ActionResult.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
+            (ActionResult.ButtonConfig (gettext "Save" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 
 
@@ -58,7 +53,7 @@ formView appState model mbQuestionnaire =
                         value =
                             TypeHintItem.questionnaireSuggestion questionnaire
                     in
-                    FormGroup.plainGroup value (lg "questionnaire.template" appState)
+                    FormGroup.plainGroup value (gettext "Project Template" appState.locale)
 
                 Nothing ->
                     let
@@ -72,9 +67,9 @@ formView appState model mbQuestionnaire =
                         typeHintInput =
                             TypeHintInput.view appState cfg model.questionnaireTypeHintInputModel
                     in
-                    FormGroup.formGroupCustom typeHintInput appState model.form "questionnaireUuid" (lg "questionnaire.template" appState)
+                    FormGroup.formGroupCustom typeHintInput appState model.form "questionnaireUuid" (gettext "Project Template" appState.locale)
     in
     div []
-        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
+        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
         , parentInput
         ]

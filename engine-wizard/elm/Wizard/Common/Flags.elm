@@ -1,5 +1,6 @@
 module Wizard.Common.Flags exposing (Flags, decoder, default)
 
+import Gettext
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Auth.Session as Session exposing (Session)
@@ -19,6 +20,7 @@ type alias Flags =
     , navigator : Navigator
     , gaEnabled : Bool
     , cookieConsent : Bool
+    , locale : Gettext.Locale
     , success : Bool
     }
 
@@ -36,6 +38,7 @@ decoder =
         |> D.required "navigator" Navigator.decoder
         |> D.required "gaEnabled" D.bool
         |> D.required "cookieConsent" D.bool
+        |> D.optional "locale" Gettext.localeDecoder Gettext.defaultLocale
         |> D.hardcoded True
 
 
@@ -52,4 +55,5 @@ default =
     , gaEnabled = False
     , cookieConsent = False
     , success = False
+    , locale = Gettext.defaultLocale
     }

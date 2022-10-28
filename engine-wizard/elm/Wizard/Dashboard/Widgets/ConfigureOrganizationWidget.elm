@@ -1,24 +1,19 @@
 module Wizard.Dashboard.Widgets.ConfigureOrganizationWidget exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Dashboard.Widgets.ConfigureOrganizationWidget"
-
-
 view : AppState -> Html msg
 view appState =
     WidgetHelpers.ctaWidget appState
-        { title = l_ "title" appState
-        , text = l_ "text" appState
+        { title = gettext "Configure Organization Info" appState.locale
+        , text = gettext "Fill in your organization name and organization ID. For example, these values will be used with knowledge models created in this instance." appState.locale
         , action =
             { route = Routes.settingsOrganization
-            , label = l_ "actionLabel" appState
+            , label = gettext "Configure" appState.locale
             }
         }

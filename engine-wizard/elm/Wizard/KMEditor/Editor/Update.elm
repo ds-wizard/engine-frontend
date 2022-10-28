@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Prefabs as PrefabsApi
@@ -10,7 +11,6 @@ import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
 import Shared.Data.WebSockets.ServerBranchAction as ServerBranchAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError
-import Shared.Locale exposing (l, lg)
 import Shared.Utils exposing (dispatch, getUuid, getUuidString)
 import Shared.WebSocket as WebSocket
 import Uuid exposing (Uuid)
@@ -30,11 +30,6 @@ import Wizard.Ports as Ports
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing exposing (cmdNavigate)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.Update"
 
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
@@ -81,7 +76,7 @@ isGuarded appState nextRoute model =
         Nothing
 
     else
-        Just (l_ "unloadMessage" appState)
+        Just (gettext "Some changes are still saving." appState.locale)
 
 
 onUnload : Routes.Route -> Model -> Cmd Msg
@@ -141,7 +136,7 @@ update wrapMsg msg appState model =
 
                 Err error ->
                     withSeed <|
-                        ( { model | branchModel = ApiError.toActionResult appState (lg "apiError.branches.getError" appState) error }
+                        ( { model | branchModel = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
                         , getResultCmd result
                         )
 
@@ -252,7 +247,7 @@ update wrapMsg msg appState model =
                     ActionResult.map (EditorBranch.applyEvent appState True event) model.branchModel
 
                 setUnloadMessageCmd =
-                    Ports.setUnloadMessage (l_ "unloadMessage" appState)
+                    Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
 
                 navigateCmd =
                     getNavigateCmd appState model.uuid model.branchModel newBranchModel

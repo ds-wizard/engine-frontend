@@ -8,6 +8,7 @@ module Wizard.Common.AppState exposing
     )
 
 import Browser.Navigation as Navigation exposing (Key)
+import Gettext
 import Json.Decode as D exposing (Error(..))
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
@@ -42,6 +43,7 @@ type alias AppState =
     , navigator : Navigator
     , gaEnabled : Bool
     , cookieConsent : Bool
+    , locale : Gettext.Locale
     }
 
 
@@ -97,6 +99,7 @@ init flagsValue key =
       , navigator = flags.navigator
       , gaEnabled = flags.gaEnabled
       , cookieConsent = flags.cookieConsent
+      , locale = flags.locale
       }
     , flagsCmd
     )

@@ -7,6 +7,7 @@ module Registry.Pages.SignupConfirmation exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, strong, text)
 import Html.Attributes exposing (class)
 import Registry.Common.AppState exposing (AppState)
@@ -14,22 +15,7 @@ import Registry.Common.Entities.OrganizationDetail exposing (OrganizationDetail)
 import Registry.Common.Requests as Requests
 import Registry.Common.View.Page as Page
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lh, lx)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.SignupConfirmation"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry.Pages.SignupConfirmation"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Registry.Pages.SignupConfirmation"
+import String.Format as String
 
 
 init : AppState -> String -> String -> ( Model, Cmd Msg )
@@ -70,7 +56,7 @@ update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
         PutOrganizationStateCompleted result ->
-            ActionResult.apply setOrganization (ApiError.toActionResult appState (l_ "update.putError" appState)) result
+            ActionResult.apply setOrganization (ApiError.toActionResult appState (gettext "Unable to activate your organization account." appState.locale)) result
 
 
 
@@ -85,13 +71,16 @@ view appState model =
 viewOrganization : AppState -> OrganizationDetail -> Html Msg
 viewOrganization appState organization =
     div []
-        [ h1 [] [ lx_ "viewOrganization.title" appState ]
+        [ h1 [] [ text (gettext "Activated" appState.locale) ]
         , p []
-            (lh_ "viewOrganization.activated" [ strong [] [ text organization.name ] ] appState)
+            (String.formatHtml
+                (gettext "The account for your organization %s has been successfully activated!" appState.locale)
+                [ strong [] [ text organization.name ] ]
+            )
         , div [ class "alert alert-info" ]
-            [ lx_ "viewOrganization.tokenInfo" appState ]
+            [ text (gettext "You will use the following token for authentication. Save it to a safe place. You will not be able to see it again." appState.locale) ]
         , div [ class "card" ]
-            [ div [ class "card-header" ] [ lx_ "viewOrganization.token" appState ]
+            [ div [ class "card-header" ] [ text (gettext "Token" appState.locale) ]
             , div [ class "card-body" ] [ text organization.token ]
             ]
         ]

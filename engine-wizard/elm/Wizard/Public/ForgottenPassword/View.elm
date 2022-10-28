@@ -2,10 +2,10 @@ module Wizard.Public.ForgottenPassword.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -16,18 +16,13 @@ import Wizard.Public.ForgottenPassword.Models exposing (Model)
 import Wizard.Public.ForgottenPassword.Msgs exposing (Msg(..))
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Public.ForgottenPassword.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     let
         content =
             case model.submitting of
                 Success _ ->
-                    Page.success appState <| l_ "recoveryLinkSent" appState
+                    Page.success appState <| gettext "We've sent you a recover link. Follow the instructions in your email." appState.locale
 
                 _ ->
                     forgottenPasswordForm appState model
@@ -40,10 +35,10 @@ forgottenPasswordForm : AppState -> Model -> Html Msg
 forgottenPasswordForm appState model =
     let
         formConfig =
-            { title = l_ "form.title" appState
+            { title = gettext "Forgotten Password" appState.locale
             , submitMsg = FormMsg Form.Submit
             , actionResult = model.submitting
-            , submitLabel = l_ "form.submit" appState
+            , submitLabel = gettext "Recover" appState.locale
             , formContent = formView appState model.form |> Html.map FormMsg
             , link = Nothing
             }
@@ -54,6 +49,6 @@ forgottenPasswordForm appState model =
 formView : AppState -> Form FormError ForgottenPasswordForm -> Html Form.Msg
 formView appState form =
     div []
-        [ FormGroup.input appState form "email" <| lg "user.email" appState
-        , FormExtra.textAfter <| l_ "form.email.description" appState
+        [ FormGroup.input appState form "email" <| gettext "Email" appState.locale
+        , FormExtra.textAfter <| gettext "Enter the email you use to log in and we will send you a recover link." appState.locale
         ]

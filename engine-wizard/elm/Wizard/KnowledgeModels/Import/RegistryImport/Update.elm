@@ -1,8 +1,8 @@
 module Wizard.KnowledgeModels.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Packages as PackagesApi
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPulling)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -29,7 +29,7 @@ update msg wrapMsg appState model =
         PullPackageCompleted result ->
             applyResult appState
                 { setResult = setPulling
-                , defaultError = lg "apiError.packages.pullError" appState
+                , defaultError = gettext "Unable to import the package." appState.locale
                 , model = model
                 , result = result
                 }

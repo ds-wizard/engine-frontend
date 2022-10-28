@@ -24,6 +24,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     )
 
 import Dict
+import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
@@ -64,17 +65,11 @@ import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Locale exposing (l, lg)
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (flip)
 import String.Extra as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.Common.EditorBranch"
 
 
 type alias EditorBranch =
@@ -244,34 +239,34 @@ getEditorName appState uuid editorBranch =
                 Nothing
 
         getChapterName =
-            getEditorName_ (String.withDefault (lg "chapter.untitled" appState) << .title) KnowledgeModel.getChapter
+            getEditorName_ (String.withDefault (gettext "Untitled chapter" appState.locale) << .title) KnowledgeModel.getChapter
 
         getQuestionName =
-            getEditorName_ (String.withDefault (lg "question.untitled" appState) << Question.getTitle) KnowledgeModel.getQuestion
+            getEditorName_ (String.withDefault (gettext "Untitled question" appState.locale) << Question.getTitle) KnowledgeModel.getQuestion
 
         getMetricName =
-            getEditorName_ (String.withDefault (lg "metric.untitled" appState) << .title) KnowledgeModel.getMetric
+            getEditorName_ (String.withDefault (gettext "Untitled metric" appState.locale) << .title) KnowledgeModel.getMetric
 
         getPhaseName =
-            getEditorName_ (String.withDefault (lg "phase.untitled" appState) << .title) KnowledgeModel.getPhase
+            getEditorName_ (String.withDefault (gettext "Untitled phase" appState.locale) << .title) KnowledgeModel.getPhase
 
         getTagName =
-            getEditorName_ (String.withDefault (lg "tag.untitled" appState) << .name) KnowledgeModel.getTag
+            getEditorName_ (String.withDefault (gettext "Untitled tag" appState.locale) << .name) KnowledgeModel.getTag
 
         getIntegrationName =
-            getEditorName_ (String.withDefault (lg "integration.untitled" appState) << Integration.getName) KnowledgeModel.getIntegration
+            getEditorName_ (String.withDefault (gettext "Untitled integration" appState.locale) << Integration.getName) KnowledgeModel.getIntegration
 
         getAnswerName =
-            getEditorName_ (String.withDefault (lg "answer.untitled" appState) << .label) KnowledgeModel.getAnswer
+            getEditorName_ (String.withDefault (gettext "Untitled answer" appState.locale) << .label) KnowledgeModel.getAnswer
 
         getChoiceName =
-            getEditorName_ (String.withDefault (lg "choice.untitled" appState) << .label) KnowledgeModel.getChoice
+            getEditorName_ (String.withDefault (gettext "Untitled choice" appState.locale) << .label) KnowledgeModel.getChoice
 
         getReferenceName =
-            getEditorName_ (String.withDefault (lg "reference.untitled" appState) << Reference.getVisibleName) KnowledgeModel.getReference
+            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName) KnowledgeModel.getReference
 
         getExpertName =
-            getEditorName_ (String.withDefault (lg "expert.untitled" appState) << Expert.getVisibleName) KnowledgeModel.getExpert
+            getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert
     in
     getKnowledgeModelName
         |> Maybe.orElse getChapterName
@@ -762,7 +757,7 @@ computeChapterWarnings appState km chapter =
         titleWarning =
             if String.isEmpty chapter.title then
                 [ { editorUuid = chapter.uuid
-                  , message = l_ "warning.chapterTitleEmpty" appState
+                  , message = gettext "Empty title for chapter" appState.locale
                   }
                 ]
 
@@ -791,7 +786,7 @@ computeQuestionWarnings appState km question =
 
         titleWarning =
             if String.isEmpty (Question.getTitle question) then
-                createError (l_ "warning.questionTitleEmpty" appState)
+                createError (gettext "Empty title for question" appState.locale)
 
             else
                 []
@@ -800,7 +795,7 @@ computeQuestionWarnings appState km question =
             case question of
                 Question.OptionsQuestion _ data ->
                     if List.isEmpty data.answerUuids then
-                        createError (l_ "warning.questionEmptyAnswers" appState)
+                        createError (gettext "No answers for options question" appState.locale)
 
                     else
                         List.concatMap
@@ -809,7 +804,7 @@ computeQuestionWarnings appState km question =
 
                 Question.ListQuestion _ data ->
                     if List.isEmpty data.itemTemplateQuestionUuids then
-                        createError (l_ "warning.questionEmptyItemQuestions" appState)
+                        createError (gettext "No item questions for list question" appState.locale)
 
                     else
                         List.concatMap
@@ -818,14 +813,14 @@ computeQuestionWarnings appState km question =
 
                 Question.IntegrationQuestion _ data ->
                     if data.integrationUuid == Uuid.toString Uuid.nil then
-                        createError (l_ "warning.questionEmptyIntegration" appState)
+                        createError (gettext "No integration selected for integration question" appState.locale)
 
                     else
                         []
 
                 Question.MultiChoiceQuestion _ data ->
                     if List.isEmpty data.choiceUuids then
-                        createError (l_ "warning.questionEmptyChoices" appState)
+                        createError (gettext "No choices for multi-choice question" appState.locale)
 
                     else
                         List.concatMap
@@ -854,7 +849,7 @@ computeAnswerWarnings appState km answer =
         labelWarning =
             if String.isEmpty answer.label then
                 [ { editorUuid = answer.uuid
-                  , message = l_ "warning.answerEmptyLabel" appState
+                  , message = gettext "Empty label for answer" appState.locale
                   }
                 ]
 
@@ -873,7 +868,7 @@ computeChoiceWarnings : AppState -> Choice -> List EditorBranchWarning
 computeChoiceWarnings appState choice =
     if String.isEmpty choice.label then
         [ { editorUuid = choice.uuid
-          , message = l_ "warning.choiceEmptyLabel" appState
+          , message = gettext "Empty label for choice" appState.locale
           }
         ]
 
@@ -893,17 +888,17 @@ computeReferenceWarnings appState reference =
     case reference of
         Reference.ResourcePageReference data ->
             if String.isEmpty data.shortUuid then
-                createError (l_ "warning.referenceEmptyShortUuid" appState)
+                createError (gettext "Empty short UUID for page reference" appState.locale)
 
             else
                 []
 
         Reference.URLReference data ->
             if String.isEmpty data.url then
-                createError (l_ "warning.referenceEmptyUrl" appState)
+                createError (gettext "Empty URL for URL reference" appState.locale)
 
             else if not (Regex.contains RegexPatterns.url data.url) then
-                createError (l_ "warning.referenceInvalidUrl" appState)
+                createError (gettext "Invalid URL for URL reference" appState.locale)
 
             else
                 []
@@ -922,10 +917,10 @@ computeExpertWarnings appState expert =
             ]
     in
     if String.isEmpty expert.email then
-        createError (l_ "warning.expertEmptyEmail" appState)
+        createError (gettext "Empty email for expert" appState.locale)
 
     else if not (Regex.contains RegexPatterns.email expert.email) then
-        createError (l_ "warning.expertInvalidEmail" appState)
+        createError (gettext "Invalid email for expert" appState.locale)
 
     else
         []
@@ -935,7 +930,7 @@ computeMetricWarnings : AppState -> Metric -> List EditorBranchWarning
 computeMetricWarnings appState metric =
     if String.isEmpty metric.title then
         [ { editorUuid = metric.uuid
-          , message = l_ "warning.metricEmptyTitle" appState
+          , message = gettext "Empty title for metric" appState.locale
           }
         ]
 
@@ -947,7 +942,7 @@ computePhaseWarnings : AppState -> Phase -> List EditorBranchWarning
 computePhaseWarnings appState phase =
     if String.isEmpty phase.title then
         [ { editorUuid = phase.uuid
-          , message = l_ "warning.phaseEmptyTitle" appState
+          , message = gettext "Empty title for phase" appState.locale
           }
         ]
 
@@ -959,7 +954,7 @@ computeTagWarnings : AppState -> Tag -> List EditorBranchWarning
 computeTagWarnings appState tag =
     if String.isEmpty tag.name then
         [ { editorUuid = tag.uuid
-          , message = l_ "warning.tagEmptyName" appState
+          , message = gettext "Empty name for tag" appState.locale
           }
         ]
 
@@ -978,14 +973,14 @@ computeIntegrationWarnings appState integration =
 
         idWarning =
             if String.isEmpty (Integration.getId integration) then
-                createError (l_ "warning.integrationEmptyId" appState)
+                createError (gettext "Empty ID for integration" appState.locale)
 
             else
                 []
 
         itemUrlWarning =
             if String.isEmpty (Integration.getItemUrl integration) then
-                createError (l_ "warning.integrationEmptyItemUrl" appState)
+                createError (gettext "Empty item URL for integration" appState.locale)
 
             else
                 []
@@ -996,28 +991,28 @@ computeIntegrationWarnings appState integration =
                     let
                         urlError =
                             if String.isEmpty data.requestUrl then
-                                createError (l_ "warning.integrationEmptyRequestUrl" appState)
+                                createError (gettext "Empty request URL for integration" appState.locale)
 
                             else
                                 []
 
                         requestMethod =
                             if String.isEmpty data.requestMethod then
-                                createError (l_ "warning.integrationEmptyRequestHttpMethod" appState)
+                                createError (gettext "Empty request HTTP method for integration" appState.locale)
 
                             else
                                 []
 
                         responseItemId =
                             if String.isEmpty data.responseItemId then
-                                createError (l_ "warning.integrationEmptyResponseItemID" appState)
+                                createError (gettext "Empty response item ID for integration" appState.locale)
 
                             else
                                 []
 
                         responseItemTemplate =
                             if String.isEmpty data.responseItemTemplate then
-                                createError (l_ "warning.integrationEmptyResponseItemTemplate" appState)
+                                createError (gettext "Empty response item template for integration" appState.locale)
 
                             else
                                 []
@@ -1026,7 +1021,7 @@ computeIntegrationWarnings appState integration =
 
                 Integration.WidgetIntegration _ data ->
                     if String.isEmpty data.widgetUrl then
-                        createError (l_ "warning.integrationEmptyWidgetUrl" appState)
+                        createError (gettext "Empty widget URL for integration" appState.locale)
 
                     else
                         []

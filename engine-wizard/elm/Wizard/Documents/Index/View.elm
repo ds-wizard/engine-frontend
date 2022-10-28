@@ -1,6 +1,7 @@
 module Wizard.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
@@ -15,9 +16,9 @@ import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listInsertIf)
+import String.Format as String
 import Time.Distance as TimeDistance
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
@@ -36,26 +37,6 @@ import Wizard.Documents.Index.Models exposing (Model)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.Routes as Routes exposing (Route(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Documents.Index.View"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Documents.Index.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Documents.Index.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Documents.Index.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -91,7 +72,7 @@ viewDocuments appState model mbQuestionnaire =
             Maybe.map questionnaireFilterView mbQuestionnaire
     in
     div [ listClass "Documents__Index" ]
-        [ Page.header (l_ "header.title" appState) []
+        [ Page.header (gettext "Documents" appState.locale) []
         , FormResult.successOnlyView appState model.deletingDocument
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
@@ -110,7 +91,7 @@ listingConfig appState model mbQuestionnaireFilterView =
 
             else
                 Just <|
-                    [ strong [] [ lx_ "submissions.title" appState ]
+                    [ strong [] [ text (gettext "Submissions" appState.locale) ]
                     , table [ class "table table-sm table-borderless table-striped" ]
                         [ tbody []
                             (List.map (viewSubmission appState) (List.sortWith Submission.compare document.submissions))
@@ -122,7 +103,7 @@ listingConfig appState model mbQuestionnaireFilterView =
     , dropdownItems = listingActions appState
     , itemAdditionalData = itemAdditionalData
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText = gettext "Click \"Create\" button to add a new document." appState.locale
     , updated =
         Just
             { getTime = .createdAt
@@ -130,10 +111,10 @@ listingConfig appState model mbQuestionnaireFilterView =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
-    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
+    , searchPlaceholderText = Just (gettext "Search documents..." appState.locale)
     , sortOptions =
-        [ ( "name", lg "document.name" appState )
-        , ( "createdAt", lg "document.createdAt" appState )
+        [ ( "name", gettext "Name" appState.locale )
+        , ( "createdAt", gettext "Created" appState.locale )
         ]
     , filters = []
     , toRoute = \_ -> Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
@@ -149,7 +130,7 @@ listingTitle appState document =
                 ( a
                     [ onClick (DownloadDocument document) ]
                     [ text document.name ]
-                , tooltipCustom "with-tooltip-right with-tooltip-align-left" (l_ "listing.name.title" appState)
+                , tooltipCustom "with-tooltip-right with-tooltip-align-left" (gettext "Click to download the document" appState.locale)
                 )
 
             else
@@ -208,7 +189,7 @@ listingActions appState document =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
-                , label = l_ "action.download" appState
+                , label = gettext "Download" appState.locale
                 , msg = ListingActionMsg (DownloadDocument document)
                 , dataCy = "download"
                 }
@@ -220,7 +201,7 @@ listingActions appState document =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.submit" appState
-                , label = l_ "action.submit" appState
+                , label = gettext "Submit" appState.locale
                 , msg = ListingActionMsg (ShowHideSubmitDocument <| Just document)
                 , dataCy = "submit"
                 }
@@ -232,7 +213,7 @@ listingActions appState document =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.viewError" appState
-                , label = "View error"
+                , label = gettext "View error" appState.locale
                 , msg = ListingActionMsg (SetDocumentErrorModal document.workerLog)
                 , dataCy = "view-error"
                 }
@@ -244,7 +225,7 @@ listingActions appState document =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
-                , label = l_ "action.delete" appState
+                , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
@@ -263,13 +244,13 @@ stateBadge appState state =
         QueuedDocumentState ->
             Badge.info [ dataCy "documents_state-badge" ]
                 [ faSet "_global.spinner" appState
-                , lx_ "badge.queued" appState
+                , text (gettext "Queued" appState.locale)
                 ]
 
         InProgressDocumentState ->
             Badge.info [ dataCy "documents_state-badge" ]
                 [ faSet "_global.spinner" appState
-                , lx_ "badge.inProgress" appState
+                , text (gettext "In Progress" appState.locale)
                 ]
 
         DoneDocumentState ->
@@ -277,7 +258,7 @@ stateBadge appState state =
 
         ErrorDocumentState ->
             Badge.danger [ dataCy "documents_state-badge" ]
-                [ lx_ "badge.error" appState ]
+                [ text (gettext "Error" appState.locale) ]
 
 
 viewSubmission : AppState -> Submission -> Html Msg
@@ -288,14 +269,14 @@ viewSubmission appState submission =
                 SubmissionState.InProgress ->
                     Badge.info []
                         [ faSet "_global.spinner" appState
-                        , lgx "submissionState.inProgress" appState
+                        , text (gettext "Submitting" appState.locale)
                         ]
 
                 SubmissionState.Done ->
-                    Badge.success [] [ lgx "submissionState.done" appState ]
+                    Badge.success [] [ text (gettext "Submitted" appState.locale) ]
 
                 SubmissionState.Error ->
-                    Badge.danger [] [ lgx "submissionState.error" appState ]
+                    Badge.danger [] [ text (gettext "Error" appState.locale) ]
 
         readableTime =
             TimeUtils.toReadableDateTime appState.timeZone submission.updatedAt
@@ -307,13 +288,13 @@ viewSubmission appState submission =
             case ( submission.state, submission.location, submission.returnedData ) of
                 ( SubmissionState.Done, Just location, _ ) ->
                     a [ href location, class "with-icon-after", target "_blank" ]
-                        [ lx_ "submissions.viewLink" appState
+                        [ text (gettext "View submission" appState.locale)
                         , faSet "_global.externalLink" appState
                         ]
 
                 ( SubmissionState.Error, _, Just _ ) ->
                     a [ onClick (SetSubmissionErrorModal (Just (Submission.getReturnedData submission))) ]
-                        [ lx_ "submissions.errorLink" appState ]
+                        [ text (gettext "View error" appState.locale) ]
 
                 _ ->
                     emptyNode
@@ -345,15 +326,15 @@ deleteModal appState model =
 
         modalContent =
             [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text name ] ] appState)
+                (String.formatHtml (gettext "Are you sure you want to permanently delete %s?" appState.locale) [ strong [] [ text name ] ])
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete document" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingDocument
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeleteDocument
             , cancelMsg = Just <| ShowHideDeleteDocument Nothing
             , dangerous = True
@@ -377,11 +358,11 @@ submitModal appState model =
         submitButton =
             if ActionResult.isSuccess model.submittingDocument then
                 button [ class "btn btn-primary", onClick <| ShowHideSubmitDocument Nothing ]
-                    [ lx_ "submitModal.button.done" appState ]
+                    [ text (gettext "Done" appState.locale) ]
 
             else if ActionResult.isSuccess model.submissionServices && Maybe.isJust model.selectedSubmissionServiceId then
                 ActionButton.button appState
-                    { label = l_ "submitModal.button.submit" appState
+                    { label = gettext "Submit" appState.locale
                     , result = model.submittingDocument
                     , msg = SubmitDocument
                     , dangerous = False
@@ -389,11 +370,11 @@ submitModal appState model =
 
             else
                 button [ class "btn btn-primary", disabled True ]
-                    [ lx_ "submitModal.button.submit" appState ]
+                    [ text (gettext "Submit" appState.locale) ]
 
         cancelButton =
             button [ onClick <| ShowHideSubmitDocument Nothing, class "btn btn-secondary", disabled <| ActionResult.isLoading model.submittingDocument ]
-                [ lx_ "submitModal.button.cancel" appState ]
+                [ text (gettext "Cancel" appState.locale) ]
 
         viewOption submissionService =
             div [ class "form-check", classList [ ( "form-check-selected", model.selectedSubmissionServiceId == Just submissionService.id ) ] ]
@@ -418,7 +399,7 @@ submitModal appState model =
                     (List.map viewOption submissionServices)
 
             else
-                Flash.info appState <| l_ "submitModal.noSubmission" appState
+                Flash.info appState <| gettext "There are no submission services configured for this type of document." appState.locale
 
         submissionBody submissionServices =
             div []
@@ -434,7 +415,7 @@ submitModal appState model =
                             case submission.location of
                                 Just location ->
                                     div [ class "mt-2" ]
-                                        [ lx_ "submitModal.success.link" appState
+                                        [ text (gettext "You can find it here: " appState.locale)
                                         , a [ href location, target "_blank" ]
                                             [ text location ]
                                         ]
@@ -444,14 +425,14 @@ submitModal appState model =
                     in
                     div [ class "alert alert-success" ]
                         [ faSet "_global.success" appState
-                        , lx_ "submitModal.success.message" appState
+                        , text (gettext "The document was successfully submitted." appState.locale)
                         , link
                         ]
 
                 SubmissionState.Error ->
                     div [ class "alert alert-danger" ]
                         [ faSet "_global.error" appState
-                        , lx_ "submitModal.error.message" appState
+                        , text (gettext "The document submission failed." appState.locale)
                         ]
 
                 _ ->
@@ -466,7 +447,7 @@ submitModal appState model =
 
         content =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text <| lf_ "submitModal.title" [ name ] appState ]
+                [ h5 [ class "modal-title" ] [ text <| String.format (gettext "Submit %s" appState.locale) [ name ] ]
                 ]
             , div [ class "modal-body" ]
                 [ body
@@ -498,7 +479,7 @@ documentErrorModal appState model =
                     ( False, "" )
 
         modalConfig =
-            { title = l_ "documentErrorModal.title" appState
+            { title = gettext "Document error" appState.locale
             , message = message
             , visible = visible
             , actionMsg = SetDocumentErrorModal Nothing
@@ -520,7 +501,7 @@ submissionErrorModal appState model =
                     ( False, "" )
 
         modalConfig =
-            { title = l_ "submissionErrorModal.title" appState
+            { title = gettext "Submission error" appState.locale
             , message = message
             , visible = visible
             , actionMsg = SetSubmissionErrorModal Nothing

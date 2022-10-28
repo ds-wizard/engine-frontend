@@ -6,12 +6,12 @@ module Wizard.KMEditor.Publish.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
+import Gettext exposing (gettext)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Common.Api exposing (getResultCmd)
@@ -71,7 +71,7 @@ handleGetBranchCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | branch = ApiError.toActionResult appState (lg "apiError.branches.getError" appState) error }
+            ( { model | branch = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
             , getResultCmd result
             )
 
@@ -142,6 +142,6 @@ handlePutBranchCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | publishingBranch = ApiError.toActionResult appState (lg "apiError.packages.version.postError" appState) error }
+            ( { model | publishingBranch = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }
             , getResultCmd result
             )

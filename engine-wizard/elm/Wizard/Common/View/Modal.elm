@@ -8,20 +8,15 @@ module Wizard.Common.View.Modal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, h5, pre, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.View.Modal"
 
 
 type alias SimpleConfig msg =
@@ -78,7 +73,7 @@ confirm appState cfg =
                         , class "btn btn-secondary"
                         , dataCy "modal_cancel-button"
                         ]
-                        [ lx_ "button.cancel" appState ]
+                        [ text (gettext "Cancel" appState.locale) ]
 
                 Nothing ->
                     emptyNode
@@ -124,7 +119,7 @@ error appState cfg =
                     [ onClick cfg.actionMsg
                     , class "btn btn-primary"
                     ]
-                    [ lx_ "button.ok" appState ]
+                    [ text (gettext "OK" appState.locale) ]
                 ]
             ]
 

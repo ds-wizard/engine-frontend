@@ -6,8 +6,7 @@ module Shared.Auth.Role exposing
     , toReadableString
     )
 
-import Shared.Locale exposing (lg)
-import Shared.Provisioning exposing (Provisioning)
+import Gettext exposing (gettext)
 
 
 admin : String
@@ -25,39 +24,39 @@ researcher =
     "researcher"
 
 
-adminLocale : { a | provisioning : Provisioning } -> String
+adminLocale : Gettext.Locale -> String
 adminLocale =
-    lg "role.admin"
+    gettext "Admin"
 
 
-dataStewardLocale : { a | provisioning : Provisioning } -> String
+dataStewardLocale : Gettext.Locale -> String
 dataStewardLocale =
-    lg "role.dataSteward"
+    gettext "Data Steward"
 
 
-researcherLocale : { a | provisioning : Provisioning } -> String
+researcherLocale : Gettext.Locale -> String
 researcherLocale =
-    lg "role.researcher"
+    gettext "Researcher"
 
 
-options : { a | provisioning : Provisioning } -> List ( String, String )
+options : { a | locale : Gettext.Locale } -> List ( String, String )
 options appState =
-    [ ( researcher, researcherLocale appState )
-    , ( dataSteward, dataStewardLocale appState )
-    , ( admin, adminLocale appState )
+    [ ( researcher, researcherLocale appState.locale )
+    , ( dataSteward, dataStewardLocale appState.locale )
+    , ( admin, adminLocale appState.locale )
     ]
 
 
-toReadableString : { a | provisioning : Provisioning } -> String -> String
+toReadableString : { a | locale : Gettext.Locale } -> String -> String
 toReadableString appState role =
     if role == admin then
-        adminLocale appState
+        adminLocale appState.locale
 
     else if role == dataSteward then
-        dataStewardLocale appState
+        dataStewardLocale appState.locale
 
     else
-        researcherLocale appState
+        researcherLocale appState.locale
 
 
 switch : String -> a -> a -> a -> a -> a
