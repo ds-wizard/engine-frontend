@@ -5,10 +5,10 @@ module Wizard.Apps.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Shared.Api.Apps as AppsApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setApp)
 import Uuid exposing (Uuid)
 import Wizard.Apps.Common.AppEditForm as AppEditForm
@@ -33,7 +33,7 @@ update msg wrapMsg appState model =
         GetAppComplete result ->
             applyResult appState
                 { setResult = setApp
-                , defaultError = lg "apiError.apps.getError" appState
+                , defaultError = gettext "Unable to get app." appState.locale
                 , model = model
                 , result = result
                 }
@@ -122,7 +122,7 @@ handlePutAppComplete appState model result =
 
         Err error ->
             ( { model
-                | savingApp = ApiError.toActionResult appState (lg "apiError.apps.putError" appState) error
+                | savingApp = ApiError.toActionResult appState (gettext "App could not be saved." appState.locale) error
                 , editForm = Maybe.map (setFormErrors appState error) model.editForm
               }
             , getResultCmd result
@@ -164,7 +164,7 @@ handlePostPlanComplete appState model result =
 
         Err error ->
             ( { model
-                | addingPlan = ApiError.toActionResult appState (lg "apiError.apps.postPlanError" appState) error
+                | addingPlan = ApiError.toActionResult appState (gettext "Plan could not be created." appState.locale) error
                 , addPlanForm = Maybe.map (setFormErrors appState error) model.addPlanForm
               }
             , getResultCmd result
@@ -206,7 +206,7 @@ handlePutPlanComplete appState model result =
 
         Err error ->
             ( { model
-                | editingPlan = ApiError.toActionResult appState (lg "apiError.apps.putPlanError" appState) error
+                | editingPlan = ApiError.toActionResult appState (gettext "Plan could not be saved." appState.locale) error
                 , editPlanForm = Maybe.map (Tuple.mapSecond (setFormErrors appState error)) model.editPlanForm
               }
             , getResultCmd result
@@ -236,7 +236,7 @@ handleDeletePlanComplete appState model result =
 
         Err error ->
             ( { model
-                | deletingPlan = ApiError.toActionResult appState (lg "apiError.apps.deletePlanError" appState) error
+                | deletingPlan = ApiError.toActionResult appState (gettext "Plan could not be deleted." appState.locale) error
               }
             , getResultCmd result
             )

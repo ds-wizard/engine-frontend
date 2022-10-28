@@ -12,10 +12,9 @@ module Shared.Data.Questionnaire.QuestionnaireCreation exposing
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
-import Shared.Locale exposing (lg)
-import Shared.Provisioning exposing (Provisioning)
 
 
 type QuestionnaireCreation
@@ -111,18 +110,18 @@ validation =
             )
 
 
-richFormOptions : { a | provisioning : Provisioning } -> List ( String, String, String )
+richFormOptions : { a | locale : Gettext.Locale } -> List ( String, String, String )
 richFormOptions appState =
     [ ( toString TemplateAndCustomQuestionnaireCreation
-      , lg "questionnaireCreation.templateAndCustom" appState
-      , lg "questionnaireCreation.templateAndCustom.description" appState
+      , gettext "Templates & Custom" appState.locale
+      , gettext "Projects can be created from project templates or with custom settings." appState.locale
       )
     , ( toString TemplateQuestionnaireCreation
-      , lg "questionnaireCreation.template" appState
-      , lg "questionnaireCreation.template.description" appState
+      , gettext "Templates only" appState.locale
+      , gettext "Only project templates can be used for creating new projects." appState.locale
       )
     , ( toString CustomQuestionnaireCreation
-      , lg "questionnaireCreation.custom" appState
-      , lg "questionnaireCreation.custom.description" appState
+      , gettext "Custom only" appState.locale
+      , gettext "Project templates feature is disabled, researchers have to choose knowledge model and set up everything." appState.locale
       )
     ]

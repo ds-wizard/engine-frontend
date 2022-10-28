@@ -1,12 +1,12 @@
 module Wizard.Users.Index.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Shared.Auth.Role as Role
 import Shared.Components.Badge as Badge
 import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lx)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
@@ -23,20 +23,10 @@ import Wizard.Users.Index.Msgs exposing (Msg(..))
 import Wizard.Users.Routes exposing (indexRouteRoleFilterId)
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Users.Index.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Users.Index.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Users__Index" ]
-        [ Page.header (lg "users" appState) []
+        [ Page.header (gettext "Users" appState.locale) []
         , FormResult.successOnlyView appState model.deletingUser
         , Listing.view appState (listingConfig appState) model.users
         , deleteModal appState model
@@ -50,7 +40,7 @@ createButton appState =
         [ class "btn btn-primary"
         , dataCy "users_create-button"
         ]
-        [ lx_ "header.create" appState ]
+        [ text (gettext "Create" appState.locale) ]
 
 
 listingConfig : AppState -> ViewConfig User Msg
@@ -60,17 +50,17 @@ listingConfig appState =
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = User.fullName
-    , emptyText = l_ "listing.empty" appState
+    , emptyText = gettext "Click \"Create\" button to add a new User." appState.locale
     , updated = Nothing
     , wrapMsg = ListingMsg
     , iconView = Just UserIcon.viewUser
-    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
+    , searchPlaceholderText = Just (gettext "Search users..." appState.locale)
     , sortOptions =
-        [ ( "firstName", lg "user.firstName" appState )
-        , ( "lastName", lg "user.lastName" appState )
-        , ( "email", lg "user.email" appState )
-        , ( "createdAt", lg "user.createdAt" appState )
-        , ( "lastVisitedAt", lg "user.lastVisitedAt" appState )
+        [ ( "firstName", gettext "First name" appState.locale )
+        , ( "lastName", gettext "Last name" appState.locale )
+        , ( "email", gettext "Email" appState.locale )
+        , ( "createdAt", gettext "Created" appState.locale )
+        , ( "lastVisitedAt", gettext "Last online" appState.locale )
         ]
     , filters =
         [ Listing.SimpleFilter indexRouteRoleFilterId
@@ -99,7 +89,7 @@ listingTitleBadge appState user =
                 emptyNode
 
             else
-                Badge.danger [] [ lx_ "badge.inactive" appState ]
+                Badge.danger [] [ text (gettext "inactive" appState.locale) ]
     in
     span []
         [ roleBadge appState user
@@ -153,7 +143,7 @@ listingActions appState user =
     [ Listing.dropdownAction
         { extraClass = Nothing
         , icon = faSet "_global.edit" appState
-        , label = l_ "action.edit" appState
+        , label = gettext "Edit" appState.locale
         , msg = ListingActionLink (Routes.usersEdit (Uuid.toString user.uuid))
         , dataCy = "edit"
         }
@@ -161,7 +151,7 @@ listingActions appState user =
     , Listing.dropdownAction
         { extraClass = Just "text-danger"
         , icon = faSet "_global.delete" appState
-        , label = l_ "action.delete" appState
+        , label = gettext "Delete" appState.locale
         , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
         , dataCy = "delete"
         }
@@ -181,16 +171,16 @@ deleteModal appState model =
 
         modalContent =
             [ p []
-                [ lx_ "deleteModal.message" appState ]
+                [ text (gettext "Are you sure you want to permanently delete the following user?" appState.locale) ]
             , userHtml
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete user" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingUser
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeleteUser
             , cancelMsg = Just <| ShowHideDeleteUser Nothing
             , dangerous = True

@@ -4,6 +4,7 @@ module Wizard.Settings.Generic.View exposing
     )
 
 import Form exposing (Form)
+import Gettext
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Shared.Form.FormError exposing (FormError)
@@ -16,8 +17,8 @@ import Wizard.Settings.Generic.Model exposing (Model)
 
 
 type alias ViewProps form msg =
-    { locTitle : AppState -> String
-    , locSave : AppState -> String
+    { locTitle : Gettext.Locale -> String
+    , locSave : Gettext.Locale -> String
     , formView : AppState -> Form FormError form -> Html msg
     , wrapMsg : Form.Msg -> msg
     }
@@ -31,13 +32,13 @@ view props appState model =
 viewForm : ViewProps form msg -> AppState -> Model form -> config -> Html msg
 viewForm props appState model _ =
     div [ wideDetailClass "" ]
-        [ Page.header (props.locTitle appState) []
+        [ Page.header (props.locTitle appState.locale) []
         , div []
             [ FormResult.errorOnlyView appState model.savingConfig
             , props.formView appState model.form
             , div [ class "mt-5" ]
                 [ ActionButton.buttonWithAttrs appState
-                    (ActionButton.ButtonWithAttrsConfig (props.locSave appState)
+                    (ActionButton.ButtonWithAttrsConfig (props.locSave appState.locale)
                         model.savingConfig
                         (props.wrapMsg Form.Submit)
                         False

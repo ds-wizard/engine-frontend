@@ -1,31 +1,26 @@
 module Wizard.Common.Components.UsageTable exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, style)
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Data.Usage exposing (Usage, UsageValue)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.UsageTable"
 
 
 view : AppState -> Usage -> Html msg
 view appState usage =
     table [ class "table table-usage table-hover" ]
         [ tbody []
-            [ viewUsageRowSimple (l_ "metric.users" appState) usage.users
-            , viewUsageRowSimple (l_ "metric.activeUsers" appState) usage.activeUsers
-            , viewUsageRowSimple (l_ "metric.kmEditors" appState) usage.branches
-            , viewUsageRowSimple (l_ "metric.knowledgeModels" appState) usage.knowledgeModels
-            , viewUsageRowSimple (l_ "metric.templates" appState) usage.templates
-            , viewUsageRowSimple (l_ "metric.projects" appState) usage.questionnaires
-            , viewUsageRowSimple (l_ "metric.documents" appState) usage.documents
-            , viewUsageRowBytes (l_ "metric.storage" appState) usage.storage
+            [ viewUsageRowSimple (gettext "Users" appState.locale) usage.users
+            , viewUsageRowSimple (gettext "Active Users" appState.locale) usage.activeUsers
+            , viewUsageRowSimple (gettext "Knowledge Model Editors" appState.locale) usage.branches
+            , viewUsageRowSimple (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
+            , viewUsageRowSimple (gettext "Document Templates" appState.locale) usage.templates
+            , viewUsageRowSimple (gettext "Projects" appState.locale) usage.questionnaires
+            , viewUsageRowSimple (gettext "Documents" appState.locale) usage.documents
+            , viewUsageRowBytes (gettext "Storage" appState.locale) usage.storage
             ]
         ]
 

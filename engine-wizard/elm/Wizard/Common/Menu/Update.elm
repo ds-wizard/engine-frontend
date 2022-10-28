@@ -3,19 +3,14 @@ module Wizard.Common.Menu.Update exposing (update)
 import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
 import Dict
+import Gettext exposing (gettext)
 import Shared.Api.BuildInfo as BuildInfoApi
 import Shared.Error.ApiError as ApiError
-import Shared.Locale exposing (l)
 import Task
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Menu.Models exposing (Model)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Msgs
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Menu.Update"
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -41,7 +36,7 @@ update wrapMsg msg appState model =
                     ( { model | apiBuildInfo = Success buildInfo }, Cmd.none )
 
                 Err error ->
-                    ( { model | apiBuildInfo = ApiError.toActionResult appState (l_ "error.buildInfo" appState) error }, Cmd.none )
+                    ( { model | apiBuildInfo = ApiError.toActionResult appState (gettext "Unable to get the build info" appState.locale) error }, Cmd.none )
 
         DevMenuDropdownMsg dropdownState ->
             ( { model | devMenuDropdownState = dropdownState }, Cmd.none )

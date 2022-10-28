@@ -9,6 +9,7 @@ module Wizard.Common.Components.Questionnaire.NavigationTree exposing
     )
 
 import Dict exposing (Dict)
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
@@ -22,13 +23,8 @@ import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (lf, lgx)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.Questionnaire.NavigationTree"
 
 
 type alias Model =
@@ -82,7 +78,7 @@ view appState cfg model =
             KnowledgeModel.getChapters cfg.questionnaire.knowledgeModel
     in
     div [ class "NavigationTree" ]
-        [ strong [] [ lgx "chapters" appState ]
+        [ strong [] [ text (gettext "Chapters" appState.locale) ]
         , div [ class "nav nav-pills flex-column" ]
             (List.indexedMap (viewChapter appState cfg model) chapters)
         ]
@@ -250,7 +246,7 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
             QuestionnaireDetail.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
 
         defaultItemTitle =
-            i [] [ text (lf_ "defaultItem" [ String.fromInt (index + 1) ] appState) ]
+            i [] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ]
 
         itemTitle =
             Maybe.unwrap defaultItemTitle text mbItemTitle

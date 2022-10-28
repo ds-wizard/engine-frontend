@@ -14,6 +14,7 @@ import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, br, button, div, h2, hr, label, li, p, strong, text, ul)
 import Html.Attributes exposing (class, classList, disabled, id, name, style)
 import Html.Events exposing (onClick, onMouseDown)
@@ -34,7 +35,6 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgx, lx)
 import Shared.Setters exposing (setSelected)
 import Shared.Utils exposing (dispatch, listFilterJust)
 import Uuid exposing (Uuid)
@@ -57,16 +57,6 @@ import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDes
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
 import Wizard.Projects.Detail.Components.Settings.DeleteModal as DeleteModal
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.Settings"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.Components.Settings"
 
 
 
@@ -196,7 +186,7 @@ handlePutQuestionnaireComplete appState model result =
             )
 
         Err error ->
-            ( { model | savingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }
+            ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
             , Cmd.none
             )
 
@@ -224,7 +214,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = TemplatesApi.getTemplatesFor cfg.packageId
-            , getError = lg "apiError.packages.getListError" appState
+            , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing
@@ -267,7 +257,7 @@ handleProjectTagsSearchComplete appState model result =
             )
 
         Err error ->
-            ( { model | projectTagsSuggestions = ApiError.toActionResult appState (lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState) error }
+            ( { model | projectTagsSuggestions = ApiError.toActionResult appState (gettext "Unable to get project tags." appState.locale) error }
             , Cmd.none
             )
 
@@ -339,7 +329,7 @@ formView appState cfg model =
                 unsupportedError =
                     case cfg.templateState of
                         Just TemplateState.UnsupportedMetamodelVersion ->
-                            Flash.error appState (l_ "unsupportedTemplate" appState)
+                            Flash.error appState (gettext "This document template is no longer supported." appState.locale)
 
                         _ ->
                             emptyNode
@@ -352,7 +342,7 @@ formView appState cfg model =
         formatInput =
             case model.templateTypeHintInputModel.selected of
                 Just selectedTemplate ->
-                    FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" (lg "questionnaire.defaultFormat" appState)
+                    FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" (gettext "Default document format" appState.locale)
 
                 _ ->
                     emptyNode
@@ -360,8 +350,8 @@ formView appState cfg model =
         isTemplateInput =
             if Feature.projectTemplatesCreate appState then
                 [ hr [] []
-                , Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| lg "questionnaire.isTemplate" appState
-                , FormExtra.mdAfter (lg "questionnaire.isTemplate.desc" appState)
+                , Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| gettext "Project Template" appState.locale
+                , FormExtra.mdAfter (gettext "Project templates can be used by other users so they don't have to start their new projects from scratch." appState.locale)
                 ]
 
             else
@@ -375,18 +365,18 @@ formView appState cfg model =
                 emptyNode
     in
     div []
-        ([ h2 [] [ lx_ "settings.title" appState ]
+        ([ h2 [] [ text (gettext "Settings" appState.locale) ]
          , FormResult.errorOnlyView appState model.savingQuestionnaire
-         , Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "questionnaire.name" appState
-         , Html.map FormMsg <| FormGroup.input appState model.form "description" <| lg "questionnaire.description" appState
+         , Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
+         , Html.map FormMsg <| FormGroup.input appState model.form "description" <| gettext "Description" appState.locale
          , Html.map FormMsg <| projectTagsInput
          , hr [] []
-         , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| lg "questionnaire.defaultTemplate" appState
+         , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| gettext "Default document template" appState.locale
          , Html.map FormMsg <| formatInput
          ]
             ++ isTemplateInput
             ++ [ FormActions.viewActionOnly appState
-                    (ActionButton.ButtonConfig (l_ "form.save" appState) model.savingQuestionnaire (FormMsg Form.Submit) False)
+                    (ActionButton.ButtonConfig (gettext "Save" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
                ]
         )
 
@@ -400,7 +390,7 @@ projectTagsFormGroup appState model =
                 |> Maybe.unwrap [] Tuple.second
     in
     div [ class "form-group form-group-project-tags" ]
-        [ label [] [ lgx "projectTags" appState ]
+        [ label [] [ text (gettext "Project Tags" appState.locale) ]
         , div []
             (List.map (projectTagView appState model.form) tags ++ projectTagInput appState model)
         ]
@@ -474,7 +464,7 @@ projectTagInput appState model =
             , onClick (Form.Append "projectTags")
             , dataCy "project_settings_add-tag-button"
             ]
-            [ lx_ "form.addProjectTag" appState ]
+            [ text (gettext "Add" appState.locale) ]
         ]
     , errorView
     , typehintsView field.hasFocus
@@ -492,7 +482,7 @@ knowledgeModel appState cfg =
                 Tag.viewList cfg.tags
     in
     div []
-        [ h2 [] [ lx_ "knowledgeModel.title" appState ]
+        [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
         , linkTo appState
             (Routes.knowledgeModelsDetail cfg.package.id)
             [ class "package-link mb-2" ]
@@ -502,7 +492,7 @@ knowledgeModel appState cfg =
             [ linkTo appState
                 (Routes.projectsCreateMigration cfg.questionnaire.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]
-                [ lx_ "knowledgeModel.createMigration" appState ]
+                [ text (gettext "Create migration" appState.locale) ]
             ]
         ]
 
@@ -510,19 +500,19 @@ knowledgeModel appState cfg =
 dangerZone : AppState -> ViewConfig -> Html Msg
 dangerZone appState cfg =
     div []
-        [ h2 [] [ lx_ "dangerZone.title" appState ]
+        [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger" ]
             [ div [ class "card-body" ]
                 [ p [ class "card-text" ]
-                    [ strong [] [ lx_ "dangerZone.delete.title" appState ]
+                    [ strong [] [ text (gettext "Delete this project" appState.locale) ]
                     , br [] []
-                    , lx_ "dangerZone.delete.desc" appState
+                    , text (gettext "Deleted projects cannot be recovered." appState.locale)
                     ]
                 , button
                     [ class "btn btn-outline-danger"
                     , onClick (DeleteModalMsg (DeleteModal.open cfg.questionnaire))
                     ]
-                    [ lx_ "dangerZone.delete.title" appState ]
+                    [ text (gettext "Delete this project" appState.locale) ]
                 ]
             ]
         ]

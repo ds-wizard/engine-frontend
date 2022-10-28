@@ -2,9 +2,9 @@ module Wizard.KMEditor.Create.View exposing (view)
 
 import ActionResult
 import Form
+import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Events exposing (onSubmit)
-import Shared.Locale exposing (l, lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -18,11 +18,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Create.Models exposing (Model)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Create.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -42,13 +37,13 @@ view appState model =
 viewCreate : AppState -> Model -> a -> Html Msg
 viewCreate appState model _ =
     div [ detailClass "KMEditor__Create" ]
-        [ Page.header (l_ "header" appState) []
+        [ Page.header (gettext "Create Knowledge Model" appState.locale) []
         , Html.form [ onSubmit (FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingBranch
             , formView appState model
             , FormActions.viewSubmit appState
                 Routes.kmEditorIndex
-                (ActionButton.SubmitConfig (l_ "create" appState) model.savingBranch)
+                (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingBranch)
             ]
         ]
 
@@ -76,9 +71,9 @@ formView appState model =
                     FormGroup.formGroupCustom typeHintInput appState model.form "previousPackageId"
     in
     div []
-        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| lg "branch.name" appState
-        , Html.map FormMsg <| FormGroup.input appState model.form "kmId" <| lg "branch.kmId" appState
-        , FormExtra.textAfter <| l_ "form.kmIdHint" appState
-        , parentInput <| lg "branch.basedOn" appState
-        , FormExtra.textAfter <| l_ "form.basedOnHint" appState
+        [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
+        , Html.map FormMsg <| FormGroup.input appState model.form "kmId" <| gettext "Knowledge Model ID" appState.locale
+        , FormExtra.textAfter <| gettext "Knowledge Model ID can contain alphanumeric characters and dashes but cannot start or end with a dash." appState.locale
+        , parentInput <| gettext "Based on" appState.locale
+        , FormExtra.textAfter <| gettext "You can create a new Knowledge Model based on the existing one or start from scratch." appState.locale
         ]

@@ -3,10 +3,10 @@ module Wizard.Projects.Create.TemplateCreate.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
+import Gettext exposing (gettext)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Uuid
 import Wizard.Common.Api exposing (applyResultCmd, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -44,7 +44,7 @@ update wrapMsg msg appState model =
         GetTemplateQuestionnaireComplete result ->
             applyResultCmd appState
                 { setResult = \value record -> { record | templateQuestionnaire = value }
-                , defaultError = lg "apiError.questionnaires.getError" appState
+                , defaultError = gettext "Unable to get the project." appState.locale
                 , model = model
                 , result = result
                 , cmd = Cmd.none
@@ -80,7 +80,7 @@ handlePostQuestionnaireCompleted appState model result =
             )
 
         Err error ->
-            ( { model | savingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.postError" appState) error }
+            ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be created." appState.locale) error }
             , getResultCmd result
             )
 
@@ -103,7 +103,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
                     , packageIds = Nothing
                     , packageIdsOp = Nothing
                     }
-            , getError = lg "apiError.packages.getListError" appState
+            , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing

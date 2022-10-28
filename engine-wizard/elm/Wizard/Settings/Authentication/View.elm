@@ -2,6 +2,7 @@ module Wizard.Settings.Authentication.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, hr, label, strong, text)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
@@ -9,7 +10,6 @@ import Shared.Auth.Role as Role
 import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -24,16 +24,6 @@ import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.View as GenericView
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.Authentication.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.Authentication.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (viewContent appState model) model.openIDPrefabs
@@ -46,8 +36,8 @@ viewContent appState model openIDPrefabs =
 
 viewProps : List EditableOpenIDServiceConfig -> GenericView.ViewProps AuthenticationConfigForm Msg
 viewProps openIDPrefabs =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Authentication"
+    , locSave = gettext "Save"
     , formView = formView openIDPrefabs
     , wrapMsg = formMsg
     }
@@ -56,13 +46,13 @@ viewProps openIDPrefabs =
 formView : List EditableOpenIDServiceConfig -> AppState -> Form FormError AuthenticationConfigForm -> Html Msg
 formView openIDPrefabs appState form =
     div [ class "Authentication" ]
-        [ mapFormMsg <| FormGroup.select appState (Role.options appState) form "defaultRole" (l_ "form.defaultRole" appState)
-        , FormExtra.mdAfter (l_ "form.defaultRole.desc" appState)
-        , h3 [] [ lx_ "section.internal" appState ]
-        , mapFormMsg <| FormGroup.toggle form "registrationEnabled" (l_ "form.registration" appState)
-        , FormExtra.mdAfter (l_ "form.registration.desc" appState)
-        , h3 [] [ lx_ "section.external" appState ]
-        , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (l_ "form.services" appState)
+        [ mapFormMsg <| FormGroup.select appState (Role.options appState) form "defaultRole" (gettext "Default role" appState.locale)
+        , FormExtra.mdAfter (gettext "Define the role that is assigned to new users." appState.locale)
+        , h3 [] [ text (gettext "Internal" appState.locale) ]
+        , mapFormMsg <| FormGroup.toggle form "registrationEnabled" (gettext "Registration" appState.locale)
+        , FormExtra.mdAfter (gettext "If enabled, users can create new internal accounts directly in the instance." appState.locale)
+        , h3 [] [ text (gettext "External" appState.locale) ]
+        , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (gettext "OpenID Services" appState.locale)
         ]
 
 
@@ -140,7 +130,7 @@ serviceFormView appState openIDPrefabs form i =
             [ prefabsView
             , div [ class "row" ]
                 [ div [ class "col" ]
-                    [ mapFormMsg <| FormGroup.input appState form idField (l_ "form.service.id" appState) ]
+                    [ mapFormMsg <| FormGroup.input appState form idField (gettext "ID" appState.locale) ]
                 , div [ class "col text-end" ]
                     [ mapFormMsg <|
                         a
@@ -149,18 +139,18 @@ serviceFormView appState openIDPrefabs form i =
                             , dataCy "settings_authentication_service_remove-button"
                             ]
                             [ faSet "_global.delete" appState
-                            , lx_ "form.service.remove" appState
+                            , text (gettext "Remove" appState.locale)
                             ]
                     ]
                 ]
-            , FormGroup.textView "callback-url" callbackUrl (l_ "form.service.callbackUrl" appState)
+            , FormGroup.textView "callback-url" callbackUrl (gettext "Callback URL" appState.locale)
             , div [ class "row" ]
-                [ div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientIdField (l_ "form.service.clientId" appState) ]
-                , div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientSecretField (l_ "form.service.clientSecret" appState) ]
+                [ div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientIdField (gettext "Client ID" appState.locale) ]
+                , div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientSecretField (gettext "Client Secret" appState.locale) ]
                 ]
-            , mapFormMsg <| FormGroup.input appState form urlField (l_ "form.service.url" appState)
+            , mapFormMsg <| FormGroup.input appState form urlField (gettext "URL" appState.locale)
             , div [ class "input-table", dataCy "settings_authentication_service_parameters" ]
-                [ label [] [ lx_ "form.service.parameters" appState ]
+                [ label [] [ text (gettext "Parameters" appState.locale) ]
                 , serviceParametersHeader appState parametersField form
                 , mapFormMsg <| FormGroup.list appState (serviceParameterView appState parametersField) form parametersField ""
                 ]
@@ -169,24 +159,24 @@ serviceFormView appState openIDPrefabs form i =
                 [ div [ class "col-7" ]
                     [ div [ class "row" ]
                         [ div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder <| ExternalLoginButton.defaultIcon appState ] appState form styleIconField (l_ "form.service.icon" appState)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder <| ExternalLoginButton.defaultIcon appState ] appState form styleIconField (gettext "Icon" appState.locale)
                             ]
                         , div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.input appState form nameField (l_ "form.service.name" appState)
+                            [ mapFormMsg <| FormGroup.input appState form nameField (gettext "Name" appState.locale)
                             ]
                         ]
                     , div [ class "row" ]
                         [ div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultBackground ] appState form styleBackgroundField (l_ "form.service.background" appState)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultBackground ] appState form styleBackgroundField (gettext "Background" appState.locale)
                             ]
                         , div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultColor ] appState form styleColorField (l_ "form.service.color" appState)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultColor ] appState form styleColorField (gettext "Color" appState.locale)
                             ]
                         ]
                     ]
                 , div [ class "col-4 offset-1" ]
                     [ div [ class "form-group" ]
-                        [ label [] [ lx_ "form.service.buttonPreview" appState ]
+                        [ label [] [ text (gettext "Button Preview" appState.locale) ]
                         , div [ class "mt-4" ]
                             [ ExternalLoginButton.render [] appState buttonName buttonIcon buttonColor buttonBackground
                             ]
@@ -208,8 +198,8 @@ serviceParametersHeader appState field form =
 
     else
         div [ class "row input-table-header" ]
-            [ div [ class "col-5" ] [ lx_ "form.service.parameter.name" appState ]
-            , div [ class "col-6" ] [ lx_ "form.service.parameter.value" appState ]
+            [ div [ class "col-5" ] [ text (gettext "Name" appState.locale) ]
+            , div [ class "col-6" ] [ text (gettext "Value" appState.locale) ]
             ]
 
 
@@ -229,10 +219,10 @@ serviceParameterView appState prefix form i =
             Form.getFieldAsString value form
 
         ( nameError, nameErrorClass ) =
-            FormGroup.getErrors appState nameField (l_ "form.service.parameter.name" appState)
+            FormGroup.getErrors appState nameField (gettext "Name" appState.locale)
 
         ( valueError, valueErrorClass ) =
-            FormGroup.getErrors appState valueField (l_ "form.service.parameter.value" appState)
+            FormGroup.getErrors appState valueField (gettext "Value" appState.locale)
     in
     div [ class "row mb-2" ]
         [ div [ class "col-5" ]

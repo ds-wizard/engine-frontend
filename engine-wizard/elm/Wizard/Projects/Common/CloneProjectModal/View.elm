@@ -1,27 +1,13 @@
 module Wizard.Projects.Common.CloneProjectModal.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, i, p, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Locale exposing (l, lh, lx)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Projects.Common.CloneProjectModal.Models exposing (Model)
 import Wizard.Projects.Common.CloneProjectModal.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Common.CloneProjectModal.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Projects.Common.CloneProjectModal.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Common.CloneProjectModal.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -37,17 +23,20 @@ view appState model =
 
         modalContent =
             [ p []
-                (lh_ "cloneModal.message" [ strong [] [ text name ] ] appState)
+                (String.formatHtml
+                    (gettext "Do you want to create a copy of %s?" appState.locale)
+                    [ strong [] [ text name ] ]
+                )
             , p [ class "text-muted" ]
-                [ i [] [ lx_ "cloneModal.info" appState ] ]
+                [ i [] [ text (gettext "The original Project will remain unchanged." appState.locale) ] ]
             ]
 
         modalConfig =
-            { modalTitle = l_ "cloneModal.title" appState
+            { modalTitle = gettext "Clone Project" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.cloningQuestionnaire
-            , actionName = l_ "cloneModal.action" appState
+            , actionName = gettext "Clone" appState.locale
             , actionMsg = CloneQuestionnaire
             , cancelMsg = Just <| ShowHideCloneQuestionnaire Nothing
             , dangerous = False

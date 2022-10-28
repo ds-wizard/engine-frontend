@@ -1,12 +1,13 @@
 module Wizard.Templates.Import.RegistryImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput, onSubmit)
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -15,21 +16,6 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Routes as Routes
 import Wizard.Templates.Import.RegistryImport.Models exposing (Model)
 import Wizard.Templates.Import.RegistryImport.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Templates.Import.RegistryImport.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Templates.Import.RegistryImport.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Templates.Import.RegistryImport.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -58,11 +44,11 @@ viewForm appState model =
                     , type_ "text"
                     , value model.templateId
                     , class "form-control"
-                    , placeholder <| lg "template.templateId" appState
+                    , placeholder <| gettext "Document Template ID" appState.locale
                     ]
                     []
                 , ActionButton.submit appState
-                    { label = l_ "form.import" appState
+                    { label = gettext "Import" appState.locale
                     , result = model.pulling
                     }
                 ]
@@ -77,10 +63,10 @@ viewRegistryText appState =
     case appState.config.registry of
         RegistryEnabled url ->
             p []
-                (lh_ "registryLink"
-                    [ a [ href url, target "_blank" ] [ lx_ "registry" appState ]
+                (String.formatHtml
+                    (gettext "You can find document templates in %s." appState.locale)
+                    [ a [ href url, target "_blank" ] [ text (gettext "DSW Registry" appState.locale) ]
                     ]
-                    appState
                 )
 
         _ ->
@@ -92,11 +78,14 @@ viewImported appState packageId =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
-            (lh_ "imported.message" [ code [] [ text packageId ] ] appState)
+            (String.formatHtml
+                (gettext "Document template %s has been imported!" appState.locale)
+                [ code [] [ text packageId ] ]
+            )
         , p [ class "lead" ]
             [ linkTo appState
                 (Routes.templatesDetail packageId)
                 [ class "btn btn-primary" ]
-                [ lx_ "imported.action" appState ]
+                [ text (gettext "View detail" appState.locale) ]
             ]
         ]

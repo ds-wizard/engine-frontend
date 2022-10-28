@@ -3,16 +3,11 @@ module Wizard.Common.Components.QuestionnaireVersionTag exposing
     , version
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, text)
 import Shared.Components.Badge as Badge
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Locale exposing (lx)
 import Wizard.Common.AppState exposing (AppState)
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.QuestionnaireVersionTag"
 
 
 version : QuestionnaireVersion -> Html msg
@@ -22,4 +17,4 @@ version qv =
 
 current : AppState -> Html msg
 current appState =
-    Badge.info [] [ lx_ "current" appState ]
+    Badge.info [] [ text (gettext "Current" appState.locale) ]

@@ -1,18 +1,9 @@
 module Wizard.Common.TimeDistance exposing (locale)
 
-import Shared.Locale exposing (l, lf)
+import Gettext exposing (gettext, ngettext)
+import String.Format as String
 import Time.Distance.Types exposing (DistanceId(..), Locale, Tense(..))
 import Wizard.Common.AppState exposing (AppState)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.TimeDistance"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.TimeDistance"
 
 
 locale : AppState -> Locale
@@ -24,83 +15,50 @@ locale appState { withAffix } tense distanceId =
         maybeAffix str =
             case ( withAffix, tense ) of
                 ( True, Past ) ->
-                    lf_ "ago" [ str ] appState
+                    String.format (gettext "%s ago" appState.locale) [ str ]
 
                 ( True, Future ) ->
-                    lf_ "in" [ str ] appState
+                    String.format (gettext "in %s" appState.locale) [ str ]
 
                 ( False, _ ) ->
                     str
+
+        lessThanMinutes n =
+            String.format (ngettext ( "less than a minute", "less than %s minutes" ) n appState.locale) [ toStr n ]
     in
     (case distanceId of
         -- We don't need that much granularity here
         LessThanXSeconds _ ->
-            l_ "lessThan1Minute" appState
+            lessThanMinutes 1
 
         HalfAMinute ->
-            l_ "lessThan1Minute" appState
+            lessThanMinutes 1
 
         LessThanXMinutes i ->
-            if i == 1 then
-                l_ "lessThan1Minute" appState
+            lessThanMinutes i
 
-            else
-                lf_ "lessThanXMinute" [ toStr i ] appState
+        XMinutes n ->
+            String.format (ngettext ( "1 minute", "%s minutes" ) n appState.locale) [ toStr n ]
 
-        XMinutes i ->
-            if i == 1 then
-                l_ "1Minute" appState
+        AboutXHours n ->
+            String.format (ngettext ( "about 1 hour", "about %s hours" ) n appState.locale) [ toStr n ]
 
-            else
-                lf_ "xMinutes" [ toStr i ] appState
+        XDays n ->
+            String.format (ngettext ( "1 day", "%s days" ) n appState.locale) [ toStr n ]
 
-        AboutXHours i ->
-            if i == 1 then
-                l_ "about1Hour" appState
+        AboutXMonths n ->
+            String.format (ngettext ( "about 1 month", "about %s months" ) n appState.locale) [ toStr n ]
 
-            else
-                lf_ "aboutXHours" [ toStr i ] appState
+        XMonths n ->
+            String.format (ngettext ( "1 month", "%s months" ) n appState.locale) [ toStr n ]
 
-        XDays i ->
-            if i == 1 then
-                l_ "1Day" appState
+        AboutXYears n ->
+            String.format (ngettext ( "about 1 year", "about %s years" ) n appState.locale) [ toStr n ]
 
-            else
-                lf_ "XDays" [ toStr i ] appState
+        OverXYears n ->
+            String.format (ngettext ( "over 1 year", "over %s years" ) n appState.locale) [ toStr n ]
 
-        AboutXMonths i ->
-            if i == 1 then
-                l_ "about1Month" appState
-
-            else
-                lf_ "aboutXMonths" [ toStr i ] appState
-
-        XMonths i ->
-            if i == 1 then
-                l_ "1Month" appState
-
-            else
-                lf_ "XMonths" [ toStr i ] appState
-
-        AboutXYears i ->
-            if i == 1 then
-                l_ "about1Year" appState
-
-            else
-                lf_ "aboutXYears" [ toStr i ] appState
-
-        OverXYears i ->
-            if i == 1 then
-                l_ "over1Year" appState
-
-            else
-                lf_ "overXYears" [ toStr i ] appState
-
-        AlmostXYears i ->
-            if i == 1 then
-                l_ "almost1Year" appState
-
-            else
-                lf_ "almostXYears" [ toStr i ] appState
+        AlmostXYears n ->
+            String.format (ngettext ( "almost 1 year", "almost %s years" ) n appState.locale) [ toStr n ]
     )
         |> maybeAffix

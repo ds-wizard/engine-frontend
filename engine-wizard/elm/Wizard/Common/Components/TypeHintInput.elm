@@ -14,6 +14,7 @@ import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
 import Browser.Events
 import Debounce exposing (Debounce)
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, text, ul)
 import Html.Attributes exposing (class, classList, id, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseDown, stopPropagationOn)
@@ -23,15 +24,9 @@ import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (lgx, lx)
 import Shared.Utils exposing (dispatch)
 import Task
 import Wizard.Common.AppState exposing (AppState)
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.TypeHintInput"
 
 
 
@@ -269,7 +264,7 @@ viewTypeHints appState cfg model =
                 case Maybe.withDefault Unset model.typehints of
                     Success hints ->
                         if List.isEmpty hints.items then
-                            div [ class "empty" ] [ lx_ "emptyResult" appState ]
+                            div [ class "empty" ] [ text (gettext "No results matching your search were found." appState.locale) ]
 
                         else
                             ul [] (List.map (viewTypeHint cfg) hints.items)
@@ -277,7 +272,7 @@ viewTypeHints appState cfg model =
                     Loading ->
                         div [ class "loading" ]
                             [ faSet "_global.spinner" appState
-                            , lgx "loading" appState
+                            , text (gettext "Loading..." appState.locale)
                             ]
 
                     Error err ->

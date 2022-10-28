@@ -10,8 +10,7 @@ module Shared.Common.TimeUtils exposing
     , toReadableTime
     )
 
-import Shared.Locale exposing (lg)
-import Shared.Provisioning exposing (Provisioning)
+import Gettext exposing (gettext)
 import Time exposing (Month(..))
 import Time.Extra as Time
 
@@ -150,44 +149,44 @@ intToMonth month =
             Dec
 
 
-monthToString : { a | provisioning : Provisioning } -> Month -> String
+monthToString : { a | locale : Gettext.Locale } -> Month -> String
 monthToString appState month =
     case month of
         Jan ->
-            lg "month.january" appState
+            gettext "January" appState.locale
 
         Feb ->
-            lg "month.february" appState
+            gettext "February" appState.locale
 
         Mar ->
-            lg "month.march" appState
+            gettext "March" appState.locale
 
         Apr ->
-            lg "month.april" appState
+            gettext "April" appState.locale
 
         May ->
-            lg "month.may" appState
+            gettext "May" appState.locale
 
         Jun ->
-            lg "month.june" appState
+            gettext "June" appState.locale
 
         Jul ->
-            lg "month.july" appState
+            gettext "July" appState.locale
 
         Aug ->
-            lg "month.august" appState
+            gettext "August" appState.locale
 
         Sep ->
-            lg "month.september" appState
+            gettext "September" appState.locale
 
         Oct ->
-            lg "month.october" appState
+            gettext "October" appState.locale
 
         Nov ->
-            lg "month.november" appState
+            gettext "November" appState.locale
 
         Dec ->
-            lg "month.december" appState
+            gettext "December" appState.locale
 
 
 isBetween : Time.Posix -> Time.Posix -> Time.Posix -> Bool

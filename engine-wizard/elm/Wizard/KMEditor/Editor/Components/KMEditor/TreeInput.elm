@@ -8,6 +8,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.TreeInput exposing
     , view
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
@@ -17,16 +18,10 @@ import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
-import Shared.Locale exposing (lg, lx)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.Components.KMEditor.TreeInput"
 
 
 type alias Model =
@@ -101,14 +96,14 @@ view appState props model =
         [ div [ class "diff-tree-input-actions" ]
             [ a [ onClick ExpandAll ]
                 [ faSet "kmEditor.expandAll" appState
-                , lx_ "expandAll" appState
+                , text (gettext "Expand all" appState.locale)
                 ]
             , a
                 [ onClick CollapseAll
                 , dataCy "km-editor_move-modal_collapse-all"
                 ]
                 [ faSet "kmEditor.collapseAll" appState
-                , lx_ "collapseAll" appState
+                , text (gettext "Collapse all" appState.locale)
                 ]
             ]
         , div [ class "diff-tree diff-tree-input" ]
@@ -163,7 +158,7 @@ treeNodeChapter appState props model chapter =
             , icon = faSet "km.chapter" appState
             , label = chapter.title
             , children = questions
-            , untitledLabel = lg "chapter.untitled" appState
+            , untitledLabel = gettext "Untitled chapter" appState.locale
             , allowed = allowed
             , open = isTreeOpen chapter.uuid model
             , selected = isSelected chapter.uuid model
@@ -210,7 +205,7 @@ treeNodeQuestion appState props model isChild question =
             , icon = faSet "km.question" appState
             , label = Question.getTitle question
             , children = answers ++ itemTemplateQuestions
-            , untitledLabel = lg "question.untitled" appState
+            , untitledLabel = gettext "Untitled question" appState.locale
             , allowed = allowed
             , open = isTreeOpen uuid model
             , selected = isSelected uuid model
@@ -241,7 +236,7 @@ treeNodeAnswer appState props model isChild answer =
             , icon = faSet "km.answer" appState
             , label = answer.label
             , children = followupQuestions
-            , untitledLabel = lg "answer.untitled" appState
+            , untitledLabel = gettext "Untitled answer" appState.locale
             , allowed = allowed
             , open = isTreeOpen answer.uuid model
             , selected = isSelected answer.uuid model

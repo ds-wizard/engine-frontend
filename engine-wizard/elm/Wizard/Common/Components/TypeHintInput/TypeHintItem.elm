@@ -6,6 +6,7 @@ module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
     , templateSuggestion
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
@@ -14,7 +15,6 @@ import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (lg)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -75,7 +75,7 @@ templateSuggestion appState template =
     let
         visibleName =
             if appState.config.template.recommendedTemplateId == Just template.id then
-                template.name ++ " (" ++ lg "questionnaire.template.recommended" appState ++ ")"
+                template.name ++ " (" ++ gettext "recommended" appState.locale ++ ")"
 
             else
                 template.name

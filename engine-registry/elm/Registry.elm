@@ -2,7 +2,8 @@ module Registry exposing (Model, Msg, PageModel, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav
-import Html exposing (Html, a, div, img, li, ul)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, img, li, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
@@ -23,19 +24,8 @@ import Registry.Pages.Templates as Templates
 import Registry.Ports as Ports
 import Registry.Routing as Routing
 import Registry.Utils exposing (dispatch)
-import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
 import Url
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry"
 
 
 main : Program D.Value Model Msg
@@ -333,8 +323,8 @@ view model =
             if not model.appState.valid then
                 Page.illustratedMessage
                     { image = Undraw.bugFixing
-                    , heading = l_ "view.invalid.heading" model.appState
-                    , msg = l_ "view.invalid.msg" model.appState
+                    , heading = gettext "Configuration Error" model.appState.locale
+                    , msg = gettext "The application is not configured correctly and cannot run." model.appState.locale
                     }
 
             else
@@ -372,8 +362,8 @@ view model =
                     NotFoundModel ->
                         Page.illustratedMessage
                             { image = Undraw.pageNotFound
-                            , heading = l_ "view.notFound.heading" model.appState
-                            , msg = l_ "view.notFound.msg" model.appState
+                            , heading = gettext "Not Found" model.appState.locale
+                            , msg = gettext "The page you are looking for does not exist." model.appState.locale
                             }
 
         html =
@@ -382,7 +372,7 @@ view model =
                 [ content ]
             ]
     in
-    { title = l_ "view.title" model.appState
+    { title = gettext "DSW Registry" model.appState.locale
     , body = html
     }
 
@@ -402,7 +392,7 @@ header model =
         [ div [ class "container" ]
             [ a [ class "navbar-brand", href <| Routing.toString Routing.Index ]
                 [ img [ class "logo", src "/img/logo.svg" ] []
-                , lx_ "header.brandTitle" appState
+                , text (gettext "DSW Registry" appState.locale)
                 ]
             , ul [ class "nav navbar-nav" ]
                 [ li
@@ -410,14 +400,14 @@ header model =
                     , classList [ ( "active", model.route == Routing.Index ) ]
                     ]
                     [ a [ href <| Routing.toString Routing.Index, class "nav-link" ]
-                        [ lx_ "header.knowledgeModels" appState ]
+                        [ text (gettext "Knowledge Models" appState.locale) ]
                     ]
                 , li
                     [ class "nav-item"
                     , classList [ ( "active", model.route == Routing.Templates ) ]
                     ]
                     [ a [ href <| Routing.toString Routing.Templates, class "nav-link" ]
-                        [ lx_ "header.templates" appState ]
+                        [ text (gettext "Document Templates" appState.locale) ]
                     ]
                 ]
             , navigation
@@ -433,14 +423,14 @@ loggedInHeaderNavigation appState =
                 [ href <| Routing.toString Routing.Organization
                 , class "nav-link"
                 ]
-                [ lx_ "loggedInNavigation.profile" appState ]
+                [ text (gettext "Profile" appState.locale) ]
             ]
         , li [ class "nav-item" ]
             [ a
                 [ onClick <| SetCredentials Nothing
                 , class "nav-link"
                 ]
-                [ lx_ "loggedInNavigation.logOut" appState ]
+                [ text (gettext "Log Out" appState.locale) ]
             ]
         ]
 
@@ -450,11 +440,11 @@ publicHeaderNavigation appState =
     ul [ class "nav navbar-nav ms-auto" ]
         [ li [ class "nav-item" ]
             [ a [ href <| Routing.toString Routing.Login, class "nav-link" ]
-                [ lx_ "publicHeaderNavigation.logIn" appState ]
+                [ text (gettext "Log In" appState.locale) ]
             ]
         , li [ class "nav-item" ]
             [ a [ href <| Routing.toString Routing.Signup, class "nav-link" ]
-                [ lx_ "publicHeaderNavigation.signUp" appState ]
+                [ text (gettext "Sign Up" appState.locale) ]
             ]
         ]
 

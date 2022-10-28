@@ -7,8 +7,8 @@ module Wizard.Common.Api exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Provisioning exposing (Provisioning)
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs
 import Wizard.Msgs
@@ -30,7 +30,7 @@ getResultCmd result =
 
 
 applyResult :
-    { a | provisioning : Provisioning }
+    { a | locale : Gettext.Locale }
     ->
         { setResult : ActionResult data -> model -> model
         , defaultError : String
@@ -49,7 +49,7 @@ applyResult appState { setResult, defaultError, model, result } =
 
 
 applyResultTransform :
-    { a | provisioning : Provisioning }
+    { a | locale : Gettext.Locale }
     ->
         { setResult : ActionResult data2 -> model -> model
         , defaultError : String
@@ -70,7 +70,7 @@ applyResultTransform appState { setResult, defaultError, model, result, transfor
 
 
 applyResultCmd :
-    { a | provisioning : Provisioning }
+    { a | locale : Gettext.Locale }
     ->
         { setResult : ActionResult data -> model -> model
         , defaultError : String
@@ -91,7 +91,7 @@ applyResultCmd appState { setResult, defaultError, model, result, cmd } =
 
 
 applyResultTransformCmd :
-    { a | provisioning : Provisioning }
+    { a | locale : Gettext.Locale }
     ->
         { setResult : ActionResult data2 -> model -> model
         , defaultError : String

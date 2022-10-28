@@ -2,12 +2,12 @@ module Wizard.Users.Edit.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Result exposing (Result)
 import Shared.Api.Users as UsersApi
 import Shared.Data.User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -80,7 +80,7 @@ getUserCompleted appState model result =
                     { model | userForm = userForm, user = Success user }
 
                 Err _ ->
-                    { model | user = Error <| lg "apiError.users.getError" appState }
+                    { model | user = Error <| gettext "Unable to get the user." appState.locale }
 
         cmd =
             getResultCmd result
@@ -114,13 +114,13 @@ putUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizar
 putUserCompleted appState model result =
     case result of
         Ok _ ->
-            ( { model | savingUser = Success <| lg "apiSuccess.users.put" appState }
+            ( { model | savingUser = Success <| gettext "Profile was successfully updated." appState.locale }
             , Ports.scrollToTop ".Users__Edit__content"
             )
 
         Err err ->
             ( { model
-                | savingUser = ApiError.toActionResult appState (lg "apiError.users.putError" appState) err
+                | savingUser = ApiError.toActionResult appState (gettext "Profile could not be saved." appState.locale) err
                 , userForm = setFormErrors appState err model.userForm
               }
             , Cmd.batch
@@ -136,10 +136,10 @@ putUserPasswordCompleted appState model result =
         passwordResult =
             case result of
                 Ok _ ->
-                    Success <| lg "apiSuccess.users.password.put" appState
+                    Success <| gettext "Password was successfully changed." appState.locale
 
                 Err error ->
-                    ApiError.toActionResult appState (lg "apiError.users.password.putError" appState) error
+                    ApiError.toActionResult appState (gettext "Password could not be changed." appState.locale) error
 
         cmd =
             getResultCmd result

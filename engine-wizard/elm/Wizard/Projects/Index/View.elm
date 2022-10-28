@@ -2,6 +2,7 @@ module Wizard.Projects.Index.View exposing (view)
 
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
+import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, img, input, span, text)
 import Html.Attributes exposing (class, classList, href, placeholder, src, style, title, type_, value)
 import Html.Events exposing (onInput)
@@ -18,7 +19,6 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgx, lx)
 import Shared.Utils exposing (listFilterJust, listInsertIf)
 import Uuid
 import Version
@@ -45,16 +45,6 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Index.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Index.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     let
@@ -70,7 +60,7 @@ view appState model =
 
         content _ =
             div [ listClass "Questionnaires__Index" ]
-                [ Page.header (l_ "header.title" appState) []
+                [ Page.header (gettext "Projects" appState.locale) []
                 , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
                 , FormResult.view appState model.deletingMigration
                 , Listing.view appState (listingConfig appState model) model.questionnaires
@@ -86,7 +76,7 @@ createButton appState =
     linkTo appState
         (Routes.projectsCreate appState)
         [ class "btn btn-primary", dataCy "projects_create-button" ]
-        [ lx_ "header.create" appState ]
+        [ text (gettext "Create" appState.locale) ]
 
 
 listingConfig : AppState -> Model -> ViewConfig Questionnaire Msg
@@ -94,10 +84,10 @@ listingConfig appState model =
     let
         templateFilter =
             Listing.SimpleFilter indexRouteIsTemplateFilterId
-                { name = l_ "filter.template.name" appState
+                { name = gettext "Project Template" appState.locale
                 , options =
-                    [ ( "true", l_ "filter.template.templatesOnly" appState )
-                    , ( "false", l_ "filter.template.projectsOnly" appState )
+                    [ ( "true", gettext "Templates only" appState.locale )
+                    , ( "false", gettext "Projects only" appState.locale )
                     ]
                 }
 
@@ -126,7 +116,7 @@ listingConfig appState model =
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = .name
-    , emptyText = l_ "listing.empty" appState
+    , emptyText = gettext "Click \"Create\" button to add a new project." appState.locale
     , updated =
         Just
             { getTime = .updatedAt
@@ -134,11 +124,11 @@ listingConfig appState model =
             }
     , wrapMsg = ListingMsg
     , iconView = Nothing
-    , searchPlaceholderText = Just (l_ "listing.searchPlaceholderText" appState)
+    , searchPlaceholderText = Just (gettext "Search projects..." appState.locale)
     , sortOptions =
-        [ ( "name", lg "questionnaire.name" appState )
-        , ( "createdAt", lg "questionnaire.createdAt" appState )
-        , ( "updatedAt", lg "questionnaire.updatedAt" appState )
+        [ ( "name", gettext "Name" appState.locale )
+        , ( "createdAt", gettext "Created" appState.locale )
+        , ( "updatedAt", gettext "Updated" appState.locale )
         ]
     , filters = listingFilters
     , toRoute = Routes.projectsIndexWithFilters
@@ -203,7 +193,7 @@ listingProjectTagsFilter appState model =
                     [ input
                         [ type_ "text"
                         , class "form-control"
-                        , placeholder (l_ "filter.projectTags.searchPlaceholder" appState)
+                        , placeholder (gettext "Search project tags..." appState.locale)
                         , alwaysStopPropagationOn "click" (D.succeed (ProjectTagsFilterInput model.projectTagsFilterSearchValue))
                         , onInput ProjectTagsFilterInput
                         , value model.projectTagsFilterSearchValue
@@ -219,14 +209,14 @@ listingProjectTagsFilter appState model =
                         , dataCy "filter_projectTags_operator_OR"
                         , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
-                        [ lgx "listingOp.or" appState ]
+                        [ text (gettext "OR" appState.locale) ]
                     , a
                         [ href (linkWithOp FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_projectTags_operator_AND"
                         , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
-                        [ lgx "listingOp.and" appState ]
+                        [ text (gettext "AND" appState.locale) ]
                     ]
             , Dropdown.divider
             ]
@@ -245,7 +235,7 @@ listingProjectTagsFilter appState model =
             else if not (String.isEmpty model.projectTagsFilterSearchValue) then
                 [ Dropdown.customItem <|
                     div [ class "dropdown-item-empty" ]
-                        [ lx_ "filter.projectTags.empty" appState ]
+                        [ text (gettext "No project tags found" appState.locale) ]
                 ]
 
             else
@@ -257,7 +247,7 @@ listingProjectTagsFilter appState model =
                     selectedTag
 
                 Nothing ->
-                    l_ "filter.projectTags.title" appState
+                    gettext "Project Tags" appState.locale
     in
     Listing.CustomFilter indexRouteProjectTagsFilterId
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
@@ -322,7 +312,7 @@ listingKMsFilter appState model =
                     [ input
                         [ type_ "text"
                         , class "form-control"
-                        , placeholder (l_ "filter.packages.searchPlaceholder" appState)
+                        , placeholder (gettext "Search knowledge models..." appState.locale)
                         , alwaysStopPropagationOn "click" (D.succeed (PackagesFilterInput model.packagesFilterSearchValue))
                         , onInput PackagesFilterInput
                         , value model.packagesFilterSearchValue
@@ -346,7 +336,7 @@ listingKMsFilter appState model =
             else if not (String.isEmpty model.packagesFilterSearchValue) then
                 [ Dropdown.customItem <|
                     div [ class "dropdown-item-empty" ]
-                        [ lx_ "filter.packages.empty" appState ]
+                        [ text (gettext "No knowledge models found" appState.locale) ]
                 ]
 
             else
@@ -358,7 +348,7 @@ listingKMsFilter appState model =
                     selectedPackage.name
 
                 Nothing ->
-                    l_ "filter.packages.title" appState
+                    gettext "Knowledge Models" appState.locale
     in
     Listing.CustomFilter indexRoutePackagesFilterId
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
@@ -433,7 +423,7 @@ listingUsersFilter appState model =
                     [ input
                         [ type_ "text"
                         , class "form-control"
-                        , placeholder (l_ "filter.users.searchPlaceholder" appState)
+                        , placeholder (gettext "Search users..." appState.locale)
                         , alwaysStopPropagationOn "click" (D.succeed (UsersFilterInput model.userFilterSearchValue))
                         , onInput UsersFilterInput
                         , value model.userFilterSearchValue
@@ -449,14 +439,14 @@ listingUsersFilter appState model =
                         , dataCy "filter_users_operator_OR"
                         , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
-                        [ lgx "listingOp.or" appState ]
+                        [ text (gettext "OR" appState.locale) ]
                     , a
                         [ href (linkWithOp FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_users_operator_AND"
                         , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
-                        [ lgx "listingOp.and" appState ]
+                        [ text (gettext "AND" appState.locale) ]
                     ]
             , Dropdown.divider
             ]
@@ -475,7 +465,7 @@ listingUsersFilter appState model =
             else if not (String.isEmpty model.userFilterSearchValue) then
                 [ Dropdown.customItem <|
                     div [ class "dropdown-item-empty" ]
-                        [ lx_ "filter.users.empty" appState ]
+                        [ text (gettext "No users found" appState.locale) ]
                 ]
 
             else
@@ -487,7 +477,7 @@ listingUsersFilter appState model =
                     User.fullName selectedUser
 
                 Nothing ->
-                    l_ "filter.users.title" appState
+                    gettext "Users" appState.locale
     in
     Listing.CustomFilter indexRouteUsersFilterId
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
@@ -573,7 +563,7 @@ listingDescription appState questionnaire =
         kmLink =
             linkTo appState
                 kmRoute
-                [ title <| lg "knowledgeModel" appState, class "fragment" ]
+                [ title <| gettext "Knowledge Model" appState.locale, class "fragment" ]
                 [ text questionnaire.package.name
                 , text ", "
                 , text <| Version.toString questionnaire.package.version
@@ -607,7 +597,7 @@ listingActions appState questionnaire =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "project.open" appState
-                , label = l_ "action.open" appState
+                , label = gettext "Open project" appState.locale
                 , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid)
                 , dataCy = "open"
                 }
@@ -619,7 +609,7 @@ listingActions appState questionnaire =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.clone" appState
-                , label = l_ "action.clone" appState
+                , label = gettext "Clone" appState.locale
                 , msg =
                     QuestionnaireDescriptor.fromQuestionnaire questionnaire
                         |> Just
@@ -636,7 +626,7 @@ listingActions appState questionnaire =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
-                , label = l_ "action.createMigration" appState
+                , label = gettext "Create migration" appState.locale
                 , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
                 , dataCy = "create-migration"
                 }
@@ -648,7 +638,7 @@ listingActions appState questionnaire =
             Listing.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
-                , label = l_ "action.continueMigration" appState
+                , label = gettext "Continue migration" appState.locale
                 , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute questionnaire.uuid)
                 , dataCy = "continue-migration"
                 }
@@ -660,7 +650,7 @@ listingActions appState questionnaire =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.cancel" appState
-                , label = l_ "action.cancelMigration" appState
+                , label = gettext "Cancel migration" appState.locale
                 , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
                 , dataCy = "cancel-migration"
                 }
@@ -672,7 +662,7 @@ listingActions appState questionnaire =
             Listing.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
-                , label = l_ "action.delete" appState
+                , label = gettext "Delete" appState.locale
                 , msg =
                     QuestionnaireDescriptor.fromQuestionnaire questionnaire
                         |> Just
@@ -700,13 +690,13 @@ stateBadge : AppState -> Questionnaire -> Html msg
 stateBadge appState questionnaire =
     case questionnaire.state of
         Migrating ->
-            Badge.info [] [ lx_ "badge.migrating" appState ]
+            Badge.info [] [ text (gettext "migrating" appState.locale) ]
 
         Outdated ->
             linkTo appState
                 (Routes.projectsCreateMigration questionnaire.uuid)
                 [ class Badge.warningClass ]
-                [ lx_ "badge.outdated" appState ]
+                [ text (gettext "update available" appState.locale) ]
 
         Default ->
             emptyNode
@@ -715,7 +705,7 @@ stateBadge appState questionnaire =
 templateBadge : AppState -> Questionnaire -> Html msg
 templateBadge appState questionnaire =
     if questionnaire.isTemplate then
-        Badge.info [] [ lgx "questionnaire.templateBadge" appState ]
+        Badge.info [] [ text (gettext "Template" appState.locale) ]
 
     else
         emptyNode

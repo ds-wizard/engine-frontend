@@ -1,10 +1,10 @@
 module Wizard.Auth.Update exposing (update)
 
+import Gettext exposing (gettext)
 import Shared.Api.Users as UsersApi
 import Shared.Auth.Session as Session
 import Shared.Data.User as User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs as AuthMsgs
 import Wizard.Models exposing (Model, setSession)
@@ -61,7 +61,7 @@ getCurrentUserCompleted model mbOriginalUrl result =
         Err error ->
             let
                 msg =
-                    ApiError.toActionResult model.appState (lg "apiError.users.current.getError" model.appState) error
+                    ApiError.toActionResult model.appState (gettext "Loading the profile info failed." model.appState.locale) error
                         |> Wizard.Public.Login.Msgs.GetProfileInfoFailed
                         |> Wizard.Public.Msgs.LoginMsg
                         |> Wizard.Msgs.PublicMsg

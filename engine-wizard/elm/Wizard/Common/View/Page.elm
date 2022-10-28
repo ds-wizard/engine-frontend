@@ -10,23 +10,13 @@ module Wizard.Common.View.Page exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, br, div, h1, h2, p, text)
 import Html.Attributes exposing (class)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.View.Page"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.View.Page"
 
 
 header : String -> List (Html msg) -> Html msg
@@ -47,7 +37,7 @@ loader : AppState -> Html msg
 loader appState =
     div [ class "full-page-loader" ]
         [ faSet "_global.spinner" appState
-        , div [] [ lx_ "loader.loading" appState ]
+        , div [] [ text (gettext "Loading..." appState.locale) ]
         ]
 
 
@@ -55,7 +45,7 @@ error : AppState -> String -> Html msg
 error appState msg =
     illustratedMessage
         { image = Undraw.cancel
-        , heading = l_ "error.heading" appState
+        , heading = gettext "Error" appState.locale
         , lines = [ msg ]
         , cy = "error"
         }

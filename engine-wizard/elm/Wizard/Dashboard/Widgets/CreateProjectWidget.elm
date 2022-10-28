@@ -1,24 +1,19 @@
 module Wizard.Dashboard.Widgets.CreateProjectWidget exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Locale exposing (l)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Dashboard.Widgets.CreateProjectWidget"
-
-
 view : AppState -> Html msg
 view appState =
     WidgetHelpers.ctaWidget appState
-        { title = l_ "title" appState
-        , text = l_ "text" appState
+        { title = gettext "Create Project" appState.locale
+        , text = gettext "Project is a workspace where you create your DMP. It is based on a knowledge model, which contains knowledge about what should be asked and how based on the research field or organization's needs. You can use document templates to transform the answers into a document. This document can be anything, from PDF to machine-actionable JSON.\n\nYou can create a new project from a project template that data stewards prepare for you to have an easier start or from scratch where you set up everything yourself." appState.locale
         , action =
             { route = Routes.projectsCreate appState
-            , label = l_ "actionLabel" appState
+            , label = gettext "Create" appState.locale
             }
         }

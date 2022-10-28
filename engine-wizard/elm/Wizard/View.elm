@@ -1,8 +1,8 @@
 module Wizard.View exposing (view)
 
 import Browser exposing (Document)
+import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Locale exposing (l)
 import Shared.Undraw as Undraw
 import Wizard.Apps.View
 import Wizard.Common.AppState exposing (AppState)
@@ -23,11 +23,6 @@ import Wizard.Routes as Routes
 import Wizard.Settings.View
 import Wizard.Templates.View
 import Wizard.Users.View
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.View"
 
 
 view : Model -> Document Msg
@@ -124,8 +119,8 @@ notFoundView : AppState -> Html msg
 notFoundView appState =
     Page.illustratedMessage
         { image = Undraw.pageNotFound
-        , heading = l_ "notFound.title" appState
-        , lines = [ l_ "notFound.message" appState ]
+        , heading = gettext "Not Found" appState.locale
+        , lines = [ gettext "The page you are looking for was not found." appState.locale ]
         , cy = "not-found"
         }
 
@@ -134,7 +129,7 @@ notAllowedView : AppState -> Html msg
 notAllowedView appState =
     Page.illustratedMessage
         { image = Undraw.security
-        , heading = l_ "notAllowed.title" appState
-        , lines = [ l_ "notAllowed.message" appState ]
+        , heading = gettext "Not Allowed" appState.locale
+        , lines = [ gettext "You don't have a permission to view this page." appState.locale ]
         , cy = "not-allowed"
         }
