@@ -1,11 +1,11 @@
 module Wizard.Dashboard.Widgets.RecentProjectsWidget exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, br, div, h2, p, strong, text)
 import Html.Attributes exposing (class, style)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (lx)
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -13,11 +13,6 @@ import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Dashboard.Widgets.RecentProjectsWidget"
 
 
 view : AppState -> ActionResult (List Questionnaire) -> Html msg
@@ -44,10 +39,10 @@ view appState questionnaires =
 viewRecentProjects : AppState -> List Questionnaire -> List (Html msg)
 viewRecentProjects appState questionnaires =
     [ div [ class "RecentProjectsWidget d-flex flex-column h-100" ]
-        [ h2 [ class "fs-4 fw-bold mb-4" ] [ lx_ "heading" appState ]
+        [ h2 [ class "fs-4 fw-bold mb-4" ] [ text (gettext "Recent Projects" appState.locale) ]
         , div [ class "Dashboard__ItemList flex-grow-1" ] (List.map (viewProject appState) questionnaires)
         , div [ class "mt-4" ]
-            [ linkTo appState (Routes.projectsIndex appState) [] [ lx_ "viewAll" appState ] ]
+            [ linkTo appState (Routes.projectsIndex appState) [] [ text (gettext "View all" appState.locale) ] ]
         ]
     ]
 
@@ -84,7 +79,7 @@ viewRecentProjectsEmpty : AppState -> List (Html msg)
 viewRecentProjectsEmpty appState =
     [ div [ class "text-lighter d-flex flex-column justify-content-center h-100" ]
         [ p [ class "fs-5 m-0 mt-3 text-center" ]
-            [ lx_ "empty" appState
+            [ text (gettext "You have no projects yet, start by creating some." appState.locale)
             , br [] []
             , faSet "_global.arrowRight" appState
             ]

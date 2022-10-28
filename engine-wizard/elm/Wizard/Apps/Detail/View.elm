@@ -1,6 +1,7 @@
 module Wizard.Apps.Detail.View exposing (view)
 
 import Form
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, hr, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
@@ -10,9 +11,9 @@ import Shared.Components.Badge as Badge
 import Shared.Data.AppDetail exposing (AppDetail)
 import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (l, lf, lg, lx)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust)
+import Shared.Utils exposing (flip, listFilterJust)
+import String.Format as String
 import Wizard.Apps.Detail.Models exposing (Model)
 import Wizard.Apps.Detail.Msgs exposing (Msg(..))
 import Wizard.Common.AppState exposing (AppState)
@@ -25,21 +26,6 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.UserIcon as UserIcon
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Apps.Detail.View"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Apps.Detail.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Apps.Detail.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -66,7 +52,7 @@ header appState app =
         editAction =
             a [ onClick EditModalOpen, dataCy "app-detail_edit" ]
                 [ faSet "_global.edit" appState
-                , lx_ "actions.edit" appState
+                , text (gettext "Edit" appState.locale)
                 ]
 
         title =
@@ -88,13 +74,13 @@ content appState appDetail =
     in
     DetailPage.content
         [ div [ DetailPage.contentInnerClass ]
-            [ h3 [] [ lx_ "content.title.usage" appState ]
+            [ h3 [] [ text (gettext "Usage" appState.locale) ]
             , UsageTable.view appState appDetail.usage
             , hr [ class "my-5" ] []
-            , h3 [] [ lx_ "content.title.plans" appState ]
+            , h3 [] [ text (gettext "Plans" appState.locale) ]
             , PlansList.view appState { actions = Just planActions } appDetail.plans
             , a [ class "with-icon", onClick AddPlanModalOpen, dataCy "app-detail_add-plan" ]
-                [ faSet "_global.add" appState, lx_ "content.plans.add" appState ]
+                [ faSet "_global.add" appState, text (gettext "Add plan" appState.locale) ]
             ]
         ]
 
@@ -117,30 +103,30 @@ sidePanelInfo appState appDetail =
     let
         enabledBadge =
             if appDetail.enabled then
-                Badge.success [] [ lx_ "badge.enabled" appState ]
+                Badge.success [] [ text (gettext "Enabled" appState.locale) ]
 
             else
-                Badge.danger [] [ lx_ "badge.disabled" appState ]
+                Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
 
         infoList =
-            [ ( l_ "sidePanel.appId" appState, "app-id", text appDetail.appId )
-            , ( l_ "sidePanel.enabled" appState, "enabled", enabledBadge )
-            , ( l_ "sidePanel.createdAt" appState, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone appDetail.createdAt )
-            , ( l_ "sidePanel.updatedAt" appState, "updated-at", text <| TimeUtils.toReadableDateTime appState.timeZone appDetail.updatedAt )
+            [ ( gettext "App ID" appState.locale, "app-id", text appDetail.appId )
+            , ( gettext "Enabled" appState.locale, "enabled", enabledBadge )
+            , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone appDetail.createdAt )
+            , ( gettext "Updated at" appState.locale, "updated-at", text <| TimeUtils.toReadableDateTime appState.timeZone appDetail.updatedAt )
             ]
     in
-    Just ( l_ "sidePanel.info" appState, "info", DetailPage.sidePanelList 4 8 infoList )
+    Just ( gettext "Info" appState.locale, "info", DetailPage.sidePanelList 4 8 infoList )
 
 
 sidePanelUrls : AppState -> AppDetail -> Maybe ( String, String, Html msg )
 sidePanelUrls appState appDetail =
     let
         urlsList =
-            [ ( l_ "sidePanel.clientUrl" appState, "client-url", a [ href appDetail.clientUrl, target "_blank" ] [ text appDetail.clientUrl ] )
-            , ( l_ "sidePanel.serverUrl" appState, "server-url", a [ href appDetail.serverUrl, target "_blank" ] [ text appDetail.serverUrl ] )
+            [ ( gettext "Client URL" appState.locale, "client-url", a [ href appDetail.clientUrl, target "_blank" ] [ text appDetail.clientUrl ] )
+            , ( gettext "Server URL" appState.locale, "server-url", a [ href appDetail.serverUrl, target "_blank" ] [ text appDetail.serverUrl ] )
             ]
     in
-    Just ( l_ "sidePanel.urls" appState, "urls", DetailPage.sidePanelList 4 8 urlsList )
+    Just ( gettext "URLs" appState.locale, "urls", DetailPage.sidePanelList 4 8 urlsList )
 
 
 sidePanelAdmins : AppState -> AppDetail -> Maybe ( String, String, Html msg )
@@ -152,7 +138,7 @@ sidePanelAdmins appState appDetail =
                 |> List.sortWith User.compare
                 |> List.map viewUser
     in
-    Just ( l_ "sidePanel.admins" appState, "admins", div [] users )
+    Just ( gettext "Admins" appState.locale, "admins", div [] users )
 
 
 viewUser : User -> Html msg
@@ -168,19 +154,19 @@ viewEditModal appState model =
         modalContent =
             case model.editForm of
                 Just form ->
-                    [ Html.map EditModalFormMsg <| FormGroup.input appState form "appId" <| lg "app.appId" appState
-                    , Html.map EditModalFormMsg <| FormGroup.input appState form "name" <| lg "app.name" appState
+                    [ Html.map EditModalFormMsg <| FormGroup.input appState form "appId" <| gettext "App ID" appState.locale
+                    , Html.map EditModalFormMsg <| FormGroup.input appState form "name" <| gettext "Name" appState.locale
                     ]
 
                 Nothing ->
                     []
 
         config =
-            { modalTitle = l_ "editModal.title" appState
+            { modalTitle = gettext "Edit app" appState.locale
             , modalContent = modalContent
             , visible = Maybe.isJust model.editForm
             , actionResult = model.savingApp
-            , actionName = l_ "editModal.save" appState
+            , actionName = gettext "Save" appState.locale
             , actionMsg = EditModalFormMsg Form.Submit
             , cancelMsg = Just EditModalClose
             , dangerous = False
@@ -196,22 +182,22 @@ viewAddPlanModal appState model =
         modalContent =
             case model.addPlanForm of
                 Just form ->
-                    [ Html.map AddPlanModalFormMsg <| FormGroup.input appState form "name" <| lg "appPlan.name" appState
-                    , Html.map AddPlanModalFormMsg <| FormGroup.input appState form "users" <| lg "appPlan.users" appState
-                    , Html.map AddPlanModalFormMsg <| FormGroup.simpleDate appState form "sinceYear" "sinceMonth" "sinceDay" <| lg "appPlan.from" appState
-                    , Html.map AddPlanModalFormMsg <| FormGroup.simpleDate appState form "untilYear" "untilMonth" "untilDay" <| lg "appPlan.to" appState
-                    , Html.map AddPlanModalFormMsg <| FormGroup.toggle form "test" <| lg "appPlan.trial" appState
+                    [ Html.map AddPlanModalFormMsg <| FormGroup.input appState form "name" <| gettext "Name" appState.locale
+                    , Html.map AddPlanModalFormMsg <| FormGroup.input appState form "users" <| gettext "Users" appState.locale
+                    , Html.map AddPlanModalFormMsg <| FormGroup.simpleDate appState form "sinceYear" "sinceMonth" "sinceDay" <| gettext "From" appState.locale
+                    , Html.map AddPlanModalFormMsg <| FormGroup.simpleDate appState form "untilYear" "untilMonth" "untilDay" <| gettext "To" appState.locale
+                    , Html.map AddPlanModalFormMsg <| FormGroup.toggle form "test" <| gettext "Trial" appState.locale
                     ]
 
                 Nothing ->
                     []
 
         config =
-            { modalTitle = l_ "addPlanModal.title" appState
+            { modalTitle = gettext "Add plan" appState.locale
             , modalContent = modalContent
             , visible = Maybe.isJust model.addPlanForm
             , actionResult = model.addingPlan
-            , actionName = l_ "addPlanModal.action" appState
+            , actionName = gettext "Add" appState.locale
             , actionMsg = AddPlanModalFormMsg Form.Submit
             , cancelMsg = Just AddPlanModalClose
             , dangerous = False
@@ -227,22 +213,22 @@ viewEditPlanModal appState model =
         modalContent =
             case model.editPlanForm of
                 Just ( _, form ) ->
-                    [ Html.map EditPlanModalFormMsg <| FormGroup.input appState form "name" <| lg "appPlan.name" appState
-                    , Html.map EditPlanModalFormMsg <| FormGroup.input appState form "users" <| lg "appPlan.users" appState
-                    , Html.map EditPlanModalFormMsg <| FormGroup.simpleDate appState form "sinceYear" "sinceMonth" "sinceDay" <| lg "appPlan.from" appState
-                    , Html.map EditPlanModalFormMsg <| FormGroup.simpleDate appState form "untilYear" "untilMonth" "untilDay" <| lg "appPlan.to" appState
-                    , Html.map EditPlanModalFormMsg <| FormGroup.toggle form "test" <| lg "appPlan.trial" appState
+                    [ Html.map EditPlanModalFormMsg <| FormGroup.input appState form "name" <| gettext "Name" appState.locale
+                    , Html.map EditPlanModalFormMsg <| FormGroup.input appState form "users" <| gettext "Users" appState.locale
+                    , Html.map EditPlanModalFormMsg <| FormGroup.simpleDate appState form "sinceYear" "sinceMonth" "sinceDay" <| gettext "From" appState.locale
+                    , Html.map EditPlanModalFormMsg <| FormGroup.simpleDate appState form "untilYear" "untilMonth" "untilDay" <| gettext "To" appState.locale
+                    , Html.map EditPlanModalFormMsg <| FormGroup.toggle form "test" <| gettext "Trial" appState.locale
                     ]
 
                 Nothing ->
                     []
 
         config =
-            { modalTitle = l_ "editPlanModal.title" appState
+            { modalTitle = gettext "Edit plan" appState.locale
             , modalContent = modalContent
             , visible = Maybe.isJust model.editPlanForm
             , actionResult = model.editingPlan
-            , actionName = l_ "editPlanModal.action" appState
+            , actionName = gettext "Save" appState.locale
             , actionMsg = EditPlanModalFormMsg Form.Submit
             , cancelMsg = Just EditPlanModalClose
             , dangerous = False
@@ -258,17 +244,20 @@ viewDeletePlanModal appState model =
         modalContent =
             case model.deletePlan of
                 Just plan ->
-                    [ Markdown.toHtml [] (lf_ "deletePlanModal.text" [ plan.name ] appState) ]
+                    gettext "Are you sure you want to delete plan **%s**?" appState.locale
+                        |> flip String.format [ plan.name ]
+                        |> Markdown.toHtml []
+                        |> List.singleton
 
                 Nothing ->
                     []
 
         config =
-            { modalTitle = l_ "deletePlanModal.title" appState
+            { modalTitle = gettext "Delete plan" appState.locale
             , modalContent = modalContent
             , visible = Maybe.isJust model.deletePlan
             , actionResult = model.deletingPlan
-            , actionName = l_ "deletePlanModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeletePlanModalConfirm
             , cancelMsg = Just DeletePlanModalClose
             , dangerous = True

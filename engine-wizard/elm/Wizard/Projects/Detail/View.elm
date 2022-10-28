@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.View exposing (view)
 
 import ActionResult
+import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -10,7 +11,6 @@ import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa)
-import Shared.Locale exposing (l, lgx, lx)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
@@ -39,16 +39,6 @@ import Wizard.Projects.Routes as PlansRoutes
 import Wizard.Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.View"
-
-
 view : ProjectDetailRoute -> AppState -> Model -> Html Msg
 view route appState model =
     if model.error then
@@ -69,10 +59,10 @@ viewOffline : AppState -> Html Msg
 viewOffline appState =
     Page.illustratedMessageHtml
         { image = Undraw.warning
-        , heading = l_ "offline.heading" appState
+        , heading = gettext "Disconnected" appState.locale
         , content =
-            [ p [] [ lx_ "offline.text" appState ]
-            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ lx_ "offline.refresh" appState ] ]
+            [ p [] [ text (gettext "You have been disconnected, try to refresh the page." appState.locale) ]
+            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ text (gettext "Refresh" appState.locale) ] ]
             ]
         , cy = "offline"
         }
@@ -82,10 +72,10 @@ viewError : AppState -> Html Msg
 viewError appState =
     Page.illustratedMessageHtml
         { image = Undraw.warning
-        , heading = l_ "error.heading" appState
+        , heading = gettext "Oops!" appState.locale
         , content =
-            [ p [] [ lx_ "error.text" appState ]
-            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ lx_ "error.refresh" appState ] ]
+            [ p [] [ text (gettext "Something went wrong, try to refresh the page." appState.locale) ]
+            , p [] [ button [ onClick Refresh, class "btn btn-lg btn-primary" ] [ text (gettext "Refresh" appState.locale) ] ]
             ]
         , cy = "error"
         }
@@ -154,7 +144,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
 templateBadge : AppState -> QuestionnaireDetail -> Html msg
 templateBadge appState questionnaire =
     if questionnaire.isTemplate then
-        Badge.info [] [ lgx "questionnaire.templateBadge" appState ]
+        Badge.info [] [ text (gettext "Template" appState.locale) ]
 
     else
         emptyNode
@@ -174,7 +164,7 @@ viewProjectNavigationActions appState model questionnaire =
             , ActionButton.buttonCustom appState
                 { content =
                     [ fa "fas fa-plus"
-                    , lx_ "actions.add" appState
+                    , text (gettext "Add to my projects" appState.locale)
                     ]
                 , result = model.addingToMyProjects
                 , msg = AddToMyProjects
@@ -190,7 +180,7 @@ viewProjectNavigationActions appState model questionnaire =
                 , dataCy "project_detail_share-button"
                 ]
                 [ fa "fas fa-user-friends"
-                , lx_ "actions.share" appState
+                , text (gettext "Share" appState.locale)
                 ]
             ]
 
@@ -224,7 +214,7 @@ viewProjectNavigationNav appState route model qm =
 
         questionnaireLink =
             { route = projectRoute ProjectDetailRoute.Questionnaire
-            , label = l_ "nav.questionnaire" appState
+            , label = gettext "Questionnaire" appState.locale
             , icon = fa "fa far fa-list-alt"
             , isActive = route == ProjectDetailRoute.Questionnaire
             , isVisible = True
@@ -233,7 +223,7 @@ viewProjectNavigationNav appState route model qm =
 
         metricsLink =
             { route = projectRoute ProjectDetailRoute.Metrics
-            , label = l_ "nav.metrics" appState
+            , label = gettext "Metrics" appState.locale
             , icon = fa "fa far fa-chart-bar"
             , isActive = route == ProjectDetailRoute.Metrics
             , isVisible = Features.projectMetrics appState questionnaire
@@ -242,7 +232,7 @@ viewProjectNavigationNav appState route model qm =
 
         previewLink =
             { route = projectRoute ProjectDetailRoute.Preview
-            , label = l_ "nav.preview" appState
+            , label = gettext "Preview" appState.locale
             , icon = fa "fa far fa-eye"
             , isActive = route == ProjectDetailRoute.Preview
             , isVisible = Features.projectPreview appState questionnaire
@@ -251,7 +241,7 @@ viewProjectNavigationNav appState route model qm =
 
         documentsLink =
             { route = projectRoute (ProjectDetailRoute.Documents PaginationQueryString.empty)
-            , label = l_ "nav.documents" appState
+            , label = gettext "Documents" appState.locale
             , icon = fa "fa far fa-copy"
             , isActive = isDocumentRoute
             , isVisible = Features.projectDocumentsView appState questionnaire
@@ -260,7 +250,7 @@ viewProjectNavigationNav appState route model qm =
 
         settingsLink =
             { route = projectRoute ProjectDetailRoute.Settings
-            , label = l_ "nav.settings" appState
+            , label = gettext "Settings" appState.locale
             , icon = fa "fa fas fa-cogs"
             , isActive = route == ProjectDetailRoute.Settings
             , isVisible = Features.projectSettings appState questionnaire
@@ -292,7 +282,7 @@ viewProjectContent appState route model qm =
             Session.exists appState.session
 
         forbiddenPage =
-            Page.error appState (l_ "forbidden" appState)
+            Page.error appState (gettext "You are not allowed to view this page." appState.locale)
     in
     case route of
         ProjectDetailRoute.Questionnaire ->

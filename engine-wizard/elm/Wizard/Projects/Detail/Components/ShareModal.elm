@@ -12,6 +12,7 @@ module Wizard.Projects.Detail.Components.ShareModal exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, hr, input, span, strong, text)
 import Html.Attributes exposing (class, classList, id, readonly, title, value)
 import Html.Events exposing (onClick)
@@ -29,8 +30,8 @@ import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgh, lgx, lx)
 import Shared.Utils exposing (getUuid)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -46,16 +47,6 @@ import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes as Routes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.ShareModal"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.Components.ShareModal"
 
 
 
@@ -159,7 +150,7 @@ handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << UserTypeHintInputMsg
             , getTypeHints = UsersApi.getUsersSuggestions
-            , getError = lg "apiError.users.getListError" appState
+            , getError = gettext "Unable to get users." appState.locale
             , setReply = cfg.wrapMsg << AddUser
             , clearReply = Nothing
             , filterResults = Just filterResults
@@ -239,7 +230,7 @@ handlePutQuestionnaireComplete appState model result =
             ( { model | visible = False, savingSharing = Unset }, Ports.refresh () )
 
         Err error ->
-            ( { model | savingSharing = ApiError.toActionResult appState (lg "apiError.questionnaires.putError" appState) error }
+            ( { model | savingSharing = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
             , Cmd.none
             )
 
@@ -267,11 +258,11 @@ view appState model =
             ]
 
         modalConfig =
-            { modalTitle = l_ "title" appState
+            { modalTitle = gettext "Share Project" appState.locale
             , modalContent = modalContent
             , visible = model.visible
             , actionResult = model.savingSharing
-            , actionName = l_ "action" appState
+            , actionName = gettext "Save" appState.locale
             , actionMsg = FormMsg Form.Submit
             , cancelMsg = Just Close
             , dangerous = False
@@ -287,7 +278,7 @@ usersView appState model =
         cfg =
             { viewItem = TypeHintInput.memberSuggestion
             , wrapMsg = UserTypeHintInputMsg
-            , nothingSelectedItem = span [ class "text-muted" ] [ text <| l_ "addUsers" appState ]
+            , nothingSelectedItem = span [ class "text-muted" ] [ text <| gettext "Add users" appState.locale ]
             , clearEnabled = False
             }
 
@@ -337,7 +328,7 @@ userView appState users form i =
                     , a
                         [ class "text-danger"
                         , onClick (Form.RemoveItem "permissions" i)
-                        , title (l_ "remove" appState)
+                        , title (gettext "Remove" appState.locale)
                         ]
                         [ faSet "_global.remove" appState ]
                     ]
@@ -355,7 +346,7 @@ formView appState questionnaireUuid form =
                 let
                     visibilitySelect =
                         if (Form.getFieldAsString "sharingPermission" form).value == Just "edit" then
-                            strong [] [ lgx "questionnairePermission.edit" appState ]
+                            strong [] [ text (gettext "edit" appState.locale) ]
 
                         else
                             FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "visibilityPermission"
@@ -368,10 +359,13 @@ formView appState questionnaireUuid form =
                             [ class "form-group form-group-toggle-extra"
                             , classList [ ( "visible", visibilityEnabled ) ]
                             ]
-                            (lgh "questionnaire.visibilityPermission" [ visibilitySelect ] appState)
+                            (String.formatHtml
+                                (gettext "Other logged-in users can %s the project." appState.locale)
+                                [ visibilitySelect ]
+                            )
 
                     visibilityEnabledInput =
-                        FormGroup.toggle form "visibilityEnabled" (lg "questionnaire.visibility" appState)
+                        FormGroup.toggle form "visibilityEnabled" (gettext "Visible by all other logged-in users" appState.locale)
                 in
                 [ Html.map FormMsg visibilityEnabledInput
                 , Html.map FormMsg visibilityPermissionInput
@@ -396,7 +390,7 @@ formView appState questionnaireUuid form =
                             ]
                             [ div [ class "d-flex" ]
                                 [ input [ readonly True, class "form-control", id "public-link", value publicLink ] []
-                                , button [ class "btn btn-link", onClick (CopyPublicLink publicLink) ] [ lx_ "copyLink" appState ]
+                                , button [ class "btn btn-link", onClick (CopyPublicLink publicLink) ] [ text (gettext "Copy link" appState.locale) ]
                                 ]
                             ]
 
@@ -408,10 +402,13 @@ formView appState questionnaireUuid form =
                             [ class "form-group form-group-toggle-extra"
                             , classList [ ( "visible", sharingEnabled ) ]
                             ]
-                            (lgh "questionnaire.sharingPermission" [ sharingSelect ] appState)
+                            (String.formatHtml
+                                (gettext "Anyone with the link can %s the project." appState.locale)
+                                [ sharingSelect ]
+                            )
 
                     sharingEnabledInput =
-                        FormGroup.toggle form "sharingEnabled" (lg "questionnaire.sharing" appState)
+                        FormGroup.toggle form "sharingEnabled" (gettext "Public link" appState.locale)
                 in
                 [ Html.map FormMsg sharingEnabledInput
                 , Html.map FormMsg sharingPermissionInput

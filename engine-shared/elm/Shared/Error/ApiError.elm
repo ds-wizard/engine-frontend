@@ -5,9 +5,9 @@ module Shared.Error.ApiError exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext
 import Json.Decode exposing (decodeString)
 import Shared.Error.ServerError as ServerError exposing (ServerError)
-import Shared.Provisioning exposing (Provisioning)
 
 
 type ApiError
@@ -34,7 +34,7 @@ toServerError error =
             Nothing
 
 
-toActionResult : { b | provisioning : Provisioning } -> String -> ApiError -> ActionResult a
+toActionResult : { b | locale : Gettext.Locale } -> String -> ApiError -> ActionResult a
 toActionResult appState defaultMessage error =
     case toServerError error of
         Just err ->

@@ -1,10 +1,10 @@
 module Wizard.Projects.Common.CloneProjectModal.Update exposing (UpdateConfig, update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Projects.Common.CloneProjectModal.Models exposing (Model)
@@ -65,13 +65,13 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
     case result of
         Ok questionnaire ->
             ( { model
-                | cloningQuestionnaire = Success <| lg "apiSuccess.questionnaires.clone" appState
+                | cloningQuestionnaire = Success <| gettext "%s has been created." appState.locale
                 , questionnaireToBeDeleted = Nothing
               }
             , cfg.cloneCompleteCmd questionnaire
             )
 
         Err error ->
-            ( { model | cloningQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.cloneError" appState) error }
+            ( { model | cloningQuestionnaire = ApiError.toActionResult appState (gettext "Unable to clone Questionnaire." appState.locale) error }
             , Cmd.none
             )

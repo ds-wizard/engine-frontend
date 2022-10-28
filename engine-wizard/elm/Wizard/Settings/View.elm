@@ -1,8 +1,8 @@
 module Wizard.Settings.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
-import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes as Routes
@@ -21,16 +21,6 @@ import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.View
 import Wizard.Settings.Template.View
 import Wizard.Settings.Usage.View
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Settings.View"
 
 
 view : Route -> AppState -> Model -> Html Msg
@@ -96,16 +86,16 @@ navigation : AppState -> Route -> Html Msg
 navigation appState currentRoute =
     let
         systemTitle =
-            [ strong [] [ lx_ "navigation.title.system" appState ] ]
+            [ strong [] [ text (gettext "System Settings" appState.locale) ] ]
 
         userInterfaceTitle =
-            [ strong [] [ lx_ "navigation.title.userInterface" appState ] ]
+            [ strong [] [ text (gettext "User Interface Settings" appState.locale) ] ]
 
         contentTitle =
-            [ strong [] [ lx_ "navigation.title.content" appState ] ]
+            [ strong [] [ text (gettext "Content Settings" appState.locale) ] ]
 
         statisticsTitle =
-            [ strong [] [ lx_ "navigation.title.info" appState ] ]
+            [ strong [] [ text (gettext "Info" appState.locale) ] ]
     in
     div [ class "nav nav-pills flex-column" ]
         (systemTitle
@@ -121,26 +111,26 @@ navigation appState currentRoute =
 
 navigationSystemLinks : AppState -> List ( Route, String )
 navigationSystemLinks appState =
-    [ ( OrganizationRoute, l_ "navigation.organization" appState )
-    , ( AuthenticationRoute, l_ "navigation.authentication" appState )
-    , ( PrivacyAndSupportRoute, l_ "navigation.privacyAndSupport" appState )
+    [ ( OrganizationRoute, gettext "Organization" appState.locale )
+    , ( AuthenticationRoute, gettext "Authentication" appState.locale )
+    , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
     ]
 
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
 navigationUserInterfaceLinks appState =
-    [ ( DashboardRoute, l_ "navigation.dashboard" appState )
-    , ( LookAndFeelRoute, l_ "navigation.lookAndFeel" appState )
+    [ ( DashboardRoute, gettext "Dashboard" appState.locale )
+    , ( LookAndFeelRoute, gettext "Look & Feel" appState.locale )
     ]
 
 
 navigationContentLinks : AppState -> List ( Route, String )
 navigationContentLinks appState =
-    [ ( RegistryRoute, l_ "navigation.registry" appState )
-    , ( KnowledgeModelsRoute, l_ "navigation.knowledgeModels" appState )
-    , ( ProjectsRoute, l_ "navigation.projects" appState )
-    , ( SubmissionRoute, l_ "navigation.submission" appState )
-    , ( TemplateRoute, l_ "navigation.template" appState )
+    [ ( RegistryRoute, gettext "DSW Registry" appState.locale )
+    , ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale )
+    , ( ProjectsRoute, gettext "Projects" appState.locale )
+    , ( SubmissionRoute, gettext "Document Submission" appState.locale )
+    , ( TemplateRoute, gettext "Document Templates" appState.locale )
     ]
 
 
@@ -148,11 +138,11 @@ navigationStatisticsLinks : AppState -> List ( Route, String )
 navigationStatisticsLinks appState =
     let
         items =
-            [ ( UsageRoute, l_ "navigation.usage" appState )
+            [ ( UsageRoute, gettext "Usage" appState.locale )
             ]
     in
     if appState.config.cloud.enabled then
-        ( PlansRoute, l_ "navigation.plans" appState ) :: items
+        ( PlansRoute, gettext "Plans" appState.locale ) :: items
 
     else
         items

@@ -10,18 +10,13 @@ module Wizard.Projects.Detail.Components.ProjectSaving exposing
     , view
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
 import Shared.Html exposing (fa, faKeyClass)
-import Shared.Locale exposing (l)
 import Time
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltipRight)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.ProjectSaving"
 
 
 
@@ -115,17 +110,17 @@ view appState model =
 
 viewSaving : AppState -> Html Msg
 viewSaving appState =
-    viewHelper [] (faKeyClass "questionnaire.saving.saving" appState) (l_ "label.saving" appState)
+    viewHelper [] (faKeyClass "questionnaire.saving.saving" appState) (gettext "Saving..." appState.locale)
 
 
 viewSavedRecently : AppState -> Html Msg
 viewSavedRecently appState =
-    viewHelper [] (faKeyClass "questionnaire.saving.saved" appState) (l_ "label.saved" appState)
+    viewHelper [] (faKeyClass "questionnaire.saving.saved" appState) (gettext "Saved" appState.locale)
 
 
 viewSaved : AppState -> Html Msg
 viewSaved appState =
-    viewHelper (tooltipRight (l_ "popover.saved" appState)) (faKeyClass "questionnaire.saving.saved" appState) ""
+    viewHelper (tooltipRight (gettext "All changes have been saved" appState.locale)) (faKeyClass "questionnaire.saving.saved" appState) ""
 
 
 viewHelper : List (Html.Attribute Msg) -> String -> String -> Html Msg

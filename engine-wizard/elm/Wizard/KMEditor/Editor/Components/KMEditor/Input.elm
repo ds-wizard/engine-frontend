@@ -24,6 +24,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , textarea
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, option, span, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, for, id, name, placeholder, rows, selected, step, style, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
@@ -37,18 +38,12 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (lg, lgx, lx)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute)
 import Wizard.Common.View.Tag as Tag
 import Wizard.Routes
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.Components.KMEditor.Input"
 
 
 
@@ -210,7 +205,7 @@ markdown appState config =
                             , class "nav-link"
                             , classList [ ( "active", not previewActive ) ]
                             ]
-                            [ lx_ "markdown.editor" appState ]
+                            [ text (gettext "Editor" appState.locale) ]
                         ]
                     , li [ class "nav-item" ]
                         [ a
@@ -218,13 +213,13 @@ markdown appState config =
                             , class "nav-link"
                             , classList [ ( "active", previewActive ) ]
                             ]
-                            [ lx_ "markdown.preview" appState ]
+                            [ text (gettext "Preview" appState.locale) ]
                         ]
                     ]
                 ]
             , div [ class "card-body" ] [ content ]
             , div [ class "card-footer text-muted" ]
-                [ lx_ "markdown.description" appState ]
+                [ text (gettext "You can use markdown and see the result in the preview tab." appState.locale) ]
             ]
         ]
 
@@ -358,7 +353,7 @@ annotations appState config =
                         , value annotation.key
                         , onInput (config.onEdit << updateKeyAt i)
                         , class "form-control"
-                        , placeholder (lg "annotations.key" appState)
+                        , placeholder (gettext "Key" appState.locale)
                         , dataCy "annotation_key"
                         ]
                         []
@@ -366,7 +361,7 @@ annotations appState config =
                         [ value annotation.value
                         , onInput (config.onEdit << updateValAt i)
                         , class "form-control"
-                        , placeholder (lg "annotations.value" appState)
+                        , placeholder (gettext "Value" appState.locale)
                         , dataCy "annotation_value"
                         , grammarlyAttribute
                         , rows lines
@@ -390,11 +385,11 @@ annotations appState config =
                 , onClick (config.onEdit (config.annotations ++ [ Annotation.new ]))
                 ]
                 [ faSet "_global.add" appState
-                , lx_ "annotations.add" appState
+                , text (gettext "Add annotation" appState.locale)
                 ]
     in
     div [ class "form-group" ]
-        [ label [] [ lgx "annotations" appState ]
+        [ label [] [ text (gettext "Annotations" appState.locale) ]
         , Html.Keyed.node "div" [] (List.indexedMap viewAnnotation config.annotations)
         , addAnnotation
         ]
@@ -512,13 +507,13 @@ metrics appState config =
                         ]
                     ]
                 , div [ class "metric-view-inputs", classList [ ( "metric-view-inputs-enabled", enabled ) ] ]
-                    [ valueField (lg "metric.weight" appState) "weight" onWeightChange .weight
-                    , valueField (lg "metric.measure" appState) "measure" onMeasureChange .measure
+                    [ valueField (gettext "Weight" appState.locale) "weight" onWeightChange .weight
+                    , valueField (gettext "Measure" appState.locale) "measure" onMeasureChange .measure
                     ]
                 ]
     in
     div [ class "form-group" ]
-        [ label [] [ lgx "metrics" appState ]
+        [ label [] [ text (gettext "Metrics" appState.locale) ]
         , div [] (List.map metricView config.metrics)
         ]
 
@@ -637,7 +632,7 @@ props appState config =
                 , class "with-icon"
                 ]
                 [ faSet "_global.add" appState
-                , lx_ "props.add" appState
+                , text (gettext "Add" appState.locale)
                 ]
     in
     div [ class "form-group" ]
@@ -688,7 +683,7 @@ headers appState config =
                     [ type_ "text"
                     , value header.key
                     , onInput (config.onEdit << updateKeyAt i)
-                    , placeholder (lg "integration.header.name" appState)
+                    , placeholder (gettext "Header Name" appState.locale)
                     , class "form-control"
                     , dataCy "integration-input_name"
                     ]
@@ -697,7 +692,7 @@ headers appState config =
                     [ type_ "text"
                     , value header.value
                     , onInput (config.onEdit << updateValAt i)
-                    , placeholder (lg "integration.header.value" appState)
+                    , placeholder (gettext "Header Value" appState.locale)
                     , class "form-control"
                     , dataCy "integration-input_value"
                     ]
@@ -718,7 +713,7 @@ headers appState config =
                 , dataCy "integration-input_add-button"
                 ]
                 [ faSet "_global.add" appState
-                , lx_ "headers.add" appState
+                , text (gettext "Add" appState.locale)
                 ]
     in
     div [ class "form-group" ]

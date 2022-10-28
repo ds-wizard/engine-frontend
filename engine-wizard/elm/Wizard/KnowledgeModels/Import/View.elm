@@ -1,11 +1,11 @@
 module Wizard.KnowledgeModels.Import.View exposing (view)
 
-import Html exposing (Html, a, div, li, ul)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lx)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
@@ -17,22 +17,12 @@ import Wizard.KnowledgeModels.Import.OwlImport.View as OwlImportView
 import Wizard.KnowledgeModels.Import.RegistryImport.View as RegistryImportView
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KnowledgeModels.Import.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KnowledgeModels.Import.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     let
         owlNavItem =
             viewNavbarItem
-                (lx_ "navbar.fromOwl" appState)
+                (text (gettext "From OWL" appState.locale))
                 (faSet "kmImport.fromOwl" appState)
                 (isOwlImportModel model)
                 ShowOwlImport
@@ -40,7 +30,7 @@ view appState model =
 
         registryNavItem =
             viewNavbarItem
-                (lx_ "navbar.fromRegistry" appState)
+                (text (gettext "From DSW Registry" appState.locale))
                 (faSet "kmImport.fromRegistry" appState)
                 (isRegistryImportModel model)
                 ShowRegistryImport
@@ -48,7 +38,7 @@ view appState model =
 
         fileNavItem =
             viewNavbarItem
-                (lx_ "navbar.fromFile" appState)
+                (text (gettext "From file" appState.locale))
                 (faSet "kmImport.fromFile" appState)
                 (isFileImportModel model)
                 ShowFileImport
@@ -90,7 +80,7 @@ view appState model =
                 emptyNode
     in
     div [ detailClass "KnowledgeModels__Import" ]
-        [ Page.header (l_ "header" appState) []
+        [ Page.header (gettext "Import Knowledge Model" appState.locale) []
         , navbar
         , content
         ]

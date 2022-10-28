@@ -12,11 +12,10 @@ module Shared.Data.Questionnaire.QuestionnaireVisibility exposing
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as Validate exposing (Validation)
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
-import Shared.Locale exposing (lg)
-import Shared.Provisioning exposing (Provisioning)
 
 
 type QuestionnaireVisibility
@@ -140,22 +139,22 @@ validation =
             )
 
 
-richFormOptions : { a | provisioning : Provisioning } -> List ( String, String, String )
+richFormOptions : { a | locale : Gettext.Locale } -> List ( String, String, String )
 richFormOptions appState =
     [ ( toString PrivateQuestionnaire
-      , lg "questionnaireVisibility.private" appState
-      , lg "questionnaireVisibility.private.description" appState
+      , gettext "Private" appState.locale
+      , gettext "Visible only to the owner." appState.locale
       )
     , ( toString VisibleViewQuestionnaire
-      , lg "questionnaireVisibility.publicReadOnly" appState
-      , lg "questionnaireVisibility.publicReadOnly.description" appState
+      , gettext "Visible - View" appState.locale
+      , gettext "Other logged-in users can view the project." appState.locale
       )
     , ( toString VisibleCommentQuestionnaire
-      , lg "questionnaireVisibility.publicComment" appState
-      , lg "questionnaireVisibility.publicComment.description" appState
+      , gettext "Visible - Comment" appState.locale
+      , gettext "Other logged-in users can view and comment the project." appState.locale
       )
     , ( toString VisibleEditQuestionnaire
-      , lg "questionnaireVisibility.public" appState
-      , lg "questionnaireVisibility.public.description" appState
+      , gettext "Visible - Edit" appState.locale
+      , gettext "Other logged-in users can edit the project." appState.locale
       )
     ]

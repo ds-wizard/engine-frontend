@@ -1,22 +1,13 @@
 module Wizard.Dashboard.Widgets.WelcomeWidget exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
 import Shared.Auth.Role as Role
 import Shared.Auth.Session as Session
-import Shared.Locale exposing (l, lf)
 import Shared.Undraw as Undraw
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Dashboard.Widgets.WelcomeWidget"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Dashboard.Widgets.WelcomeWidget"
 
 
 view : AppState -> Html msg
@@ -25,16 +16,16 @@ view appState =
         welcomeText =
             case appState.session.user of
                 Just user ->
-                    lf_ "welcomeName" [ user.firstName ] appState
+                    String.format (gettext "Welcome, %s!" appState.locale) [ user.firstName ]
 
                 Nothing ->
-                    l_ "welcomeDefault" appState
+                    gettext "Welcome!" appState.locale
 
         roleText =
             Role.switch (Session.getUserRole appState.session)
-                (l_ "roleAdmin" appState)
-                (l_ "roleDataSteward" appState)
-                (l_ "roleResearcher" appState)
+                (gettext "As an admin, you configure the instance and manage user accounts." appState.locale)
+                (gettext "As a data steward, you prepare knowledge models, document templates, and project templates for researchers." appState.locale)
+                (gettext "As a researcher, you create and collaborate on data management plans." appState.locale)
                 ""
     in
     div [ class "col-12" ]

@@ -2,6 +2,7 @@ module Wizard.Users.Edit.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h4, img, p, strong, text)
 import Html.Attributes exposing (class, classList, src)
 import Html.Events exposing (onClick, onSubmit)
@@ -9,8 +10,8 @@ import Shared.Auth.Role as Role
 import Shared.Data.User as User exposing (User)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lf, lg, lx)
 import Shared.Markdown as Markdown
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -23,21 +24,6 @@ import Wizard.Users.Common.UserEditForm exposing (UserEditForm)
 import Wizard.Users.Common.UserPasswordForm exposing (UserPasswordForm)
 import Wizard.Users.Edit.Models exposing (Model, View(..))
 import Wizard.Users.Edit.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Users.Edit.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Users.Edit.View"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Users.Edit.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -66,7 +52,7 @@ navigation appState model =
             , onClick <| ChangeView Profile
             , dataCy "user_nav_profile"
             ]
-            [ lx_ "navbar.profile" appState
+            [ text (gettext "Profile" appState.locale)
             ]
         , a
             [ class "nav-link"
@@ -74,7 +60,7 @@ navigation appState model =
             , onClick <| ChangeView Password
             , dataCy "user_nav_password"
             ]
-            [ lx_ "navbar.password" appState
+            [ text (gettext "Password" appState.locale)
             ]
         ]
 
@@ -86,21 +72,21 @@ userView appState model user =
 
     else
         div [ wideDetailClass "" ]
-            [ Page.header (l_ "navbar.profile" appState) []
+            [ Page.header (gettext "Profile" appState.locale) []
             , div [ class "row" ]
                 [ Html.form [ onSubmit (EditFormMsg Form.Submit), class "col-8" ]
                     [ FormResult.view appState model.savingUser
                     , userFormView appState user model.userForm (model.uuid == "current") |> Html.map EditFormMsg
                     , div [ class "mt-5" ]
-                        [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "userView.save" appState) model.savingUser) ]
+                        [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
                     ]
                 , div [ class "col-4" ]
                     [ div [ class "col-user-image" ]
-                        [ strong [] [ lx_ "userView.userImage" appState ]
+                        [ strong [] [ text (gettext "User Image" appState.locale) ]
                         , div []
                             [ img [ src (User.imageUrl user), class "user-icon user-icon-large" ] []
                             ]
-                        , Markdown.toHtml [ class "text-muted" ] (l_ "userView.userImage.desc" appState)
+                        , Markdown.toHtml [ class "text-muted" ] (gettext "Image is taken from OpenID profile or [Gravatar](https://gravatar.com)." appState.locale)
                         ]
                     ]
                 ]
@@ -115,14 +101,14 @@ userFormView appState user form current =
                 emptyNode
 
             else
-                FormGroup.select appState (Role.options appState) form "role" <| lg "user.role" appState
+                FormGroup.select appState (Role.options appState) form "role" <| gettext "Role" appState.locale
 
         activeToggle =
             if current then
                 emptyNode
 
             else
-                FormGroup.toggle form "active" <| lg "user.active" appState
+                FormGroup.toggle form "active" <| gettext "Active" appState.locale
 
         submissionPropsIndexes =
             Form.getListIndexes "submissionProps" form
@@ -130,7 +116,7 @@ userFormView appState user form current =
         submissionSettings =
             if current && appState.config.submission.enabled && List.length submissionPropsIndexes > 0 then
                 div [ class "mt-5" ]
-                    (h4 [] [ lx_ "submissionSettings.title" appState ]
+                    (h4 [] [ text (gettext "Submission Settings" appState.locale) ]
                         :: List.map submissionSettingsSection submissionPropsIndexes
                     )
 
@@ -154,7 +140,7 @@ userFormView appState user form current =
                             (List.map (submissionSettingsSectionProp (field "values")) valueIndexes)
 
                     else
-                        p [ class "text-muted" ] [ text <| lf_ "submissionSettings.empty" [ sectionName ] appState ]
+                        p [ class "text-muted" ] [ text <| String.format (gettext "There is no settings for %s." appState.locale) [ sectionName ] ]
             in
             div [ class "mb-4" ]
                 [ strong [] [ text sectionName ]
@@ -178,11 +164,11 @@ userFormView appState user form current =
                 ]
     in
     div []
-        [ FormGroup.input appState form "email" <| lg "user.email" appState
+        [ FormGroup.input appState form "email" <| gettext "Email" appState.locale
         , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
-        , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
-        , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
-        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| lg "user.affiliation" appState
+        , FormGroup.input appState form "firstName" <| gettext "First name" appState.locale
+        , FormGroup.input appState form "lastName" <| gettext "Last name" appState.locale
+        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| gettext "Affiliation" appState.locale
         , roleSelect
         , activeToggle
         , submissionSettings
@@ -196,17 +182,17 @@ passwordView appState model =
 
     else
         Html.form [ onSubmit (PasswordFormMsg Form.Submit), detailClass "" ]
-            [ Page.header (l_ "navbar.password" appState) []
+            [ Page.header (gettext "Password" appState.locale) []
             , FormResult.view appState model.savingPassword
             , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
             , div [ class "mt-5" ]
-                [ ActionButton.submit appState (ActionButton.SubmitConfig (l_ "passwordView.save" appState) model.savingPassword) ]
+                [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingPassword) ]
             ]
 
 
 passwordFormView : AppState -> Form FormError UserPasswordForm -> Html Form.Msg
 passwordFormView appState form =
     div []
-        [ FormGroup.passwordWithStrength appState form "password" <| l_ "passwordForm.password" appState
-        , FormGroup.password appState form "passwordConfirmation" <| l_ "passwordForm.passwordConfirmation" appState
+        [ FormGroup.passwordWithStrength appState form "password" <| gettext "New password" appState.locale
+        , FormGroup.password appState form "passwordConfirmation" <| gettext "New password again" appState.locale
         ]

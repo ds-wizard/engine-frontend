@@ -2,12 +2,12 @@ module Wizard.Settings.Template.View exposing (view)
 
 import Form exposing (Form)
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
 import Shared.Data.BootstrapConfig.TemplateConfig exposing (TemplateConfig)
 import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l)
 import Shared.Utils exposing (getOrganizationAndItemId)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -16,11 +16,6 @@ import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Template.Models exposing (Model)
 import Wizard.Settings.Template.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.Template.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -35,8 +30,8 @@ viewContent appState model templates =
 
 viewProps : List TemplateSuggestion -> GenericView.ViewProps TemplateConfig Msg
 viewProps templates =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Document Templates"
+    , locSave = gettext "Save"
     , formView = formView templates
     , wrapMsg = GenericMsg << GenericMsgs.FormMsg
     }
@@ -68,7 +63,7 @@ formView templates appState form =
     in
     Html.map (GenericMsg << GenericMsgs.FormMsg) <|
         div [ class "form-group" ]
-            [ label [] [ text (l_ "form.recommendedTemplateId" appState) ]
+            [ label [] [ text (gettext "Recommended Template" appState.locale) ]
             , div [ class "input-group" ]
                 [ Input.selectInput templateOptions recommendedTemplateField [ class "form-control" ]
                 , Input.selectInput templateVersionOptions recommendedTemplateIdField [ class "form-control" ]

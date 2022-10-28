@@ -4,6 +4,7 @@ module Wizard.Documents.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.Document exposing (Document)
@@ -11,7 +12,6 @@ import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setQuestionnaire)
 import Uuid
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -92,7 +92,7 @@ handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError Questionn
 handleGetQuestionnaireCompleted appState model result =
     applyResult appState
         { setResult = setQuestionnaire << Just
-        , defaultError = lg "apiError.documents.getListError" appState
+        , defaultError = gettext "Unable to get documents." appState.locale
         , model = model
         , result = result
         }
@@ -132,7 +132,7 @@ handleDeleteDocumentCompleted appState model result =
             )
 
         Err error ->
-            ( { model | deletingDocument = ApiError.toActionResult appState (lg "apiError.documents.deleteError" appState) error }
+            ( { model | deletingDocument = ApiError.toActionResult appState (gettext "Document could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -187,7 +187,7 @@ handleGetSubmissionServicesCompleted appState model result =
     in
     applyResult appState
         { setResult = setResult
-        , defaultError = lg "apiError.documents.getSubmissionServicesError" appState
+        , defaultError = gettext "Unable to get submission services for the document." appState.locale
         , model = model
         , result = result
         }
@@ -224,7 +224,7 @@ handleSubmitDocumentCompleted appState model result =
     in
     applyResult appState
         { setResult = \value record -> updateSubmissions { record | submittingDocument = value }
-        , defaultError = lg "apiError.submissions.postError" appState
+        , defaultError = gettext "Unable to submit the document." appState.locale
         , model = model
         , result = result
         }
@@ -237,7 +237,7 @@ handleSubmitDocumentCompleted appState model result =
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig Document
 listingUpdateConfig wrapMsg appState model =
     { getRequest = DocumentsApi.getDocuments model.questionnaireUuid
-    , getError = lg "apiError.documents.getListError" appState
+    , getError = gettext "Unable to get documents." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
     }

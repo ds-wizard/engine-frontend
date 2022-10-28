@@ -1,5 +1,6 @@
 module Wizard.Templates.Detail.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
@@ -9,9 +10,9 @@ import Shared.Data.Template.TemplatePackage as TemplatePackage
 import Shared.Data.Template.TemplateState as TemplateState
 import Shared.Data.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust, listInsertIf)
+import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
@@ -24,21 +25,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 import Wizard.Templates.Detail.Models exposing (Model)
 import Wizard.Templates.Detail.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Templates.Detail.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Templates.Detail.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Templates.Detail.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -62,7 +48,7 @@ header appState template =
         exportAction =
             a [ onClick (ExportTemplate template) ]
                 [ faSet "_global.export" appState
-                , lx_ "header.export" appState
+                , text (gettext "Export" appState.locale)
                 ]
 
         exportActionVisible =
@@ -71,7 +57,7 @@ header appState template =
         deleteAction =
             a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
                 [ faSet "_global.delete" appState
-                , lx_ "header.delete" appState
+                , text (gettext "Delete" appState.locale)
                 ]
 
         deleteActionVisible =
@@ -95,7 +81,7 @@ readme appState template =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
                     [ faSet "_global.warning" appState
-                    , lx_ "readme.versionWarning" appState
+                    , text (gettext "This is not the latest available version of this document template." appState.locale)
                     ]
 
             else
@@ -122,7 +108,7 @@ newVersionInRegistryWarning appState template =
                         [ linkTo appState
                             (Routes.templatesImport (Just latestPackageId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                            [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                            [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
                         ]
 
                     else
@@ -130,9 +116,9 @@ newVersionInRegistryWarning appState template =
             in
             div [ class "alert alert-warning" ]
                 (faSet "_global.warning" appState
-                    :: lh_ "registryVersion.warning"
+                    :: String.formatHtml
+                        (gettext "There is a newer version (%s) available." appState.locale)
                         [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                        appState
                     ++ link
                 )
 
@@ -153,13 +139,13 @@ unsupportedMetamodelVersionWarning appState template =
                                     template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
                             in
                             text " "
-                                :: lh_ "registryVersion.warning"
+                                :: String.formatHtml
+                                    (gettext "There is a newer version (%s) available." appState.locale)
                                     [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                                    appState
                                 ++ [ linkTo appState
                                         (Routes.templatesImport (Just latestPackageId))
                                         [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                                        [ faSet "kmImport.fromRegistry" appState, lx_ "registryVersion.warning.import" appState ]
+                                        [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
                                    ]
 
                         else
@@ -170,7 +156,7 @@ unsupportedMetamodelVersionWarning appState template =
         in
         div [ class "alert alert-danger" ]
             ([ faSet "_global.warning" appState
-             , lx_ "readme.unsupportedMetamodelVersion" appState
+             , text (gettext "This document template is not supported in this version of DSW." appState.locale)
              ]
                 ++ link
             )
@@ -199,13 +185,13 @@ sidePanelKmInfo : AppState -> TemplateDetail -> Maybe ( String, String, Html msg
 sidePanelKmInfo appState template =
     let
         templateInfoList =
-            [ ( lg "template.id" appState, "id", text template.id )
-            , ( lg "template.version" appState, "version", text <| Version.toString template.version )
-            , ( lg "template.metamodel" appState, "metamodel", text <| String.fromInt template.metamodelVersion )
-            , ( lg "template.license" appState, "license", text template.license )
+            [ ( gettext "ID" appState.locale, "id", text template.id )
+            , ( gettext "Version" appState.locale, "version", text <| Version.toString template.version )
+            , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt template.metamodelVersion )
+            , ( gettext "License" appState.locale, "license", text template.license )
             ]
     in
-    Just ( lg "template" appState, "template", DetailPage.sidePanelList 4 8 templateInfoList )
+    Just ( gettext "Document Template" appState.locale, "template", DetailPage.sidePanelList 4 8 templateInfoList )
 
 
 sidePanelFormats : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
@@ -220,7 +206,7 @@ sidePanelFormats appState template =
                 |> List.map formatView
     in
     if List.length formats > 0 then
-        Just ( lg "template.formats" appState, "formats", ul [ class "format-list" ] formats )
+        Just ( gettext "Formats" appState.locale, "formats", ul [ class "format-list" ] formats )
 
     else
         Nothing
@@ -245,7 +231,7 @@ sidePanelOtherVersions appState template =
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then
-        Just ( lg "template.otherVersions" appState, "other-versions", ul [] versionLinks )
+        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
 
     else
         Nothing
@@ -253,18 +239,18 @@ sidePanelOtherVersions appState template =
 
 sidePanelOrganizationInfo : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelOrganizationInfo appState template =
-    Maybe.map (\organization -> ( lg "template.publishedBy" appState, "published-by", viewOrganization organization )) template.organization
+    Maybe.map (\organization -> ( gettext "Published by" appState.locale, "published-by", viewOrganization organization )) template.organization
 
 
 sidePanelRegistryLink : AppState -> TemplateDetail -> Maybe ( String, String, Html msg )
 sidePanelRegistryLink appState template =
     let
         toRegistryLink registryLink =
-            ( lg "template.registryLink" appState
+            ( gettext "Registry link" appState.locale
             , "registry-link"
             , a [ href registryLink, target "_blank", class "with-icon" ]
                 [ faSet "kmDetail.registryLink" appState
-                , lx_ "registryLinkLabel" appState
+                , text (gettext "View in registry" appState.locale)
                 ]
             )
     in
@@ -288,7 +274,7 @@ sidePanelUsableWith appState template =
                 |> List.map packageLink
     in
     if List.length packageLinks > 0 then
-        Just ( lg "template.usableWith" appState, "usable-with", ul [] packageLinks )
+        Just ( gettext "Usable with" appState.locale, "usable-with", ul [] packageLinks )
 
     else
         Nothing
@@ -306,15 +292,18 @@ deleteVersionModal appState model template =
     let
         modalContent =
             [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text template.id ] ] appState)
+                (String.formatHtml
+                    (gettext "Are you sure you want to permanently delete %s?" appState.locale)
+                    [ strong [] [ text template.id ] ]
+                )
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete version" appState.locale
             , modalContent = modalContent
             , visible = model.showDeleteDialog
             , actionResult = model.deletingVersion
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeleteVersion
             , cancelMsg = Just <| ShowDeleteDialog False
             , dangerous = True

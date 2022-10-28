@@ -1,9 +1,9 @@
 module Wizard.KnowledgeModels.Preview.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Shared.Data.Package exposing (Package)
-import Shared.Locale exposing (l)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
@@ -15,11 +15,6 @@ import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.Preview.Models exposing (Model)
 import Wizard.KnowledgeModels.Preview.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KnowledgeModels.Preview.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -60,7 +55,7 @@ viewHeader appState model package =
             if Features.projectsCreateCustom appState then
                 let
                     cfg =
-                        { label = l_ "createProject" appState
+                        { label = gettext "Create project" appState.locale
                         , result = model.creatingQuestionnaire
                         , msg = CreateProjectMsg
                         , dangerous = False

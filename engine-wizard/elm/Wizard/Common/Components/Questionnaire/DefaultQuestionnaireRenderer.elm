@@ -1,5 +1,8 @@
 module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create)
 
+--import Shared.Locale exposing (l, lg, lx)
+
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
 import List.Extra as List
@@ -16,21 +19,21 @@ import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
 import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lx)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
 
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
+--l_ : String -> AppState -> String
+--l_ =
+--    l "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
+--
+--
+--lx_ : String -> AppState -> Html msg
+--lx_ =
+--    lx "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
 
 
 create : AppState -> KnowledgeModel -> QuestionnaireRenderer msg
@@ -184,7 +187,8 @@ viewRequiredLevel appState qvs phases questionPhaseUuid =
             span []
                 [ span [ class "caption" ]
                     [ faSet "questionnaire.desirable" appState
-                    , lx_ "desirable" appState
+                    , text (gettext "Desirable" appState.locale)
+                    , text ": "
                     , span [] [ text level.title ]
                     ]
                 ]
@@ -234,7 +238,7 @@ viewUrlReferences : AppState -> List URLReferenceData -> Html msg
 viewUrlReferences appState =
     viewExtraItems
         { icon = faSet "questionnaire.urlReferences" appState
-        , label = l_ "externalLinks" appState
+        , label = gettext "External links" appState.locale
         , viewItem = viewUrlReference
         }
 
@@ -249,7 +253,7 @@ viewExperts : AppState -> List Expert -> Html msg
 viewExperts appState =
     viewExtraItems
         { icon = faSet "questionnaire.experts" appState
-        , label = lg "experts" appState
+        , label = gettext "Experts" appState.locale
         , viewItem = viewExpert
         }
 

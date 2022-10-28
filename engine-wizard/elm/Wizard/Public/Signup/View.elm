@@ -4,11 +4,12 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Form exposing (label)
 import Form exposing (Form)
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, text)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lh, lx)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -21,28 +22,13 @@ import Wizard.Public.Signup.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Public.Signup.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Public.Signup.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Public.Signup.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     let
         content =
             case model.signingUp of
                 Success _ ->
-                    Page.success appState <| l_ "success" appState
+                    Page.success appState <| gettext "Sign up was successful. Check your email for the activation link." appState.locale
 
                 _ ->
                     signupForm appState model
@@ -55,12 +41,12 @@ signupForm : AppState -> Model -> Html Msg
 signupForm appState model =
     let
         formConfig =
-            { title = l_ "form.title" appState
+            { title = gettext "Sign Up" appState.locale
             , submitMsg = FormMsg Form.Submit
             , actionResult = model.signingUp
-            , submitLabel = l_ "form.submit" appState
+            , submitLabel = gettext "Sign Up" appState.locale
             , formContent = formView appState model.form |> Html.map FormMsg
-            , link = Just ( Routes.PublicRoute (LoginRoute Nothing), l_ "form.link" appState )
+            , link = Just ( Routes.PublicRoute (LoginRoute Nothing), gettext "I already have an account" appState.locale )
             }
     in
     publicForm appState formConfig
@@ -94,33 +80,39 @@ formView appState form =
 
         privacyLink privacyUrl =
             a [ href privacyUrl, target "_blank", dataCy "signup_link_privacy" ]
-                [ lx_ "form.privacy" appState ]
+                [ text (gettext "Privacy" appState.locale) ]
 
         termsOfServiceLink termsOfServiceUrl =
             a [ href termsOfServiceUrl, target "_blank", dataCy "signup_link_tos" ]
-                [ lx_ "form.termsOfService" appState ]
+                [ text (gettext "Terms of Service" appState.locale) ]
 
         acceptGroup =
             case ( appState.config.privacyAndSupport.privacyUrl, appState.config.privacyAndSupport.termsOfServiceUrl ) of
                 ( Just privacyUrl, Just termsOfServiceUrl ) ->
                     viewAcceptGroup
-                        (lh_ "form.privacyTextBoth"
+                        (String.formatHtml
+                            (gettext "I have read %s and %s." appState.locale)
                             [ privacyLink privacyUrl
                             , termsOfServiceLink termsOfServiceUrl
                             ]
-                            appState
                         )
-                        (lx_ "form.privacyErrorBoth" appState)
+                        (text (gettext "You have to read Privacy and Terms of Service first" appState.locale))
 
                 ( Just privacyUrl, Nothing ) ->
                     viewAcceptGroup
-                        (lh_ "form.privacyText" [ privacyLink privacyUrl ] appState)
-                        (lx_ "form.privacyErrorPrivacy" appState)
+                        (String.formatHtml
+                            (gettext "I have read %s." appState.locale)
+                            [ privacyLink privacyUrl ]
+                        )
+                        (text (gettext "You have to read Privacy first" appState.locale))
 
                 ( Nothing, Just termsOfServiceUrl ) ->
                     viewAcceptGroup
-                        (lh_ "form.privacyText" [ termsOfServiceLink termsOfServiceUrl ] appState)
-                        (lx_ "form.privacyErrorTerms" appState)
+                        (String.formatHtml
+                            (gettext "I have read %s." appState.locale)
+                            [ termsOfServiceLink termsOfServiceUrl ]
+                        )
+                        (text (gettext "You have to read Terms of Service first" appState.locale))
 
                 _ ->
                     emptyNode
@@ -134,14 +126,14 @@ formView appState form =
                 ]
     in
     div []
-        [ FormGroup.input appState form "email" <| lg "user.email" appState
-        , FormGroup.input appState form "firstName" <| lg "user.firstName" appState
-        , FormGroup.input appState form "lastName" <| lg "user.lastName" appState
+        [ FormGroup.input appState form "email" <| gettext "Email" appState.locale
+        , FormGroup.input appState form "firstName" <| gettext "First name" appState.locale
+        , FormGroup.input appState form "lastName" <| gettext "Last name" appState.locale
         , FormGroup.optionalWrapper appState <|
             FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <|
-                lg "user.affiliation" appState
-        , FormGroup.passwordWithStrength appState form "password" <| lg "user.password" appState
-        , FormGroup.password appState form "passwordConfirmation" <| lg "user.passwordConfirmation" appState
+                gettext "Affiliation" appState.locale
+        , FormGroup.passwordWithStrength appState form "password" <| gettext "Password" appState.locale
+        , FormGroup.password appState form "passwordConfirmation" <| gettext "Password again" appState.locale
         , acceptGroup
         , acceptFakeGroup
         ]

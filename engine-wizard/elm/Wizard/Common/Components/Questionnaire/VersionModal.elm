@@ -11,23 +11,18 @@ module Wizard.Common.Components.Questionnaire.VersionModal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Gettext exposing (gettext)
 import Html exposing (Html)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.VersionForm as VersionForm exposing (VersionForm)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Questionnaire.VersionModal"
 
 
 
@@ -158,24 +153,24 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         form =
-            [ Html.map FormMsg <| FormGroup.input appState model.form "name" (l_ "form.name" appState)
-            , Html.map FormMsg <| FormGroup.textarea appState model.form "description" (l_ "form.description" appState)
+            [ Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)
+            , Html.map FormMsg <| FormGroup.textarea appState model.form "description" (gettext "Description" appState.locale)
             ]
 
         modalTitle =
             case model.mbQuestionnaireVersion of
                 Just _ ->
-                    l_ "title.rename" appState
+                    gettext "Rename version" appState.locale
 
                 Nothing ->
-                    l_ "title.new" appState
+                    gettext "New version" appState.locale
     in
     Modal.confirm appState
         { modalTitle = modalTitle
         , modalContent = form
         , visible = Maybe.isJust model.mbEventUuid
         , actionResult = ActionResult.map (always "") model.versionResult
-        , actionName = l_ "action" appState
+        , actionName = gettext "Save" appState.locale
         , actionMsg = FormMsg Form.Submit
         , cancelMsg = Just Close
         , dangerous = False

@@ -7,51 +7,41 @@ import Dict
 import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation, customError)
+import Gettext exposing (gettext)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Form.FormError exposing (FormError(..))
-import Shared.Locale exposing (l, lf)
-import Shared.Provisioning exposing (Provisioning)
+import String.Format as String
 
 
-l_ : String -> { a | provisioning : Provisioning } -> String
-l_ =
-    l "Shared.Form"
-
-
-lf_ : String -> List String -> { a | provisioning : Provisioning } -> String
-lf_ =
-    lf "Shared.Form"
-
-
-errorToString : { a | provisioning : Provisioning } -> String -> ErrorValue FormError -> String
+errorToString : { a | locale : Gettext.Locale } -> String -> ErrorValue FormError -> String
 errorToString appState labelText error =
     case error of
         Empty ->
-            lf_ "error.empty" [ labelText ] appState
+            String.format (gettext "%s cannot be empty." appState.locale) [ labelText ]
 
         InvalidString ->
-            lf_ "error.invalidString" [ labelText ] appState
+            String.format (gettext "%s cannot be empty." appState.locale) [ labelText ]
 
         InvalidEmail ->
-            l_ "error.invalidEmail" appState
+            gettext "This is not a valid email." appState.locale
 
         InvalidFloat ->
-            l_ "error.invalidFloat" appState
+            gettext "This is not a valid number." appState.locale
 
         SmallerFloatThan n ->
-            lf_ "error.smallerFloatThan" [ String.fromFloat n ] appState
+            String.format (gettext "This should not be less than %s." appState.locale) [ String.fromFloat n ]
 
         GreaterFloatThan n ->
-            lf_ "error.greaterFloatThan" [ String.fromFloat n ] appState
+            String.format (gettext "This should not be more than %s." appState.locale) [ String.fromFloat n ]
 
         CustomError err ->
             case err of
                 ConfirmationError ->
-                    l_ "error.confirmationError" appState
+                    gettext "Passwords do not match!" appState.locale
 
                 InvalidUuid ->
-                    l_ "error.invalidUuid" appState
+                    gettext "This is not a valid UUID." appState.locale
 
                 ServerValidationError msg ->
                     msg
@@ -60,10 +50,10 @@ errorToString appState labelText error =
                     msg
 
         _ ->
-            l_ "error.default" appState
+            gettext "Invalid value." appState.locale
 
 
-setFormErrors : { b | provisioning : Provisioning } -> ApiError -> Form FormError a -> Form FormError a
+setFormErrors : { b | locale : Gettext.Locale } -> ApiError -> Form FormError a -> Form FormError a
 setFormErrors appState apiError form =
     case ApiError.toServerError apiError of
         Just (ServerError.UserFormError error) ->
@@ -73,7 +63,7 @@ setFormErrors appState apiError form =
             form
 
 
-setFormError : { b | provisioning : Provisioning } -> ( String, List ServerError.Message ) -> Form FormError a -> Form FormError a
+setFormError : { b | locale : Gettext.Locale } -> ( String, List ServerError.Message ) -> Form FormError a -> Form FormError a
 setFormError appState ( fieldName, fieldErrors ) form =
     case List.head fieldErrors of
         Just fieldError ->
@@ -83,7 +73,7 @@ setFormError appState ( fieldName, fieldErrors ) form =
             form
 
 
-createFieldValidation : { b | provisioning : Provisioning } -> String -> ServerError.Message -> Validation FormError a
+createFieldValidation : { b | locale : Gettext.Locale } -> String -> ServerError.Message -> Validation FormError a
 createFieldValidation appState fieldName fieldError =
     let
         error =

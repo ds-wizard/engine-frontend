@@ -4,9 +4,9 @@ module Wizard.Registry.RegistrySignupConfirmation.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Registry as RegistryApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Registry.RegistrySignupConfirmation.Models exposing (Model)
@@ -32,4 +32,4 @@ handlePostConfirmationComplete appState model result =
             { model | confirmation = Success () }
 
         Err error ->
-            { model | confirmation = ApiError.toActionResult appState (lg "apiError.registry.confirmation" appState) error }
+            { model | confirmation = ApiError.toActionResult appState (gettext "Unable to confirm the registry account." appState.locale) error }

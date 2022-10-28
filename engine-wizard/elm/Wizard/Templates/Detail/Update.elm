@@ -4,9 +4,9 @@ module Wizard.Templates.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Templates as TemplatesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setTemplate)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -29,7 +29,7 @@ update msg wrapMsg appState model =
         GetTemplateCompleted result ->
             applyResult appState
                 { setResult = setTemplate
-                , defaultError = lg "apiError.templates.getError" appState
+                , defaultError = gettext "Unable to get the document template." appState.locale
                 , model = model
                 , result = result
                 }
@@ -66,6 +66,6 @@ deleteVersionCompleted appState model result =
             ( model, cmdNavigate appState Routes.templatesIndex )
 
         Err error ->
-            ( { model | deletingVersion = ApiError.toActionResult appState (lg "apiError.templates.deleteError" appState) error }
+            ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
             , getResultCmd result
             )

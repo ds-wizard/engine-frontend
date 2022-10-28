@@ -5,12 +5,12 @@ module Wizard.Settings.Registry.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Shared.Api.Registry as RegistryApi
 import Shared.Data.EditableConfig as EditableConfig
 import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -100,13 +100,13 @@ handlePostSignupComplete : AppState -> Model -> Result ApiError () -> ( Model, C
 handlePostSignupComplete appState model result =
     case result of
         Ok _ ->
-            ( { model | registrySigningUp = Success (lg "apiSuccess.registry.signup" appState) }
+            ( { model | registrySigningUp = Success (gettext "You have signed up for the Registry, you should receive a confirmation email soon." appState.locale) }
             , Cmd.none
             )
 
         Err error ->
             ( { model
-                | registrySigningUp = ApiError.toActionResult appState (lg "apiError.registry.signup.postError" appState) error
+                | registrySigningUp = ApiError.toActionResult appState (gettext "Sign up request failed." appState.locale) error
                 , registrySignupForm = setFormErrors appState error model.registrySignupForm
               }
             , getResultCmd result
