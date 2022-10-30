@@ -91,6 +91,11 @@ serviceFormView appState openIDPrefabs form i =
                 |> Maybe.map (\id -> appState.clientUrl ++ "/auth/" ++ id ++ "/callback")
                 |> Maybe.withDefault "-"
 
+        logoutUrl =
+            (Form.getFieldAsString idField form).value
+                |> Maybe.map (\id -> appState.apiUrl ++ "/auth/" ++ id ++ "/logout")
+                |> Maybe.withDefault "-"
+
         buttonName =
             Maybe.withDefault "" <| (Form.getFieldAsString nameField form).value
 
@@ -118,7 +123,7 @@ serviceFormView appState openIDPrefabs form i =
                             openID.style.background
                 in
                 div [ class "prefab-selection" ]
-                    [ strong [] [ text "Quick setup" ]
+                    [ strong [] [ text (gettext "Quick setup" appState.locale) ]
                     , div [] (List.map viewPrefabButton <| List.sortBy .name openIDPrefabs)
                     ]
 
@@ -144,6 +149,7 @@ serviceFormView appState openIDPrefabs form i =
                     ]
                 ]
             , FormGroup.textView "callback-url" callbackUrl (gettext "Callback URL" appState.locale)
+            , FormGroup.textView "logout-url" logoutUrl (gettext "Logout URL" appState.locale)
             , div [ class "row" ]
                 [ div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientIdField (gettext "Client ID" appState.locale) ]
                 , div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientSecretField (gettext "Client Secret" appState.locale) ]
