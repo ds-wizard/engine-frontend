@@ -1,5 +1,6 @@
 module Shared.Api.Users exposing
     ( GetUsersFilters
+    , deleteToken
     , deleteUser
     , getCurrentUser
     , getUser
@@ -117,3 +118,8 @@ putUserActivation uuid hash =
 deleteUser : String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 deleteUser uuid =
     jwtDelete ("/users/" ++ uuid)
+
+
+deleteToken : AbstractAppState a -> ToMsg () msg -> Cmd msg
+deleteToken =
+    jwtDelete "/users/current/token"

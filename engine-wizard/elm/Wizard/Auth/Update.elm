@@ -25,7 +25,7 @@ update msg model =
                     setSession (Session.setToken model.appState.session token) model
             in
             ( newModel
-            , UsersApi.getCurrentUser newModel.appState (AuthMsgs.GetCurrentUserCompleted mbOriginalUrl >> Wizard.Msgs.AuthMsg)
+            , UsersApi.getCurrentUser newModel.appState (Wizard.Msgs.AuthMsg << AuthMsgs.GetCurrentUserCompleted mbOriginalUrl)
             )
 
         AuthMsgs.GetCurrentUserCompleted mbOriginalUrl result ->
@@ -33,6 +33,9 @@ update msg model =
 
         AuthMsgs.Logout ->
             logout model
+
+        AuthMsgs.LogoutDone ->
+            ( model, Cmd.none )
 
 
 getCurrentUserCompleted : Model -> Maybe String -> Result ApiError User -> ( Model, Cmd Msg )
@@ -73,6 +76,10 @@ logout : Model -> ( Model, Cmd Msg )
 logout model =
     let
         cmd =
-            Cmd.batch [ Ports.clearSession (), cmdNavigate model.appState Routes.publicHome ]
+            Cmd.batch
+                [ Ports.clearSession ()
+                , UsersApi.deleteToken model.appState (Wizard.Msgs.AuthMsg << always AuthMsgs.LogoutDone)
+                , cmdNavigate model.appState Routes.publicHome
+                ]
     in
     ( setSession Session.init model, cmd )
