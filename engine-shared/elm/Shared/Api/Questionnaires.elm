@@ -50,6 +50,7 @@ import Uuid exposing (Uuid)
 
 type alias GetQuestionnairesFilters =
     { isTemplate : Maybe Bool
+    , isMigrating : Maybe Bool
     , userUuids : Maybe String
     , userUuidsOp : Maybe FilterOperator
     , projectTags : Maybe String
@@ -65,6 +66,7 @@ getQuestionnaires filters qs =
         extraParams =
             PaginationQueryString.filterParams <|
                 [ ( "isTemplate", Maybe.map boolToString filters.isTemplate )
+                , ( "isMigrating", Maybe.map boolToString filters.isMigrating )
                 , ( "userUuids", filters.userUuids )
                 , ( "userUuidsOp", Maybe.map FilterOperator.toString filters.userUuidsOp )
                 , ( "projectTags", filters.projectTags )

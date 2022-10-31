@@ -326,6 +326,7 @@ listingUpdateConfig wrapMsg appState model =
     { getRequest =
         QuestionnairesApi.getQuestionnaires
             { isTemplate = isTemplate
+            , isMigrating = Nothing
             , userUuids = users
             , userUuidsOp = usersOp
             , projectTags = projectTags

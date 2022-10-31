@@ -96,6 +96,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             , getTypeHints =
                 QuestionnairesApi.getQuestionnaires
                     { isTemplate = Just True
+                    , isMigrating = Just False
                     , userUuids = Nothing
                     , userUuidsOp = Nothing
                     , projectTags = Nothing

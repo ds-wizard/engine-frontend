@@ -49,6 +49,7 @@ fetchData appState =
     in
     QuestionnairesApi.getQuestionnaires
         { isTemplate = Just False
+        , isMigrating = Nothing
         , userUuids = mbUserUuid
         , userUuidsOp = Nothing
         , projectTags = Nothing
