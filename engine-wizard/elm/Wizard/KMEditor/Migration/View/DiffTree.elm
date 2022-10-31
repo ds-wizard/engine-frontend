@@ -48,7 +48,7 @@ viewEvent appState kmName km event =
             Maybe.map .name <| KnowledgeModel.getTag commonData.entityUuid km
 
         getIntegrationName commonData =
-            Maybe.map Integration.getName <| KnowledgeModel.getIntegration commonData.entityUuid km
+            Maybe.map Integration.getVisibleName <| KnowledgeModel.getIntegration commonData.entityUuid km
 
         getQuestionTitle commonData =
             Maybe.map Question.getTitle <| KnowledgeModel.getQuestion commonData.entityUuid km

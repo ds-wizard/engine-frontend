@@ -167,7 +167,7 @@ treeNodeIntegration props appState editorBranch integration =
         config =
             { uuid = Integration.getUuid integration
             , icon = faSet "km.integration" appState
-            , label = Integration.getName integration
+            , label = Integration.getVisibleName integration
             , children = []
             , untitledLabel = gettext "Untitled integration" appState.locale
             }

@@ -254,7 +254,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (gettext "Untitled tag" appState.locale) << .name) KnowledgeModel.getTag
 
         getIntegrationName =
-            getEditorName_ (String.withDefault (gettext "Untitled integration" appState.locale) << Integration.getName) KnowledgeModel.getIntegration
+            getEditorName_ (String.withDefault (gettext "Untitled integration" appState.locale) << Integration.getVisibleName) KnowledgeModel.getIntegration
 
         getAnswerName =
             getEditorName_ (String.withDefault (gettext "Untitled answer" appState.locale) << .label) KnowledgeModel.getAnswer

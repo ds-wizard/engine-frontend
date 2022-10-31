@@ -999,7 +999,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         integrationUuidOptions =
                             KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel
                                 |> EditorBranch.filterDeletedWith Integration.getUuid editorBranch
-                                |> List.map (\integration -> ( Integration.getUuid integration, String.withDefault (gettext "Untitled integration" appState.locale) (Integration.getName integration) ))
+                                |> List.map (\integration -> ( Integration.getUuid integration, String.withDefault (gettext "Untitled integration" appState.locale) (Integration.getVisibleName integration) ))
                                 |> (::) ( Uuid.toString Uuid.nil, gettext "- select integration -" appState.locale )
 
                         selectedIntegrationProps =
@@ -1578,13 +1578,13 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         li []
                             [ a [ onClick (createEditEventFromPrefab i) ]
                                 [ viewLogo i
-                                , span [] [ text (Integration.getName i) ]
+                                , span [] [ text (Integration.getVisibleName i) ]
                                 ]
                             ]
                 in
                 div [ class "prefab-selection" ]
                     [ strong [] [ text (gettext "Quick setup" appState.locale) ]
-                    , ul [] (List.map viewIntegrationButton <| List.sortBy Integration.getName integrationPrefabs)
+                    , ul [] (List.map viewIntegrationButton <| List.sortBy Integration.getVisibleName integrationPrefabs)
                     ]
 
             else

@@ -17,6 +17,7 @@ module Shared.Data.KnowledgeModel.Integration exposing
     , getResponseListField
     , getTypeString
     , getUuid
+    , getVisibleName
     , getWidgetUrl
     )
 
@@ -82,7 +83,12 @@ getId =
 
 
 getName : Integration -> String
-getName integration =
+getName =
+    .name << getCommonIntegrationData
+
+
+getVisibleName : Integration -> String
+getVisibleName integration =
     let
         name =
             (getCommonIntegrationData integration).name
