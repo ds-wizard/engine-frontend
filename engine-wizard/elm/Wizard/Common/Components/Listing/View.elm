@@ -30,6 +30,7 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (Pa
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
+import String.Format as String
 import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -568,7 +569,7 @@ viewUpdated appState config item =
                     TimeUtils.toReadableDateTime appState.timeZone time
             in
             span (tooltip readableTime)
-                [ text <| gettext "Updated" appState.locale ++ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ]
+                [ text <| String.format (gettext "Updated %s" appState.locale) [ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ] ]
 
         Nothing ->
             emptyNode
