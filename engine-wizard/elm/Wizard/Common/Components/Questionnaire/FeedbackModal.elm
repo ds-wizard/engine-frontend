@@ -6,8 +6,6 @@ module Wizard.Common.Components.Questionnaire.FeedbackModal exposing
     , view
     )
 
---import Shared.Locale exposing (l, lf, lg, lh, lx)
-
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Gettext exposing (gettext)
@@ -25,27 +23,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.FeedbackForm as FeedbackForm exposing (FeedbackForm)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
-
-
-
---l_ : String -> AppState -> String
---l_ =
---    l "Wizard.Common.Components.Questionnaire.FeedbackModal"
---
---
---lf_ : String -> List String -> AppState -> String
---lf_ =
---    lf "Wizard.Common.Components.Questionnaire.FeedbackModal"
---
---
---lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
---lh_ =
---    lh "Wizard.Common.Components.Questionnaire.FeedbackModal"
---
---
---lx_ : String -> AppState -> Html msg
---lx_ =
---    lx "Wizard.Common.Components.Questionnaire.FeedbackModal"
 
 
 type alias Model =
@@ -167,7 +144,7 @@ view appState model =
                     ( gettext "Send" appState.locale, FeedbackFormMsg Form.Submit, Just <| CloseFeedback )
 
         modalConfig =
-            { modalTitle = gettext "Title" appState.locale
+            { modalTitle = gettext "Feedback" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = ActionResult.map (\_ -> gettext "Your feedback has been sent." appState.locale) model.feedbackResult
