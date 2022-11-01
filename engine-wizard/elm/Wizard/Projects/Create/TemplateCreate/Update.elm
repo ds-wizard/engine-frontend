@@ -47,6 +47,7 @@ update wrapMsg msg appState model =
                 , defaultError = gettext "Unable to get the project." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 , cmd = Cmd.none
                 }
 
@@ -81,7 +82,7 @@ handlePostQuestionnaireCompleted appState model result =
 
         Err error ->
             ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be created." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

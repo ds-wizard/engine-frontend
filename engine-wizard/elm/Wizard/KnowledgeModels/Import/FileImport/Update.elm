@@ -69,5 +69,5 @@ importPackageCompleted appState model result =
 
         Err error ->
             ( { model | importing = ApiError.toActionResult appState (gettext "Importing the package failed." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )

@@ -1,4 +1,7 @@
-module Wizard.Msgs exposing (Msg(..))
+module Wizard.Msgs exposing
+    ( Msg(..)
+    , logoutMsg
+    )
 
 import Browser exposing (UrlRequest)
 import Time
@@ -43,3 +46,8 @@ type Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
     | TemplatesMsg Wizard.Templates.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg
+
+
+logoutMsg : Msg
+logoutMsg =
+    AuthMsg Wizard.Auth.Msgs.Logout

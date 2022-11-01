@@ -5,10 +5,12 @@ module Shared.Setters exposing
     , setKnowledgeModel
     , setMigration
     , setPackage
+    , setPackages
     , setPlans
     , setPulling
     , setQuestionnaire
     , setQuestionnaireImporter
+    , setQuestionnaires
     , setSelected
     , setTemplate
     , setTemplates
@@ -46,6 +48,11 @@ setPackage value record =
     { record | package = value }
 
 
+setPackages : a -> { b | packages : a } -> { b | packages : a }
+setPackages value record =
+    { record | packages = value }
+
+
 setPlans : a -> { b | plans : a } -> { b | plans : a }
 setPlans value record =
     { record | plans = value }
@@ -64,6 +71,11 @@ setQuestionnaire value record =
 setQuestionnaireImporter : a -> { b | questionnaireImporter : a } -> { b | questionnaireImporter : a }
 setQuestionnaireImporter value record =
     { record | questionnaireImporter = value }
+
+
+setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }
+setQuestionnaires value record =
+    { record | questionnaires = value }
 
 
 setSelected : a -> { b | selected : a } -> { b | selected : a }

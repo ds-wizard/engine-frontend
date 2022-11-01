@@ -41,6 +41,7 @@ update wrapMsg msg appState model =
                     , defaultError = gettext "Unable to get the project." appState.locale
                     , model = model
                     , result = result
+                    , logoutMsg = Wizard.Msgs.logoutMsg
                     }
 
         GetQuestionnaireImporterComplete result ->
@@ -54,7 +55,7 @@ update wrapMsg msg appState model =
                 Err error ->
                     withSeed <|
                         ( setQuestionnaireImporter (ApiError.toActionResult appState (gettext "Unable to get importer." appState.locale) error) model
-                        , getResultCmd result
+                        , getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
         GotImporterData data ->

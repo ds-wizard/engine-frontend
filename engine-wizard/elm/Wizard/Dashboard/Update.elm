@@ -35,16 +35,28 @@ update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg appState model =
     case msg of
         ResearcherDashboardMsg researcherDashboardMsg ->
-            ( { model | researcherDashboardModel = ResearcherDashboard.update researcherDashboardMsg appState model.researcherDashboardModel }
-            , Cmd.none
+            let
+                ( researcherDashboardModel, cmd ) =
+                    ResearcherDashboard.update Wizard.Msgs.logoutMsg researcherDashboardMsg appState model.researcherDashboardModel
+            in
+            ( { model | researcherDashboardModel = researcherDashboardModel }
+            , cmd
             )
 
         DataStewardDashboardMsg dataStewardDashboardMsg ->
-            ( { model | dataStewardDashboardModel = DataStewardDashboard.update dataStewardDashboardMsg appState model.dataStewardDashboardModel }
-            , Cmd.none
+            let
+                ( dataStewardDashboardModel, cmd ) =
+                    DataStewardDashboard.update Wizard.Msgs.logoutMsg dataStewardDashboardMsg appState model.dataStewardDashboardModel
+            in
+            ( { model | dataStewardDashboardModel = dataStewardDashboardModel }
+            , cmd
             )
 
         AdminDashboardMsg adminDashboardMsg ->
-            ( { model | adminDashboardModel = AdminDashboard.update adminDashboardMsg appState model.adminDashboardModel }
-            , Cmd.none
+            let
+                ( adminDashboardModel, cmd ) =
+                    AdminDashboard.update Wizard.Msgs.logoutMsg adminDashboardMsg appState model.adminDashboardModel
+            in
+            ( { model | adminDashboardModel = adminDashboardModel }
+            , cmd
             )

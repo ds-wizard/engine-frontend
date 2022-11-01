@@ -27,6 +27,7 @@ update msg wrapMsg appState model =
                 , defaultError = "Unable to get persistent command."
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         RerunCommand ->
@@ -40,5 +41,6 @@ update msg wrapMsg appState model =
                 , defaultError = "Unable to rerun persistent command."
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always "Persistent command has been scheduled for the rerun."
                 }

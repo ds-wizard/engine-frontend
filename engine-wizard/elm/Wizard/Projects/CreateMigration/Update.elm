@@ -83,6 +83,7 @@ handleGetQuestionnaireCompleted appState model result =
             , defaultError = gettext "Unable to get the project." appState.locale
             , model = model
             , result = result
+            , logoutMsg = Wizard.Msgs.logoutMsg
             }
 
 
@@ -148,7 +149,7 @@ handlePostMigrationCompleted appState model result =
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be created." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -164,7 +165,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the Knowledge Model." appState.locale) error }
 
         cmd =
-            getResultCmd result
+            getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( newModel, cmd )
 

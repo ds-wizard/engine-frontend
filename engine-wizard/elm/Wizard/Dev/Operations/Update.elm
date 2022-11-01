@@ -30,6 +30,7 @@ update msg wrapMsg appState model =
                         , defaultError = "Unable to get dev operations."
                         , model = model
                         , result = result
+                        , logoutMsg = Wizard.Msgs.logoutMsg
                         }
 
                 openedSection =
@@ -81,4 +82,5 @@ update msg wrapMsg appState model =
                 , defaultError = "Execution failed."
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }

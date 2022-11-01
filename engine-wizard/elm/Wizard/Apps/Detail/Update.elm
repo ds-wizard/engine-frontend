@@ -36,6 +36,7 @@ update msg wrapMsg appState model =
                 , defaultError = gettext "Unable to get app." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         EditModalOpen ->
@@ -125,7 +126,7 @@ handlePutAppComplete appState model result =
                 | savingApp = ApiError.toActionResult appState (gettext "App could not be saved." appState.locale) error
                 , editForm = Maybe.map (setFormErrors appState error) model.editForm
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -167,7 +168,7 @@ handlePostPlanComplete appState model result =
                 | addingPlan = ApiError.toActionResult appState (gettext "Plan could not be created." appState.locale) error
                 , addPlanForm = Maybe.map (setFormErrors appState error) model.addPlanForm
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -209,7 +210,7 @@ handlePutPlanComplete appState model result =
                 | editingPlan = ApiError.toActionResult appState (gettext "Plan could not be saved." appState.locale) error
                 , editPlanForm = Maybe.map (Tuple.mapSecond (setFormErrors appState error)) model.editPlanForm
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -238,5 +239,5 @@ handleDeletePlanComplete appState model result =
             ( { model
                 | deletingPlan = ApiError.toActionResult appState (gettext "Plan could not be deleted." appState.locale) error
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
