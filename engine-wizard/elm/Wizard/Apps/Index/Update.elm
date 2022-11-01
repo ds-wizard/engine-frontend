@@ -1,9 +1,9 @@
 module Wizard.Apps.Index.Update exposing (fetchData, update)
 
 import Dict
+import Gettext exposing (gettext)
 import Shared.Api.Apps as AppsApi
 import Shared.Data.App exposing (App)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (stringToBool)
 import Wizard.Apps.Index.Models exposing (Model)
 import Wizard.Apps.Index.Msgs exposing (Msg(..))
@@ -46,7 +46,7 @@ listingUpdateConfig wrapMsg appState model =
                 Dict.get indexRouteEnabledFilterId model.apps.filters.values
     in
     { getRequest = AppsApi.getApps { enabled = enabled }
-    , getError = lg "apiError.apps.getListError" appState
+    , getError = gettext "Unable to get apps." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.appsIndexWithFilters model.apps.filters
     }

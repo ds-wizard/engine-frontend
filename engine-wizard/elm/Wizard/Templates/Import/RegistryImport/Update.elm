@@ -1,8 +1,8 @@
 module Wizard.Templates.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Templates as TemplatesApi
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setPulling)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -29,7 +29,7 @@ update msg wrapMsg appState model =
         PullTemplateCompleted result ->
             applyResult appState
                 { setResult = setPulling
-                , defaultError = lg "apiError.templates.pullError" appState
+                , defaultError = gettext "Unable to import the document template." appState.locale
                 , model = model
                 , result = result
                 }

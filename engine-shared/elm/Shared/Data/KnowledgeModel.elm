@@ -365,7 +365,7 @@ getTagName km uuid =
 
 getIntegrationName : KnowledgeModel -> String -> String
 getIntegrationName km uuid =
-    Maybe.unwrap "" Integration.getName <| getIntegration uuid km
+    Maybe.unwrap "" Integration.getVisibleName <| getIntegration uuid km
 
 
 getQuestionName : KnowledgeModel -> String -> String

@@ -8,4 +8,5 @@ import Shared.Error.ApiError exposing (ApiError)
 type Msg
     = GetCurrentUserCompleted (Maybe String) (Result ApiError User)
     | Logout
+    | LogoutDone
     | GotToken Token (Maybe String)

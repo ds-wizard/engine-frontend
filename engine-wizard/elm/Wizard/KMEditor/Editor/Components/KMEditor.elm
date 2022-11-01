@@ -12,13 +12,15 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
     )
 
 import Dict exposing (Dict)
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
-import Html.Attributes exposing (class, disabled, id, src)
+import Html.Attributes exposing (class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
+import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
 import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
@@ -67,7 +69,6 @@ import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueTyp
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lgx, lx)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (compose2, dispatch, flip, httpMethodOptions, nilUuid)
 import SplitPane
@@ -88,16 +89,6 @@ import Wizard.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.Components.KMEditor"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.Components.KMEditor"
-
-
 
 -- MODEL
 
@@ -108,6 +99,7 @@ type alias Model =
     , reorderableStates : Dict String Reorderable.State
     , deleteModalState : DeleteModalState
     , moveModalState : Maybe MoveModalState
+    , warningsPanelOpen : Bool
     }
 
 
@@ -139,6 +131,7 @@ initialModel =
     , reorderableStates = Dict.empty
     , deleteModalState = Closed
     , moveModalState = Nothing
+    , warningsPanelOpen = False
     }
 
 
@@ -164,6 +157,7 @@ type Msg
     | OpenMoveModal TreeInput.MovingEntity String
     | MoveModalMsg TreeInput.Msg
     | CloseMoveModal
+    | SetWarningPanelsOpen Bool
 
 
 update : (Bool -> msg) -> Msg -> Model -> EditorBranch -> ( EditorBranch, Model, Cmd msg )
@@ -239,6 +233,9 @@ update setFullscreenMsg msg model editorBranch =
         CloseMoveModal ->
             ( editorBranch, { model | moveModalState = Nothing }, Cmd.none )
 
+        SetWarningPanelsOpen open ->
+            ( editorBranch, { model | warningsPanelOpen = open }, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -293,19 +290,65 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                 { toMsg = wrapMsg << SplitPaneMsg
                 , customSplitter = Nothing
                 }
+
+        warningsCount =
+            List.length editorBranch.warnings
+
+        warningsButton =
+            if warningsCount > 0 || model.warningsPanelOpen then
+                a
+                    [ class "item"
+                    , classList [ ( "selected", model.warningsPanelOpen ) ]
+                    , onClick (wrapMsg (SetWarningPanelsOpen (not model.warningsPanelOpen)))
+                    ]
+                    [ text (gettext "Warnings" appState.locale)
+                    , Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsCount) ]
+                    ]
+
+            else
+                emptyNode
+
+        warningsPanel =
+            if model.warningsPanelOpen then
+                Html.map wrapMsg <|
+                    viewWarningsPanel appState editorBranch
+
+            else
+                emptyNode
     in
     div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
             [ Breadcrumbs.view appState editorBranch
+            , warningsButton
             , a [ class "breadcrumb-button", onClick expandMsg ] [ expandIcon ]
             ]
-        , SplitPane.view splitPaneConfig
-            (Tree.view treeViewProps appState editorBranch)
-            (viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch)
-            model.splitPane
+        , div [ class "editor-body" ]
+            [ SplitPane.view splitPaneConfig
+                (Tree.view treeViewProps appState editorBranch)
+                (viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch)
+                model.splitPane
+            , warningsPanel
+            ]
         , deleteModal appState wrapMsg eventMsg editorBranch model.deleteModalState
         , moveModal appState wrapMsg eventMsg editorBranch model.moveModalState
         ]
+
+
+viewWarningsPanel : AppState -> EditorBranch -> Html Msg
+viewWarningsPanel appState editorBranch =
+    let
+        viewWarning warning =
+            li [] [ linkTo appState (editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
+
+        warnings =
+            if List.isEmpty editorBranch.warnings then
+                Flash.info appState (gettext "There are no more warnings." appState.locale)
+
+            else
+                ul [] (List.map viewWarning editorBranch.warnings)
+    in
+    div [ class "right-panel" ]
+        [ warnings ]
 
 
 type alias EditorConfig msg =
@@ -407,7 +450,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
 
         kmEditorTitle =
             editorTitle appState
-                { title = lg "knowledgeModel" appState
+                { title = gettext "Knowledge Model" appState.locale
                 , uuid = kmUuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Nothing
@@ -443,7 +486,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         chaptersInput =
             Input.reorderable appState
                 { name = "chapters"
-                , label = lg "chapters" appState
+                , label = gettext "Chapters" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.chapterUuids
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -451,8 +494,8 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , updateList = createEditEvent setChapterUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getChapterName km
-                , untitledLabel = lg "chapter.untitled" appState
-                , addChildLabel = l_ "knowledgeModel.addChapter" appState
+                , untitledLabel = gettext "Untitled chapter" appState.locale
+                , addChildLabel = gettext "Add chapter" appState.locale
                 , addChildMsg = addChapterEvent
                 , addChildDataCy = "chapter"
                 }
@@ -460,7 +503,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         metricsInput =
             Input.reorderable appState
                 { name = "metrics"
-                , label = lg "metrics" appState
+                , label = gettext "Metrics" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.metricUuids
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -468,8 +511,8 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , updateList = createEditEvent setMetricUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getMetricName km
-                , untitledLabel = lg "metric.untitled" appState
-                , addChildLabel = l_ "knowledgeModel.addMetric" appState
+                , untitledLabel = gettext "Untitled metric" appState.locale
+                , addChildLabel = gettext "Add metric" appState.locale
                 , addChildMsg = addMetricEvent
                 , addChildDataCy = "metric"
                 }
@@ -477,7 +520,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         phasesInput =
             Input.reorderable appState
                 { name = "phases"
-                , label = lg "phases" appState
+                , label = gettext "Phases" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.phaseUuids
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -485,8 +528,8 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , updateList = createEditEvent setPhaseUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getPhaseName km
-                , untitledLabel = lg "phase.untitled" appState
-                , addChildLabel = l_ "knowledgeModel.addPhase" appState
+                , untitledLabel = gettext "Untitled phase" appState.locale
+                , addChildLabel = gettext "Add phase" appState.locale
                 , addChildMsg = addPhaseEvent
                 , addChildDataCy = "phase"
                 }
@@ -494,7 +537,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         tagsInput =
             Input.reorderable appState
                 { name = "tags"
-                , label = lg "tags" appState
+                , label = gettext "Question Tags" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.tagUuids
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -502,8 +545,8 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , updateList = createEditEvent setTagUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getTagName km
-                , untitledLabel = lg "tag.untitled" appState
-                , addChildLabel = l_ "knowledgeModel.addTag" appState
+                , untitledLabel = gettext "Untitled tag" appState.locale
+                , addChildLabel = gettext "Add tag" appState.locale
                 , addChildMsg = addTagEvent
                 , addChildDataCy = "tag"
                 }
@@ -511,7 +554,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         integrationsInput =
             Input.reorderable appState
                 { name = "integrations"
-                , label = lg "integrations" appState
+                , label = gettext "Integrations" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.integrationUuids
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -519,8 +562,8 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , updateList = createEditEvent setIntegrationUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getIntegrationName km
-                , untitledLabel = lg "integration.untitled" appState
-                , addChildLabel = l_ "knowledgeModel.addIntegration" appState
+                , untitledLabel = gettext "Untitled integration" appState.locale
+                , addChildLabel = gettext "Add integration" appState.locale
                 , addChildMsg = addIntegrationEvent
                 , addChildDataCy = "integration"
                 }
@@ -561,7 +604,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
 
         chapterEditorTitle =
             editorTitle appState
-                { title = lg "chapter" appState
+                { title = gettext "Chapter" appState.locale
                 , uuid = chapter.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just ChapterState
@@ -571,7 +614,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
         titleInput =
             Input.string
                 { name = "title"
-                , label = lg "chapter.title" appState
+                , label = gettext "Title" appState.locale
                 , value = chapter.title
                 , onInput = createEditEvent setTitle
                 }
@@ -579,7 +622,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
         textInput =
             Input.markdown appState
                 { name = "text"
-                , label = lg "chapter.text" appState
+                , label = gettext "Text" appState.locale
                 , value = Maybe.withDefault "" chapter.text
                 , onInput = createEditEvent setText << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
@@ -590,7 +633,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
         questionsInput =
             Input.reorderable appState
                 { name = "questions"
-                , label = lg "questions" appState
+                , label = gettext "Questions" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch chapter.questionUuids
                 , entityUuid = chapter.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -598,8 +641,8 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 , updateList = createEditEvent setQuestionUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
-                , untitledLabel = lg "question.untitled" appState
-                , addChildLabel = l_ "chapter.addQuestion" appState
+                , untitledLabel = gettext "Untitled question" appState.locale
+                , addChildLabel = gettext "Add question" appState.locale
                 , addChildMsg = questionAddEvent
                 , addChildDataCy = "question"
                 }
@@ -698,22 +741,22 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 |> eventMsg questionUuid Nothing
 
         questionTypeOptions =
-            [ ( "Options", lg "questionType.options" appState )
-            , ( "List", lg "questionType.list" appState )
-            , ( "Value", lg "questionType.value" appState )
-            , ( "Integration", lg "questionType.integration" appState )
-            , ( "MultiChoice", lg "questionType.multiChoice" appState )
+            [ ( "Options", gettext "Options" appState.locale )
+            , ( "List", gettext "List of Items" appState.locale )
+            , ( "Value", gettext "Value" appState.locale )
+            , ( "Integration", gettext "Integration" appState.locale )
+            , ( "MultiChoice", gettext "Multi-Choice" appState.locale )
             ]
 
         requiredPhaseUuidOptions =
             KnowledgeModel.getPhases editorBranch.branch.knowledgeModel
                 |> EditorBranch.filterDeletedWith .uuid editorBranch
                 |> List.map (\phase -> ( phase.uuid, phase.title ))
-                |> (::) ( "", l_ "question.phase.never" appState )
+                |> (::) ( "", gettext "Never" appState.locale )
 
         questionEditorTitle =
             editorTitle appState
-                { title = lg "question" appState
+                { title = gettext "Question" appState.locale
                 , uuid = Question.getUuid question
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just QuestionState
@@ -723,7 +766,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         typeInput =
             Input.select
                 { name = "type"
-                , label = lg "question.type" appState
+                , label = gettext "Type" appState.locale
                 , value = Question.getTypeString question
                 , options = questionTypeOptions
                 , onChange = onTypeChange
@@ -738,7 +781,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                     else
                         FormExtra.blockAfter
                             [ faSet "_global.warning" appState
-                            , text (l_ "question.type.warning.options" appState)
+                            , text (gettext "Changing a question type will remove all answers." appState.locale)
                             ]
 
                 ListQuestion _ _ ->
@@ -748,7 +791,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                     else
                         FormExtra.blockAfter
                             [ faSet "_global.warning" appState
-                            , text (l_ "question.type.warning.list" appState)
+                            , text (gettext "Changing a question type will remove all item questions." appState.locale)
                             ]
 
                 MultiChoiceQuestion _ _ ->
@@ -758,7 +801,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                     else
                         FormExtra.blockAfter
                             [ faSet "_global.warning" appState
-                            , text (l_ "question.type.warning.multichoice" appState)
+                            , text (gettext "Changing a question type will remove all choices." appState.locale)
                             ]
 
                 _ ->
@@ -767,7 +810,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         titleInput =
             Input.string
                 { name = "title"
-                , label = lg "question.title" appState
+                , label = gettext "Title" appState.locale
                 , value = Question.getTitle question
                 , onInput = createEditEvent setTitle setTitle setTitle setTitle setTitle
                 }
@@ -775,7 +818,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         textInput =
             Input.markdown appState
                 { name = "text"
-                , label = lg "question.text" appState
+                , label = gettext "Text" appState.locale
                 , value = Maybe.withDefault "" (Question.getText question)
                 , onInput = createEditEvent setText setText setText setText setText << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
@@ -786,7 +829,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         requiredPhaseUuidInput =
             Input.select
                 { name = "requiredPhaseUuid"
-                , label = lg "question.requiredLevel" appState
+                , label = gettext "When does this question become desirable?" appState.locale
                 , value = String.fromMaybe <| Question.getRequiredPhaseUuid question
                 , options = requiredPhaseUuidOptions
                 , onChange = createEditEvent setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid << String.toMaybe
@@ -794,7 +837,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
         tagUuidsInput =
             Input.tags appState
-                { label = lg "tags" appState
+                { label = gettext "Question Tags" appState.locale
                 , tags = EditorBranch.filterDeletedWith .uuid editorBranch <| KnowledgeModel.getTags editorBranch.branch.knowledgeModel
                 , selected = Question.getTagUuids question
                 , onChange = createEditEvent setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids
@@ -803,7 +846,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         referencesInput =
             Input.reorderable appState
                 { name = "references"
-                , label = lg "references" appState
+                , label = gettext "References" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch <| Question.getReferenceUuids question
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -811,8 +854,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getReferenceName editorBranch.branch.knowledgeModel
-                , untitledLabel = lg "reference.untitled" appState
-                , addChildLabel = l_ "question.addReference" appState
+                , untitledLabel = gettext "Untitled reference" appState.locale
+                , addChildLabel = gettext "Add reference" appState.locale
                 , addChildMsg = addReferenceEvent
                 , addChildDataCy = "reference"
                 }
@@ -820,7 +863,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         expertsInput =
             Input.reorderable appState
                 { name = "experts"
-                , label = lg "experts" appState
+                , label = gettext "Experts" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch <| Question.getExpertUuids question
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -828,8 +871,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getExpertName editorBranch.branch.knowledgeModel
-                , untitledLabel = lg "expert.untitled" appState
-                , addChildLabel = l_ "question.addExpert" appState
+                , untitledLabel = gettext "Untitled expert" appState.locale
+                , addChildLabel = gettext "Add expert" appState.locale
                 , addChildMsg = expertAddEvent
                 , addChildDataCy = "expert"
                 }
@@ -858,7 +901,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         answersInput =
                             Input.reorderable appState
                                 { name = "answers"
-                                , label = lg "answers" appState
+                                , label = gettext "Answers" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -866,8 +909,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , updateList = createTypeEditEvent setAnswerUuids
                                 , getRoute = editorRoute editorBranch
                                 , getName = KnowledgeModel.getAnswerName editorBranch.branch.knowledgeModel
-                                , untitledLabel = lg "answer.untitled" appState
-                                , addChildLabel = l_ "question.addAnswer" appState
+                                , untitledLabel = gettext "Untitled answer" appState.locale
+                                , addChildLabel = gettext "Add answer" appState.locale
                                 , addChildMsg = addAnswerEvent
                                 , addChildDataCy = "answer"
                                 }
@@ -890,7 +933,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         itemTemplateQuestionsInput =
                             Input.reorderable appState
                                 { name = "questions"
-                                , label = lg "questions" appState
+                                , label = gettext "Questions" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -898,8 +941,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , updateList = createTypeEditEvent setItemTemplateQuestionUuids
                                 , getRoute = editorRoute editorBranch
                                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
-                                , untitledLabel = lg "question.untitled" appState
-                                , addChildLabel = l_ "question.addItemTemplateQuestion" appState
+                                , untitledLabel = gettext "Untitled question" appState.locale
+                                , addChildLabel = gettext "Add question" appState.locale
                                 , addChildMsg = addItemTemplateQuestionEvent
                                 , addChildDataCy = "question"
                                 }
@@ -907,7 +950,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                     [ div [ class "form-group" ]
                         [ div [ class "card card-border-light card-item-template" ]
                             [ div [ class "card-header" ]
-                                [ lgx "question.itemTemplate" appState ]
+                                [ text (gettext "Item Template" appState.locale) ]
                             , div [ class "card-body" ]
                                 [ itemTemplateQuestionsInput ]
                             ]
@@ -923,21 +966,21 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg parentUuid (Just questionUuid)
 
                         questionValueTypeOptions =
-                            [ ( "StringQuestionValueType", lg "questionValueType.string" appState )
-                            , ( "NumberQuestionValueType", lg "questionValueType.number" appState )
-                            , ( "DateQuestionValueType", lg "questionValueType.date" appState )
-                            , ( "DateTimeQuestionValueType", lg "questionValueType.datetime" appState )
-                            , ( "TimeQuestionValueType", lg "questionValueType.time" appState )
-                            , ( "TextQuestionValueType", lg "questionValueType.text" appState )
-                            , ( "EmailQuestionValueType", lg "questionValueType.email" appState )
-                            , ( "UrlQuestionValueType", lg "questionValueType.url" appState )
-                            , ( "ColorQuestionValueType", lg "questionValueType.color" appState )
+                            [ ( "StringQuestionValueType", gettext "String" appState.locale )
+                            , ( "NumberQuestionValueType", gettext "Number" appState.locale )
+                            , ( "DateQuestionValueType", gettext "Date" appState.locale )
+                            , ( "DateTimeQuestionValueType", gettext "Date Time" appState.locale )
+                            , ( "TimeQuestionValueType", gettext "Time" appState.locale )
+                            , ( "TextQuestionValueType", gettext "Text" appState.locale )
+                            , ( "EmailQuestionValueType", gettext "Email" appState.locale )
+                            , ( "UrlQuestionValueType", gettext "URL" appState.locale )
+                            , ( "ColorQuestionValueType", gettext "Color" appState.locale )
                             ]
 
                         valueTypeInput =
                             Input.select
                                 { name = "valueType"
-                                , label = lg "questionValueType" appState
+                                , label = gettext "Value Type" appState.locale
                                 , value = QuestionValueType.toString <| Maybe.withDefault QuestionValueType.default <| Question.getValueType question
                                 , options = questionValueTypeOptions
                                 , onChange = createTypeEditEvent setValueType << Maybe.withDefault QuestionValueType.default << QuestionValueType.fromString
@@ -956,8 +999,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         integrationUuidOptions =
                             KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel
                                 |> EditorBranch.filterDeletedWith Integration.getUuid editorBranch
-                                |> List.map (\integration -> ( Integration.getUuid integration, String.withDefault (lg "integration.untitled" appState) (Integration.getName integration) ))
-                                |> (::) ( Uuid.toString Uuid.nil, l_ "question.integration.select" appState )
+                                |> List.map (\integration -> ( Integration.getUuid integration, String.withDefault (gettext "Untitled integration" appState.locale) (Integration.getVisibleName integration) ))
+                                |> (::) ( Uuid.toString Uuid.nil, gettext "- select integration -" appState.locale )
 
                         selectedIntegrationProps =
                             Question.getIntegrationUuid question
@@ -985,7 +1028,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 in
                                 div [ class "form-group" ]
                                     [ div [ class "card card-border-light" ]
-                                        [ div [ class "card-header" ] [ lx_ "question.integration.configuration" appState ]
+                                        [ div [ class "card-header" ] [ text (gettext "Integration Configuration" appState.locale) ]
                                         , div [ class "card-body" ]
                                             (List.map propInput selectedIntegrationProps)
                                         ]
@@ -997,7 +1040,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         integrationUuidInput =
                             Input.select
                                 { name = "integrationUuid"
-                                , label = lg "integration" appState
+                                , label = gettext "Integration" appState.locale
                                 , value = String.fromMaybe <| Question.getIntegrationUuid question
                                 , options = integrationUuidOptions
                                 , onChange = createTypeEditEvent setIntegrationUuid
@@ -1023,7 +1066,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         choicesInput =
                             Input.reorderable appState
                                 { name = "choices"
-                                , label = lg "choices" appState
+                                , label = gettext "Choices" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -1031,8 +1074,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , updateList = createTypeEditEvent setChoiceUuids
                                 , getRoute = editorRoute editorBranch
                                 , getName = KnowledgeModel.getChoiceName editorBranch.branch.knowledgeModel
-                                , untitledLabel = lg "choice.untitled" appState
-                                , addChildLabel = l_ "question.addChoice" appState
+                                , untitledLabel = gettext "Untitled choice" appState.locale
+                                , addChildLabel = gettext "Add choice" appState.locale
                                 , addChildMsg = addChoiceEvent
                                 , addChildDataCy = "choice"
                                 }
@@ -1070,7 +1113,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
 
         metricEditorTitle =
             editorTitle appState
-                { title = lg "metric" appState
+                { title = gettext "Metric" appState.locale
                 , uuid = metric.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just MetricState
@@ -1080,7 +1123,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
         titleInput =
             Input.string
                 { name = "title"
-                , label = lg "metric.title" appState
+                , label = gettext "Title" appState.locale
                 , value = metric.title
                 , onInput = createEditEvent setTitle
                 }
@@ -1088,7 +1131,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
         abbreviationInput =
             Input.string
                 { name = "abbreviation"
-                , label = lg "metric.abbreviation" appState
+                , label = gettext "Abbreviation" appState.locale
                 , value = Maybe.withDefault "" metric.abbreviation
                 , onInput = createEditEvent setAbbreviation << String.toMaybe
                 }
@@ -1096,7 +1139,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
         descriptionInput =
             Input.markdown appState
                 { name = "description"
-                , label = lg "metric.description" appState
+                , label = gettext "Description" appState.locale
                 , value = Maybe.withDefault "" metric.description
                 , onInput = createEditEvent setDescription << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
@@ -1133,7 +1176,7 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, model, editorBranch } phase =
 
         phaseEditorTitle =
             editorTitle appState
-                { title = lg "phase" appState
+                { title = gettext "Phase" appState.locale
                 , uuid = phase.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just PhaseState
@@ -1143,7 +1186,7 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, model, editorBranch } phase =
         titleInput =
             Input.string
                 { name = "title"
-                , label = lg "phase.title" appState
+                , label = gettext "Title" appState.locale
                 , value = phase.title
                 , onInput = createEditEvent setTitle
                 }
@@ -1151,7 +1194,7 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, model, editorBranch } phase =
         descriptionInput =
             Input.markdown appState
                 { name = "description"
-                , label = lg "phase.description" appState
+                , label = gettext "Description" appState.locale
                 , value = Maybe.withDefault "" phase.description
                 , onInput = createEditEvent setDescription << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
@@ -1187,7 +1230,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
 
         tagEditorTitle =
             editorTitle appState
-                { title = lg "tag" appState
+                { title = gettext "Tag" appState.locale
                 , uuid = tag.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just TagState
@@ -1197,7 +1240,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
         nameInput =
             Input.string
                 { name = "name"
-                , label = lg "tag.name" appState
+                , label = gettext "Name" appState.locale
                 , value = tag.name
                 , onInput = createEditEvent setName
                 }
@@ -1205,7 +1248,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
         descriptionInput =
             Input.textarea
                 { name = "description"
-                , label = lg "tag.description" appState
+                , label = gettext "Description" appState.locale
                 , value = Maybe.withDefault "" tag.description
                 , onInput = createEditEvent setDescription << String.toMaybe
                 }
@@ -1213,7 +1256,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
         colorInput =
             Input.color
                 { name = "color"
-                , label = lg "tag.color" appState
+                , label = gettext "Color" appState.locale
                 , value = tag.color
                 , onInput = createEditEvent setColor
                 }
@@ -1303,13 +1346,13 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             |> EditIntegrationEvent
 
         integrationTypeOptions =
-            [ ( "Api", lg "integrationType.api" appState )
-            , ( "Widget", lg "integrationType.widget" appState )
+            [ ( "Api", gettext "API" appState.locale )
+            , ( "Widget", gettext "Widget" appState.locale )
             ]
 
         integrationEditorTitle =
             editorTitle appState
-                { title = lg "integration" appState
+                { title = gettext "Integration" appState.locale
                 , uuid = integrationUuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just IntegrationState
@@ -1319,7 +1362,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
         typeInput =
             Input.select
                 { name = "type"
-                , label = lg "integration.type" appState
+                , label = gettext "Type" appState.locale
                 , value = Integration.getTypeString integration
                 , options = integrationTypeOptions
                 , onChange = onTypeChange
@@ -1328,7 +1371,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
         idInput =
             Input.string
                 { name = "id"
-                , label = lg "integration.id" appState
+                , label = gettext "ID" appState.locale
                 , value = Integration.getId integration
                 , onInput = createEditEvent setId setId
                 }
@@ -1336,7 +1379,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
         nameInput =
             Input.string
                 { name = "name"
-                , label = lg "integration.name" appState
+                , label = gettext "Name" appState.locale
                 , value = Integration.getName integration
                 , onInput = createEditEvent setName setName
                 }
@@ -1344,14 +1387,14 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
         logoUrlInput =
             Input.string
                 { name = "logo"
-                , label = lg "integration.logo" appState
+                , label = gettext "Logo URL" appState.locale
                 , value = Integration.getLogo integration
                 , onInput = createEditEvent setLogo setLogo
                 }
 
         propsInput =
             Input.props appState
-                { label = lg "integration.props" appState
+                { label = gettext "Props" appState.locale
                 , values = Integration.getProps integration
                 , onChange = createEditEvent setProps setProps
                 }
@@ -1359,7 +1402,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
         itemUrl =
             Input.string
                 { name = "itemUrl"
-                , label = lg "integration.itemUrl" appState
+                , label = gettext "Item URL" appState.locale
                 , value = Integration.getItemUrl integration
                 , onInput = createEditEvent setItemUrl setItemUrl
                 }
@@ -1383,7 +1426,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         requestUrlInput =
                             Input.string
                                 { name = "requestUrl"
-                                , label = lg "integration.request.url" appState
+                                , label = gettext "Request URL" appState.locale
                                 , value = data.requestUrl
                                 , onInput = createTypeEditEvent setRequestUrl
                                 }
@@ -1391,7 +1434,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         requestMethodInput =
                             Input.select
                                 { name = "requestMethod"
-                                , label = lg "integration.request.method" appState
+                                , label = gettext "Request HTTP Method" appState.locale
                                 , value = data.requestMethod
                                 , options = httpMethodOptions
                                 , onChange = createTypeEditEvent setRequestMethod
@@ -1399,7 +1442,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
 
                         requestHeadersInput =
                             Input.headers appState
-                                { label = lg "integration.request.headers" appState
+                                { label = gettext "Request HTTP Headers" appState.locale
                                 , headers = data.requestHeaders
                                 , onEdit = createTypeEditEvent setRequestHeaders
                                 }
@@ -1407,7 +1450,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         requestBodyInput =
                             Input.textarea
                                 { name = "requestBody"
-                                , label = lg "integration.request.body" appState
+                                , label = gettext "Request HTTP Body" appState.locale
                                 , value = data.requestBody
                                 , onInput = createTypeEditEvent setRequestBody
                                 }
@@ -1415,7 +1458,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         requestEmptySearchInput =
                             Input.checkbox
                                 { name = "requestEmptySearch"
-                                , label = lg "integration.request.emptySearch" appState
+                                , label = gettext "Allow Empty Search" appState.locale
                                 , value = data.requestEmptySearch
                                 , onInput = createTypeEditEvent setRequestEmptySearch
                                 }
@@ -1423,7 +1466,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         responseItemId =
                             Input.string
                                 { name = "responseItemId"
-                                , label = lg "integration.response.idField" appState
+                                , label = gettext "Response Item ID" appState.locale
                                 , value = data.responseItemId
                                 , onInput = createTypeEditEvent setResponseItemId
                                 }
@@ -1431,7 +1474,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         responseListFieldInput =
                             Input.string
                                 { name = "responseListField"
-                                , label = lg "integration.response.listField" appState
+                                , label = gettext "Response List Field" appState.locale
                                 , value = data.responseListField
                                 , onInput = createTypeEditEvent setResponseListField
                                 }
@@ -1439,38 +1482,38 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         responseItemTemplate =
                             Input.textarea
                                 { name = "responseItemTemplate"
-                                , label = lg "integration.response.itemTemplate" appState
+                                , label = gettext "Response Item Template" appState.locale
                                 , value = data.responseItemTemplate
                                 , onInput = createTypeEditEvent setResponseItemTemplate
                                 }
                     in
                     [ div [ class "card card-border-light mb-5" ]
-                        [ div [ class "card-header" ] [ lgx "integration.request" appState ]
+                        [ div [ class "card-header" ] [ text (gettext "Request" appState.locale) ]
                         , div [ class "card-body" ]
-                            [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integration.request.description" appState)
+                            [ Markdown.toHtml [ class "alert alert-info mb-5" ] (gettext "Use this section to configure the search request. The service you want to integrate has to provide a search HTTP API where you send a search string and it returns a JSON with found items." appState.locale)
                             , requestUrlInput
-                            , FormExtra.mdAfter (l_ "integration.requestUrl.description" appState)
+                            , FormExtra.mdAfter (gettext "A URL of the integrated service API that supports the search. Use `${q}` for the actual string that will be filled when users search for items, such as *ht&#8203;tps://example.com/search?q=${q}*." appState.locale)
                             , requestMethodInput
                             , requestHeadersInput
                             , requestBodyInput
                             , requestEmptySearchInput
-                            , FormExtra.mdAfter (l_ "integration.requestEmptySearch.description" appState)
+                            , FormExtra.mdAfter (gettext "Turn this off if the API cannot handle empty search requests. In that case, the requests will be made only after users type something." appState.locale)
                             ]
                         ]
                     , div [ class "card card-border-light mb-5" ]
-                        [ div [ class "card-header" ] [ lgx "integration.response" appState ]
+                        [ div [ class "card-header" ] [ text (gettext "Response" appState.locale) ]
                         , div [ class "card-body" ]
-                            [ Markdown.toHtml [ class "alert alert-info mb-5" ] (l_ "integration.response.description" appState)
+                            [ Markdown.toHtml [ class "alert alert-info mb-5" ] (gettext "Use this section to configure how to process the response returned from the search API." appState.locale)
                             , responseListFieldInput
-                            , FormExtra.mdAfter (l_ "integration.responseListField.description" appState)
+                            , FormExtra.mdAfter (gettext "If the returned JSON is not an array of items directly but the items are nested, use this to define the name or path to the field in the response that contains the list of items. Keep empty otherwise." appState.locale)
                             , responseItemId
-                            , FormExtra.mdAfter (l_ "integration.responseItemId.description" appState)
+                            , FormExtra.mdAfter (gettext "Use this to define an identifier for the item. This will be used in **Item URL** as `${id}` to compose a URL to the found item. You can use properties from the returned item in Jinja2 notation. For example, if the item has a field `id` use `{{item.id}}` here. You can also compose multiple fields together, e.g., `{{item.field1}}-{{item.field2}}`." appState.locale)
                             , responseItemTemplate
-                            , FormExtra.mdAfter (l_ "integration.responseItemTemplate.description" appState)
+                            , FormExtra.mdAfter (gettext "This defines how the found items will be displayed for the user. You can use properties from the returned item in Jinja2 notation, you can also use Markdown for some formatting. For example, if the returned item has a field called name, you can use `**{{item.name}}**` to display the name in bold." appState.locale)
                             ]
                         ]
                     , itemUrl
-                    , FormExtra.mdAfter (l_ "integration.itemUrl.api.description" appState)
+                    , FormExtra.mdAfter (gettext "Defines the URL to the selected item. Use `${id}` to get the value defined in **Response Item ID** field, for example `https://example.com/${id}`." appState.locale)
                     ]
 
                 WidgetIntegration _ data ->
@@ -1484,15 +1527,15 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         widgetUrlInput =
                             Input.string
                                 { name = "widgetUrl"
-                                , label = lg "integration.widgetUrl" appState
+                                , label = gettext "Widget URL" appState.locale
                                 , value = data.widgetUrl
                                 , onInput = createTypeEditEvent setWidgetUrl
                                 }
                     in
                     [ widgetUrlInput
-                    , FormExtra.mdAfter (l_ "integration.widgetUrl.description" appState)
+                    , FormExtra.mdAfter (gettext "The URL of the widget implemented using [DSW Integration Widget SDK](https://github.com/ds-wizard/dsw-integration-widget-sdk)." appState.locale)
                     , itemUrl
-                    , FormExtra.mdAfter (l_ "integration.itemUrl.widget.description" appState)
+                    , FormExtra.mdAfter (gettext "Defines the URL to the selected item. Use `${id}` value returned from the widget, for example `https://example.com/${id}`." appState.locale)
                     ]
 
         viewQuestionLink question =
@@ -1505,7 +1548,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
 
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
-                div [] [ i [] [ lx_ "integration.questions.noQuestions" appState ] ]
+                div [] [ i [] [ text (gettext "No questions" appState.locale) ] ]
 
             else
                 ul [] questions
@@ -1535,13 +1578,13 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         li []
                             [ a [ onClick (createEditEventFromPrefab i) ]
                                 [ viewLogo i
-                                , span [] [ text (Integration.getName i) ]
+                                , span [] [ text (Integration.getVisibleName i) ]
                                 ]
                             ]
                 in
                 div [ class "prefab-selection" ]
-                    [ strong [] [ lx_ "integration.quickSetup" appState ]
-                    , ul [] (List.map viewIntegrationButton <| List.sortBy Integration.getName integrationPrefabs)
+                    [ strong [] [ text (gettext "Quick setup" appState.locale) ]
+                    , ul [] (List.map viewIntegrationButton <| List.sortBy Integration.getVisibleName integrationPrefabs)
                     ]
 
             else
@@ -1552,17 +1595,17 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
          , prefabsView
          , typeInput
          , idInput
-         , FormExtra.mdAfter (l_ "integration.id.description" appState)
+         , FormExtra.mdAfter (gettext "A string that identifies the integration. It has to be unique for each integration." appState.locale)
          , nameInput
-         , FormExtra.mdAfter (l_ "integration.name.description" appState)
+         , FormExtra.mdAfter (gettext "A name visible everywhere else in the KM Editor, such as when choosing the integration for a question." appState.locale)
          , logoUrlInput
-         , FormExtra.mdAfter (l_ "integration.logo.description" appState)
+         , FormExtra.mdAfter (gettext "Logo is displayed next to the link to the selected item in questionnaires. It can be either URL or base64 image." appState.locale)
          , propsInput
-         , FormExtra.mdAfter (l_ "integration.props.description" appState)
+         , FormExtra.mdAfter (gettext "Props can be used to parametrize the integration for each question. Use this to define the props whose value can be filled on the questions using this integration. The props can then be used in the URL configuration. For example, if you define prop named *type*, you can use it as `${type}`, such as *ht&#8203;tps://example.com/${type}*." appState.locale)
          ]
             ++ integrationTypeInputs
             ++ [ annotationsInput
-               , FormGroup.plainGroup questionsWithIntegration (l_ "integration.questions.label" appState)
+               , FormGroup.plainGroup questionsWithIntegration (gettext "Questions using this integration" appState.locale)
                ]
         )
 
@@ -1586,7 +1629,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
 
         answerEditorTitle =
             editorTitle appState
-                { title = lg "answer" appState
+                { title = gettext "Answer" appState.locale
                 , uuid = answer.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just AnswerState
@@ -1596,7 +1639,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
         labelInput =
             Input.string
                 { name = "label"
-                , label = lg "answer.label" appState
+                , label = gettext "Label" appState.locale
                 , value = answer.label
                 , onInput = createEditEvent setLabel
                 }
@@ -1604,7 +1647,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
         adviceInput =
             Input.markdown appState
                 { name = "advice"
-                , label = lg "answer.advice" appState
+                , label = gettext "Advice" appState.locale
                 , value = String.fromMaybe answer.advice
                 , onInput = createEditEvent setAdvice << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
@@ -1615,7 +1658,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
         followUpsInput =
             Input.reorderable appState
                 { name = "questions"
-                , label = lg "followupQuestions" appState
+                , label = gettext "Follow-Up Questions" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch answer.followUpUuids
                 , entityUuid = answer.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
@@ -1623,8 +1666,8 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 , updateList = createEditEvent setFollowUpUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
-                , untitledLabel = lg "question.untitled" appState
-                , addChildLabel = l_ "answer.addQuestion" appState
+                , untitledLabel = gettext "Untitled question" appState.locale
+                , addChildLabel = gettext "Add question" appState.locale
                 , addChildMsg = questionAddEvent
                 , addChildDataCy = "question"
                 }
@@ -1674,7 +1717,7 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
 
         choiceEditorTitle =
             editorTitle appState
-                { title = lg "choice" appState
+                { title = gettext "Choice" appState.locale
                 , uuid = choice.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just ChoiceState
@@ -1684,7 +1727,7 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
         labelInput =
             Input.string
                 { name = "label"
-                , label = lg "choice.label" appState
+                , label = gettext "Label" appState.locale
                 , value = choice.label
                 , onInput = createEditEvent setLabel
                 }
@@ -1723,13 +1766,13 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                             |> (EditReferenceEvent << EditReferenceURLEvent)
 
         referenceTypeOptions =
-            [ ( "ResourcePage", lg "referenceType.resourcePage" appState )
-            , ( "URL", lg "referenceType.url" appState )
+            [ ( "ResourcePage", gettext "Resource Page" appState.locale )
+            , ( "URL", gettext "URL" appState.locale )
             ]
 
         referenceEditorTitle =
             editorTitle appState
-                { title = lg "reference" appState
+                { title = gettext "Reference" appState.locale
                 , uuid = Reference.getUuid reference
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just ReferenceState
@@ -1739,7 +1782,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
         typeInput =
             Input.select
                 { name = "type"
-                , label = lg "referenceType" appState
+                , label = gettext "Reference Type" appState.locale
                 , value = Reference.getTypeString reference
                 , options = referenceTypeOptions
                 , onChange = onTypeChange
@@ -1758,7 +1801,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                         shortUuidInput =
                             Input.string
                                 { name = "shortUuid"
-                                , label = lg "reference.shortUuid" appState
+                                , label = gettext "Short UUID" appState.locale
                                 , value = data.shortUuid
                                 , onInput = createTypeEditEvent setShortUuid
                                 }
@@ -1782,7 +1825,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                         urlInput =
                             Input.string
                                 { name = "url"
-                                , label = lg "reference.url" appState
+                                , label = gettext "URL" appState.locale
                                 , value = data.url
                                 , onInput = createTypeEditEvent setUrl
                                 }
@@ -1790,7 +1833,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                         labelInput =
                             Input.string
                                 { name = "label"
-                                , label = lg "reference.label" appState
+                                , label = gettext "Label" appState.locale
                                 , value = data.label
                                 , onInput = createTypeEditEvent setLabel
                                 }
@@ -1831,7 +1874,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
 
         expertEditorTitle =
             editorTitle appState
-                { title = lg "expert" appState
+                { title = gettext "Expert" appState.locale
                 , uuid = expert.uuid
                 , wrapMsg = wrapMsg
                 , mbDeleteModalState = Just ExpertState
@@ -1841,7 +1884,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
         nameInput =
             Input.string
                 { name = "name"
-                , label = lg "expert.name" appState
+                , label = gettext "Name" appState.locale
                 , value = expert.name
                 , onInput = createEditEvent setName
                 }
@@ -1849,7 +1892,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
         emailInput =
             Input.string
                 { name = "email"
-                , label = lg "expert.email" appState
+                , label = gettext "Email" appState.locale
                 , value = expert.email
                 , onInput = createEditEvent setEmail
                 }
@@ -1871,7 +1914,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
 viewEmptyEditor : AppState -> Html msg
 viewEmptyEditor appState =
     editor "empty"
-        [ Flash.error appState (l_ "empty" appState)
+        [ Flash.error appState (gettext "The knowledge model entity you are trying to open does not exist." appState.locale)
         ]
 
 
@@ -1902,7 +1945,7 @@ editorTitle appState config =
                 ([ class "btn btn-link with-icon"
                  , onClick <| config.wrapMsg <| CopyUuid config.uuid
                  ]
-                    ++ tooltip (l_ "editorTitle.copyUuid" appState)
+                    ++ tooltip (gettext "Click to copy UUID" appState.locale)
                 )
                 [ faSet "kmEditor.copyUuid" appState
                 , small [] [ text <| String.slice 0 8 config.uuid ]
@@ -1917,7 +1960,7 @@ editorTitle appState config =
                         , dataCy "km-editor_move-button"
                         ]
                         [ faSet "kmEditor.move" appState
-                        , lx_ "editorTitle.move" appState
+                        , text (gettext "Move" appState.locale)
                         ]
 
                 Nothing ->
@@ -1932,7 +1975,7 @@ editorTitle appState config =
                         , onClick <| config.wrapMsg <| SetDeleteModalState <| deleteModalState config.uuid
                         ]
                         [ faSet "_global.delete" appState
-                        , lx_ "editorTitle.delete" appState
+                        , text (gettext "Delete" appState.locale)
                         ]
 
                 Nothing ->
@@ -1963,70 +2006,70 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                 ChapterState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.chapter" appState)
+                        (gettext "Are you sure you want to delete this chapter?" appState.locale)
                         (createEvent DeleteChapterEvent uuid)
                     )
 
                 QuestionState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.question" appState)
+                        (gettext "Are you sure you want to delete this question?" appState.locale)
                         (createEvent DeleteQuestionEvent uuid)
                     )
 
                 MetricState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.metric" appState)
+                        (gettext "Are you sure you want to delete this metric?" appState.locale)
                         (createEvent DeleteMetricEvent uuid)
                     )
 
                 PhaseState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.phase" appState)
+                        (gettext "Are you sure you want to delete this phase?" appState.locale)
                         (createEvent DeletePhaseEvent uuid)
                     )
 
                 TagState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.tag" appState)
+                        (gettext "Are you sure you want to delete this question tag?" appState.locale)
                         (createEvent DeleteTagEvent uuid)
                     )
 
                 IntegrationState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.integration" appState)
+                        (gettext "Are you sure you want to delete this integration?" appState.locale)
                         (createEvent DeleteIntegrationEvent uuid)
                     )
 
                 AnswerState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.answer" appState)
+                        (gettext "Are you sure you want to delete this answer?" appState.locale)
                         (createEvent DeleteAnswerEvent uuid)
                     )
 
                 ChoiceState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.choice" appState)
+                        (gettext "Are you sure you want to delete this choice?" appState.locale)
                         (createEvent DeleteChoiceEvent uuid)
                     )
 
                 ReferenceState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.reference" appState)
+                        (gettext "Are you sure you want to delete this reference?" appState.locale)
                         (createEvent DeleteReferenceEvent uuid)
                     )
 
                 ExpertState uuid ->
                     ( True
                     , getContent
-                        (l_ "deleteModal.expert" appState)
+                        (gettext "Are you sure you want to delete this expert?" appState.locale)
                         (createEvent DeleteExpertEvent uuid)
                     )
 
@@ -2035,7 +2078,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
 
         getContent contentText onDelete =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ lx_ "deleteModal.title" appState ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Heads up!" appState.locale) ]
                 ]
             , div [ class "modal-body" ]
                 [ text contentText ]
@@ -2045,13 +2088,13 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                     , dataCy "modal_action-button"
                     , onClick onDelete
                     ]
-                    [ lx_ "deleteModal.delete" appState ]
+                    [ text (gettext "Delete" appState.locale) ]
                 , button
                     [ class "btn btn-secondary"
                     , dataCy "modal_cancel-button"
                     , onClick <| wrapMsg <| SetDeleteModalState Closed
                     ]
-                    [ lx_ "deleteModal.cancel" appState ]
+                    [ text (gettext "Cancel" appState.locale) ]
                 ]
             ]
 
@@ -2109,10 +2152,10 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
                                     createEvent MoveExpertEvent
                     in
                     [ div [ class "modal-header" ]
-                        [ h5 [ class "modal-title" ] [ lx_ "moveModal.title" appState ]
+                        [ h5 [ class "modal-title" ] [ text (gettext "Move" appState.locale) ]
                         ]
                     , div [ class "modal-body" ]
-                        [ label [] [ lx_ "moveModal.label" appState ]
+                        [ label [] [ text (gettext "Select a new parent" appState.locale) ]
                         , Html.map (wrapMsg << MoveModalMsg) <| TreeInput.view appState viewProps moveModalState.treeInputModel
                         ]
                     , div [ class "modal-footer" ]
@@ -2122,13 +2165,13 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
                             , disabled (String.isEmpty selectedUuid)
                             , dataCy "modal_action-button"
                             ]
-                            [ lx_ "moveModal.move" appState ]
+                            [ text (gettext "Move" appState.locale) ]
                         , button
                             [ class "btn btn-secondary"
                             , onClick <| wrapMsg CloseMoveModal
                             , dataCy "modal_cancel-button"
                             ]
-                            [ lx_ "moveModal.cancel" appState ]
+                            [ text (gettext "Cancel" appState.locale) ]
                         ]
                     ]
 

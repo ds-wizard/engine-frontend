@@ -12,11 +12,10 @@ module Shared.Data.Questionnaire.QuestionnaireSharing exposing
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as Validate exposing (Validation)
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
-import Shared.Locale exposing (lg)
-import Shared.Provisioning exposing (Provisioning)
 
 
 type QuestionnaireSharing
@@ -130,22 +129,22 @@ validation =
             )
 
 
-richFormOptions : { a | provisioning : Provisioning } -> List ( String, String, String )
+richFormOptions : { a | locale : Gettext.Locale } -> List ( String, String, String )
 richFormOptions appState =
     [ ( toString RestrictedQuestionnaire
-      , lg "questionnaireSharing.restricted" appState
-      , lg "questionnaireSharing.restricted.description" appState
+      , gettext "Restricted" appState.locale
+      , gettext "Only logged-in users can access the project depending on the project visibility." appState.locale
       )
     , ( toString AnyoneWithLinkViewQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLinkView" appState
-      , lg "questionnaireSharing.anyoneWithLinkView.description" appState
+      , gettext "View with the link" appState.locale
+      , gettext "Anyone on the internet with the link can view." appState.locale
       )
     , ( toString AnyoneWithLinkCommentQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLinkComment" appState
-      , lg "questionnaireSharing.anyoneWithLinkComment.description" appState
+      , gettext "Comment with the link" appState.locale
+      , gettext "Anyone on the internet with the link can view and comment." appState.locale
       )
     , ( toString AnyoneWithLinkEditQuestionnaire
-      , lg "questionnaireSharing.anyoneWithLinkEdit" appState
-      , lg "questionnaireSharing.anyoneWithLinkEdit.description" appState
+      , gettext "Edit with the link" appState.locale
+      , gettext "Anyone on the internet with the link can edit." appState.locale
       )
     ]

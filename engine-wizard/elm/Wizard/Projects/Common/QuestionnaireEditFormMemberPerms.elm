@@ -10,10 +10,10 @@ module Wizard.Projects.Common.QuestionnaireEditFormMemberPerms exposing
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
+import Gettext exposing (gettext)
 import Json.Encode as E
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -58,10 +58,10 @@ toString perms =
 
 formOptions : AppState -> List ( String, String )
 formOptions appState =
-    [ ( toString Viewer, lg "project.role.viewer" appState )
-    , ( toString Commenter, lg "project.role.commenter" appState )
-    , ( toString Editor, lg "project.role.editor" appState )
-    , ( toString Owner, lg "project.role.owner" appState )
+    [ ( toString Viewer, gettext "Viewer" appState.locale )
+    , ( toString Commenter, gettext "Commenter" appState.locale )
+    , ( toString Editor, gettext "Editor" appState.locale )
+    , ( toString Owner, gettext "Owner" appState.locale )
     ]
 
 

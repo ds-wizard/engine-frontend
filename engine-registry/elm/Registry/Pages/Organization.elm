@@ -11,7 +11,8 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as Validate exposing (Validation)
-import Html exposing (Html, div, form, h1)
+import Gettext exposing (gettext)
+import Html exposing (Html, div, form, h1, text)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Credentials exposing (Credentials)
@@ -23,17 +24,6 @@ import Registry.Common.View.FormResult as FormResult
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lx)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.Organization"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry.Pages.Organization"
 
 
 init : AppState -> Credentials -> ( Model, Cmd Msg )
@@ -119,7 +109,7 @@ update msg appState model =
             handleFormMsg formMsg appState model
 
         GetOrganizationCompleted result ->
-            ( ActionResult.apply setOrganization (ApiError.toActionResult appState (l_ "update.getError" appState)) result model
+            ( ActionResult.apply setOrganization (ApiError.toActionResult appState (gettext "Unable to get organization detail." appState.locale)) result model
             , Cmd.none
             )
 
@@ -129,13 +119,13 @@ update msg appState model =
                     case result of
                         Ok organization ->
                             { model
-                                | saving = Success <| l_ "update.putSuccess" appState
+                                | saving = Success <| gettext "Your changes have been saved." appState.locale
                                 , form = initOrganizationForm <| organizationFormInitials organization
                             }
 
                         Err err ->
                             { model
-                                | saving = ApiError.toActionResult appState (l_ "update.putError" appState) err
+                                | saving = ApiError.toActionResult appState (gettext "Unable to save changes." appState.locale) err
                                 , form = setFormErrors appState err model.form
                             }
             in
@@ -163,12 +153,12 @@ handleFormMsg formMsg appState model =
 view : AppState -> Model -> Html Msg
 view appState model =
     div []
-        [ h1 [] [ lx_ "view.title" appState ]
+        [ h1 [] [ text (gettext "Edit Organization" appState.locale) ]
         , form [ onSubmit <| FormMsg Form.Submit ]
             [ FormResult.view model.saving
-            , Html.map FormMsg <| FormGroup.input appState model.form "name" <| l_ "view.organizationName" appState
-            , Html.map FormMsg <| FormGroup.textarea appState model.form "description" <| l_ "view.description" appState
-            , Html.map FormMsg <| FormGroup.input appState model.form "email" <| l_ "view.email" appState
-            , ActionButton.submit ( l_ "view.save" appState, model.saving )
+            , Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Organization Name" appState.locale
+            , Html.map FormMsg <| FormGroup.textarea appState model.form "description" <| gettext "Organization Description" appState.locale
+            , Html.map FormMsg <| FormGroup.input appState model.form "email" <| gettext "Email" appState.locale
+            , ActionButton.submit ( gettext "Save" appState.locale, model.saving )
             ]
         ]

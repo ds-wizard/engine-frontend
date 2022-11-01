@@ -10,6 +10,7 @@ module Wizard.KMEditor.Common.UpgradeModal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
@@ -19,23 +20,13 @@ import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lh)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Common.UpgradeModal"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.KMEditor.Common.UpgradeModal"
 
 
 type alias Model =
@@ -112,7 +103,7 @@ update cfg appState msg model =
                     ( { model | branch = Nothing }, cfg.cmdUpgraded kmUuid )
 
                 Err error ->
-                    ( { model | creatingMigration = ApiError.toActionResult appState (lg "apiError.branches.migrations.postError" appState) error }
+                    ( { model | creatingMigration = ApiError.toActionResult appState (gettext "Migration could not be created." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -122,7 +113,7 @@ update cfg appState msg model =
                     ( { model | package = ActionResult.Success package }, Cmd.none )
 
                 Err error ->
-                    ( { model | package = ApiError.toActionResult appState (lg "apiError.packages.getError" appState) error }
+                    ( { model | package = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -157,23 +148,23 @@ view appState model =
                         options =
                             case model.package of
                                 Success package ->
-                                    ( "", l_ "form.defaultOption" appState ) :: PackageDetail.createFormOptions package
+                                    ( "", gettext "- select parent package -" appState.locale ) :: PackageDetail.createFormOptions package
 
                                 _ ->
                                     []
                     in
                     [ p [ class "alert alert-info" ]
-                        (lh_ "text" [ strong [] [ text name ] ] appState)
-                    , FormGroup.select appState options model.branchUpgradeForm "targetPackageId" (l_ "form.targetPackageId" appState)
+                        (String.formatHtml (gettext "Select the new parent knowledge model for %s." appState.locale) [ strong [] [ text name ] ])
+                    , FormGroup.select appState options model.branchUpgradeForm "targetPackageId" (gettext "New parent package" appState.locale)
                         |> Html.map FormMsg
                     ]
 
         modalConfig =
-            { modalTitle = l_ "title" appState
+            { modalTitle = gettext "Create migration" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.creatingMigration
-            , actionName = l_ "action" appState
+            , actionName = gettext "Create" appState.locale
             , actionMsg = FormMsg Form.Submit
             , cancelMsg = Just Close
             , dangerous = False

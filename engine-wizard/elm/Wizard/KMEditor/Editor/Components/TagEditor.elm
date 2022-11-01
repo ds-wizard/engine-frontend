@@ -8,6 +8,7 @@ module Wizard.KMEditor.Editor.Components.TagEditor exposing
     )
 
 import Dict
+import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (checked, class, classList, style, type_)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
@@ -27,18 +28,12 @@ import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (l, lg)
 import Shared.Utils exposing (getContrastColorHex)
 import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Editor.Components.TagEditor"
 
 
 type alias Model =
@@ -111,10 +106,10 @@ view appState wrapMsg eventMsg editorBranch model =
 
         content =
             if List.isEmpty editorBranch.branch.knowledgeModel.tagUuids then
-                Flash.info appState (l_ "noTags" appState)
+                Flash.info appState (gettext "There are no question tags, create them first." appState.locale)
 
             else if Dict.isEmpty editorBranch.branch.knowledgeModel.entities.questions then
-                Flash.info appState (l_ "noQuestions" appState)
+                Flash.info appState (gettext "There are no questions create them first." appState.locale)
 
             else
                 let
@@ -170,7 +165,7 @@ thTag appState model tag =
 
         ( untitled, tagName ) =
             if String.isEmpty tag.name then
-                ( True, lg "tag.untitled" appState )
+                ( True, gettext "Untitled tag" appState.locale )
 
             else
                 ( False, tag.name )
@@ -257,7 +252,7 @@ trQuestion : AppState -> Props msg -> Model -> Int -> List Tag -> Question -> Ht
 trQuestion appState props model indent tags question =
     let
         questionTitle =
-            String.withDefault (lg "question.untitled" appState) (Question.getTitle question)
+            String.withDefault (gettext "Untitled question" appState.locale) (Question.getTitle question)
     in
     tr []
         (th [ onClick <| props.wrapMsg <| CopyUuid <| Question.getUuid question ]
@@ -312,7 +307,7 @@ trChapter : AppState -> Props msg -> Chapter -> List Tag -> Html msg
 trChapter appState props chapter =
     trSeparator props
         (Just chapter.uuid)
-        (String.withDefault (lg "chapter.untitled" appState) chapter.title)
+        (String.withDefault (gettext "Untitled chapter" appState.locale) chapter.title)
         (faSet "km.chapter" appState)
         "separator-chapter"
         0
@@ -322,7 +317,7 @@ trAnswer : AppState -> Props msg -> Answer -> Int -> List Tag -> Html msg
 trAnswer appState props answer =
     trSeparator props
         (Just answer.uuid)
-        (String.withDefault (lg "answer.untitled" appState) answer.label)
+        (String.withDefault (gettext "Untitled answer" appState.locale) answer.label)
         (faSet "km.answer" appState)
         ""
 
@@ -331,7 +326,7 @@ trItemTemplate : AppState -> Props msg -> Int -> List Tag -> Html msg
 trItemTemplate appState props =
     trSeparator props
         Nothing
-        (lg "question.itemTemplate" appState)
+        (gettext "Item Template" appState.locale)
         (faSet "km.itemTemplate" appState)
         ""
 

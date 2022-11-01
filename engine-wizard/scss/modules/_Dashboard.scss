@@ -32,44 +32,43 @@
         }
     }
 
-    .RecentProjectsWidget {
-        &__ProjectList {
-            a {
-                color: $body-color;
-                text-decoration: none !important;
-                position: relative;
+    &__ItemList {
+        a {
+            color: $body-color;
+            text-decoration: none !important;
+            position: relative;
 
-                &:not(:last-child):after {
-                    content: ' ';
-                    border-bottom: 1px solid $gray-200;
-                    position: absolute;
-                    bottom: -1px;
-                    left: 0.3rem;
-                    right: 0.3rem;
+            &:not(:last-child):after {
+                content: ' ';
+                border-bottom: 1px solid $gray-200;
+                position: absolute;
+                bottom: -1px;
+                left: 0.3rem;
+                right: 0.3rem;
+            }
+
+            &:hover {
+                background-color: $gray-200;
+                border-bottom-color: transparent;
+
+                &:after {
+                    display: none;
                 }
+            }
 
-                &:hover {
-                    background-color: $gray-200;
-                    border-bottom-color: transparent;
+            .content {
+                flex-basis: 0;
+                min-width: 0;
 
-                    &:after {
-                        display: none;
-                    }
-                }
-
-                .content {
-                    flex-basis: 0;
-                    min-width: 0;
-
-                    strong {
-                        white-space: nowrap;
-                        overflow: hidden;
-                        display: block;
-                        max-width: 100%;
-                        text-overflow: ellipsis;
-                    }
+                strong {
+                    white-space: nowrap;
+                    overflow: hidden;
+                    display: block;
+                    max-width: 100%;
+                    text-overflow: ellipsis;
                 }
             }
         }
     }
 }
+

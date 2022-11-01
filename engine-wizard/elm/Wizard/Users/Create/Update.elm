@@ -2,10 +2,10 @@ module Wizard.Users.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
+import Gettext exposing (gettext)
 import Random exposing (Seed, step)
 import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (tuplePrepend)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
@@ -60,6 +60,6 @@ postUserCompleted appState model result =
             ( model, cmdNavigate appState Routes.usersIndex )
 
         Err error ->
-            ( { model | savingUser = ApiError.toActionResult appState (lg "apiError.users.postError" appState) error }
+            ( { model | savingUser = ApiError.toActionResult appState (gettext "User could not be created." appState.locale) error }
             , getResultCmd result
             )

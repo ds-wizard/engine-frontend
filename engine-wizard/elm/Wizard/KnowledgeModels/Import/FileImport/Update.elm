@@ -2,10 +2,10 @@ module Wizard.KnowledgeModels.Import.FileImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import File
+import Gettext exposing (gettext)
 import Json.Decode exposing (decodeValue)
 import Shared.Api.Packages as PackagesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
@@ -68,6 +68,6 @@ importPackageCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | importing = ApiError.toActionResult appState (lg "apiError.packages.importError" appState) error }
+            ( { model | importing = ApiError.toActionResult appState (gettext "Importing the package failed." appState.locale) error }
             , getResultCmd result
             )

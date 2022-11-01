@@ -1,18 +1,13 @@
 module Wizard.Projects.Common.View exposing (visibilityIcons)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, i, span)
 import Html.Attributes exposing (class)
 import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
-import Shared.Locale exposing (l)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltipRight)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Common.View"
 
 
 visibilityIcons : AppState -> { q | visibility : QuestionnaireVisibility, sharing : QuestionnaireSharing } -> List (Html msg)
@@ -24,10 +19,10 @@ visibilityIcons appState questionnaire =
 
         visibleTitle =
             if questionnaire.visibility == VisibleEditQuestionnaire then
-                l_ "visibilityIcons.titleLoggedEdit" appState
+                gettext "Other logged-in users can edit the project." appState.locale
 
             else
-                l_ "visibilityIcons.titleLoggedView" appState
+                gettext "Other logged-in users can view the project." appState.locale
 
         linkIcon =
             span (tooltipRight linkTitle)
@@ -35,10 +30,10 @@ visibilityIcons appState questionnaire =
 
         linkTitle =
             if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
-                l_ "visibilityIcons.titleAnyoneEdit" appState
+                gettext "Anyone with the link can edit the project." appState.locale
 
             else
-                l_ "visibilityIcons.titleAnyoneView" appState
+                gettext "Anyone with the link can view the project." appState.locale
     in
     []
         |> listInsertIf visibleIcon (questionnaire.visibility /= PrivateQuestionnaire)

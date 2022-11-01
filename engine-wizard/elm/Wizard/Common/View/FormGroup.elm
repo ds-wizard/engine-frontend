@@ -29,6 +29,7 @@ module Wizard.Common.View.FormGroup exposing
 import Form exposing (Form, Msg(..))
 import Form.Field as Field
 import Form.Input as Input
+import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
@@ -37,7 +38,6 @@ import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa)
-import Shared.Locale exposing (l, lx)
 import Shared.Markdown as Markdown
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
@@ -46,20 +46,10 @@ import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.View.Flash as Flash
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.View.FormGroup"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.View.FormGroup"
-
-
 optionalWrapper : AppState -> Html Form.Msg -> Html Form.Msg
 optionalWrapper appState content =
     div [ class "form-group form-group-optional-wrapper" ]
-        [ span [ class "optional-label" ] [ lx_ "optional" appState ]
+        [ span [ class "optional-label" ] [ text (gettext "(optional)" appState.locale) ]
         , content
         ]
 
@@ -217,7 +207,7 @@ formatRadioGroup appState options =
 
                 pdfOnlyInfo =
                     if appState.config.feature.pdfOnlyEnabled then
-                        Flash.info appState (l_ "formatRadioGroup.pdfOnly" appState)
+                        Flash.info appState (gettext "Only PDF documents are enabled in this instance." appState.locale)
 
                     else
                         emptyNode
@@ -318,7 +308,7 @@ list appState itemView form fieldName labelText =
             , onClick (Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ lx_ "list.add" appState ]
+            [ text (gettext "Add" appState.locale) ]
         ]
 
 
@@ -340,7 +330,7 @@ listWithCustomMsg appState wrapMsg itemView form fieldName labelText =
             , onClick (wrapMsg <| Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ lx_ "list.add" appState ]
+            [ text (gettext "Add" appState.locale) ]
         ]
 
 
@@ -363,7 +353,7 @@ listWithHeader appState header itemView form fieldName labelText =
             , onClick (Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ lx_ "list.add" appState ]
+            [ text (gettext "Add" appState.locale) ]
         ]
 
 
@@ -446,7 +436,7 @@ markdownEditor appState form fieldName labelText =
                             , class "nav-link"
                             , classList [ ( "active", not previewActive ) ]
                             ]
-                            [ lx_ "markdownEditor.editor" appState ]
+                            [ text (gettext "Editor" appState.locale) ]
                         ]
                     , li [ class "nav-item" ]
                         [ a
@@ -454,7 +444,7 @@ markdownEditor appState form fieldName labelText =
                             , class "nav-link"
                             , classList [ ( "active", previewActive ) ]
                             ]
-                            [ lx_ "markdownEditor.preview" appState ]
+                            [ text (gettext "Preview" appState.locale) ]
                         ]
                     ]
                 ]
@@ -462,7 +452,7 @@ markdownEditor appState form fieldName labelText =
                 [ content
                 ]
             , div [ class "card-footer text-muted" ]
-                [ lx_ "markdownEditor.markdownDescription" appState ]
+                [ text (gettext "You can use markdown and see the result in the preview tab." appState.locale) ]
             ]
         , error
         ]

@@ -1,23 +1,14 @@
 module Wizard.Projects.Detail.Components.Settings.DeleteModal exposing (Model, Msg, UpdateConfig, initialModel, open, update, view)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (l, lg, lh)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.Settings.DeleteModal"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Projects.Detail.Components.Settings.DeleteModal"
 
 
 type alias Model =
@@ -93,14 +84,14 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
     case result of
         Ok _ ->
             ( { model
-                | deletingQuestionnaire = Success <| lg "apiSuccess.questionnaires.delete" appState
+                | deletingQuestionnaire = Success <| gettext "Questionnaire was successfully deleted." appState.locale
                 , questionnaireToBeDeleted = Nothing
               }
             , cfg.deleteCompleteCmd
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (lg "apiError.questionnaires.deleteError" appState) error }
+            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be deleted." appState.locale) error }
             , Cmd.none
             )
 
@@ -118,15 +109,18 @@ view appState model =
 
         modalContent =
             [ p []
-                (lh_ "deleteModal.message" [ strong [] [ text name ] ] appState)
+                (String.formatHtml
+                    (gettext "Are you sure you want to permanently delete %s?" appState.locale)
+                    [ strong [] [ text name ] ]
+                )
             ]
 
         modalConfig =
-            { modalTitle = l_ "deleteModal.title" appState
+            { modalTitle = gettext "Delete Project" appState.locale
             , modalContent = modalContent
             , visible = visible
             , actionResult = model.deletingQuestionnaire
-            , actionName = l_ "deleteModal.action" appState
+            , actionName = gettext "Delete" appState.locale
             , actionMsg = DeleteQuestionnaire
             , cancelMsg = Just <| ShowHideDeleteQuestionnaire Nothing
             , dangerous = True

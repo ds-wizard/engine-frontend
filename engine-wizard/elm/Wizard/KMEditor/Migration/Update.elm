@@ -4,12 +4,12 @@ module Wizard.KMEditor.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Event as Event
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.MigrationResolution as MigrationResolution exposing (MigrationResolution)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setMigration)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -51,7 +51,7 @@ handleGetMigrationCompleted : AppState -> Model -> Result ApiError Migration -> 
 handleGetMigrationCompleted appState model result =
     applyResult appState
         { setResult = setMigration
-        , defaultError = lg "apiError.branches.migrations.getError" appState
+        , defaultError = gettext "Unable to get migration." appState.locale
         , model = model
         , result = result
         }
@@ -88,7 +88,7 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
         Err error ->
-            ( { model | conflict = ApiError.toActionResult appState (lg "apiError.branches.migrations.conflict.postError" appState) error }
+            ( { model | conflict = ApiError.toActionResult appState (gettext "Unable to resolve conflict." appState.locale) error }
             , getResultCmd result
             )
 

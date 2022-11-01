@@ -8,6 +8,7 @@ module Wizard.Common.Components.Questionnaire.FeedbackModal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Maybe.Extra as Maybe
@@ -16,32 +17,12 @@ import Shared.Data.Feedback exposing (Feedback)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lf, lg, lh, lx)
 import String exposing (fromInt)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.FeedbackForm as FeedbackForm exposing (FeedbackForm)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Questionnaire.FeedbackModal"
-
-
-lf_ : String -> List String -> AppState -> String
-lf_ =
-    lf "Wizard.Common.Components.Questionnaire.FeedbackModal"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Common.Components.Questionnaire.FeedbackModal"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.Questionnaire.FeedbackModal"
 
 
 type alias Model =
@@ -98,7 +79,7 @@ update msg appState model =
                             ( { model | feedbacks = Success feedbacks }, Cmd.none )
 
                         Err error ->
-                            ( { model | feedbacks = ApiError.toActionResult appState (lg "apiError.feedbacks.getError" appState) error }
+                            ( { model | feedbacks = ApiError.toActionResult appState (gettext "Unable to get feedback." appState.locale) error }
                             , Cmd.none
                             )
 
@@ -111,7 +92,7 @@ update msg appState model =
                     ( { model | feedbackResult = Success feedbackResult }, Cmd.none )
 
                 Err error ->
-                    ( { model | feedbackResult = ApiError.toActionResult appState (lg "apiError.feedbacks.postError" appState) error }
+                    ( { model | feedbackResult = ApiError.toActionResult appState (gettext "Feedback could not be sent." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -145,10 +126,10 @@ view appState model =
                     let
                         issueLink =
                             a [ href feedback.issueUrl, target "_blank" ]
-                                [ text <| lf_ "issue" [ fromInt feedback.issueId ] appState ]
+                                [ text <| String.format (gettext "Issue %s" appState.locale) [ fromInt feedback.issueId ] ]
                     in
                     [ p []
-                        (lh_ "follow" [ issueLink ] appState)
+                        (String.formatHtml (gettext "You can follow the GitHub %s." appState.locale) [ issueLink ])
                     ]
 
                 _ ->
@@ -157,16 +138,16 @@ view appState model =
         ( actionName, actionMsg, cancelMsg ) =
             case model.feedbackResult of
                 Success _ ->
-                    ( l_ "done" appState, CloseFeedback, Nothing )
+                    ( gettext "Done" appState.locale, CloseFeedback, Nothing )
 
                 _ ->
-                    ( l_ "send" appState, FeedbackFormMsg Form.Submit, Just <| CloseFeedback )
+                    ( gettext "Send" appState.locale, FeedbackFormMsg Form.Submit, Just <| CloseFeedback )
 
         modalConfig =
-            { modalTitle = l_ "title" appState
+            { modalTitle = gettext "Feedback" appState.locale
             , modalContent = modalContent
             , visible = visible
-            , actionResult = ActionResult.map (\_ -> lg "apiSuccess.feedbacks.post" appState) model.feedbackResult
+            , actionResult = ActionResult.map (\_ -> gettext "Your feedback has been sent." appState.locale) model.feedbackResult
             , actionName = actionName
             , actionMsg = actionMsg
             , cancelMsg = cancelMsg
@@ -186,7 +167,7 @@ feedbackModalContent appState model =
                     if List.length feedbacks > 0 then
                         div []
                             [ div []
-                                [ lx_ "reportedIssues" appState ]
+                                [ text (gettext "There are already some issues reported with this question." appState.locale) ]
                             , ul [] (List.map feedbackIssue feedbacks)
                             ]
 
@@ -197,10 +178,10 @@ feedbackModalContent appState model =
                     emptyNode
     in
     [ div [ class "alert alert-info" ]
-        [ lx_ "info" appState ]
+        [ text (gettext "If you found something wrong with the question, you can send us your recommendation on how to improve it." appState.locale) ]
     , feedbackList
-    , FormGroup.input appState model.feedbackForm "title" (l_ "form.title" appState) |> Html.map FeedbackFormMsg
-    , FormGroup.textarea appState model.feedbackForm "content" (l_ "form.description" appState) |> Html.map FeedbackFormMsg
+    , FormGroup.input appState model.feedbackForm "title" (gettext "Title" appState.locale) |> Html.map FeedbackFormMsg
+    , FormGroup.textarea appState model.feedbackForm "content" (gettext "Description" appState.locale) |> Html.map FeedbackFormMsg
     ]
 
 

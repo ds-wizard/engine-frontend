@@ -2,9 +2,11 @@ module Shared.Api.Packages exposing
     ( deletePackage
     , deletePackageVersion
     , exportPackageUrl
+    , getOutdatedPackages
     , getPackage
     , getPackages
     , getPackagesSuggestions
+    , getPackagesSuggestionsWithOptions
     , importFromOwl
     , importPackage
     , pullPackage
@@ -33,11 +35,41 @@ getPackages qs =
     jwtGet url (Pagination.decoder "packages" Package.decoder)
 
 
+getOutdatedPackages : AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
+getOutdatedPackages =
+    let
+        queryString =
+            PaginationQueryString.empty
+                |> PaginationQueryString.withSize (Just 5)
+                |> PaginationQueryString.toApiUrlWith [ ( "state", "OutdatedPackageState" ) ]
+
+        url =
+            "/packages" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "packages" Package.decoder)
+
+
 getPackagesSuggestions : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination PackageSuggestion) msg -> Cmd msg
 getPackagesSuggestions qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
+
+        url =
+            "/packages/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "packages" PackageSuggestion.decoder)
+
+
+getPackagesSuggestionsWithOptions : PaginationQueryString -> List String -> List String -> AbstractAppState a -> ToMsg (Pagination PackageSuggestion) msg -> Cmd msg
+getPackagesSuggestionsWithOptions qs select exclude =
+    let
+        queryString =
+            PaginationQueryString.toApiUrlWith
+                [ ( "select", String.join "," select )
+                , ( "exclude", String.join "," exclude )
+                ]
+                qs
 
         url =
             "/packages/suggestions" ++ queryString

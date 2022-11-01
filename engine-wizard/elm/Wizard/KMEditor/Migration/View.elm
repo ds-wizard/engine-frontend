@@ -2,6 +2,7 @@ module Wizard.KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
+import Gettext exposing (gettext)
 import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
@@ -55,8 +56,7 @@ import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Locale exposing (l, lg, lh, lx)
-import String.Format exposing (format)
+import String.Format as String exposing (format)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -69,21 +69,6 @@ import Wizard.KMEditor.Migration.View.DiffTree as DiffTree
 import Wizard.Routes as Routes
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KMEditor.Migration.View"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.KMEditor.Migration.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Migration.View"
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (migrationView appState model) model.migration
@@ -94,7 +79,7 @@ migrationView appState model migration =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
-                [ lx_ "stateError" appState ]
+                [ text (gettext "Migration state is corrupted." appState.locale) ]
 
         currentView =
             case migration.migrationState.stateType of
@@ -123,13 +108,13 @@ migrationView appState model migration =
 
                 RunningState ->
                     div [ class "alert alert-warning" ]
-                        [ lx_ "running" appState ]
+                        [ text (gettext "Migration is still running, try again later." appState.locale) ]
 
                 _ ->
                     errorMessage
     in
     div [ class "col KMEditor__Migration", dataCy "km-editor_migration" ]
-        [ div [] [ Page.header (lg "kmMigration" appState) [] ]
+        [ div [] [ Page.header (gettext "Migration" appState.locale) [] ]
         , FormResult.view appState model.conflict
         , currentView
         ]
@@ -139,12 +124,11 @@ migrationSummary : AppState -> Migration -> Html Msg
 migrationSummary appState migration =
     div [ class "col-12" ]
         [ p []
-            (lh_ "summary"
+            (String.formatHtml (gettext "Migration of %s from %s to %s." appState.locale)
                 [ strong [] [ text migration.branchName ]
                 , code [] [ text migration.branchPreviousPackageId ]
                 , code [] [ text migration.targetPackageId ]
                 ]
-                appState
             )
         ]
 
@@ -154,7 +138,7 @@ getEventView appState model migration event =
     let
         errorMessage =
             div [ class "alert alert-danger" ]
-                [ lx_ "eventError" appState ]
+                [ text (gettext "The event is not connected to any entity in the Knowledge Model." appState.locale) ]
     in
     case event of
         AddKnowledgeModelEvent _ _ ->
@@ -164,196 +148,196 @@ getEventView appState model migration event =
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff appState eventData
-                |> viewEvent appState model event (lg "event.editKM" appState)
+                |> viewEvent appState model event (gettext "Edit Knowledge Model" appState.locale)
 
         AddMetricEvent eventData _ ->
             viewAddMetricDiff appState eventData
-                |> viewEvent appState model event (lg "event.addMetric" appState)
+                |> viewEvent appState model event (gettext "Add metric" appState.locale)
 
         EditMetricEvent eventData commonData ->
             KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditMetricDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editMetric" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit metric" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteMetricEvent commonData ->
             KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteMetricDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteMetric" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete metric" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddPhaseEvent eventData _ ->
             viewAddPhaseDiff appState eventData
-                |> viewEvent appState model event (lg "event.addPhase" appState)
+                |> viewEvent appState model event (gettext "Add phase" appState.locale)
 
         EditPhaseEvent eventData commonData ->
             KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditPhaseDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editPhase" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit phase" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeletePhaseEvent commonData ->
             KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeletePhaseDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deletePhase" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete phase" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddTagEvent eventData _ ->
             viewAddTagDiff appState eventData
-                |> viewEvent appState model event (lg "event.addTag" appState)
+                |> viewEvent appState model event (gettext "Add question tag" appState.locale)
 
         EditTagEvent eventData commonData ->
             KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditTagDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editTag" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit question tag" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteTagEvent commonData ->
             KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteTagDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteTag" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete question tag" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddIntegrationEvent eventData _ ->
             viewAddIntegrationDiff appState eventData
-                |> viewEvent appState model event (lg "event.addIntegration" appState)
+                |> viewEvent appState model event (gettext "Add integration" appState.locale)
 
         EditIntegrationEvent eventData commonData ->
             KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditIntegrationDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editIntegration" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit integration" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteIntegrationEvent commonData ->
             KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteIntegrationDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteIntegration" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete integration" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddChapterEvent eventData _ ->
             viewAddChapterDiff appState eventData
-                |> viewEvent appState model event (lg "event.addChapter" appState)
+                |> viewEvent appState model event (gettext "Add chapter" appState.locale)
 
         EditChapterEvent eventData commonData ->
             KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditChapterDiff appState migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editChapter" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit chapter" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteChapterEvent commonData ->
             KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteChapterDiff appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteChapter" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete chapter" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddQuestionEvent eventData _ ->
             viewAddQuestionDiff appState migration.currentKnowledgeModel eventData
-                |> viewEvent appState model event (lg "event.addQuestion" appState)
+                |> viewEvent appState model event (gettext "Add question" appState.locale)
 
         EditQuestionEvent eventData commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditQuestionDiff appState migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editQuestion" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit question" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteQuestionEvent commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteQuestionDiff appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteQuestion" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete question" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddAnswerEvent eventData _ ->
             viewAddAnswerDiff appState migration.currentKnowledgeModel eventData
-                |> viewEvent appState model event (lg "event.addAnswer" appState)
+                |> viewEvent appState model event (gettext "Add answer" appState.locale)
 
         EditAnswerEvent eventData commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editAnswer" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit answer" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteAnswerEvent commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteAnswer" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete answer" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddChoiceEvent eventData _ ->
             viewAddChoiceDiff appState eventData
-                |> viewEvent appState model event (lg "event.addChoice" appState)
+                |> viewEvent appState model event (gettext "Add choice" appState.locale)
 
         EditChoiceEvent eventData commonData ->
             KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditChoiceDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editChoice" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit choice" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteChoiceEvent commonData ->
             KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteChoiceDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteChoice" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete choice" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddReferenceEvent eventData _ ->
             viewAddReferenceDiff appState eventData
-                |> viewEvent appState model event (lg "event.addReference" appState)
+                |> viewEvent appState model event (gettext "Add reference" appState.locale)
 
         EditReferenceEvent eventData commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditReferenceDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editReference" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit reference" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteReferenceEvent commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteReferenceDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteReference" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete reference" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         AddExpertEvent eventData _ ->
             viewAddExpertDiff appState eventData
-                |> viewEvent appState model event (lg "event.addExpert" appState)
+                |> viewEvent appState model event (gettext "Add expert" appState.locale)
 
         EditExpertEvent eventData commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditExpertDiff appState eventData)
-                |> Maybe.map (viewEvent appState model event (lg "event.editExpert" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Edit expert" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         DeleteExpertEvent commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteExpertDiff appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.deleteExpert" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Delete expert" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         MoveQuestionEvent _ commonData ->
             KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveQuestion appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model event (lg "event.moveQuestion" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Move question" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         MoveAnswerEvent _ commonData ->
             KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveAnswer appState migration.currentKnowledgeModel)
-                |> Maybe.map (viewEvent appState model event (lg "event.moveAnswer" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Move answer" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         MoveChoiceEvent _ commonData ->
             KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveChoice appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.moveChoice" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Move choice" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         MoveReferenceEvent _ commonData ->
             KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveReference appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.moveReference" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Move reference" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         MoveExpertEvent _ commonData ->
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveExpert appState)
-                |> Maybe.map (viewEvent appState model event (lg "event.moveExpert" appState))
+                |> Maybe.map (viewEvent appState model event (gettext "Move expert" appState.locale))
                 |> Maybe.withDefault errorMessage
 
 
@@ -383,7 +367,7 @@ viewEditKnowledgeModelDiff appState event km =
             Dict.fromList <| List.map (\c -> ( c.uuid, c.title )) chapters
 
         chaptersDiff =
-            viewDiffChildren (lg "chapters" appState) originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
+            viewDiffChildren (gettext "Chapters" appState.locale) originalChapters (EventField.getValueWithDefault event.chapterUuids originalChapters) chapterNames
 
         metrics =
             KnowledgeModel.getMetrics km
@@ -395,7 +379,7 @@ viewEditKnowledgeModelDiff appState event km =
             Dict.fromList <| List.map (\m -> ( m.uuid, m.title )) metrics
 
         metricsDiff =
-            viewDiffChildren (lg "metrics" appState)
+            viewDiffChildren (gettext "Metrics" appState.locale)
                 originalMetrics
                 (EventField.getValueWithDefault event.metricUuids originalMetrics)
                 metricNames
@@ -410,7 +394,7 @@ viewEditKnowledgeModelDiff appState event km =
             Dict.fromList <| List.map (\p -> ( p.uuid, p.title )) phases
 
         phasesDiff =
-            viewDiffChildren (lg "phases" appState)
+            viewDiffChildren (gettext "Phases" appState.locale)
                 originalPhases
                 (EventField.getValueWithDefault event.phaseUuids originalPhases)
                 phaseNames
@@ -425,7 +409,7 @@ viewEditKnowledgeModelDiff appState event km =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
 
         tagsDiff =
-            viewDiffChildren (lg "tags" appState)
+            viewDiffChildren (gettext "Question Tags" appState.locale)
                 originalTags
                 (EventField.getValueWithDefault event.tagUuids originalTags)
                 tagNames
@@ -440,7 +424,7 @@ viewEditKnowledgeModelDiff appState event km =
             Dict.fromList <| List.map (\i -> ( Integration.getUuid i, Integration.getName i )) integrations
 
         integrationsDiff =
-            viewDiffChildren (lg "integrations" appState)
+            viewDiffChildren (gettext "Integrations" appState.locale)
                 originalIntegrations
                 (EventField.getValueWithDefault event.integrationUuids originalIntegrations)
                 integrationNames
@@ -458,9 +442,9 @@ viewAddMetricDiff appState event =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "metric.title" appState
-                    , lg "metric.abbreviation" appState
-                    , lg "metric.description" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Abbreviation" appState.locale
+                    , gettext "Description" appState.locale
                     ]
                     [ event.title
                     , Maybe.withDefault "" event.abbreviation
@@ -479,9 +463,9 @@ viewEditMetricDiff appState event metric =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "metric.title" appState
-                    , lg "metric.abbreviation" appState
-                    , lg "metric.description" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Abbreviation" appState.locale
+                    , gettext "Description" appState.locale
                     ]
                     [ metric.title
                     , Maybe.withDefault "" metric.abbreviation
@@ -504,9 +488,9 @@ viewDeleteMetricDiff appState metric =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "metric.title" appState
-                    , lg "metric.abbreviation" appState
-                    , lg "metric.description" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Abbreviation" appState.locale
+                    , gettext "Description" appState.locale
                     ]
                     [ metric.title
                     , Maybe.withDefault "" metric.abbreviation
@@ -525,8 +509,8 @@ viewAddPhaseDiff appState event =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "phase.title" appState
-                    , lg "phase.description" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Description" appState.locale
                     ]
                     [ event.title
                     , Maybe.withDefault "" event.description
@@ -544,8 +528,8 @@ viewEditPhaseDiff appState event phase =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "phase.title" appState
-                    , lg "phase.description" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Description" appState.locale
                     ]
                     [ phase.title
                     , Maybe.withDefault "" phase.description
@@ -566,8 +550,8 @@ viewDeletePhaseDiff appState phase =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "phase.title" appState
-                    , lg "phase.description" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Description" appState.locale
                     ]
                     [ phase.title
                     , Maybe.withDefault "" phase.description
@@ -585,9 +569,9 @@ viewAddTagDiff appState event =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "tag.name" appState
-                    , lg "tag.description" appState
-                    , lg "tag.color" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Description" appState.locale
+                    , gettext "Color" appState.locale
                     ]
                     [ event.name
                     , event.description |> Maybe.withDefault ""
@@ -607,9 +591,9 @@ viewEditTagDiff appState event tag =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "tag.name" appState
-                    , lg "tag.description" appState
-                    , lg "tag.color" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Description" appState.locale
+                    , gettext "Color" appState.locale
                     ]
                     [ tag.name
                     , Maybe.withDefault "" tag.description
@@ -632,9 +616,9 @@ viewDeleteTagDiff appState tag =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "tag.name" appState
-                    , lg "tag.description" appState
-                    , lg "tag.color" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Description" appState.locale
+                    , gettext "Color" appState.locale
                     ]
                     [ tag.name
                     , tag.description |> Maybe.withDefault ""
@@ -652,11 +636,11 @@ viewAddIntegrationDiff appState event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "integration.type" appState
-                , lg "integration.id" appState
-                , lg "integration.name" appState
-                , lg "integration.props" appState
-                , lg "integration.itemUrl" appState
+                [ gettext "Type" appState.locale
+                , gettext "ID" appState.locale
+                , gettext "Name" appState.locale
+                , gettext "Props" appState.locale
+                , gettext "Item URL" appState.locale
                 ]
                 [ AddIntegrationEventData.getTypeString event
                 , AddIntegrationEventData.map .id .id event
@@ -669,13 +653,13 @@ viewAddIntegrationDiff appState event =
             case event of
                 AddIntegrationApiEvent data ->
                     List.map2 (\a b -> ( a, b ))
-                        [ lg "integration.request.method" appState
-                        , lg "integration.request.url" appState
-                        , lg "integration.request.headers" appState
-                        , lg "integration.request.body" appState
-                        , lg "integration.response.listField" appState
-                        , lg "integration.response.idField" appState
-                        , lg "integration.response.itemTemplate" appState
+                        [ gettext "Request HTTP Method" appState.locale
+                        , gettext "Request URL" appState.locale
+                        , gettext "Request HTTP Headers" appState.locale
+                        , gettext "Request HTTP Body" appState.locale
+                        , gettext "Response List Field" appState.locale
+                        , gettext "Response Item ID" appState.locale
+                        , gettext "Response Item Template" appState.locale
                         ]
                         [ data.requestMethod
                         , data.requestUrl
@@ -688,7 +672,7 @@ viewAddIntegrationDiff appState event =
 
                 AddIntegrationWidgetEvent data ->
                     List.map2 (\a b -> ( a, b ))
-                        [ lg "integration.widgetUrl" appState
+                        [ gettext "Widget URL" appState.locale
                         ]
                         [ data.widgetUrl
                         ]
@@ -707,11 +691,11 @@ viewEditIntegrationDiff appState event integration =
     let
         fields =
             List.map3 (\a b c -> ( a, b, c ))
-                [ lg "integration.type" appState
-                , lg "integration.id" appState
-                , lg "integration.name" appState
-                , lg "integration.props" appState
-                , lg "integration.itemUrl" appState
+                [ gettext "Type" appState.locale
+                , gettext "ID" appState.locale
+                , gettext "Name" appState.locale
+                , gettext "Props" appState.locale
+                , gettext "Item URL" appState.locale
                 ]
                 [ Integration.getTypeString integration
                 , Integration.getId integration
@@ -730,13 +714,13 @@ viewEditIntegrationDiff appState event integration =
             case event of
                 EditIntegrationApiEvent data ->
                     List.map3 (\a b c -> ( a, b, c ))
-                        [ lg "integration.request.method" appState
-                        , lg "integration.request.url" appState
-                        , lg "integration.request.headers" appState
-                        , lg "integration.request.body" appState
-                        , lg "integration.response.listField" appState
-                        , lg "integration.response.idField" appState
-                        , lg "integration.response.itemTemplate" appState
+                        [ gettext "Request HTTP Method" appState.locale
+                        , gettext "Request URL" appState.locale
+                        , gettext "Request HTTP Headers" appState.locale
+                        , gettext "Request HTTP Body" appState.locale
+                        , gettext "Response List Field" appState.locale
+                        , gettext "Response Item ID" appState.locale
+                        , gettext "Response Item Template" appState.locale
                         ]
                         [ Maybe.withDefault "" <| Integration.getRequestMethod integration
                         , Maybe.withDefault "" <| Integration.getRequestUrl integration
@@ -757,7 +741,7 @@ viewEditIntegrationDiff appState event integration =
 
                 EditIntegrationWidgetEvent data ->
                     List.map3 (\a b c -> ( a, b, c ))
-                        [ lg "integration.widgetUrl" appState
+                        [ gettext "Widget URL" appState.locale
                         ]
                         [ Maybe.withDefault "" <| Integration.getWidgetUrl integration
                         ]
@@ -780,11 +764,11 @@ viewDeleteIntegrationDiff appState integration =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "integration.type" appState
-                , lg "integration.id" appState
-                , lg "integration.name" appState
-                , lg "integration.props" appState
-                , lg "integration.itemUrl" appState
+                [ gettext "Type" appState.locale
+                , gettext "ID" appState.locale
+                , gettext "Name" appState.locale
+                , gettext "Props" appState.locale
+                , gettext "Item URL" appState.locale
                 ]
                 [ Integration.getTypeString integration
                 , Integration.getId integration
@@ -797,13 +781,13 @@ viewDeleteIntegrationDiff appState integration =
             case integration of
                 ApiIntegration _ data ->
                     List.map2 (\a b -> ( a, b ))
-                        [ lg "integration.request.method" appState
-                        , lg "integration.request.url" appState
-                        , lg "integration.request.headers" appState
-                        , lg "integration.request.body" appState
-                        , lg "integration.response.listField" appState
-                        , lg "integration.response.idField" appState
-                        , lg "integration.response.itemTemplate" appState
+                        [ gettext "Request HTTP Method" appState.locale
+                        , gettext "Request URL" appState.locale
+                        , gettext "Request HTTP Headers" appState.locale
+                        , gettext "Request HTTP Body" appState.locale
+                        , gettext "Response List Field" appState.locale
+                        , gettext "Response Item ID" appState.locale
+                        , gettext "Response Item Template" appState.locale
                         ]
                         [ data.requestMethod
                         , data.requestUrl
@@ -816,7 +800,7 @@ viewDeleteIntegrationDiff appState integration =
 
                 WidgetIntegration _ data ->
                     List.map2 (\a b -> ( a, b ))
-                        [ lg "integration.widgetUrl" appState
+                        [ gettext "Widget URL" appState.locale
                         ]
                         [ data.widgetUrl
                         ]
@@ -836,8 +820,8 @@ viewAddChapterDiff appState event =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "chapter.title" appState
-                    , lg "chapter.text" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Text" appState.locale
                     ]
                     [ event.title
                     , Maybe.withDefault "" event.text
@@ -855,8 +839,8 @@ viewEditChapterDiff appState km event chapter =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "chapter.title" appState
-                    , lg "chapter.text" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Text" appState.locale
                     ]
                     [ chapter.title
                     , Maybe.withDefault "" chapter.text
@@ -875,7 +859,7 @@ viewEditChapterDiff appState km event chapter =
             Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) questions
 
         questionsDiff =
-            viewDiffChildren (lg "questions" appState)
+            viewDiffChildren (gettext "Questions" appState.locale)
                 originalQuestions
                 (EventField.getValueWithDefault event.questionUuids originalQuestions)
                 questionNames
@@ -892,8 +876,8 @@ viewDeleteChapterDiff appState km chapter =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "chapter.title" appState
-                    , lg "chapter.text" appState
+                    [ gettext "Title" appState.locale
+                    , gettext "Text" appState.locale
                     ]
                     [ chapter.title
                     , Maybe.withDefault "" chapter.text
@@ -906,7 +890,7 @@ viewDeleteChapterDiff appState km chapter =
             List.map Question.getTitle questions
 
         questionsDiff =
-            viewDeletedChildren (lg "questions" appState) questionNames
+            viewDeletedChildren (gettext "Questions" appState.locale) questionNames
 
         annotationsDiff =
             viewAnnotationsDiff appState chapter.annotations []
@@ -919,9 +903,9 @@ viewAddQuestionDiff appState km event =
     let
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "question.type" appState
-                , lg "question.title" appState
-                , lg "question.text" appState
+                [ gettext "Type" appState.locale
+                , gettext "Title" appState.locale
+                , gettext "Text" appState.locale
                 ]
                 [ AddQuestionEventQuestionData.getTypeString event
                 , AddQuestionEventQuestionData.map .title .title .title .title .title event
@@ -931,10 +915,10 @@ viewAddQuestionDiff appState km event =
         extraFields =
             case event of
                 AddQuestionValueEvent data ->
-                    [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
+                    [ ( gettext "Value Type" appState.locale, QuestionValueType.toString data.valueType ) ]
 
                 AddQuestionIntegrationEvent data ->
-                    [ ( lg "integration" appState, getIntegrationName km data.integrationUuid ) ]
+                    [ ( gettext "Integration" appState.locale, getIntegrationName km data.integrationUuid ) ]
 
                 _ ->
                     []
@@ -949,7 +933,7 @@ viewAddQuestionDiff appState km event =
                         props =
                             List.map (\( p, v ) -> p ++ " = " ++ v) <| Dict.toList data.props
                     in
-                    viewAddedChildren (lg "integration.props" appState) props
+                    viewAddedChildren (gettext "Props" appState.locale) props
 
                 _ ->
                     emptyNode
@@ -967,7 +951,7 @@ viewAddQuestionDiff appState km event =
             List.map (\_ -> "") tagUuids
 
         tagsDiff =
-            viewDiffChildren (lg "tags" appState) originalTags tagUuids tagNames
+            viewDiffChildren (gettext "Question Tags" appState.locale) originalTags tagUuids tagNames
 
         annotations =
             AddQuestionEventQuestionData.map .annotations .annotations .annotations .annotations .annotations event
@@ -994,9 +978,9 @@ viewEditQuestionDiff appState km event question =
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
-                [ lg "question.type" appState
-                , lg "question.title" appState
-                , lg "question.text" appState
+                [ gettext "Type" appState.locale
+                , gettext "Title" appState.locale
+                , gettext "Text" appState.locale
                 ]
                 [ Question.getTypeString question
                 , Question.getTitle question
@@ -1022,7 +1006,7 @@ viewEditQuestionDiff appState km event question =
                                 newStr =
                                     Maybe.withDefault originalStr <| Maybe.map QuestionValueType.toString new
                             in
-                            [ ( lg "questionValueType" appState, originalStr, newStr ) ]
+                            [ ( gettext "Value Type" appState.locale, originalStr, newStr ) ]
 
                 EditQuestionIntegrationEvent data ->
                     case ( Question.getIntegrationUuid question, EventField.getValue data.integrationUuid ) of
@@ -1041,7 +1025,7 @@ viewEditQuestionDiff appState km event question =
                                         |> Maybe.map (getIntegrationName km)
                                         |> Maybe.withDefault originalStr
                             in
-                            [ ( lg "integration" appState, originalStr, newStr ) ]
+                            [ ( gettext "Integration" appState.locale, originalStr, newStr ) ]
 
                 _ ->
                     []
@@ -1064,7 +1048,7 @@ viewEditQuestionDiff appState km event question =
                                 |> Maybe.map (List.map (\( p, v ) -> p ++ " = " ++ v) << Dict.toList)
                                 |> Maybe.withDefault originalProps
                     in
-                    viewAddedAndDeletedChildren (lg "integration.props" appState) originalProps newProps
+                    viewAddedAndDeletedChildren (gettext "Props" appState.locale) originalProps newProps
 
                 _ ->
                     emptyNode
@@ -1080,7 +1064,7 @@ viewEditQuestionDiff appState km event question =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
 
         tagsDiff =
-            viewDiffChildren (lg "tags" appState)
+            viewDiffChildren (gettext "Question Tags" appState.locale)
                 originalTags
                 (EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags)
                 tagNames
@@ -1099,7 +1083,7 @@ viewEditQuestionDiff appState km event question =
                         answerNames =
                             Dict.fromList <| List.map (\a -> ( a.uuid, a.label )) answers
                     in
-                    viewDiffChildren (lg "answers" appState)
+                    viewDiffChildren (gettext "Answers" appState.locale)
                         originalAnswers
                         (EventField.getValueWithDefault data.answerUuids originalAnswers)
                         answerNames
@@ -1111,7 +1095,7 @@ viewEditQuestionDiff appState km event question =
         choicesDiff =
             case question of
                 MultiChoiceQuestion _ _ ->
-                    viewPlainChildren (lg "choices" appState) <|
+                    viewPlainChildren (gettext "Choices" appState.locale) <|
                         List.map .label <|
                             KnowledgeModel.getQuestionChoices questionUuid km
 
@@ -1132,7 +1116,7 @@ viewEditQuestionDiff appState km event question =
                         itemTemplateQuestionNames =
                             Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) itemTemplateQuestions
                     in
-                    viewDiffChildren (lg "questions" appState)
+                    viewDiffChildren (gettext "Questions" appState.locale)
                         originalItemTemplateQuestions
                         (EventField.getValueWithDefault data.itemTemplateQuestionUuids originalItemTemplateQuestions)
                         itemTemplateQuestionNames
@@ -1151,7 +1135,7 @@ viewEditQuestionDiff appState km event question =
             Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName r )) references
 
         referencesDiff =
-            viewDiffChildren (lg "references" appState)
+            viewDiffChildren (gettext "References" appState.locale)
                 originalReferences
                 (EventField.getValueWithDefault (EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids event) originalReferences)
                 referenceNames
@@ -1167,7 +1151,7 @@ viewEditQuestionDiff appState km event question =
             Dict.fromList <| List.map (\e -> ( e.uuid, e.name )) experts
 
         expertsDiff =
-            viewDiffChildren (lg "experts" appState)
+            viewDiffChildren (gettext "Experts" appState.locale)
                 originalExperts
                 (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
                 expertNames
@@ -1197,9 +1181,9 @@ viewDeleteQuestionDiff appState km question =
 
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "question.type" appState
-                , lg "question.title" appState
-                , lg "question.text" appState
+                [ gettext "Type" appState.locale
+                , gettext "Title" appState.locale
+                , gettext "Text" appState.locale
                 ]
                 [ Question.getTypeString question
                 , Question.getTitle question
@@ -1209,10 +1193,10 @@ viewDeleteQuestionDiff appState km question =
         extraFields =
             case question of
                 ValueQuestion _ data ->
-                    [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
+                    [ ( gettext "Value Type" appState.locale, QuestionValueType.toString data.valueType ) ]
 
                 IntegrationQuestion _ data ->
-                    [ ( lg "integration" appState, getIntegrationName km data.integrationUuid ) ]
+                    [ ( gettext "Integration" appState.locale, getIntegrationName km data.integrationUuid ) ]
 
                 _ ->
                     []
@@ -1228,13 +1212,13 @@ viewDeleteQuestionDiff appState km question =
             List.map .name <| List.filter (\t -> List.member t.uuid (Question.getTagUuids question)) tags
 
         tagsDiff =
-            viewDeletedChildren (lg "tags" appState) tagNames
+            viewDeletedChildren (gettext "Question Tags" appState.locale) tagNames
 
         -- Answers
         answersDiff =
             case question of
                 OptionsQuestion _ _ ->
-                    viewDeletedChildren (lg "answers" appState) <|
+                    viewDeletedChildren (gettext "Answers" appState.locale) <|
                         List.map .label <|
                             KnowledgeModel.getQuestionAnswers questionUuid km
 
@@ -1245,7 +1229,7 @@ viewDeleteQuestionDiff appState km question =
         choicesDiff =
             case question of
                 MultiChoiceQuestion _ _ ->
-                    viewPlainChildren (lg "choices" appState) <|
+                    viewPlainChildren (gettext "Choices" appState.locale) <|
                         List.map .label <|
                             KnowledgeModel.getQuestionChoices questionUuid km
 
@@ -1256,7 +1240,7 @@ viewDeleteQuestionDiff appState km question =
         itemTemplateQuestionsDiff =
             case question of
                 ListQuestion _ _ ->
-                    viewDeletedChildren (lg "questions" appState) <|
+                    viewDeletedChildren (gettext "Questions" appState.locale) <|
                         List.map Question.getTitle <|
                             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
@@ -1268,14 +1252,14 @@ viewDeleteQuestionDiff appState km question =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewDeletedChildren (lg "references" appState) <| List.map Reference.getVisibleName references
+            viewDeletedChildren (gettext "References" appState.locale) <| List.map Reference.getVisibleName references
 
         -- Experts
         experts =
             KnowledgeModel.getQuestionExperts questionUuid km
 
         expertsDiff =
-            viewDeletedChildren (lg "experts" appState) <| List.map .name experts
+            viewDeletedChildren (gettext "Experts" appState.locale) <| List.map .name experts
 
         -- Annotations
         annotationsDiff =
@@ -1294,9 +1278,9 @@ viewMoveQuestion appState km question =
 
         fields =
             List.map2 (\a b -> ( a, b ))
-                [ lg "question.type" appState
-                , lg "question.title" appState
-                , lg "question.text" appState
+                [ gettext "Type" appState.locale
+                , gettext "Title" appState.locale
+                , gettext "Text" appState.locale
                 ]
                 [ Question.getTypeString question
                 , Question.getTitle question
@@ -1306,10 +1290,10 @@ viewMoveQuestion appState km question =
         extraFields =
             case question of
                 ValueQuestion _ data ->
-                    [ ( lg "questionValueType" appState, QuestionValueType.toString data.valueType ) ]
+                    [ ( gettext "Value Type" appState.locale, QuestionValueType.toString data.valueType ) ]
 
                 IntegrationQuestion _ data ->
-                    [ ( lg "integration" appState, getIntegrationName km data.integrationUuid ) ]
+                    [ ( gettext "Integration" appState.locale, getIntegrationName km data.integrationUuid ) ]
 
                 _ ->
                     []
@@ -1325,13 +1309,13 @@ viewMoveQuestion appState km question =
             List.map .name <| List.filter (\t -> List.member t.uuid (Question.getTagUuids question)) tags
 
         tagsDiff =
-            viewPlainChildren (lg "tags" appState) tagNames
+            viewPlainChildren (gettext "Question Tags" appState.locale) tagNames
 
         -- Answers
         answersDiff =
             case question of
                 OptionsQuestion _ _ ->
-                    viewPlainChildren (lg "answers" appState) <|
+                    viewPlainChildren (gettext "Answers" appState.locale) <|
                         List.map .label <|
                             KnowledgeModel.getQuestionAnswers questionUuid km
 
@@ -1342,7 +1326,7 @@ viewMoveQuestion appState km question =
         choicesDiff =
             case question of
                 MultiChoiceQuestion _ _ ->
-                    viewPlainChildren (lg "choices" appState) <|
+                    viewPlainChildren (gettext "Choices" appState.locale) <|
                         List.map .label <|
                             KnowledgeModel.getQuestionChoices questionUuid km
 
@@ -1353,7 +1337,7 @@ viewMoveQuestion appState km question =
         itemTemplateQuestionsDiff =
             case question of
                 ListQuestion _ _ ->
-                    viewPlainChildren (lg "questions" appState) <|
+                    viewPlainChildren (gettext "Questions" appState.locale) <|
                         List.map Question.getTitle <|
                             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
@@ -1365,14 +1349,14 @@ viewMoveQuestion appState km question =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewPlainChildren (lg "references" appState) <| List.map Reference.getVisibleName references
+            viewPlainChildren (gettext "References" appState.locale) <| List.map Reference.getVisibleName references
 
         -- Experts
         experts =
             KnowledgeModel.getQuestionExperts questionUuid km
 
         expertsDiff =
-            viewPlainChildren (lg "experts" appState) <| List.map .name experts
+            viewPlainChildren (gettext "Experts" appState.locale) <| List.map .name experts
 
         -- Annotations
         annotations =
@@ -1401,15 +1385,15 @@ viewAddAnswerDiff appState km event =
         fieldsDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "answer.label" appState
-                    , lg "answer.advice" appState
+                    [ gettext "Label" appState.locale
+                    , gettext "Advice" appState.locale
                     ]
                     [ event.label
                     , event.advice |> Maybe.withDefault ""
                     ]
 
         metricsDiff =
-            viewAddedChildren (lg "metrics" appState) <|
+            viewAddedChildren (gettext "Metrics" appState.locale) <|
                 List.map (metricMeasureToString metrics) event.metricMeasures
 
         annotationsDiff =
@@ -1427,8 +1411,8 @@ viewEditAnswerDiff appState km event answer =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "answer.label" appState
-                    , lg "answer.advice" appState
+                    [ gettext "Label" appState.locale
+                    , gettext "Advice" appState.locale
                     ]
                     [ answer.label
                     , Maybe.withDefault "" answer.advice
@@ -1447,7 +1431,7 @@ viewEditAnswerDiff appState km event answer =
             Dict.fromList <| List.map (\q -> ( Question.getUuid q, Question.getTitle q )) questions
 
         questionsDiff =
-            viewDiffChildren (lg "questions" appState)
+            viewDiffChildren (gettext "Questions" appState.locale)
                 originalQuestions
                 (EventField.getValueWithDefault event.followUpUuids originalQuestions)
                 questionNames
@@ -1460,7 +1444,7 @@ viewEditAnswerDiff appState km event answer =
                 |> List.map (metricMeasureToString metrics)
 
         metricsPropsDiff =
-            viewAddedAndDeletedChildren (lg "metrics" appState) originalMetrics newMetrics
+            viewAddedAndDeletedChildren (gettext "Metrics" appState.locale) originalMetrics newMetrics
 
         annotationsDiff =
             viewAnnotationsDiff appState answer.annotations (EventField.getValueWithDefault event.annotations answer.annotations)
@@ -1478,8 +1462,8 @@ viewDeleteAnswerDiff appState km answer =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "answer.label" appState
-                    , lg "answer.advice" appState
+                    [ gettext "Label" appState.locale
+                    , gettext "Advice" appState.locale
                     ]
                     [ answer.label
                     , answer.advice |> Maybe.withDefault ""
@@ -1492,13 +1476,13 @@ viewDeleteAnswerDiff appState km answer =
             List.map Question.getTitle questions
 
         questionsDiff =
-            viewDeletedChildren (lg "questions" appState) questionNames
+            viewDeletedChildren (gettext "Questions" appState.locale) questionNames
 
         originalMetrics =
             List.map (metricMeasureToString metrics) answer.metricMeasures
 
         metricsDiff =
-            viewDeletedChildren (lg "metrics" appState) originalMetrics
+            viewDeletedChildren (gettext "Metrics" appState.locale) originalMetrics
 
         annotationsDiff =
             viewAnnotationsDiff appState answer.annotations []
@@ -1516,8 +1500,8 @@ viewMoveAnswer appState km answer =
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "answer.label" appState
-                    , lg "answer.advice" appState
+                    [ gettext "Label" appState.locale
+                    , gettext "Advice" appState.locale
                     ]
                     [ answer.label
                     , answer.advice |> Maybe.withDefault ""
@@ -1530,13 +1514,13 @@ viewMoveAnswer appState km answer =
             List.map Question.getTitle questions
 
         questionsDiff =
-            viewPlainChildren (lg "questions" appState) questionNames
+            viewPlainChildren (gettext "Questions" appState.locale) questionNames
 
         originalMetrics =
             List.map (metricMeasureToString metrics) answer.metricMeasures
 
         metricsDiff =
-            viewPlainChildren (lg "metrics" appState) originalMetrics
+            viewPlainChildren (gettext "Metrics" appState.locale) originalMetrics
 
         annotationsDiff =
             viewAnnotationsDiff appState answer.annotations answer.annotations
@@ -1567,7 +1551,7 @@ viewAddChoiceDiff appState event =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "choice.label" appState
+                    [ gettext "Label" appState.locale
                     ]
                     [ event.label
                     ]
@@ -1584,7 +1568,7 @@ viewEditChoiceDiff appState event choice =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "choice.label" appState
+                    [ gettext "Label" appState.locale
                     ]
                     [ choice.label
                     ]
@@ -1603,7 +1587,7 @@ viewDeleteChoiceDiff appState choice =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "choice.label" appState
+                    [ gettext "Label" appState.locale
                     ]
                     [ choice.label
                     ]
@@ -1620,7 +1604,7 @@ viewMoveChoice appState choice =
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "choice.label" appState
+                    [ gettext "Label" appState.locale
                     ]
                     [ choice.label
                     ]
@@ -1645,10 +1629,10 @@ viewAddResourcePageReferenceDiff appState data =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.shortUuid" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Short UUID" appState.locale
                     ]
-                    [ lg "referenceType.resourcePage" appState
+                    [ gettext "Resource Page" appState.locale
                     , data.shortUuid
                     ]
 
@@ -1664,11 +1648,11 @@ viewAddURLReferenceDiff appState data =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.url" appState
-                    , lg "reference.label" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "URL" appState.locale
+                    , gettext "Label" appState.locale
                     ]
-                    [ lg "referenceType.url" appState
+                    [ gettext "URL" appState.locale
                     , data.url
                     , data.label
                     ]
@@ -1685,11 +1669,11 @@ viewAddCrossReferenceDiff appState data =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.targetUuid" appState
-                    , lg "reference.description" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Target UUID" appState.locale
+                    , gettext "Description" appState.locale
                     ]
-                    [ lg "referenceType.cross" appState
+                    [ gettext "Cross Reference" appState.locale
                     , data.targetUuid
                     , data.description
                     ]
@@ -1708,13 +1692,13 @@ viewEditReferenceDiff appState event reference =
                 fieldDiff =
                     viewDiff <|
                         List.map3 (\a b c -> ( a, b, c ))
-                            [ lg "referenceType" appState
-                            , lg "reference.shortUuid" appState
+                            [ gettext "Reference Type" appState.locale
+                            , gettext "Short UUID" appState.locale
                             ]
-                            [ lg "referenceType.resourcePage" appState
+                            [ gettext "Resource Page" appState.locale
                             , referenceData.shortUuid
                             ]
-                            [ lg "referenceType.resourcePage" appState
+                            [ gettext "Resource Page" appState.locale
                             , EventField.getValueWithDefault eventData.shortUuid referenceData.shortUuid
                             ]
 
@@ -1728,15 +1712,15 @@ viewEditReferenceDiff appState event reference =
                 fieldDiff =
                     viewDiff <|
                         List.map3 (\a b c -> ( a, b, c ))
-                            [ lg "referenceType" appState
-                            , lg "reference.url" appState
-                            , lg "reference.label" appState
+                            [ gettext "Reference Type" appState.locale
+                            , gettext "URL" appState.locale
+                            , gettext "Label" appState.locale
                             ]
-                            [ lg "referenceType.url" appState
+                            [ gettext "URL" appState.locale
                             , referenceData.url
                             , referenceData.label
                             ]
-                            [ lg "referenceType.url" appState
+                            [ gettext "URL" appState.locale
                             , EventField.getValueWithDefault eventData.url referenceData.url
                             , EventField.getValueWithDefault eventData.label referenceData.label
                             ]
@@ -1751,15 +1735,15 @@ viewEditReferenceDiff appState event reference =
                 fieldDiff =
                     viewDiff <|
                         List.map3 (\a b c -> ( a, b, c ))
-                            [ lg "referenceType" appState
-                            , lg "reference.targetUuid" appState
-                            , lg "reference.description" appState
+                            [ gettext "Reference Type" appState.locale
+                            , gettext "Target UUID" appState.locale
+                            , gettext "Description" appState.locale
                             ]
-                            [ lg "referenceType.cross" appState
+                            [ gettext "Cross Reference" appState.locale
                             , referenceData.targetUuid
                             , referenceData.description
                             ]
-                            [ lg "referenceType.cross" appState
+                            [ gettext "Cross Reference" appState.locale
                             , EventField.getValueWithDefault eventData.targetUuid referenceData.targetUuid
                             , EventField.getValueWithDefault eventData.description referenceData.description
                             ]
@@ -1790,10 +1774,10 @@ viewEditResourcePageReferenceDiff appState data =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.shortUuid" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Short UUID" appState.locale
                     ]
-                    [ lg "referenceType.resourcePage" appState
+                    [ gettext "Resource Page" appState.locale
                     , EventField.getValueWithDefault data.shortUuid ""
                     ]
 
@@ -1809,11 +1793,11 @@ viewEditURLReferenceDiff appState data =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.url" appState
-                    , lg "reference.label" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "URL" appState.locale
+                    , gettext "Label" appState.locale
                     ]
-                    [ lg "referenceType.url" appState
+                    [ gettext "URL" appState.locale
                     , EventField.getValueWithDefault data.url ""
                     , EventField.getValueWithDefault data.label ""
                     ]
@@ -1830,11 +1814,11 @@ viewEditCrossReferenceDiff appState data =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.targetUuid" appState
-                    , lg "reference.description" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Target UUID" appState.locale
+                    , gettext "Description" appState.locale
                     ]
-                    [ lg "referenceType.cross" appState
+                    [ gettext "Cross Reference" appState.locale
                     , EventField.getValueWithDefault data.targetUuid ""
                     , EventField.getValueWithDefault data.description ""
                     ]
@@ -1859,10 +1843,10 @@ viewDeleteResourcePageReferenceDiff appState data =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.shortUuid" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Short UUID" appState.locale
                     ]
-                    [ lg "referenceType.resourcePage" appState
+                    [ gettext "Resource Page" appState.locale
                     , data.shortUuid
                     ]
 
@@ -1878,11 +1862,11 @@ viewDeleteURLReferenceDiff appState data =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.url" appState
-                    , lg "reference.label" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "URL" appState.locale
+                    , gettext "Label" appState.locale
                     ]
-                    [ lg "referenceType.url" appState
+                    [ gettext "URL" appState.locale
                     , data.url
                     , data.label
                     ]
@@ -1899,11 +1883,11 @@ viewDeleteCrossReferenceDiff appState data =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.targetUuid" appState
-                    , lg "reference.description" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Target UUID" appState.locale
+                    , gettext "Description" appState.locale
                     ]
-                    [ lg "referenceType.cross" appState
+                    [ gettext "Cross Reference" appState.locale
                     , data.targetUuid
                     , data.description
                     ]
@@ -1928,10 +1912,10 @@ viewMoveResourcePageReference appState data =
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.shortUuid" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Short UUID" appState.locale
                     ]
-                    [ lg "referenceType.resourcePage" appState
+                    [ gettext "Resource Page" appState.locale
                     , data.shortUuid
                     ]
 
@@ -1947,11 +1931,11 @@ viewMoveURLReference appState data =
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.url" appState
-                    , lg "reference.label" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "URL" appState.locale
+                    , gettext "Label" appState.locale
                     ]
-                    [ lg "referenceType.url" appState
+                    [ gettext "URL" appState.locale
                     , data.url
                     , data.label
                     ]
@@ -1968,11 +1952,11 @@ viewMoveCrossReference appState data =
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "referenceType" appState
-                    , lg "reference.targetUuid" appState
-                    , lg "reference.description" appState
+                    [ gettext "Reference Type" appState.locale
+                    , gettext "Target UUID" appState.locale
+                    , gettext "Description" appState.locale
                     ]
-                    [ lg "referenceType.cross" appState
+                    [ gettext "Cross Reference" appState.locale
                     , data.targetUuid
                     , data.description
                     ]
@@ -1989,8 +1973,8 @@ viewAddExpertDiff appState event =
         fieldDiff =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "expert.name" appState
-                    , lg "expert.email" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Email" appState.locale
                     ]
                     [ event.name
                     , event.email
@@ -2008,8 +1992,8 @@ viewEditExpertDiff appState event expert =
         fieldDiff =
             viewDiff <|
                 List.map3 (\a b c -> ( a, b, c ))
-                    [ lg "expert.name" appState
-                    , lg "expert.email" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Email" appState.locale
                     ]
                     [ expert.name
                     , expert.email
@@ -2030,8 +2014,8 @@ viewDeleteExpertDiff appState expert =
         fieldDiff =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "expert.name" appState
-                    , lg "expert.email" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Email" appState.locale
                     ]
                     [ expert.name
                     , expert.email
@@ -2049,8 +2033,8 @@ viewMoveExpert appState expert =
         fieldDiff =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
-                    [ lg "expert.name" appState
-                    , lg "expert.email" appState
+                    [ gettext "Name" appState.locale
+                    , gettext "Email" appState.locale
                     ]
                     [ expert.name
                     , expert.email
@@ -2295,7 +2279,7 @@ viewAnnotationsDiff appState originalAnnotations currentAnnotations =
     in
     div [ class "form-group" ]
         [ label [ class "control-label" ]
-            [ text (lg "annotations" appState) ]
+            [ text (gettext "Annotations" appState.locale) ]
         , div [ class "form-value" ]
             [ valueView ]
         ]
@@ -2305,13 +2289,13 @@ formActions : AppState -> Model -> Html Msg
 formActions appState model =
     let
         ( rejectLabel, rejectDisabled ) =
-            actionState appState model RejectButtonClicked (l_ "action.reject" appState)
+            actionState appState model RejectButtonClicked (gettext "Reject" appState.locale)
 
         ( applyLabel, applyDisabled ) =
-            actionState appState model ApplyButtonClicked (l_ "action.apply" appState)
+            actionState appState model ApplyButtonClicked (gettext "Apply" appState.locale)
 
         ( applyAllLabel, applyAllDisabled ) =
-            actionState appState model ApplyAllButtonClicked (l_ "action.applyAll" appState)
+            actionState appState model ApplyAllButtonClicked (gettext "Apply all" appState.locale)
     in
     div [ class "form-actions" ]
         [ button [ class "btn btn-warning btn-with-loader", onClick RejectEvent, rejectDisabled, dataCy "km-migration_reject-button" ]
@@ -2353,16 +2337,16 @@ viewCompletedMigration appState model =
         [ div [ class "p-5 mb-4 bg-light rounded-3 full-page-error", dataCy "km-migration_completed" ]
             [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
             , p [ class "fs-4" ]
-                [ lx_ "completed.msg1" appState
+                [ text (gettext "Migration successfully completed." appState.locale)
                 , br [] []
-                , lx_ "completed.msg2" appState
+                , text (gettext "You can publish the new version now." appState.locale)
                 ]
             , linkTo appState
                 (Routes.kmEditorPublish model.branchUuid)
                 [ class "btn btn-primary btn-lg with-icon-after"
                 , dataCy "km-migration_publish-button"
                 ]
-                [ lx_ "completed.publish" appState
+                [ text (gettext "Publish" appState.locale)
                 , faSet "_global.arrowRight" appState
                 ]
             ]

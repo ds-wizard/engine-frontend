@@ -16,6 +16,7 @@ module Wizard.Common.Components.Listing.View exposing
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -28,8 +29,8 @@ import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Locale exposing (l, lx)
 import Shared.Undraw as Undraw
+import String.Format as String
 import Time
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -43,16 +44,6 @@ import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes exposing (Route)
 import Wizard.Routing as Routing
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.Components.Listing.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.Components.Listing.View"
 
 
 type alias ViewConfig a msg =
@@ -158,7 +149,7 @@ viewToolbarSearch : AppState -> ViewConfig a msg -> Model a -> Html msg
 viewToolbarSearch appState cfg model =
     let
         placeholderText =
-            Maybe.withDefault (l_ "toolbarFilter.placeholder" appState) cfg.searchPlaceholderText
+            Maybe.withDefault (gettext "Filter by name..." appState.locale) cfg.searchPlaceholderText
     in
     input
         [ type_ "text"
@@ -207,7 +198,7 @@ viewToolbarSort appState cfg model =
             , toggleButton =
                 Dropdown.toggle [ Button.outlineSecondary ] [ text currentSort ]
             , items =
-                Dropdown.header [ lx_ "toolbarSort.orderBy" appState ] :: List.map sortOption cfg.sortOptions
+                Dropdown.header [ text (gettext "Order by" appState.locale) ] :: List.map sortOption cfg.sortOptions
             }
         , linkTo appState
             sortDirectionButtonUrl
@@ -373,7 +364,7 @@ viewFilter appState cfg model filterId label items =
 
                     clearAllItem =
                         Dropdown.anchorItem [ href clearAllRoute ]
-                            [ lx_ "filter.clearSelection" appState ]
+                            [ text (gettext "Clear selection" appState.locale) ]
                 in
                 [ Dropdown.divider
                 , clearAllItem
@@ -451,7 +442,7 @@ viewPagination appState cfg model page =
                 if currentPage < page.totalPages then
                     viewPageLink page.totalPages
                         [ class "icon-right" ]
-                        [ lx_ "pagination.last" appState
+                        [ text (gettext "Last" appState.locale)
                         , fa "fas fa-angle-double-right"
                         ]
 
@@ -464,7 +455,7 @@ viewPagination appState cfg model page =
                     , classList [ ( "disabled", currentPage == page.totalPages ) ]
                     , dataCy "listing_page-link_next"
                     ]
-                    [ lx_ "pagination.next" appState
+                    [ text (gettext "Next" appState.locale)
                     , fa "fas fa-angle-right"
                     ]
 
@@ -478,7 +469,7 @@ viewPagination appState cfg model page =
                     , dataCy "listing_page-link_prev"
                     ]
                     [ fa "fas fa-angle-left"
-                    , lx_ "pagination.prev" appState
+                    , text (gettext "Prev" appState.locale)
                     ]
 
             firstLink =
@@ -486,7 +477,7 @@ viewPagination appState cfg model page =
                     viewPageLink 1
                         [ class "icon-left" ]
                         [ fa "fas fa-angle-double-left"
-                        , lx_ "pagination.first" appState
+                        , text (gettext "First" appState.locale)
                         ]
 
                 else
@@ -509,14 +500,14 @@ viewEmpty appState config model =
 
         emptyText =
             if filtersActive then
-                l_ "empty.noMatch" appState
+                gettext "There are no results matching your search and filters." appState.locale
 
             else
                 config.emptyText
     in
     Page.illustratedMessage
         { image = Undraw.noData
-        , heading = l_ "empty.heading" appState
+        , heading = gettext "No data" appState.locale
         , lines = [ emptyText ]
         , cy = "listing-empty"
         }
@@ -578,7 +569,7 @@ viewUpdated appState config item =
                     TimeUtils.toReadableDateTime appState.timeZone time
             in
             span (tooltip readableTime)
-                [ text <| l_ "item.updated" appState ++ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ]
+                [ text <| String.format (gettext "Updated %s" appState.locale) [ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ] ]
 
         Nothing ->
             emptyNode

@@ -1,9 +1,9 @@
 module Wizard.Settings.Organization.View exposing (view)
 
 import Form exposing (Form)
+import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
@@ -14,11 +14,6 @@ import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.Organization.Models exposing (Model)
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Settings.Organization.View"
-
-
 view : AppState -> Model -> Html Msg
 view =
     GenericView.view viewProps
@@ -26,8 +21,8 @@ view =
 
 viewProps : GenericView.ViewProps OrganizationConfigForm Msg
 viewProps =
-    { locTitle = l_ "title"
-    , locSave = l_ "save"
+    { locTitle = gettext "Organization"
+    , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
     , wrapMsg = FormMsg
     }
@@ -36,11 +31,11 @@ viewProps =
 formView : AppState -> Form FormError OrganizationConfigForm -> Html Form.Msg
 formView appState form =
     div []
-        [ FormGroup.input appState form "name" (l_ "form.name" appState)
-        , FormExtra.textAfter (l_ "form.name.desc" appState)
-        , FormGroup.textarea appState form "description" (l_ "form.description" appState)
-        , FormGroup.input appState form "organizationId" (l_ "form.organizationId" appState)
-        , FormExtra.textAfter (l_ "form.organizationId.desc" appState)
-        , FormGroup.resizableTextarea appState form "affiliations" (l_ "form.affiliations" appState)
-        , FormExtra.mdAfter (l_ "form.affiliations.desc" appState)
+        [ FormGroup.input appState form "name" (gettext "Name" appState.locale)
+        , FormExtra.textAfter (gettext "Name of the organization running this instance." appState.locale)
+        , FormGroup.textarea appState form "description" (gettext "Description" appState.locale)
+        , FormGroup.input appState form "organizationId" (gettext "Organization ID" appState.locale)
+        , FormExtra.textAfter (gettext "Organization ID is used to identify Knowledge Models created in this instance. It can contain alphanumeric characters and dots but cannot start or end with a dot." appState.locale)
+        , FormGroup.resizableTextarea appState form "affiliations" (gettext "Affiliations" appState.locale)
+        , FormExtra.mdAfter (gettext "Affiliation options will be used to help users choose their affiliation while signing up or editing their profile. Write one affiliation option per line." appState.locale)
         ]

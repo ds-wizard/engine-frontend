@@ -2,7 +2,7 @@ module Wizard.Public.Routes exposing (Route(..))
 
 
 type Route
-    = AuthCallback String (Maybe String) (Maybe String)
+    = AuthCallback String (Maybe String) (Maybe String) (Maybe String)
     | BookReferenceRoute String
     | ForgottenPasswordRoute
     | ForgottenPasswordConfirmationRoute String String

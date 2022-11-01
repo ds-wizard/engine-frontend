@@ -6,14 +6,15 @@ module Wizard.Projects.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debouncer
 import Dict
+import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
+import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Users as UsersApi
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Shared.Utils exposing (dispatch, stringToBool)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -26,7 +27,7 @@ import Wizard.Projects.Common.CloneProjectModal.Update as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -46,12 +47,27 @@ fetchData appState model =
 
                 Nothing ->
                     Cmd.none
+
+        selectedPackagesCmd =
+            case Dict.get indexRoutePackagesFilterId model.questionnaires.filters.values of
+                Just packageIds ->
+                    PackagesApi.getPackagesSuggestionsWithOptions
+                        PaginationQueryString.empty
+                        (String.split "," packageIds)
+                        []
+                        appState
+                        PackagesFilterGetValuesComplete
+
+                Nothing ->
+                    Cmd.none
     in
     Cmd.batch
         [ Cmd.map ListingMsg Listing.fetchData
         , dispatch (ProjectTagsFilterSearch "")
         , dispatch (UsersFilterSearch "")
+        , dispatch (PackagesFilterSearch "")
         , selectedUsersCmd
+        , selectedPackagesCmd
         ]
 
 
@@ -142,14 +158,14 @@ update wrapMsg msg appState model =
                             else
                                 model
                     in
-                    ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (lg "apiError.questionnaires.getProjectTagsSuggestionsError" appState) err }
+                    ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (gettext "Unable to get project tags." appState.locale) err }
                     , getResultCmd result
                     )
 
         UsersFilterGetValuesComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | userFilterSelectedUsers = r }
-                , defaultError = lg "apiError.users.getListError" appState
+                , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
                 }
@@ -179,7 +195,45 @@ update wrapMsg msg appState model =
         UsersFilterSearchComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | userFilterUsers = r }
-                , defaultError = lg "apiError.users.getListError" appState
+                , defaultError = gettext "Unable to get users." appState.locale
+                , model = model
+                , result = result
+                }
+
+        PackagesFilterGetValuesComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | packagesFilterSelectedPackages = r }
+                , defaultError = gettext "Unable to get Knowledge Models." appState.locale
+                , model = model
+                , result = result
+                }
+
+        PackagesFilterInput value ->
+            ( { model | packagesFilterSearchValue = value }
+            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| PackagesFilterSearch value)
+            )
+
+        PackagesFilterSearch value ->
+            let
+                queryString =
+                    PaginationQueryString.fromQ value
+                        |> PaginationQueryString.withSize (Just 10)
+
+                selectedKMs =
+                    model.questionnaires.filters.values
+                        |> Dict.get indexRoutePackagesFilterId
+                        |> Maybe.unwrap [] (String.split ",")
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        PackagesApi.getPackagesSuggestionsWithOptions queryString [] selectedKMs appState PackagesFilterSearchComplete
+            in
+            ( model, cmd )
+
+        PackagesFilterSearchComplete result ->
+            applyResult appState
+                { setResult = \r m -> { m | packagesFilterPackages = r }
+                , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
                 }
@@ -217,14 +271,14 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
                     Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.questionnaires
             in
             ( { model
-                | deletingMigration = Success <| lg "apiSuccess.questionnaires.migration.delete" appState
+                | deletingMigration = Success <| gettext "Questionnaire migration was successfully canceled." appState.locale
                 , questionnaires = questionnaires
               }
             , cmd
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult appState (lg "apiError.questionnaires.migrations.deleteError" appState) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -262,16 +316,25 @@ listingUpdateConfig wrapMsg appState model =
 
         projectTagsOp =
             PaginationQueryFilters.getOp indexRouteProjectTagsFilterId model.questionnaires.filters
+
+        packageIds =
+            PaginationQueryFilters.getValue indexRoutePackagesFilterId model.questionnaires.filters
+
+        packageIdsOp =
+            PaginationQueryFilters.getOp indexRoutePackagesFilterId model.questionnaires.filters
     in
     { getRequest =
         QuestionnairesApi.getQuestionnaires
             { isTemplate = isTemplate
+            , isMigrating = Nothing
             , userUuids = users
             , userUuidsOp = usersOp
             , projectTags = projectTags
             , projectTagsOp = projectTagsOp
+            , packageIds = packageIds
+            , packageIdsOp = packageIdsOp
             }
-    , getError = lg "apiError.questionnaires.getListError" appState
+    , getError = gettext "Unable to get projects." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectsIndexWithFilters model.questionnaires.filters
     }

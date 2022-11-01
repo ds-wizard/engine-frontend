@@ -1,11 +1,11 @@
 module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -65,14 +65,14 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
                     Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.branches
             in
             ( { model
-                | deletingMigration = Success <| lg "apiSuccess.migration.delete" appState
+                | deletingMigration = Success <| gettext "Migration was successfully canceled." appState.locale
                 , branches = branches
               }
             , cmd
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult appState (lg "apiError.branches.migrations.deleteError" appState) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Migration could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -123,7 +123,7 @@ handleUpgradeModalMsg wrapMsg appState upgradeModalMsg model =
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Branch
 listingUpdateConfig wrapMsg appState =
     { getRequest = BranchesApi.getBranches
-    , getError = lg "apiError.branches.getListError" appState
+    , getError = gettext "Unable to get knowledge model editors." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.kmEditorIndexWithFilters PaginationQueryFilters.empty
     }

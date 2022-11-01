@@ -8,8 +8,7 @@ module Shared.Data.QuestionnairePermission exposing
 import Form.Error as Error
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
-import Shared.Locale exposing (lg)
-import Shared.Provisioning exposing (Provisioning)
+import Gettext exposing (gettext)
 
 
 type QuestionnairePermission
@@ -56,9 +55,9 @@ field =
     toString >> Field.string
 
 
-formOptions : { a | provisioning : Provisioning } -> List ( String, String )
+formOptions : { a | locale : Gettext.Locale } -> List ( String, String )
 formOptions appState =
-    [ ( "view", lg "questionnairePermission.view" appState )
-    , ( "comment", lg "questionnairePermission.comment" appState )
-    , ( "edit", lg "questionnairePermission.edit" appState )
+    [ ( "view", gettext "view" appState.locale )
+    , ( "comment", gettext "comment" appState.locale )
+    , ( "edit", gettext "edit" appState.locale )
     ]

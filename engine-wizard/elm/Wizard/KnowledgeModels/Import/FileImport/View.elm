@@ -2,28 +2,18 @@ module Wizard.KnowledgeModels.Import.FileImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import File
+import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, input, label, p, text)
 import Html.Attributes exposing (class, disabled, id, type_)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
 import Shared.Html exposing (faSet)
-import Shared.Locale exposing (l, lx)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.KnowledgeModels.Import.FileImport.View"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KnowledgeModels.Import.FileImport.View"
 
 
 view : AppState -> Model -> Html Msg
@@ -62,8 +52,8 @@ fileView appState model fileName =
             ]
         , div [ class "actions" ]
             [ button [ disabled cancelDisabled, onClick Cancel, class "btn btn-secondary" ]
-                [ lx_ "fileView.cancel" appState ]
-            , ActionButton.button appState <| ActionButton.ButtonConfig (l_ "fileView.upload" appState) model.importing Submit False
+                [ text (gettext "Cancel" appState.locale) ]
+            , ActionButton.button appState <| ActionButton.ButtonConfig (gettext "Upload" appState.locale) model.importing Submit False
             ]
         ]
 
@@ -72,10 +62,10 @@ dropzone : AppState -> Model -> Html Msg
 dropzone appState model =
     div (dropzoneAttributes model)
         [ label [ class "btn btn-secondary btn-file" ]
-            [ lx_ "dropzone.choose" appState
+            [ text (gettext "Choose a file" appState.locale)
             , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected) ] []
             ]
-        , p [] [ lx_ "dropzone.drop" appState ]
+        , p [] [ text (gettext "Or just drop it here" appState.locale) ]
         ]
 
 

@@ -13,7 +13,8 @@ import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Input as Input
 import Form.Validate as Validate exposing (Validation)
-import Html exposing (Html, a, div, form, label, p)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, form, label, p, text)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
@@ -27,23 +28,8 @@ import Result exposing (Result)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (l, lh, lx)
 import Shared.Undraw as Undraw
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Registry.Pages.Signup"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Registry.Pages.Signup"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Registry.Pages.Signup"
+import String.Format as String
 
 
 init : Model
@@ -118,7 +104,7 @@ update msg appState model =
 
                 Err err ->
                     ( { model
-                        | signingUp = ApiError.toActionResult appState (l_ "update.postError" appState) err
+                        | signingUp = ApiError.toActionResult appState (gettext "Registration was not successful." appState.locale) err
                         , form = setFormErrors appState err model.form
                       }
                     , Cmd.none
@@ -158,8 +144,8 @@ successView : AppState -> Html Msg
 successView appState =
     Page.illustratedMessage
         { image = Undraw.confirmation
-        , heading = l_ "success.heading" appState
-        , msg = l_ "success.msg" appState
+        , heading = gettext "Sign up was successful!" appState.locale
+        , msg = gettext "Check your email address for the activation link." appState.locale
         }
 
 
@@ -181,28 +167,28 @@ formView appState model =
             div [ class "form-group form-group-accept", classList [ ( "has-error", hasError ) ] ]
                 [ label [ for "accept" ]
                     (Input.checkboxInput acceptField [ id "accept", name "accept" ]
-                        :: lh_ "formView.privacyRead"
+                        :: String.formatHtml
+                            (gettext "I have read %s and %s." appState.locale)
                             [ a [ href "https://ds-wizard.org/privacy.html", target "_blank" ]
-                                [ lx_ "formView.privacy" appState ]
+                                [ text (gettext "Privacy" appState.locale) ]
                             , a [ href "https://ds-wizard.org/terms.html", target "_blank" ]
-                                [ lx_ "formView.termsOfService" appState ]
+                                [ text (gettext "Terms of Service" appState.locale) ]
                             ]
-                            appState
                     )
-                , p [ class "invalid-feedback" ] [ lx_ "formView.privacyError" appState ]
+                , p [ class "invalid-feedback" ] [ text (gettext "You have to read Privacy and Terms of Service first." appState.locale) ]
                 ]
     in
     div [ class "card card-form bg-light" ]
-        [ div [ class "card-header" ] [ lx_ "formView.title" appState ]
+        [ div [ class "card-header" ] [ text (gettext "Sign Up" appState.locale) ]
         , div [ class "card-body" ]
             [ form [ onSubmit <| FormMsg Form.Submit ]
                 [ FormResult.errorOnlyView model.signingUp
-                , Html.map FormMsg <| FormGroup.input appState model.form "organizationId" <| l_ "formView.organizationId" appState
-                , Html.map FormMsg <| FormGroup.input appState model.form "name" <| l_ "formView.name" appState
-                , Html.map FormMsg <| FormGroup.input appState model.form "email" <| l_ "formView.email" appState
-                , Html.map FormMsg <| FormGroup.textarea appState model.form "description" <| l_ "formView.description" appState
+                , Html.map FormMsg <| FormGroup.input appState model.form "organizationId" <| gettext "Organization ID" appState.locale
+                , Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Organization Name" appState.locale
+                , Html.map FormMsg <| FormGroup.input appState model.form "email" <| gettext "Email" appState.locale
+                , Html.map FormMsg <| FormGroup.textarea appState model.form "description" <| gettext "Organization Description" appState.locale
                 , Html.map FormMsg <| acceptGroup
-                , ActionButton.submit ( l_ "formView.signUp" appState, model.signingUp )
+                , ActionButton.submit ( gettext "Sign Up" appState.locale, model.signingUp )
                 ]
             ]
         ]

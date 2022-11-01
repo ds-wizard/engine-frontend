@@ -2,6 +2,7 @@ module Shared.Api.Templates exposing
     ( deleteTemplate
     , deleteTemplateVersion
     , exportTemplateUrl
+    , getOutdatedTemplates
     , getTemplate
     , getTemplates
     , getTemplatesAll
@@ -36,6 +37,20 @@ getTemplates qs =
 getTemplatesAll : AbstractAppState a -> ToMsg (List TemplateSuggestion) msg -> Cmd msg
 getTemplatesAll =
     jwtGet "/templates/all" (D.list TemplateSuggestion.decoder)
+
+
+getOutdatedTemplates : AbstractAppState a -> ToMsg (Pagination Template) msg -> Cmd msg
+getOutdatedTemplates =
+    let
+        queryString =
+            PaginationQueryString.empty
+                |> PaginationQueryString.withSize (Just 5)
+                |> PaginationQueryString.toApiUrlWith [ ( "state", "OutdatedTemplateState" ) ]
+
+        url =
+            "/templates" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "templates" Template.decoder)
 
 
 getTemplate : String -> AbstractAppState a -> ToMsg TemplateDetail msg -> Cmd msg

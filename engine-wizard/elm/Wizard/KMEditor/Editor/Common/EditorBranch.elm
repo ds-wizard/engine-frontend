@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     ( EditorBranch
+    , EditorBranchWarning
     , applyEvent
     , filterDeleted
     , filterDeletedWith
@@ -23,8 +24,10 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     )
 
 import Dict
+import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Regex
 import Set exposing (Set)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Event exposing (Event(..))
@@ -52,10 +55,17 @@ import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData
 import Shared.Data.Event.EditTagEventData as EditTagEventData
 import Shared.Data.Event.MoveEventData exposing (MoveEventData)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Integration as Integration
+import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Choice exposing (Choice)
+import Shared.Data.KnowledgeModel.Expert as Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
+import Shared.Data.KnowledgeModel.Metric exposing (Metric)
+import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Reference as Reference
-import Shared.Locale exposing (lg)
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (flip)
 import String.Extra as String
 import Uuid exposing (Uuid)
@@ -71,11 +81,18 @@ type alias EditorBranch =
     , editedUuids : List String
     , deletedUuids : List String
     , emptyIntegrationEditorUuids : Set String
+    , warnings : List EditorBranchWarning
     }
 
 
-init : BranchDetail -> Maybe Uuid -> EditorBranch
-init branch mbEditorUuid =
+type alias EditorBranchWarning =
+    { editorUuid : String
+    , message : String
+    }
+
+
+init : AppState -> BranchDetail -> Maybe Uuid -> EditorBranch
+init appState branch mbEditorUuid =
     let
         kmUuid =
             Uuid.toString branch.knowledgeModel.uuid
@@ -89,10 +106,12 @@ init branch mbEditorUuid =
             , editedUuids = []
             , deletedUuids = []
             , emptyIntegrationEditorUuids = Set.empty
+            , warnings = []
             }
     in
-    setActiveEditor (Maybe.map Uuid.toString mbEditorUuid) <|
-        List.foldl (applyEvent False) editorBranch editorBranch.branch.events
+    List.foldl (applyEvent appState False) editorBranch editorBranch.branch.events
+        |> setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)
+        |> computeWarnings appState
 
 
 getEditUuid : String -> EditorBranch -> Maybe Uuid
@@ -220,34 +239,34 @@ getEditorName appState uuid editorBranch =
                 Nothing
 
         getChapterName =
-            getEditorName_ (String.withDefault (lg "chapter.untitled" appState) << .title) KnowledgeModel.getChapter
+            getEditorName_ (String.withDefault (gettext "Untitled chapter" appState.locale) << .title) KnowledgeModel.getChapter
 
         getQuestionName =
-            getEditorName_ (String.withDefault (lg "question.untitled" appState) << Question.getTitle) KnowledgeModel.getQuestion
+            getEditorName_ (String.withDefault (gettext "Untitled question" appState.locale) << Question.getTitle) KnowledgeModel.getQuestion
 
         getMetricName =
-            getEditorName_ (String.withDefault (lg "metric.untitled" appState) << .title) KnowledgeModel.getMetric
+            getEditorName_ (String.withDefault (gettext "Untitled metric" appState.locale) << .title) KnowledgeModel.getMetric
 
         getPhaseName =
-            getEditorName_ (String.withDefault (lg "phase.untitled" appState) << .title) KnowledgeModel.getPhase
+            getEditorName_ (String.withDefault (gettext "Untitled phase" appState.locale) << .title) KnowledgeModel.getPhase
 
         getTagName =
-            getEditorName_ (String.withDefault (lg "tag.untitled" appState) << .name) KnowledgeModel.getTag
+            getEditorName_ (String.withDefault (gettext "Untitled tag" appState.locale) << .name) KnowledgeModel.getTag
 
         getIntegrationName =
-            getEditorName_ (String.withDefault (lg "integration.untitled" appState) << Integration.getName) KnowledgeModel.getIntegration
+            getEditorName_ (String.withDefault (gettext "Untitled integration" appState.locale) << Integration.getVisibleName) KnowledgeModel.getIntegration
 
         getAnswerName =
-            getEditorName_ (String.withDefault (lg "answer.untitled" appState) << .label) KnowledgeModel.getAnswer
+            getEditorName_ (String.withDefault (gettext "Untitled answer" appState.locale) << .label) KnowledgeModel.getAnswer
 
         getChoiceName =
-            getEditorName_ (String.withDefault (lg "choice.untitled" appState) << .label) KnowledgeModel.getChoice
+            getEditorName_ (String.withDefault (gettext "Untitled choice" appState.locale) << .label) KnowledgeModel.getChoice
 
         getReferenceName =
-            getEditorName_ (String.withDefault (lg "reference.untitled" appState) << Reference.getVisibleName) KnowledgeModel.getReference
+            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName) KnowledgeModel.getReference
 
         getExpertName =
-            getEditorName_ (String.withDefault (lg "expert.untitled" appState) << .name) KnowledgeModel.getExpert
+            getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert
     in
     getKnowledgeModelName
         |> Maybe.orElse getChapterName
@@ -438,8 +457,8 @@ isEmptyIntegrationEditorUuid uuid editorBranch =
     Set.member uuid editorBranch.emptyIntegrationEditorUuids
 
 
-applyEvent : Bool -> Event -> EditorBranch -> EditorBranch
-applyEvent local event originalEditorBranch =
+applyEvent : AppState -> Bool -> Event -> EditorBranch -> EditorBranch
+applyEvent appState local event originalEditorBranch =
     let
         branch =
             originalEditorBranch.branch
@@ -450,218 +469,219 @@ applyEvent local event originalEditorBranch =
         editorBranch =
             { originalEditorBranch | branch = { branch | events = branch.events ++ [ event ] } }
     in
-    case event of
-        AddKnowledgeModelEvent _ _ ->
-            editorBranch
+    computeWarnings appState <|
+        case event of
+            AddKnowledgeModelEvent _ _ ->
+                editorBranch
 
-        AddAnswerEvent eventData commonData ->
-            let
-                answer =
-                    AddAnswerEventData.toAnswer commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertAnswer answer commonData editorBranch
+            AddAnswerEvent eventData commonData ->
+                let
+                    answer =
+                        AddAnswerEventData.toAnswer commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertAnswer answer commonData editorBranch
 
-        AddChapterEvent eventData commonData ->
-            let
-                chapter =
-                    AddChapterEventData.toChapter commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertChapter chapter commonData editorBranch
+            AddChapterEvent eventData commonData ->
+                let
+                    chapter =
+                        AddChapterEventData.toChapter commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertChapter chapter commonData editorBranch
 
-        AddChoiceEvent eventData commonData ->
-            let
-                choice =
-                    AddChoiceEventData.toChoice commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertChoice choice commonData editorBranch
+            AddChoiceEvent eventData commonData ->
+                let
+                    choice =
+                        AddChoiceEventData.toChoice commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertChoice choice commonData editorBranch
 
-        AddExpertEvent eventData commonData ->
-            let
-                expert =
-                    AddExpertEventData.toExpert commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertExpert expert commonData editorBranch
+            AddExpertEvent eventData commonData ->
+                let
+                    expert =
+                        AddExpertEventData.toExpert commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertExpert expert commonData editorBranch
 
-        AddIntegrationEvent eventData commonData ->
-            let
-                integration =
-                    AddIntegrationEventData.toIntegration commonData.entityUuid eventData
+            AddIntegrationEvent eventData commonData ->
+                let
+                    integration =
+                        AddIntegrationEventData.toIntegration commonData.entityUuid eventData
 
-                updatedEditorBranch =
-                    addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorBranch
-            in
-            applyAdd local KnowledgeModel.insertIntegration integration commonData updatedEditorBranch
+                    updatedEditorBranch =
+                        addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorBranch
+                in
+                applyAdd local KnowledgeModel.insertIntegration integration commonData updatedEditorBranch
 
-        AddMetricEvent eventData commonData ->
-            let
-                metric =
-                    AddMetricEventData.toMetric commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertMetric metric commonData editorBranch
+            AddMetricEvent eventData commonData ->
+                let
+                    metric =
+                        AddMetricEventData.toMetric commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertMetric metric commonData editorBranch
 
-        AddPhaseEvent eventData commonData ->
-            let
-                phase =
-                    AddPhaseEventData.toPhase commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertPhase phase commonData editorBranch
+            AddPhaseEvent eventData commonData ->
+                let
+                    phase =
+                        AddPhaseEventData.toPhase commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertPhase phase commonData editorBranch
 
-        AddQuestionEvent eventData commonData ->
-            let
-                question =
-                    AddQuestionEventData.toQuestion commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertQuestion question commonData editorBranch
+            AddQuestionEvent eventData commonData ->
+                let
+                    question =
+                        AddQuestionEventData.toQuestion commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertQuestion question commonData editorBranch
 
-        AddReferenceEvent eventData commonData ->
-            let
-                reference =
-                    AddReferenceEventData.toReference commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertReference reference commonData editorBranch
+            AddReferenceEvent eventData commonData ->
+                let
+                    reference =
+                        AddReferenceEventData.toReference commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertReference reference commonData editorBranch
 
-        AddTagEvent eventData commonData ->
-            let
-                tag =
-                    AddTagEventData.toTag commonData.entityUuid eventData
-            in
-            applyAdd local KnowledgeModel.insertTag tag commonData editorBranch
+            AddTagEvent eventData commonData ->
+                let
+                    tag =
+                        AddTagEventData.toTag commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertTag tag commonData editorBranch
 
-        EditAnswerEvent eventData commonData ->
-            let
-                mbAnswer =
-                    KnowledgeModel.getAnswer commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditAnswerEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateAnswer mbAnswer commonData editorBranch
+            EditAnswerEvent eventData commonData ->
+                let
+                    mbAnswer =
+                        KnowledgeModel.getAnswer commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditAnswerEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateAnswer mbAnswer commonData editorBranch
 
-        EditChapterEvent eventData commonData ->
-            let
-                mbChapter =
-                    KnowledgeModel.getChapter commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditChapterEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateChapter mbChapter commonData editorBranch
+            EditChapterEvent eventData commonData ->
+                let
+                    mbChapter =
+                        KnowledgeModel.getChapter commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditChapterEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateChapter mbChapter commonData editorBranch
 
-        EditChoiceEvent eventData commonData ->
-            let
-                mbChoice =
-                    KnowledgeModel.getChoice commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditChoiceEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateChoice mbChoice commonData editorBranch
+            EditChoiceEvent eventData commonData ->
+                let
+                    mbChoice =
+                        KnowledgeModel.getChoice commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditChoiceEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateChoice mbChoice commonData editorBranch
 
-        EditExpertEvent eventData commonData ->
-            let
-                mbExpert =
-                    KnowledgeModel.getExpert commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditExpertEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateExpert mbExpert commonData editorBranch
+            EditExpertEvent eventData commonData ->
+                let
+                    mbExpert =
+                        KnowledgeModel.getExpert commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditExpertEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateExpert mbExpert commonData editorBranch
 
-        EditIntegrationEvent eventData commonData ->
-            let
-                mbIntegration =
-                    KnowledgeModel.getIntegration commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditIntegrationEvent.apply eventData)
+            EditIntegrationEvent eventData commonData ->
+                let
+                    mbIntegration =
+                        KnowledgeModel.getIntegration commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditIntegrationEvent.apply eventData)
 
-                updatedEditorBranch =
-                    removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorBranch
-            in
-            applyEdit KnowledgeModel.updateIntegration mbIntegration commonData updatedEditorBranch
+                    updatedEditorBranch =
+                        removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorBranch
+                in
+                applyEdit KnowledgeModel.updateIntegration mbIntegration commonData updatedEditorBranch
 
-        EditKnowledgeModelEvent eventData _ ->
-            let
-                newKnowledgeModel =
-                    EditKnowledgeModelEventData.apply eventData knowledgeModel
-            in
-            setKnowledgeModel newKnowledgeModel editorBranch
-                |> setEdited (Uuid.toString knowledgeModel.uuid)
+            EditKnowledgeModelEvent eventData _ ->
+                let
+                    newKnowledgeModel =
+                        EditKnowledgeModelEventData.apply eventData knowledgeModel
+                in
+                setKnowledgeModel newKnowledgeModel editorBranch
+                    |> setEdited (Uuid.toString knowledgeModel.uuid)
 
-        EditMetricEvent eventData commonData ->
-            let
-                mbMetric =
-                    KnowledgeModel.getMetric commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditMetricEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateMetric mbMetric commonData editorBranch
+            EditMetricEvent eventData commonData ->
+                let
+                    mbMetric =
+                        KnowledgeModel.getMetric commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditMetricEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateMetric mbMetric commonData editorBranch
 
-        EditPhaseEvent eventData commonData ->
-            let
-                mbPhase =
-                    KnowledgeModel.getPhase commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditPhaseEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updatePhase mbPhase commonData editorBranch
+            EditPhaseEvent eventData commonData ->
+                let
+                    mbPhase =
+                        KnowledgeModel.getPhase commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditPhaseEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updatePhase mbPhase commonData editorBranch
 
-        EditQuestionEvent eventData commonData ->
-            let
-                mbQuestion =
-                    KnowledgeModel.getQuestion commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditQuestionEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateQuestion mbQuestion commonData editorBranch
+            EditQuestionEvent eventData commonData ->
+                let
+                    mbQuestion =
+                        KnowledgeModel.getQuestion commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditQuestionEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateQuestion mbQuestion commonData editorBranch
 
-        EditReferenceEvent eventData commonData ->
-            let
-                mbReference =
-                    KnowledgeModel.getReference commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditReferenceEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateReference mbReference commonData editorBranch
+            EditReferenceEvent eventData commonData ->
+                let
+                    mbReference =
+                        KnowledgeModel.getReference commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditReferenceEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateReference mbReference commonData editorBranch
 
-        EditTagEvent eventData commonData ->
-            let
-                mbTag =
-                    KnowledgeModel.getTag commonData.entityUuid knowledgeModel
-                        |> Maybe.map (EditTagEventData.apply eventData)
-            in
-            applyEdit KnowledgeModel.updateTag mbTag commonData editorBranch
+            EditTagEvent eventData commonData ->
+                let
+                    mbTag =
+                        KnowledgeModel.getTag commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditTagEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateTag mbTag commonData editorBranch
 
-        DeleteAnswerEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteAnswerEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteChapterEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteChapterEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteChoiceEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteChoiceEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteExpertEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteExpertEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteIntegrationEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteIntegrationEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteMetricEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteMetricEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeletePhaseEvent commonData ->
-            applyDelete commonData editorBranch
+            DeletePhaseEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteReferenceEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteReferenceEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteQuestionEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteQuestionEvent commonData ->
+                applyDelete commonData editorBranch
 
-        DeleteTagEvent commonData ->
-            applyDelete commonData editorBranch
+            DeleteTagEvent commonData ->
+                applyDelete commonData editorBranch
 
-        MoveQuestionEvent moveData commonData ->
-            applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion commonData moveData editorBranch
+            MoveQuestionEvent moveData commonData ->
+                applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion commonData moveData editorBranch
 
-        MoveAnswerEvent moveData commonData ->
-            applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer commonData moveData editorBranch
+            MoveAnswerEvent moveData commonData ->
+                applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer commonData moveData editorBranch
 
-        MoveChoiceEvent moveData commonData ->
-            applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice commonData moveData editorBranch
+            MoveChoiceEvent moveData commonData ->
+                applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice commonData moveData editorBranch
 
-        MoveReferenceEvent moveData commonData ->
-            applyMove KnowledgeModel.moveReference KnowledgeModel.getReference commonData moveData editorBranch
+            MoveReferenceEvent moveData commonData ->
+                applyMove KnowledgeModel.moveReference KnowledgeModel.getReference commonData moveData editorBranch
 
-        MoveExpertEvent moveData commonData ->
-            applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert commonData moveData editorBranch
+            MoveExpertEvent moveData commonData ->
+                applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert commonData moveData editorBranch
 
 
 applyAdd : Bool -> (a -> String -> KnowledgeModel -> KnowledgeModel) -> a -> CommonEventData -> EditorBranch -> EditorBranch
@@ -716,3 +736,294 @@ applyMove updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorBra
 
         Nothing ->
             editorBranch
+
+
+computeWarnings : AppState -> EditorBranch -> EditorBranch
+computeWarnings appState editorBranch =
+    let
+        warnings =
+            List.concatMap (computeChapterWarnings appState (getFilteredKM editorBranch)) (KnowledgeModel.getChapters editorBranch.branch.knowledgeModel)
+                |> flip (++) (List.concatMap (computeMetricWarnings appState) (KnowledgeModel.getMetrics editorBranch.branch.knowledgeModel))
+                |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases editorBranch.branch.knowledgeModel))
+                |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags editorBranch.branch.knowledgeModel))
+                |> flip (++) (List.concatMap (computeIntegrationWarnings appState) (KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel))
+    in
+    { editorBranch | warnings = warnings }
+
+
+computeChapterWarnings : AppState -> KnowledgeModel -> Chapter -> List EditorBranchWarning
+computeChapterWarnings appState km chapter =
+    let
+        titleWarning =
+            if String.isEmpty chapter.title then
+                [ { editorUuid = chapter.uuid
+                  , message = gettext "Empty title for chapter" appState.locale
+                  }
+                ]
+
+            else
+                []
+
+        questionWarnings =
+            List.concatMap
+                (computeQuestionWarnings appState km)
+                (KnowledgeModel.getChapterQuestions chapter.uuid km)
+    in
+    titleWarning ++ questionWarnings
+
+
+computeQuestionWarnings : AppState -> KnowledgeModel -> Question -> List EditorBranchWarning
+computeQuestionWarnings appState km question =
+    let
+        questionUuid =
+            Question.getUuid question
+
+        createError message =
+            [ { editorUuid = questionUuid
+              , message = message
+              }
+            ]
+
+        titleWarning =
+            if String.isEmpty (Question.getTitle question) then
+                createError (gettext "Empty title for question" appState.locale)
+
+            else
+                []
+
+        typeWarnings =
+            case question of
+                Question.OptionsQuestion _ data ->
+                    if List.isEmpty data.answerUuids then
+                        createError (gettext "No answers for options question" appState.locale)
+
+                    else
+                        List.concatMap
+                            (computeAnswerWarnings appState km)
+                            (KnowledgeModel.getQuestionAnswers questionUuid km)
+
+                Question.ListQuestion _ data ->
+                    if List.isEmpty data.itemTemplateQuestionUuids then
+                        createError (gettext "No item questions for list question" appState.locale)
+
+                    else
+                        List.concatMap
+                            (computeQuestionWarnings appState km)
+                            (KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km)
+
+                Question.IntegrationQuestion _ data ->
+                    if data.integrationUuid == Uuid.toString Uuid.nil then
+                        createError (gettext "No integration selected for integration question" appState.locale)
+
+                    else
+                        []
+
+                Question.MultiChoiceQuestion _ data ->
+                    if List.isEmpty data.choiceUuids then
+                        createError (gettext "No choices for multi-choice question" appState.locale)
+
+                    else
+                        List.concatMap
+                            (computeChoiceWarnings appState)
+                            (KnowledgeModel.getQuestionChoices questionUuid km)
+
+                _ ->
+                    []
+
+        referencesWarnings =
+            List.concatMap
+                (computeReferenceWarnings appState)
+                (KnowledgeModel.getQuestionReferences questionUuid km)
+
+        expertWarnings =
+            List.concatMap
+                (computeExpertWarnings appState)
+                (KnowledgeModel.getQuestionExperts questionUuid km)
+    in
+    titleWarning ++ typeWarnings ++ referencesWarnings ++ expertWarnings
+
+
+computeAnswerWarnings : AppState -> KnowledgeModel -> Answer -> List EditorBranchWarning
+computeAnswerWarnings appState km answer =
+    let
+        labelWarning =
+            if String.isEmpty answer.label then
+                [ { editorUuid = answer.uuid
+                  , message = gettext "Empty label for answer" appState.locale
+                  }
+                ]
+
+            else
+                []
+
+        followUpQuestionsWarnings =
+            List.concatMap
+                (computeQuestionWarnings appState km)
+                (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km)
+    in
+    labelWarning ++ followUpQuestionsWarnings
+
+
+computeChoiceWarnings : AppState -> Choice -> List EditorBranchWarning
+computeChoiceWarnings appState choice =
+    if String.isEmpty choice.label then
+        [ { editorUuid = choice.uuid
+          , message = gettext "Empty label for choice" appState.locale
+          }
+        ]
+
+    else
+        []
+
+
+computeReferenceWarnings : AppState -> Reference -> List EditorBranchWarning
+computeReferenceWarnings appState reference =
+    let
+        createError message =
+            [ { editorUuid = Reference.getUuid reference
+              , message = message
+              }
+            ]
+    in
+    case reference of
+        Reference.ResourcePageReference data ->
+            if String.isEmpty data.shortUuid then
+                createError (gettext "Empty short UUID for page reference" appState.locale)
+
+            else
+                []
+
+        Reference.URLReference data ->
+            if String.isEmpty data.url then
+                createError (gettext "Empty URL for URL reference" appState.locale)
+
+            else if not (Regex.contains RegexPatterns.url data.url) then
+                createError (gettext "Invalid URL for URL reference" appState.locale)
+
+            else
+                []
+
+        _ ->
+            []
+
+
+computeExpertWarnings : AppState -> Expert -> List EditorBranchWarning
+computeExpertWarnings appState expert =
+    let
+        createError message =
+            [ { editorUuid = expert.uuid
+              , message = message
+              }
+            ]
+    in
+    if String.isEmpty expert.email then
+        createError (gettext "Empty email for expert" appState.locale)
+
+    else if not (Regex.contains RegexPatterns.email expert.email) then
+        createError (gettext "Invalid email for expert" appState.locale)
+
+    else
+        []
+
+
+computeMetricWarnings : AppState -> Metric -> List EditorBranchWarning
+computeMetricWarnings appState metric =
+    if String.isEmpty metric.title then
+        [ { editorUuid = metric.uuid
+          , message = gettext "Empty title for metric" appState.locale
+          }
+        ]
+
+    else
+        []
+
+
+computePhaseWarnings : AppState -> Phase -> List EditorBranchWarning
+computePhaseWarnings appState phase =
+    if String.isEmpty phase.title then
+        [ { editorUuid = phase.uuid
+          , message = gettext "Empty title for phase" appState.locale
+          }
+        ]
+
+    else
+        []
+
+
+computeTagWarnings : AppState -> Tag -> List EditorBranchWarning
+computeTagWarnings appState tag =
+    if String.isEmpty tag.name then
+        [ { editorUuid = tag.uuid
+          , message = gettext "Empty name for tag" appState.locale
+          }
+        ]
+
+    else
+        []
+
+
+computeIntegrationWarnings : AppState -> Integration -> List EditorBranchWarning
+computeIntegrationWarnings appState integration =
+    let
+        createError message =
+            [ { editorUuid = Integration.getUuid integration
+              , message = message
+              }
+            ]
+
+        idWarning =
+            if String.isEmpty (Integration.getId integration) then
+                createError (gettext "Empty ID for integration" appState.locale)
+
+            else
+                []
+
+        itemUrlWarning =
+            if String.isEmpty (Integration.getItemUrl integration) then
+                createError (gettext "Empty item URL for integration" appState.locale)
+
+            else
+                []
+
+        typeWarnings =
+            case integration of
+                Integration.ApiIntegration _ data ->
+                    let
+                        urlError =
+                            if String.isEmpty data.requestUrl then
+                                createError (gettext "Empty request URL for integration" appState.locale)
+
+                            else
+                                []
+
+                        requestMethod =
+                            if String.isEmpty data.requestMethod then
+                                createError (gettext "Empty request HTTP method for integration" appState.locale)
+
+                            else
+                                []
+
+                        responseItemId =
+                            if String.isEmpty data.responseItemId then
+                                createError (gettext "Empty response item ID for integration" appState.locale)
+
+                            else
+                                []
+
+                        responseItemTemplate =
+                            if String.isEmpty data.responseItemTemplate then
+                                createError (gettext "Empty response item template for integration" appState.locale)
+
+                            else
+                                []
+                    in
+                    urlError ++ requestMethod ++ responseItemId ++ responseItemTemplate
+
+                Integration.WidgetIntegration _ data ->
+                    if String.isEmpty data.widgetUrl then
+                        createError (gettext "Empty widget URL for integration" appState.locale)
+
+                    else
+                        []
+    in
+    idWarning ++ typeWarnings ++ itemUrlWarning

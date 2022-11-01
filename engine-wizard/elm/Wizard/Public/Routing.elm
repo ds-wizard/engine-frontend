@@ -23,7 +23,7 @@ parsers appState wrapRoute =
             else
                 []
     in
-    [ map (authCallback wrapRoute) (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code")
+    [ map (authCallback wrapRoute) (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state")
     , map (wrapRoute << BookReferenceRoute) (s (lr "public.bookReferences" appState) </> string)
     , map (wrapRoute <| ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
     , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
@@ -32,9 +32,9 @@ parsers appState wrapRoute =
         ++ signUpRoutes
 
 
-authCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> a
-authCallback wrapRoute id error code =
-    AuthCallback id error code |> wrapRoute
+authCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> Maybe String -> a
+authCallback wrapRoute id error code sessionState =
+    AuthCallback id error code sessionState |> wrapRoute
 
 
 signupConfirmation : (Route -> a) -> String -> String -> a
@@ -50,8 +50,12 @@ forgottenPasswordConfirmation wrapRoute userId hash =
 toUrl : AppState -> Route -> List String
 toUrl appState route =
     case route of
-        AuthCallback id error code ->
-            [ "auth", id, "callback", "?error=" ++ Maybe.withDefault "" error ++ "&code=" ++ Maybe.withDefault "" code ]
+        AuthCallback id error code sessionState ->
+            [ "auth"
+            , id
+            , "callback"
+            , "?error=" ++ Maybe.withDefault "" error ++ "&code=" ++ Maybe.withDefault "" code ++ "&session_state=" ++ Maybe.withDefault "" sessionState
+            ]
 
         BookReferenceRoute uuid ->
             [ lr "public.bookReferences" appState, uuid ]

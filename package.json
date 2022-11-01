@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "3.16.0",
+  "version": "3.17.0",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -11,30 +11,23 @@
     "start": "npm run start:wizard",
     "start:registry": "COMPONENT=registry webpack serve",
     "start:wizard": "COMPONENT=wizard webpack serve",
-    "test": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale && npm run test:shared:icon-set && npm run test:shared:locale && npm run test:wizard:icon-set && npm run test:wizard:locale",
+    "test": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:elm": "elm-test && elm-review",
     "test:registry": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale",
     "test:registry:icon-set": "COMPONENT=registry node scripts/test-icon-set.js",
     "test:registry:locale": "COMPONENT=registry node scripts/test-locale.js",
-    "test:shared:icon-set": "COMPONENT=shared node scripts/test-locale.js",
-    "test:shared:locale": "COMPONENT=shared node scripts/test-locale.js",
     "test:wizard": "npm run test:elm && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:wizard:icon-set": "COMPONENT=wizard node scripts/test-icon-set.js",
     "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js",
     "review": "elm-review",
-    "extract-locale": "npm run extract-locale:registry && npm run extract-locale:shared && npm run extract-locale:wizard",
-    "extract-locale:registry": "mkdir -p locale && COMPONENT=registry node scripts/extract-locale.js",
-    "extract-locale:shared": "mkdir -p locale && COMPONENT=shared node scripts/extract-locale.js",
-    "extract-locale:wizard": "mkdir -p locale && COMPONENT=wizard node scripts/extract-locale.js",
-    "apply-locale": "npm run apply-locale:registry && npm run apply-locale:shared && npm run apply-locale:wizard",
-    "apply-locale:registry": "COMPONENT=registry node scripts/apply-locale.js",
-    "apply-locale:shared": "COMPONENT=shared node scripts/apply-locale.js",
-    "apply-locale:wizard": "COMPONENT=wizard node scripts/apply-locale.js"
+    "pot": "mkdir -p locale && npm run pot:registry && npm run pot:wizard",
+    "pot:registry": "COMPONENT=registry node scripts/create-pot-file.js",
+    "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js"
   },
   "devDependencies": {
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.1",
-    "css-minimizer-webpack-plugin": "^4.1.0",
+    "css-minimizer-webpack-plugin": "^4.2.2",
     "elm": "^0.19.1-5",
     "elm-review": "^2.7.5",
     "elm-test": "^0.19.1-revision9",
@@ -44,19 +37,20 @@
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.6.1",
     "sass": "^1.55.0",
-    "sass-loader": "^13.0.2",
+    "sass-loader": "^13.1.0",
     "terser-webpack-plugin": "^5.3.6",
-    "uglify-js": "^3.17.2",
+    "uglify-js": "^3.17.4",
     "webpack": "^5.74.0",
     "webpack-cli": "^4.10.0",
     "webpack-dev-server": "^4.11.1"
   },
   "dependencies": {
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "axios": "^0.27.2",
+    "axios": "1.1.2",
     "axios-retry": "^3.3.1",
-    "bootstrap": "^5.2.1",
+    "bootstrap": "^5.2.2",
     "chart.js": "^3.9.1",
-    "flatpickr": "^4.6.13"
+    "flatpickr": "^4.6.13",
+    "po2json": "^1.0.0-beta-3"
   }
 }

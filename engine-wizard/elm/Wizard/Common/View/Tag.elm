@@ -1,13 +1,13 @@
 module Wizard.Common.View.Tag exposing (TagListConfig, list, readOnlyList, selection, viewList)
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Html exposing (Html, div, i, input, label, text)
 import Html.Attributes exposing (checked, class, classList, disabled, style, type_)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lx)
 import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -22,16 +22,6 @@ type alias TagListConfig msg =
     }
 
 
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Common.View.Tag"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Common.View.Tag"
-
-
 list : AppState -> TagListConfig msg -> List Tag -> Html msg
 list appState config tags =
     let
@@ -40,7 +30,7 @@ list appState config tags =
                 List.map (tagView appState config) (List.sortBy .name tags)
 
             else
-                [ Flash.info appState <| l_ "list.empty" appState ]
+                [ Flash.info appState <| gettext "There are no question tags configured for the Knowledge Model." appState.locale ]
     in
     div [ class "tag-list" ] content
 
@@ -60,7 +50,7 @@ tagView appState config tag =
 
         ( untitled, tagName ) =
             if String.isEmpty tag.name then
-                ( True, lg "tag.untitled" appState )
+                ( True, gettext "Untitled question tag" appState.locale )
 
             else
                 ( False, tag.name )
@@ -89,7 +79,7 @@ selection appState tagListConfig knowledgeModelResult =
     let
         viewContent content =
             div [ class "form-group form-group-tags" ]
-                [ label [] [ text (lg "tags" appState) ]
+                [ label [] [ text (gettext "Question Tags" appState.locale) ]
                 , div []
                     [ content ]
                 ]
@@ -115,13 +105,13 @@ selection appState tagListConfig knowledgeModelResult =
                 viewContent <|
                     div []
                         [ list appState tagListConfig tags
-                        , FormExtra.text <| l_ "selection.info" appState
+                        , FormExtra.text <| gettext "You can filter questions in the questionnaire by question tags. If no question tags are selected, all questions will be used." appState.locale
                         ]
 
             else
                 viewContent <|
                     Flash.info appState <|
-                        l_ "selection.empty" appState
+                        gettext "There are no question tags for this knowledge model." appState.locale
 
 
 readOnlyList : AppState -> List String -> List Tag -> Html msg
@@ -133,7 +123,7 @@ readOnlyList appState selected tags =
 
             else
                 [ div [ class "alert alert-light" ]
-                    [ i [] [ lx_ "readOnlyList.noTags" appState ] ]
+                    [ i [] [ text (gettext "No question tags" appState.locale) ] ]
                 ]
     in
     div [ class "tag-list" ] content

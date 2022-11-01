@@ -1,7 +1,7 @@
 module Wizard.Settings.Usage.Update exposing (fetchData, update)
 
+import Gettext exposing (gettext)
 import Shared.Api.Usage as UsageApi
-import Shared.Locale exposing (lg)
 import Shared.Setters exposing (setUsage)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -21,7 +21,7 @@ update msg appState model =
         GetUsageComplete result ->
             applyResult appState
                 { setResult = setUsage
-                , defaultError = lg "apiError.usage.getError" appState
+                , defaultError = gettext "Unable to get usage." appState.locale
                 , model = model
                 , result = result
                 }

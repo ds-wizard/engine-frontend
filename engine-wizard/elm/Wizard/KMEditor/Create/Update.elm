@@ -6,6 +6,7 @@ module Wizard.KMEditor.Create.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
+import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Result exposing (Result)
 import Shared.Api.Branches as BranchesApi
@@ -15,7 +16,6 @@ import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Locale exposing (lg)
 import String.Normalize as Normalize
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -62,7 +62,7 @@ update msg wrapMsg appState model =
                     ( { model | package = Success package, form = form }, Cmd.none )
 
                 Err error ->
-                    ( { model | package = ApiError.toActionResult appState (lg "apiError.packages.getError" appState) error }, Cmd.none )
+                    ( { model | package = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }, Cmd.none )
 
 
 handleFormMsg : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -114,7 +114,7 @@ handlePostBranchCompleted appState model result =
         Err error ->
             ( { model
                 | form = setFormErrors appState error model.form
-                , savingBranch = ApiError.toActionResult appState (lg "apiError.branches.postError" appState) error
+                , savingBranch = ApiError.toActionResult appState (gettext "Knowledge Model could not be created." appState.locale) error
               }
             , getResultCmd result
             )
@@ -129,7 +129,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
         cfg =
             { wrapMsg = wrapMsg << PackageTypeHintInputMsg
             , getTypeHints = PackagesApi.getPackagesSuggestions
-            , getError = lg "apiError.packages.getListError" appState
+            , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing

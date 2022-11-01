@@ -9,12 +9,14 @@ import Shared.Auth.Session as Session
 import Shared.Data.BootstrapConfig.DashboardConfig.DashboardType as DashboardType
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
+import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
 import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
 
 
 type alias Model =
     { currentDashboard : CurrentDashboard
     , researcherDashboardModel : ResearcherDashboard.Model
+    , dataStewardDashboardModel : DataStewardDashboard.Model
     , adminDashboardModel : AdminDashboard.Model
     }
 
@@ -43,5 +45,6 @@ initialModel appState =
     in
     { currentDashboard = currentDashboard
     , researcherDashboardModel = ResearcherDashboard.initialModel
+    , dataStewardDashboardModel = DataStewardDashboard.initialModel
     , adminDashboardModel = AdminDashboard.initialModel
     }

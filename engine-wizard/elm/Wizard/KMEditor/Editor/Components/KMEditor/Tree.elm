@@ -3,6 +3,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Tree exposing
     , view
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
@@ -10,7 +11,7 @@ import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
+import Shared.Data.KnowledgeModel.Expert as Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
@@ -18,18 +19,12 @@ import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
-import Shared.Locale exposing (lg, lx)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.Routes as Routes
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.KMEditor.Editor.Components.KMEditor.Tree"
 
 
 type alias ViewProps msg =
@@ -47,11 +42,11 @@ view props appState editorBranch =
                 [ div [ class "actions" ]
                     [ a [ onClick props.expandAll ]
                         [ faSet "kmEditor.expandAll" appState
-                        , lx_ "expandAll" appState
+                        , text (gettext "Expand all" appState.locale)
                         ]
                     , a [ onClick props.collapseAll ]
                         [ faSet "kmEditor.collapseAll" appState
-                        , lx_ "collapseAll" appState
+                        , text (gettext "Collapse all" appState.locale)
                         ]
                     ]
                 , ul [] [ treeNodeKM props appState editorBranch ]
@@ -118,7 +113,7 @@ treeNodeChapter props appState editorBranch chapter =
             , icon = faSet "km.chapter" appState
             , label = chapter.title
             , children = questions
-            , untitledLabel = lg "chapter.untitled" appState
+            , untitledLabel = gettext "Untitled chapter" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -132,7 +127,7 @@ treeNodeMetric props appState editorBranch metric =
             , icon = faSet "km.metric" appState
             , label = metric.title
             , children = []
-            , untitledLabel = lg "metric.untitled" appState
+            , untitledLabel = gettext "Untitled metric" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -146,7 +141,7 @@ treeNodePhase props appState editorBranch phase =
             , icon = faSet "km.phase" appState
             , label = phase.title
             , children = []
-            , untitledLabel = lg "phase.untitled" appState
+            , untitledLabel = gettext "Untitled phase" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -160,7 +155,7 @@ treeNodeTag props appState editorBranch tag =
             , icon = faSet "km.tag" appState
             , label = tag.name
             , children = []
-            , untitledLabel = lg "tag.untitled" appState
+            , untitledLabel = gettext "Untitled tag" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -172,9 +167,9 @@ treeNodeIntegration props appState editorBranch integration =
         config =
             { uuid = Integration.getUuid integration
             , icon = faSet "km.integration" appState
-            , label = Integration.getName integration
+            , label = Integration.getVisibleName integration
             , children = []
-            , untitledLabel = lg "integration.untitled" appState
+            , untitledLabel = gettext "Untitled integration" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -216,7 +211,7 @@ treeNodeQuestion props appState editorBranch question =
             , icon = faSet "km.question" appState
             , label = Question.getTitle question
             , children = answers ++ itemTemplateQuestions ++ choices ++ references ++ experts
-            , untitledLabel = lg "question.untitled" appState
+            , untitledLabel = gettext "Untitled question" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -235,7 +230,7 @@ treeNodeAnswer props appState editorBranch answer =
             , icon = faSet "km.answer" appState
             , label = answer.label
             , children = followupQuestions
-            , untitledLabel = lg "answer.untitled" appState
+            , untitledLabel = gettext "Untitled answer" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -249,7 +244,7 @@ treeNodeChoice props appState editorBranch choice =
             , icon = faSet "km.choice" appState
             , label = choice.label
             , children = []
-            , untitledLabel = lg "choice.untitled" appState
+            , untitledLabel = gettext "Untitled choice" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -263,7 +258,7 @@ treeNodeReference props appState editorBranch reference =
             , icon = faSet "km.reference" appState
             , label = Reference.getVisibleName reference
             , children = []
-            , untitledLabel = lg "reference.untitled" appState
+            , untitledLabel = gettext "Untitled reference" appState.locale
             }
     in
     treeNode props appState editorBranch config
@@ -275,9 +270,9 @@ treeNodeExperts props appState editorBranch expert =
         config =
             { uuid = expert.uuid
             , icon = faSet "km.expert" appState
-            , label = expert.name
+            , label = Expert.getVisibleName expert
             , children = []
-            , untitledLabel = lg "expert.untitled" appState
+            , untitledLabel = gettext "Untitled expert" appState.locale
             }
     in
     treeNode props appState editorBranch config

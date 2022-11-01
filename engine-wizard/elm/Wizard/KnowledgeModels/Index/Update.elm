@@ -4,11 +4,11 @@ module Wizard.KnowledgeModels.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Gettext exposing (gettext)
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Locale exposing (lg)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models as Listing
@@ -68,7 +68,7 @@ deletePackageCompleted appState model result =
             )
 
         Err error ->
-            ( { model | deletingPackage = ApiError.toActionResult appState (lg "apiError.packages.deleteError" appState) error }
+            ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
             , getResultCmd result
             )
 
@@ -91,7 +91,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Package
 listingUpdateConfig wrapMsg appState =
     { getRequest = PackagesApi.getPackages
-    , getError = lg "apiError.packages.getListError" appState
+    , getError = gettext "Unable to get Knowledge Models." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.knowledgeModelsIndexWithFilters PaginationQueryFilters.empty
     }

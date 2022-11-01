@@ -12,6 +12,7 @@ module Wizard.Projects.Detail.Components.NewDocument exposing
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
+import Gettext exposing (gettext)
 import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
@@ -28,8 +29,8 @@ import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
-import Shared.Locale exposing (l, lg, lh, lx)
 import Shared.Setters exposing (setSelected)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.SummaryReport exposing (viewIndications)
@@ -46,21 +47,6 @@ import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-
-
-l_ : String -> AppState -> String
-l_ =
-    l "Wizard.Projects.Detail.Components.NewDocument"
-
-
-lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
-lh_ =
-    lh "Wizard.Projects.Detail.Components.NewDocument"
-
-
-lx_ : String -> AppState -> Html msg
-lx_ =
-    lx "Wizard.Projects.Detail.Components.NewDocument"
 
 
 
@@ -159,7 +145,7 @@ handleGetSummaryReportCompleted appState model result =
                     Success summaryReport
 
                 Err error ->
-                    ApiError.toActionResult appState (lg "apiError.questionnaires.summaryReport.fetchError" appState) error
+                    ApiError.toActionResult appState (gettext "Unable to get the summary report." appState.locale) error
     in
     ( { model | summaryReport = newSummaryReport }, Cmd.none )
 
@@ -173,7 +159,7 @@ handleGetQuestionnaireEventCompleted appState model result =
                     Success event
 
                 Err error ->
-                    ApiError.toActionResult appState (lg "apiError.questionnaires.events.getError" appState) error
+                    ApiError.toActionResult appState (gettext "Unable to get questionnaire event." appState.locale) error
     in
     ( { model | event = newEvent }, Cmd.none )
 
@@ -209,7 +195,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = TemplatesApi.getTemplatesFor cfg.packageId
-            , getError = lg "apiError.packages.getListError" appState
+            , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing
@@ -241,7 +227,7 @@ handlePostDocumentCompleted cfg appState model result =
             ( model, cfg.documentsNavigateCmd )
 
         Err error ->
-            ( { model | savingDocument = ApiError.toActionResult appState (lg "apiError.documents.postError" appState) error }, Cmd.none )
+            ( { model | savingDocument = ApiError.toActionResult appState (gettext "Document could not be created." appState.locale) error }, Cmd.none )
 
 
 
@@ -268,13 +254,13 @@ viewFormState : AppState -> QuestionnaireDetail -> Model -> ( SummaryReport, May
 viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
     div [ class "Projects__Detail__Content Projects__Detail__Content--NewDocument" ]
         [ div [ detailClass "container" ]
-            [ Page.header (l_ "header.title" appState) []
+            [ Page.header (gettext "New Document" appState.locale) []
             , div []
                 [ FormResult.view appState model.savingDocument
                 , formView appState questionnaire mbEvent model summaryReport
                 , FormActions.view appState
                     (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid <| ProjectDetailRoute.Documents PaginationQueryString.empty)
-                    (ActionResult.ButtonConfig (l_ "form.create" appState) model.savingDocument (FormMsg Form.Submit) False)
+                    (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingDocument (FormMsg Form.Submit) False)
                 ]
             ]
         ]
@@ -291,7 +277,7 @@ formView appState questionnaire mbEvent model summaryReport =
             }
 
         nameInput =
-            FormGroup.input appState model.form "name" <| lg "document.name" appState
+            FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
 
         templateInput =
             TypeHintInput.view appState cfg model.templateTypeHintInputModel
@@ -299,7 +285,7 @@ formView appState questionnaire mbEvent model summaryReport =
         formatInput =
             case model.templateTypeHintInputModel.selected of
                 Just selectedTemplate ->
-                    FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" <| lg "template.format" appState
+                    FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" <| gettext "Format" appState.locale
 
                 _ ->
                     emptyNode
@@ -316,11 +302,14 @@ formView appState questionnaire mbEvent model summaryReport =
                             linkTo appState
                                 (Routes.projectsDetailDocumentsNew questionnaire.uuid Nothing)
                                 []
-                                [ lx_ "oldVersionInfo.link" appState ]
+                                [ text (gettext "Create for current version" appState.locale) ]
                     in
                     div [ class "alert alert-info" ]
                         [ p []
-                            (lh_ "oldVersionInfo.text" [ strong [] [ br [] [], text datetime ] ] appState)
+                            (String.formatHtml
+                                (gettext "You are creating a document for a project version from %s" appState.locale)
+                                [ strong [] [ br [] [], text datetime ] ]
+                            )
                         , currentLink
                         ]
 
@@ -330,6 +319,6 @@ formView appState questionnaire mbEvent model summaryReport =
     div []
         [ Html.map FormMsg <| nameInput
         , div [ class "form-group" ] [ extraInfo ]
-        , FormGroup.formGroupCustom templateInput appState model.form "templateId" <| lg "template" appState
+        , FormGroup.formGroupCustom templateInput appState model.form "templateId" <| gettext "Document Template" appState.locale
         , Html.map FormMsg <| formatInput
         ]
