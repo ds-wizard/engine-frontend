@@ -155,20 +155,28 @@ newVersionInRegistryWarning appState package =
     case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
-                latestPackageId =
-                    package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
-            in
-            div [ class "alert alert-warning" ]
-                (faSet "_global.warning" appState
-                    :: String.formatHtml (gettext "There is a newer version (%s) available." appState.locale)
-                        [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                    ++ [ linkTo appState
+                importLink =
+                    if Feature.knowledgeModelsImport appState then
+                        let
+                            latestPackageId =
+                                package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
+                        in
+                        [ linkTo appState
                             (Routes.templatesImport (Just latestPackageId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
                             [ faSet "kmImport.fromRegistry" appState
                             , text (gettext "Import" appState.locale)
                             ]
-                       ]
+                        ]
+
+                    else
+                        []
+            in
+            div [ class "alert alert-warning" ]
+                (faSet "_global.warning" appState
+                    :: String.formatHtml (gettext "There is a newer version (%s) available." appState.locale)
+                        [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
+                    ++ importLink
                 )
 
         _ ->

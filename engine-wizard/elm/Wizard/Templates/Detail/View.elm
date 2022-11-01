@@ -99,8 +99,8 @@ newVersionInRegistryWarning appState template =
     case ( template.remoteLatestVersion, template.state == TemplateState.Outdated, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
-                link =
-                    if Version.greaterThan template.version remoteLatestVersion then
+                importLink =
+                    if Feature.templatesImport appState && Version.greaterThan template.version remoteLatestVersion then
                         let
                             latestPackageId =
                                 template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
@@ -119,7 +119,7 @@ newVersionInRegistryWarning appState template =
                     :: String.formatHtml
                         (gettext "There is a newer version (%s) available." appState.locale)
                         [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                    ++ link
+                    ++ importLink
                 )
 
         _ ->
@@ -135,18 +135,26 @@ unsupportedMetamodelVersionWarning appState template =
                     ( True, Just remoteLatestVersion, RegistryEnabled _ ) ->
                         if Version.greaterThan template.version remoteLatestVersion then
                             let
-                                latestPackageId =
-                                    template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                                importLink =
+                                    if Feature.templatesImport appState then
+                                        let
+                                            latestPackageId =
+                                                template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                                        in
+                                        [ linkTo appState
+                                            (Routes.templatesImport (Just latestPackageId))
+                                            [ class "btn btn-primary btn-sm with-icon ms-2" ]
+                                            [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
+                                        ]
+
+                                    else
+                                        []
                             in
                             text " "
                                 :: String.formatHtml
                                     (gettext "There is a newer version (%s) available." appState.locale)
                                     [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                                ++ [ linkTo appState
-                                        (Routes.templatesImport (Just latestPackageId))
-                                        [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                                        [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
-                                   ]
+                                ++ importLink
 
                         else
                             []
