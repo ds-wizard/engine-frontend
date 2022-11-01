@@ -95,6 +95,7 @@ handleGetQuestionnaireCompleted appState model result =
         , defaultError = gettext "Unable to get documents." appState.locale
         , model = model
         , result = result
+        , logoutMsg = Wizard.Msgs.logoutMsg
         }
 
 
@@ -133,7 +134,7 @@ handleDeleteDocumentCompleted appState model result =
 
         Err error ->
             ( { model | deletingDocument = ApiError.toActionResult appState (gettext "Document could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -190,6 +191,7 @@ handleGetSubmissionServicesCompleted appState model result =
         , defaultError = gettext "Unable to get submission services for the document." appState.locale
         , model = model
         , result = result
+        , logoutMsg = Wizard.Msgs.logoutMsg
         }
 
 
@@ -227,6 +229,7 @@ handleSubmitDocumentCompleted appState model result =
         , defaultError = gettext "Unable to submit the document." appState.locale
         , model = model
         , result = result
+        , logoutMsg = Wizard.Msgs.logoutMsg
         }
 
 

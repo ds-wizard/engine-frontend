@@ -159,7 +159,7 @@ update wrapMsg msg appState model =
                                 model
                     in
                     ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (gettext "Unable to get project tags." appState.locale) err }
-                    , getResultCmd result
+                    , getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
         UsersFilterGetValuesComplete result ->
@@ -168,6 +168,7 @@ update wrapMsg msg appState model =
                 , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         UsersFilterInput value ->
@@ -198,6 +199,7 @@ update wrapMsg msg appState model =
                 , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         PackagesFilterGetValuesComplete result ->
@@ -206,6 +208,7 @@ update wrapMsg msg appState model =
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         PackagesFilterInput value ->
@@ -236,6 +239,7 @@ update wrapMsg msg appState model =
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         DebouncerMsg debounceMsg ->
@@ -279,7 +283,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

@@ -44,6 +44,7 @@ update msg wrapMsg appState model =
                 , defaultError = gettext "Unable to change project importer." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always (gettext "Project importer was changed successfully." appState.locale)
                 , cmd = Cmd.map (wrapMsg << ListingMsg) Listing.fetchData
                 }

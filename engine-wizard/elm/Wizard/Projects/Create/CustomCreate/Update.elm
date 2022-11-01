@@ -85,7 +85,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the Knowledge Model." appState.locale) error }
 
         cmd =
-            getResultCmd result
+            getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -138,7 +138,7 @@ handlePostQuestionnaireCompleted appState model result =
 
         Err error ->
             ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be created." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

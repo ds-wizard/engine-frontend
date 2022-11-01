@@ -32,6 +32,7 @@ update msg wrapMsg appState model =
                 , defaultError = gettext "Unable to get the document template." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         ShowDeleteDialog visible ->
@@ -67,5 +68,5 @@ deleteVersionCompleted appState model result =
 
         Err error ->
             ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )

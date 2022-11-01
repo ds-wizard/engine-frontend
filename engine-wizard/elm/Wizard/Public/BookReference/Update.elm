@@ -27,4 +27,5 @@ update msg appState model =
                 , defaultError = gettext "Unable to get a book reference." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }

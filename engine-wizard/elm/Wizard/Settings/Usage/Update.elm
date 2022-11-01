@@ -24,4 +24,5 @@ update msg appState model =
                 , defaultError = gettext "Unable to get usage." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }

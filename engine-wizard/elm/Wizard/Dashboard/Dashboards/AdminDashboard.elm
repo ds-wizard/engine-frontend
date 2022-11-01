@@ -20,8 +20,10 @@ import Shared.Data.Package exposing (Package)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Template exposing (Template)
 import Shared.Data.Usage exposing (Usage)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Error.ApiError exposing (ApiError)
+import Shared.Setters exposing (setPackages, setTemplates, setUsage)
 import Shared.Utils exposing (listInsertIf)
+import Wizard.Common.Api exposing (applyResult, applyResultTransform)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.AddOpenIDWidget as AddOpenIDWidget
 import Wizard.Dashboard.Widgets.ConfigureLookAndFeelWidget as ConfigureLookAndFeel
@@ -69,32 +71,37 @@ fetchData appState =
     Cmd.batch [ packagesCmd, templatesCmd, usageCmd ]
 
 
-update : Msg -> AppState -> Model -> Model
-update msg appState model =
+update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
+update logoutMsg msg appState model =
     case msg of
         GetUsageComplete result ->
-            case result of
-                Ok data ->
-                    { model | usage = ActionResult.Success data }
-
-                Err error ->
-                    { model | usage = ApiError.toActionResult appState (gettext "Unable to get usage." appState.locale) error }
+            applyResult appState
+                { setResult = setUsage
+                , defaultError = gettext "Unable to get usage." appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = logoutMsg
+                }
 
         GetPackagesComplete result ->
-            case result of
-                Ok data ->
-                    { model | packages = ActionResult.Success data.items }
-
-                Err error ->
-                    { model | packages = ApiError.toActionResult appState (gettext "Unable to get Knowledge Models." appState.locale) error }
+            applyResultTransform appState
+                { setResult = setPackages
+                , defaultError = gettext "Unable to get Knowledge Models." appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = logoutMsg
+                , transform = .items
+                }
 
         GetTemplatesComplete result ->
-            case result of
-                Ok data ->
-                    { model | templates = ActionResult.Success data.items }
-
-                Err error ->
-                    { model | templates = ApiError.toActionResult appState (gettext "Unable to get document templates." appState.locale) error }
+            applyResultTransform appState
+                { setResult = setTemplates
+                , defaultError = gettext "Unable to get document templates." appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = logoutMsg
+                , transform = .items
+                }
 
 
 view : AppState -> Model -> Html msg

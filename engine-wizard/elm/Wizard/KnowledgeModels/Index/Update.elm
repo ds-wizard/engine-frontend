@@ -69,7 +69,7 @@ deletePackageCompleted appState model result =
 
         Err error ->
             ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

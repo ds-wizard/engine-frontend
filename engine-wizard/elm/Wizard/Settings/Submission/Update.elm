@@ -40,6 +40,7 @@ update wrapMsg msg appState model =
                 , defaultError = gettext "Unable to get document templates." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
 

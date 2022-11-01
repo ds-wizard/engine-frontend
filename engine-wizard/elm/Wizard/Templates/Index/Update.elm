@@ -69,7 +69,7 @@ deletePackageCompleted appState model result =
 
         Err error ->
             ( { model | deletingTemplate = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

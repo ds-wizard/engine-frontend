@@ -59,5 +59,5 @@ postAppCompleted appState model result =
                 | savingApp = ApiError.toActionResult appState (gettext "App could not be created." appState.locale) error
                 , form = setFormErrors appState error model.form
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )

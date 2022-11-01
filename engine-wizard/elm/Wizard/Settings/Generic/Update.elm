@@ -68,7 +68,7 @@ handleGetConfigCompleted props appState model result =
                     { model | config = ApiError.toActionResult appState (gettext "Unable to load settings." appState.locale) error }
 
         cmd =
-            getResultCmd result
+            getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -90,7 +90,7 @@ handlePutConfigCompleted _ appState model result =
 
                 Err error ->
                     ( ApiError.toActionResult appState (gettext "Settings could not be saved." appState.locale) error
-                    , getResultCmd result
+                    , getResultCmd Wizard.Msgs.logoutMsg result
                     )
     in
     ( { model | savingConfig = newResult }, Cmd.batch [ cmd, Ports.scrollToTop ".Settings__content" ] )

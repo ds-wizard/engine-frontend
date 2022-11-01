@@ -61,5 +61,5 @@ postUserCompleted appState model result =
 
         Err error ->
             ( { model | savingUser = ApiError.toActionResult appState (gettext "User could not be created." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )

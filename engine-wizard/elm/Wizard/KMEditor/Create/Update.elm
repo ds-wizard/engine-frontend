@@ -116,7 +116,7 @@ handlePostBranchCompleted appState model result =
                 | form = setFormErrors appState error model.form
                 , savingBranch = ApiError.toActionResult appState (gettext "Knowledge Model could not be created." appState.locale) error
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

@@ -55,6 +55,7 @@ update msg wrapMsg appState model =
                     , defaultError = gettext "Unable to get the Knowledge Model." appState.locale
                     , model = model
                     , result = result
+                    , logoutMsg = Wizard.Msgs.logoutMsg
                     }
 
         GetPackageComplete result ->
@@ -64,6 +65,7 @@ update msg wrapMsg appState model =
                     , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                     , model = model
                     , result = result
+                    , logoutMsg = Wizard.Msgs.logoutMsg
                     }
 
         QuestionnaireMsg qtnMsg ->
