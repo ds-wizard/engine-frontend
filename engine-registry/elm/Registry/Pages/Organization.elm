@@ -13,6 +13,7 @@ import Form.Field as Field exposing (Field)
 import Form.Validate as Validate exposing (Validation)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form, h1, text)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Registry.Common.AppState exposing (AppState)
 import Registry.Common.Credentials exposing (Credentials)
@@ -152,7 +153,7 @@ handleFormMsg formMsg appState model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div []
+    div [ class "Organization" ]
         [ h1 [] [ text (gettext "Edit Organization" appState.locale) ]
         , form [ onSubmit <| FormMsg Form.Submit ]
             [ FormResult.view model.saving
