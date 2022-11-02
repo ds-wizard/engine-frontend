@@ -11,6 +11,7 @@ const regexNGettext = /[\s+(]ngettext \( "(.*?[^\\])?(\\\\)*", "(.*?[^\\])?(\\\\
 
 const keys = {}
 
+// npm install po2json@1.0.0-beta
 // npx po2json -f jed cs.po cs.json
 
 glob(`{engine-${component},engine-shared}/elm/**/*.elm`, (err, files) => {

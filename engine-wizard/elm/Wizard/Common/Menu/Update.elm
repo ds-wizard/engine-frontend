@@ -30,6 +30,9 @@ update wrapMsg msg appState model =
             in
             ( { model | aboutOpen = open, apiBuildInfo = apiBuildInfo }, cmd )
 
+        SetLanguagesOpen open ->
+            ( { model | languagesOpen = open }, Cmd.none )
+
         GetBuildInfoCompleted result ->
             case result of
                 Ok buildInfo ->

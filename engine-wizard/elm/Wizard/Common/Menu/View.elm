@@ -1,9 +1,9 @@
-module Wizard.Common.Menu.View exposing (view, viewAboutModal, viewReportIssueModal)
+module Wizard.Common.Menu.View exposing (view, viewAboutModal, viewLanguagesModal, viewReportIssueModal)
 
 import ActionResult exposing (ActionResult(..))
 import Dict
 import Gettext exposing (gettext)
-import Html exposing (Html, a, code, div, em, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
+import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Shared.Auth.Role as Role
@@ -407,6 +407,21 @@ viewProfileMenu model =
 
             else
                 emptyNode
+
+        langaugeButton =
+            if List.isEmpty model.appState.config.locales then
+                emptyNode
+
+            else
+                li []
+                    [ a
+                        [ onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.SetLanguagesOpen True))
+                        , dataCy "menu_languages"
+                        ]
+                        [ faSetFw "menu.language" model.appState
+                        , text (gettext "Change language" model.appState.locale)
+                        ]
+                    ]
     in
     div [ id itemId, class "profile-info", mouseenter, mouseleave ]
         [ img [ src imageUrl, class "profile-image" ] []
@@ -425,6 +440,7 @@ viewProfileMenu model =
                         , text (gettext "Edit profile" model.appState.locale)
                         ]
                     ]
+                , langaugeButton
                 , li []
                     [ a
                         [ onClick (Wizard.Msgs.AuthMsg Wizard.Auth.Msgs.Logout)
@@ -580,3 +596,36 @@ viewBuildInfo appState name buildInfo extra =
                 ++ List.map viewExtraRow extra
             )
         ]
+
+
+viewLanguagesModal : AppState -> Bool -> Html Wizard.Msgs.Msg
+viewLanguagesModal appState visible =
+    let
+        viewLocale locale =
+            let
+                defaultText =
+                    if locale.fallback then
+                        " (" ++ gettext "default" appState.locale ++ ")"
+
+                    else
+                        ""
+            in
+            div [ class "nav-link cursor-pointer", onClick (Wizard.Msgs.SetLocale locale.code) ]
+                [ text (locale.name ++ defaultText) ]
+
+        content =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Change language" appState.locale) ]
+                , button [ class "btn-close", onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.SetLanguagesOpen False)) ] []
+                ]
+            , div [ class "modal-body" ]
+                [ div [ class "nav flex-column nav-pills" ]
+                    (List.map viewLocale appState.config.locales)
+                ]
+            ]
+    in
+    Modal.simple
+        { modalContent = content
+        , visible = visible
+        , dataCy = "languages"
+        }

@@ -16,7 +16,7 @@ import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.Common.Menu.View as Menu exposing (viewAboutModal, viewReportIssueModal)
+import Wizard.Common.Menu.View as Menu exposing (viewAboutModal, viewLanguagesModal, viewReportIssueModal)
 import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
@@ -148,6 +148,7 @@ app model content =
                     [ content ]
                 , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
                 , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.apiBuildInfo
+                , viewLanguagesModal model.appState model.menuModel.languagesOpen
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel

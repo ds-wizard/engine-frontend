@@ -148,9 +148,10 @@ window.onload = function () {
     defaultStyleUrl = style.getAttribute('href')
     style.remove()
 
+    const language = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
     const promises = [
         axios.get(configUrl()),
-        axios.get(apiUrl() + '/configs/locales/' + navigator.language)
+        axios.get(apiUrl() + '/configs/locales/' + language)
     ]
     const hasProvisioning = !!provisioningUrl()
     if (hasProvisioning) {

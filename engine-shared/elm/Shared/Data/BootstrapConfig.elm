@@ -10,6 +10,7 @@ import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig 
 import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Shared.Data.BootstrapConfig.DashboardConfig as DashboardConfig exposing (DashboardConfig)
 import Shared.Data.BootstrapConfig.FeatureConfig as FeatureConfig exposing (FeatureConfig)
+import Shared.Data.BootstrapConfig.LocaleConfig as LocaleConfig exposing (LocaleConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Shared.Data.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
@@ -33,6 +34,7 @@ type alias BootstrapConfig =
     , feature : FeatureConfig
     , cloud : CloudConfig
     , owl : OwlConfig
+    , locales : List LocaleConfig
     }
 
 
@@ -50,6 +52,7 @@ default =
     , feature = FeatureConfig.default
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
+    , locales = []
     }
 
 
@@ -68,3 +71,4 @@ decoder =
         |> D.required "feature" FeatureConfig.decoder
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder
+        |> D.required "locales" (D.list LocaleConfig.decoder)
