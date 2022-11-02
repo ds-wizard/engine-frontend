@@ -9,6 +9,7 @@ import Shared.Error.ApiError exposing (ApiError)
 type Msg
     = SetReportIssueOpen Bool
     | SetAboutOpen Bool
+    | SetLanguagesOpen Bool
     | GetBuildInfoCompleted (Result ApiError BuildInfo)
     | DevMenuDropdownMsg Dropdown.State
     | HelpMenuDropdownMsg Dropdown.State

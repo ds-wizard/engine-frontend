@@ -18,6 +18,7 @@ type alias Model =
     , aboutOpen : Bool
     , apiBuildInfo : ActionResult BuildInfo
     , submenuPositions : Dict String Dom.Element
+    , languagesOpen : Bool
     }
 
 
@@ -30,4 +31,5 @@ initialModel =
     , aboutOpen = False
     , apiBuildInfo = Unset
     , submenuPositions = Dict.empty
+    , languagesOpen = False
     }

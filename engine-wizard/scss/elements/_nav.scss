@@ -21,6 +21,7 @@
     .nav-link {
         color: $gray-700 !important;
         font-weight: 500;
+        cursor: pointer;
 
         &.active, &.active:hover, &:hover {
             color: $primary !important;

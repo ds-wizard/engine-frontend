@@ -32,6 +32,7 @@ type Msg
     | AuthMsg Wizard.Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | SetFullscreen Bool
+    | SetLocale String
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | AdminMsg Wizard.Dev.Msgs.Msg
     | AppsMsg Wizard.Apps.Msgs.Msg

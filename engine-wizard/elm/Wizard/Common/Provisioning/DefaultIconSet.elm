@@ -100,6 +100,7 @@ iconSet =
         , ( "menu.dev", "fas fa-laptop-code" )
         , ( "menu.documents", "fas fa-layer-group" )
         , ( "menu.knowledgeModels", "fas fa-sitemap" )
+        , ( "menu.language", "fas fa-language" )
         , ( "menu.logout", "fas fa-sign-out-alt" )
         , ( "menu.open", "fas fa-angle-double-right" )
         , ( "menu.profile", "fas fa-user-edit" )
