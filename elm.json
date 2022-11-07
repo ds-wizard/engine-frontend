@@ -59,7 +59,7 @@
     },
     "test-dependencies": {
         "direct": {
-            "elm-explorations/test": "2.0.0"
+            "elm-explorations/test": "2.0.1"
         },
         "indirect": {
             "BrianHicks/elm-trend": "2.1.3",
