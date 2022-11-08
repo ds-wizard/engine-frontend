@@ -10,7 +10,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Shared.Data.EditableConfig.EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
-import Shared.Data.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage exposing (AllowedPackage)
+import Shared.Data.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage as AllowedPackage exposing (AllowedPackage)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 
@@ -30,17 +30,9 @@ initEmpty =
 init : EditableKnowledgeModelConfig -> Form FormError EditableKnowledgeModelConfigForm
 init config =
     let
-        packageToFields allowedPackage =
-            Field.group
-                [ ( "orgId", Field.string (Maybe.withDefault "" allowedPackage.orgId) )
-                , ( "kmId", Field.string (Maybe.withDefault "" allowedPackage.kmId) )
-                , ( "minVersion", Field.string (Maybe.withDefault "" allowedPackage.minVersion) )
-                , ( "maxVersion", Field.string (Maybe.withDefault "" allowedPackage.maxVersion) )
-                ]
-
         fields =
             [ ( "publicEnabled", Field.bool config.public.enabled )
-            , ( "publicPackages", Field.list (List.map packageToFields config.public.packages) )
+            , ( "publicPackages", Field.list (List.map AllowedPackage.init config.public.packages) )
             , ( "integrationConfig", Field.string config.integrationConfig )
             ]
     in
@@ -49,17 +41,9 @@ init config =
 
 validation : Validation FormError EditableKnowledgeModelConfigForm
 validation =
-    let
-        validatePackage =
-            V.succeed AllowedPackage
-                |> V.andMap (V.field "orgId" V.maybeString)
-                |> V.andMap (V.field "kmId" V.maybeString)
-                |> V.andMap (V.field "minVersion" V.maybeString)
-                |> V.andMap (V.field "maxVersion" V.maybeString)
-    in
     V.succeed EditableKnowledgeModelConfigForm
         |> V.andMap (V.field "publicEnabled" V.bool)
-        |> V.andMap (V.field "publicPackages" (V.list validatePackage))
+        |> V.andMap (V.field "publicPackages" (V.list AllowedPackage.validation))
         |> V.andMap (V.field "integrationConfig" V.optionalString)
 
 

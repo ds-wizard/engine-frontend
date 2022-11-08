@@ -2,12 +2,18 @@ module Shared.Data.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKno
     ( AllowedPackage
     , decoder
     , encode
+    , init
+    , validation
     )
 
+import Form.Field as Field exposing (Field)
+import Form.Validate as V exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 
 
 type alias AllowedPackage =
@@ -35,3 +41,22 @@ encode allowedPackage =
         , ( "minVersion", E.maybe E.string allowedPackage.minVersion )
         , ( "maxVersion", E.maybe E.string allowedPackage.maxVersion )
         ]
+
+
+init : AllowedPackage -> Field
+init allowedPackage =
+    Field.group
+        [ ( "orgId", Field.string (Maybe.withDefault "" allowedPackage.orgId) )
+        , ( "kmId", Field.string (Maybe.withDefault "" allowedPackage.kmId) )
+        , ( "minVersion", Field.string (Maybe.withDefault "" allowedPackage.minVersion) )
+        , ( "maxVersion", Field.string (Maybe.withDefault "" allowedPackage.maxVersion) )
+        ]
+
+
+validation : Validation FormError AllowedPackage
+validation =
+    V.succeed AllowedPackage
+        |> V.andMap (V.field "orgId" V.maybeString)
+        |> V.andMap (V.field "kmId" V.maybeString)
+        |> V.andMap (V.field "minVersion" V.maybeString)
+        |> V.andMap (V.field "maxVersion" V.maybeString)

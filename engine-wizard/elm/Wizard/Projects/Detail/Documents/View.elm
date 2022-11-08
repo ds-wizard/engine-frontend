@@ -170,7 +170,7 @@ listingDescription cfg _ document =
     span []
         [ span [ class "fragment" ] [ icon, text formatName ]
         , fileSizeFragment
-        , span [ class "fragment" ] [ text document.template.name ]
+        , span [ class "fragment" ] [ text document.documentTemplate.name ]
         , versionFragment
         ]
 

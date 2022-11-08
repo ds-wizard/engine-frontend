@@ -5,13 +5,13 @@ module Shared.Data.Document.DocumentTemplate exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
+import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
 
 
 type alias DocumentTemplate =
     { id : String
     , name : String
-    , formats : List TemplateFormat
+    , formats : List DocumentTemplateFormat
     }
 
 
@@ -20,4 +20,4 @@ decoder =
     D.succeed DocumentTemplate
         |> D.required "id" D.string
         |> D.required "name" D.string
-        |> D.required "formats" (D.list TemplateFormat.decoder)
+        |> D.required "formats" (D.list DocumentTemplateFormat.decoder)

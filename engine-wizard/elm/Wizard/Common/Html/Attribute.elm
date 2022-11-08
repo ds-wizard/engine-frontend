@@ -51,8 +51,8 @@ grammarlyAttribute =
 
 
 dataCy : String -> Html.Attribute msg
-dataCy value =
-    attribute "data-cy" value
+dataCy =
+    attribute "data-cy"
 
 
 tooltip : String -> List (Html.Attribute msg)

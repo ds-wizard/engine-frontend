@@ -15,6 +15,8 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Menu.Models
 import Wizard.Dashboard.Models
 import Wizard.Dev.Models
+import Wizard.DocumentTemplateEditors.Models
+import Wizard.DocumentTemplates.Models
 import Wizard.Documents.Models
 import Wizard.KMEditor.Models
 import Wizard.KnowledgeModels.Models
@@ -25,7 +27,6 @@ import Wizard.Public.Models
 import Wizard.Registry.Models
 import Wizard.Routes as Routes
 import Wizard.Settings.Models
-import Wizard.Templates.Models
 import Wizard.Users.Models
 
 
@@ -36,6 +37,8 @@ type alias Model =
     , appsModel : Wizard.Apps.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
     , documentsModel : Wizard.Documents.Models.Model
+    , documentTemplateEditorsModel : Wizard.DocumentTemplateEditors.Models.Model
+    , documentTemplatesModel : Wizard.DocumentTemplates.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
     , localeModel : Wizard.Locales.Models.Model
@@ -44,7 +47,6 @@ type alias Model =
     , publicModel : Wizard.Public.Models.Model
     , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
-    , templatesModel : Wizard.Templates.Models.Model
     , users : Wizard.Users.Models.Model
     }
 
@@ -57,6 +59,8 @@ initialModel appState =
     , appsModel = Wizard.Apps.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel appState
     , documentsModel = Wizard.Documents.Models.initialModel
+    , documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initialModel
+    , documentTemplatesModel = Wizard.DocumentTemplates.Models.initialModel appState
     , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
     , localeModel = Wizard.Locales.Models.initialModel appState
@@ -65,7 +69,6 @@ initialModel appState =
     , publicModel = Wizard.Public.Models.initialModel appState
     , registryModel = Wizard.Registry.Models.initialModel
     , settingsModel = Wizard.Settings.Models.initialModel appState
-    , templatesModel = Wizard.Templates.Models.initialModel appState
     , users = Wizard.Users.Models.initialModel appState
     }
 
@@ -121,6 +124,12 @@ initLocalModel model =
         Routes.DocumentsRoute route ->
             { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }
 
+        Routes.DocumentTemplatesRoute route ->
+            { model | documentTemplatesModel = Wizard.DocumentTemplates.Models.initLocalModel route model.appState model.documentTemplatesModel }
+
+        Routes.DocumentTemplateEditorsRoute route ->
+            { model | documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initLocalModel route model.documentTemplateEditorsModel }
+
         Routes.KMEditorRoute route ->
             { model | kmEditorModel = Wizard.KMEditor.Models.initLocalModel model.appState route model.kmEditorModel }
 
@@ -144,9 +153,6 @@ initLocalModel model =
 
         Routes.SettingsRoute route ->
             { model | settingsModel = Wizard.Settings.Models.initLocalModel model.appState route model.settingsModel }
-
-        Routes.TemplatesRoute route ->
-            { model | templatesModel = Wizard.Templates.Models.initLocalModel route model.appState model.templatesModel }
 
         Routes.UsersRoute route ->
             { model | users = Wizard.Users.Models.initLocalModel model.appState route model.users }

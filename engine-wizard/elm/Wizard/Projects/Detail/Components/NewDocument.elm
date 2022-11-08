@@ -16,16 +16,16 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
+import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.Templates as TemplatesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document exposing (Document)
+import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.SummaryReport exposing (SummaryReport)
-import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
@@ -57,27 +57,27 @@ type alias Model =
     { summaryReport : ActionResult SummaryReport
     , event : ActionResult QuestionnaireEvent
     , form : Form FormError DocumentCreateForm
-    , templateTypeHintInputModel : TypeHintInput.Model TemplateSuggestion
+    , templateTypeHintInputModel : TypeHintInput.Model DocumentTemplateSuggestion
     , savingDocument : ActionResult String
     }
 
 
 initialModel :
-    { q | name : String, template : Maybe TemplateSuggestion, formatUuid : Maybe Uuid }
+    { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid }
     -> Maybe Uuid
     -> Model
 initialModel questionnaire mbEventUuid =
     { summaryReport = Loading
     , event = Maybe.unwrap Unset (always Loading) mbEventUuid
     , form = DocumentCreateForm.init questionnaire mbEventUuid
-    , templateTypeHintInputModel = setSelected questionnaire.template <| TypeHintInput.init "templateId"
+    , templateTypeHintInputModel = setSelected questionnaire.documentTemplate <| TypeHintInput.init "documentTemplateId"
     , savingDocument = Unset
     }
 
 
 initEmpty : Model
 initEmpty =
-    initialModel { name = "", template = Nothing, formatUuid = Nothing, events = [] } Nothing
+    initialModel { name = "", documentTemplate = Nothing, formatUuid = Nothing, events = [] } Nothing
 
 
 
@@ -88,7 +88,7 @@ type Msg
     = GetSummaryReportComplete (Result ApiError SummaryReport)
     | GetQuestionnaireEventComplete (Result ApiError QuestionnaireEvent)
     | FormMsg Form.Msg
-    | TemplateTypeHintInputMsg (TypeHintInput.Msg TemplateSuggestion)
+    | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | PostDocumentCompleted (Result ApiError Document)
 
 
@@ -186,15 +186,15 @@ handleForm cfg formMsg appState model =
             ( newModel, Cmd.none )
 
 
-handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg TemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
+handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg DocumentTemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
 handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         formMsg =
-            cfg.wrapMsg << FormMsg << Form.Input "templateId" Form.Select << Field.String
+            cfg.wrapMsg << FormMsg << Form.Input "documentTemplateId" Form.Select << Field.String
 
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = TemplatesApi.getTemplatesFor cfg.packageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
@@ -270,7 +270,7 @@ formView : AppState -> QuestionnaireDetail -> Maybe QuestionnaireEvent -> Model 
 formView appState questionnaire mbEvent model summaryReport =
     let
         cfg =
-            { viewItem = TypeHintItem.templateSuggestion appState
+            { viewItem = TypeHintItem.templateSuggestion
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
@@ -319,6 +319,6 @@ formView appState questionnaire mbEvent model summaryReport =
     div []
         [ Html.map FormMsg <| nameInput
         , div [ class "form-group" ] [ extraInfo ]
-        , FormGroup.formGroupCustom templateInput appState model.form "templateId" <| gettext "Document Template" appState.locale
+        , FormGroup.formGroupCustom templateInput appState model.form "documentTemplateId" <| gettext "Document Template" appState.locale
         , Html.map FormMsg <| formatInput
         ]

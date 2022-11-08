@@ -11,6 +11,7 @@ module Shared.Form.Validate exposing
     , projectTag
     , projectTags
     , uuid
+    , versionNumber
     )
 
 import Dict exposing (Dict)
@@ -153,3 +154,8 @@ dict valueValidation =
                 |> V.andMap (V.field "value" valueValidation)
     in
     V.map Dict.fromList <| V.list validateEntry
+
+
+versionNumber : Validation e Int
+versionNumber =
+    V.int |> V.andThen (V.minInt 0)

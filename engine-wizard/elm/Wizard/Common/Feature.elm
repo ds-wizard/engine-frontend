@@ -178,7 +178,7 @@ knowledgeModelsPreview _ =
 
 templatesView : AppState -> Bool
 templatesView =
-    adminOr Perm.templates
+    adminOr Perm.documentTemplates
 
 
 templatesImport : AppState -> Bool
@@ -188,7 +188,7 @@ templatesImport =
 
 templatesExport : AppState -> Bool
 templatesExport =
-    adminOr Perm.templates
+    adminOr Perm.documentTemplates
 
 
 templatesDelete : AppState -> Bool

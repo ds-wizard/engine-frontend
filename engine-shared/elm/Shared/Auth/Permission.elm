@@ -1,6 +1,7 @@
 module Shared.Auth.Permission exposing
     ( apps
     , dev
+    , documentTemplates
     , hasPerm
     , knowledgeModel
     , knowledgeModelPublish
@@ -13,7 +14,6 @@ module Shared.Auth.Permission exposing
     , questionnaireTemplate
     , settings
     , submission
-    , templates
     , userManagement
     )
 
@@ -91,9 +91,9 @@ submission =
     "SUBM_PERM"
 
 
-templates : String
-templates =
-    "TML_PERM"
+documentTemplates : String
+documentTemplates =
+    "DOC_TML_WRITE_PERM"
 
 
 userManagement : String

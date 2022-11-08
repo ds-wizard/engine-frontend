@@ -10,6 +10,8 @@ import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
 import Wizard.Dashboard.View
 import Wizard.Dev.View
+import Wizard.DocumentTemplateEditors.View
+import Wizard.DocumentTemplates.View
 import Wizard.Documents.View
 import Wizard.KMEditor.View
 import Wizard.KnowledgeModels.View
@@ -22,7 +24,6 @@ import Wizard.Public.View
 import Wizard.Registry.View
 import Wizard.Routes as Routes
 import Wizard.Settings.View
-import Wizard.Templates.View
 import Wizard.Users.View
 
 
@@ -52,6 +53,18 @@ view model =
                 model.documentsModel
                     |> Wizard.Documents.View.view model.appState
                     |> Html.map DocumentsMsg
+                    |> Layout.app model
+
+            Routes.DocumentTemplateEditorsRoute route ->
+                model.documentTemplateEditorsModel
+                    |> Wizard.DocumentTemplateEditors.View.view route model.appState
+                    |> Html.map DocumentTemplateEditorsMsg
+                    |> Layout.app model
+
+            Routes.DocumentTemplatesRoute route ->
+                model.documentTemplatesModel
+                    |> Wizard.DocumentTemplates.View.view route model.appState
+                    |> Html.map DocumentTemplatesMsg
                     |> Layout.app model
 
             Routes.KMEditorRoute route ->
@@ -100,12 +113,6 @@ view model =
                 model.settingsModel
                     |> Wizard.Settings.View.view route model.appState
                     |> Html.map SettingsMsg
-                    |> Layout.app model
-
-            Routes.TemplatesRoute route ->
-                model.templatesModel
-                    |> Wizard.Templates.View.view route model.appState
-                    |> Html.map TemplatesMsg
                     |> Layout.app model
 
             Routes.UsersRoute route ->

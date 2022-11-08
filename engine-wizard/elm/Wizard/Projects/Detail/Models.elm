@@ -116,7 +116,7 @@ initPageModel appState route model =
 
 hasTemplate : Model -> Bool
 hasTemplate model =
-    ActionResult.unwrap False (.questionnaire >> .templateId >> Maybe.isJust) model.questionnaireModel
+    ActionResult.unwrap False (.questionnaire >> .documentTemplateId >> Maybe.isJust) model.questionnaireModel
         && ActionResult.unwrap False (.questionnaire >> .format >> Maybe.isJust) model.questionnaireModel
 
 

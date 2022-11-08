@@ -13,6 +13,8 @@ import Wizard.Common.Menu.Update
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
 import Wizard.Dev.Update
+import Wizard.DocumentTemplateEditors.Update
+import Wizard.DocumentTemplates.Update
 import Wizard.Documents.Update
 import Wizard.KMEditor.Update
 import Wizard.KnowledgeModels.Update
@@ -27,7 +29,6 @@ import Wizard.Registry.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation)
 import Wizard.Settings.Update
-import Wizard.Templates.Update
 import Wizard.Users.Update
 
 
@@ -49,6 +50,14 @@ fetchData model =
         Routes.DocumentsRoute _ ->
             Cmd.map DocumentsMsg <|
                 Wizard.Documents.Update.fetchData model.appState model.documentsModel
+
+        Routes.DocumentTemplateEditorsRoute route ->
+            Cmd.map Wizard.Msgs.DocumentTemplateEditorsMsg <|
+                Wizard.DocumentTemplateEditors.Update.fetchData route model.appState model.documentTemplateEditorsModel
+
+        Routes.DocumentTemplatesRoute route ->
+            Cmd.map Wizard.Msgs.DocumentTemplatesMsg <|
+                Wizard.DocumentTemplates.Update.fetchData route model.appState
 
         Routes.KMEditorRoute route ->
             Cmd.map Wizard.Msgs.KMEditorMsg <|
@@ -81,10 +90,6 @@ fetchData model =
         Routes.SettingsRoute route ->
             Cmd.map Wizard.Msgs.SettingsMsg <|
                 Wizard.Settings.Update.fetchData route model.appState model.settingsModel
-
-        Routes.TemplatesRoute route ->
-            Cmd.map Wizard.Msgs.TemplatesMsg <|
-                Wizard.Templates.Update.fetchData route model.appState
 
         Routes.UsersRoute route ->
             Cmd.map Wizard.Msgs.UsersMsg <|
@@ -249,6 +254,20 @@ update msg model =
                 in
                 ( { model | documentsModel = documentsModel }, cmd )
 
+            Wizard.Msgs.DocumentTemplateEditorsMsg templatesMsg ->
+                let
+                    ( seed, templatesModel, cmd ) =
+                        Wizard.DocumentTemplateEditors.Update.update templatesMsg Wizard.Msgs.DocumentTemplateEditorsMsg model.appState model.documentTemplateEditorsModel
+                in
+                ( setSeed seed { model | documentTemplateEditorsModel = templatesModel }, cmd )
+
+            Wizard.Msgs.DocumentTemplatesMsg templatesMsg ->
+                let
+                    ( seed, templatesModel, cmd ) =
+                        Wizard.DocumentTemplates.Update.update templatesMsg Wizard.Msgs.DocumentTemplatesMsg model.appState model.documentTemplatesModel
+                in
+                ( setSeed seed { model | documentTemplatesModel = templatesModel }, cmd )
+
             Wizard.Msgs.KMEditorMsg kmEditorMsg ->
                 let
                     ( seed, kmEditorModel, cmd ) =
@@ -304,13 +323,6 @@ update msg model =
                         Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
                 in
                 ( { model | settingsModel = settingsModel }, cmd )
-
-            Wizard.Msgs.TemplatesMsg templatesMsg ->
-                let
-                    ( templatesModel, cmd ) =
-                        Wizard.Templates.Update.update templatesMsg Wizard.Msgs.TemplatesMsg model.appState model.templatesModel
-                in
-                ( { model | templatesModel = templatesModel }, cmd )
 
             Wizard.Msgs.UsersMsg usersMsg ->
                 let

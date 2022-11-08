@@ -34,7 +34,7 @@ type alias QuestionnaireEditForm =
     , visibilityPermission : QuestionnairePermission
     , sharingEnabled : Bool
     , sharingPermission : QuestionnairePermission
-    , templateId : Maybe String
+    , documentTemplateId : Maybe String
     , formatUuid : Maybe String
     , permissions : List QuestionnaireEditFormPermission
     }
@@ -83,7 +83,7 @@ questionnaireToFormInitials questionnaire =
     , ( "visibilityPermission", QuestionnairePermission.field visibilityPermission )
     , ( "sharingEnabled", Field.bool sharingEnabled )
     , ( "sharingPermission", QuestionnairePermission.field sharingPermission )
-    , ( "templateId", Field.string (Maybe.withDefault "" questionnaire.templateId) )
+    , ( "documentTemplateId", Field.string (Maybe.withDefault "" questionnaire.documentTemplateId) )
     , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString questionnaire.formatUuid) )
     , ( "permissions", Field.list permissionFields )
     ]
@@ -100,7 +100,7 @@ validation appState =
         |> V.andMap (V.field "visibilityPermission" QuestionnairePermission.validation)
         |> V.andMap (V.field "sharingEnabled" V.bool)
         |> V.andMap (V.field "sharingPermission" QuestionnairePermission.validation)
-        |> V.andMap (V.field "templateId" (V.maybe V.string))
+        |> V.andMap (V.field "documentTemplateId" (V.maybe V.string))
         |> V.andMap (V.field "formatUuid" (V.maybe V.string))
         |> V.andMap (V.field "permissions" (V.list QuestionnaireEditFormPermission.validation))
 
@@ -109,7 +109,7 @@ encode : QuestionnaireEditForm -> E.Value
 encode form =
     let
         formatUuid =
-            Maybe.andThen (always form.formatUuid) form.templateId
+            Maybe.andThen (always form.formatUuid) form.documentTemplateId
 
         projectTags =
             form.projectTags
@@ -123,7 +123,7 @@ encode form =
         , ( "isTemplate", E.bool form.isTemplate )
         , ( "visibility", QuestionnaireVisibility.encode (QuestionnaireVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
         , ( "sharing", QuestionnaireSharing.encode (QuestionnaireSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
-        , ( "templateId", E.maybe E.string form.templateId )
+        , ( "documentTemplateId", E.maybe E.string form.documentTemplateId )
         , ( "formatUuid", E.maybe E.string formatUuid )
         , ( "permissions", E.list QuestionnaireEditFormPermission.encode form.permissions )
         ]

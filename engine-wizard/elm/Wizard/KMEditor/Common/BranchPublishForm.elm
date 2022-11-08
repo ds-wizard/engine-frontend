@@ -9,6 +9,7 @@ import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as Validate
 import String exposing (fromInt)
 
 
@@ -30,9 +31,9 @@ init =
 validation : Validation FormError BranchPublishForm
 validation =
     Validate.map6 BranchPublishForm
-        (Validate.field "major" (Validate.int |> Validate.andThen (Validate.minInt 0)))
-        (Validate.field "minor" (Validate.int |> Validate.andThen (Validate.minInt 0)))
-        (Validate.field "patch" (Validate.int |> Validate.andThen (Validate.minInt 0)))
+        (Validate.field "major" Validate.versionNumber)
+        (Validate.field "minor" Validate.versionNumber)
+        (Validate.field "patch" Validate.versionNumber)
         (Validate.field "description" Validate.string)
         (Validate.field "readme" Validate.string)
         (Validate.field "license" Validate.string)

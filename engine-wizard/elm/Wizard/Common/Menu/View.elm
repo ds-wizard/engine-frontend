@@ -74,14 +74,6 @@ menuItems appState =
         , isActive = Routes.isAppIndex
         , isVisible = Feature.apps
         }
-    , MenuItem
-        { title = gettext "Users" appState.locale
-        , icon = faSetFw "menu.users" appState
-        , id = "users"
-        , route = Routes.usersIndex
-        , isActive = Routes.isUsersIndex
-        , isVisible = Feature.usersView
-        }
     , MenuGroup
         { title = gettext "Knowledge Models" appState.locale
         , icon = faSetFw "menu.knowledgeModels" appState
@@ -99,6 +91,26 @@ menuItems appState =
               , id = "knowledge-models-editors"
               , route = Routes.kmEditorIndex
               , isActive = Routes.isKmEditorIndex
+              }
+            ]
+        }
+    , MenuGroup
+        { title = gettext "Document Templates" appState.locale
+        , icon = faSetFw "menu.templates" appState
+        , id = "document-templates"
+        , route = Routes.documentTemplatesIndex
+        , isActive = Routes.isDocumentTemplatesSubroute
+        , isVisible = Feature.templatesView
+        , items =
+            [ { title = gettext "List" appState.locale
+              , id = "documents-list"
+              , route = Routes.documentTemplatesIndex
+              , isActive = Routes.isDocumentTemplatesIndex
+              }
+            , { title = gettext "Editors" appState.locale
+              , id = "document-editors"
+              , route = Routes.documentTemplateEditorsIndex
+              , isActive = Routes.isDocumentTemplateEditorsIndex
               }
             ]
         }
@@ -130,33 +142,13 @@ menuItems appState =
               }
             ]
         }
-    , MenuGroup
+    , MenuItem
         { title = gettext "Documents" appState.locale
         , icon = faSetFw "menu.documents" appState
         , id = "documents"
         , route = Routes.documentsIndex
-        , isActive = Routes.isDocumentsSubroute
+        , isActive = Routes.isDocumentsIndex
         , isVisible = Feature.documentsView
-        , items =
-            [ { title = gettext "List" appState.locale
-              , id = "documents-list"
-              , route = Routes.documentsIndex
-              , isActive = Routes.isDocumentsIndex
-              }
-            , { title = gettext "Templates" appState.locale
-              , id = "document-templates"
-              , route = Routes.templatesIndex
-              , isActive = Routes.isTemplateIndex
-              }
-            ]
-        }
-    , MenuItem
-        { title = gettext "Document Templates" appState.locale
-        , icon = faSetFw "menu.templates" appState
-        , id = "document-templates"
-        , route = Routes.templatesIndex
-        , isActive = Routes.isTemplateIndex
-        , isVisible = \a -> Feature.templatesView a && not (Feature.documentsView a)
         }
     , MenuGroup
         { title = gettext "Dev" appState.locale
@@ -179,9 +171,9 @@ menuItems appState =
             ]
         }
     , MenuGroup
-        { title = gettext "System" appState.locale
-        , icon = faSetFw "menu.settings" appState
-        , id = "system"
+        { title = gettext "Administration" appState.locale
+        , icon = faSetFw "menu.administration" appState
+        , id = "administration"
         , route = Routes.settingsDefault
         , isActive = Routes.isSettingsSubroute
         , isVisible = Feature.settings
@@ -190,6 +182,11 @@ menuItems appState =
               , id = "system-settings"
               , route = Routes.settingsDefault
               , isActive = Routes.isSettingsRoute
+              }
+            , { title = gettext "Users" appState.locale
+              , id = "users"
+              , route = Routes.usersIndex
+              , isActive = Routes.isUsersIndex
               }
             , { title = gettext "Locales" appState.locale
               , id = "system-locales"

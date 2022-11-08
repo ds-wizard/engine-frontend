@@ -2,6 +2,8 @@ module Wizard.Subscriptions exposing (subscriptions)
 
 import Wizard.Apps.Subscriptions
 import Wizard.Common.Menu.Subscriptions
+import Wizard.DocumentTemplateEditors.Subscriptions
+import Wizard.DocumentTemplates.Subscriptions
 import Wizard.Documents.Subscriptions
 import Wizard.KMEditor.Subscriptions
 import Wizard.KnowledgeModels.Subscriptions
@@ -11,7 +13,6 @@ import Wizard.Msgs exposing (Msg(..))
 import Wizard.ProjectImporters.Subscriptions
 import Wizard.Projects.Subscriptions
 import Wizard.Routes as Routes
-import Wizard.Templates.Subscriptions
 import Wizard.Users.Subscriptions
 
 
@@ -25,6 +26,12 @@ subscriptions model =
 
                 Routes.DocumentsRoute _ ->
                     Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions model.documentsModel
+
+                Routes.DocumentTemplateEditorsRoute route ->
+                    Sub.map DocumentTemplateEditorsMsg <| Wizard.DocumentTemplateEditors.Subscriptions.subscriptions route model.documentTemplateEditorsModel
+
+                Routes.DocumentTemplatesRoute route ->
+                    Sub.map DocumentTemplatesMsg <| Wizard.DocumentTemplates.Subscriptions.subscriptions route model.documentTemplatesModel
 
                 Routes.KMEditorRoute route ->
                     Wizard.KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
@@ -40,9 +47,6 @@ subscriptions model =
 
                 Routes.ProjectsRoute route ->
                     Sub.map ProjectsMsg <| Wizard.Projects.Subscriptions.subscriptions route model.projectsModel
-
-                Routes.TemplatesRoute route ->
-                    Sub.map TemplatesMsg <| Wizard.Templates.Subscriptions.subscriptions route model.templatesModel
 
                 Routes.UsersRoute route ->
                     Sub.map UsersMsg <| Wizard.Users.Subscriptions.subscriptions route model.users

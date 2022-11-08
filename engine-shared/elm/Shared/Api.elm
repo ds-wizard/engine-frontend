@@ -10,9 +10,11 @@ module Shared.Api exposing
     , jwtDelete
     , jwtFetch
     , jwtFetchEmpty
+    , jwtFetchFileWithData
     , jwtFetchPut
     , jwtFetchString
     , jwtGet
+    , jwtGetString
     , jwtOrHttpFetch
     , jwtOrHttpGet
     , jwtOrHttpPut
@@ -21,6 +23,7 @@ module Shared.Api exposing
     , jwtPostFile
     , jwtPostFileWithData
     , jwtPut
+    , jwtPutString
     , wsUrl
     )
 
@@ -61,6 +64,14 @@ jwtGet url decoder appState toMsg =
         }
 
 
+jwtGetString : String -> AbstractAppState b -> ToMsg String msg -> Cmd msg
+jwtGetString url appState toMsg =
+    Jwt.Http.get appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , expect = expectString toMsg
+        }
+
+
 jwtFetchString : String -> E.Value -> AbstractAppState b -> ToMsg String msg -> Cmd msg
 jwtFetchString url body appState toMsg =
     Jwt.Http.post appState.session.token.token
@@ -97,6 +108,15 @@ jwtPostFileWithData url data file appState toMsg =
         }
 
 
+jwtFetchFileWithData : String -> List Http.Part -> Decoder a -> File -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+jwtFetchFileWithData url data decoder file appState toMsg =
+    Jwt.Http.post appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.multipartBody (Http.filePart "file" file :: data)
+        , expect = expectJson toMsg decoder
+        }
+
+
 jwtPostEmpty : String -> AbstractAppState b -> ToMsg () msg -> Cmd msg
 jwtPostEmpty url appState toMsg =
     Jwt.Http.post appState.session.token.token
@@ -129,6 +149,15 @@ jwtPut url body appState toMsg =
     Jwt.Http.put appState.session.token.token
         { url = appState.apiUrl ++ url
         , body = Http.jsonBody body
+        , expect = expectWhatever toMsg
+        }
+
+
+jwtPutString : String -> String -> String -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+jwtPutString url contentType body appState toMsg =
+    Jwt.Http.put appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.stringBody contentType body
         , expect = expectWhatever toMsg
         }
 

@@ -6,13 +6,23 @@ module Wizard.Routes exposing
     , appsIndex
     , appsIndexWithFilters
     , devOperations
+    , documentTemplateEditorCreate
+    , documentTemplateEditorDetail
+    , documentTemplateEditorsIndex
+    , documentTemplateEditorsIndexWithFilters
+    , documentTemplatesDetail
+    , documentTemplatesImport
+    , documentTemplatesIndex
+    , documentTemplatesIndexWithFilters
     , documentsIndex
     , documentsIndexWithFilters
     , isAppIndex
     , isDevOperations
     , isDevSubroute
+    , isDocumentTemplateEditorsIndex
+    , isDocumentTemplatesIndex
+    , isDocumentTemplatesSubroute
     , isDocumentsIndex
-    , isDocumentsSubroute
     , isKmEditorEditor
     , isKmEditorIndex
     , isKnowledgeModelsIndex
@@ -25,7 +35,6 @@ module Wizard.Routes exposing
     , isProjectsIndex
     , isSettingsRoute
     , isSettingsSubroute
-    , isTemplateIndex
     , isUsersIndex
     , kmEditorCreate
     , kmEditorEditor
@@ -70,10 +79,6 @@ module Wizard.Routes exposing
     , settingsLookAndFeel
     , settingsOrganization
     , settingsRegistry
-    , templatesDetail
-    , templatesImport
-    , templatesIndex
-    , templatesIndexWithFilters
     , usersCreate
     , usersEdit
     , usersEditCurrent
@@ -89,6 +94,8 @@ import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Uuid exposing (Uuid)
 import Wizard.Apps.Routes
 import Wizard.Dev.Routes
+import Wizard.DocumentTemplateEditors.Routes
+import Wizard.DocumentTemplates.Routes
 import Wizard.Documents.Routes
 import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
@@ -101,7 +108,6 @@ import Wizard.Projects.Routes
 import Wizard.Public.Routes
 import Wizard.Registry.Routes
 import Wizard.Settings.Routes
-import Wizard.Templates.Routes
 import Wizard.Users.Routes
 
 
@@ -110,6 +116,8 @@ type Route
     | DashboardRoute
     | DevRoute Wizard.Dev.Routes.Route
     | DocumentsRoute Wizard.Documents.Routes.Route
+    | DocumentTemplateEditorsRoute Wizard.DocumentTemplateEditors.Routes.Route
+    | DocumentTemplatesRoute Wizard.DocumentTemplates.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
     | LocalesRoute Wizard.Locales.Routes.Route
@@ -118,7 +126,6 @@ type Route
     | PublicRoute Wizard.Public.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
     | SettingsRoute Wizard.Settings.Routes.Route
-    | TemplatesRoute Wizard.Templates.Routes.Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute
@@ -247,13 +254,73 @@ isDocumentsIndex route =
             False
 
 
-isDocumentsSubroute : Route -> Bool
-isDocumentsSubroute route =
+
+-- Document Templates
+
+
+documentTemplatesDetail : String -> Route
+documentTemplatesDetail =
+    DocumentTemplatesRoute << Wizard.DocumentTemplates.Routes.DetailRoute
+
+
+documentTemplatesImport : Maybe String -> Route
+documentTemplatesImport =
+    DocumentTemplatesRoute << Wizard.DocumentTemplates.Routes.ImportRoute
+
+
+documentTemplatesIndex : Route
+documentTemplatesIndex =
+    DocumentTemplatesRoute (Wizard.DocumentTemplates.Routes.IndexRoute PaginationQueryString.empty)
+
+
+documentTemplatesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+documentTemplatesIndexWithFilters _ pagination =
+    DocumentTemplatesRoute (Wizard.DocumentTemplates.Routes.IndexRoute pagination)
+
+
+isDocumentTemplatesIndex : Route -> Bool
+isDocumentTemplatesIndex route =
     case route of
-        DocumentsRoute _ ->
+        DocumentTemplatesRoute (Wizard.DocumentTemplates.Routes.IndexRoute _) ->
             True
 
-        TemplatesRoute _ ->
+        _ ->
+            False
+
+
+isDocumentTemplatesSubroute : Route -> Bool
+isDocumentTemplatesSubroute route =
+    isDocumentTemplatesIndex route || isDocumentTemplateEditorsIndex route
+
+
+
+-- Document Template Editors
+
+
+documentTemplateEditorCreate : Maybe String -> Maybe Bool -> Route
+documentTemplateEditorCreate mbBasedOn mbEdit =
+    DocumentTemplateEditorsRoute <| Wizard.DocumentTemplateEditors.Routes.CreateRoute mbBasedOn mbEdit
+
+
+documentTemplateEditorDetail : String -> Route
+documentTemplateEditorDetail =
+    DocumentTemplateEditorsRoute << Wizard.DocumentTemplateEditors.Routes.EditorRoute
+
+
+documentTemplateEditorsIndex : Route
+documentTemplateEditorsIndex =
+    DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute PaginationQueryString.empty)
+
+
+documentTemplateEditorsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+documentTemplateEditorsIndexWithFilters _ pagination =
+    DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute pagination)
+
+
+isDocumentTemplateEditorsIndex : Route -> Bool
+isDocumentTemplateEditorsIndex route =
+    case route of
+        DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -554,7 +621,7 @@ isSettingsRoute route =
 
 isSettingsSubroute : Route -> Bool
 isSettingsSubroute route =
-    isSettingsRoute route || isLocalesRoute route
+    isSettingsRoute route || isUsersIndex route || isLocalesRoute route
 
 
 settingsAuthentication : Route
@@ -575,40 +642,6 @@ settingsOrganization =
 settingsRegistry : Route
 settingsRegistry =
     SettingsRoute Wizard.Settings.Routes.RegistryRoute
-
-
-
--- Templates
-
-
-templatesDetail : String -> Route
-templatesDetail =
-    TemplatesRoute << Wizard.Templates.Routes.DetailRoute
-
-
-templatesImport : Maybe String -> Route
-templatesImport =
-    TemplatesRoute << Wizard.Templates.Routes.ImportRoute
-
-
-templatesIndex : Route
-templatesIndex =
-    TemplatesRoute (Wizard.Templates.Routes.IndexRoute PaginationQueryString.empty)
-
-
-templatesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
-templatesIndexWithFilters _ pagination =
-    TemplatesRoute (Wizard.Templates.Routes.IndexRoute pagination)
-
-
-isTemplateIndex : Route -> Bool
-isTemplateIndex route =
-    case route of
-        TemplatesRoute (Wizard.Templates.Routes.IndexRoute _) ->
-            True
-
-        _ ->
-            False
 
 
 
