@@ -1,5 +1,6 @@
 module ActionResult exposing
     ( ActionResult(..)
+    , all
     , apply
     , combine
     , combine3
@@ -151,3 +152,36 @@ apply setData convertError result =
 
         Err err ->
             setData (convertError err)
+
+
+all : List (ActionResult a) -> ActionResult (List a)
+all results =
+    let
+        merge actionResult1 actionResult2 =
+            case ( actionResult1, actionResult2 ) of
+                ( Success a, Success b ) ->
+                    Success (b ++ [ a ])
+
+                ( Error a, _ ) ->
+                    Error a
+
+                ( _, Error b ) ->
+                    Error b
+
+                ( Loading, _ ) ->
+                    Loading
+
+                ( _, Loading ) ->
+                    Loading
+
+                ( Unset, _ ) ->
+                    Unset
+
+                ( _, Unset ) ->
+                    Unset
+    in
+    if List.isEmpty results then
+        Unset
+
+    else
+        List.foldl merge (Success []) results

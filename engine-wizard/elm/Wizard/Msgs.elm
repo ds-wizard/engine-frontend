@@ -11,6 +11,8 @@ import Wizard.Auth.Msgs
 import Wizard.Common.Menu.Msgs
 import Wizard.Dashboard.Msgs
 import Wizard.Dev.Msgs
+import Wizard.DocumentTemplateEditors.Msgs
+import Wizard.DocumentTemplates.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
@@ -20,7 +22,6 @@ import Wizard.Projects.Msgs
 import Wizard.Public.Msgs
 import Wizard.Registry.Msgs
 import Wizard.Settings.Msgs
-import Wizard.Templates.Msgs
 import Wizard.Users.Msgs
 
 
@@ -39,6 +40,8 @@ type Msg
     | AppsMsg Wizard.Apps.Msgs.Msg
     | DashboardMsg Wizard.Dashboard.Msgs.Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
+    | DocumentTemplateEditorsMsg Wizard.DocumentTemplateEditors.Msgs.Msg
+    | DocumentTemplatesMsg Wizard.DocumentTemplates.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
     | LocaleMsg Wizard.Locales.Msgs.Msg
@@ -47,7 +50,6 @@ type Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | RegistryMsg Wizard.Registry.Msgs.Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
-    | TemplatesMsg Wizard.Templates.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg
 
 

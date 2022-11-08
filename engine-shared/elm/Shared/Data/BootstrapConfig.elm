@@ -18,7 +18,6 @@ import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportC
 import Shared.Data.BootstrapConfig.QuestionnaireConfig as QuestionnaireConfig exposing (QuestionnaireConfig)
 import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig)
 import Shared.Data.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
-import Shared.Data.BootstrapConfig.TemplateConfig as TemplateConfig exposing (TemplateConfig)
 
 
 type alias BootstrapConfig =
@@ -30,7 +29,6 @@ type alias BootstrapConfig =
     , privacyAndSupport : PrivacyAndSupportConfig
     , questionnaire : QuestionnaireConfig
     , submission : SubmissionConfig
-    , template : TemplateConfig
     , feature : FeatureConfig
     , cloud : CloudConfig
     , owl : OwlConfig
@@ -48,7 +46,6 @@ default =
     , privacyAndSupport = PrivacyAndSupportConfig.default
     , questionnaire = QuestionnaireConfig.default
     , submission = SubmissionConfig.default
-    , template = TemplateConfig.default
     , feature = FeatureConfig.default
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
@@ -67,7 +64,6 @@ decoder =
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
         |> D.required "questionnaire" QuestionnaireConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
-        |> D.required "template" TemplateConfig.decoder
         |> D.required "feature" FeatureConfig.decoder
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder

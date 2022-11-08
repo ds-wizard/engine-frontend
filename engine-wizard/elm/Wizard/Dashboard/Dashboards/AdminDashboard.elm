@@ -12,13 +12,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
+import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Packages as PackagesApi
-import Shared.Api.Templates as TemplatesApi
 import Shared.Api.Usage as UsageApi
 import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig
+import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.Template exposing (Template)
 import Shared.Data.Usage exposing (Usage)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Setters exposing (setPackages, setTemplates, setUsage)
@@ -38,7 +38,7 @@ import Wizard.Dashboard.Widgets.WelcomeWidget as WelcomeWidget
 type alias Model =
     { usage : ActionResult Usage
     , packages : ActionResult (List Package)
-    , templates : ActionResult (List Template)
+    , templates : ActionResult (List DocumentTemplate)
     }
 
 
@@ -53,7 +53,7 @@ initialModel =
 type Msg
     = GetUsageComplete (Result ApiError Usage)
     | GetPackagesComplete (Result ApiError (Pagination Package))
-    | GetTemplatesComplete (Result ApiError (Pagination Template))
+    | GetTemplatesComplete (Result ApiError (Pagination DocumentTemplate))
 
 
 fetchData : AppState -> Cmd Msg
@@ -63,7 +63,7 @@ fetchData appState =
             PackagesApi.getOutdatedPackages appState GetPackagesComplete
 
         templatesCmd =
-            TemplatesApi.getOutdatedTemplates appState GetTemplatesComplete
+            DocumentTemplatesApi.getOutdatedTemplates appState GetTemplatesComplete
 
         usageCmd =
             UsageApi.getUsage appState GetUsageComplete

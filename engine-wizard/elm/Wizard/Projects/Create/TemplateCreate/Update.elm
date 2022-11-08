@@ -105,7 +105,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
                     , packageIds = Nothing
                     , packageIdsOp = Nothing
                     }
-            , getError = gettext "Unable to get Knowledge Models." appState.locale
+            , getError = gettext "Unable to get project templates." appState.locale
             , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing

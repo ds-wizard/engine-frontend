@@ -25,7 +25,6 @@ parsers appState wrapRoute =
     , map (wrapRoute <| RegistryRoute) (s moduleRoot </> s (lr "settings.registry" appState))
     , map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s (lr "settings.projects" appState))
     , map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))
-    , map (wrapRoute <| TemplateRoute) (s moduleRoot </> s (lr "settings.template" appState))
     , map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))
     , map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))
     , map (wrapRoute <| PlansRoute) (s moduleRoot </> s (lr "settings.plans" appState))
@@ -62,9 +61,6 @@ toUrl appState route =
 
         SubmissionRoute ->
             [ moduleRoot, lr "settings.submission" appState ]
-
-        TemplateRoute ->
-            [ moduleRoot, lr "settings.template" appState ]
 
         KnowledgeModelsRoute ->
             [ moduleRoot, lr "settings.knowledgeModel" appState ]

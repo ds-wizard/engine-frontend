@@ -1,6 +1,6 @@
 customElements.define('chart-radar', class extends HTMLElement {
     constructor() {
-        super();
+        super()
         this._chartData = null
     }
 

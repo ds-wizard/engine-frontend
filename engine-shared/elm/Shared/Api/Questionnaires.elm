@@ -15,6 +15,7 @@ module Shared.Api.Questionnaires exposing
     , getQuestionnaireEvent
     , getQuestionnaireEvents
     , getQuestionnaireMigration
+    , getQuestionnaireSuggestions
     , getQuestionnaires
     , getSummaryReport
     , postQuestionnaire
@@ -42,6 +43,7 @@ import Shared.Data.QuestionnaireContent as QuestionnaireContent exposing (Questi
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Shared.Data.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport as SummaryReport exposing (SummaryReport)
 import Shared.Utils exposing (boolToString)
@@ -82,6 +84,30 @@ getQuestionnaires filters qs =
             "/questionnaires" ++ queryString
     in
     jwtGet url (Pagination.decoder "questionnaires" Questionnaire.decoder)
+
+
+getQuestionnaireSuggestions : GetQuestionnairesFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination QuestionnaireSuggestion) msg -> Cmd msg
+getQuestionnaireSuggestions filters qs =
+    let
+        extraParams =
+            PaginationQueryString.filterParams <|
+                [ ( "isTemplate", Maybe.map boolToString filters.isTemplate )
+                , ( "isMigrating", Maybe.map boolToString filters.isMigrating )
+                , ( "userUuids", filters.userUuids )
+                , ( "userUuidsOp", Maybe.map FilterOperator.toString filters.userUuidsOp )
+                , ( "projectTags", filters.projectTags )
+                , ( "projectTagsOp", Maybe.map FilterOperator.toString filters.projectTagsOp )
+                , ( "packageIds", filters.packageIds )
+                , ( "packageIdsOp", Maybe.map FilterOperator.toString filters.packageIdsOp )
+                ]
+
+        queryString =
+            PaginationQueryString.toApiUrlWith extraParams qs
+
+        url =
+            "/questionnaires" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "questionnaires" QuestionnaireSuggestion.decoder)
 
 
 getQuestionnaire : Uuid -> AbstractAppState a -> ToMsg QuestionnaireDetail msg -> Cmd msg

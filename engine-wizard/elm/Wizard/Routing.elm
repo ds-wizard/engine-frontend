@@ -13,6 +13,8 @@ import Url.Parser exposing (Parser, map, oneOf, s)
 import Wizard.Apps.Routing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.Routing
+import Wizard.DocumentTemplateEditors.Routing
+import Wizard.DocumentTemplates.Routing
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
@@ -23,7 +25,6 @@ import Wizard.Public.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
-import Wizard.Templates.Routing
 import Wizard.Users.Routing
 
 
@@ -34,6 +35,8 @@ matchers appState =
             Wizard.Dev.Routing.parsers appState Routes.DevRoute
                 ++ Wizard.Apps.Routing.parsers Routes.AppsRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
+                ++ Wizard.DocumentTemplateEditors.Routing.parsers appState Routes.DocumentTemplateEditorsRoute
+                ++ Wizard.DocumentTemplates.Routing.parsers appState Routes.DocumentTemplatesRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
                 ++ Wizard.Locales.Routing.parsers appState Routes.LocalesRoute
@@ -42,7 +45,6 @@ matchers appState =
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
-                ++ Wizard.Templates.Routing.parsers appState Routes.TemplatesRoute
                 ++ Wizard.Users.Routing.parsers Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
@@ -74,6 +76,12 @@ isAllowed route appState =
         Routes.DocumentsRoute documentsRoute ->
             Wizard.Documents.Routing.isAllowed documentsRoute appState
 
+        Routes.DocumentTemplateEditorsRoute _ ->
+            Wizard.DocumentTemplateEditors.Routing.isAllowed appState
+
+        Routes.DocumentTemplatesRoute templatesRoute ->
+            Wizard.DocumentTemplates.Routing.isAllowed templatesRoute appState
+
         Routes.KMEditorRoute kmEditorRoute ->
             Wizard.KMEditor.Routing.isAllowed kmEditorRoute appState
 
@@ -97,9 +105,6 @@ isAllowed route appState =
 
         Routes.SettingsRoute settingsRoute ->
             Wizard.Settings.Routing.isAllowed settingsRoute appState
-
-        Routes.TemplatesRoute templatesRoute ->
-            Wizard.Templates.Routing.isAllowed templatesRoute appState
 
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute appState
@@ -128,6 +133,12 @@ toUrl appState route =
                 Routes.DocumentsRoute documentsRoute ->
                     Wizard.Documents.Routing.toUrl appState documentsRoute
 
+                Routes.DocumentTemplateEditorsRoute templatesRoute ->
+                    Wizard.DocumentTemplateEditors.Routing.toUrl appState templatesRoute
+
+                Routes.DocumentTemplatesRoute templatesRoute ->
+                    Wizard.DocumentTemplates.Routing.toUrl appState templatesRoute
+
                 Routes.KMEditorRoute kmEditorRoute ->
                     Wizard.KMEditor.Routing.toUrl appState kmEditorRoute
 
@@ -151,9 +162,6 @@ toUrl appState route =
 
                 Routes.SettingsRoute settingsRoute ->
                     Wizard.Settings.Routing.toUrl appState settingsRoute
-
-                Routes.TemplatesRoute templatesRoute ->
-                    Wizard.Templates.Routing.toUrl appState templatesRoute
 
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute

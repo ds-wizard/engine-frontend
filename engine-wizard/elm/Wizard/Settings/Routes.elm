@@ -13,7 +13,6 @@ type Route
     | RegistryRoute
     | ProjectsRoute
     | SubmissionRoute
-    | TemplateRoute
     | KnowledgeModelsRoute
     | UsageRoute
     | PlansRoute

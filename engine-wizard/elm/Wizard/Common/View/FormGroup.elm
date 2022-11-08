@@ -1,5 +1,6 @@
 module Wizard.Common.View.FormGroup exposing
-    ( codeView
+    ( VersionFormGroupConfig
+    , codeView
     , formGroupCustom
     , formatRadioGroup
     , getErrors
@@ -23,6 +24,7 @@ module Wizard.Common.View.FormGroup exposing
     , textarea
     , textareaAttrs
     , toggle
+    , version
     , viewList
     )
 
@@ -34,16 +36,18 @@ import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
-import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
+import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa)
 import Shared.Markdown as Markdown
 import Uuid
+import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.View.Flash as Flash
+import Wizard.Common.View.FormExtra as FormExtra
 
 
 optionalWrapper : AppState -> Html Form.Msg -> Html Form.Msg
@@ -174,12 +178,12 @@ richRadioGroup appState options =
     formGroup radioInput [] appState
 
 
-formatRadioGroup : AppState -> List TemplateFormat -> Form FormError o -> String -> String -> Html Form.Msg
+formatRadioGroup : AppState -> List DocumentTemplateFormatSimple -> Form FormError o -> String -> String -> Html Form.Msg
 formatRadioGroup appState options =
     let
         radioInput state _ =
             let
-                buildOption : TemplateFormat -> Html Form.Msg
+                buildOption : DocumentTemplateFormatSimple -> Html Form.Msg
                 buildOption format =
                     let
                         isDisabled =
@@ -298,9 +302,16 @@ list appState itemView form fieldName labelText =
 
         ( error, _ ) =
             getErrors appState field labelText
+
+        listLabel =
+            if String.isEmpty labelText then
+                emptyNode
+
+            else
+                label [] [ text labelText ]
     in
     div [ class "form-group" ]
-        [ label [] [ text labelText ]
+        [ listLabel
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
         , button
@@ -532,7 +543,7 @@ formGroupCustom customInput appState form fieldName labelText =
 
 {-| Helper for creating plain group with text value.
 -}
-textView : String -> String -> String -> Html.Html msg
+textView : String -> String -> String -> Html msg
 textView name value =
     plainGroup <|
         p [ class "form-value", dataCy ("form-group_text_" ++ name) ] [ text value ]
@@ -540,7 +551,7 @@ textView name value =
 
 {-| Helper for creating plain group with code block.
 -}
-codeView : String -> String -> Html.Html msg
+codeView : String -> String -> Html msg
 codeView value =
     plainGroup <|
         code [ class "form-value" ] [ text value ]
@@ -549,7 +560,7 @@ codeView value =
 {-| Plain group is same Html as formGroup but without any input fields. It only
 shows label with read only Html value.
 -}
-plainGroup : Html.Html msg -> String -> Html.Html msg
+plainGroup : Html.Html msg -> String -> Html msg
 plainGroup valueHtml labelText =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text labelText ]
@@ -568,3 +579,77 @@ getErrors appState field labelText =
 
         Nothing ->
             ( emptyNode, "" )
+
+
+type alias VersionFormGroupConfig msg =
+    { label : String
+    , majorField : String
+    , minorField : String
+    , patchField : String
+    , currentVersion : Maybe Version
+    , wrapFormMsg : Form.Msg -> msg
+    , setVersionMsg : Maybe (Version -> msg)
+    }
+
+
+version : AppState -> VersionFormGroupConfig msg -> Form FormError o -> Html msg
+version appState cfg form =
+    let
+        majorField =
+            Form.getFieldAsString cfg.majorField form
+
+        minorField =
+            Form.getFieldAsString cfg.minorField form
+
+        patchField =
+            Form.getFieldAsString cfg.patchField form
+
+        errorClass =
+            case ( majorField.liveError, minorField.liveError, patchField.liveError ) of
+                ( Nothing, Nothing, Nothing ) ->
+                    ""
+
+                _ ->
+                    " is-invalid"
+
+        suggestions =
+            case cfg.setVersionMsg of
+                Just setVersionMsg ->
+                    let
+                        nextMajor =
+                            cfg.currentVersion
+                                |> Maybe.map Version.nextMajor
+                                |> Maybe.withDefault (Version.create 1 0 0)
+
+                        nextMinor =
+                            cfg.currentVersion
+                                |> Maybe.map Version.nextMinor
+                                |> Maybe.withDefault (Version.create 0 1 0)
+
+                        nextPatch =
+                            cfg.currentVersion
+                                |> Maybe.map Version.nextPatch
+                                |> Maybe.withDefault (Version.create 0 0 1)
+                    in
+                    p [ class "form-text text-muted version-suggestions" ]
+                        [ text (gettext "Suggestions: " appState.locale)
+                        , a [ onClick <| setVersionMsg nextMajor ] [ text <| Version.toString nextMajor ]
+                        , a [ onClick <| setVersionMsg nextMinor ] [ text <| Version.toString nextMinor ]
+                        , a [ onClick <| setVersionMsg nextPatch ] [ text <| Version.toString nextPatch ]
+                        ]
+
+                Nothing ->
+                    emptyNode
+    in
+    div [ class "form-group" ]
+        [ label [ class "control-label" ] [ text cfg.label ]
+        , div [ class "version-inputs" ]
+            [ Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text majorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-major", id "version-major" ]
+            , text "."
+            , Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text minorField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-minor", id "version-minor" ]
+            , text "."
+            , Html.map cfg.wrapFormMsg <| Input.baseInput "number" Field.String Form.Text patchField [ class <| "form-control" ++ errorClass, Html.Attributes.min "0", name "version-patch", id "version-patch" ]
+            ]
+        , suggestions
+        , FormExtra.text <| gettext "The version number is in format X.Y.Z. Increasing number Z indicates only some fixes, number Y minor changes, and number X indicates a major change." appState.locale
+        ]

@@ -56,6 +56,12 @@
             }
         }
 
+        &__SimpleItem {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
         &__ComplexItem {
             display: flex;
             padding: 0.2rem 0;

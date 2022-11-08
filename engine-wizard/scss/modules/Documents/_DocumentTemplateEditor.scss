@@ -1,0 +1,127 @@
+@import '../../variables';
+@import '../../mixins';
+
+$nav-row-height: 32px;
+$nav-row-padding: 16px;
+$header-height: 2 * ($nav-row-height + $nav-row-padding) + 1;
+$content-height: calc(100vh - #{$header-height});
+
+.DocumentTemplateEditor {
+    .pane-container {
+        height: $content-height !important;
+
+        .pane-first-view {
+            overflow: auto !important;
+        }
+
+        textarea {
+            width: 100%;
+            border: 0;
+            height: 100%;
+            font-family: $font-family-monospace;
+            outline: none;
+        }
+    }
+
+    &__MetadataEditor {
+        display: flex;
+        height: $content-height;
+
+        &__Navigation {
+            flex: 0 0 20rem;
+            height: 100%;
+            overflow: auto;
+            padding: 1rem
+        }
+
+        &__Content {
+            flex-grow: 1;
+            height: 100%;
+            overflow: auto;
+            padding: 1rem;
+
+            & > div {
+                max-width: 50rem;
+            }
+        }
+    }
+
+    &__Asset {
+        background: $gray-300;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+
+        &--Image {
+            padding: 1rem;
+
+            img {
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+                max-height: 100%;
+                max-width: 100%;
+                background: $white;
+            }
+        }
+
+        &--Pdf {
+            width: 100%;
+            height: 100%;
+
+            iframe {
+                width: 100%;
+                height: 100%;
+            }
+        }
+
+        &--Other {
+            padding: 1rem;
+
+            .icon {
+                font-size: 4rem;
+                margin-right: $spacer-3;
+            }
+
+            .filename {
+                font-size: 1.25rem;
+                margin-bottom: $spacer-2;
+            }
+        }
+    }
+
+    &__EmptyEditor {
+        width: 100%;
+        height: 100%;
+        color: $gray-600;
+        background-color: $gray-300;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+
+        .btn {
+            min-width: 130px;
+        }
+
+    }
+
+    &__PreviewEditor {
+        &__Toolbar {
+            padding: 8px 16px;
+            border-bottom: 1px solid $gray-400;
+
+            .TypeHintInput {
+                width: 250px;
+                margin-left: $spacer-1;
+                margin-right: $spacer-3;
+            }
+
+            .form-select {
+                width: auto;
+                margin-left: $spacer-1;
+                margin-right: $spacer-3;
+            }
+        }
+    }
+}

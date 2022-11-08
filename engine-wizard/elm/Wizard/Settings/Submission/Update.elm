@@ -4,7 +4,7 @@ module Wizard.Settings.Submission.Update exposing
     )
 
 import Gettext exposing (gettext)
-import Shared.Api.Templates as TemplatesApi
+import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Data.EditableConfig as EditableConfig
 import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Shared.Setters exposing (setTemplates)
@@ -19,7 +19,7 @@ import Wizard.Settings.Submission.Msgs exposing (Msg(..))
 fetchData : AppState -> Cmd Msg
 fetchData appState =
     Cmd.batch
-        [ TemplatesApi.getTemplatesAll appState GetTemplatesCompleted
+        [ DocumentTemplatesApi.getTemplatesAll appState GetTemplatesCompleted
         , Cmd.map GenericMsg <| GenericUpdate.fetchData appState
         ]
 

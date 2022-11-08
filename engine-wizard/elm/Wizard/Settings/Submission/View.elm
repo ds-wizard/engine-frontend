@@ -7,8 +7,8 @@ import Html exposing (Html, a, button, div, label, p, strong, text)
 import Html.Attributes exposing (class, placeholder)
 import Html.Events exposing (onClick)
 import List.Extra as List
+import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
-import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
@@ -30,12 +30,12 @@ view appState model =
     Page.actionResultView appState (viewConfig appState model) model.templates
 
 
-viewConfig : AppState -> Model -> List TemplateSuggestion -> Html Msg
+viewConfig : AppState -> Model -> List DocumentTemplateSuggestion -> Html Msg
 viewConfig appState model templates =
     GenericView.view (viewProps templates) appState model.genericModel
 
 
-viewProps : List TemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig Msg
+viewProps : List DocumentTemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig Msg
 viewProps templates =
     { locTitle = gettext "Document Submission"
     , locSave = gettext "Save"
@@ -44,7 +44,7 @@ viewProps templates =
     }
 
 
-formView : List TemplateSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Msg
+formView : List DocumentTemplateSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Msg
 formView templates appState form =
     let
         enabled =
@@ -65,7 +65,7 @@ formView templates appState form =
             ]
 
 
-serviceFormView : AppState -> List TemplateSuggestion -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+serviceFormView : AppState -> List DocumentTemplateSuggestion -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 serviceFormView appState templates form i =
     let
         field name =
@@ -118,7 +118,7 @@ serviceFormView appState templates form i =
         ]
 
 
-supportedFormatFormView : AppState -> List TemplateSuggestion -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+supportedFormatFormView : AppState -> List DocumentTemplateSuggestion -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 supportedFormatFormView appState templates prefix form index =
     let
         field name =
@@ -143,7 +143,7 @@ supportedFormatFormView appState templates prefix form index =
             ( "", "--" )
 
         templateOptions =
-            TemplateSuggestion.createOptions templates
+            DocumentTemplateSuggestion.createOptions templates
 
         templateToTemplateVersionOptions template =
             templates

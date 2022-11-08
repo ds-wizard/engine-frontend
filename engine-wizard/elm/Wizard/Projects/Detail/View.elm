@@ -342,7 +342,7 @@ viewProjectContent appState route model qm =
                         { questionnaire = QuestionnaireDescriptor.fromQuestionnaireDetail qm.questionnaire
                         , package = qm.questionnaire.package
                         , packageVersions = qm.questionnaire.packageVersions
-                        , templateState = qm.questionnaire.templateState
+                        , templateState = qm.questionnaire.documentTemplateState
                         , tags = KnowledgeModel.getTags qm.questionnaire.knowledgeModel
                         }
                         model.settingsModel
