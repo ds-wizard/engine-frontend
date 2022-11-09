@@ -1,6 +1,7 @@
 module Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing
     ( AddItemData
     , ImporterEvent(..)
+    , ReplyIntegrationData
     , ReplyListData
     , ReplyStringData
     , decoder
@@ -13,6 +14,7 @@ import Json.Decode.Pipeline as D
 type ImporterEvent
     = ReplyString ReplyStringData
     | ReplyList ReplyListData
+    | ReplyIntegration ReplyIntegrationData
     | AddItem AddItemData
 
 
@@ -30,6 +32,9 @@ decoderByType eventType =
 
         "ReplyList" ->
             D.map ReplyList decodeReplyListData
+
+        "ReplyIntegration" ->
+            D.map ReplyIntegration decodeReplyIntegrationData
 
         "AddItem" ->
             D.map AddItem decodeAddItemData
@@ -62,6 +67,21 @@ decodeReplyListData =
     D.succeed ReplyListData
         |> D.required "path" D.string
         |> D.required "value" (D.list D.string)
+
+
+type alias ReplyIntegrationData =
+    { path : String
+    , value : String
+    , id : String
+    }
+
+
+decodeReplyIntegrationData : Decoder ReplyIntegrationData
+decodeReplyIntegrationData =
+    D.succeed ReplyIntegrationData
+        |> D.required "path" D.string
+        |> D.required "value" D.string
+        |> D.required "id" D.string
 
 
 type alias AddItemData =

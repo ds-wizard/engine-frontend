@@ -16,6 +16,7 @@ import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (flip)
 import String.Format as String
@@ -235,17 +236,17 @@ viewReply appState questionnaire question data =
         replyView ( icon, replyText ) =
             li []
                 [ span [ class "fa-li" ] [ icon ]
-                , span [ class "fa-li-content" ] [ text replyText ]
+                , span [ class "fa-li-content" ] [ replyText ]
                 ]
     in
     case data.value of
         ReplyValue.StringReply reply ->
-            eventView [ ( fa "far fa-edit", reply ) ]
+            eventView [ ( fa "far fa-edit", text reply ) ]
 
         ReplyValue.AnswerReply answerUuid ->
             eventView
                 [ ( faSet "km.answer" appState
-                  , Maybe.unwrap "" .label (KnowledgeModel.getAnswer answerUuid questionnaire.knowledgeModel)
+                  , text (Maybe.unwrap "" .label (KnowledgeModel.getAnswer answerUuid questionnaire.knowledgeModel))
                   )
                 ]
 
@@ -254,17 +255,17 @@ viewReply appState questionnaire question data =
                 choices =
                     KnowledgeModel.getQuestionChoices (Question.getUuid question) questionnaire.knowledgeModel
                         |> List.filter (.uuid >> flip List.member choiceUuids)
-                        |> List.map (\choice -> ( faSet "km.choice" appState, choice.label ))
+                        |> List.map (\choice -> ( faSet "km.choice" appState, text choice.label ))
             in
             eventView choices
 
         ReplyValue.ItemListReply _ ->
-            eventView [ ( fa "fas fa-plus", gettext "Added item" appState.locale ) ]
+            eventView [ ( fa "fas fa-plus", text (gettext "Added item" appState.locale) ) ]
 
         ReplyValue.IntegrationReply replyType ->
             case replyType of
                 IntegrationReplyType.PlainType reply ->
-                    eventView [ ( fa "far fa-edit", reply ) ]
+                    eventView [ ( fa "far fa-edit", text reply ) ]
 
                 IntegrationReplyType.IntegrationType _ reply ->
-                    eventView [ ( fa "fas fa-link", reply ) ]
+                    eventView [ ( fa "fas fa-link", Markdown.toHtml [] reply ) ]
