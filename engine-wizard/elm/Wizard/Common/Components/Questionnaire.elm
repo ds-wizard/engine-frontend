@@ -2373,7 +2373,11 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 , div [] buttons
                 ]
     in
-    div [ class "item mb-3", classList [ ( "item-collapsed", isCollapsed ) ] ]
+    div
+        [ class "item mb-3"
+        , classList [ ( "item-collapsed", isCollapsed ) ]
+        , attribute "data-path" (pathToString itemPath)
+        ]
         [ div [ class "card bg-light" ]
             [ div [ class "card-body" ]
                 (itemHeader :: itemQuestions)

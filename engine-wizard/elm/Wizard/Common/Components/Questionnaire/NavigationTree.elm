@@ -239,9 +239,6 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
             else
                 ul [] (List.map (viewQuestion appState cfg model (currentPath ++ [ itemUuid ])) itemTemplateQuestions)
 
-        firstQuestionUuid =
-            Maybe.unwrap "" Question.getUuid (List.head itemTemplateQuestions)
-
         mbItemTitle =
             QuestionnaireDetail.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
 
@@ -261,7 +258,7 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
     in
     li []
         [ itemCaret
-        , a [ onClick (cfg.scrollToPath (pathToString (currentPath ++ [ itemUuid, firstQuestionUuid ]))) ]
+        , a [ onClick (cfg.scrollToPath (pathToString (currentPath ++ [ itemUuid ]))) ]
             [ faSet "km.itemTemplate" appState
             , itemTitle
             ]
