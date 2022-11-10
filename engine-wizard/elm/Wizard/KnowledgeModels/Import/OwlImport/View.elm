@@ -53,7 +53,7 @@ view appState model =
                 Routes.knowledgeModelsIndex
                 (ActionButton.ButtonConfig (gettext "Upload" appState.locale) model.importing (FormMsg <| Form.Submit) False)
     in
-    div [ class "KnowledgeModels__Import__FileImport", id dropzoneId, dataCy "km_import_file" ]
+    div [ id dropzoneId, dataCy "import_file" ]
         [ FormResult.view appState model.importing
         , formView
         , fileGroup
@@ -74,7 +74,7 @@ fileView appState model fileName =
     in
     div [ class "file-view" ]
         [ div [ class "file" ]
-            [ faSet "kmImport.file" appState
+            [ faSet "import.file" appState
             , div [ class "filename" ]
                 [ text fileName
                 , a [ disabled cancelDisabled, class "ms-1 text-danger", onClick CancelFile ]

@@ -65,7 +65,7 @@ viewRegistryText appState =
             p []
                 (String.formatHtml
                     (gettext "You can find document templates in %s." appState.locale)
-                    [ a [ href url, target "_blank" ] [ text (gettext "DSW Registry" appState.locale) ]
+                    [ a [ href (url ++ "/templates"), target "_blank" ] [ text (gettext "DSW Registry" appState.locale) ]
                     ]
                 )
 

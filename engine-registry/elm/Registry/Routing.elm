@@ -15,6 +15,8 @@ type Route
     | SignupConfirmation String String
     | Templates
     | TemplateDetail String
+    | Locales
+    | LocaleDetail String
     | NotFound
 
 
@@ -31,6 +33,8 @@ routeParser =
         , map SignupConfirmation (s "signup" </> string </> string)
         , map Templates (s "templates")
         , map TemplateDetail (s "templates" </> string)
+        , map Locales (s "locales")
+        , map LocaleDetail (s "locales" </> string)
         ]
 
 
@@ -71,6 +75,12 @@ toString route =
 
         TemplateDetail tepmlateId ->
             "/templates/" ++ tepmlateId
+
+        Locales ->
+            "/locales"
+
+        LocaleDetail localeId ->
+            "/locales/" ++ localeId
 
         _ ->
             "/"

@@ -13,4 +13,5 @@ docs
 config.js
 
 # locale
-locale
+!*/locale
+/locale

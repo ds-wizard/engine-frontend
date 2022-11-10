@@ -176,13 +176,25 @@ menuItems appState =
               }
             ]
         }
-    , MenuItem
-        { title = gettext "Settings" appState.locale
+    , MenuGroup
+        { title = gettext "System" appState.locale
         , icon = faSetFw "menu.settings" appState
-        , id = "settings"
+        , id = "system"
         , route = Routes.settingsDefault
-        , isActive = Routes.isSettingsRoute
+        , isActive = Routes.isSettingsSubroute
         , isVisible = Feature.settings
+        , items =
+            [ { title = gettext "Settings" appState.locale
+              , id = "system-settings"
+              , route = Routes.settingsDefault
+              , isActive = Routes.isSettingsRoute
+              }
+            , { title = gettext "Locales" appState.locale
+              , id = "system-locales"
+              , route = Routes.localesIndex
+              , isActive = Routes.isLocalesRoute
+              }
+            ]
         }
     ]
 
@@ -409,7 +421,7 @@ viewProfileMenu model =
                 emptyNode
 
         langaugeButton =
-            if List.isEmpty model.appState.config.locales then
+            if List.length model.appState.config.locales < 2 then
                 emptyNode
 
             else
@@ -604,7 +616,7 @@ viewLanguagesModal appState visible =
         viewLocale locale =
             let
                 defaultText =
-                    if locale.fallback then
+                    if locale.defaultLocale then
                         " (" ++ gettext "default" appState.locale ++ ")"
 
                     else

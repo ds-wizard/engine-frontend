@@ -51,6 +51,8 @@
     "bootstrap": "^5.2.2",
     "chart.js": "^3.9.1",
     "flatpickr": "^4.6.13",
-    "po2json": "^1.0.0-beta"
+    "po2json": "^1.0.0-beta",
+    "stream-browserify": "^3.0.0",
+    "util": "^0.12.5"
   }
 }

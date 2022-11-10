@@ -3,6 +3,7 @@ module Shared.Setters exposing
     , setBookReference
     , setDropdownState
     , setKnowledgeModel
+    , setLocale
     , setMigration
     , setPackage
     , setPackages
@@ -36,6 +37,11 @@ setDropdownState value record =
 setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
 setKnowledgeModel value record =
     { record | knowledgeModel = value }
+
+
+setLocale : a -> { b | locale : a } -> { b | locale : a }
+setLocale value record =
+    { record | locale = value }
 
 
 setMigration : a -> { b | migration : a } -> { b | migration : a }

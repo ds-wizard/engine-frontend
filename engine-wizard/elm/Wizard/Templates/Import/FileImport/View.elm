@@ -27,7 +27,7 @@ view appState model =
                 Nothing ->
                     dropzone appState model
     in
-    div [ class "KnowledgeModels__Import__FileImport", id dropzoneId, dataCy "template_import_file" ]
+    div [ id dropzoneId, dataCy "template_import_file" ]
         [ FormResult.view appState model.importing
         , content
         ]
@@ -46,7 +46,7 @@ fileView appState model fileName =
     in
     div [ class "file-view rounded-3" ]
         [ div [ class "file" ]
-            [ faSet "kmImport.file" appState
+            [ faSet "import.file" appState
             , div [ class "filename" ]
                 [ text fileName ]
             ]

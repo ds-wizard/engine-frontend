@@ -17,12 +17,14 @@ module Wizard.Routes exposing
     , isKmEditorIndex
     , isKnowledgeModelsIndex
     , isKnowledgeModelsSubroute
+    , isLocalesRoute
     , isPersistentCommandsIndex
     , isProjectImportersIndex
     , isProjectSubroute
     , isProjectsDetail
     , isProjectsIndex
     , isSettingsRoute
+    , isSettingsSubroute
     , isTemplateIndex
     , isUsersIndex
     , kmEditorCreate
@@ -39,6 +41,10 @@ module Wizard.Routes exposing
     , knowledgeModelsIndex
     , knowledgeModelsIndexWithFilters
     , knowledgeModelsPreview
+    , localesCreate
+    , localesDetail
+    , localesImport
+    , localesIndex
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
@@ -87,6 +93,7 @@ import Wizard.Documents.Routes
 import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
+import Wizard.Locales.Routes
 import Wizard.ProjectImporters.Routes
 import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Detail.ProjectDetailRoute
@@ -105,6 +112,7 @@ type Route
     | DocumentsRoute Wizard.Documents.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
+    | LocalesRoute Wizard.Locales.Routes.Route
     | ProjectsRoute Wizard.Projects.Routes.Route
     | ProjectImportersRoute Wizard.ProjectImporters.Routes.Route
     | PublicRoute Wizard.Public.Routes.Route
@@ -544,6 +552,11 @@ isSettingsRoute route =
             False
 
 
+isSettingsSubroute : Route -> Bool
+isSettingsSubroute route =
+    isSettingsRoute route || isLocalesRoute route
+
+
 settingsAuthentication : Route
 settingsAuthentication =
     SettingsRoute Wizard.Settings.Routes.AuthenticationRoute
@@ -638,3 +651,37 @@ isUsersIndex route =
 
         _ ->
             False
+
+
+
+-- Locales
+
+
+isLocalesRoute : Route -> Bool
+isLocalesRoute route =
+    case route of
+        LocalesRoute _ ->
+            True
+
+        _ ->
+            False
+
+
+localesCreate : Route
+localesCreate =
+    LocalesRoute <| Wizard.Locales.Routes.CreateRoute
+
+
+localesImport : Maybe String -> Route
+localesImport =
+    LocalesRoute << Wizard.Locales.Routes.ImportRoute
+
+
+localesIndex : Route
+localesIndex =
+    LocalesRoute (Wizard.Locales.Routes.IndexRoute PaginationQueryString.empty)
+
+
+localesDetail : String -> Route
+localesDetail =
+    LocalesRoute << Wizard.Locales.Routes.DetailRoute
