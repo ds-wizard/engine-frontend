@@ -6,6 +6,7 @@ port module Wizard.Ports exposing
     , clearUnloadMessage
     , consoleError
     , createDropzone
+    , createLocaleDropzone
     , downloadFile
     , fileContentRead
     , fileSelected
@@ -14,6 +15,7 @@ port module Wizard.Ports exposing
     , localStorageData
     , localStorageGet
     , localStorageSet
+    , localeFileSelected
     , openImporter
     , openIntegrationWidget
     , refresh
@@ -53,10 +55,16 @@ port clearSessionAndReload : () -> Cmd msg
 port fileSelected : String -> Cmd msg
 
 
+port localeFileSelected : String -> Cmd msg
+
+
 port fileContentRead : (E.Value -> msg) -> Sub msg
 
 
 port createDropzone : String -> Cmd msg
+
+
+port createLocaleDropzone : String -> Cmd msg
 
 
 

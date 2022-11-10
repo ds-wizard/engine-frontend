@@ -26,8 +26,8 @@ parsers appState wrapRoute =
 
 
 detail : (Route -> a) -> String -> a
-detail wrapRoute packageId =
-    DetailRoute packageId |> wrapRoute
+detail wrapRoute templateId =
+    DetailRoute templateId |> wrapRoute
 
 
 toUrl : AppState -> Route -> List String

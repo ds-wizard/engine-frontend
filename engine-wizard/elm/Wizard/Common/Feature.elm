@@ -21,6 +21,12 @@ module Wizard.Common.Feature exposing
     , knowledgeModelsImport
     , knowledgeModelsPreview
     , knowledgeModelsView
+    , localeCreate
+    , localeDelete
+    , localeEdit
+    , localeExport
+    , localeImport
+    , localeView
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -387,6 +393,40 @@ usersCreate =
 userEdit : AppState -> String -> Bool
 userEdit appState uuid =
     (uuid == "current") || adminOr Perm.userManagement appState
+
+
+
+-- Locale
+
+
+localeView : AppState -> Bool
+localeView =
+    adminOr Perm.locale
+
+
+localeCreate : AppState -> Bool
+localeCreate =
+    adminOr Perm.locale
+
+
+localeImport : AppState -> Bool
+localeImport =
+    adminOr Perm.locale
+
+
+localeEdit : AppState -> Bool
+localeEdit =
+    adminOr Perm.locale
+
+
+localeExport : AppState -> Bool
+localeExport =
+    adminOr Perm.locale
+
+
+localeDelete : AppState -> Bool
+localeDelete =
+    adminOr Perm.locale
 
 
 

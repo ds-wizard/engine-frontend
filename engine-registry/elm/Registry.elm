@@ -15,6 +15,8 @@ import Registry.Pages.ForgottenToken as ForgottenToken
 import Registry.Pages.ForgottenTokenConfirmation as ForgottenTokenConfirmation
 import Registry.Pages.Index as Index
 import Registry.Pages.KMDetail as KMDetail
+import Registry.Pages.Locales as Locales
+import Registry.Pages.LocalesDetail as LocaleDetail
 import Registry.Pages.Login as Login
 import Registry.Pages.Organization as Organization
 import Registry.Pages.Signup as Signup
@@ -59,6 +61,8 @@ type PageModel
     | SignupConfirmationModel SignupConfirmation.Model
     | TemplatesModel Templates.Model
     | TemplateDetailModel TemplateDetail.Model
+    | LocalesModel Locales.Model
+    | LocaleDetailModel LocaleDetail.Model
     | NotFoundModel
 
 
@@ -76,6 +80,8 @@ type Msg
     | SignupConfirmationMsg SignupConfirmation.Msg
     | TemplatesMsg Templates.Msg
     | TemplateDetailMsg TemplateDetail.Msg
+    | LocalesMsg Locales.Msg
+    | LocaleDetailMsg LocaleDetail.Msg
 
 
 init : D.Value -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -203,6 +209,20 @@ update msg model =
             , cmd
             )
 
+        ( LocalesMsg localesMsg, LocalesModel localesModel ) ->
+            ( { model | pageModel = LocalesModel <| Locales.update localesMsg model.appState localesModel }
+            , Cmd.none
+            )
+
+        ( LocaleDetailMsg localeDetailMsg, LocaleDetailModel localeDetailModel ) ->
+            let
+                ( newLocaleModel, cmd ) =
+                    LocaleDetail.update localeDetailMsg model.appState localeDetailModel
+            in
+            ( { model | pageModel = LocaleDetailModel newLocaleModel }
+            , cmd
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -300,6 +320,24 @@ initChildModel model =
             , Cmd.map TemplateDetailMsg templateDetailCmd
             )
 
+        Routing.Locales ->
+            let
+                ( localesModel, localesCmd ) =
+                    Locales.init model.appState
+            in
+            ( { model | pageModel = LocalesModel localesModel }
+            , Cmd.map LocalesMsg localesCmd
+            )
+
+        Routing.LocaleDetail localeId ->
+            let
+                ( localeDetailModel, localeDetailCmd ) =
+                    LocaleDetail.init model.appState localeId
+            in
+            ( { model | pageModel = LocaleDetailModel localeDetailModel }
+            , Cmd.map LocaleDetailMsg localeDetailCmd
+            )
+
         Routing.NotFound ->
             ( { model | pageModel = NotFoundModel }
             , Cmd.none
@@ -359,6 +397,12 @@ view model =
                     TemplateDetailModel templateDetailModel ->
                         Html.map TemplateDetailMsg <| TemplateDetail.view model.appState templateDetailModel
 
+                    LocalesModel localesModel ->
+                        Html.map LocalesMsg <| Locales.view localesModel
+
+                    LocaleDetailModel localeDetailModel ->
+                        Html.map LocaleDetailMsg <| LocaleDetail.view model.appState localeDetailModel
+
                     NotFoundModel ->
                         Page.illustratedMessage
                             { image = Undraw.pageNotFound
@@ -408,6 +452,13 @@ header model =
                     ]
                     [ a [ href <| Routing.toString Routing.Templates, class "nav-link" ]
                         [ text (gettext "Document Templates" appState.locale) ]
+                    ]
+                , li
+                    [ class "nav-item"
+                    , classList [ ( "active", model.route == Routing.Locales ) ]
+                    ]
+                    [ a [ href <| Routing.toString Routing.Locales, class "nav-link" ]
+                        [ text (gettext "Locales" appState.locale) ]
                     ]
                 ]
             , navigation

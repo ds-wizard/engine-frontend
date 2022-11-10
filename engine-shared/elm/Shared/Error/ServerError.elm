@@ -114,6 +114,9 @@ messageToReadable appState message =
         "error.validation.tml_id_uniqueness" ->
             Just <| gettext "Template already exists." appState.locale
 
+        "error.validation.lcl_id_uniqueness" ->
+            Just <| gettext "Locale already exists." appState.locale
+
         "error.validation.user_email_uniqueness" ->
             Just <| gettext "Email is already used." appState.locale
 

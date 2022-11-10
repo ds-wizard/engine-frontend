@@ -16,6 +16,7 @@ import Wizard.Dev.Routing
 import Wizard.Documents.Routing
 import Wizard.KMEditor.Routing
 import Wizard.KnowledgeModels.Routing
+import Wizard.Locales.Routing
 import Wizard.ProjectImporters.Routing
 import Wizard.Projects.Routing
 import Wizard.Public.Routing
@@ -35,6 +36,7 @@ matchers appState =
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.KMEditor.Routing.parsers appState Routes.KMEditorRoute
                 ++ Wizard.KnowledgeModels.Routing.parsers appState Routes.KnowledgeModelsRoute
+                ++ Wizard.Locales.Routing.parsers appState Routes.LocalesRoute
                 ++ Wizard.ProjectImporters.Routing.parsers appState Routes.ProjectImportersRoute
                 ++ Wizard.Projects.Routing.parsers appState Routes.ProjectsRoute
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
@@ -77,6 +79,9 @@ isAllowed route appState =
 
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
             Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute appState
+
+        Routes.LocalesRoute localeRoute ->
+            Wizard.Locales.Routing.isAllowed localeRoute appState
 
         Routes.ProjectImportersRoute _ ->
             Wizard.ProjectImporters.Routing.isAllowed appState
@@ -128,6 +133,9 @@ toUrl appState route =
 
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
                     Wizard.KnowledgeModels.Routing.toUrl appState kmPackagesRoute
+
+                Routes.LocalesRoute localeRoute ->
+                    Wizard.Locales.Routing.toUrl appState localeRoute
 
                 Routes.ProjectImportersRoute projectImportersRoute ->
                     Wizard.ProjectImporters.Routing.toUrl appState projectImportersRoute
