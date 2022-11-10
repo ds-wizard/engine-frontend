@@ -12,7 +12,10 @@ module.exports = function (app) {
         var popup = window.open(requestUrl, 'popup', getWindowFeatures())
         var handler = (event) => {
             if (event.data.type === 'ready') {
-                popup.postMessage({type: 'ready'}, requestUrl)
+                popup.postMessage({
+                    type: 'ready',
+                    styleUrl: window.wizard.styleUrl
+                }, requestUrl)
             } else if (event.data.type === 'Import') {
                 if (event.origin !== widgetOrigin) {
                     return
