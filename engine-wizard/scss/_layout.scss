@@ -280,10 +280,10 @@ body {
 
         .profile-submenu {
             position: fixed;
-            left: $side-navigation-width - 35px;
+            left: $side-navigation-width - 60px;
             top: 0;
             display: none;
-            padding-left: 25px;
+            padding-left: 50px;
             transform: translateY(-100%);
 
             ul {
@@ -428,8 +428,8 @@ body {
             }
 
             .profile-submenu {
-                left: $side-navigation-width-collapsed - 10px;
-                padding-left: 15px;
+                left: $side-navigation-width-collapsed - 20px;
+                padding-left: 25px;
             }
         }
 
