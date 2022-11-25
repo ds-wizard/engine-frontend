@@ -58,7 +58,7 @@ update msg wrapMsg appState model =
                     ( model, Cmd.none )
 
         SetDefaultCompleted ->
-            ( model, LocalesApi.getLocale model.id appState (wrapMsg << GetLocaleCompleted) )
+            ( model, Ports.refresh () )
 
         SetEnabled enabled ->
             case model.locale of
@@ -71,7 +71,7 @@ update msg wrapMsg appState model =
                     ( model, Cmd.none )
 
         SetEnabledCompleted ->
-            ( model, LocalesApi.getLocale model.id appState (wrapMsg << GetLocaleCompleted) )
+            ( model, Ports.refresh () )
 
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

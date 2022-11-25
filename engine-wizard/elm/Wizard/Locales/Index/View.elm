@@ -159,7 +159,7 @@ listingActions appState locale =
                 }
 
         exportActionVisible =
-            Feature.localeExport appState
+            Feature.localeExport appState locale
 
         setDefaultAction =
             Listing.dropdownAction
@@ -171,7 +171,7 @@ listingActions appState locale =
                 }
 
         setDefaultActionVisible =
-            Feature.localeEdit appState && not locale.defaultLocale
+            Feature.localeSetDefault appState locale
 
         changeEnabledAction =
             if locale.enabled then
@@ -193,7 +193,7 @@ listingActions appState locale =
                     }
 
         changeEnabledActionVisible =
-            Feature.localeEdit appState && not locale.defaultLocale
+            Feature.localeChangeEnabled appState locale
 
         deleteAction =
             Listing.dropdownAction
@@ -205,7 +205,7 @@ listingActions appState locale =
                 }
 
         deleteActionVisible =
-            Feature.localeDelete appState && not locale.defaultLocale
+            Feature.localeDelete appState locale && not locale.defaultLocale
     in
     []
         |> listInsertIf viewAction viewActionVisible

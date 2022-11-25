@@ -97,3 +97,17 @@
         }
     }
 }
+
+.nav-languages {
+    .nav-link {
+        position: relative;
+        padding: $nav-link-padding-y 2rem;
+
+        .fa {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+    }
+}

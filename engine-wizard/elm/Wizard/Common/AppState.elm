@@ -44,6 +44,7 @@ type alias AppState =
     , gaEnabled : Bool
     , cookieConsent : Bool
     , locale : Gettext.Locale
+    , selectedLocale : Maybe String
     }
 
 
@@ -100,6 +101,7 @@ init flagsValue key =
       , gaEnabled = flags.gaEnabled
       , cookieConsent = flags.cookieConsent
       , locale = flags.locale
+      , selectedLocale = flags.selectedLocale
       }
     , flagsCmd
     )

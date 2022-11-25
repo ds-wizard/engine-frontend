@@ -21,6 +21,7 @@ type alias Flags =
     , gaEnabled : Bool
     , cookieConsent : Bool
     , locale : Gettext.Locale
+    , selectedLocale : Maybe String
     , success : Bool
     }
 
@@ -39,6 +40,7 @@ decoder =
         |> D.required "gaEnabled" D.bool
         |> D.required "cookieConsent" D.bool
         |> D.optional "locale" Gettext.localeDecoder Gettext.defaultLocale
+        |> D.required "selectedLocale" (D.nullable D.string)
         |> D.hardcoded True
 
 
@@ -56,4 +58,5 @@ default =
     , cookieConsent = False
     , success = False
     , locale = Gettext.defaultLocale
+    , selectedLocale = Nothing
     }

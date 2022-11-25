@@ -51,7 +51,7 @@ header appState locale =
                 ]
 
         exportActionVisible =
-            Feature.localeExport appState
+            Feature.localeExport appState locale
 
         setDefaultAction =
             a [ onClick <| SetDefault, class "with-icon" ]
@@ -60,7 +60,7 @@ header appState locale =
                 ]
 
         setDefaultActionVisible =
-            locale.enabled && not locale.defaultLocale && Feature.localeEdit appState
+            Feature.localeSetDefault appState locale
 
         enableAction =
             if locale.enabled then
@@ -76,7 +76,7 @@ header appState locale =
                     ]
 
         enableActionVisible =
-            Feature.localeEdit appState
+            Feature.localeChangeEnabled appState locale
 
         deleteAction =
             a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
@@ -85,7 +85,7 @@ header appState locale =
                 ]
 
         deleteActionVisible =
-            not locale.defaultLocale && Feature.localeDelete appState
+            Feature.localeDelete appState locale
 
         actions =
             []

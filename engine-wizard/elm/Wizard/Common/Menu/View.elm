@@ -6,7 +6,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.Auth.Role as Role
+import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
@@ -613,17 +616,40 @@ viewBuildInfo appState name buildInfo extra =
 viewLanguagesModal : AppState -> Bool -> Html Wizard.Msgs.Msg
 viewLanguagesModal appState visible =
     let
+        defaultLocale =
+            List.find .defaultLocale appState.config.locales
+                |> Maybe.unwrap "" .code
+
+        selectedLocale =
+            case appState.selectedLocale of
+                Just selected ->
+                    List.find (\locale -> locale.code == selected) appState.config.locales
+                        |> Maybe.unwrap defaultLocale .code
+
+                Nothing ->
+                    defaultLocale
+
         viewLocale locale =
             let
-                defaultText =
+                defaultBadge =
                     if locale.defaultLocale then
-                        " (" ++ gettext "default" appState.locale ++ ")"
+                        Badge.info [ class "ms-2" ] [ text (gettext "default" appState.locale) ]
 
                     else
-                        ""
+                        emptyNode
+
+                selected =
+                    if locale.code == selectedLocale then
+                        faSet "locale.selected" appState
+
+                    else
+                        emptyNode
             in
             div [ class "nav-link cursor-pointer", onClick (Wizard.Msgs.SetLocale locale.code) ]
-                [ text (locale.name ++ defaultText) ]
+                [ selected
+                , text locale.name
+                , defaultBadge
+                ]
 
         content =
             [ div [ class "modal-header" ]
@@ -631,8 +657,8 @@ viewLanguagesModal appState visible =
                 , button [ class "btn-close", onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.SetLanguagesOpen False)) ] []
                 ]
             , div [ class "modal-body" ]
-                [ div [ class "nav flex-column nav-pills" ]
-                    (List.map viewLocale appState.config.locales)
+                [ div [ class "nav flex-column nav-pills nav-languages" ]
+                    (List.map viewLocale (List.sortBy .name appState.config.locales))
                 ]
             ]
     in

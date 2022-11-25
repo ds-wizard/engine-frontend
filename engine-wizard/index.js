@@ -107,6 +107,7 @@ function loadApp(config, locale, provisioning) {
         const flags = {
             seed: Math.floor(Math.random() * 0xFFFFFFFF),
             session: JSON.parse(localStorage.session || null),
+            selectedLocale: JSON.parse(localStorage.locale || null),
             apiUrl: getApiUrl(config),
             clientUrl: clientUrl(),
             config: config,
@@ -151,10 +152,12 @@ window.onload = function () {
     defaultStyleUrl = style.getAttribute('href')
     style.remove()
 
-    const language = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
+    const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
     const promises = [
         axios.get(configUrl()),
-        axios.get(apiUrl() + '/configs/locales/' + language)
+        axios.get(apiUrl() + '/configs/locales/' + locale).catch(() => {
+            return {data: {}}
+        })
     ]
     const hasProvisioning = !!provisioningUrl()
     if (hasProvisioning) {
