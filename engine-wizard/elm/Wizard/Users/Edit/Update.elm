@@ -83,7 +83,7 @@ getUserCompleted appState model result =
                     { model | user = Error <| gettext "Unable to get the user." appState.locale }
 
         cmd =
-            getResultCmd result
+            getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -124,7 +124,7 @@ putUserCompleted appState model result =
                 , userForm = setFormErrors appState err model.userForm
               }
             , Cmd.batch
-                [ getResultCmd result
+                [ getResultCmd Wizard.Msgs.logoutMsg result
                 , Ports.scrollToTop ".Users__Edit__content"
                 ]
             )
@@ -142,7 +142,7 @@ putUserPasswordCompleted appState model result =
                     ApiError.toActionResult appState (gettext "Password could not be changed." appState.locale) error
 
         cmd =
-            getResultCmd result
+            getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( { model | savingPassword = passwordResult }
     , Cmd.batch [ cmd, Ports.scrollToTop ".Users__Edit__content" ]

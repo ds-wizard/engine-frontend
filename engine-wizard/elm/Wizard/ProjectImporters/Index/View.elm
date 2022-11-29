@@ -78,12 +78,12 @@ listingActions appState questionnaireImporter =
     let
         ( actionIcon, actionLabel ) =
             if questionnaireImporter.enabled then
-                ( faSet "questionnaireImporter.disable" appState
+                ( faSet "_global.disable" appState
                 , gettext "Disable" appState.locale
                 )
 
             else
-                ( faSet "questionnaireImporter.enable" appState
+                ( faSet "_global.enable" appState
                 , gettext "Enable" appState.locale
                 )
 

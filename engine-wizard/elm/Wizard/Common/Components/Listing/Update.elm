@@ -76,7 +76,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | pagination = ApiError.toActionResult appState cfg.getError error }
-                    , getResultCmd result
+                    , getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
         QueryInput string ->

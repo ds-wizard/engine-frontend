@@ -1,5 +1,6 @@
 module Wizard.Common.Feature exposing
-    ( apps
+    ( LocaleLike
+    , apps
     , dev
     , documentDelete
     , documentDownload
@@ -21,6 +22,13 @@ module Wizard.Common.Feature exposing
     , knowledgeModelsImport
     , knowledgeModelsPreview
     , knowledgeModelsView
+    , localeChangeEnabled
+    , localeCreate
+    , localeDelete
+    , localeExport
+    , localeImport
+    , localeSetDefault
+    , localeView
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -387,6 +395,65 @@ usersCreate =
 userEdit : AppState -> String -> Bool
 userEdit appState uuid =
     (uuid == "current") || adminOr Perm.userManagement appState
+
+
+
+-- Locale
+
+
+type alias LocaleLike a =
+    { a
+        | localeId : String
+        , organizationId : String
+        , defaultLocale : Bool
+        , enabled : Bool
+    }
+
+
+isDefaultLanguage : LocaleLike a -> Bool
+isDefaultLanguage locale =
+    locale.organizationId == "wizard" && locale.localeId == "default"
+
+
+localeView : AppState -> Bool
+localeView =
+    adminOr Perm.locale
+
+
+localeCreate : AppState -> Bool
+localeCreate =
+    adminOr Perm.locale
+
+
+localeImport : AppState -> Bool
+localeImport =
+    adminOr Perm.locale
+
+
+localeExport : AppState -> LocaleLike a -> Bool
+localeExport appState locale =
+    adminOr Perm.locale appState
+        && not (isDefaultLanguage locale)
+
+
+localeSetDefault : AppState -> LocaleLike a -> Bool
+localeSetDefault appState locale =
+    adminOr Perm.locale appState
+        && locale.enabled
+        && not locale.defaultLocale
+
+
+localeChangeEnabled : AppState -> LocaleLike a -> Bool
+localeChangeEnabled appState locale =
+    adminOr Perm.locale appState
+        && not locale.defaultLocale
+
+
+localeDelete : AppState -> LocaleLike a -> Bool
+localeDelete appState locale =
+    adminOr Perm.locale appState
+        && not (isDefaultLanguage locale)
+        && not locale.defaultLocale
 
 
 

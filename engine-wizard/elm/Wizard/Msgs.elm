@@ -1,4 +1,7 @@
-module Wizard.Msgs exposing (Msg(..))
+module Wizard.Msgs exposing
+    ( Msg(..)
+    , logoutMsg
+    )
 
 import Browser exposing (UrlRequest)
 import Time
@@ -11,6 +14,7 @@ import Wizard.Dev.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
+import Wizard.Locales.Msgs
 import Wizard.ProjectImporters.Msgs
 import Wizard.Projects.Msgs
 import Wizard.Public.Msgs
@@ -29,6 +33,7 @@ type Msg
     | AuthMsg Wizard.Auth.Msgs.Msg
     | SetSidebarCollapsed Bool
     | SetFullscreen Bool
+    | SetLocale String
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | AdminMsg Wizard.Dev.Msgs.Msg
     | AppsMsg Wizard.Apps.Msgs.Msg
@@ -36,6 +41,7 @@ type Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
+    | LocaleMsg Wizard.Locales.Msgs.Msg
     | ProjectImportersMsg Wizard.ProjectImporters.Msgs.Msg
     | ProjectsMsg Wizard.Projects.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg
@@ -43,3 +49,8 @@ type Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
     | TemplatesMsg Wizard.Templates.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg
+
+
+logoutMsg : Msg
+logoutMsg =
+    AuthMsg Wizard.Auth.Msgs.Logout

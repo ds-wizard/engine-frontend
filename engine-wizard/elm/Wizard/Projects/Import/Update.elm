@@ -5,11 +5,14 @@ import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Error.ApiError as ApiError
-import Shared.Setters exposing (setQuestionnaire, setQuestionnaireImporter)
+import Shared.Setters exposing (setQuestionnaireImporter)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.Importer as Importer
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -32,42 +35,101 @@ update wrapMsg msg appState model =
     let
         withSeed ( m, c ) =
             ( appState.seed, m, c )
+
+        openImporter newModel =
+            case ( newModel.questionnaire, newModel.questionnaireImporter ) of
+                ( Success _, Success importer ) ->
+                    Ports.openImporter importer.url
+
+                _ ->
+                    Cmd.none
     in
     case msg of
         GetQuestionnaireComplete result ->
-            withSeed <|
-                applyResult appState
-                    { setResult = setQuestionnaire
-                    , defaultError = gettext "Unable to get the project." appState.locale
-                    , model = model
-                    , result = result
+            let
+                setResult r m =
+                    { m
+                        | questionnaire = r
+                        , questionnaireModel = ActionResult.map (Tuple.first << Questionnaire.init appState) r
                     }
+
+                ( newModel, cmd ) =
+                    applyResult appState
+                        { setResult = setResult
+                        , defaultError = gettext "Unable to get the project." appState.locale
+                        , model = model
+                        , result = result
+                        , logoutMsg = Wizard.Msgs.logoutMsg
+                        }
+            in
+            withSeed <|
+                ( newModel, Cmd.batch [ cmd, openImporter newModel ] )
 
         GetQuestionnaireImporterComplete result ->
             case result of
                 Ok importer ->
+                    let
+                        newModel =
+                            setQuestionnaireImporter (Success importer) model
+                    in
                     withSeed <|
-                        ( setQuestionnaireImporter (Success importer) model
-                        , Ports.openImporter importer.url
+                        ( newModel
+                        , openImporter newModel
                         )
 
                 Err error ->
                     withSeed <|
                         ( setQuestionnaireImporter (ApiError.toActionResult appState (gettext "Unable to get importer." appState.locale) error) model
-                        , getResultCmd result
+                        , getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
         GotImporterData data ->
-            case model.questionnaire of
-                Success questionnaire ->
+            case ( model.questionnaire, model.questionnaireModel ) of
+                ( Success questionnaire, Success questionnaireModel ) ->
                     let
                         ( newSeed, importResult ) =
                             Importer.convertToQuestionnaireEvents appState questionnaire data
 
+                        updateQuestionnaire event qm =
+                            case event of
+                                QuestionnaireEvent.SetReply setReplyData ->
+                                    qm
+                                        |> Questionnaire.addEvent event
+                                        |> Questionnaire.setReply setReplyData.path (SetReplyData.toReply setReplyData)
+
+                                _ ->
+                                    qm
+
+                        newQuestionnaireModel =
+                            List.foldl updateQuestionnaire questionnaireModel importResult.questionnaireEvents
+
                         newModel =
-                            { model | importResult = Just importResult }
+                            { model
+                                | importResult = Just importResult
+                                , questionnaireModel = Success newQuestionnaireModel
+                            }
                     in
                     ( newSeed, newModel, Cmd.none )
+
+                _ ->
+                    withSeed ( model, Cmd.none )
+
+        QuestionnaireMsg questionnaireMsg ->
+            case model.questionnaireModel of
+                Success questionnaireModel ->
+                    let
+                        ( newSeed, newQuestionnaireModel, questionnaireCmd ) =
+                            Questionnaire.update questionnaireMsg
+                                (wrapMsg << QuestionnaireMsg)
+                                Nothing
+                                appState
+                                { events = [] }
+                                questionnaireModel
+                    in
+                    ( newSeed
+                    , { model | questionnaireModel = Success newQuestionnaireModel }
+                    , questionnaireCmd
+                    )
 
                 _ ->
                     withSeed ( model, Cmd.none )
@@ -96,3 +158,6 @@ update wrapMsg msg appState model =
                         ( { model | importing = ApiError.toActionResult appState (gettext "Questionnaire changes could not be saved." appState.locale) error }
                         , Cmd.none
                         )
+
+        ChangeSidePanel sidePanel ->
+            withSeed ( { model | sidePanel = sidePanel }, Cmd.none )

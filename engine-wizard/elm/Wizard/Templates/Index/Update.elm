@@ -30,14 +30,14 @@ fetchData =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ShowHideDeleteTemplate package ->
-            ( { model | templateToBeDeleted = package, deletingTemplate = Unset }, Cmd.none )
+        ShowHideDeleteTemplate template ->
+            ( { model | templateToBeDeleted = template, deletingTemplate = Unset }, Cmd.none )
 
         DeleteTemplate ->
-            handleDeletePackage wrapMsg appState model
+            handleDeleteTemplate wrapMsg appState model
 
         DeleteTemplateCompleted result ->
-            deletePackageCompleted appState model result
+            deleteTemplateCompleted appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -46,8 +46,8 @@ update msg wrapMsg appState model =
             ( model, Ports.downloadFile (TemplatesApi.exportTemplateUrl template.id appState) )
 
 
-handleDeletePackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeletePackage wrapMsg appState model =
+handleDeleteTemplate : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteTemplate wrapMsg appState model =
     case model.templateToBeDeleted of
         Just template ->
             ( { model | deletingTemplate = Loading }
@@ -59,8 +59,8 @@ handleDeletePackage wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deletePackageCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deletePackageCompleted appState model result =
+deleteTemplateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deleteTemplateCompleted appState model result =
     case result of
         Ok _ ->
             ( model
@@ -69,7 +69,7 @@ deletePackageCompleted appState model result =
 
         Err error ->
             ( { model | deletingTemplate = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

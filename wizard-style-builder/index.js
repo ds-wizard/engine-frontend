@@ -17,6 +17,7 @@ if (process.env.NODE_ENV === 'production') {
 app.use(express.json())
 
 app.post('/simple', (req, res) => {
+    console.log('Request', JSON.stringify(req.body))
     let tempDir
     core.createTempDir()
         .then((folder) => tempDir = folder)

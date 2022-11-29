@@ -4,7 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import File
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, input, label, p, text)
-import Html.Attributes exposing (class, disabled, id, type_)
+import Html.Attributes exposing (accept, class, disabled, id, type_)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
 import Shared.Html exposing (faSet)
@@ -27,7 +27,7 @@ view appState model =
                 Nothing ->
                     dropzone appState model
     in
-    div [ class "KnowledgeModels__Import__FileImport", id dropzoneId, dataCy "template_import_file" ]
+    div [ id dropzoneId, dataCy "template_import_file" ]
         [ FormResult.view appState model.importing
         , content
         ]
@@ -46,7 +46,7 @@ fileView appState model fileName =
     in
     div [ class "file-view rounded-3" ]
         [ div [ class "file" ]
-            [ faSet "kmImport.file" appState
+            [ faSet "import.file" appState
             , div [ class "filename" ]
                 [ text fileName ]
             ]
@@ -63,7 +63,7 @@ dropzone appState model =
     div (dropzoneAttributes model)
         [ label [ class "btn btn-secondary btn-file" ]
             [ text (gettext "Choose a file" appState.locale)
-            , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected) ] []
+            , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected), accept ".zip" ] []
             ]
         , p [] [ text (gettext "Or just drop it here" appState.locale) ]
         ]

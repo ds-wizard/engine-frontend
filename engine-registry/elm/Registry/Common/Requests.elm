@@ -1,5 +1,7 @@
 module Registry.Common.Requests exposing
     ( ToMsg
+    , getLocale
+    , getLocales
     , getOrganization
     , getPackage
     , getPackages
@@ -17,6 +19,8 @@ import Http
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Registry.Common.AppState exposing (AppState)
+import Registry.Common.Entities.Locale as Locale exposing (Locale)
+import Registry.Common.Entities.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Registry.Common.Entities.OrganizationDetail as OrganizationDetail exposing (OrganizationDetail)
 import Registry.Common.Entities.Package as Package exposing (Package)
 import Registry.Common.Entities.PackageDetail as PackageDetail exposing (PackageDetail)
@@ -219,6 +223,22 @@ getTemplate appState templateId msg =
     Http.get
         { url = appState.apiUrl ++ "/templates/" ++ templateId
         , expect = expectJson msg TemplateDetail.decoder
+        }
+
+
+getLocales : AppState -> ToMsg (List Locale) msg -> Cmd msg
+getLocales appState msg =
+    Http.get
+        { url = appState.apiUrl ++ "/locales"
+        , expect = expectJson msg (D.list Locale.decoder)
+        }
+
+
+getLocale : AppState -> String -> ToMsg LocaleDetail msg -> Cmd msg
+getLocale appState localeId msg =
+    Http.get
+        { url = appState.apiUrl ++ "/locales/" ++ localeId
+        , expect = expectJson msg LocaleDetail.decoder
         }
 
 

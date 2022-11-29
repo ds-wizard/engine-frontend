@@ -32,4 +32,5 @@ update msg wrapMsg appState model =
                 , defaultError = gettext "Unable to import the document template." appState.locale
                 , model = model
                 , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }

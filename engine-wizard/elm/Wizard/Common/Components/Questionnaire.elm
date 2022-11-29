@@ -27,8 +27,6 @@ module Wizard.Common.Components.Questionnaire exposing
     , view
     )
 
---import Shared.Locale exposing (l, lf, lg, lgx, lh, lx)
-
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
@@ -112,24 +110,6 @@ import Wizard.Routes as Routes
 
 
 
---l_ : String -> AppState -> String
---l_ =
---    l "Wizard.Common.Components.Questionnaire"
---
---
---lh_ : String -> List (Html msg) -> AppState -> List (Html msg)
---lh_ =
---    lh "Wizard.Common.Components.Questionnaire"
---
---
---lx_ : String -> AppState -> Html msg
---lx_ =
---    lx "Wizard.Common.Components.Questionnaire"
---
---
---lf_ : String -> List String -> AppState -> String
---lf_ =
---    lf "Wizard.Common.Components.Questionnaire"
 -- MODEL
 
 
@@ -2393,7 +2373,11 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 , div [] buttons
                 ]
     in
-    div [ class "item mb-3", classList [ ( "item-collapsed", isCollapsed ) ] ]
+    div
+        [ class "item mb-3"
+        , classList [ ( "item-collapsed", isCollapsed ) ]
+        , attribute "data-path" (pathToString itemPath)
+        ]
         [ div [ class "card bg-light" ]
             [ div [ class "card-body" ]
                 (itemHeader :: itemQuestions)
@@ -2804,6 +2788,7 @@ viewTodoAction appState cfg model path =
                 [ span [] [ text (gettext "TODO" appState.locale) ]
                 , a
                     ((onClick <| SetLabels currentPath [])
+                        :: class "text-danger"
                         :: tooltip (gettext "Remove TODO" appState.locale)
                     )
                     [ faSet "_global.remove" appState ]

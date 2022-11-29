@@ -1,4 +1,5 @@
 const path = require('path')
+const webpack = require('webpack')
 const CopyWebpackPlugin = require('copy-webpack-plugin')
 const CssMinimizerPlugin = require('css-minimizer-webpack-plugin')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
@@ -84,6 +85,15 @@ module.exports = {
         noParse: /\.elm$/
     },
 
+    resolve: {
+        fallback: {
+            "stream": false,
+            util: require.resolve("util/"),
+            "fs": false,
+            "process": false
+        }
+    },
+
     optimization: {
         splitChunks: {
             chunks: 'all'
@@ -121,7 +131,10 @@ module.exports = {
                 {from: `${component}/img`, to: 'img'},
                 {from: `${component}/favicon.ico`, to: 'favicon.ico'}
             ]
-        })
+        }),
+        new webpack.DefinePlugin({
+            'process.env.NODE_DEBUG': JSON.stringify(process.env.NODE_DEBUG),
+        }),
     ],
 
     devServer: {

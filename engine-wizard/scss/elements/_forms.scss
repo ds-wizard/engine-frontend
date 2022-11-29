@@ -264,6 +264,27 @@ select {
             }
         }
     }
+
+    .version-inputs {
+        font-weight: bold;
+
+        input {
+            display: inline-block;
+            width: 60px;
+            text-align: center;
+            margin: 5px;
+
+            &:first-child {
+                margin-left: 0;
+            }
+        }
+    }
+
+    .version-suggestions {
+        a {
+            margin-left: 0.5rem;
+        }
+    }
 }
 
 .form-control:disabled {

@@ -16,7 +16,9 @@ import Shared.Auth.Session as Session
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Error.ApiError exposing (ApiError)
+import Shared.Setters exposing (setQuestionnaires)
+import Wizard.Common.Api exposing (applyResultTransform)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.CreateProjectWidget as CreateProjectWidget
 import Wizard.Dashboard.Widgets.RecentProjectsWidget as RecentProjectsWidget
@@ -62,14 +64,16 @@ fetchData appState =
         GetQuestionnairesComplete
 
 
-update : Msg -> AppState -> Model -> Model
-update (GetQuestionnairesComplete result) appState model =
-    case result of
-        Ok data ->
-            { model | questionnaires = ActionResult.Success data.items }
-
-        Err error ->
-            { model | questionnaires = ApiError.toActionResult appState (gettext "Unable to get projects." appState.locale) error }
+update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
+update logoutMsg (GetQuestionnairesComplete result) appState model =
+    applyResultTransform appState
+        { setResult = setQuestionnaires
+        , defaultError = gettext "Unable to get projects." appState.locale
+        , model = model
+        , result = result
+        , logoutMsg = logoutMsg
+        , transform = .items
+        }
 
 
 view : AppState -> Model -> Html msg

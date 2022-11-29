@@ -26,7 +26,7 @@ import Wizard.Templates.Routes exposing (Route(..))
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ listClass "KnowledgeModels__Index" ]
+    div [ listClass "" ]
         [ Page.header (gettext "Document Templates" appState.locale) []
         , FormResult.successOnlyView appState model.deletingTemplate
         , Listing.view appState (listingConfig appState) model.templates

@@ -10,12 +10,10 @@ import ActionResult exposing (ActionResult(..))
 import Gettext
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
 import Shared.Utils exposing (dispatch)
-import Wizard.Auth.Msgs
-import Wizard.Msgs
 
 
-getResultCmd : Result ApiError a -> Cmd Wizard.Msgs.Msg
-getResultCmd result =
+getResultCmd : msg -> Result ApiError a -> Cmd msg
+getResultCmd logoutMsg result =
     case result of
         Ok _ ->
             Cmd.none
@@ -23,7 +21,7 @@ getResultCmd result =
         Err error ->
             case error of
                 BadStatus 401 _ ->
-                    dispatch <| Wizard.Msgs.AuthMsg Wizard.Auth.Msgs.Logout
+                    dispatch logoutMsg
 
                 _ ->
                     Cmd.none
@@ -36,14 +34,16 @@ applyResult :
         , defaultError : String
         , model : model
         , result : Result ApiError data
+        , logoutMsg : msg
         }
-    -> ( model, Cmd Wizard.Msgs.Msg )
-applyResult appState { setResult, defaultError, model, result } =
+    -> ( model, Cmd msg )
+applyResult appState { setResult, defaultError, model, result, logoutMsg } =
     applyResultTransform appState
         { setResult = setResult
         , defaultError = defaultError
         , model = model
         , result = result
+        , logoutMsg = logoutMsg
         , transform = identity
         }
 
@@ -55,15 +55,17 @@ applyResultTransform :
         , defaultError : String
         , model : model
         , result : Result ApiError data1
+        , logoutMsg : msg
         , transform : data1 -> data2
         }
-    -> ( model, Cmd Wizard.Msgs.Msg )
-applyResultTransform appState { setResult, defaultError, model, result, transform } =
+    -> ( model, Cmd msg )
+applyResultTransform appState { setResult, defaultError, model, result, logoutMsg, transform } =
     applyResultTransformCmd appState
         { setResult = setResult
         , defaultError = defaultError
         , model = model
         , result = result
+        , logoutMsg = logoutMsg
         , transform = transform
         , cmd = Cmd.none
         }
@@ -76,15 +78,17 @@ applyResultCmd :
         , defaultError : String
         , model : model
         , result : Result ApiError data
-        , cmd : Cmd Wizard.Msgs.Msg
+        , logoutMsg : msg
+        , cmd : Cmd msg
         }
-    -> ( model, Cmd Wizard.Msgs.Msg )
-applyResultCmd appState { setResult, defaultError, model, result, cmd } =
+    -> ( model, Cmd msg )
+applyResultCmd appState { setResult, defaultError, model, result, logoutMsg, cmd } =
     applyResultTransformCmd appState
         { setResult = setResult
         , defaultError = defaultError
         , model = model
         , result = result
+        , logoutMsg = logoutMsg
         , transform = identity
         , cmd = cmd
         }
@@ -97,11 +101,12 @@ applyResultTransformCmd :
         , defaultError : String
         , model : model
         , result : Result ApiError data1
+        , logoutMsg : msg
         , transform : data1 -> data2
-        , cmd : Cmd Wizard.Msgs.Msg
+        , cmd : Cmd msg
         }
-    -> ( model, Cmd Wizard.Msgs.Msg )
-applyResultTransformCmd appState { setResult, defaultError, model, result, transform, cmd } =
+    -> ( model, Cmd msg )
+applyResultTransformCmd appState { setResult, defaultError, model, result, logoutMsg, transform, cmd } =
     case result of
         Ok data ->
             ( setResult (Success <| transform data) model
@@ -110,5 +115,5 @@ applyResultTransformCmd appState { setResult, defaultError, model, result, trans
 
         Err error ->
             ( setResult (ApiError.toActionResult appState defaultError error) model
-            , getResultCmd result
+            , getResultCmd logoutMsg result
             )

@@ -81,8 +81,9 @@ handleGetQuestionnaireMigrationCompleted appState model result =
             applyResult appState
                 { setResult = setResult appState
                 , defaultError = gettext "Unable to get the Questionnaire migration." appState.locale
-                , result = result
                 , model = model
+                , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
         ( newSeed, newModel, scrollCmd ) =
@@ -96,8 +97,9 @@ handlePutQuestionnaireMigrationCompleted appState model result =
     applyResult appState
         { setResult = \_ _ -> model
         , defaultError = gettext "Unable to save migration." appState.locale
-        , result = result
         , model = model
+        , result = result
+        , logoutMsg = Wizard.Msgs.logoutMsg
         }
 
 

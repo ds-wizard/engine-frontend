@@ -64,7 +64,7 @@ deleteUserCompleted appState model result =
 
         Err error ->
             ( { model | deletingUser = ApiError.toActionResult appState (gettext "User could not be deleted." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

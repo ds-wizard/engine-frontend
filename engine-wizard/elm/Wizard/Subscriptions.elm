@@ -5,6 +5,7 @@ import Wizard.Common.Menu.Subscriptions
 import Wizard.Documents.Subscriptions
 import Wizard.KMEditor.Subscriptions
 import Wizard.KnowledgeModels.Subscriptions
+import Wizard.Locales.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.ProjectImporters.Subscriptions
@@ -30,6 +31,9 @@ subscriptions model =
 
                 Routes.KnowledgeModelsRoute route ->
                     Sub.map KnowledgeModelsMsg <| Wizard.KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
+
+                Routes.LocalesRoute route ->
+                    Sub.map LocaleMsg <| Wizard.Locales.Subscriptions.subscriptions route model.localeModel
 
                 Routes.ProjectImportersRoute _ ->
                     Sub.map ProjectImportersMsg <| Wizard.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel

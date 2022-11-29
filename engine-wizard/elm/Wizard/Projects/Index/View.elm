@@ -695,7 +695,7 @@ stateBadge appState questionnaire =
         Outdated ->
             linkTo appState
                 (Routes.projectsCreateMigration questionnaire.uuid)
-                [ class Badge.warningClass ]
+                [ class Badge.warningClass, dataCy "badge_project_update-available" ]
                 [ text (gettext "update available" appState.locale) ]
 
         Default ->

@@ -137,7 +137,7 @@ update wrapMsg msg appState model =
                 Err error ->
                     withSeed <|
                         ( { model | branchModel = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
-                        , getResultCmd result
+                        , getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
         GetIntegrationPrefabsComplete result ->

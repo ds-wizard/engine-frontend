@@ -21,6 +21,7 @@
     .nav-link {
         color: $gray-700 !important;
         font-weight: 500;
+        cursor: pointer;
 
         &.active, &.active:hover, &:hover {
             color: $primary !important;
@@ -93,6 +94,20 @@
                     visibility: hidden;
                 }
             }
+        }
+    }
+}
+
+.nav-languages {
+    .nav-link {
+        position: relative;
+        padding: $nav-link-padding-y 2rem;
+
+        .fa {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
         }
     }
 }

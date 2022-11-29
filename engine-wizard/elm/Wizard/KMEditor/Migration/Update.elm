@@ -54,6 +54,7 @@ handleGetMigrationCompleted appState model result =
         , defaultError = gettext "Unable to get migration." appState.locale
         , model = model
         , result = result
+        , logoutMsg = Wizard.Msgs.logoutMsg
         }
 
 
@@ -89,7 +90,7 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | conflict = ApiError.toActionResult appState (gettext "Unable to resolve conflict." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 

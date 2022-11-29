@@ -1,12 +1,15 @@
-module Wizard.Common.Menu.View exposing (view, viewAboutModal, viewReportIssueModal)
+module Wizard.Common.Menu.View exposing (view, viewAboutModal, viewLanguagesModal, viewReportIssueModal)
 
 import ActionResult exposing (ActionResult(..))
 import Dict
 import Gettext exposing (gettext)
-import Html exposing (Html, a, code, div, em, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
+import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.Auth.Role as Role
+import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
@@ -176,13 +179,25 @@ menuItems appState =
               }
             ]
         }
-    , MenuItem
-        { title = gettext "Settings" appState.locale
+    , MenuGroup
+        { title = gettext "System" appState.locale
         , icon = faSetFw "menu.settings" appState
-        , id = "settings"
+        , id = "system"
         , route = Routes.settingsDefault
-        , isActive = Routes.isSettingsRoute
+        , isActive = Routes.isSettingsSubroute
         , isVisible = Feature.settings
+        , items =
+            [ { title = gettext "Settings" appState.locale
+              , id = "system-settings"
+              , route = Routes.settingsDefault
+              , isActive = Routes.isSettingsRoute
+              }
+            , { title = gettext "Locales" appState.locale
+              , id = "system-locales"
+              , route = Routes.localesIndex
+              , isActive = Routes.isLocalesRoute
+              }
+            ]
         }
     ]
 
@@ -407,6 +422,21 @@ viewProfileMenu model =
 
             else
                 emptyNode
+
+        langaugeButton =
+            if List.length model.appState.config.locales < 2 then
+                emptyNode
+
+            else
+                li []
+                    [ a
+                        [ onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.SetLanguagesOpen True))
+                        , dataCy "menu_languages"
+                        ]
+                        [ faSetFw "menu.language" model.appState
+                        , text (gettext "Change language" model.appState.locale)
+                        ]
+                    ]
     in
     div [ id itemId, class "profile-info", mouseenter, mouseleave ]
         [ img [ src imageUrl, class "profile-image" ] []
@@ -425,6 +455,7 @@ viewProfileMenu model =
                         , text (gettext "Edit profile" model.appState.locale)
                         ]
                     ]
+                , langaugeButton
                 , li []
                     [ a
                         [ onClick (Wizard.Msgs.AuthMsg Wizard.Auth.Msgs.Logout)
@@ -580,3 +611,59 @@ viewBuildInfo appState name buildInfo extra =
                 ++ List.map viewExtraRow extra
             )
         ]
+
+
+viewLanguagesModal : AppState -> Bool -> Html Wizard.Msgs.Msg
+viewLanguagesModal appState visible =
+    let
+        defaultLocale =
+            List.find .defaultLocale appState.config.locales
+                |> Maybe.unwrap "" .code
+
+        selectedLocale =
+            case appState.selectedLocale of
+                Just selected ->
+                    List.find (\locale -> locale.code == selected) appState.config.locales
+                        |> Maybe.unwrap defaultLocale .code
+
+                Nothing ->
+                    defaultLocale
+
+        viewLocale locale =
+            let
+                defaultBadge =
+                    if locale.defaultLocale then
+                        Badge.info [ class "ms-2" ] [ text (gettext "default" appState.locale) ]
+
+                    else
+                        emptyNode
+
+                selected =
+                    if locale.code == selectedLocale then
+                        faSet "locale.selected" appState
+
+                    else
+                        emptyNode
+            in
+            div [ class "nav-link cursor-pointer", onClick (Wizard.Msgs.SetLocale locale.code) ]
+                [ selected
+                , text locale.name
+                , defaultBadge
+                ]
+
+        content =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Change language" appState.locale) ]
+                , button [ class "btn-close", onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.SetLanguagesOpen False)) ] []
+                ]
+            , div [ class "modal-body" ]
+                [ div [ class "nav flex-column nav-pills nav-languages" ]
+                    (List.map viewLocale (List.sortBy .name appState.config.locales))
+                ]
+            ]
+    in
+    Modal.simple
+        { modalContent = content
+        , visible = visible
+        , dataCy = "languages"
+        }

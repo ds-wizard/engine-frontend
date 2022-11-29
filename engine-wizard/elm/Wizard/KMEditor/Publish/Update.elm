@@ -72,7 +72,7 @@ handleGetBranchCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | branch = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -95,7 +95,7 @@ handleGetPreviousPackageCompleted model result =
             )
 
         Err _ ->
-            ( model, getResultCmd result )
+            ( model, getResultCmd Wizard.Msgs.logoutMsg result )
 
 
 handleFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -143,5 +143,5 @@ handlePutBranchCompleted appState model result =
 
         Err error ->
             ( { model | publishingBranch = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )

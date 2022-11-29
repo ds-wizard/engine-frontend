@@ -37,4 +37,15 @@
             }
         }
     }
+
+    blockquote {
+        background: $gray-100;
+        padding: $spacer-2 $spacer-3;
+        border-left: 4px solid $gray-200;
+        color: $gray-700;
+
+        p:last-child {
+            margin-bottom: 0;
+        }
+    }
 }

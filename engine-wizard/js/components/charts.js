@@ -26,6 +26,9 @@ customElements.define('chart-radar', class extends HTMLElement {
             type: 'radar',
             data: this._chartData,
             options: {
+                animation: {
+                    duration: 0
+                },
                 aspectRatio: 2,
                 plugins: {
                     legend: {

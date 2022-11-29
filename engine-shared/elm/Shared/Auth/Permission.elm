@@ -5,6 +5,7 @@ module Shared.Auth.Permission exposing
     , knowledgeModel
     , knowledgeModelPublish
     , knowledgeModelUpgrade
+    , locale
     , packageManagementRead
     , packageManagementWrite
     , questionnaire
@@ -48,6 +49,11 @@ knowledgeModelPublish =
 knowledgeModelUpgrade : String
 knowledgeModelUpgrade =
     "KM_UPGRADE_PERM"
+
+
+locale : String
+locale =
+    "LOC_PERM"
 
 
 packageManagementRead : String

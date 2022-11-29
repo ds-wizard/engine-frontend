@@ -27,7 +27,7 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionT
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (tooltip, tooltipCustom)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip, tooltipCustom)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -256,13 +256,13 @@ stateBadge : AppState -> DocumentState -> Html msg
 stateBadge appState state =
     case state of
         QueuedDocumentState ->
-            Badge.info []
+            Badge.info [ dataCy "badge_doc_queued" ]
                 [ faSet "_global.spinner" appState
                 , text (gettext "Queued" appState.locale)
                 ]
 
         InProgressDocumentState ->
-            Badge.info []
+            Badge.info [ dataCy "badge_doc_in-progress" ]
                 [ faSet "_global.spinner" appState
                 , text (gettext "In Progress" appState.locale)
                 ]
@@ -271,7 +271,7 @@ stateBadge appState state =
             emptyNode
 
         ErrorDocumentState ->
-            Badge.danger [] [ text (gettext "Error" appState.locale) ]
+            Badge.danger [ dataCy "badge_doc_error" ] [ text (gettext "Error" appState.locale) ]
 
 
 viewSubmission : ViewConfig msg -> AppState -> Submission -> Html msg

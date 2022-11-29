@@ -26,7 +26,7 @@ import Wizard.Routes as Routes
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ listClass "KnowledgeModels__Index" ]
+    div [ listClass "" ]
         [ Page.header (gettext "Knowledge Models" appState.locale) []
         , FormResult.successOnlyView appState model.deletingPackage
         , Listing.view appState (listingConfig appState) model.packages

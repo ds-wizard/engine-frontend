@@ -109,5 +109,5 @@ handlePostSignupComplete appState model result =
                 | registrySigningUp = ApiError.toActionResult appState (gettext "Sign up request failed." appState.locale) error
                 , registrySignupForm = setFormErrors appState error model.registrySignupForm
               }
-            , getResultCmd result
+            , getResultCmd Wizard.Msgs.logoutMsg result
             )

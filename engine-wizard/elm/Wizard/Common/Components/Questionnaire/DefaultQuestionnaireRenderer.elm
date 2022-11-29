@@ -1,7 +1,5 @@
 module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create)
 
---import Shared.Locale exposing (l, lg, lx)
-
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
@@ -23,17 +21,6 @@ import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
-
-
-
---l_ : String -> AppState -> String
---l_ =
---    l "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
---
---
---lx_ : String -> AppState -> Html msg
---lx_ =
---    lx "Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer"
 
 
 create : AppState -> KnowledgeModel -> QuestionnaireRenderer msg

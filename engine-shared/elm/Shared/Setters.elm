@@ -3,12 +3,15 @@ module Shared.Setters exposing
     , setBookReference
     , setDropdownState
     , setKnowledgeModel
+    , setLocale
     , setMigration
     , setPackage
+    , setPackages
     , setPlans
     , setPulling
     , setQuestionnaire
     , setQuestionnaireImporter
+    , setQuestionnaires
     , setSelected
     , setTemplate
     , setTemplates
@@ -36,6 +39,11 @@ setKnowledgeModel value record =
     { record | knowledgeModel = value }
 
 
+setLocale : a -> { b | locale : a } -> { b | locale : a }
+setLocale value record =
+    { record | locale = value }
+
+
 setMigration : a -> { b | migration : a } -> { b | migration : a }
 setMigration value record =
     { record | migration = value }
@@ -44,6 +52,11 @@ setMigration value record =
 setPackage : a -> { b | package : a } -> { b | package : a }
 setPackage value record =
     { record | package = value }
+
+
+setPackages : a -> { b | packages : a } -> { b | packages : a }
+setPackages value record =
+    { record | packages = value }
 
 
 setPlans : a -> { b | plans : a } -> { b | plans : a }
@@ -64,6 +77,11 @@ setQuestionnaire value record =
 setQuestionnaireImporter : a -> { b | questionnaireImporter : a } -> { b | questionnaireImporter : a }
 setQuestionnaireImporter value record =
     { record | questionnaireImporter = value }
+
+
+setQuestionnaires : a -> { b | questionnaires : a } -> { b | questionnaires : a }
+setQuestionnaires value record =
+    { record | questionnaires = value }
 
 
 setSelected : a -> { b | selected : a } -> { b | selected : a }

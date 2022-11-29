@@ -85,11 +85,14 @@ function setStyles(config, cb) {
     const customizationEnabled = config.feature && config.feature.clientCustomizationEnabled
     const styleUrl = customizationEnabled && config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
     const link = document.createElement('link')
-    link.setAttribute("rel", "stylesheet")
-    link.setAttribute("type", "text/css")
+    link.setAttribute('rel', 'stylesheet')
+    link.setAttribute('type', 'text/css')
     link.onload = cb
-    link.setAttribute("href", styleUrl)
-    document.getElementsByTagName("head")[0].appendChild(link)
+    link.setAttribute('href', styleUrl)
+    document.getElementsByTagName('head')[0].appendChild(link)
+
+    if (!window.wizard) window.wizard = {}
+    window.wizard.styleUrl = styleUrl[0] === '/' ? window.location.origin + styleUrl : styleUrl
 }
 
 function getApiUrl(config) {
@@ -104,6 +107,7 @@ function loadApp(config, locale, provisioning) {
         const flags = {
             seed: Math.floor(Math.random() * 0xFFFFFFFF),
             session: JSON.parse(localStorage.session || null),
+            selectedLocale: JSON.parse(localStorage.locale || null),
             apiUrl: getApiUrl(config),
             clientUrl: clientUrl(),
             config: config,
@@ -116,7 +120,7 @@ function loadApp(config, locale, provisioning) {
             cookieConsent: cookies.getCookieConsent(),
         }
 
-        if (Object.keys(locale).length >  0) {
+        if (Object.keys(locale).length > 0) {
             flags.locale = locale
         }
 
@@ -148,9 +152,12 @@ window.onload = function () {
     defaultStyleUrl = style.getAttribute('href')
     style.remove()
 
+    const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
     const promises = [
         axios.get(configUrl()),
-        axios.get(apiUrl() + '/configs/locales/' + navigator.language)
+        axios.get(apiUrl() + '/configs/locales/' + locale).catch(() => {
+            return {data: {}}
+        })
     ]
     const hasProvisioning = !!provisioningUrl()
     if (hasProvisioning) {
