@@ -162,7 +162,7 @@ newVersionInRegistryWarning appState package =
                                 package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
                         in
                         [ linkTo appState
-                            (Routes.templatesImport (Just latestPackageId))
+                            (Routes.knowledgeModelsImport (Just latestPackageId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
                             [ faSet "kmImport.fromRegistry" appState
                             , text (gettext "Import" appState.locale)
