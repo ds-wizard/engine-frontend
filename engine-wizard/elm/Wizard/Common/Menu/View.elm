@@ -7,7 +7,6 @@ import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, tabl
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import List.Extra as List
-import Maybe.Extra as Maybe
 import Shared.Auth.Role as Role
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
@@ -616,18 +615,14 @@ viewBuildInfo appState name buildInfo extra =
 viewLanguagesModal : AppState -> Bool -> Html Wizard.Msgs.Msg
 viewLanguagesModal appState visible =
     let
-        defaultLocale =
-            List.find .defaultLocale appState.config.locales
-                |> Maybe.unwrap "" .code
-
         selectedLocale =
             case appState.selectedLocale of
                 Just selected ->
                     List.find (\locale -> locale.code == selected) appState.config.locales
-                        |> Maybe.unwrap defaultLocale .code
+                        |> Maybe.map .code
 
                 Nothing ->
-                    defaultLocale
+                    Nothing
 
         viewLocale locale =
             let
@@ -639,7 +634,7 @@ viewLanguagesModal appState visible =
                         emptyNode
 
                 selected =
-                    if locale.code == selectedLocale then
+                    if Just locale.code == selectedLocale then
                         faSet "locale.selected" appState
 
                     else

@@ -170,6 +170,18 @@ messageToReadable appState message =
         "error.service.app.limit_exceeded" ->
             Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
 
+        "error.service.lb.missing_locale_json" ->
+            Just <| gettext "\"locale.json\" was not found in archive." appState.locale
+
+        "error.service.lb.unable_to_decode_locale_json" ->
+            Just <| String.format (gettext "Error while parsing locale.json: \"%s\"." appState.locale) message.params
+
+        "error.service.lb.missing_file" ->
+            Just <| String.format (gettext "File \"%s\" was not found in archive." appState.locale) message.params
+
+        "error.service.lb.pull_non_existing_locale" ->
+            Just <| gettext "The locale not found in Registry" appState.locale
+
         "error.service.pkg.pkg_cant_be_deleted_because_it_is_used_by_some_other_entity" ->
             Just <| gettext "Knowledge Model cannot be deleted because it is used in some Projects or Knowledge Model Editors." appState.locale
 
