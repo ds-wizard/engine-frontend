@@ -61,6 +61,12 @@ function configUrl() {
     return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
+function localeUrl() {
+    const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
+    const clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
+    return apiUrl() + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
+}
+
 function provisioningUrl() {
     if (window.wizard && window.wizard['provisioningUrl']) return window.wizard['provisioningUrl']
     return false
@@ -152,10 +158,9 @@ window.onload = function () {
     defaultStyleUrl = style.getAttribute('href')
     style.remove()
 
-    const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
     const promises = [
         axios.get(configUrl()),
-        axios.get(apiUrl() + '/configs/locales/' + locale).catch(() => {
+        axios.get(localeUrl()).catch(() => {
             return {data: {}}
         })
     ]
