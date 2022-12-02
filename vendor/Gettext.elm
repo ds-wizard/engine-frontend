@@ -96,7 +96,11 @@ ngettext ( singular, plural ) n lang =
         Just options ->
             case List.getAt pluralIndex options of
                 Just message ->
-                    message
+                    if String.isEmpty message then
+                        default
+
+                    else
+                        message
 
                 Nothing ->
                     default
