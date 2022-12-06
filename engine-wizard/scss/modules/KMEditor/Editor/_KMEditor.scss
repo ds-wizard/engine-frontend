@@ -86,6 +86,11 @@ $breadcrumbs-height: 40px;
             overflow: auto;
             padding: 1rem;
             border-left: 1px solid $gray-400;
+            height: calc(100vh - #{$editor-header-height + $breadcrumbs-height}) !important;
+
+            .app-fullscreen & {
+                height: calc(100vh - #{$breadcrumbs-height}) !important;
+            }
         }
     }
 
