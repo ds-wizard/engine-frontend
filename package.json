@@ -49,7 +49,7 @@
     "axios": "1.2.1",
     "axios-retry": "^3.3.1",
     "bootstrap": "^5.2.3",
-    "chart.js": "^3.9.1",
+    "chart.js": "^4.1.1",
     "flatpickr": "^4.6.13",
     "po2json": "^1.0.0-beta",
     "stream-browserify": "^3.0.0",
