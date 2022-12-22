@@ -28,7 +28,7 @@ view appState model =
                     [ strong [] [ text name ] ]
                 )
             , p [ class "text-muted" ]
-                [ i [] [ text (gettext "The original Project will remain unchanged." appState.locale) ] ]
+                [ i [] [ text (gettext "The original project will remain unchanged." appState.locale) ] ]
             ]
 
         modalConfig =

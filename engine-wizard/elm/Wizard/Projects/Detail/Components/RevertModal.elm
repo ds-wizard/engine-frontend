@@ -87,7 +87,7 @@ update cfg appState msg model =
                     ( model, Ports.refresh () )
 
                 Err error ->
-                    ( { model | revertResult = ApiError.toActionResult appState "Unable to revert questionnaire" error }
+                    ( { model | revertResult = ApiError.toActionResult appState "Unable to revert the project" error }
                     , Cmd.none
                     )
 

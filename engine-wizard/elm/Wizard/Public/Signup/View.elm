@@ -96,7 +96,13 @@ formView appState form =
                             , termsOfServiceLink termsOfServiceUrl
                             ]
                         )
-                        (text (gettext "You have to read Privacy and Terms of Service first" appState.locale))
+                        (text
+                            (String.format (gettext "You have to read %s and %s first" appState.locale)
+                                [ gettext "Privacy" appState.locale
+                                , gettext "Terms of Service" appState.locale
+                                ]
+                            )
+                        )
 
                 ( Just privacyUrl, Nothing ) ->
                     viewAcceptGroup
@@ -104,7 +110,11 @@ formView appState form =
                             (gettext "I have read %s." appState.locale)
                             [ privacyLink privacyUrl ]
                         )
-                        (text (gettext "You have to read Privacy first" appState.locale))
+                        (text
+                            (String.format (gettext "You have to read %s first" appState.locale)
+                                [ gettext "Privacy" appState.locale ]
+                            )
+                        )
 
                 ( Nothing, Just termsOfServiceUrl ) ->
                     viewAcceptGroup
@@ -112,7 +122,11 @@ formView appState form =
                             (gettext "I have read %s." appState.locale)
                             [ termsOfServiceLink termsOfServiceUrl ]
                         )
-                        (text (gettext "You have to read Terms of Service first" appState.locale))
+                        (text
+                            (String.format (gettext "You have to read %s first" appState.locale)
+                                [ gettext "Terms of Service" appState.locale ]
+                            )
+                        )
 
                 _ ->
                     emptyNode

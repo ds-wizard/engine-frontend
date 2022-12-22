@@ -32,4 +32,4 @@ handlePostConfirmationComplete appState model result =
             { model | confirmation = Success () }
 
         Err error ->
-            { model | confirmation = ApiError.toActionResult appState (gettext "Unable to confirm the registry account." appState.locale) error }
+            { model | confirmation = ApiError.toActionResult appState (gettext "Unable to confirm the DSW Registry account." appState.locale) error }

@@ -63,7 +63,7 @@ formView templates appState form =
     in
     Html.map (GenericMsg << GenericMsgs.FormMsg) <|
         div [ class "form-group" ]
-            [ label [] [ text (gettext "Recommended Template" appState.locale) ]
+            [ label [] [ text (gettext "Recommended Document Template" appState.locale) ]
             , div [ class "input-group" ]
                 [ Input.selectInput templateOptions recommendedTemplateField [ class "form-control" ]
                 , Input.selectInput templateVersionOptions recommendedTemplateIdField [ class "form-control" ]

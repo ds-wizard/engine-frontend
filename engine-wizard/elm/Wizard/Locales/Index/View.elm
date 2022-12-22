@@ -41,7 +41,7 @@ listingConfig appState =
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = .name
-    , emptyText = gettext "Click \"Import\" or \"Create\" button to import new locale." appState.locale
+    , emptyText = gettext "Click \"Import\" or \"Create\" button to add a new locale." appState.locale
     , updated =
         Just
             { getTime = .createdAt
