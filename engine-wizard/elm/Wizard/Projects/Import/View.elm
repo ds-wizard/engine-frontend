@@ -1,7 +1,7 @@
 module Wizard.Projects.Import.View exposing (view)
 
 import ActionResult
-import Gettext exposing (gettext)
+import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, div, em, h5, li, span, strong, text, ul)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -81,12 +81,15 @@ viewNavigation appState model questionnaire importResult =
                 , errorsLink
                 ]
 
+        changesCount =
+            List.length importResult.questionnaireEvents
+
         changesLink =
             a [ onClick (ChangeSidePanel ChangesSidePanel), class "ms-3" ]
                 (String.formatHtml
-                    (gettext "%s questionnaire changes will be imported" appState.locale)
+                    (ngettext ( "%s questionnaire change will be imported", "%s questionnaire changes will be imported" ) changesCount appState.locale)
                     [ strong []
-                        [ text (String.fromInt (List.length importResult.questionnaireEvents))
+                        [ text (String.fromInt changesCount)
                         ]
                     ]
                 )
@@ -96,11 +99,15 @@ viewNavigation appState model questionnaire importResult =
                 emptyNode
 
             else
+                let
+                    errorCount =
+                        List.length importResult.errors
+                in
                 a [ onClick (ChangeSidePanel ErrorsSidePanel), class "ms-3 text-danger" ]
                     (String.formatHtml
-                        (gettext "%s errors encountered" appState.locale)
+                        (ngettext ( "%s error encountered", "%s errors encountered" ) errorCount appState.locale)
                         [ strong []
-                            [ text (String.fromInt (List.length importResult.errors))
+                            [ text (String.fromInt errorCount)
                             ]
                         ]
                     )

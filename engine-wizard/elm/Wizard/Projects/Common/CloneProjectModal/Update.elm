@@ -72,6 +72,6 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
             )
 
         Err error ->
-            ( { model | cloningQuestionnaire = ApiError.toActionResult appState (gettext "Unable to clone Questionnaire." appState.locale) error }
+            ( { model | cloningQuestionnaire = ApiError.toActionResult appState (gettext "Unable to clone project." appState.locale) error }
             , Cmd.none
             )

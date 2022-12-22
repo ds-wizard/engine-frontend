@@ -59,7 +59,7 @@
     }
 
     .modal-body {
-        .btn {
+        .btn:not(.btn-link) {
             min-width: 100px;
         }
 

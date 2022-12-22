@@ -1103,7 +1103,7 @@ viewQuestionnaireToolbar appState model =
                         , toggleMsg = ImportersDropdownMsg
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                                [ text "Import answers" ]
+                                [ text (gettext "Import answers" appState.locale) ]
                         , items = List.map importerDropdownItem model.questionnaireImporters
                         }
                     ]

@@ -275,14 +275,14 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
                     Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.questionnaires
             in
             ( { model
-                | deletingMigration = Success <| gettext "Questionnaire migration was successfully canceled." appState.locale
+                | deletingMigration = Success <| gettext "Project migration was successfully canceled." appState.locale
                 , questionnaires = questionnaires
               }
             , cmd
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be deleted." appState.locale) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Project migration could not be deleted." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
 

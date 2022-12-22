@@ -148,7 +148,7 @@ handlePostMigrationCompleted appState model result =
             ( model, cmdNavigate appState <| Routes.projectsMigration migration.newQuestionnaire.uuid )
 
         Err error ->
-            ( { model | savingMigration = ApiError.toActionResult appState (gettext "Questionnaire migration could not be created." appState.locale) error }
+            ( { model | savingMigration = ApiError.toActionResult appState (gettext "Project migration could not be created." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
