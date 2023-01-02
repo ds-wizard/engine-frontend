@@ -103,7 +103,7 @@ selection appState tagListConfig knowledgeModelResult =
             in
             if List.length tags > 0 then
                 viewContent <|
-                    div []
+                    div [ class "tag-selection" ]
                         [ list appState tagListConfig tags
                         , FormExtra.text <| gettext "You can filter questions in the questionnaire by question tags. If no question tags are selected, all questions will be used." appState.locale
                         ]
