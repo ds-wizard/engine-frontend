@@ -109,7 +109,7 @@ view appState wrapMsg eventMsg editorBranch model =
                 Flash.info appState (gettext "There are no question tags, create them first." appState.locale)
 
             else if Dict.isEmpty editorBranch.branch.knowledgeModel.entities.questions then
-                Flash.info appState (gettext "There are no questions create them first." appState.locale)
+                Flash.info appState (gettext "There are no questions, create them first." appState.locale)
 
             else
                 let

@@ -80,7 +80,7 @@ handleGetQuestionnaireMigrationCompleted appState model result =
         ( modelWithMigration, cmd ) =
             applyResult appState
                 { setResult = setResult appState
-                , defaultError = gettext "Unable to get the Questionnaire migration." appState.locale
+                , defaultError = gettext "Unable to get the project migration." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg

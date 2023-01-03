@@ -15,6 +15,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.QuestionChange as QuestionChange exposing (QuestionChange(..))
 import Wizard.Projects.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
@@ -32,7 +33,7 @@ contentView appState model migration =
     let
         finalizeAction =
             if allResolved model migration then
-                button [ class "btn btn-primary", onClick FinalizeMigration ]
+                button [ class "btn btn-primary", onClick FinalizeMigration, dataCy "project-migration_finalize" ]
                     [ text (gettext "Finalize migration" appState.locale) ]
 
             else
@@ -120,12 +121,12 @@ changeView appState model migration =
             if isSelectedChangeResolved model then
                 div []
                     [ text (gettext "Change already resolved" appState.locale)
-                    , button [ class "btn btn-outline-secondary with-icon", onClick UndoResolveCurrentChange ]
+                    , button [ class "btn btn-outline-secondary with-icon", onClick UndoResolveCurrentChange, dataCy "project-migration_undo" ]
                         [ faSet "questionnaireMigration.undo" appState, text (gettext "Undo" appState.locale) ]
                     ]
 
             else
-                button [ class "btn btn-outline-primary with-icon", onClick ResolveCurrentChange ]
+                button [ class "btn btn-outline-primary with-icon", onClick ResolveCurrentChange, dataCy "project-migration_resolve" ]
                     [ faSet "questionnaireMigration.resolve" appState, text (gettext "Resolve" appState.locale) ]
 
         resolveAllAction =
@@ -133,7 +134,7 @@ changeView appState model migration =
                 emptyNode
 
             else
-                button [ class "btn btn-outline-primary with-icon", onClick ResolveAllChanges ]
+                button [ class "btn btn-outline-primary with-icon", onClick ResolveAllChanges, dataCy "project-migration_resolve-all" ]
                     [ faSet "questionnaireMigration.resolveAll" appState, text (gettext "Resolve all" appState.locale) ]
     in
     div [ class "change-view" ]

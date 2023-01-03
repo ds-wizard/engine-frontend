@@ -15,6 +15,7 @@ import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import String.Extra as String
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -93,6 +94,9 @@ formView appState form =
         colorPicker colorOptions field =
             div [ class "color-picker" ] (List.map (colorButtonView field) colorOptions)
 
+        fontAwesomeLink =
+            "https://fontawesome.com/v5/search?o=r&m=free"
+
         clientCustomizations =
             if appState.config.feature.clientCustomizationEnabled then
                 let
@@ -113,14 +117,14 @@ formView appState form =
                                     [ class "btn btn-secondary"
                                     , onClick (LogoUploadModalMsg (LogoUploadModal.SetOpen True))
                                     ]
-                                    [ text "Change" ]
+                                    [ text (gettext "Change" appState.locale) ]
                                 ]
                             ]
                 in
                 [ div [ class "row mt-5" ]
                     [ div [ class "col-8" ]
-                        [ FormGroup.plainGroup logoPreview "Logo"
-                        , FormExtra.mdAfter "Logo is used next to the application name in the menu. It is recommended to use a square image."
+                        [ FormGroup.plainGroup logoPreview (gettext "Logo" appState.locale)
+                        , FormExtra.mdAfter (gettext "Logo is used next to the application name in the menu. It is recommended to use a square image." appState.locale)
                         ]
                     , div [ class "col-4" ]
                         [ img [ class "settings-img", src "/img/settings/logo.png" ] []
@@ -128,11 +132,11 @@ formView appState form =
                     ]
                 , div [ class "row mt-5" ]
                     [ div [ class "col-6" ]
-                        [ formWrap <| FormGroup.input appState form "stylePrimaryColor" "Primary Color"
+                        [ formWrap <| FormGroup.input appState form "stylePrimaryColor" (gettext "Primary Color" appState.locale)
                         , formWrap <| colorPicker colorOptionsDarker "stylePrimaryColor"
                         ]
                     , div [ class "col-6" ]
-                        [ formWrap <| FormGroup.input appState form "styleIllustrationsColor" "Illustrations Color"
+                        [ formWrap <| FormGroup.input appState form "styleIllustrationsColor" (gettext "Illustrations Color" appState.locale)
                         , formWrap <| colorPicker colorOptionsLighter "styleIllustrationsColor"
                         ]
                     ]
@@ -173,7 +177,11 @@ formView appState form =
                     [ div [ class "row" ]
                         [ div [ class "col-8" ]
                             [ label [] [ text (gettext "Custom Menu Links" appState.locale) ]
-                            , Markdown.toHtml [ class "form-text text-muted" ] (gettext "Configure additional links in the menu. Choose any free icon from the [Font Awesome](https://fontawesome.com/icons?d=gallery&m=free), e.g. *fas fa-magic*. Check *New window* if you want to open the link in a new window." appState.locale)
+                            , Markdown.toHtml [ class "form-text text-muted" ]
+                                (String.format
+                                    (gettext "Configure additional links in the menu. Choose any free icon from the [Font Awesome](%s), e.g. *fas fa-magic*. Check *New window* if you want to open the link in a new window." appState.locale)
+                                    [ fontAwesomeLink ]
+                                )
                             ]
                         , div [ class "col-4" ]
                             [ img [ class "settings-img", src "/img/settings/custom-menu-links.png" ] [] ]
@@ -249,7 +257,7 @@ viewAppPreview appState form =
             , div [ class "menu-button", primaryColorStyle ]
                 [ div [ class "menu-button-color", primaryColorBackgroundStyle ] []
                 , faSetFw "menu.projects" appState
-                , text "Projects"
+                , text (gettext "Projects" appState.locale)
                 ]
             ]
         , div [ class "AppPreview__Content" ]
@@ -298,13 +306,13 @@ customMenuLinkItemView appState form i =
             Form.getFieldAsBool ("customMenuLinks." ++ String.fromInt i ++ ".newWindow") form
 
         ( iconError, iconErrorClass ) =
-            FormGroup.getErrors appState iconField "Icon"
+            FormGroup.getErrors appState iconField (gettext "Icon" appState.locale)
 
         ( titleError, titleErrorClass ) =
-            FormGroup.getErrors appState titleField "Title"
+            FormGroup.getErrors appState titleField (gettext "Title" appState.locale)
 
         ( urlError, urlErrorClass ) =
-            FormGroup.getErrors appState urlField "URL"
+            FormGroup.getErrors appState urlField (gettext "URL" appState.locale)
     in
     div [ class "row" ]
         [ div [ class "col-2" ]

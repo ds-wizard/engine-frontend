@@ -64,13 +64,13 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
     case result of
         Ok _ ->
             ( { model
-                | deletingQuestionnaire = Success <| gettext "Questionnaire was successfully deleted." appState.locale
+                | deletingQuestionnaire = Success <| gettext "Project was successfully deleted." appState.locale
                 , questionnaireToBeDeleted = Nothing
               }
             , cfg.deleteCompleteCmd
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be deleted." appState.locale) error }
+            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (gettext "Project could not be deleted." appState.locale) error }
             , Cmd.none
             )

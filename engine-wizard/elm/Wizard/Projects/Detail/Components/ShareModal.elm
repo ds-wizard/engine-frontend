@@ -293,7 +293,7 @@ usersView appState model =
                 emptyNode
     in
     div [ class "ShareModal__Users" ]
-        [ strong [] [ text "Users" ]
+        [ strong [] [ text (gettext "Users" appState.locale) ]
         , typeHintInput
         , Html.map FormMsg <| FormGroup.viewList appState (userView appState model.users) model.questionnaireEditForm "permissions" ""
         , separator
@@ -390,7 +390,7 @@ formView appState questionnaireUuid form =
                             ]
                             [ div [ class "d-flex" ]
                                 [ input [ readonly True, class "form-control", id "public-link", value publicLink ] []
-                                , button [ class "btn btn-link", onClick (CopyPublicLink publicLink) ] [ text (gettext "Copy link" appState.locale) ]
+                                , button [ class "btn btn-link text-nowrap", onClick (CopyPublicLink publicLink) ] [ text (gettext "Copy link" appState.locale) ]
                                 ]
                             ]
 

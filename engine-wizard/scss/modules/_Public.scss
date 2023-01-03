@@ -31,9 +31,9 @@
         color: $side-navigation-title-color;
         background-image: $side-navigation-logo-url;
         background-repeat: no-repeat;
-        background-size: 35px;
+        background-size: $side-navigation-logo-width $side-navigation-logo-height;
         background-position: left center;
-        padding-left: 45px;
+        padding-left: 10px + $side-navigation-logo-width;
         font-weight: 500;
     }
 
