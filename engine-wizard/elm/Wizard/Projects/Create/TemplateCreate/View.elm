@@ -39,7 +39,7 @@ viewContent appState model mbQuestionnaire =
         , formView appState model mbQuestionnaire
         , FormActions.view appState
             (Routes.projectsIndex appState)
-            (ActionResult.ButtonConfig (gettext "Save" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
+            (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 
 
