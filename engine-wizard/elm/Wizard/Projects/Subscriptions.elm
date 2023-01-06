@@ -33,4 +33,4 @@ subscriptions route model =
             Sub.map MigrationMsg <| Wizard.Projects.Migration.Subscriptions.subscriptions model.migrationModel
 
         ImportRoute _ _ ->
-            Sub.map ImportMsg Wizard.Projects.Import.Subscriptions.subscriptions
+            Sub.map ImportMsg <| Wizard.Projects.Import.Subscriptions.subscriptions model.importModel
