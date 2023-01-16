@@ -2,13 +2,15 @@ module Wizard.Projects.Import.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
+import Json.Encode as E
 import Random exposing (Seed)
+import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Error.ApiError as ApiError
-import Shared.Setters exposing (setQuestionnaireImporter)
+import Shared.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -37,9 +39,13 @@ update wrapMsg msg appState model =
             ( appState.seed, m, c )
 
         openImporter newModel =
-            case ( newModel.questionnaire, newModel.questionnaireImporter ) of
-                ( Success _, Success importer ) ->
-                    Ports.openImporter importer.url
+            case ( newModel.knowledgeModelString, newModel.questionnaireImporter ) of
+                ( Success knowledgeModelString, Success importer ) ->
+                    Ports.openImporter <|
+                        E.object
+                            [ ( "url", E.string importer.url )
+                            , ( "knowledgeModel", E.string knowledgeModelString )
+                            ]
 
                 _ ->
                     Cmd.none
@@ -61,9 +67,17 @@ update wrapMsg msg appState model =
                         , result = result
                         , logoutMsg = Wizard.Msgs.logoutMsg
                         }
+
+                fetchCmd =
+                    case newModel.questionnaire of
+                        Success questionnaire ->
+                            KnowledgeModelsApi.fetchAsString questionnaire.package.id questionnaire.selectedQuestionTagUuids appState (wrapMsg << FetchKnowledgeModelStringComplete)
+
+                        _ ->
+                            Cmd.none
             in
             withSeed <|
-                ( newModel, Cmd.batch [ cmd, openImporter newModel ] )
+                ( newModel, Cmd.batch [ cmd, fetchCmd ] )
 
         GetQuestionnaireImporterComplete result ->
             case result of
@@ -82,6 +96,19 @@ update wrapMsg msg appState model =
                         ( setQuestionnaireImporter (ApiError.toActionResult appState (gettext "Unable to get importer." appState.locale) error) model
                         , getResultCmd Wizard.Msgs.logoutMsg result
                         )
+
+        FetchKnowledgeModelStringComplete result ->
+            let
+                ( newModel, cmd ) =
+                    applyResult appState
+                        { setResult = setKnowledgeModelString
+                        , defaultError = gettext "Unable to get the project." appState.locale
+                        , model = model
+                        , result = result
+                        , logoutMsg = Wizard.Msgs.logoutMsg
+                        }
+            in
+            withSeed ( newModel, Cmd.batch [ cmd, openImporter newModel ] )
 
         GotImporterData data ->
             case ( model.questionnaire, model.questionnaireModel ) of

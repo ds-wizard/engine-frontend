@@ -3,18 +3,20 @@ module.exports = function (app) {
 
     var lastListener
 
-    function openImporter(requestUrl) {
+    function openImporter(data) {
         if (lastListener) {
             unbind()
         }
 
+        var requestUrl = data.url
         var widgetOrigin = getWidgetOrigin(requestUrl)
         var popup = window.open(requestUrl, 'popup', getWindowFeatures())
         var handler = (event) => {
             if (event.data.type === 'ready') {
                 popup.postMessage({
                     type: 'ready',
-                    styleUrl: window.wizard.styleUrl
+                    styleUrl: window.wizard.styleUrl,
+                    knowledgeModel: data.knowledgeModel
                 }, requestUrl)
             } else if (event.data.type === 'Import') {
                 if (event.origin !== widgetOrigin) {

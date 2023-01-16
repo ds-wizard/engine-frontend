@@ -11,6 +11,7 @@ import Wizard.Projects.Import.Models exposing (SidePanel)
 type Msg
     = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
     | GetQuestionnaireImporterComplete (Result ApiError QuestionnaireImporter)
+    | FetchKnowledgeModelStringComplete (Result ApiError String)
     | GotImporterData E.Value
     | PutImportData
     | PutImporterDataComplete (Result ApiError ())

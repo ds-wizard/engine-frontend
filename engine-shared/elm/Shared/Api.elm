@@ -11,6 +11,7 @@ module Shared.Api exposing
     , jwtFetch
     , jwtFetchEmpty
     , jwtFetchPut
+    , jwtFetchString
     , jwtGet
     , jwtOrHttpFetch
     , jwtOrHttpGet
@@ -57,6 +58,15 @@ jwtGet url decoder appState toMsg =
     Jwt.Http.get appState.session.token.token
         { url = appState.apiUrl ++ url
         , expect = expectJson toMsg decoder
+        }
+
+
+jwtFetchString : String -> E.Value -> AbstractAppState b -> ToMsg String msg -> Cmd msg
+jwtFetchString url body appState toMsg =
+    Jwt.Http.post appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.jsonBody body
+        , expect = expectString toMsg
         }
 
 
@@ -212,6 +222,12 @@ expectJson toMsg decoder =
         resolve <|
             \string ->
                 Result.mapError D.errorToString (D.decodeString decoder string)
+
+
+expectString : ToMsg String msg -> Http.Expect msg
+expectString toMsg =
+    Http.expectStringResponse toMsg <|
+        resolve Ok
 
 
 expectWhatever : ToMsg () msg -> Http.Expect msg

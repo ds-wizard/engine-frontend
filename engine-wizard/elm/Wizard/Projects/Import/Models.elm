@@ -19,6 +19,7 @@ type alias Model =
     , questionnaire : ActionResult QuestionnaireDetail
     , questionnaireModel : ActionResult Questionnaire.Model
     , questionnaireImporter : ActionResult QuestionnaireImporter
+    , knowledgeModelString : ActionResult String
     , importResult : Maybe ImporterResult
     , importing : ActionResult ()
     }
@@ -37,6 +38,7 @@ initialModel uuid importerId =
     , questionnaire = Loading
     , questionnaireModel = Loading
     , questionnaireImporter = Loading
+    , knowledgeModelString = Loading
     , importResult = Nothing
     , importing = Unset
     }

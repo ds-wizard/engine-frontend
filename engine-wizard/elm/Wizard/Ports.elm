@@ -118,7 +118,7 @@ port gotIntegrationWidgetValue : (E.Value -> msg) -> Sub msg
 -- Importer
 
 
-port openImporter : String -> Cmd msg
+port openImporter : E.Value -> Cmd msg
 
 
 port gotImporterData : (E.Value -> msg) -> Sub msg
