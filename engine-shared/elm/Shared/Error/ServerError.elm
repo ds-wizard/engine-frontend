@@ -111,6 +111,9 @@ messageToReadable appState message =
         "error.validation.pkg_id_uniqueness" ->
             Just <| gettext "Knowledge Model already exists." appState.locale
 
+        "error.validation.pkg_unsupported_metamodel_version" ->
+            Just <| gettext "Knowledge Model metamodel version is not supported." appState.locale
+
         "error.validation.tml_id_uniqueness" ->
             Just <| gettext "Document template already exists." appState.locale
 
@@ -164,7 +167,7 @@ messageToReadable appState message =
         "error.validation.tml_deletation" ->
             Just <| gettext "Document template cannot be deleted because it is used in some projects or documents." appState.locale
 
-        "error.validation.tml_unsupported_version" ->
+        "error.validation.tml_unsupported_metamodel_version" ->
             Just <| gettext "Document template metamodel version is not supported." appState.locale
 
         "error.service.app.limit_exceeded" ->
