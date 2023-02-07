@@ -19,7 +19,6 @@ import Wizard.Settings.Projects.View
 import Wizard.Settings.Registry.View
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.View
-import Wizard.Settings.Template.View
 import Wizard.Settings.Usage.View
 
 
@@ -59,10 +58,6 @@ view route appState model =
                 SubmissionRoute ->
                     Html.map SubmissionMsg <|
                         Wizard.Settings.Submission.View.view appState model.documentSubmissionModel
-
-                TemplateRoute ->
-                    Html.map TemplateMsg <|
-                        Wizard.Settings.Template.View.view appState model.templateModel
 
                 KnowledgeModelsRoute ->
                     Html.map KnowledgeModelsMsg <|
@@ -130,7 +125,6 @@ navigationContentLinks appState =
     , ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale )
     , ( ProjectsRoute, gettext "Projects" appState.locale )
     , ( SubmissionRoute, gettext "Document Submission" appState.locale )
-    , ( TemplateRoute, gettext "Document Templates" appState.locale )
     ]
 
 

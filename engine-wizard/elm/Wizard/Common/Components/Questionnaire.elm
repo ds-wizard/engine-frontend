@@ -996,7 +996,7 @@ view appState cfg ctx model =
     let
         ( toolbar, toolbarEnabled ) =
             if cfg.features.toolbarEnabled then
-                ( Html.map cfg.wrapMsg <| viewQuestionnaireToolbar appState model, True )
+                ( Html.map cfg.wrapMsg <| viewQuestionnaireToolbar appState cfg model, True )
 
             else
                 ( emptyNode, False )
@@ -1045,8 +1045,8 @@ view appState cfg ctx model =
 -- QUESTIONNAIRE - TOOLBAR
 
 
-viewQuestionnaireToolbar : AppState -> Model -> Html Msg
-viewQuestionnaireToolbar appState model =
+viewQuestionnaireToolbar : AppState -> Config msg -> Model -> Html Msg
+viewQuestionnaireToolbar appState cfg model =
     let
         viewDropdown =
             let
@@ -1093,7 +1093,7 @@ viewQuestionnaireToolbar appState model =
                 ]
 
         importersDropdown =
-            if List.isEmpty model.questionnaireImporters then
+            if cfg.features.readonly || List.isEmpty model.questionnaireImporters then
                 emptyNode
 
             else

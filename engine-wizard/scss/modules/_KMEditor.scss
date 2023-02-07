@@ -1,21 +1,9 @@
+@import '../mixins';
 @import '../variables';
 @import 'KMEditor/Editor';
 @import 'KMEditor/Migration';
 
-$indent-step: 20px;
 
-@mixin indent($level, $maxLevel) {
-    ul li {
-        &::after {
-            width: calc(100% + #{$indent-step * $level});
-            margin-left: -($level * $indent-step);
-        }
-
-        @if $level < $maxLevel {
-            @include indent($level + 1, $maxLevel)
-        }
-    }
-}
 
 .diff-tree-input-actions {
     padding: 0.5rem 0;

@@ -9,3 +9,10 @@
     background-size: contain;
     margin-bottom: -2px;
 }
+
+
+.fa-stack {
+    &.small {
+        font-size: 0.5rem;
+    }
+}

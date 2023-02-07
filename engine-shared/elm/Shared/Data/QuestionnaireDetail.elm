@@ -45,6 +45,9 @@ import Maybe.Extra as Maybe
 import Regex
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
+import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
+import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
+import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
@@ -63,9 +66,6 @@ import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
-import Shared.Data.Template.TemplateFormat as TemplateFormat exposing (TemplateFormat)
-import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
-import Shared.Data.TemplateSuggestion as TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.UserInfo as UserInfo
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
@@ -93,11 +93,11 @@ type alias QuestionnaireDetail =
     , sharing : QuestionnaireSharing
     , permissions : List Permission
     , selectedQuestionTagUuids : List String
-    , templateId : Maybe String
-    , template : Maybe TemplateSuggestion
-    , templateState : Maybe TemplateState
+    , documentTemplateId : Maybe String
+    , documentTemplate : Maybe DocumentTemplateSuggestion
+    , documentTemplateState : Maybe DocumentTemplateState
     , formatUuid : Maybe Uuid
-    , format : Maybe TemplateFormat
+    , format : Maybe DocumentTemplateFormat
     , labels : Dict String (List String)
     , versions : List QuestionnaireVersion
     , migrationUuid : Maybe Uuid
@@ -122,11 +122,11 @@ decoder =
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
-        |> D.required "templateId" (D.maybe D.string)
-        |> D.required "template" (D.maybe TemplateSuggestion.decoder)
-        |> D.required "templateState" (D.maybe TemplateState.decoder)
+        |> D.required "documentTemplateId" (D.maybe D.string)
+        |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)
+        |> D.required "documentTemplateState" (D.maybe DocumentTemplateState.decoder)
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
-        |> D.required "format" (D.maybe TemplateFormat.decoder)
+        |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
         |> D.required "versions" (D.list QuestionnaireVersion.decoder)
         |> D.required "migrationUuid" (D.maybe Uuid.decoder)
@@ -174,9 +174,9 @@ createQuestionnaireDetail package km =
     , commentThreadsMap = Dict.empty
     , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
     , selectedQuestionTagUuids = []
-    , templateId = Nothing
-    , template = Nothing
-    , templateState = Nothing
+    , documentTemplateId = Nothing
+    , documentTemplate = Nothing
+    , documentTemplateState = Nothing
     , formatUuid = Nothing
     , format = Nothing
     , labels = Dict.empty

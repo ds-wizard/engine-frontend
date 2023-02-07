@@ -3,6 +3,7 @@ module Version exposing
     , compare
     , create
     , decoder
+    , encode
     , fromString
     , getMajor
     , getMinor
@@ -15,6 +16,7 @@ module Version exposing
     )
 
 import Json.Decode as D exposing (Decoder)
+import Json.Encode as E
 
 
 type Version
@@ -73,6 +75,14 @@ decoder =
                     _ ->
                         D.fail <| "Invalid version " ++ str
             )
+
+
+encode : Version -> E.Value
+encode (Version major minor patch) =
+    [ major, minor, patch ]
+        |> List.map String.fromInt
+        |> String.join "."
+        |> E.string
 
 
 toString : Version -> String

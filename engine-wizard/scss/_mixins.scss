@@ -81,3 +81,18 @@
     -ms-user-select: none;
     user-select: none;
 }
+
+$indent-step: 20px;
+
+@mixin indent($level, $maxLevel) {
+    ul li {
+        &::after {
+            width: calc(100% + #{$indent-step * $level});
+            margin-left: -($level * $indent-step);
+        }
+
+        @if $level < $maxLevel {
+            @include indent($level + 1, $maxLevel)
+        }
+    }
+}

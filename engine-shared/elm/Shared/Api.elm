@@ -10,8 +10,11 @@ module Shared.Api exposing
     , jwtDelete
     , jwtFetch
     , jwtFetchEmpty
+    , jwtFetchFileWithData
     , jwtFetchPut
+    , jwtFetchString
     , jwtGet
+    , jwtGetString
     , jwtOrHttpFetch
     , jwtOrHttpGet
     , jwtOrHttpPut
@@ -20,6 +23,7 @@ module Shared.Api exposing
     , jwtPostFile
     , jwtPostFileWithData
     , jwtPut
+    , jwtPutString
     , wsUrl
     )
 
@@ -60,6 +64,23 @@ jwtGet url decoder appState toMsg =
         }
 
 
+jwtGetString : String -> AbstractAppState b -> ToMsg String msg -> Cmd msg
+jwtGetString url appState toMsg =
+    Jwt.Http.get appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , expect = expectString toMsg
+        }
+
+
+jwtFetchString : String -> E.Value -> AbstractAppState b -> ToMsg String msg -> Cmd msg
+jwtFetchString url body appState toMsg =
+    Jwt.Http.post appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.jsonBody body
+        , expect = expectString toMsg
+        }
+
+
 jwtPost : String -> E.Value -> AbstractAppState b -> ToMsg () msg -> Cmd msg
 jwtPost url body appState toMsg =
     Jwt.Http.post appState.session.token.token
@@ -84,6 +105,15 @@ jwtPostFileWithData url data file appState toMsg =
         { url = appState.apiUrl ++ url
         , body = Http.multipartBody (Http.filePart "file" file :: data)
         , expect = expectWhatever toMsg
+        }
+
+
+jwtFetchFileWithData : String -> List Http.Part -> Decoder a -> File -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+jwtFetchFileWithData url data decoder file appState toMsg =
+    Jwt.Http.post appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.multipartBody (Http.filePart "file" file :: data)
+        , expect = expectJson toMsg decoder
         }
 
 
@@ -119,6 +149,15 @@ jwtPut url body appState toMsg =
     Jwt.Http.put appState.session.token.token
         { url = appState.apiUrl ++ url
         , body = Http.jsonBody body
+        , expect = expectWhatever toMsg
+        }
+
+
+jwtPutString : String -> String -> String -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+jwtPutString url contentType body appState toMsg =
+    Jwt.Http.put appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.stringBody contentType body
         , expect = expectWhatever toMsg
         }
 
@@ -212,6 +251,12 @@ expectJson toMsg decoder =
         resolve <|
             \string ->
                 Result.mapError D.errorToString (D.decodeString decoder string)
+
+
+expectString : ToMsg String msg -> Http.Expect msg
+expectString toMsg =
+    Http.expectStringResponse toMsg <|
+        resolve Ok
 
 
 expectWhatever : ToMsg () msg -> Http.Expect msg

@@ -1,6 +1,7 @@
-module Url.Parser.Query.Extra exposing (uuid)
+module Url.Parser.Query.Extra exposing (bool, uuid)
 
-import Url.Parser.Query exposing (Parser, custom)
+import Dict
+import Url.Parser.Query exposing (Parser, custom, enum)
 import Uuid exposing (Uuid)
 
 
@@ -14,3 +15,8 @@ uuid key =
 
                 _ ->
                     Nothing
+
+
+bool : String -> Parser (Maybe Bool)
+bool key =
+    enum key (Dict.fromList [ ( "true", True ), ( "false", False ) ])

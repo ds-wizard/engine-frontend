@@ -17,9 +17,11 @@ view appState usage =
             , viewUsageRowSimple (gettext "Active Users" appState.locale) usage.activeUsers
             , viewUsageRowSimple (gettext "Knowledge Model Editors" appState.locale) usage.branches
             , viewUsageRowSimple (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
-            , viewUsageRowSimple (gettext "Document Templates" appState.locale) usage.templates
+            , viewUsageRowSimple (gettext "Document Template Editors" appState.locale) usage.documentTemplateDrafts
+            , viewUsageRowSimple (gettext "Document Templates" appState.locale) usage.documentTemplates
             , viewUsageRowSimple (gettext "Projects" appState.locale) usage.questionnaires
             , viewUsageRowSimple (gettext "Documents" appState.locale) usage.documents
+            , viewUsageRowSimple (gettext "Locales" appState.locale) usage.locales
             , viewUsageRowBytes (gettext "Storage" appState.locale) usage.storage
             ]
         ]

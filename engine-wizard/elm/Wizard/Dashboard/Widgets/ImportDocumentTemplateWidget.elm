@@ -13,7 +13,7 @@ view appState =
         { title = gettext "Import Document Template" appState.locale
         , text = gettext "Document templates transform answers from a questionnaire into a document. This document can be anything, from PDF to machine-actionable JSON. You can import existing document templates from [DSW Registry](https://registry.ds-wizard.org/templates) or create new ones using [DSW TDK](https://guide.ds-wizard.org/miscellaneous/development/template-development)." appState.locale
         , action =
-            { route = Routes.templatesImport Nothing
+            { route = Routes.documentTemplatesImport Nothing
             , label = gettext "Import" appState.locale
             }
         }

@@ -12,6 +12,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 
 @import '~flatpickr/dist/flatpickr';
 
+@import 'lib/code-mirror';
 @import 'lib/flatpickr';
 @import 'lib/syntax-highlight';
 
@@ -27,6 +28,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'elements/diffs';
 @import 'elements/dropdown';
 @import 'elements/fa';
+@import 'elements/file-tree';
 @import 'elements/files';
 @import 'elements/flex';
 @import 'elements/forms';

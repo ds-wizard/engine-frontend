@@ -19,7 +19,6 @@ import Wizard.Settings.Projects.Update
 import Wizard.Settings.Registry.Update
 import Wizard.Settings.Routes exposing (Route(..))
 import Wizard.Settings.Submission.Update
-import Wizard.Settings.Template.Update
 import Wizard.Settings.Usage.Update
 
 
@@ -58,10 +57,6 @@ fetchData route appState _ =
         SubmissionRoute ->
             Cmd.map SubmissionMsg <|
                 Wizard.Settings.Submission.Update.fetchData appState
-
-        TemplateRoute ->
-            Cmd.map TemplateMsg <|
-                Wizard.Settings.Template.Update.fetchData appState
 
         KnowledgeModelsRoute ->
             genericFetch KnowledgeModelsMsg
@@ -133,13 +128,6 @@ update wrapMsg msg appState model =
                     Wizard.Settings.Submission.Update.update (wrapMsg << SubmissionMsg) documentSubmissionMsg appState model.documentSubmissionModel
             in
             ( { model | documentSubmissionModel = documentSubmissionModel }, cmd )
-
-        TemplateMsg templateMsg ->
-            let
-                ( templateModel, cmd ) =
-                    Wizard.Settings.Template.Update.update (wrapMsg << TemplateMsg) templateMsg appState model.templateModel
-            in
-            ( { model | templateModel = templateModel }, cmd )
 
         KnowledgeModelsMsg knowledgeModelsMsg ->
             let

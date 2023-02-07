@@ -24,7 +24,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         buttonConfig =
-            { label = gettext "Save" appState.locale
+            { label = gettext "Create" appState.locale
             , result = model.savingQuestionnaire
             , msg = FormMsg Form.Submit
             , dangerous = False

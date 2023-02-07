@@ -91,5 +91,5 @@ navLink appState cfg =
 
 navigation : AppState -> List (NavLinkConfig msg) -> Html msg
 navigation appState cfgs =
-    div [ class "DetailNavigation__Row" ]
+    row
         [ ul [ class "nav nav-underline-tabs" ] (List.map (navLink appState) cfgs) ]

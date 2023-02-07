@@ -1,8 +1,12 @@
 module Shared.Setters exposing
     ( setApp
+    , setAssets
     , setBookReference
     , setDropdownState
+    , setFiles
+    , setFormatUuid
     , setKnowledgeModel
+    , setKnowledgeModelString
     , setLocale
     , setMigration
     , setPackage
@@ -11,6 +15,7 @@ module Shared.Setters exposing
     , setPulling
     , setQuestionnaire
     , setQuestionnaireImporter
+    , setQuestionnaireUuid
     , setQuestionnaires
     , setSelected
     , setTemplate
@@ -24,6 +29,11 @@ setApp value record =
     { record | app = value }
 
 
+setAssets : a -> { b | assets : a } -> { b | assets : a }
+setAssets value record =
+    { record | assets = value }
+
+
 setBookReference : a -> { b | bookReference : a } -> { b | bookReference : a }
 setBookReference value record =
     { record | bookReference = value }
@@ -34,9 +44,24 @@ setDropdownState value record =
     { record | dropdownState = value }
 
 
+setFiles : a -> { b | files : a } -> { b | files : a }
+setFiles value record =
+    { record | files = value }
+
+
+setFormatUuid : a -> { b | formatUuid : a } -> { b | formatUuid : a }
+setFormatUuid value record =
+    { record | formatUuid = value }
+
+
 setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
 setKnowledgeModel value record =
     { record | knowledgeModel = value }
+
+
+setKnowledgeModelString : a -> { b | knowledgeModelString : a } -> { b | knowledgeModelString : a }
+setKnowledgeModelString value record =
+    { record | knowledgeModelString = value }
 
 
 setLocale : a -> { b | locale : a } -> { b | locale : a }
@@ -72,6 +97,11 @@ setPulling value record =
 setQuestionnaire : a -> { b | questionnaire : a } -> { b | questionnaire : a }
 setQuestionnaire value record =
     { record | questionnaire = value }
+
+
+setQuestionnaireUuid : a -> { b | questionnaireUuid : a } -> { b | questionnaireUuid : a }
+setQuestionnaireUuid value record =
+    { record | questionnaireUuid = value }
 
 
 setQuestionnaireImporter : a -> { b | questionnaireImporter : a } -> { b | questionnaireImporter : a }

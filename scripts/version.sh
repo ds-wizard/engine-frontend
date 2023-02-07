@@ -7,3 +7,6 @@ FILES=("package.json" "package-lock.json" "wizard-style-builder/package.json" "w
 for FILE in ${FILES[@]}; do
   sed 's/^  "version": ".*"/  "version": "'$1'"/' $FILE > $FILE.new && mv $FILE.new $FILE
 done
+
+npm install
+cd wizard-style-builder && npm install

@@ -10,6 +10,7 @@ port module Wizard.Ports exposing
     , downloadFile
     , fileContentRead
     , fileSelected
+    , focus
     , gotImporterData
     , gotIntegrationWidgetValue
     , localStorageData
@@ -68,7 +69,10 @@ port createLocaleDropzone : String -> Cmd msg
 
 
 
--- Scroll
+-- DOM
+
+
+port focus : String -> Cmd msg
 
 
 port scrollIntoView : String -> Cmd msg
@@ -118,7 +122,7 @@ port gotIntegrationWidgetValue : (E.Value -> msg) -> Sub msg
 -- Importer
 
 
-port openImporter : String -> Cmd msg
+port openImporter : E.Value -> Cmd msg
 
 
 port gotImporterData : (E.Value -> msg) -> Sub msg

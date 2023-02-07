@@ -103,7 +103,7 @@ listingConfig appState model mbQuestionnaireFilterView =
     , dropdownItems = listingActions appState
     , itemAdditionalData = itemAdditionalData
     , textTitle = .name
-    , emptyText = gettext "Click \"Create\" button to add a new document." appState.locale
+    , emptyText = gettext "There are no documents." appState.locale
     , updated =
         Just
             { getTime = .createdAt

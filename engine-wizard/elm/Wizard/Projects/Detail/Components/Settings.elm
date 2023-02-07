@@ -20,8 +20,10 @@ import Html.Attributes exposing (class, classList, disabled, id, name, style)
 import Html.Events exposing (onClick, onMouseDown)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.Templates as TemplatesApi
+import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
+import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
@@ -29,8 +31,6 @@ import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.Template.TemplateState as TemplateState exposing (TemplateState)
-import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
@@ -65,7 +65,7 @@ import Wizard.Routes as Routes
 
 type alias Model =
     { form : Form FormError QuestionnaireEditForm
-    , templateTypeHintInputModel : TypeHintInput.Model TemplateSuggestion
+    , templateTypeHintInputModel : TypeHintInput.Model DocumentTemplateSuggestion
     , savingQuestionnaire : ActionResult String
     , deleteModalModel : DeleteModal.Model
     , projectTagsDebouncer : Debouncer Msg
@@ -77,10 +77,10 @@ init : AppState -> Maybe QuestionnaireDetail -> Model
 init appState mbQuestionnaire =
     let
         setSelectedTemplate =
-            setSelected (Maybe.andThen .template mbQuestionnaire)
+            setSelected (Maybe.andThen .documentTemplate mbQuestionnaire)
     in
     { form = Maybe.unwrap (QuestionnaireEditForm.initEmpty appState) (QuestionnaireEditForm.init appState) mbQuestionnaire
-    , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "templateId"
+    , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "documentTemplateId"
     , savingQuestionnaire = Unset
     , deleteModalModel = DeleteModal.initialModel
     , projectTagsDebouncer = Debouncer.toDebouncer <| Debouncer.debounce 500
@@ -96,7 +96,7 @@ type Msg
     = FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
-    | TemplateTypeHintInputMsg (TypeHintInput.Msg TemplateSuggestion)
+    | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | ProjectTagsSearch String
     | ProjectTagsSearchComplete (Result ApiError (Pagination String))
     | DebouncerMsg (Debouncer.Msg Msg)
@@ -205,15 +205,15 @@ handleDeleteModalMsg cfg deleteModalMsg appState model =
     ( { model | deleteModalModel = deleteModalModel }, cmd )
 
 
-handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg TemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
+handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg DocumentTemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
 handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         formMsg =
-            cfg.wrapMsg << FormMsg << Form.Input "templateId" Form.Select << Field.String
+            cfg.wrapMsg << FormMsg << Form.Input "documentTemplateId" Form.Select << Field.String
 
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = TemplatesApi.getTemplatesFor cfg.packageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
@@ -295,7 +295,7 @@ type alias ViewConfig =
     { questionnaire : QuestionnaireDescriptor
     , package : Package
     , packageVersions : List Version
-    , templateState : Maybe TemplateState
+    , templateState : Maybe DocumentTemplateState
     , tags : List Tag
     }
 
@@ -318,7 +318,7 @@ formView : AppState -> ViewConfig -> Model -> Html Msg
 formView appState cfg model =
     let
         typeHintInputConfig =
-            { viewItem = TypeHintItem.templateSuggestion appState
+            { viewItem = TypeHintItem.templateSuggestion
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = True
@@ -328,7 +328,7 @@ formView appState cfg model =
             let
                 unsupportedError =
                     case cfg.templateState of
-                        Just TemplateState.UnsupportedMetamodelVersion ->
+                        Just DocumentTemplateState.UnsupportedMetamodelVersion ->
                             Flash.error appState (gettext "This document template is no longer supported." appState.locale)
 
                         _ ->
@@ -371,7 +371,7 @@ formView appState cfg model =
          , Html.map FormMsg <| FormGroup.input appState model.form "description" <| gettext "Description" appState.locale
          , Html.map FormMsg <| projectTagsInput
          , hr [] []
-         , FormGroup.formGroupCustom typeHintInput appState model.form "templateId" <| gettext "Default document template" appState.locale
+         , FormGroup.formGroupCustom typeHintInput appState model.form "documentTemplateId" <| gettext "Default document template" appState.locale
          , Html.map FormMsg <| formatInput
          ]
             ++ isTemplateInput

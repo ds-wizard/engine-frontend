@@ -8,10 +8,12 @@ type alias Usage =
     { activeUsers : UsageValue
     , branches : UsageValue
     , documents : UsageValue
+    , documentTemplateDrafts : UsageValue
+    , documentTemplates : UsageValue
     , knowledgeModels : UsageValue
+    , locales : UsageValue
     , questionnaires : UsageValue
     , storage : UsageValue
-    , templates : UsageValue
     , users : UsageValue
     }
 
@@ -28,10 +30,12 @@ decoder =
         |> D.required "activeUsers" decodeUsageValue
         |> D.required "branches" decodeUsageValue
         |> D.required "documents" decodeUsageValue
+        |> D.required "documentTemplateDrafts" decodeUsageValue
+        |> D.required "documentTemplates" decodeUsageValue
         |> D.required "knowledgeModels" decodeUsageValue
+        |> D.required "locales" decodeUsageValue
         |> D.required "questionnaires" decodeUsageValue
         |> D.required "storage" decodeUsageValue
-        |> D.required "templates" decodeUsageValue
         |> D.required "users" decodeUsageValue
 
 

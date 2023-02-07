@@ -12,9 +12,9 @@ import List.Extra as List
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Data.Document.DocumentState as DocumentState exposing (DocumentState)
 import Shared.Data.Document.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
+import Shared.Data.DocumentTemplate.DocumentTemplateFormat exposing (DocumentTemplateFormat)
 import Shared.Data.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
 import Shared.Data.Submission as Submission exposing (Submission)
-import Shared.Data.Template.TemplateFormat exposing (TemplateFormat)
 import Time
 import Uuid exposing (Uuid)
 
@@ -25,7 +25,7 @@ type alias Document =
     , createdAt : Time.Posix
     , questionnaire : Maybe QuestionnaireInfo
     , questionnaireEventUuid : Maybe Uuid
-    , template : DocumentTemplate
+    , documentTemplate : DocumentTemplate
     , formatUuid : Uuid
     , state : DocumentState
     , submissions : List Submission
@@ -50,7 +50,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.optional "questionnaire" (D.maybe QuestionnaireInfo.decoder) Nothing
         |> D.required "questionnaireEventUuid" (D.maybe Uuid.decoder)
-        |> D.required "template" DocumentTemplate.decoder
+        |> D.required "documentTemplate" DocumentTemplate.decoder
         |> D.required "formatUuid" Uuid.decoder
         |> D.required "state" DocumentState.decoder
         |> D.required "submissions" (D.list Submission.decoder)
@@ -59,6 +59,6 @@ decoder =
         |> D.required "workerLog" (D.maybe D.string)
 
 
-getFormat : Document -> Maybe TemplateFormat
+getFormat : Document -> Maybe DocumentTemplateFormat
 getFormat document =
-    List.find (.uuid >> (==) document.formatUuid) document.template.formats
+    List.find (.uuid >> (==) document.formatUuid) document.documentTemplate.formats

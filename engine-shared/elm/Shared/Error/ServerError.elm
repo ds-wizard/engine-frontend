@@ -111,8 +111,11 @@ messageToReadable appState message =
         "error.validation.pkg_id_uniqueness" ->
             Just <| gettext "Knowledge Model already exists." appState.locale
 
+        "error.validation.pkg_unsupported_metamodel_version" ->
+            Just <| gettext "Knowledge Model metamodel version is not supported." appState.locale
+
         "error.validation.tml_id_uniqueness" ->
-            Just <| gettext "Template already exists." appState.locale
+            Just <| gettext "Document template already exists." appState.locale
 
         "error.validation.lcl_id_uniqueness" ->
             Just <| gettext "Locale already exists." appState.locale
@@ -162,10 +165,10 @@ messageToReadable appState message =
             Just <| gettext "Profile Information from OpenID service is missing." appState.locale
 
         "error.validation.tml_deletation" ->
-            Just <| gettext "Template cannot be deleted because it is used in some Projects or documents." appState.locale
+            Just <| gettext "Document template cannot be deleted because it is used in some projects or documents." appState.locale
 
-        "error.validation.tml_unsupported_version" ->
-            Just <| gettext "Template version is not supported." appState.locale
+        "error.validation.tml_unsupported_metamodel_version" ->
+            Just <| gettext "Document template metamodel version is not supported." appState.locale
 
         "error.service.app.limit_exceeded" ->
             Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
@@ -192,7 +195,7 @@ messageToReadable appState message =
             Just <| gettext "Project cannot be deleted because it is used in some project migration." appState.locale
 
         "error.service.tb.pull_non_existing_tml" ->
-            Just <| gettext "The template was not found in the Registry." appState.locale
+            Just <| gettext "The document template was not found in the Registry." appState.locale
 
         "error.service.token.Incorrect_email_or_password" ->
             Just <| gettext "Incorrect email or password" appState.locale

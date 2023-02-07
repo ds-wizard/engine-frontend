@@ -3,23 +3,27 @@ module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
     , packageSuggestion
     , packageSuggestionWithVersion
     , questionnaireSuggestion
+    , simple
     , templateSuggestion
     )
 
-import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
+import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.TemplateSuggestion exposing (TemplateSuggestion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode)
 import Version
-import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.UserIcon as UserIcon
+
+
+simple : (a -> String) -> a -> Html msg
+simple toName item =
+    div [ class "TypeHintInput__TypeHints__SimpleItem" ] [ text (toName item) ]
 
 
 memberSuggestion : UserSuggestion -> Html msg
@@ -70,21 +74,13 @@ packageSuggestion withVersion pkg =
         ]
 
 
-templateSuggestion : AppState -> TemplateSuggestion -> Html msg
-templateSuggestion appState template =
-    let
-        visibleName =
-            if appState.config.template.recommendedTemplateId == Just template.id then
-                template.name ++ " (" ++ gettext "recommended" appState.locale ++ ")"
-
-            else
-                template.name
-    in
+templateSuggestion : DocumentTemplateSuggestion -> Html msg
+templateSuggestion template =
     complexItem
         [ div [] [ ItemIcon.view { text = template.name, image = Nothing } ]
         , div []
             [ div []
-                [ strong [] [ text visibleName ]
+                [ strong [] [ text template.name ]
                 , Badge.light [] [ text <| Version.toString template.version ]
                 ]
             , div [] [ text template.description ]

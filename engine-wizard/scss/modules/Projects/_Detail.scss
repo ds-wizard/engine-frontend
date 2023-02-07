@@ -79,12 +79,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
             }
         }
 
-        &--PreviewError {
-            pre {
-                margin: 1rem;
-            }
-        }
-
         &--Documents {
             .container {
                 margin: 2rem auto;
@@ -212,10 +206,6 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
 
             .ItemIcon {
                 margin-right: 0.5rem;
-            }
-
-            .form-control-inline {
-                font-weight: normal;
             }
 
             .fa {
