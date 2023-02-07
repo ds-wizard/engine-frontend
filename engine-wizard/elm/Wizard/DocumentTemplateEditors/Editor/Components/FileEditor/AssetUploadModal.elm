@@ -83,7 +83,7 @@ update wrapMsg documentTemplateId path msg appState model =
                 )
 
         SetOpen open ->
-            withoutAsset ( { model | hover = False, open = open, file = Nothing }, Cmd.none )
+            withoutAsset ( { model | hover = False, open = open, file = Nothing, submitting = Unset }, Cmd.none )
 
         Upload ->
             case model.file of
