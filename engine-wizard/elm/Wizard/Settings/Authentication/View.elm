@@ -173,10 +173,10 @@ serviceFormView appState openIDPrefabs form i =
                         ]
                     , div [ class "row" ]
                         [ div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultBackground ] appState form styleBackgroundField (gettext "Background" appState.locale)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultBackground ] appState form styleBackgroundField (gettext "Background Color" appState.locale)
                             ]
                         , div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultColor ] appState form styleColorField (gettext "Color" appState.locale)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultColor ] appState form styleColorField (gettext "Text Color" appState.locale)
                             ]
                         ]
                     ]
