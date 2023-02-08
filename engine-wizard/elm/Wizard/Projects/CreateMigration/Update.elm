@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
+import Maybe.Extra as Maybe
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -41,7 +42,7 @@ update wrapMsg msg appState model =
             handleRemoveTag model tagUuid
 
         GetQuestionnaireCompleted result ->
-            handleGetQuestionnaireCompleted appState model result
+            handleGetQuestionnaireCompleted appState wrapMsg model result
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model
@@ -75,9 +76,9 @@ handleRemoveTag model tagUuid =
         { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
 
 
-handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetQuestionnaireCompleted appState model result =
-    preselectKnowledgeModel <|
+handleGetQuestionnaireCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireCompleted appState wrapMsg model result =
+    preselectKnowledgeModel appState wrapMsg <|
         applyResult appState
             { setResult = setQuestionnaire
             , defaultError = gettext "Unable to get the project." appState.locale
@@ -192,25 +193,42 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 -- Helpers
 
 
-preselectKnowledgeModel : ( Model, Cmd Wizard.Msgs.Msg ) -> ( Model, Cmd Wizard.Msgs.Msg )
-preselectKnowledgeModel ( model, cmd ) =
-    let
-        newModel =
-            case model.questionnaire of
-                Success questionnaire ->
-                    let
-                        packageSuggestion =
-                            Just <| PackageSuggestion.fromPackage questionnaire.package questionnaire.packageVersions
-                    in
-                    { model
-                        | selectedPackage = packageSuggestion
-                        , packageTypeHintInputModel = setSelected packageSuggestion model.packageTypeHintInputModel
-                    }
+preselectKnowledgeModel : AppState -> (Msg -> Wizard.Msgs.Msg) -> ( Model, Cmd Wizard.Msgs.Msg ) -> ( Model, Cmd Wizard.Msgs.Msg )
+preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
+    case model.questionnaire of
+        Success questionnaire ->
+            let
+                packageSuggestion =
+                    PackageSuggestion.fromPackage questionnaire.package questionnaire.packageVersions
 
-                _ ->
-                    model
-    in
-    ( newModel, cmd )
+                mbLatestPackageId =
+                    PackageSuggestion.getLatestPackageId packageSuggestion
+
+                packageCmd =
+                    case mbLatestPackageId of
+                        Just latestPackageId ->
+                            Cmd.map wrapMsg <|
+                                KnowledgeModelsApi.fetchPreview (Just latestPackageId) [] [] appState GetKnowledgeModelPreviewCompleted
+
+                        Nothing ->
+                            Cmd.none
+
+                form =
+                    Maybe.unwrap
+                        QuestionnaireMigrationCreateForm.initEmpty
+                        QuestionnaireMigrationCreateForm.init
+                        mbLatestPackageId
+            in
+            ( { model
+                | selectedPackage = Just packageSuggestion
+                , form = form
+                , packageTypeHintInputModel = setSelected (Just packageSuggestion) model.packageTypeHintInputModel
+              }
+            , Cmd.batch [ cmd, packageCmd ]
+            )
+
+        _ ->
+            ( model, cmd )
 
 
 getSelectedPackageId : Model -> Maybe String
