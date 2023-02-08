@@ -3,7 +3,7 @@ module Wizard.Projects.Index.View exposing (view)
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
-import Html exposing (Html, a, code, div, img, input, span, text)
+import Html exposing (Html, a, div, img, input, span, text)
 import Html.Attributes exposing (class, classList, href, placeholder, src, style, title, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
@@ -565,11 +565,7 @@ listingDescription appState questionnaire =
                 kmRoute
                 [ title <| gettext "Knowledge Model" appState.locale, class "fragment" ]
                 [ text questionnaire.package.name
-                , text ", "
-                , text <| Version.toString questionnaire.package.version
-                , text " ("
-                , code [] [ text questionnaire.package.id ]
-                , text ")"
+                , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.package.version ]
                 ]
 
         projectProgressView =
