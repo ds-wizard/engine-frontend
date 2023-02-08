@@ -10,6 +10,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Auth.Role as Role
 import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as OpenIDServiceConfig exposing (OpenIDServiceConfig)
+import Shared.Data.BootstrapConfig.AuthenticationConfig.TwoFactorAuthConfig as TwoFactorAuthConfig exposing (TwoFactorAuthConfig)
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 
 
@@ -21,7 +22,9 @@ type alias AuthenticationConfig =
 
 
 type alias Internal =
-    { registration : SimpleFeatureConfig }
+    { registration : SimpleFeatureConfig
+    , twoFactorAuth : TwoFactorAuthConfig
+    }
 
 
 type alias External =
@@ -31,7 +34,10 @@ type alias External =
 default : AuthenticationConfig
 default =
     { defaultRole = Role.researcher
-    , internal = { registration = SimpleFeatureConfig.init True }
+    , internal =
+        { registration = SimpleFeatureConfig.init True
+        , twoFactorAuth = TwoFactorAuthConfig.default
+        }
     , external = { services = [] }
     }
 
@@ -48,6 +54,7 @@ internalDecoder : Decoder Internal
 internalDecoder =
     D.succeed Internal
         |> D.required "registration" SimpleFeatureConfig.decoder
+        |> D.required "twoFactorAuth" TwoFactorAuthConfig.decoder
 
 
 externalDecoder : Decoder External

@@ -3,10 +3,13 @@ module Wizard.Public.Login.Update exposing (update)
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Shared.Api.Tokens as TokensApi
-import Shared.Data.Token exposing (Token)
+import Shared.Data.Token as Token
+import Shared.Data.TokenResponse as TokenResponse exposing (TokenResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Utils exposing (dispatch)
+import String.Extra as String
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -23,12 +26,16 @@ update msg wrapMsg appState model =
         Password password ->
             ( { model | password = password }, Cmd.none )
 
+        Code code ->
+            ( { model | code = code }, Cmd.none )
+
         DoLogin ->
             let
                 body =
                     E.object
                         [ ( "email", E.string model.email )
                         , ( "password", E.string model.password )
+                        , ( "code", E.maybe E.int (Maybe.andThen String.toInt (String.toMaybe model.code)) )
                         ]
             in
             ( { model | loggingIn = Loading }
@@ -42,11 +49,16 @@ update msg wrapMsg appState model =
             ( { model | loggingIn = error }, Cmd.none )
 
 
-loginCompleted : AppState -> Model -> Result ApiError Token -> ( Model, Cmd Wizard.Msgs.Msg )
+loginCompleted : AppState -> Model -> Result ApiError TokenResponse -> ( Model, Cmd Wizard.Msgs.Msg )
 loginCompleted appState model result =
     case result of
-        Ok token ->
-            ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token model.originalUrl) )
+        Ok tokenResponse ->
+            case tokenResponse of
+                TokenResponse.Token token ->
+                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.fromString token) model.originalUrl) )
+
+                TokenResponse.CodeRequired ->
+                    ( { model | codeRequired = True, loggingIn = Unset }, Cmd.none )
 
         Err error ->
             ( { model | loggingIn = ApiError.toActionResult appState (gettext "Login failed." appState.locale) error }, Cmd.none )
