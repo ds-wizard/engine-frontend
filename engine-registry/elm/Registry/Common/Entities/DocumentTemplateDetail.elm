@@ -1,5 +1,5 @@
-module Registry.Common.Entities.TemplateDetail exposing
-    ( TemplateDetail
+module Registry.Common.Entities.DocumentTemplateDetail exposing
+    ( DocumentTemplateDetail
     , decoder
     )
 
@@ -9,7 +9,7 @@ import Registry.Common.Entities.OrganizationInfo as OrganizationInfo exposing (O
 import Version exposing (Version)
 
 
-type alias TemplateDetail =
+type alias DocumentTemplateDetail =
     { id : String
     , name : String
     , templateId : String
@@ -23,9 +23,9 @@ type alias TemplateDetail =
     }
 
 
-decoder : Decoder TemplateDetail
+decoder : Decoder DocumentTemplateDetail
 decoder =
-    D.succeed TemplateDetail
+    D.succeed DocumentTemplateDetail
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "templateId" D.string

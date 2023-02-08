@@ -1,7 +1,7 @@
 module Registry exposing (Model, Msg, PageModel, main)
 
 import Browser exposing (Document, UrlRequest)
-import Browser.Navigation as Nav
+import Browser.Navigation as Nav exposing (load)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, li, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
@@ -11,6 +11,8 @@ import Json.Encode as E
 import Registry.Common.AppState as AppState exposing (AppState)
 import Registry.Common.Credentials as Credentials exposing (Credentials)
 import Registry.Common.View.Page as Page
+import Registry.Pages.DocumentTemplateDetail as TemplateDetail
+import Registry.Pages.DocumentTemplates as Templates
 import Registry.Pages.ForgottenToken as ForgottenToken
 import Registry.Pages.ForgottenTokenConfirmation as ForgottenTokenConfirmation
 import Registry.Pages.Index as Index
@@ -21,8 +23,6 @@ import Registry.Pages.Login as Login
 import Registry.Pages.Organization as Organization
 import Registry.Pages.Signup as Signup
 import Registry.Pages.SignupConfirmation as SignupConfirmation
-import Registry.Pages.TemplateDetail as TemplateDetail
-import Registry.Pages.Templates as Templates
 import Registry.Ports as Ports
 import Registry.Routing as Routing
 import Registry.Utils exposing (dispatch)
@@ -302,7 +302,7 @@ initChildModel model =
                 , Cmd.map SignupConfirmationMsg signupConfirmationCmd
                 )
 
-        Routing.Templates ->
+        Routing.DocumentTemplates ->
             let
                 ( templatesModel, templatesCmd ) =
                     Templates.init model.appState
@@ -311,7 +311,7 @@ initChildModel model =
             , Cmd.map TemplatesMsg templatesCmd
             )
 
-        Routing.TemplateDetail templateId ->
+        Routing.DocumentTemplateDetail templateId ->
             let
                 ( templateDetailModel, templateDetailCmd ) =
                     TemplateDetail.init model.appState templateId
@@ -337,6 +337,12 @@ initChildModel model =
             ( { model | pageModel = LocaleDetailModel localeDetailModel }
             , Cmd.map LocaleDetailMsg localeDetailCmd
             )
+
+        Routing.DeprecatedTemplates ->
+            ( model, load (Routing.toString Routing.DocumentTemplates) )
+
+        Routing.DeprecatedTemplateDetail templateId ->
+            ( model, load (Routing.toString (Routing.DocumentTemplateDetail templateId)) )
 
         Routing.NotFound ->
             ( { model | pageModel = NotFoundModel }
@@ -448,9 +454,9 @@ header model =
                     ]
                 , li
                     [ class "nav-item"
-                    , classList [ ( "active", model.route == Routing.Templates ) ]
+                    , classList [ ( "active", model.route == Routing.DocumentTemplates ) ]
                     ]
-                    [ a [ href <| Routing.toString Routing.Templates, class "nav-link" ]
+                    [ a [ href <| Routing.toString Routing.DocumentTemplates, class "nav-link" ]
                         [ text (gettext "Document Templates" appState.locale) ]
                     ]
                 , li
