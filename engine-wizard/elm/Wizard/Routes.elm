@@ -290,7 +290,15 @@ isDocumentTemplatesIndex route =
 
 isDocumentTemplatesSubroute : Route -> Bool
 isDocumentTemplatesSubroute route =
-    isDocumentTemplatesIndex route || isDocumentTemplateEditorsIndex route
+    case route of
+        DocumentTemplatesRoute _ ->
+            True
+
+        DocumentTemplateEditorsRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 
