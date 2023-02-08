@@ -1,12 +1,12 @@
 module Registry.Common.Requests exposing
     ( ToMsg
+    , getDocumentTemplate
+    , getDocumentTemplates
     , getLocale
     , getLocales
     , getOrganization
     , getPackage
     , getPackages
-    , getTemplate
-    , getTemplates
     , getToken
     , postForgottenTokenActionKey
     , postOrganization
@@ -19,13 +19,13 @@ import Http
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Registry.Common.AppState exposing (AppState)
+import Registry.Common.Entities.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
+import Registry.Common.Entities.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Registry.Common.Entities.Locale as Locale exposing (Locale)
 import Registry.Common.Entities.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Registry.Common.Entities.OrganizationDetail as OrganizationDetail exposing (OrganizationDetail)
 import Registry.Common.Entities.Package as Package exposing (Package)
 import Registry.Common.Entities.PackageDetail as PackageDetail exposing (PackageDetail)
-import Registry.Common.Entities.Template as Template exposing (Template)
-import Registry.Common.Entities.TemplateDetail as TemplateDetail exposing (TemplateDetail)
 import Shared.Error.ApiError exposing (ApiError(..))
 
 
@@ -210,19 +210,19 @@ getPackage appState pkgId msg =
         }
 
 
-getTemplates : AppState -> ToMsg (List Template) msg -> Cmd msg
-getTemplates appState msg =
+getDocumentTemplates : AppState -> ToMsg (List DocumentTemplate) msg -> Cmd msg
+getDocumentTemplates appState msg =
     Http.get
-        { url = appState.apiUrl ++ "/templates"
-        , expect = expectJson msg (D.list Template.decoder)
+        { url = appState.apiUrl ++ "/document-templates"
+        , expect = expectJson msg (D.list DocumentTemplate.decoder)
         }
 
 
-getTemplate : AppState -> String -> ToMsg TemplateDetail msg -> Cmd msg
-getTemplate appState templateId msg =
+getDocumentTemplate : AppState -> String -> ToMsg DocumentTemplateDetail msg -> Cmd msg
+getDocumentTemplate appState templateId msg =
     Http.get
-        { url = appState.apiUrl ++ "/templates/" ++ templateId
-        , expect = expectJson msg TemplateDetail.decoder
+        { url = appState.apiUrl ++ "/document-templates/" ++ templateId
+        , expect = expectJson msg DocumentTemplateDetail.decoder
         }
 
 

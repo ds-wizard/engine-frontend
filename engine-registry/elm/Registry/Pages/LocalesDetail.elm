@@ -146,7 +146,7 @@ viewDetail appState model locale =
 
         viewVersion version =
             li []
-                [ a [ href <| Routing.toString <| Routing.TemplateDetail (locale.organization.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString version) ]
+                [ a [ href <| Routing.toString <| Routing.DocumentTemplateDetail (locale.organization.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString version) ]
                     [ text <| Version.toString version ]
                 ]
 
