@@ -13,8 +13,8 @@ type Route
     | Organization
     | Signup
     | SignupConfirmation String String
-    | Templates
-    | TemplateDetail String
+    | DocumentTemplates
+    | DocumentTemplateDetail String
     | Locales
     | LocaleDetail String
     | NotFound
@@ -31,8 +31,8 @@ routeParser =
         , map Organization (s "organization")
         , map Signup (s "signup")
         , map SignupConfirmation (s "signup" </> string </> string)
-        , map Templates (s "templates")
-        , map TemplateDetail (s "templates" </> string)
+        , map DocumentTemplates (s "document-templates")
+        , map DocumentTemplateDetail (s "document-templates" </> string)
         , map Locales (s "locales")
         , map LocaleDetail (s "locales" </> string)
         ]
@@ -70,11 +70,11 @@ toString route =
         SignupConfirmation orgId hash ->
             "/signup/" ++ orgId ++ "/" ++ hash
 
-        Templates ->
-            "/templates"
+        DocumentTemplates ->
+            "/document-templates"
 
-        TemplateDetail tepmlateId ->
-            "/templates/" ++ tepmlateId
+        DocumentTemplateDetail tepmlateId ->
+            "/document-templates/" ++ tepmlateId
 
         Locales ->
             "/locales"

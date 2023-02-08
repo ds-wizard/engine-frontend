@@ -1,4 +1,4 @@
-module Registry.Pages.Templates exposing
+module Registry.Pages.DocumentTemplates exposing
     ( Model
     , Msg
     , init
@@ -11,7 +11,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h5, p, small, text)
 import Html.Attributes exposing (class, href)
 import Registry.Common.AppState exposing (AppState)
-import Registry.Common.Entities.Template exposing (Template)
+import Registry.Common.Entities.DocumentTemplate exposing (DocumentTemplate)
 import Registry.Common.Requests as Requests
 import Registry.Common.View.Page as Page
 import Registry.Routing as Routing
@@ -20,8 +20,8 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 
 init : AppState -> ( Model, Cmd Msg )
 init appState =
-    ( { templates = Loading }
-    , Requests.getTemplates appState GetTemplatesCompleted
+    ( { documentTemplates = Loading }
+    , Requests.getDocumentTemplates appState GetDocumentTemplatesCompleted
     )
 
 
@@ -30,12 +30,12 @@ init appState =
 
 
 type alias Model =
-    { templates : ActionResult (List Template) }
+    { documentTemplates : ActionResult (List DocumentTemplate) }
 
 
-setPackages : ActionResult (List Template) -> Model -> Model
-setPackages templates model =
-    { model | templates = templates }
+setPackages : ActionResult (List DocumentTemplate) -> Model -> Model
+setPackages documentTemplates model =
+    { model | documentTemplates = documentTemplates }
 
 
 
@@ -43,13 +43,13 @@ setPackages templates model =
 
 
 type Msg
-    = GetTemplatesCompleted (Result ApiError (List Template))
+    = GetDocumentTemplatesCompleted (Result ApiError (List DocumentTemplate))
 
 
 update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
-        GetTemplatesCompleted result ->
+        GetDocumentTemplatesCompleted result ->
             ActionResult.apply setPackages (ApiError.toActionResult appState (gettext "Unable to get templates." appState.locale)) result
 
 
@@ -59,29 +59,29 @@ update msg appState =
 
 view : Model -> Html Msg
 view model =
-    Page.actionResultView viewList model.templates
+    Page.actionResultView viewList model.documentTemplates
 
 
-viewList : List Template -> Html Msg
-viewList templates =
+viewList : List DocumentTemplate -> Html Msg
+viewList documentTemplates =
     div []
         [ div [ class "list-group list-group-flush" ]
-            (List.map viewItem <| List.sortBy .name templates)
+            (List.map viewItem <| List.sortBy .name documentTemplates)
         ]
 
 
-viewItem : Template -> Html Msg
-viewItem template =
+viewItem : DocumentTemplate -> Html Msg
+viewItem documentTemplate =
     let
         packageLink =
-            Routing.toString <| Routing.TemplateDetail template.id
+            Routing.toString <| Routing.DocumentTemplateDetail documentTemplate.id
     in
     div [ class "list-group-item flex-column align-items-start" ]
         [ div [ class "d-flex justify-content-between" ]
             [ h5 [ class "mb-1" ]
-                [ a [ href packageLink ] [ text template.name ]
+                [ a [ href packageLink ] [ text documentTemplate.name ]
                 ]
-            , small [] [ text template.organization.name ]
+            , small [] [ text documentTemplate.organization.name ]
             ]
-        , p [] [ text template.description ]
+        , p [] [ text documentTemplate.description ]
         ]
