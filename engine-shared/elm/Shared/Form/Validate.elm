@@ -5,6 +5,7 @@ module Shared.Form.Validate exposing
     , kmId
     , maybeInt
     , maybeString
+    , optionalInt
     , optionalString
     , organizationId
     , password
@@ -92,6 +93,11 @@ maybeInt =
 optionalString : Validation e String
 optionalString =
     V.oneOf [ V.emptyString, V.string ]
+
+
+optionalInt : Validation e Int
+optionalInt =
+    V.oneOf [ V.emptyString |> V.map (\_ -> 0), V.int ]
 
 
 regex : Regex -> Validation e String

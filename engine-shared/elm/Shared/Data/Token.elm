@@ -3,6 +3,7 @@ module Shared.Data.Token exposing
     , decoder
     , empty
     , encode
+    , fromString
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -19,6 +20,11 @@ empty : Token
 empty =
     { token = ""
     }
+
+
+fromString : String -> Token
+fromString token =
+    { token = token }
 
 
 decoder : Decoder Token

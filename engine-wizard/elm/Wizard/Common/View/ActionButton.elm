@@ -3,11 +3,13 @@ module Wizard.Common.View.ActionButton exposing
     , ButtonCustomConfig
     , ButtonWithAttrsConfig
     , SubmitConfig
+    , SubmitWithAttrsConfig
     , button
     , buttonCustom
     , buttonWithAttrs
     , loader
     , submit
+    , submitWithAttrs
     )
 
 import ActionResult exposing (ActionResult(..))
@@ -66,6 +68,26 @@ buttonCustom appState cfg =
         [ onClick cfg.msg, class <| "btn btn-with-loader " ++ cfg.btnClass ]
         cfg.content
         cfg.result
+
+
+type alias SubmitWithAttrsConfig a msg =
+    { label : String
+    , result : ActionResult a
+    , attrs : List (Attribute msg)
+    }
+
+
+submitWithAttrs : AppState -> SubmitWithAttrsConfig a msg -> Html msg
+submitWithAttrs appState { label, result, attrs } =
+    actionButtonView appState
+        ([ type_ "submit"
+         , class "btn btn-primary btn-with-loader"
+         , dataCy "form_submit"
+         ]
+            ++ attrs
+        )
+        [ text label ]
+        result
 
 
 type alias SubmitConfig a =

@@ -15,6 +15,7 @@ import Maybe.Extra as Maybe
 import Shared.Data.EditableConfig.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
 import Wizard.Settings.Common.Forms.OpenIDServiceConfigForm as OpenIDServiceConfigForm exposing (OpenIDServiceConfigForm)
 
 
@@ -22,6 +23,9 @@ type alias AuthenticationConfigForm =
     { defaultRole : String
     , services : List OpenIDServiceConfigForm
     , registrationEnabled : Bool
+    , twoFactorAuthEnabled : Bool
+    , twoFactorAuthCodeLength : Int
+    , twoFactorAuthExpiration : Int
     }
 
 
@@ -41,6 +45,9 @@ validation =
         |> V.andMap (V.field "defaultRole" V.string)
         |> V.andMap (V.field "services" (V.list OpenIDServiceConfigForm.validation))
         |> V.andMap (V.field "registrationEnabled" V.bool)
+        |> V.andMap (V.field "twoFactorAuthEnabled" V.bool)
+        |> V.andMap (V.field "twoFactorAuthEnabled" V.bool |> V.ifElse "twoFactorAuthCodeLength" V.int V.optionalInt)
+        |> V.andMap (V.field "twoFactorAuthEnabled" V.bool |> V.ifElse "twoFactorAuthExpiration" V.int V.optionalInt)
 
 
 configToFormInitials : EditableAuthenticationConfig -> List ( String, Field )
@@ -53,13 +60,23 @@ configToFormInitials config =
     [ ( "defaultRole", Field.string config.defaultRole )
     , ( "services", Field.list services )
     , ( "registrationEnabled", Field.bool config.internal.registration.enabled )
+    , ( "twoFactorAuthEnabled", Field.bool config.internal.twoFactorAuth.enabled )
+    , ( "twoFactorAuthCodeLength", Field.string (String.fromInt config.internal.twoFactorAuth.codeLength) )
+    , ( "twoFactorAuthExpiration", Field.string (String.fromInt config.internal.twoFactorAuth.expiration) )
     ]
 
 
 toEditableAuthConfig : AuthenticationConfigForm -> EditableAuthenticationConfig
 toEditableAuthConfig form =
     { defaultRole = form.defaultRole
-    , internal = { registration = { enabled = form.registrationEnabled } }
+    , internal =
+        { registration = { enabled = form.registrationEnabled }
+        , twoFactorAuth =
+            { enabled = form.twoFactorAuthEnabled
+            , codeLength = form.twoFactorAuthCodeLength
+            , expiration = form.twoFactorAuthExpiration
+            }
+        }
     , external = { services = List.map OpenIDServiceConfigForm.toEditableOpenIDServiceConfig form.services }
     }
 

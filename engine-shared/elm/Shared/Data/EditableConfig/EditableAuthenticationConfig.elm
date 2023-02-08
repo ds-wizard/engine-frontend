@@ -11,6 +11,7 @@ import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Shared.Data.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
+import Shared.Data.EditableConfig.EditableTwoFactorAuthConfig as EditableTwoFactorAuthConfig exposing (EditableTwoFactorAuthConfig)
 
 
 type alias EditableAuthenticationConfig =
@@ -25,7 +26,9 @@ type alias External =
 
 
 type alias Internal =
-    { registration : SimpleFeatureConfig }
+    { registration : SimpleFeatureConfig
+    , twoFactorAuth : EditableTwoFactorAuthConfig
+    }
 
 
 decoder : Decoder EditableAuthenticationConfig
@@ -46,6 +49,7 @@ internalDecoder : Decoder Internal
 internalDecoder =
     D.succeed Internal
         |> D.required "registration" SimpleFeatureConfig.decoder
+        |> D.required "twoFactorAuth" EditableTwoFactorAuthConfig.decoder
 
 
 encode : EditableAuthenticationConfig -> E.Value
@@ -66,4 +70,6 @@ encodeExternal external =
 encodeInternal : Internal -> E.Value
 encodeInternal internal =
     E.object
-        [ ( "registration", SimpleFeatureConfig.encode internal.registration ) ]
+        [ ( "registration", SimpleFeatureConfig.encode internal.registration )
+        , ( "twoFactorAuth", EditableTwoFactorAuthConfig.encode internal.twoFactorAuth )
+        ]
