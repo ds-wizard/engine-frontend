@@ -629,7 +629,18 @@ isSettingsRoute route =
 
 isSettingsSubroute : Route -> Bool
 isSettingsSubroute route =
-    isSettingsRoute route || isUsersIndex route || isLocalesRoute route
+    case route of
+        SettingsRoute _ ->
+            True
+
+        UsersRoute _ ->
+            True
+
+        LocalesRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 settingsAuthentication : Route
@@ -701,7 +712,7 @@ isUsersIndex route =
 isLocalesRoute : Route -> Bool
 isLocalesRoute route =
     case route of
-        LocalesRoute _ ->
+        LocalesRoute (Wizard.Locales.Routes.IndexRoute _) ->
             True
 
         _ ->
