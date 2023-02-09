@@ -1935,7 +1935,7 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
             KnowledgeModel.getChapterQuestions chapter.uuid model.questionnaire.knowledgeModel
 
         questionViews =
-            List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] []) questions
+            List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
     in
     div [ class "questionnaire__form container" ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
