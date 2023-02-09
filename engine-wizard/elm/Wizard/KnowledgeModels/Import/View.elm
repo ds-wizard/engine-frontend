@@ -20,14 +20,6 @@ import Wizard.KnowledgeModels.Import.RegistryImport.View as RegistryImportView
 view : AppState -> Model -> Html Msg
 view appState model =
     let
-        owlNavItem =
-            viewNavbarItem
-                (text (gettext "From OWL" appState.locale))
-                (faSet "kmImport.fromOwl" appState)
-                (isOwlImportModel model)
-                ShowOwlImport
-                "km_import_nav_owl"
-
         registryNavItem =
             viewNavbarItem
                 (text (gettext "From DSW Registry" appState.locale))
@@ -44,6 +36,14 @@ view appState model =
                 ShowFileImport
                 "km_import_nav_file"
 
+        owlNavItem =
+            viewNavbarItem
+                (text (gettext "From OWL" appState.locale))
+                (faSet "kmImport.fromOwl" appState)
+                (isOwlImportModel model)
+                ShowOwlImport
+                "km_import_nav_owl"
+
         registryEnabled =
             case appState.config.registry of
                 RegistryEnabled _ ->
@@ -54,9 +54,9 @@ view appState model =
 
         navItems =
             []
-                |> listInsertIf owlNavItem appState.config.owl.enabled
                 |> listInsertIf registryNavItem registryEnabled
                 |> listInsertIf fileNavItem True
+                |> listInsertIf owlNavItem appState.config.owl.enabled
 
         content =
             case model.importModel of
