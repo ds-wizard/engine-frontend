@@ -4,11 +4,13 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.OnlineUserInfo as OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData as SetQuestionnaireData exposing (SetQuestionnaireData)
 
 
 type ServerQuestionnaireAction
     = SetUserList (List OnlineUserInfo)
     | SetContent QuestionnaireEvent
+    | SetQuestionnaire SetQuestionnaireData
 
 
 decoder : Decoder ServerQuestionnaireAction
@@ -25,6 +27,9 @@ decoderByType actionType =
 
         "SetContent_ServerQuestionnaireAction" ->
             buildDecoder SetContent QuestionnaireEvent.decoder
+
+        "SetQuestionnaire_ServerQuestionnaireAction" ->
+            buildDecoder SetQuestionnaire SetQuestionnaireData.decoder
 
         _ ->
             D.fail <| "Unknown ServerQuestionnaireAction: " ++ actionType

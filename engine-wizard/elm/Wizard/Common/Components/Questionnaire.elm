@@ -24,6 +24,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , setReply
     , subscriptions
     , update
+    , updateWithQuestionnaireData
     , view
     )
 
@@ -74,6 +75,7 @@ import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.TypeHint exposing (TypeHint)
 import Shared.Data.User as User
 import Shared.Data.UserInfo as UserInfo
+import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Markdown as Markdown
@@ -226,6 +228,11 @@ setActiveChapterUuid uuid model =
         | activePage = PageChapter uuid
         , navigationTreeModel = NavigationTree.openChapter uuid model.navigationTreeModel
     }
+
+
+updateWithQuestionnaireData : SetQuestionnaireData -> Model -> Model
+updateWithQuestionnaireData data =
+    updateQuestionnaire <| QuestionnaireDetail.updateWithQuestionnaireData data
 
 
 setPhaseUuid : Maybe Uuid -> Model -> Model
