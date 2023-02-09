@@ -226,6 +226,8 @@ type Msg
     | DeleteSelectedFileCompleted Uuid (Result ApiError ())
     | DeleteSelectedAssetCompleted Uuid (Result ApiError ())
     | AssetUploadModalMsg AssetUploadModal.Msg
+    | AddAsset DocumentTemplateAsset
+    | AddFile DocumentTemplateFile
 
 
 saveMsg : Msg
@@ -454,7 +456,7 @@ update cfg appState msg model =
                         }
 
                     cmd =
-                        DocumentTemplateDraftsApi.postFile cfg.documentTemplateId templateFile appState (cfg.wrapMsg << AddFileCompleted)
+                        DocumentTemplateDraftsApi.postFile cfg.documentTemplateId templateFile "" appState (cfg.wrapMsg << AddFileCompleted)
                 in
                 ( { model | addingFile = ActionResult.Loading }
                 , cmd
@@ -602,23 +604,27 @@ update cfg appState msg model =
 
         AssetUploadModalMsg assetUploadModalMsg ->
             let
-                ( mbAsset, assetUploadModal, cmd ) =
-                    AssetUploadModal.update (cfg.wrapMsg << AssetUploadModalMsg)
-                        cfg.documentTemplateId
-                        (getSelectedFolderPath model)
+                assetUploadModalConfig =
+                    { wrapMsg = cfg.wrapMsg << AssetUploadModalMsg
+                    , addAssetMsg = cfg.wrapMsg << AddAsset
+                    , addFileMsg = cfg.wrapMsg << AddFile
+                    , documentTemplateId = cfg.documentTemplateId
+                    , path = getSelectedFolderPath model
+                    }
+
+                ( assetUploadModal, cmd ) =
+                    AssetUploadModal.update assetUploadModalConfig
                         assetUploadModalMsg
                         appState
                         model.assetUploadModal
-
-                assets =
-                    case mbAsset of
-                        Just asset ->
-                            ActionResult.map ((++) [ asset ]) model.assets
-
-                        Nothing ->
-                            model.assets
             in
-            ( { model | assets = assets, assetUploadModal = assetUploadModal }, cmd )
+            ( { model | assetUploadModal = assetUploadModal }, cmd )
+
+        AddAsset asset ->
+            ( { model | assets = ActionResult.map ((++) [ asset ]) model.assets }, Cmd.none )
+
+        AddFile file ->
+            ( { model | files = ActionResult.map ((++) [ file ]) model.files }, Cmd.none )
 
 
 
@@ -890,8 +896,8 @@ viewEmptyEditor appState =
         [ div [] [ strong [] [ text (gettext "Open a file from the file tree" appState.locale) ] ]
         , div [ class "mt-2 mb-3" ] [ text (gettext "or" appState.locale) ]
         , div []
-            [ button [ class "btn btn-outline-secondary me-2", onClick (SetAddFileModalOpen True) ] [ text (gettext "Create a file" appState.locale) ]
-            , button [ class "btn btn-outline-secondary", onClick (AssetUploadModalMsg (AssetUploadModal.SetOpen True)) ] [ text (gettext "Upload an asset" appState.locale) ]
+            [ button [ class "btn btn-outline-secondary me-2", onClick (SetAddFileModalOpen True) ] [ text (gettext "Create new" appState.locale) ]
+            , button [ class "btn btn-outline-secondary", onClick (AssetUploadModalMsg (AssetUploadModal.SetOpen True)) ] [ text (gettext "Upload" appState.locale) ]
             ]
         ]
 

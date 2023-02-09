@@ -75,9 +75,9 @@ getFileContent templateId fileUuid =
     jwtGetString ("/document-template-drafts/" ++ templateId ++ "/files/" ++ Uuid.toString fileUuid ++ "/content")
 
 
-postFile : String -> DocumentTemplateFile -> AbstractAppState a -> ToMsg DocumentTemplateFile msg -> Cmd msg
-postFile templateId file =
-    jwtFetch ("/document-template-drafts/" ++ templateId ++ "/files") DocumentTemplateFile.decoder (DocumentTemplateFile.encode file)
+postFile : String -> DocumentTemplateFile -> String -> AbstractAppState a -> ToMsg DocumentTemplateFile msg -> Cmd msg
+postFile templateId file fileContent =
+    jwtFetch ("/document-template-drafts/" ++ templateId ++ "/files") DocumentTemplateFile.decoder (DocumentTemplateFile.encode file fileContent)
 
 
 putFileContent : String -> Uuid -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg

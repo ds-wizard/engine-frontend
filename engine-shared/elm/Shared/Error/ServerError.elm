@@ -158,6 +158,9 @@ messageToReadable appState message =
         "error.validation.app_id_uniqueness" ->
             Just <| gettext "App ID is already used." appState.locale
 
+        "error.validation.doc_tml_file_or_asset_uniqueness" ->
+            Just <| gettext "File with this name already exists." appState.locale
+
         "error.validation.openid_code_absence" ->
             Just <| gettext "Authentication Code is not provided." appState.locale
 
