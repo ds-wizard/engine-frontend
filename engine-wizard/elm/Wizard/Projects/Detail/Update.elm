@@ -679,6 +679,12 @@ handleWebsocketMsg websocketMsg appState model =
             , newModel2
             , clearUnloadMessageCmd
             )
+
+        updateQuestionnaireData data =
+            ( appState.seed
+            , { model | questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData data) model.questionnaireModel }
+            , Cmd.none
+            )
     in
     case WebSocket.receive ServerQuestionnaireAction.decoder websocketMsg model.websocket of
         WebSocket.Message serverAction ->
@@ -719,6 +725,9 @@ handleWebsocketMsg websocketMsg appState model =
 
                                 QuestionnaireEvent.DeleteComment data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.deleteComment data.path data.threadUuid data.commentUuid)
+
+                        ServerQuestionnaireAction.SetQuestionnaire data ->
+                            updateQuestionnaireData data
 
                 WebSocketServerAction.Error ->
                     ( appState.seed, { model | error = True }, Cmd.none )
