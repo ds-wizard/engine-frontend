@@ -11,6 +11,18 @@ updates:
       - "janslifka"
     labels:
       - "dependencies"
+      -
+  - package-ecosystem: "elm"
+    directory: "/review"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "8:00"
+    target-branch: "develop"
+    assignees:
+      - "janslifka"
+    labels:
+      - "dependencies"
 
   - package-ecosystem: "npm"
     directory: "/"
