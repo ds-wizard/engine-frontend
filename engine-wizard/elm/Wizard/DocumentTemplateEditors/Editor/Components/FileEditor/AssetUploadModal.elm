@@ -1,6 +1,7 @@
 module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUploadModal exposing
     ( Model
     , Msg(..)
+    , UpdateConfig
     , initialModel
     , update
     , view
@@ -17,14 +18,23 @@ import Json.Decode as D
 import Maybe.Extra as Maybe
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
+import Shared.Utils exposing (dispatch)
+import Task
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.ContentType as ContentType
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
+
+
+
+-- MODEL
 
 
 type alias Model =
@@ -44,70 +54,136 @@ initialModel =
     }
 
 
+
+-- UPDATE
+
+
 type Msg
     = Pick
     | DragEnter
     | DragLeave
     | GotFile File
+    | GotFileContent String
     | SetOpen Bool
     | Upload
-    | SubmitComplete (Result ApiError DocumentTemplateAsset)
+    | SubmitAssetComplete (Result ApiError DocumentTemplateAsset)
+    | SubmitFileComplete (Result ApiError DocumentTemplateFile)
 
 
-update : (Msg -> msg) -> String -> String -> Msg -> AppState -> Model -> ( Maybe DocumentTemplateAsset, Model, Cmd msg )
-update wrapMsg documentTemplateId path msg appState model =
-    let
-        withoutAsset ( m, cmd ) =
-            ( Nothing, m, cmd )
-    in
+type alias UpdateConfig msg =
+    { wrapMsg : Msg -> msg
+    , addAssetMsg : DocumentTemplateAsset -> msg
+    , addFileMsg : DocumentTemplateFile -> msg
+    , documentTemplateId : String
+    , path : String
+    }
+
+
+update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
+update cfg msg appState model =
     case msg of
         Pick ->
-            withoutAsset ( model, Cmd.map wrapMsg <| Select.file [ "*/*" ] GotFile )
+            ( model, Cmd.map cfg.wrapMsg <| Select.file [ "*/*" ] GotFile )
 
         DragEnter ->
-            withoutAsset
-                ( { model | hover = True }
-                , Cmd.none
-                )
+            ( { model | hover = True }
+            , Cmd.none
+            )
 
         DragLeave ->
-            withoutAsset
-                ( { model | hover = False }
-                , Cmd.none
-                )
+            ( { model | hover = False }
+            , Cmd.none
+            )
 
         GotFile file ->
-            withoutAsset
-                ( { model | hover = False, file = Just file }
-                , Cmd.none
-                )
+            ( { model | hover = False, file = Just file }
+            , Cmd.none
+            )
+
+        GotFileContent fileContent ->
+            case model.file of
+                Just file ->
+                    uploadFile cfg appState model file fileContent
+
+                _ ->
+                    ( model, Cmd.none )
 
         SetOpen open ->
-            withoutAsset ( { model | hover = False, open = open, file = Nothing, submitting = Unset }, Cmd.none )
+            ( { model | hover = False, open = open, file = Nothing, submitting = Unset }
+            , Cmd.none
+            )
 
         Upload ->
             case model.file of
                 Just file ->
-                    let
-                        fileName =
-                            String.join "/" (List.filter (not << String.isEmpty) [ path, File.name file ])
+                    if ContentType.isText (File.mime file) then
+                        ( { model | submitting = Loading }
+                        , Task.perform (cfg.wrapMsg << GotFileContent) (File.toString file)
+                        )
 
-                        cmd =
-                            Cmd.map wrapMsg <|
-                                DocumentTemplateDraftsApi.uploadAsset documentTemplateId fileName file appState SubmitComplete
-                    in
-                    withoutAsset ( { model | submitting = Loading }, cmd )
+                    else
+                        uploadAsset cfg appState model file
 
                 _ ->
-                    withoutAsset ( model, Cmd.none )
+                    ( model, Cmd.none )
 
-        SubmitComplete result ->
-            case result of
-                Ok documentTemplateAsset ->
-                    ( Just documentTemplateAsset, { model | open = False }, Cmd.none )
+        SubmitAssetComplete result ->
+            handleSubmitComplete cfg.addAssetMsg appState model result
 
-                Err error ->
-                    withoutAsset ( { model | submitting = ApiError.toActionResult appState (gettext "Unable to upload asset." appState.locale) error }, Cmd.none )
+        SubmitFileComplete result ->
+            handleSubmitComplete cfg.addFileMsg appState model result
+
+
+handleSubmitComplete : (a -> msg) -> AppState -> Model -> Result ApiError a -> ( Model, Cmd msg )
+handleSubmitComplete dispatchMsg appState model result =
+    case result of
+        Ok documentTemplateFile ->
+            ( { model | open = False }
+            , dispatch (dispatchMsg documentTemplateFile)
+            )
+
+        Err error ->
+            ( { model | submitting = ApiError.toActionResult appState (gettext "Unable to upload file." appState.locale) error }, Cmd.none )
+
+
+uploadAsset : UpdateConfig msg -> AppState -> Model -> File -> ( Model, Cmd msg )
+uploadAsset cfg appState model file =
+    let
+        cmd =
+            DocumentTemplateDraftsApi.uploadAsset cfg.documentTemplateId
+                (getFileName cfg.path file)
+                file
+                appState
+                (cfg.wrapMsg << SubmitAssetComplete)
+    in
+    ( { model | submitting = Loading }, cmd )
+
+
+uploadFile : UpdateConfig msg -> AppState -> Model -> File -> String -> ( Model, Cmd msg )
+uploadFile cfg appState model file content =
+    let
+        documentTemplateFile =
+            { uuid = Uuid.nil
+            , fileName = getFileName cfg.path file
+            }
+
+        cmd =
+            DocumentTemplateDraftsApi.postFile cfg.documentTemplateId
+                documentTemplateFile
+                content
+                appState
+                (cfg.wrapMsg << SubmitFileComplete)
+    in
+    ( { model | submitting = Loading }, cmd )
+
+
+getFileName : String -> File -> String
+getFileName path file =
+    String.join "/" (List.filter (not << String.isEmpty) [ path, File.name file ])
+
+
+
+-- VIEW
 
 
 view : AppState -> Model -> Html Msg
@@ -139,7 +215,7 @@ view appState model =
 
         content =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text (gettext "Upload an asset" appState.locale) ] ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Upload file" appState.locale) ] ]
             , div [ class "modal-body logo-upload" ]
                 [ FormResult.errorOnlyView appState model.submitting
                 , fileContent

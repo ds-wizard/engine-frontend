@@ -2,6 +2,7 @@ module Wizard.Common.ContentType exposing
     ( getContentTypeText
     , isImage
     , isSupportedInBrowser
+    , isText
     )
 
 import Dict exposing (Dict)
@@ -119,9 +120,14 @@ isSupportedInBrowser appState contentType =
         appState.navigator.pdf
 
     else
-        String.startsWith "text/" contentType || List.member contentType supportedMimeTypes
+        isText contentType
 
 
-supportedMimeTypes : List String
-supportedMimeTypes =
+isText : String -> Bool
+isText contentType =
+    String.startsWith "text/" contentType || List.member contentType otherTextContentTypes
+
+
+otherTextContentTypes : List String
+otherTextContentTypes =
     [ "application/json", "application/ld+json" ]

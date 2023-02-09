@@ -23,9 +23,9 @@ decoder =
         |> D.required "fileName" D.string
 
 
-encode : DocumentTemplateFile -> E.Value
-encode file =
+encode : DocumentTemplateFile -> String -> E.Value
+encode file content =
     E.object
         [ ( "fileName", E.string file.fileName )
-        , ( "content", E.string "" )
+        , ( "content", E.string content )
         ]
