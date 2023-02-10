@@ -142,7 +142,7 @@ handleDocumentTemplateTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInp
 handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         formMsg =
-            wrapMsg << FormMsg << Form.Input "previousPackageId" Form.Select << Field.String
+            wrapMsg << FormMsg << Form.Input "basedOn" Form.Select << Field.String
 
         cfg =
             { wrapMsg = wrapMsg << DocumentTemplateTypeHintInputMsg
