@@ -3,8 +3,8 @@ module Wizard.DocumentTemplateEditors.Editor.View exposing (view)
 import ActionResult
 import Dict
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, li, span, text, ul)
-import Html.Attributes exposing (attribute, class, classList)
+import Html exposing (Html, button, div, span, text)
+import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Html exposing (faSet)
@@ -17,17 +17,19 @@ import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
 import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor as TemplateEditor
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute exposing (DTEditorRoute)
 import Wizard.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model, containsChanges)
 import Wizard.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
+import Wizard.Routes as Routes
 
 
-view : AppState -> Model -> Html Msg
-view appState model =
-    Page.actionResultView appState (viewTemplateEditor appState model) model.documentTemplate
+view : AppState -> DTEditorRoute -> Model -> Html Msg
+view appState route model =
+    Page.actionResultView appState (viewTemplateEditor appState route model) model.documentTemplate
 
 
-viewTemplateEditor : AppState -> Model -> DocumentTemplateDraftDetail -> Html Msg
-viewTemplateEditor appState model documentTemplate =
+viewTemplateEditor : AppState -> DTEditorRoute -> Model -> DocumentTemplateDraftDetail -> Html Msg
+viewTemplateEditor appState route model documentTemplate =
     let
         content =
             case model.currentEditor of
@@ -55,14 +57,14 @@ viewTemplateEditor appState model documentTemplate =
             { documentTemplate = documentTemplate }
     in
     div [ class "DocumentTemplateEditor col-full flex-column" ]
-        [ viewEditorNavigation appState model
+        [ viewEditorNavigation appState route model
         , content
         , Html.map PublishModalMsg <| PublishModal.view publishModalViewConfig appState model.publishModalModel
         ]
 
 
-viewEditorNavigation : AppState -> Model -> Html Msg
-viewEditorNavigation appState model =
+viewEditorNavigation : AppState -> DTEditorRoute -> Model -> Html Msg
+viewEditorNavigation appState route model =
     let
         rightSection =
             if containsChanges model then
@@ -79,6 +81,13 @@ viewEditorNavigation appState model =
                             , dangerous = False
                             , attrs = [ dataCy "dt-editor_save" ]
                             }
+
+                    discardButton =
+                        button
+                            [ class "btn btn-outline-secondary btn-with-loader ms-1"
+                            , onClick DiscardChanges
+                            ]
+                            [ text (gettext "Discard" appState.locale) ]
                 in
                 [ span [ class "me-2" ]
                     [ text "("
@@ -86,6 +95,7 @@ viewEditorNavigation appState model =
                     , text ")"
                     ]
                 , saveButton
+                , discardButton
                 ]
 
             else
@@ -109,46 +119,39 @@ viewEditorNavigation appState model =
                 ]
             , DetailNavigation.sectionActions rightSection
             ]
-        , viewEditorNavigationNav appState model
+        , viewEditorNavigationNav appState route model
         ]
 
 
-viewEditorNavigationNav : AppState -> Model -> Html Msg
-viewEditorNavigationNav appState model =
+viewEditorNavigationNav : AppState -> DTEditorRoute -> Model -> Html Msg
+viewEditorNavigationNav appState route model =
     let
         templateLink =
-            { label = gettext "Template" appState.locale
+            { route = Routes.documentTemplateEditorDetail model.documentTemplateId
+            , label = gettext "Template" appState.locale
             , icon = faSet "documentTemplateEditor.template" appState
-            , editor = TemplateEditor
+            , isActive = route == DTEditorRoute.Template
+            , isVisible = True
             , dataCy = "dt-editor_nav_template"
             }
 
         filesLink =
-            { label = gettext "Files" appState.locale
+            { route = Routes.documentTemplateEditorDetailFiles model.documentTemplateId
+            , label = gettext "Files" appState.locale
             , icon = faSet "documentTemplateEditor.files" appState
-            , editor = FilesEditor
+            , isActive = route == DTEditorRoute.Files
+            , isVisible = True
             , dataCy = "dt-editor_nav_files"
             }
 
         previewLink =
-            { label = gettext "Preview" appState.locale
+            { route = Routes.documentTemplateEditorDetailPreview model.documentTemplateId
+            , label = gettext "Preview" appState.locale
             , icon = faSet "documentTemplateEditor.preview" appState
-            , editor = PreviewEditor
+            , isActive = route == DTEditorRoute.Preview
+            , isVisible = True
             , dataCy = "dt-editor_nav_preview"
             }
-
-        viewLink link =
-            li [ class "nav-item" ]
-                [ a
-                    [ class "nav-link"
-                    , classList [ ( "active", link.editor == model.currentEditor ) ]
-                    , dataCy link.dataCy
-                    , onClick (SetEditor link.editor)
-                    ]
-                    [ link.icon
-                    , span [ attribute "data-content" link.label ] [ text link.label ]
-                    ]
-                ]
 
         links =
             [ templateLink
@@ -156,4 +159,4 @@ viewEditorNavigationNav appState model =
             , previewLink
             ]
     in
-    DetailNavigation.row [ ul [ class "nav nav-underline-tabs" ] (List.map viewLink links) ]
+    DetailNavigation.navigation appState links

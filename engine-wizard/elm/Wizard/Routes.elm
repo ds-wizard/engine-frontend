@@ -8,6 +8,8 @@ module Wizard.Routes exposing
     , devOperations
     , documentTemplateEditorCreate
     , documentTemplateEditorDetail
+    , documentTemplateEditorDetailFiles
+    , documentTemplateEditorDetailPreview
     , documentTemplateEditorsIndex
     , documentTemplateEditorsIndexWithFilters
     , documentTemplatesDetail
@@ -19,6 +21,7 @@ module Wizard.Routes exposing
     , isAppIndex
     , isDevOperations
     , isDevSubroute
+    , isDocumentTemplateEditor
     , isDocumentTemplateEditorsIndex
     , isDocumentTemplatesIndex
     , isDocumentTemplatesSubroute
@@ -91,9 +94,11 @@ import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
+import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Apps.Routes
 import Wizard.Dev.Routes
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute
 import Wizard.DocumentTemplateEditors.Routes
 import Wizard.DocumentTemplates.Routes
 import Wizard.Documents.Routes
@@ -312,7 +317,17 @@ documentTemplateEditorCreate mbBasedOn mbEdit =
 
 documentTemplateEditorDetail : String -> Route
 documentTemplateEditorDetail =
-    DocumentTemplateEditorsRoute << Wizard.DocumentTemplateEditors.Routes.EditorRoute
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Template
+
+
+documentTemplateEditorDetailFiles : String -> Route
+documentTemplateEditorDetailFiles =
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Files
+
+
+documentTemplateEditorDetailPreview : String -> Route
+documentTemplateEditorDetailPreview =
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
 
 
 documentTemplateEditorsIndex : Route
@@ -330,6 +345,16 @@ isDocumentTemplateEditorsIndex route =
     case route of
         DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute _) ->
             True
+
+        _ ->
+            False
+
+
+isDocumentTemplateEditor : String -> Route -> Bool
+isDocumentTemplateEditor id route =
+    case route of
+        DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.EditorRoute documentTemplateId _) ->
+            id == documentTemplateId
 
         _ ->
             False

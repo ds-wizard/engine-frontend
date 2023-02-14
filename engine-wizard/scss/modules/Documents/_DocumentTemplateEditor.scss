@@ -46,8 +46,50 @@ $content-height: calc(100vh - #{$header-height});
         }
     }
 
+    &__FileEditor {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+
+        & > div:last-child {
+            flex-grow: 1;
+        }
+
+        .tabs {
+            background-color: $gray-300;
+
+            .tab {
+                display: inline-block;
+                padding: $spacer-2 $spacer-3;
+                margin-left: 1px;
+                margin-top: 1px;
+                background-color: $gray-200;
+                cursor: pointer;
+
+                &.active-group {
+                    background-color: $gray-100;
+                }
+
+                &.active {
+                    font-weight: 600;
+                    background-color: $white;
+                }
+
+                .tab-close {
+                    @include transition(color 0.1s ease-in-out);
+                    color: $gray-400;
+
+                    &:hover {
+                        color: $gray-600;
+                    }
+                }
+            }
+        }
+    }
+
     &__Asset {
-        background: $gray-300;
+        background: $gray-100;
         width: 100%;
         height: 100%;
         display: flex;

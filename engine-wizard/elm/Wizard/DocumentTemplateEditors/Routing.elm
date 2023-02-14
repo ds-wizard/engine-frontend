@@ -6,11 +6,13 @@ module Wizard.DocumentTemplateEditors.Routing exposing
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
+import Shared.Utils exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
 import Url.Parser.Query.Extra as Query
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute
 import Wizard.DocumentTemplateEditors.Routes exposing (Route(..))
 
 
@@ -22,7 +24,9 @@ parsers appState wrapRoute =
     in
     [ map (createRoute wrapRoute) (s moduleRoot </> s "create" <?> Query.string "selected" <?> Query.bool "edit")
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
-    , map (wrapRoute << EditorRoute) (s moduleRoot </> string)
+    , map (wrapRoute << flip EditorRoute DTEditorRoute.Template) (s moduleRoot </> string)
+    , map (wrapRoute << flip EditorRoute DTEditorRoute.Files) (s moduleRoot </> string </> s "files")
+    , map (wrapRoute << flip EditorRoute DTEditorRoute.Preview) (s moduleRoot </> string </> s "preview")
     ]
 
 
@@ -66,8 +70,20 @@ toUrl appState route =
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
-        EditorRoute templateId ->
-            [ moduleRoot, templateId ]
+        EditorRoute templateId subroute ->
+            let
+                base =
+                    [ moduleRoot, templateId ]
+            in
+            case subroute of
+                DTEditorRoute.Template ->
+                    base
+
+                DTEditorRoute.Files ->
+                    base ++ [ "files" ]
+
+                DTEditorRoute.Preview ->
+                    base ++ [ "preview" ]
 
 
 isAllowed : AppState -> Bool

@@ -212,11 +212,7 @@ update cfg appState msg model =
                     )
 
         LoadPreview ->
-            if ActionResult.unwrap False DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
-                ( { model | urlResponse = ActionResult.Loading }, getPreviewCmd )
-
-            else
-                ( model, Cmd.none )
+            ( { model | urlResponse = ActionResult.Loading }, getPreviewCmd )
 
 
 

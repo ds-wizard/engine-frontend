@@ -102,6 +102,9 @@ fetchData model =
 isGuarded : Routes.Route -> Model -> Maybe String
 isGuarded nextRoute model =
     case model.appState.route of
+        Routes.DocumentTemplateEditorsRoute route ->
+            Wizard.DocumentTemplateEditors.Update.isGuarded route model.appState nextRoute model.documentTemplateEditorsModel
+
         Routes.KMEditorRoute route ->
             Wizard.KMEditor.Update.isGuarded route model.appState nextRoute model.kmEditorModel
 
