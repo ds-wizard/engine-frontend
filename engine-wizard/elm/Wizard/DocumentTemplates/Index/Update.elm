@@ -13,11 +13,11 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
+import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.DocumentTemplates.Index.Models exposing (Model)
 import Wizard.DocumentTemplates.Index.Msgs exposing (Msg(..))
 import Wizard.DocumentTemplates.Routes exposing (Route(..))
 import Wizard.Msgs
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -43,7 +43,10 @@ update msg wrapMsg appState model =
             handleListingMsg wrapMsg appState listingMsg model
 
         ExportDocumentTemplate template ->
-            ( model, Ports.downloadFile (DocumentTemplatesApi.exportTemplateUrl template.id appState) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl template.id appState)) )
+
+        FileDownloaderMsg fileDownloaderMsg ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
 handleDeleteTemplate : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

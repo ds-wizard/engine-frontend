@@ -10,6 +10,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setLocale)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.Locales.Detail.Models exposing (Model)
 import Wizard.Locales.Detail.Msgs exposing (Msg(..))
 import Wizard.Msgs
@@ -44,9 +45,6 @@ update msg wrapMsg appState model =
         DeleteVersionCompleted result ->
             deleteVersionCompleted appState model result
 
-        ExportLocale locale ->
-            ( model, Ports.downloadFile (LocalesApi.exportLocaleUrl locale.id appState) )
-
         SetDefault ->
             case model.locale of
                 Success locale ->
@@ -72,6 +70,12 @@ update msg wrapMsg appState model =
 
         SetEnabledCompleted ->
             ( model, Ports.refresh () )
+
+        ExportLocale locale ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (LocalesApi.exportLocaleUrl locale.id appState)) )
+
+        FileDownloaderMsg fileDownloaderMsg ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

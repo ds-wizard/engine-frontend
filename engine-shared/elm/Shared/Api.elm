@@ -1,8 +1,8 @@
 module Shared.Api exposing
     ( ToMsg
     , authorizationHeaders
-    , authorizedUrl
-    , expectMetadata
+    , expectJson
+    , expectMetadataAndJson
     , httpFetch
     , httpGet
     , httpPost
@@ -266,8 +266,8 @@ expectWhatever toMsg =
             \_ -> Ok ()
 
 
-expectMetadata : ToMsg Http.Metadata msg -> Http.Expect msg
-expectMetadata toMsg =
+expectMetadataAndJson : ToMsg ( Http.Metadata, Maybe a ) msg -> Decoder a -> Http.Expect msg
+expectMetadataAndJson toMsg decoder =
     Http.expectStringResponse toMsg <|
         \response ->
             case response of
@@ -283,8 +283,14 @@ expectMetadata toMsg =
                 Http.BadStatus_ metadata body ->
                     Err (BadStatus metadata.statusCode body)
 
-                Http.GoodStatus_ metadata _ ->
-                    Ok metadata
+                Http.GoodStatus_ metadata body ->
+                    if metadata.statusCode == 200 then
+                        D.decodeString decoder body
+                            |> Result.mapError (always OtherError)
+                            |> Result.map (\data -> ( metadata, Just data ))
+
+                    else
+                        Ok ( metadata, Nothing )
 
 
 resolve : (String -> Result String a) -> Http.Response String -> Result ApiError a

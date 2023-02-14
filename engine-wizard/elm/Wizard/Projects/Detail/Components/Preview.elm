@@ -9,16 +9,15 @@ module Wizard.Projects.Detail.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Http
-import Maybe.Extra as Maybe
 import Process
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.UrlResponse exposing (UrlResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Html exposing (faSet)
@@ -27,6 +26,7 @@ import String.Format as String
 import Task
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.ContentType as ContentType
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
@@ -46,7 +46,7 @@ type alias Model =
 type PreviewState
     = TemplateNotSet
     | TemplateUnsupported
-    | Preview (ActionResult (Maybe String))
+    | Preview (ActionResult UrlResponse)
 
 
 init : Uuid -> PreviewState -> Model
@@ -61,7 +61,7 @@ init uuid previewState =
 
 
 type Msg
-    = GetDocumentPreviewComplete (Result ApiError Http.Metadata)
+    = GetDocumentPreviewComplete (Result ApiError ( Http.Metadata, Maybe UrlResponse ))
     | HeadRequest
 
 
@@ -84,18 +84,19 @@ update msg appState model =
             ( model, fetchData appState model.questionnaireUuid True )
 
 
-handleHeadDocumentPreviewComplete : AppState -> Model -> Result ApiError Http.Metadata -> ( Model, Cmd Msg )
+handleHeadDocumentPreviewComplete : AppState -> Model -> Result ApiError ( Http.Metadata, Maybe UrlResponse ) -> ( Model, Cmd Msg )
 handleHeadDocumentPreviewComplete appState model result =
     case result of
-        Ok metadata ->
-            if metadata.statusCode == 202 then
-                ( model
-                , Process.sleep 1000
-                    |> Task.perform (always HeadRequest)
-                )
+        Ok ( metadata, mbUrlResponse ) ->
+            case ( metadata.statusCode, mbUrlResponse ) of
+                ( 202, _ ) ->
+                    ( model, Task.perform (always HeadRequest) (Process.sleep 1000) )
 
-            else
-                ( { model | previewState = Preview (Success (Dict.get "content-type" metadata.headers)) }, Cmd.none )
+                ( 200, Just urlResponse ) ->
+                    ( { model | previewState = Preview (Success urlResponse) }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
 
         Err apiError ->
             let
@@ -128,7 +129,7 @@ view : AppState -> QuestionnaireDetail -> Model -> Html Msg
 view appState questionnaire model =
     case model.previewState of
         Preview preview ->
-            Page.actionResultViewWithError appState (viewContent appState model) viewError preview
+            Page.actionResultViewWithError appState (viewContent appState) viewError preview
 
         TemplateNotSet ->
             viewTemplateNotSet appState questionnaire
@@ -137,18 +138,14 @@ view appState questionnaire model =
             viewTemplateUnsupported appState questionnaire
 
 
-viewContent : AppState -> Model -> Maybe String -> Html Msg
-viewContent appState model mbContentType =
-    let
-        documentUrl =
-            QuestionnairesApi.documentPreviewUrl model.questionnaireUuid appState
-    in
-    if Maybe.unwrap False (isSupportedInBrowser appState) mbContentType then
+viewContent : AppState -> UrlResponse -> Html Msg
+viewContent appState urlResponse =
+    if ContentType.isSupportedInBrowser appState urlResponse.contentType then
         div [ class "Projects__Detail__Content Projects__Detail__Content--Preview" ]
-            [ iframe [ src documentUrl ] [] ]
+            [ iframe [ src urlResponse.url ] [] ]
 
     else
-        viewNotSupported appState documentUrl
+        viewNotSupported appState urlResponse.url
 
 
 viewError : String -> Html Msg
@@ -238,17 +235,3 @@ viewTemplateUnsupported appState questionnaire =
         , content = content
         , cy = "template-not-set"
         }
-
-
-isSupportedInBrowser : AppState -> String -> Bool
-isSupportedInBrowser appState contentType =
-    if contentType == "application/pdf" then
-        appState.navigator.pdf
-
-    else
-        String.startsWith "text/" contentType || List.member contentType supportedMimeTypes
-
-
-supportedMimeTypes : List String
-supportedMimeTypes =
-    [ "application/json", "application/ld+json" ]

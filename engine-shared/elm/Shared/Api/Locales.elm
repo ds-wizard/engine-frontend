@@ -14,7 +14,7 @@ module Shared.Api.Locales exposing
 import File exposing (File)
 import Http
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
 import Shared.Data.Locale as Locale exposing (Locale)
 import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
@@ -86,5 +86,5 @@ importLocale =
 
 
 exportLocaleUrl : String -> AbstractAppState a -> String
-exportLocaleUrl localeId =
-    authorizedUrl ("/locales/" ++ localeId ++ "/bundle")
+exportLocaleUrl localeId appState =
+    appState.apiUrl ++ "/locales/" ++ localeId ++ "/bundle"
