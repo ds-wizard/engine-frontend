@@ -54,10 +54,17 @@ customElements.define('code-editor', class extends HTMLElement {
             }
         })
 
+        const domEventHandlers = EditorView.domEventHandlers({
+            "focus": () => {
+                this.dispatchEvent(new CustomEvent('focus'))
+            }
+        })
+
         const extensions = [
             basicSetup,
             keymap.of(indentWithTab),
             updateListenerExtension,
+            domEventHandlers,
         ]
 
         const languageExtension = this._chooseLanguageExtension()

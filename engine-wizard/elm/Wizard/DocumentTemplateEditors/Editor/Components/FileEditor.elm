@@ -1,6 +1,5 @@
 module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor exposing
-    ( CurrentFileEditor
-    , Model
+    ( Model
     , Msg
     , Selected
     , UpdateConfig
@@ -22,8 +21,9 @@ import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, form, h5, i, iframe, img, input, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, href, id, src, target, value)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Events exposing (onClick, onInput, onSubmit, stopPropagationOn)
 import Html.Keyed
+import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
@@ -46,6 +46,8 @@ import Wizard.Common.Html.Attribute exposing (dataCy, tooltipLeft)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUploadModal as AssetUploadModal
+import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.Editor as Editor exposing (Editor)
+import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.EditorGroup as EditorGroup exposing (EditorGroup)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.FileTree as FileTree exposing (FileTree(..))
 import Wizard.Ports as Ports
 
@@ -57,8 +59,12 @@ import Wizard.Ports as Ports
 type alias Model =
     { files : ActionResult (List DocumentTemplateFile)
     , assets : ActionResult (List DocumentTemplateAsset)
-    , splitPane : SplitPane.State
-    , currentFileEditor : CurrentFileEditor
+    , filesSplitPane : SplitPane.State
+    , editorSplitPane : SplitPane.State
+    , activeEditor : Editor
+    , activeGroup : Int
+    , editorGroup1 : EditorGroup
+    , editorGroup2 : EditorGroup
     , fileContents : Dict String (ActionResult String)
     , changedFiles : Set String
     , savingFiles : Dict String (ActionResult ())
@@ -83,18 +89,16 @@ type Selected
     | SelectedFolder String
 
 
-type CurrentFileEditor
-    = NoFileEditor
-    | FileFileEditor DocumentTemplateFile
-    | AssetFileEditor DocumentTemplateAsset
-
-
 initialModel : Model
 initialModel =
     { files = ActionResult.Loading
     , assets = ActionResult.Loading
-    , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
-    , currentFileEditor = NoFileEditor
+    , filesSplitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
+    , editorSplitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.5 (Just ( 0.1, 0.9 )))
+    , activeEditor = Editor.Empty
+    , activeGroup = 1
+    , editorGroup1 = EditorGroup.init 1
+    , editorGroup2 = EditorGroup.init 2
     , fileContents = Dict.empty
     , changedFiles = Set.empty
     , savingFiles = Dict.empty
@@ -205,9 +209,13 @@ type Msg
     = GetTemplateFilesCompleted (Result ApiError (List DocumentTemplateFile))
     | GetTemplateAssetsCompleted (Result ApiError (List DocumentTemplateAsset))
     | GetTemplateFileContentCompleted Uuid (Result ApiError String)
-    | SplitPaneMsg SplitPane.Msg
-    | OpenFile Uuid String
-    | OpenAsset Uuid String
+    | FilesSplitPaneMsg SplitPane.Msg
+    | EditorSplitPaneMsg SplitPane.Msg
+    | OpenFile Int Uuid String
+    | OpenAsset Int Uuid String
+    | SetActiveEditor Int Editor
+    | MoveCurrentEditor
+    | CloseTab Editor
     | FileChanged Uuid String
     | Save
     | FileSaveComplete Uuid (Result ApiError ())
@@ -242,14 +250,22 @@ saveMsg =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     let
-        splitPaneSub =
-            Sub.map SplitPaneMsg <|
-                SplitPane.subscriptions model.splitPane
+        filesSplitPaneSub =
+            Sub.map FilesSplitPaneMsg <|
+                SplitPane.subscriptions model.filesSplitPane
+
+        editorSplitPaneSub =
+            Sub.map EditorSplitPaneMsg <|
+                SplitPane.subscriptions model.editorSplitPane
 
         addDropdownSub =
             Dropdown.subscriptions model.addDropdownState AddDropdownMsg
     in
-    Sub.batch [ splitPaneSub, addDropdownSub ]
+    Sub.batch
+        [ filesSplitPaneSub
+        , editorSplitPaneSub
+        , addDropdownSub
+        ]
 
 
 
@@ -274,9 +290,59 @@ type alias UpdateConfig msg =
 
 update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
+    let
+        openEditor : Int -> Editor -> Model -> Model
+        openEditor groupId editor m =
+            if EditorGroup.isEditorOpen editor m.editorGroup1 then
+                { m | editorGroup1 = EditorGroup.addAndOpenEditor editor model.editorGroup1 }
+
+            else if EditorGroup.isEditorOpen editor m.editorGroup2 then
+                { m | editorGroup2 = EditorGroup.addAndOpenEditor editor model.editorGroup2 }
+
+            else
+                let
+                    editorGroup1 =
+                        if groupId == 1 then
+                            EditorGroup.addAndOpenEditor editor model.editorGroup1
+
+                        else
+                            model.editorGroup1
+
+                    editorGroup2 =
+                        if groupId == 2 then
+                            EditorGroup.addAndOpenEditor editor model.editorGroup2
+
+                        else
+                            model.editorGroup2
+                in
+                { m | editorGroup1 = editorGroup1, editorGroup2 = editorGroup2 }
+
+        ensureActiveEditor : Model -> Model
+        ensureActiveEditor m =
+            if EditorGroup.isEditorOpen m.activeEditor m.editorGroup1 || EditorGroup.isEditorOpen m.activeEditor m.editorGroup2 then
+                m
+
+            else
+                { m | activeEditor = m.editorGroup1.currentEditor }
+
+        consolidateEditorGroups : Model -> Model
+        consolidateEditorGroups m =
+            ensureActiveEditor <|
+                if EditorGroup.isEmpty m.editorGroup1 then
+                    { m
+                        | editorGroup1 = m.editorGroup2
+                        , editorGroup2 = EditorGroup.init 2
+                    }
+
+                else
+                    m
+    in
     case msg of
-        SplitPaneMsg splitPaneMsg ->
-            ( { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }, Cmd.none )
+        FilesSplitPaneMsg splitPaneMsg ->
+            ( { model | filesSplitPane = SplitPane.update splitPaneMsg model.filesSplitPane }, Cmd.none )
+
+        EditorSplitPaneMsg splitPaneMsg ->
+            ( { model | editorSplitPane = SplitPane.update splitPaneMsg model.editorSplitPane }, Cmd.none )
 
         GetTemplateFilesCompleted result ->
             applyResult appState
@@ -309,7 +375,7 @@ update cfg appState msg model =
                 , logoutMsg = cfg.logoutMsg
                 }
 
-        OpenFile uuid path ->
+        OpenFile groupId uuid path ->
             case getFile uuid model of
                 Just file ->
                     let
@@ -321,19 +387,24 @@ update cfg appState msg model =
                                 ( Dict.insert (Uuid.toString uuid) ActionResult.Loading model.fileContents
                                 , DocumentTemplateDraftsApi.getFileContent cfg.documentTemplateId file.uuid appState (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
                                 )
+
+                        editor =
+                            Editor.File file
                     in
-                    ( { model
-                        | currentFileEditor = FileFileEditor file
-                        , fileContents = fileContents
-                        , selected = SelectedFile path
-                      }
+                    ( openEditor groupId
+                        editor
+                        { model
+                            | activeEditor = editor
+                            , fileContents = fileContents
+                            , selected = SelectedFile path
+                        }
                     , cmd
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
 
-        OpenAsset uuid path ->
+        OpenAsset groupId uuid path ->
             let
                 mbAsset =
                     case model.assets of
@@ -345,12 +416,83 @@ update cfg appState msg model =
             in
             case mbAsset of
                 Just asset ->
-                    ( { model | selected = SelectedAsset path, currentFileEditor = AssetFileEditor asset }
+                    let
+                        editor =
+                            Editor.Asset asset
+                    in
+                    ( openEditor groupId
+                        editor
+                        { model
+                            | selected = SelectedAsset path
+                            , activeEditor = editor
+                        }
                     , Cmd.none
                     )
 
                 Nothing ->
                     ( model, Cmd.none )
+
+        SetActiveEditor groupId editor ->
+            let
+                selected =
+                    case editor of
+                        Editor.File file ->
+                            SelectedFile file.fileName
+
+                        Editor.Asset asset ->
+                            SelectedAsset asset.fileName
+
+                        _ ->
+                            model.selected
+            in
+            ( { model
+                | activeEditor = editor
+                , activeGroup = groupId
+                , selected = selected
+              }
+            , Cmd.none
+            )
+
+        MoveCurrentEditor ->
+            let
+                ( editorGroup1, editorGroup2 ) =
+                    if EditorGroup.isEditorOpen model.activeEditor model.editorGroup1 then
+                        ( EditorGroup.removeEditor model.activeEditor model.editorGroup1
+                        , EditorGroup.addAndOpenEditor model.activeEditor model.editorGroup2
+                        )
+
+                    else if EditorGroup.isEditorOpen model.activeEditor model.editorGroup2 then
+                        ( EditorGroup.addAndOpenEditor model.activeEditor model.editorGroup1
+                        , EditorGroup.removeEditor model.activeEditor model.editorGroup2
+                        )
+
+                    else
+                        ( model.editorGroup1, model.editorGroup2 )
+
+                activeGroup =
+                    if model.activeGroup == 1 then
+                        2
+
+                    else
+                        1
+            in
+            ( consolidateEditorGroups
+                { model
+                    | editorGroup1 = editorGroup1
+                    , editorGroup2 = editorGroup2
+                    , activeGroup = activeGroup
+                }
+            , Cmd.none
+            )
+
+        CloseTab editor ->
+            ( consolidateEditorGroups
+                { model
+                    | editorGroup1 = EditorGroup.removeEditor editor model.editorGroup1
+                    , editorGroup2 = EditorGroup.removeEditor editor model.editorGroup2
+                }
+            , Cmd.none
+            )
 
         FileChanged uuid content ->
             ( updateFile uuid content model, Cmd.none )
@@ -468,6 +610,9 @@ update cfg appState msg model =
                     let
                         files =
                             ActionResult.map ((++) [ file ]) model.files
+
+                        editor =
+                            Editor.File file
                     in
                     ( { model
                         | files = files
@@ -475,7 +620,8 @@ update cfg appState msg model =
                         , addingFile = ActionResult.Unset
                         , fileContents = Dict.insert (Uuid.toString file.uuid) (Success "") model.fileContents
                         , selected = SelectedFile file.fileName
-                        , currentFileEditor = FileFileEditor file
+                        , activeEditor = editor
+                        , editorGroup1 = EditorGroup.addAndOpenEditor editor model.editorGroup1
                       }
                     , Cmd.none
                     )
@@ -540,27 +686,36 @@ update cfg appState msg model =
             case result of
                 Ok _ ->
                     let
+                        editorGroup1 =
+                            EditorGroup.removeEditorByUuid uuid model.editorGroup1
+
+                        editorGroup2 =
+                            EditorGroup.removeEditorByUuid uuid model.editorGroup2
+
                         file =
-                            case model.currentFileEditor of
-                                FileFileEditor currentFile ->
+                            case model.activeEditor of
+                                Editor.File currentFile ->
                                     if currentFile.uuid == uuid then
-                                        NoFileEditor
+                                        editorGroup1.currentEditor
 
                                     else
-                                        model.currentFileEditor
+                                        model.activeEditor
 
                                 _ ->
-                                    model.currentFileEditor
+                                    model.activeEditor
                     in
-                    ( { model
-                        | deleting = ActionResult.Unset
-                        , deleteModalOpen = False
-                        , currentFileEditor = file
-                        , files = ActionResult.map (List.filter ((/=) uuid << .uuid)) model.files
-                        , changedFiles = Set.remove (Uuid.toString uuid) model.changedFiles
-                        , savingFiles = Dict.remove (Uuid.toString uuid) model.savingFiles
-                        , selected = SelectedFolder ""
-                      }
+                    ( consolidateEditorGroups
+                        { model
+                            | deleting = ActionResult.Unset
+                            , deleteModalOpen = False
+                            , activeEditor = file
+                            , files = ActionResult.map (List.filter ((/=) uuid << .uuid)) model.files
+                            , changedFiles = Set.remove (Uuid.toString uuid) model.changedFiles
+                            , savingFiles = Dict.remove (Uuid.toString uuid) model.savingFiles
+                            , selected = SelectedFolder ""
+                            , editorGroup1 = editorGroup1
+                            , editorGroup2 = editorGroup2
+                        }
                     , Cmd.none
                     )
 
@@ -573,27 +728,36 @@ update cfg appState msg model =
             case result of
                 Ok _ ->
                     let
+                        editorGroup1 =
+                            EditorGroup.removeEditorByUuid uuid model.editorGroup1
+
+                        editorGroup2 =
+                            EditorGroup.removeEditorByUuid uuid model.editorGroup2
+
                         asset =
-                            case model.currentFileEditor of
-                                AssetFileEditor currentAsset ->
+                            case model.activeEditor of
+                                Editor.Asset currentAsset ->
                                     if currentAsset.uuid == uuid then
-                                        NoFileEditor
+                                        editorGroup1.currentEditor
 
                                     else
-                                        model.currentFileEditor
+                                        model.activeEditor
 
                                 _ ->
-                                    model.currentFileEditor
+                                    model.activeEditor
                     in
-                    ( { model
-                        | deleting = ActionResult.Unset
-                        , deleteModalOpen = False
-                        , currentFileEditor = asset
-                        , assets = ActionResult.map (List.filter ((/=) uuid << .uuid)) model.assets
-                        , changedFiles = Set.remove (Uuid.toString uuid) model.changedFiles
-                        , savingFiles = Dict.remove (Uuid.toString uuid) model.savingFiles
-                        , selected = SelectedFolder ""
-                      }
+                    ( consolidateEditorGroups
+                        { model
+                            | deleting = ActionResult.Unset
+                            , deleteModalOpen = False
+                            , activeEditor = asset
+                            , assets = ActionResult.map (List.filter ((/=) uuid << .uuid)) model.assets
+                            , changedFiles = Set.remove (Uuid.toString uuid) model.changedFiles
+                            , savingFiles = Dict.remove (Uuid.toString uuid) model.savingFiles
+                            , selected = SelectedFolder ""
+                            , editorGroup1 = editorGroup1
+                            , editorGroup2 = editorGroup2
+                        }
                     , Cmd.none
                     )
 
@@ -645,15 +809,15 @@ viewFileEditor cfg appState model ( files, assets ) =
     let
         splitPaneConfig =
             SplitPane.createViewConfig
-                { toMsg = SplitPaneMsg
+                { toMsg = FilesSplitPaneMsg
                 , customSplitter = Nothing
                 }
     in
     div []
         [ SplitPane.view splitPaneConfig
             (viewSidebar appState model cfg.documentTemplate files assets)
-            (viewFile appState model)
-            model.splitPane
+            (viewEditorContent appState model)
+            model.filesSplitPane
         , viewAddFileModal appState model
         , viewAddFolderModal appState model
         , viewDeleteModal appState model
@@ -706,22 +870,36 @@ viewSidebar appState model documentTemplate files assets =
         actions =
             case model.selected of
                 SelectedFolder _ ->
-                    []
+                    emptyNode
 
                 _ ->
-                    [ a
-                        ([ class "text-danger"
-                         , onClick (SetDeleteModalOpen True)
-                         , dataCy "dt-editor_file-tree_delete"
-                         ]
-                            ++ tooltipLeft (gettext "Delete" appState.locale)
-                        )
-                        [ faSet "_global.delete" appState ]
-                    ]
+                    let
+                        groupLink =
+                            if List.length model.editorGroup1.tabs + List.length model.editorGroup2.tabs > 1 then
+                                a
+                                    ([ onClick MoveCurrentEditor, class "me-3" ]
+                                        ++ tooltipLeft (gettext "Move to opposite group" appState.locale)
+                                    )
+                                    [ fa "fas fa-columns" ]
+
+                            else
+                                emptyNode
+                    in
+                    span []
+                        [ groupLink
+                        , a
+                            ([ class "text-danger"
+                             , onClick (SetDeleteModalOpen True)
+                             , dataCy "dt-editor_file-tree_delete"
+                             ]
+                                ++ tooltipLeft (gettext "Delete" appState.locale)
+                            )
+                            [ faSet "_global.delete" appState ]
+                        ]
     in
     div [ class "w-100 d-flex flex-column" ]
         [ div [ class "file-tree-actions bg-light p-2 d-flex justify-content-between align-items-center" ]
-            (addDropdown :: actions)
+            [ addDropdown, actions ]
         , div [ class "file-tree" ]
             [ ul [] [ viewFiles appState model fileTree ]
             ]
@@ -731,28 +909,18 @@ viewSidebar appState model documentTemplate files assets =
 viewFiles : AppState -> Model -> FileTree -> Html Msg
 viewFiles appState model fileTree =
     let
-        changedFileIndicator fileUuid =
-            if Set.member (Uuid.toString fileUuid) model.changedFiles then
-                " *"
-
-            else
-                ""
-
         isSelected =
             FileTree.getPath SelectedFolder SelectedFile SelectedAsset fileTree == model.selected
-
-        wrapFileName fileUuid name =
-            name ++ changedFileIndicator fileUuid
 
         itemLi =
             li [ classList [ ( "selected", isSelected ) ] ]
 
         isOpenInEditor =
-            case ( model.currentFileEditor, fileTree ) of
-                ( FileFileEditor editorFile, File treeFile ) ->
+            case ( model.activeEditor, fileTree ) of
+                ( Editor.File editorFile, File treeFile ) ->
                     editorFile.uuid == treeFile.uuid
 
-                ( AssetFileEditor editorAsset, Asset treeAsset ) ->
+                ( Editor.Asset editorAsset, Asset treeAsset ) ->
                     editorAsset.uuid == treeAsset.uuid
 
                 _ ->
@@ -760,7 +928,7 @@ viewFiles appState model fileTree =
 
         itemText =
             if isOpenInEditor then
-                strong []
+                span [ class "active" ]
 
             else
                 span []
@@ -797,69 +965,139 @@ viewFiles appState model fileTree =
                     ]
                 , a [ onClick (Select (SelectedFolder folderData.path)), dataCy "dt-editor_file-tree_folder" ]
                     [ icon
-                    , itemText [ text (wrapFileName Uuid.nil folderData.name) ]
+                    , itemText [ text (wrapFileName model Uuid.nil folderData.name) ]
                     ]
                 , children
                 ]
 
         File fileData ->
             itemLi
-                [ a [ onClick (OpenFile fileData.uuid fileData.path), dataCy "dt-editor_file-tree_file" ]
+                [ a [ onClick (OpenFile model.activeGroup fileData.uuid fileData.path), dataCy "dt-editor_file-tree_file" ]
                     [ fa "far fa-file-alt"
-                    , itemText [ text (wrapFileName fileData.uuid fileData.name) ]
+                    , itemText [ text (wrapFileName model fileData.uuid fileData.name) ]
                     ]
                 ]
 
         Asset assetData ->
             itemLi
-                [ a [ onClick (OpenAsset assetData.uuid assetData.path), dataCy "dt-editor_file-tree_asset" ]
+                [ a [ onClick (OpenAsset model.activeGroup assetData.uuid assetData.path), dataCy "dt-editor_file-tree_asset" ]
                     [ fa "far fa-file"
-                    , itemText [ text (wrapFileName assetData.uuid assetData.name) ]
+                    , itemText [ text (wrapFileName model assetData.uuid assetData.name) ]
                     ]
                 ]
 
 
-viewFile : AppState -> Model -> Html Msg
-viewFile appState model =
-    case model.currentFileEditor of
-        AssetFileEditor asset ->
-            Html.Keyed.node "div" [ class "w-100" ] <|
-                [ ( Uuid.toString asset.uuid
-                  , viewAssetContent appState asset
-                  )
-                ]
+wrapFileName : Model -> Uuid -> String -> String
+wrapFileName model fileUuid name =
+    if Set.member (Uuid.toString fileUuid) model.changedFiles then
+        name ++ " *"
 
-        FileFileEditor file ->
-            case Dict.get (Uuid.toString file.uuid) model.fileContents of
-                Just fileActionResult ->
-                    case fileActionResult of
-                        ActionResult.Success content ->
-                            Html.Keyed.node "div" [ class "w-100 overflow-auto" ] <|
-                                [ ( Uuid.toString file.uuid
-                                  , CodeEditor.codeEditor
-                                        [ CodeEditor.value content
-                                        , CodeEditor.onChange (FileChanged file.uuid)
-                                        , CodeEditor.language (CodeEditor.chooseLanguage (ContentType.getContentTypeText file.fileName))
+    else
+        name
+
+
+viewEditorContent : AppState -> Model -> Html Msg
+viewEditorContent appState model =
+    if EditorGroup.isEmpty model.editorGroup2 then
+        viewEditorGroup appState model model.editorGroup1
+
+    else
+        let
+            splitPaneConfig =
+                SplitPane.createViewConfig
+                    { toMsg = EditorSplitPaneMsg
+                    , customSplitter = Nothing
+                    }
+        in
+        SplitPane.view splitPaneConfig
+            (viewEditorGroup appState model model.editorGroup1)
+            (viewEditorGroup appState model model.editorGroup2)
+            model.editorSplitPane
+
+
+viewEditorGroup : AppState -> Model -> EditorGroup -> Html Msg
+viewEditorGroup appState model editorGroup =
+    let
+        editorContent =
+            case editorGroup.currentEditor of
+                Editor.Asset asset ->
+                    Html.Keyed.node "div" [ class "w-100" ] <|
+                        [ ( Uuid.toString asset.uuid
+                          , viewAssetContent appState asset
+                          )
+                        ]
+
+                Editor.File file ->
+                    case Dict.get (Uuid.toString file.uuid) model.fileContents of
+                        Just fileActionResult ->
+                            case fileActionResult of
+                                ActionResult.Success content ->
+                                    Html.Keyed.node "div" [ class "w-100 overflow-auto" ] <|
+                                        [ ( Uuid.toString file.uuid
+                                          , CodeEditor.codeEditor
+                                                [ CodeEditor.value content
+                                                , CodeEditor.onChange (FileChanged file.uuid)
+                                                , CodeEditor.onFocus (SetActiveEditor editorGroup.id editorGroup.currentEditor)
+                                                , CodeEditor.language (CodeEditor.chooseLanguage (ContentType.getContentTypeText file.fileName))
+                                                ]
+                                          )
                                         ]
-                                  )
-                                ]
 
-                        ActionResult.Loading ->
-                            div [ class "w-100" ]
-                                [ Page.loader appState
-                                ]
+                                ActionResult.Loading ->
+                                    div [ class "w-100" ]
+                                        [ Page.loader appState
+                                        ]
 
-                        ActionResult.Error error ->
-                            div [] [ text error ]
+                                ActionResult.Error error ->
+                                    div [] [ text error ]
 
-                        _ ->
+                                _ ->
+                                    viewEmptyEditor appState
+
+                        Nothing ->
                             viewEmptyEditor appState
 
-                Nothing ->
+                _ ->
                     viewEmptyEditor appState
+    in
+    div [ class "DocumentTemplateEditor__FileEditor" ]
+        [ viewTabs appState model editorGroup
+        , editorContent
+        ]
 
-        _ ->
-            viewEmptyEditor appState
+
+viewTabs : AppState -> Model -> EditorGroup -> Html Msg
+viewTabs appState model editorGroup =
+    let
+        viewTab openMsg tab file =
+            span
+                [ onClick (openMsg editorGroup.id file.uuid file.fileName)
+                , class "tab"
+                , classList
+                    [ ( "active", model.activeEditor == tab )
+                    , ( "active-group", editorGroup.currentEditor == tab )
+                    ]
+                ]
+                [ text (wrapFileName model file.uuid (getFileName file))
+                , span
+                    [ class "ms-2 tab-close"
+                    , stopPropagationOn "click" (D.succeed ( CloseTab tab, True ))
+                    ]
+                    [ faSet "_global.close" appState ]
+                ]
+
+        viewTabWrapper tab =
+            case tab of
+                Editor.File file ->
+                    viewTab OpenFile tab file
+
+                Editor.Asset asset ->
+                    viewTab OpenAsset tab asset
+
+                _ ->
+                    emptyNode
+    in
+    div [ class "tabs" ] (List.map viewTabWrapper editorGroup.tabs)
 
 
 viewAssetContent : AppState -> DocumentTemplateAsset -> Html Msg

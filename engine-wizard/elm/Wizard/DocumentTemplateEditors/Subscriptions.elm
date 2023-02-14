@@ -19,5 +19,5 @@ subscriptions route model =
             Sub.map IndexMsg <|
                 Wizard.DocumentTemplateEditors.Index.Subcriptions.subscriptions model.indexModel
 
-        EditorRoute _ ->
+        EditorRoute _ _ ->
             Sub.map EditorMsg <| Wizard.DocumentTemplateEditors.Editor.Subscriptions.subscriptions model.editorModel

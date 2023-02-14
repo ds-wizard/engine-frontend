@@ -1,5 +1,6 @@
 module Wizard.DocumentTemplateEditors.Editor.Update exposing
     ( fetchData
+    , isGuarded
     , update
     )
 
@@ -9,23 +10,53 @@ import Random exposing (Seed)
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail
 import Shared.Error.ApiError as ApiError
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
 import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor as TemplateEditor
-import Wizard.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model)
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute exposing (DTEditorRoute)
+import Wizard.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model, containsChanges)
 import Wizard.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
+import Wizard.Routes as Routes
 
 
-fetchData : String -> AppState -> Cmd Msg
-fetchData documentTemplateId appState =
-    Cmd.batch
-        [ DocumentTemplateDraftsApi.getDraft documentTemplateId appState GetTemplateCompleted
-        , Cmd.map FileEditorMsg (FileEditor.fetchData documentTemplateId appState)
-        ]
+fetchData : AppState -> String -> DTEditorRoute -> Model -> Cmd Msg
+fetchData appState documentTemplateId subroute model =
+    if ActionResult.unwrap False ((==) documentTemplateId << .id) model.documentTemplate then
+        loadPreviewCmd (subroute == DTEditorRoute.Preview)
+
+    else
+        Cmd.batch
+            [ DocumentTemplateDraftsApi.getDraft documentTemplateId appState GetTemplateCompleted
+            , Cmd.map FileEditorMsg (FileEditor.fetchData documentTemplateId appState)
+            , loadPreviewCmd (subroute == DTEditorRoute.Preview)
+            ]
+
+
+loadPreviewCmd : Bool -> Cmd Msg
+loadPreviewCmd isPreview =
+    if isPreview then
+        dispatch (PreviewMsg Preview.loadPreviewMsg)
+
+    else
+        Cmd.none
+
+
+isGuarded : AppState -> Routes.Route -> Model -> Maybe String
+isGuarded appState nextRoute model =
+    if not (containsChanges model) then
+        Nothing
+
+    else if Routes.isDocumentTemplateEditor model.documentTemplateId nextRoute then
+        Nothing
+
+    else
+        Just (gettext "There are unsaved changes." appState.locale)
 
 
 update : AppState -> (Msg -> Wizard.Msgs.Msg) -> Msg -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -54,6 +85,29 @@ update appState wrapMsg msg model =
             else
                 wrap model
 
+        updateUnloadMessage : ( Seed, Model, Cmd Wizard.Msgs.Msg ) -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+        updateUnloadMessage ( seed, m, cmd ) =
+            if containsChanges m && not m.unloadMessageSet then
+                ( seed
+                , { m | unloadMessageSet = True }
+                , Cmd.batch
+                    [ cmd
+                    , Ports.setUnloadMessage (gettext "There are unsaved changes." appState.locale)
+                    ]
+                )
+
+            else if not (containsChanges m) && m.unloadMessageSet then
+                ( seed
+                , { m | unloadMessageSet = True }
+                , Cmd.batch
+                    [ cmd
+                    , Ports.clearUnloadMessage ()
+                    ]
+                )
+
+            else
+                ( seed, m, cmd )
+
         templateEditorUpdateConfig : TemplateEditor.UpdateConfig Wizard.Msgs.Msg
         templateEditorUpdateConfig =
             { wrapMsg = wrapMsg << TemplateEditorMsg
@@ -68,15 +122,6 @@ update appState wrapMsg msg model =
             , logoutMsg = Wizard.Msgs.logoutMsg
             , documentTemplateId = model.documentTemplateId
             , onFileSavedMsg = wrapMsg SaveForm
-            }
-
-        previewUpdateConfig : Preview.UpdateConfig Wizard.Msgs.Msg
-        previewUpdateConfig =
-            { wrapMsg = wrapMsg << PreviewMsg
-            , logoutMsg = Wizard.Msgs.logoutMsg
-            , documentTemplateId = model.documentTemplateId
-            , documentTemplate = model.documentTemplate
-            , updatePreviewSettings = wrapMsg << UpdatePreviewSettings
             }
     in
     case msg of
@@ -98,37 +143,33 @@ update appState wrapMsg msg model =
                         , getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
-        SetEditor editor ->
-            let
-                newModel =
-                    { model | currentEditor = editor }
-            in
-            if editor == PreviewEditor then
-                let
-                    ( previewModel, previewCmd ) =
-                        Preview.update previewUpdateConfig appState Preview.loadPreviewMsg model.previewModel
-                in
-                withSeed ( { newModel | previewModel = previewModel }, previewCmd )
-
-            else
-                wrap newModel
-
         TemplateEditorMsg templateEditorMsg ->
             let
                 ( newSeed, templateEditorModel, templateEditorCmd ) =
                     TemplateEditor.update templateEditorUpdateConfig appState templateEditorMsg model.templateEditorModel
             in
-            ( newSeed, { model | templateEditorModel = templateEditorModel }, templateEditorCmd )
+            updateUnloadMessage <|
+                ( newSeed, { model | templateEditorModel = templateEditorModel }, templateEditorCmd )
 
         FileEditorMsg fileEditorMsg ->
             let
                 ( fileEditorModel, fileEditorCmd ) =
                     FileEditor.update fileEditorUpdateConfig appState fileEditorMsg model.fileEditorModel
             in
-            withSeed ( { model | fileEditorModel = fileEditorModel }, fileEditorCmd )
+            updateUnloadMessage <|
+                withSeed ( { model | fileEditorModel = fileEditorModel }, fileEditorCmd )
 
         PreviewMsg previewMsg ->
             let
+                previewUpdateConfig : Preview.UpdateConfig Wizard.Msgs.Msg
+                previewUpdateConfig =
+                    { wrapMsg = wrapMsg << PreviewMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    , documentTemplateId = model.documentTemplateId
+                    , documentTemplate = model.documentTemplate
+                    , updatePreviewSettings = wrapMsg << UpdatePreviewSettings
+                    }
+
                 ( previewModel, previewCmd ) =
                     Preview.update previewUpdateConfig appState previewMsg model.previewModel
             in
@@ -166,3 +207,17 @@ update appState wrapMsg msg model =
 
         SaveForm ->
             saveForm ( model, Cmd.none )
+
+        DiscardChanges ->
+            withSeed
+                ( { model
+                    | fileEditorModel = FileEditor.initialModel
+                    , templateEditorModel = TemplateEditor.initialModel
+                  }
+                , Cmd.batch
+                    [ DocumentTemplateDraftsApi.getDraft model.documentTemplateId appState (wrapMsg << GetTemplateCompleted)
+                    , Cmd.map (wrapMsg << FileEditorMsg) (FileEditor.fetchData model.documentTemplateId appState)
+                    , Cmd.map wrapMsg (loadPreviewCmd (model.currentEditor == PreviewEditor))
+                    , Ports.clearUnloadMessage ()
+                    ]
+                )
