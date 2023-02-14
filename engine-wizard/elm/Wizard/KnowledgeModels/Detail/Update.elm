@@ -10,10 +10,10 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setPackage)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Msgs
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -45,7 +45,10 @@ update msg wrapMsg appState model =
             deleteVersionCompleted appState model result
 
         ExportPackage package ->
-            ( model, Ports.downloadFile (PackagesApi.exportPackageUrl package.id appState) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (PackagesApi.exportPackageUrl package.id appState)) )
+
+        FileDownloaderMsg fileDownloaderMsg ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

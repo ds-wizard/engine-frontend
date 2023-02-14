@@ -12,19 +12,18 @@ module Wizard.DocumentTemplateEditors.Editor.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, iframe, option, p, pre, select, text)
 import Html.Attributes exposing (class, href, id, name, selected, src, target, value)
 import Html.Events exposing (onInput)
 import Http
-import Maybe.Extra as Maybe
 import Process
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Data.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
+import Shared.Data.UrlResponse exposing (UrlResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Html exposing (faSet)
@@ -49,14 +48,14 @@ import Wizard.Common.View.Page as Page
 
 type alias Model =
     { typeHintInputModel : TypeHintInput.Model QuestionnaireSuggestion
-    , contentType : ActionResult (Maybe String)
+    , urlResponse : ActionResult UrlResponse
     }
 
 
 initialModel : Model
 initialModel =
     { typeHintInputModel = TypeHintInput.init "uuid"
-    , contentType = ActionResult.Unset
+    , urlResponse = ActionResult.Unset
     }
 
 
@@ -74,8 +73,8 @@ type Msg
     | QuestionnaireTypeHintInputSelect Uuid
     | FormatSelected String
     | PutPreviewSettingsCompleted (Result ApiError DocumentTemplateDraftPreviewSettings)
-    | GetPreviewCompleted (Result ApiError Http.Metadata)
-    | HeadPreviewRequest
+    | GetPreviewRequest
+    | GetPreviewCompleted (Result ApiError ( Http.Metadata, Maybe UrlResponse ))
     | LoadPreview
 
 
@@ -111,7 +110,7 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     let
         getPreviewCmd =
-            DocumentTemplateDraftsApi.headPreview cfg.documentTemplateId appState (cfg.wrapMsg << GetPreviewCompleted)
+            DocumentTemplateDraftsApi.getPreview cfg.documentTemplateId appState (cfg.wrapMsg << GetPreviewCompleted)
 
         updatePreviewSettings updateFn =
             let
@@ -168,7 +167,7 @@ update cfg appState msg model =
                             dispatch (cfg.updatePreviewSettings previewSettings)
                     in
                     if DocumentTemplateDraftPreviewSettings.isPreviewSet previewSettings then
-                        ( { model | contentType = ActionResult.Loading }
+                        ( { model | urlResponse = ActionResult.Loading }
                         , Cmd.batch
                             [ getPreviewCmd
                             , dispatchUpdateCmd
@@ -181,17 +180,21 @@ update cfg appState msg model =
                 Err _ ->
                     ( model, Cmd.none )
 
-        HeadPreviewRequest ->
+        GetPreviewRequest ->
             ( model, getPreviewCmd )
 
         GetPreviewCompleted result ->
             case result of
-                Ok metadata ->
-                    if metadata.statusCode == 202 then
-                        ( model, Task.perform (always (cfg.wrapMsg HeadPreviewRequest)) (Process.sleep 1000) )
+                Ok ( metadata, mbUrlResponse ) ->
+                    case ( metadata.statusCode, mbUrlResponse ) of
+                        ( 202, _ ) ->
+                            ( model, Task.perform (always (cfg.wrapMsg GetPreviewRequest)) (Process.sleep 1000) )
 
-                    else
-                        ( { model | contentType = ActionResult.Success (Dict.get "content-type" metadata.headers) }, Cmd.none )
+                        ( 200, Just urlResponse ) ->
+                            ( { model | urlResponse = ActionResult.Success urlResponse }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
 
                 Err error ->
                     let
@@ -204,13 +207,13 @@ update cfg appState msg model =
                                     _ ->
                                         gettext "Unable to get the document preview." appState.locale
                     in
-                    ( { model | contentType = previewError }
+                    ( { model | urlResponse = previewError }
                     , getResultCmd cfg.logoutMsg result
                     )
 
         LoadPreview ->
             if ActionResult.unwrap False DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
-                ( { model | contentType = ActionResult.Loading }, getPreviewCmd )
+                ( { model | urlResponse = ActionResult.Loading }, getPreviewCmd )
 
             else
                 ( model, Cmd.none )
@@ -243,7 +246,7 @@ view cfg appState model =
 
         content =
             if DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
-                Page.actionResultViewWithError appState (viewContent cfg appState) viewError model.contentType
+                Page.actionResultViewWithError appState (viewContent appState) viewError model.urlResponse
 
             else
                 viewNotSet appState
@@ -271,17 +274,13 @@ viewNotSet appState =
         }
 
 
-viewContent : ViewConfig -> AppState -> Maybe String -> Html msg
-viewContent cfg appState mbContentType =
-    let
-        documentUrl =
-            DocumentTemplateDraftsApi.previewUrl cfg.documentTemplate.id appState
-    in
-    if Maybe.unwrap False (ContentType.isSupportedInBrowser appState) mbContentType then
-        iframe [ src documentUrl, class "w-100 h-100", dataCy "document-preview" ] []
+viewContent : AppState -> UrlResponse -> Html msg
+viewContent appState urlResponse =
+    if ContentType.isSupportedInBrowser appState urlResponse.contentType then
+        iframe [ src urlResponse.url, class "w-100 h-100", dataCy "document-preview" ] []
 
     else
-        viewNotSupported appState documentUrl
+        viewNotSupported appState urlResponse.url
 
 
 viewError : String -> Html msg

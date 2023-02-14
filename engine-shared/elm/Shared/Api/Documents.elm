@@ -11,7 +11,7 @@ import Json.Decode as D
 import Json.Encode as E
 import Maybe.Extra as Maybe
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtFetch, jwtGet)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -50,8 +50,8 @@ getSubmissionServices documentId =
 
 
 downloadDocumentUrl : Uuid -> AbstractAppState a -> String
-downloadDocumentUrl uuid =
-    authorizedUrl ("/documents/" ++ Uuid.toString uuid ++ "/download")
+downloadDocumentUrl uuid appState =
+    appState.apiUrl ++ "/documents/" ++ Uuid.toString uuid ++ "/download"
 
 
 postSubmission : String -> String -> AbstractAppState a -> ToMsg Submission msg -> Cmd msg

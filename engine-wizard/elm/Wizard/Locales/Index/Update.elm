@@ -9,6 +9,7 @@ import Wizard.Common.Api exposing (applyResultTransformCmd, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
+import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.Locales.Index.Models exposing (Model)
 import Wizard.Locales.Index.Msgs exposing (Msg(..))
 import Wizard.Locales.Routes exposing (Route(..))
@@ -37,9 +38,6 @@ update msg wrapMsg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
-        ExportLocale locale ->
-            ( model, Ports.downloadFile (LocalesApi.exportLocaleUrl locale.id appState) )
-
         SetEnabled enabled locale ->
             ( { model | changingLocale = ActionResult.Loading }
             , LocalesApi.setEnabled locale enabled appState (wrapMsg << ChangeLocaleCompleted)
@@ -60,6 +58,12 @@ update msg wrapMsg appState model =
                 , transform = always (gettext "Locale was changed successfully." appState.locale)
                 , cmd = Ports.refresh ()
                 }
+
+        ExportLocale locale ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (LocalesApi.exportLocaleUrl locale.id appState)) )
+
+        FileDownloaderMsg fileDownloaderMsg ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
 handleDeleteLocale : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
