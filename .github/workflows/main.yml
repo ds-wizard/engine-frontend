@@ -56,7 +56,7 @@ jobs:
           type=sha
 
     - name: Docker build [test]
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       with:
         context: ${{ env.DOCKER_META_CONTEXT }}
         file: ${{ env.DOCKER_META_FILE }}
@@ -85,7 +85,7 @@ jobs:
           type=ref,event=branch
 
     - name: Docker build+push [dev]
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       if: github.event_name != 'pull_request' && steps.meta-dev.outputs.tags != '' && secrets.DOCKER_HUB_USERNAME != ''
       with:
         context: ${{ env.DOCKER_META_CONTEXT }}
@@ -110,7 +110,7 @@ jobs:
           type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
 
     - name: Docker build+push [public]
-      uses: docker/build-push-action@v3
+      uses: docker/build-push-action@v4
       if: github.event_name != 'pull_request' && steps.meta-public.outputs.tags != '' && secrets.DOCKER_HUB_USERNAME != ''
       with:
         context: ${{ env.DOCKER_META_CONTEXT }}
