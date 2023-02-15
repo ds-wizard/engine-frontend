@@ -67,7 +67,7 @@ jobs:
 
 # (4.2) -> Docker login
     - name: Docker login [docker.io]
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKER_HUB_USERNAME }}
@@ -76,7 +76,7 @@ jobs:
 # (4.3) -> Docker build+push (dev)
     - name: Docker meta [dev]
       id: meta-dev
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
       uses: docker/metadata-action@v4
       with:
         images: |
@@ -86,7 +86,7 @@ jobs:
 
     - name: Docker build+push [dev]
       uses: docker/build-push-action@v3
-      if: github.event_name != 'pull_request' && steps.meta-dev.outputs.tags != ''
+      if: github.event_name != 'pull_request' && steps.meta-dev.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
       with:
         context: ${{ env.DOCKER_META_CONTEXT }}
         file: ${{ env.DOCKER_META_FILE }}
@@ -98,7 +98,7 @@ jobs:
 # (4.4) -> Docker build+push (public)
     - name: Docker meta [public]
       id: meta-public
-      if: github.event_name != 'pull_request'
+      if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
       uses: docker/metadata-action@v4
       with:
         images: |
@@ -111,7 +111,7 @@ jobs:
 
     - name: Docker build+push [public]
       uses: docker/build-push-action@v3
-      if: github.event_name != 'pull_request' && steps.meta-public.outputs.tags != ''
+      if: github.event_name != 'pull_request' && steps.meta-public.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
       with:
         context: ${{ env.DOCKER_META_CONTEXT }}
         file: ${{ env.DOCKER_META_FILE }}
