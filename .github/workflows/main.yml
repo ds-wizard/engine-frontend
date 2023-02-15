@@ -18,6 +18,7 @@ jobs:
       COMPONENT: ${{ matrix.component }}
       IMAGE_NAME: ${{ matrix.component }}-client
       PUBLIC_IMAGE_PREFIX: datastewardshipwizard
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_META_CONTEXT: '.'
       DOCKER_META_FILE: './engine-${{ matrix.component }}/docker/Dockerfile'
       DOCKER_META_PLATFORMS: 'linux/amd64'
