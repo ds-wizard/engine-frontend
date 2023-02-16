@@ -1,7 +1,7 @@
 module Wizard.Public.Login.View exposing (view)
 
 import Gettext exposing (gettext)
-import Html exposing (Html, div, form, input, span, text)
+import Html exposing (Html, div, form, input, p, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
 import Html.Keyed
@@ -37,14 +37,14 @@ view appState model =
                     in
                     [ ( "side-info"
                       , div
-                            [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info"
+                            [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 col-md-6 side-info"
                             , dataCy "login_side-info"
                             ]
                             [ Markdown.toHtml [] loginInfo ]
                       )
                     , ( "login-form"
                       , Html.Keyed.node "div"
-                            [ class <| splitScreenClass ++ " justify-content-center col-lg-5 col-md-6 side-login" ]
+                            [ class <| splitScreenClass ++ " justify-content-center col-xl-4 col-lg-5 col-md-6 side-login" ]
                             [ form ]
                       )
                     ]
@@ -103,13 +103,14 @@ codeFormView appState model =
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]
                 [ FormResult.view appState model.loggingIn
+                , p [] [ text (gettext "Please enter the authentication code from your email to verify your identity." appState.locale) ]
                 , div [ class "form-group" ]
                     [ span [ class "input-icon" ] [ fa "fas fa-unlock-alt" ]
                     , input [ onInput Code, id "code", type_ "text", class "form-control", placeholder <| gettext "Authentication Code" appState.locale ] []
                     ]
                 , div [ class "form-group mt-0" ]
                     [ ActionButton.submitWithAttrs appState
-                        { label = gettext "Confirm" appState.locale
+                        { label = gettext "Verify" appState.locale
                         , result = model.loggingIn
                         , attrs = [ class "w-100" ]
                         }
