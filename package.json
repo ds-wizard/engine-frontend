@@ -47,7 +47,7 @@
   "dependencies": {
     "@codemirror/commands": "^6.2.1",
     "@codemirror/lang-css": "^6.0.1",
-    "@codemirror/lang-html": "^6.4.0",
+    "@codemirror/lang-html": "^6.4.2",
     "@codemirror/lang-xml": "^6.0.2",
     "@codemirror/language": "^6.6.0",
     "@codemirror/legacy-modes": "^6.3.1",
