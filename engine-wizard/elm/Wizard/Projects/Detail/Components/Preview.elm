@@ -109,7 +109,7 @@ handleHeadDocumentPreviewComplete appState model result =
                             Preview (Error (String.format data.defaultMessage data.params))
 
                         Just (ServerError.UserSimpleError message) ->
-                            if message.code == "error.validation.tml_unsupported_version" then
+                            if message.code == "error.validation.tml_unsupported_metamodel_version" then
                                 TemplateUnsupported
 
                             else
