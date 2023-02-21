@@ -441,7 +441,7 @@ update wrapMsg msg appState model =
                 Ok questionnaire ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Questionnaire.init appState questionnaire
+                            Questionnaire.init appState questionnaire model.mbSelectedPath
 
                         questionnaireModelWithImporters =
                             case model.questionnaireImporters of
@@ -470,7 +470,7 @@ update wrapMsg msg appState model =
                         ( BadStatus 403 _, False ) ->
                             let
                                 questionnaireRoute =
-                                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid)
+                                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
 
                                 loginRoute =
                                     Routes.publicLogin (Just questionnaireRoute)

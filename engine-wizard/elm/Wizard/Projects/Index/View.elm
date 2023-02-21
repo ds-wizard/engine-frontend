@@ -19,7 +19,7 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (listFilterJust, listInsertIf)
+import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -506,7 +506,7 @@ listingTitle appState questionnaire =
                 Routes.projectsMigration
 
             else
-                Routes.projectsDetailQuestionnaire
+                flip Routes.projectsDetailQuestionnaire Nothing
     in
     span []
         (linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
@@ -594,7 +594,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "project.open" appState
                 , label = gettext "Open project" appState.locale
-                , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid)
+                , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
                 , dataCy = "open"
                 }
 

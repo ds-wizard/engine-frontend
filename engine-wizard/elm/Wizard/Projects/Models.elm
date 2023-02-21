@@ -6,6 +6,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Projects.Create.Models
 import Wizard.Projects.CreateMigration.Models
 import Wizard.Projects.Detail.Models as Detail
+import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Import.Models
 import Wizard.Projects.Index.Models
 import Wizard.Projects.Migration.Models
@@ -26,7 +27,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Projects.Create.Models.empty
     , createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel Uuid.nil
-    , detailModel = Detail.init appState Uuid.nil
+    , detailModel = Detail.init appState Uuid.nil Nothing
     , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
     , migrationModel = Wizard.Projects.Migration.Models.initialModel Uuid.nil
     , importModel = Wizard.Projects.Import.Models.initialModel Uuid.nil ""
@@ -47,7 +48,16 @@ initLocalModel appState route model =
                 { model | detailModel = Detail.initPageModel appState subroute model.detailModel }
 
             else
-                { model | detailModel = Detail.initPageModel appState subroute <| Detail.init appState uuid }
+                let
+                    mbSelectedPath =
+                        case subroute of
+                            ProjectDetailRoute.Questionnaire path ->
+                                path
+
+                            _ ->
+                                Nothing
+                in
+                { model | detailModel = Detail.initPageModel appState subroute <| Detail.init appState uuid mbSelectedPath }
 
         IndexRoute paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
             { model | indexModel = Wizard.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp (Just model.indexModel) }
