@@ -62,7 +62,7 @@ viewProject appState questionnaire =
             inWordsWithConfig { withAffix = True } (locale appState) questionnaire.updatedAt appState.currentTime
     in
     linkTo appState
-        (Routes.projectsDetailQuestionnaire questionnaire.uuid)
+        (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
         [ class "p-2 py-3 d-flex rounded-3" ]
         [ ItemIcon.view { text = questionnaire.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]

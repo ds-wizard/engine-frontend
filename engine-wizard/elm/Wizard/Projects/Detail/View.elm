@@ -201,6 +201,14 @@ viewProjectNavigationNav appState route model qm =
         questionnaire =
             qm.questionnaire
 
+        isQuestionnaireRoute =
+            case route of
+                ProjectDetailRoute.Questionnaire _ ->
+                    True
+
+                _ ->
+                    False
+
         isDocumentRoute =
             case route of
                 ProjectDetailRoute.Documents _ ->
@@ -213,10 +221,10 @@ viewProjectNavigationNav appState route model qm =
                     False
 
         questionnaireLink =
-            { route = projectRoute ProjectDetailRoute.Questionnaire
+            { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing)
             , label = gettext "Questionnaire" appState.locale
             , icon = fa "fa far fa-list-alt"
-            , isActive = route == ProjectDetailRoute.Questionnaire
+            , isActive = isQuestionnaireRoute
             , isVisible = True
             , dataCy = "project_nav_questionnaire"
             }
@@ -285,7 +293,7 @@ viewProjectContent appState route model qm =
             Page.error appState (gettext "You are not allowed to view this page." appState.locale)
     in
     case route of
-        ProjectDetailRoute.Questionnaire ->
+        ProjectDetailRoute.Questionnaire _ ->
             let
                 isMigrating =
                     QuestionnaireDetail.isMigrating qm.questionnaire

@@ -126,6 +126,7 @@ iconSet =
         , ( "questionnaire.clearAnswer", "fas fa-undo-alt" )
         , ( "questionnaire.comments", "fas fa-comments" )
         , ( "questionnaire.commentsResolve", "fas fa-check" )
+        , ( "questionnaire.copyLink", "fas fa-link" )
         , ( "questionnaire.desirable", "far fa-check-square" )
         , ( "questionnaire.expand", "fas fa-expand" )
         , ( "questionnaire.expand", "fas fa-expand" )

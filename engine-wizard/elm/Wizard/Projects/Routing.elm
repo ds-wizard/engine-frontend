@@ -75,6 +75,9 @@ parsers appState wrapRoute =
                 (Query.string indexRoutePackagesFilterId)
                 (FilterOperator.queryParser indexRoutePackagesFilterId)
 
+        projectDetailQuestionnaire projectUuid mbQuestionPath =
+            wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Questionnaire mbQuestionPath)
+
         -- Project Import
         projectImportRoute uuid string =
             wrapRoute <| ImportRoute uuid string
@@ -82,7 +85,7 @@ parsers appState wrapRoute =
     createFromTemplateRoute
         ++ createCustomRoute
         ++ [ map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "projects.createMigration" appState) </> uuid)
-           , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Questionnaire) (s moduleRoot </> uuid)
+           , map projectDetailQuestionnaire (s moduleRoot </> uuid <?> Query.string "questionPath")
            , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
            , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
            , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
@@ -129,8 +132,13 @@ toUrl appState route =
 
         DetailRoute uuid subroute ->
             case subroute of
-                ProjectDetailRoute.Questionnaire ->
-                    [ moduleRoot, Uuid.toString uuid ]
+                ProjectDetailRoute.Questionnaire mbQuestionPath ->
+                    case mbQuestionPath of
+                        Just questionPath ->
+                            [ moduleRoot, Uuid.toString uuid, "?questionPath=" ++ questionPath ]
+
+                        Nothing ->
+                            [ moduleRoot, Uuid.toString uuid ]
 
                 ProjectDetailRoute.Preview ->
                     [ moduleRoot, Uuid.toString uuid, "preview" ]

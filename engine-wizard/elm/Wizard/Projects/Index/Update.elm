@@ -15,7 +15,7 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch, stringToBool)
+import Shared.Utils exposing (dispatch, flip, stringToBool)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -102,7 +102,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << CloneQuestionnaireModalMsg
                     , cloneCompleteCmd =
-                        cmdNavigate appState << Routes.projectsDetailQuestionnaire << .uuid
+                        cmdNavigate appState << flip Routes.projectsDetailQuestionnaire Nothing << .uuid
                     }
 
                 ( deleteModalModel, cmd ) =

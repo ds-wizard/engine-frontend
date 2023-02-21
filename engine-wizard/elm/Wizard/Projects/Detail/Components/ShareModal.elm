@@ -378,7 +378,7 @@ formView appState questionnaireUuid form =
             if appState.config.questionnaire.questionnaireSharing.enabled then
                 let
                     publicLink =
-                        appState.clientUrl ++ Routing.toUrl appState (Routes.ProjectsRoute (Routes.DetailRoute questionnaireUuid ProjectDetailRoute.Questionnaire))
+                        appState.clientUrl ++ Routing.toUrl appState (Routes.ProjectsRoute (Routes.DetailRoute questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing)))
 
                     sharingEnabled =
                         Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value

@@ -33,6 +33,7 @@ import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (Pr
 
 type alias Model =
     { uuid : Uuid
+    , mbSelectedPath : Maybe String
     , websocket : WebSocket
     , offline : Bool
     , error : Bool
@@ -53,9 +54,10 @@ type alias Model =
     }
 
 
-init : AppState -> Uuid -> Model
-init appState uuid =
+init : AppState -> Uuid -> Maybe String -> Model
+init appState uuid mbSelectedPath =
     { uuid = uuid
+    , mbSelectedPath = mbSelectedPath
     , websocket = WebSocket.init (QuestionnaireApi.websocket uuid appState)
     , offline = False
     , error = False

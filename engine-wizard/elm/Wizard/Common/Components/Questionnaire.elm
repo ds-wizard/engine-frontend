@@ -37,7 +37,7 @@ import Dict exposing (Dict)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
-import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown)
+import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Json.Decode as D exposing (Decoder, decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
@@ -51,6 +51,7 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Copy as Copy
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -109,6 +110,7 @@ import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 
 
 
@@ -142,6 +144,7 @@ type alias Model =
     , questionnaireImportersDropdown : Dropdown.State
     , questionnaireImporters : List QuestionnaireImporter
     , collapsedItems : Set String
+    , recentlyCopied : Bool
     }
 
 
@@ -165,8 +168,8 @@ type RightPanel
     | RightPanelWarnings
 
 
-init : AppState -> QuestionnaireDetail -> ( Model, Cmd Msg )
-init appState questionnaire =
+init : AppState -> QuestionnaireDetail -> Maybe String -> ( Model, Cmd Msg )
+init appState questionnaire mbPath =
     let
         mbChapterUuid =
             Maybe.map .uuid <|
@@ -180,7 +183,7 @@ init appState questionnaire =
                 (flip NavigationTree.openChapter NavigationTree.initialModel)
                 mbChapterUuid
 
-        model =
+        defaultModel =
             { uuid = questionnaire.uuid
             , activePage = activePage
             , rightPanel = RightPanelNone
@@ -207,9 +210,23 @@ init appState questionnaire =
             , questionnaireImportersDropdown = Dropdown.initialState
             , questionnaireImporters = []
             , collapsedItems = Set.empty
+            , recentlyCopied = False
             }
+
+        ( model, scrollCmd ) =
+            case mbPath of
+                Just path ->
+                    handleScrollToPath defaultModel path
+
+                Nothing ->
+                    ( defaultModel, Cmd.none )
     in
-    ( model, Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid) )
+    ( model
+    , Cmd.batch
+        [ scrollCmd
+        , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
+        ]
+    )
 
 
 setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
@@ -405,6 +422,8 @@ type Msg
     | CollapseItem String
     | ExpandItem String
     | GotCollapsedItems E.Value
+    | CopyLinkToQuestion (List String)
+    | ClearRecentlyCopied
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -781,6 +800,17 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                 Err _ ->
                     wrap model
+
+        CopyLinkToQuestion path ->
+            let
+                route =
+                    Routing.toUrl appState <|
+                        Routes.projectsDetailQuestionnaire model.uuid (Just (String.join "." path))
+            in
+            ( appState.seed, { model | recentlyCopied = True }, Copy.copyToClipboard (appState.clientUrl ++ route) )
+
+        ClearRecentlyCopied ->
+            wrap { model | recentlyCopied = False }
 
         _ ->
             wrap model
@@ -2159,6 +2189,7 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question =
             [ viewTodoAction appState cfg model path
             , viewCommentAction appState cfg model path
             , viewFeedbackAction appState cfg model question
+            , viewCopyLinkAction appState model path
             ]
         ]
 
@@ -2767,11 +2798,12 @@ viewCommentAction appState cfg model path =
 
         else
             a
-                [ class "action"
-                , classList [ ( "action-comments-open", isOpen ) ]
-                , onClick msg
-                , dataCy "questionnaire_question-action_comment"
-                ]
+                (class "action"
+                    :: classList [ ( "action-comments-open", isOpen ) ]
+                    :: onClick msg
+                    :: dataCy "questionnaire_question-action_comment"
+                    :: tooltip (gettext "Comments" appState.locale)
+                )
                 [ faSet "questionnaire.comments" appState ]
 
     else
@@ -2826,14 +2858,29 @@ viewFeedbackAction appState cfg model question =
                 FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.package.id (Question.getUuid question))
         in
         a
-            [ class "action"
-            , attribute "data-cy" "feedback"
-            , onClick openFeedbackModal
-            ]
+            (class "action"
+                :: attribute "data-cy" "feedback"
+                :: onClick openFeedbackModal
+                :: tooltip (gettext "Feedback" appState.locale)
+            )
             [ faSet "questionnaire.feedback" appState ]
 
     else
         emptyNode
+
+
+viewCopyLinkAction : AppState -> Model -> List String -> Html Msg
+viewCopyLinkAction appState model path =
+    let
+        copyText =
+            if model.recentlyCopied then
+                gettext "Copied!" appState.locale
+
+            else
+                gettext "Copy link" appState.locale
+    in
+    a (class "action" :: onClick (CopyLinkToQuestion path) :: onMouseOut ClearRecentlyCopied :: tooltipLeft copyText)
+        [ faSet "questionnaire.copyLink" appState ]
 
 
 viewRemoveItemModal : AppState -> Model -> Html Msg

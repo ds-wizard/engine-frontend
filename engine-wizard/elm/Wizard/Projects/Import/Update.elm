@@ -11,6 +11,7 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Error.ApiError as ApiError
 import Shared.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
+import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -56,7 +57,7 @@ update wrapMsg msg appState model =
                 setResult r m =
                     { m
                         | questionnaire = r
-                        , questionnaireModel = ActionResult.map (Tuple.first << Questionnaire.init appState) r
+                        , questionnaireModel = ActionResult.map (Tuple.first << flip (Questionnaire.init appState) Nothing) r
                     }
 
                 ( newModel, cmd ) =
@@ -177,7 +178,7 @@ update wrapMsg msg appState model =
                 Ok _ ->
                     withSeed
                         ( model
-                        , cmdNavigate appState (Routes.projectsDetailQuestionnaire model.uuid)
+                        , cmdNavigate appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
                         )
 
                 Err error ->

@@ -528,9 +528,9 @@ projectsCreateMigration =
     ProjectsRoute << Wizard.Projects.Routes.CreateMigrationRoute
 
 
-projectsDetailQuestionnaire : Uuid -> Route
-projectsDetailQuestionnaire uuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire
+projectsDetailQuestionnaire : Uuid -> Maybe String -> Route
+projectsDetailQuestionnaire uuid mbQuestionUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire mbQuestionUuid
 
 
 projectsDetailDocuments : Uuid -> Route
