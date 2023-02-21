@@ -7,10 +7,11 @@ import Html exposing (Attribute, Html, button, div, input, label, p, text)
 import Html.Attributes exposing (accept, class, disabled, id, type_)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
-import Shared.Html exposing (faSet)
+import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.DocumentTemplates.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.DocumentTemplates.Import.FileImport.Msgs exposing (Msg(..))
@@ -29,8 +30,23 @@ view appState model =
     in
     div [ id dropzoneId, dataCy "template_import_file" ]
         [ FormResult.view appState model.importing
+        , warningView appState model
         , content
         ]
+
+
+warningView : AppState -> Model -> Html msg
+warningView appState model =
+    case ( model.importing, model.file ) of
+        ( Unset, Just file ) ->
+            if File.mime file == "application/zip" then
+                emptyNode
+
+            else
+                Flash.warning appState (gettext "This doesn't look like a document template. Are you sure you picked the correct file?" appState.locale)
+
+        _ ->
+            emptyNode
 
 
 fileView : AppState -> Model -> String -> Html Msg

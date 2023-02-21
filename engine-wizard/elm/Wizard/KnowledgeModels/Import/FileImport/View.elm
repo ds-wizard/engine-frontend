@@ -7,10 +7,12 @@ import Html exposing (Attribute, Html, button, div, input, label, p, text)
 import Html.Attributes exposing (accept, class, disabled, id, type_)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
-import Shared.Html exposing (faSet)
+import List.Extra as List
+import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Import.FileImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.FileImport.Msgs exposing (Msg(..))
@@ -29,8 +31,27 @@ view appState model =
     in
     div [ id dropzoneId, dataCy "import_file" ]
         [ FormResult.view appState model.importing
+        , warningView appState model
         , content
         ]
+
+
+warningView : AppState -> Model -> Html msg
+warningView appState model =
+    case ( model.importing, model.file ) of
+        ( Unset, Just file ) ->
+            let
+                ext =
+                    Maybe.withDefault "" (List.last <| String.split "." <| File.name file)
+            in
+            if ext == "km" || ext == "json" then
+                emptyNode
+
+            else
+                Flash.warning appState (gettext "This doesn't look like a knowledge model. Are you sure you picked the correct file?" appState.locale)
+
+        _ ->
+            emptyNode
 
 
 fileView : AppState -> Model -> String -> Html Msg
