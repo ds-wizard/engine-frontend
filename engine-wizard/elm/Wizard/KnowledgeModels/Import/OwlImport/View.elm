@@ -51,7 +51,7 @@ view appState model =
         formActions =
             FormActions.view appState
                 Routes.knowledgeModelsIndex
-                (ActionButton.ButtonConfig (gettext "Upload" appState.locale) model.importing (FormMsg <| Form.Submit) False)
+                (ActionButton.ButtonConfig (gettext "Import" appState.locale) model.importing (FormMsg <| Form.Submit) False)
     in
     div [ id dropzoneId, dataCy "import_file" ]
         [ FormResult.view appState model.importing
