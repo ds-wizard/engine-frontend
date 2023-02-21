@@ -74,7 +74,7 @@ fileView appState model fileName =
         , div [ class "actions" ]
             [ button [ disabled cancelDisabled, onClick Cancel, class "btn btn-secondary" ]
                 [ text (gettext "Cancel" appState.locale) ]
-            , ActionButton.button appState <| ActionButton.ButtonConfig (gettext "Upload" appState.locale) model.importing Submit False
+            , ActionButton.button appState <| ActionButton.ButtonConfig (gettext "Import" appState.locale) model.importing Submit False
             ]
         ]
 
