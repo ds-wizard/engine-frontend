@@ -1,5 +1,6 @@
 module Registry.Common.Requests exposing
     ( ToMsg
+    , getBuildInfo
     , getDocumentTemplate
     , getDocumentTemplates
     , getLocale
@@ -26,11 +27,20 @@ import Registry.Common.Entities.LocaleDetail as LocaleDetail exposing (LocaleDet
 import Registry.Common.Entities.OrganizationDetail as OrganizationDetail exposing (OrganizationDetail)
 import Registry.Common.Entities.Package as Package exposing (Package)
 import Registry.Common.Entities.PackageDetail as PackageDetail exposing (PackageDetail)
+import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Shared.Error.ApiError exposing (ApiError(..))
 
 
 type alias ToMsg a msg =
     Result ApiError a -> msg
+
+
+getBuildInfo : AppState -> ToMsg BuildInfo msg -> Cmd msg
+getBuildInfo appState toMsg =
+    Http.get
+        { url = appState.apiUrl
+        , expect = expectJson toMsg BuildInfo.decoder
+        }
 
 
 postForgottenTokenActionKey :
