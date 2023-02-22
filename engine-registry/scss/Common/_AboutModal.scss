@@ -1,0 +1,18 @@
+@import '../variables';
+
+
+.table-build-info {
+    thead {
+        background: $gray-200;
+    }
+
+    &:first-child {
+        margin-bottom: 2rem;
+    }
+
+    tr {
+        td:first-child {
+            width: 25%;
+        }
+    }
+}
