@@ -3,12 +3,14 @@ module Shared.Data.BootstrapConfig.PrivacyAndSupportConfig exposing
     , decoder
     , default
     , defaultSupportEmail
-    , defaultSupportRepositoryName
-    , defaultSupportRepositoryUrl
+    , defaultSupportSiteIcon
+    , defaultSupportSiteName
+    , defaultSupportSiteUrl
     , encode
     , getSupportEmail
-    , getSupportRepositoryName
-    , getSupportRepositoryUrl
+    , getSupportSiteIcon
+    , getSupportSiteName
+    , getSupportSiteUrl
     , initEmptyForm
     , initForm
     , validation
@@ -29,8 +31,9 @@ type alias PrivacyAndSupportConfig =
     { privacyUrl : Maybe String
     , termsOfServiceUrl : Maybe String
     , supportEmail : Maybe String
-    , supportRepositoryName : Maybe String
-    , supportRepositoryUrl : Maybe String
+    , supportSiteName : Maybe String
+    , supportSiteUrl : Maybe String
+    , supportSiteIcon : Maybe String
     }
 
 
@@ -39,8 +42,9 @@ default =
     { privacyUrl = Nothing
     , termsOfServiceUrl = Nothing
     , supportEmail = Nothing
-    , supportRepositoryName = Nothing
-    , supportRepositoryUrl = Nothing
+    , supportSiteName = Nothing
+    , supportSiteUrl = Nothing
+    , supportSiteIcon = Nothing
     }
 
 
@@ -49,14 +53,19 @@ getSupportEmail config =
     Maybe.withDefault defaultSupportEmail config.supportEmail
 
 
-getSupportRepositoryName : PrivacyAndSupportConfig -> String
-getSupportRepositoryName config =
-    Maybe.withDefault defaultSupportRepositoryName config.supportRepositoryName
+getSupportSiteName : PrivacyAndSupportConfig -> String
+getSupportSiteName config =
+    Maybe.withDefault defaultSupportSiteName config.supportSiteName
 
 
-getSupportRepositoryUrl : PrivacyAndSupportConfig -> String
-getSupportRepositoryUrl config =
-    Maybe.withDefault defaultSupportRepositoryUrl config.supportRepositoryUrl
+getSupportSiteUrl : PrivacyAndSupportConfig -> String
+getSupportSiteUrl config =
+    Maybe.withDefault defaultSupportSiteUrl config.supportSiteUrl
+
+
+getSupportSiteIcon : PrivacyAndSupportConfig -> String
+getSupportSiteIcon config =
+    Maybe.withDefault defaultSupportSiteIcon config.supportSiteIcon
 
 
 defaultSupportEmail : String
@@ -64,14 +73,19 @@ defaultSupportEmail =
     "{defaultSupportEmail}"
 
 
-defaultSupportRepositoryName : String
-defaultSupportRepositoryName =
+defaultSupportSiteName : String
+defaultSupportSiteName =
     "{defaultSupportRepositoryName}"
 
 
-defaultSupportRepositoryUrl : String
-defaultSupportRepositoryUrl =
+defaultSupportSiteUrl : String
+defaultSupportSiteUrl =
     "{defaultSupportRepositoryUrl}"
+
+
+defaultSupportSiteIcon : String
+defaultSupportSiteIcon =
+    "fab fa-github"
 
 
 
@@ -84,8 +98,9 @@ decoder =
         |> D.required "privacyUrl" (D.maybe D.string)
         |> D.required "termsOfServiceUrl" (D.maybe D.string)
         |> D.required "supportEmail" (D.maybe D.string)
-        |> D.required "supportRepositoryName" (D.maybe D.string)
-        |> D.required "supportRepositoryUrl" (D.maybe D.string)
+        |> D.required "supportSiteName" (D.maybe D.string)
+        |> D.required "supportSiteUrl" (D.maybe D.string)
+        |> D.required "supportSiteIcon" (D.maybe D.string)
 
 
 encode : PrivacyAndSupportConfig -> E.Value
@@ -94,8 +109,9 @@ encode config =
         [ ( "privacyUrl", E.maybe E.string config.privacyUrl )
         , ( "termsOfServiceUrl", E.maybe E.string config.termsOfServiceUrl )
         , ( "supportEmail", E.maybe E.string config.supportEmail )
-        , ( "supportRepositoryName", E.maybe E.string config.supportRepositoryName )
-        , ( "supportRepositoryUrl", E.maybe E.string config.supportRepositoryUrl )
+        , ( "supportSiteName", E.maybe E.string config.supportSiteName )
+        , ( "supportSiteUrl", E.maybe E.string config.supportSiteUrl )
+        , ( "supportSiteIcon", E.maybe E.string config.supportSiteIcon )
         ]
 
 
@@ -109,8 +125,9 @@ validation =
         |> V.andMap (V.field "privacyUrl" V.maybeString)
         |> V.andMap (V.field "termsOfServiceUrl" V.maybeString)
         |> V.andMap (V.field "supportEmail" V.maybeString)
-        |> V.andMap (V.field "supportRepositoryName" V.maybeString)
-        |> V.andMap (V.field "supportRepositoryUrl" V.maybeString)
+        |> V.andMap (V.field "supportSiteName" V.maybeString)
+        |> V.andMap (V.field "supportSiteUrl" V.maybeString)
+        |> V.andMap (V.field "supportSiteIcon" V.maybeString)
 
 
 initEmptyForm : Form FormError PrivacyAndSupportConfig
@@ -125,8 +142,9 @@ initForm config =
             [ ( "privacyUrl", Field.maybeString config.privacyUrl )
             , ( "termsOfServiceUrl", Field.maybeString config.termsOfServiceUrl )
             , ( "supportEmail", Field.maybeString config.supportEmail )
-            , ( "supportRepositoryName", Field.maybeString config.supportRepositoryName )
-            , ( "supportRepositoryUrl", Field.maybeString config.supportRepositoryUrl )
+            , ( "supportSiteName", Field.maybeString config.supportSiteName )
+            , ( "supportSiteUrl", Field.maybeString config.supportSiteUrl )
+            , ( "supportSiteIcon", Field.maybeString config.supportSiteIcon )
             ]
     in
     Form.initial fields validation
