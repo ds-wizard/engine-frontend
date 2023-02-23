@@ -7,9 +7,11 @@ import Html.Attributes exposing (placeholder)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (compose2)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Settings.Common.FontAwesome as FontAwesome
 import Wizard.Settings.Generic.Msgs exposing (Msg(..))
 import Wizard.Settings.Generic.View as GenericView
 import Wizard.Settings.PrivacyAndSupport.Models exposing (Model)
@@ -39,8 +41,10 @@ formView appState form =
         , h3 [] [ text (gettext "Support" appState.locale) ]
         , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportEmail ] appState form "supportEmail" (gettext "Support Email" appState.locale)
         , FormExtra.mdAfter (gettext "Support email displayed in the help modal." appState.locale)
-        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportRepositoryName ] appState form "supportRepositoryName" (gettext "Support Repository Name" appState.locale)
-        , FormExtra.mdAfter (gettext "Name of the repository where users can report issues related to the service." appState.locale)
-        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportRepositoryUrl ] appState form "supportRepositoryUrl" (gettext "Support Repository URL" appState.locale)
-        , FormExtra.mdAfter (gettext "URL of the repository where users can report issues related to the service." appState.locale)
+        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportSiteName ] appState form "supportSiteName" (gettext "Support Site Name" appState.locale)
+        , FormExtra.mdAfter (gettext "Name of the support site where users can report issues related to the service." appState.locale)
+        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportSiteUrl ] appState form "supportSiteUrl" (gettext "Support Site URL" appState.locale)
+        , FormExtra.mdAfter (gettext "URL of the support site where users can report issues related to the service." appState.locale)
+        , FormGroup.inputAttrs [ placeholder PrivacyAndSupportConfig.defaultSupportSiteIcon ] appState form "supportSiteIcon" (gettext "Support Site Icon" appState.locale)
+        , FormExtra.mdAfter (String.format (gettext "Icon of the support site using [Font Awesome](%s)." appState.locale) [ FontAwesome.fontAwesomeLink ])
         ]

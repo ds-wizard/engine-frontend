@@ -508,16 +508,16 @@ viewReportIssueModal appState isOpen =
                 [ text <| PrivacyAndSupportConfig.getSupportEmail appState.config.privacyAndSupport ]
 
         modalContent =
-            [ p [] [ text (gettext "If you find any problem, the best way to report it is to open an issue in our GitHub repository." appState.locale) ]
+            [ p [] [ text (gettext "If you find any problem, you can report an issue here:" appState.locale) ]
             , p []
                 [ a
                     [ dataCy "report-modal_link_repository"
                     , class "with-icon"
-                    , href <| PrivacyAndSupportConfig.getSupportRepositoryUrl appState.config.privacyAndSupport
+                    , href <| PrivacyAndSupportConfig.getSupportSiteUrl appState.config.privacyAndSupport
                     , target "_blank"
                     ]
-                    [ faSet "report.repository" appState
-                    , text <| PrivacyAndSupportConfig.getSupportRepositoryName appState.config.privacyAndSupport
+                    [ fa <| PrivacyAndSupportConfig.getSupportSiteIcon appState.config.privacyAndSupport
+                    , text <| PrivacyAndSupportConfig.getSupportSiteName appState.config.privacyAndSupport
                     ]
                 ]
             , p [] (String.formatHtml (gettext "You can also write us an email to %s." appState.locale) [ supportMailLink ])
