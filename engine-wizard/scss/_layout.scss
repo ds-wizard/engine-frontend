@@ -313,6 +313,7 @@ body {
 
                         &-last {
                             padding-bottom: 5px;
+                            @include border-radius-bottom($border-radius);
                         }
                     }
 
