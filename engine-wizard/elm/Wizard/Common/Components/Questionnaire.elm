@@ -248,8 +248,11 @@ setActiveChapterUuid uuid model =
 
 
 updateWithQuestionnaireData : SetQuestionnaireData -> Model -> Model
-updateWithQuestionnaireData data =
-    updateQuestionnaire <| QuestionnaireDetail.updateWithQuestionnaireData data
+updateWithQuestionnaireData data model =
+    { model
+        | questionnaire = QuestionnaireDetail.updateWithQuestionnaireData data model.questionnaire
+        , rightPanel = RightPanelNone
+    }
 
 
 setPhaseUuid : Maybe Uuid -> Model -> Model
