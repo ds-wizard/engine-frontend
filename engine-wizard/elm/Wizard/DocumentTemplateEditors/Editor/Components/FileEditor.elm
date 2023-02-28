@@ -43,6 +43,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.CodeEditor as CodeEditor
 import Wizard.Common.ContentType as ContentType
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltipLeft)
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUploadModal as AssetUploadModal
@@ -1049,7 +1050,8 @@ viewEditorGroup appState model editorGroup =
                                         ]
 
                                 ActionResult.Error error ->
-                                    div [] [ text error ]
+                                    div [ class "m-3" ]
+                                        [ Flash.error appState error ]
 
                                 _ ->
                                     viewEmptyEditor appState
