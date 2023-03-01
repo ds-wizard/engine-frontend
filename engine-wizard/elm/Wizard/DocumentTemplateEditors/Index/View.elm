@@ -43,7 +43,7 @@ listingConfig appState =
     , emptyText = gettext "Click \"Import\" button to import a new document template." appState.locale
     , updated =
         Just
-            { getTime = .createdAt
+            { getTime = .updatedAt
             , currentTime = appState.currentTime
             }
     , wrapMsg = ListingMsg
