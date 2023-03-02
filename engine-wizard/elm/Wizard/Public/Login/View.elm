@@ -2,9 +2,10 @@ module Wizard.Public.Login.View exposing (view)
 
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form, input, p, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_)
+import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
 import Html.Keyed
+import Maybe.Extra as Maybe
 import Shared.Html exposing (fa)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
@@ -106,13 +107,22 @@ codeFormView appState model =
                 , p [] [ text (gettext "Please enter the authentication code from your email to verify your identity." appState.locale) ]
                 , div [ class "form-group" ]
                     [ span [ class "input-icon" ] [ fa "fas fa-unlock-alt" ]
-                    , input [ onInput Code, id "code", type_ "text", class "form-control", placeholder <| gettext "Authentication Code" appState.locale ] []
+                    , input
+                        [ onInput Code
+                        , id "code"
+                        , type_ "text"
+                        , attribute "inputmode" "numeric"
+                        , pattern "[0-9]*"
+                        , class "form-control"
+                        , placeholder <| gettext "Authentication Code" appState.locale
+                        ]
+                        []
                     ]
                 , div [ class "form-group mt-0" ]
                     [ ActionButton.submitWithAttrs appState
                         { label = gettext "Verify" appState.locale
                         , result = model.loggingIn
-                        , attrs = [ class "w-100" ]
+                        , attrs = [ class "w-100", disabled (Maybe.isNothing (String.toInt model.code)) ]
                         }
                     ]
                 ]

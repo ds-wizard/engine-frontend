@@ -200,8 +200,11 @@ messageToReadable appState message =
         "error.service.tb.pull_non_existing_tml" ->
             Just <| gettext "The document template was not found in the Registry." appState.locale
 
-        "error.service.token.Incorrect_email_or_password" ->
+        "error.service.token.incorrect_email_or_password" ->
             Just <| gettext "Incorrect email or password" appState.locale
+
+        "error.service.token.incorrect_code" ->
+            Just <| gettext "Incorrect authentication code" appState.locale
 
         "error.service.token.account_is_not_activated" ->
             Just <| gettext "The account is not activated." appState.locale
