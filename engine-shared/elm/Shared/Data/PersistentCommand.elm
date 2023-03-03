@@ -21,7 +21,7 @@ type alias PersistentCommand =
     , state : PersistentCommandState
     , attempts : Int
     , maxAttempts : Int
-    , createdBy : UserSuggestion
+    , createdBy : Maybe UserSuggestion
     , app : AppSuggestion
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
@@ -37,7 +37,7 @@ decoder =
         |> D.required "state" PersistentCommandState.decoder
         |> D.required "attempts" D.int
         |> D.required "maxAttempts" D.int
-        |> D.required "createdBy" UserSuggestion.decoder
+        |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
         |> D.required "app" AppSuggestion.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "updatedAt" D.datetime

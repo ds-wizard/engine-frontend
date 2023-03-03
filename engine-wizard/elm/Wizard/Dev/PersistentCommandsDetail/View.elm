@@ -8,6 +8,7 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.PersistentCommand as PersistentCommand
 import Shared.Data.PersistentCommandDetail exposing (PersistentCommandDetail)
 import Shared.Data.User as User
+import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, faSet)
 import SyntaxHighlight
 import Wizard.Common.AppState exposing (AppState)
@@ -110,11 +111,18 @@ sidePanel appState persistentCommand =
         sections =
             [ sidePanelPersistentCommandInfo appState persistentCommand
             , sidePanelAppInfo appState persistentCommand
-            , sidePanelCreatedByInfo persistentCommand
             ]
+
+        sectionsWithCreatedBy =
+            case persistentCommand.createdBy of
+                Just createdBy ->
+                    sections ++ [ sidePanelCreatedByInfo createdBy ]
+
+                Nothing ->
+                    sections
     in
     DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 sections ]
+        [ DetailPage.sidePanelList 12 12 sectionsWithCreatedBy ]
 
 
 sidePanelPersistentCommandInfo : AppState -> PersistentCommandDetail -> ( String, String, Html msg )
@@ -149,12 +157,12 @@ sidePanelAppInfo appState persistentCommand =
     ( "App", "app", appView )
 
 
-sidePanelCreatedByInfo : PersistentCommandDetail -> ( String, String, Html msg )
-sidePanelCreatedByInfo persistentCommand =
+sidePanelCreatedByInfo : UserSuggestion -> ( String, String, Html msg )
+sidePanelCreatedByInfo createdBy =
     let
         userView =
-            DetailPage.sidePanelItemWithIcon (User.fullName persistentCommand.createdBy)
+            DetailPage.sidePanelItemWithIcon (User.fullName createdBy)
                 emptyNode
-                (UserIcon.viewSmall persistentCommand.createdBy)
+                (UserIcon.viewSmall createdBy)
     in
     ( "Created by", "created-by", userView )
