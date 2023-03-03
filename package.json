@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "3.20.3",
+  "version": "3.20.4",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -36,7 +36,7 @@
     "html-webpack-plugin": "^5.5.0",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.7.2",
-    "sass": "^1.57.1",
+    "sass": "^1.58.3",
     "sass-loader": "^13.2.0",
     "terser-webpack-plugin": "^5.3.6",
     "uglify-js": "^3.17.4",

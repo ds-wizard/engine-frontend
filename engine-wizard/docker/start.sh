@@ -32,7 +32,7 @@ echo -n "};" >> ${config}
 if [[ $(find /src/scss/customizations -name "*.scss" | xargs cat | wc -l) -gt 0 ]]; then
   # regenerate styles
   echo '$fa-font-path: "";' >> /src/scss/customizations/_variables-app.scss
-  find /usr/share/nginx/html -name "*.css" -exec /opt/dart-sass/sass -I /src -s compressed /src/scss/main.scss {} \;
+  find /usr/share/nginx/html -name "*.css" -exec /usr/bin/sass -I /src -s compressed /src/scss/main.scss {} \;
 fi
 
 # check for custom scripts block
