@@ -159,6 +159,7 @@ view appState editorBranch model =
                     , commentsEnabled = False
                     , readonly = False
                     , toolbarEnabled = False
+                    , questionLinksEnabled = False
                     }
                 , renderer = DefaultQuestionnaireRenderer.create appState knowledgeModel
                 , wrapMsg = QuestionnaireMsg

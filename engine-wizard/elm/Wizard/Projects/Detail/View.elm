@@ -305,6 +305,7 @@ viewProjectContent appState route model qm =
                     , commentsEnabled = True
                     , readonly = not isEditable || isMigrating
                     , toolbarEnabled = True
+                    , questionLinksEnabled = True
                     }
                 , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
                 , wrapMsg = QuestionnaireMsg

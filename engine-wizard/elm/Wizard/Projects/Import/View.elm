@@ -154,6 +154,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
                 , commentsEnabled = False
                 , readonly = True
                 , toolbarEnabled = False
+                , questionLinksEnabled = False
                 }
             , renderer = DefaultQuestionnaireRenderer.create appState questionnaire.knowledgeModel
             , wrapMsg = QuestionnaireMsg

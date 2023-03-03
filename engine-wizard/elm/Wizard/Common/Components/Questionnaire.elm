@@ -325,6 +325,7 @@ type alias FeaturesConfig =
     , commentsEnabled : Bool
     , readonly : Bool
     , toolbarEnabled : Bool
+    , questionLinksEnabled : Bool
     }
 
 
@@ -2192,7 +2193,7 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question =
             [ viewTodoAction appState cfg model path
             , viewCommentAction appState cfg model path
             , viewFeedbackAction appState cfg model question
-            , viewCopyLinkAction appState model path
+            , viewCopyLinkAction appState cfg model path
             ]
         ]
 
@@ -2872,18 +2873,22 @@ viewFeedbackAction appState cfg model question =
         emptyNode
 
 
-viewCopyLinkAction : AppState -> Model -> List String -> Html Msg
-viewCopyLinkAction appState model path =
-    let
-        copyText =
-            if model.recentlyCopied then
-                gettext "Copied!" appState.locale
+viewCopyLinkAction : AppState -> Config msg -> Model -> List String -> Html Msg
+viewCopyLinkAction appState cfg model path =
+    if cfg.features.questionLinksEnabled then
+        let
+            copyText =
+                if model.recentlyCopied then
+                    gettext "Copied!" appState.locale
 
-            else
-                gettext "Copy link" appState.locale
-    in
-    a (class "action" :: onClick (CopyLinkToQuestion path) :: onMouseOut ClearRecentlyCopied :: tooltipLeft copyText)
-        [ faSet "questionnaire.copyLink" appState ]
+                else
+                    gettext "Copy link" appState.locale
+        in
+        a (class "action" :: onClick (CopyLinkToQuestion path) :: onMouseOut ClearRecentlyCopied :: tooltipLeft copyText)
+            [ faSet "questionnaire.copyLink" appState ]
+
+    else
+        emptyNode
 
 
 viewRemoveItemModal : AppState -> Model -> Html Msg

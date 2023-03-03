@@ -158,6 +158,7 @@ viewContent appState qm =
             , commentsEnabled = False
             , readonly = True
             , toolbarEnabled = False
+            , questionLinksEnabled = False
             }
         , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
         , wrapMsg = QuestionnaireMsg
