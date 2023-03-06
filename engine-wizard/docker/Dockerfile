@@ -1,5 +1,8 @@
 FROM nginx:alpine
 
+RUN apk --purge del curl
+RUN apk --purge del tiff
+
 # Install dart-sass
 RUN apk add dart-sass=1.58.0-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
 
