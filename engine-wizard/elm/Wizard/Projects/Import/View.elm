@@ -114,7 +114,7 @@ viewNavigation appState model questionnaire importResult =
 
         cancelButton =
             linkTo appState
-                (Routes.projectsDetailQuestionnaire model.uuid)
+                (Routes.projectsDetailQuestionnaire model.uuid Nothing)
                 [ class "btn btn-secondary btn-with-loader me-2" ]
                 [ text (gettext "Cancel" appState.locale) ]
 
@@ -154,6 +154,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
                 , commentsEnabled = False
                 , readonly = True
                 , toolbarEnabled = False
+                , questionLinksEnabled = False
                 }
             , renderer = DefaultQuestionnaireRenderer.create appState questionnaire.knowledgeModel
             , wrapMsg = QuestionnaireMsg

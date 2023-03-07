@@ -5,7 +5,6 @@ module Shared.Api.Questionnaires exposing
     , deleteQuestionnaire
     , deleteQuestionnaireMigration
     , deleteVersion
-    , documentPreviewUrl
     , fetchPreview
     , fetchQuestionnaireMigration
     , getDocumentPreview
@@ -33,7 +32,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizationHeaders, authorizedUrl, expectMetadata, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
+import Shared.Api exposing (ToMsg, authorizationHeaders, expectMetadataAndJson, jwtDelete, jwtFetch, jwtFetchEmpty, jwtFetchPut, jwtGet, jwtOrHttpFetch, jwtOrHttpGet, jwtOrHttpPut, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator exposing (FilterOperator)
@@ -46,6 +45,7 @@ import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (Qu
 import Shared.Data.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport as SummaryReport exposing (SummaryReport)
+import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
 import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 
@@ -195,22 +195,17 @@ websocket questionnaireUuid =
     wsUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/websocket")
 
 
-getDocumentPreview : Uuid -> AbstractAppState a -> ToMsg Http.Metadata msg -> Cmd msg
+getDocumentPreview : Uuid -> AbstractAppState a -> ToMsg ( Http.Metadata, Maybe UrlResponse ) msg -> Cmd msg
 getDocumentPreview questionnaireUuid appState toMsg =
     Http.request
         { method = "GET"
         , headers = authorizationHeaders appState
         , url = appState.apiUrl ++ "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents/preview"
         , body = Http.emptyBody
-        , expect = expectMetadata toMsg
+        , expect = expectMetadataAndJson toMsg UrlResponse.decoder
         , timeout = Nothing
         , tracker = Nothing
         }
-
-
-documentPreviewUrl : Uuid -> AbstractAppState a -> String
-documentPreviewUrl questionnaireUuid =
-    authorizedUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents/preview")
 
 
 getDocuments : Uuid -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Document) msg -> Cmd msg

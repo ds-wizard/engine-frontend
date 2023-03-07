@@ -143,7 +143,7 @@ richFormOptions : { a | locale : Gettext.Locale } -> List ( String, String, Stri
 richFormOptions appState =
     [ ( toString PrivateQuestionnaire
       , gettext "Private" appState.locale
-      , gettext "Visible only to the owner." appState.locale
+      , gettext "Visible only to the owner and invited users." appState.locale
       )
     , ( toString VisibleViewQuestionnaire
       , gettext "Visible - View" appState.locale

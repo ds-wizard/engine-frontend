@@ -43,7 +43,7 @@ initialModel appState packageId =
             createQuestionnaireDetail packageId KnowledgeModel.empty
 
         ( questionnaireModel, _ ) =
-            Questionnaire.init appState questionnaire
+            Questionnaire.init appState questionnaire Nothing
     in
     { questionnaireModel = questionnaireModel
     , tags = Set.empty
@@ -75,7 +75,7 @@ setPackageId appState packageId model =
             createQuestionnaireDetail packageId KnowledgeModel.empty
 
         ( questionnaireModel, _ ) =
-            Questionnaire.init appState questionnaire
+            Questionnaire.init appState questionnaire Nothing
     in
     { model | questionnaireModel = questionnaireModel }
 
@@ -159,6 +159,7 @@ view appState editorBranch model =
                     , commentsEnabled = False
                     , readonly = False
                     , toolbarEnabled = False
+                    , questionLinksEnabled = False
                     }
                 , renderer = DefaultQuestionnaireRenderer.create appState knowledgeModel
                 , wrapMsg = QuestionnaireMsg

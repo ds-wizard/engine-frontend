@@ -16,7 +16,7 @@ module Shared.Api.DocumentTemplates exposing
 import File exposing (File)
 import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizedUrl, jwtDelete, jwtFetchPut, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtFetchPut, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Shared.Data.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
@@ -131,5 +131,5 @@ importTemplate =
 
 
 exportTemplateUrl : String -> AbstractAppState a -> String
-exportTemplateUrl templateId =
-    authorizedUrl ("/document-templates/" ++ templateId ++ "/bundle")
+exportTemplateUrl templateId appState =
+    appState.apiUrl ++ "/document-templates/" ++ templateId ++ "/bundle"

@@ -17,7 +17,7 @@ subscriptions route model =
     let
         pageSubscriptions =
             case route of
-                ProjectDetailRoute.Questionnaire ->
+                ProjectDetailRoute.Questionnaire _ ->
                     case model.questionnaireModel of
                         Success questionnaireModel ->
                             Sub.map QuestionnaireMsg <|

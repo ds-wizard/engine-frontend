@@ -34,6 +34,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , todoUuid
     , todosLength
     , updateContent
+    , updateWithQuestionnaireData
     , warningsLength
     )
 
@@ -67,6 +68,7 @@ import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Data.UserInfo as UserInfo
+import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (boolToInt)
@@ -242,6 +244,23 @@ hasPerm appState questionnaire role =
             globalPerms ++ visibilityPerms ++ sharingPerms ++ userPerms
     in
     List.member role appliedPerms
+
+
+updateWithQuestionnaireData : SetQuestionnaireData -> QuestionnaireDetail -> QuestionnaireDetail
+updateWithQuestionnaireData data detail =
+    { detail
+        | name = data.name
+        , description = data.description
+        , projectTags = data.projectTags
+        , isTemplate = data.isTemplate
+        , visibility = data.visibility
+        , sharing = data.sharing
+        , documentTemplateId = data.documentTemplateId
+        , documentTemplate = data.documentTemplate
+        , formatUuid = data.formatUuid
+        , format = data.format
+        , permissions = data.permissions
+    }
 
 
 setPhaseUuid : Maybe Uuid -> QuestionnaireDetail -> QuestionnaireDetail

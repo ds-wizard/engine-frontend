@@ -3,6 +3,7 @@ module Wizard.DocumentTemplateEditors.Editor.Models exposing
     , Model
     , containsChanges
     , initialModel
+    , setEditorFromRoute
     )
 
 import ActionResult exposing (ActionResult)
@@ -11,6 +12,7 @@ import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
 import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor as TemplateEditor
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute exposing (DTEditorRoute)
 
 
 type alias Model =
@@ -21,6 +23,7 @@ type alias Model =
     , fileEditorModel : FileEditor.Model
     , previewModel : Preview.Model
     , publishModalModel : PublishModal.Model
+    , unloadMessageSet : Bool
     }
 
 
@@ -30,16 +33,35 @@ type CurrentEditor
     | PreviewEditor
 
 
-initialModel : String -> Model
-initialModel documentTemplateId =
-    { documentTemplateId = documentTemplateId
-    , documentTemplate = ActionResult.Loading
-    , currentEditor = TemplateEditor
-    , templateEditorModel = TemplateEditor.initialModel
-    , fileEditorModel = FileEditor.initialModel
-    , previewModel = Preview.initialModel
-    , publishModalModel = PublishModal.initialModel
-    }
+initialModel : String -> DTEditorRoute -> Model
+initialModel documentTemplateId editorRoute =
+    setEditorFromRoute editorRoute
+        { documentTemplateId = documentTemplateId
+        , documentTemplate = ActionResult.Loading
+        , currentEditor = TemplateEditor
+        , templateEditorModel = TemplateEditor.initialModel
+        , fileEditorModel = FileEditor.initialModel
+        , previewModel = Preview.initialModel
+        , publishModalModel = PublishModal.initialModel
+        , unloadMessageSet = False
+        }
+
+
+setEditorFromRoute : DTEditorRoute -> Model -> Model
+setEditorFromRoute editorRoute model =
+    let
+        currentEditor =
+            case editorRoute of
+                DTEditorRoute.Template ->
+                    TemplateEditor
+
+                DTEditorRoute.Files ->
+                    FilesEditor
+
+                DTEditorRoute.Preview ->
+                    PreviewEditor
+    in
+    { model | currentEditor = currentEditor }
 
 
 containsChanges : Model -> Bool

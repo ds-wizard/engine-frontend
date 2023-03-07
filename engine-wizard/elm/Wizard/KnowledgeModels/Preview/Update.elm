@@ -129,7 +129,7 @@ update msg wrapMsg appState model =
                             ( newSeed, model, cmd )
 
                         _ ->
-                            ( appState.seed, model, cmdNavigate appState (Routes.projectsDetailQuestionnaire questionnaire.uuid) )
+                            ( appState.seed, model, cmdNavigate appState (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing) )
 
                 Err error ->
                     ( appState.seed
@@ -140,7 +140,7 @@ update msg wrapMsg appState model =
         PutQuestionnaireContentComplete questionnaireUuid result ->
             case result of
                 Ok _ ->
-                    ( appState.seed, model, cmdNavigate appState (Routes.projectsDetailQuestionnaire questionnaireUuid) )
+                    ( appState.seed, model, cmdNavigate appState (Routes.projectsDetailQuestionnaire questionnaireUuid Nothing) )
 
                 Err error ->
                     ( appState.seed
@@ -168,7 +168,7 @@ initQuestionnaireModel appState ( model, cmd ) =
                             ( ( appState.seed, Nothing, questionnaire ), Cmd.none )
 
                 ( questionnaireModel, _ ) =
-                    Questionnaire.init appState questionnaireWithReplies
+                    Questionnaire.init appState questionnaireWithReplies Nothing
 
                 questionnaireModelWithChapter =
                     case mbChapterUuid of

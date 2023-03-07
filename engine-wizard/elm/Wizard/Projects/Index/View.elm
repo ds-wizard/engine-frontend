@@ -3,7 +3,7 @@ module Wizard.Projects.Index.View exposing (view)
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
-import Html exposing (Html, a, code, div, img, input, span, text)
+import Html exposing (Html, a, div, img, input, span, text)
 import Html.Attributes exposing (class, classList, href, placeholder, src, style, title, type_, value)
 import Html.Events exposing (onInput)
 import Json.Decode as D
@@ -19,7 +19,7 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (listFilterJust, listInsertIf)
+import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -506,7 +506,7 @@ listingTitle appState questionnaire =
                 Routes.projectsMigration
 
             else
-                Routes.projectsDetailQuestionnaire
+                flip Routes.projectsDetailQuestionnaire Nothing
     in
     span []
         (linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
@@ -565,11 +565,7 @@ listingDescription appState questionnaire =
                 kmRoute
                 [ title <| gettext "Knowledge Model" appState.locale, class "fragment" ]
                 [ text questionnaire.package.name
-                , text ", "
-                , text <| Version.toString questionnaire.package.version
-                , text " ("
-                , code [] [ text questionnaire.package.id ]
-                , text ")"
+                , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.package.version ]
                 ]
 
         projectProgressView =
@@ -598,7 +594,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "project.open" appState
                 , label = gettext "Open project" appState.locale
-                , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid)
+                , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
                 , dataCy = "open"
                 }
 

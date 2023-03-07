@@ -3,11 +3,12 @@ module Registry exposing (Model, Msg, PageModel, main)
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Nav exposing (load)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, img, li, text, ul)
+import Html exposing (Html, a, button, div, img, li, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Json.Encode as E
+import Registry.Common.AboutModal as AboutModal
 import Registry.Common.AppState as AppState exposing (AppState)
 import Registry.Common.Credentials as Credentials exposing (Credentials)
 import Registry.Common.View.Page as Page
@@ -47,6 +48,7 @@ type alias Model =
     , key : Nav.Key
     , appState : AppState
     , pageModel : PageModel
+    , aboutModalModel : AboutModal.Model
     }
 
 
@@ -83,6 +85,7 @@ type Msg
     | TemplateDetailMsg TemplateDetail.Msg
     | LocalesMsg Locales.Msg
     | LocaleDetailMsg LocaleDetail.Msg
+    | AboutModalMsg AboutModal.Msg
 
 
 init : D.Value -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -92,6 +95,7 @@ init flags url key =
         , key = key
         , appState = AppState.init flags
         , pageModel = NotFoundModel
+        , aboutModalModel = AboutModal.initialModel
         }
 
 
@@ -222,6 +226,15 @@ update msg model =
             in
             ( { model | pageModel = LocaleDetailModel newLocaleModel }
             , cmd
+            )
+
+        ( AboutModalMsg aboutModalMsg, _ ) ->
+            let
+                ( newAboutModalModel, cmd ) =
+                    AboutModal.update model.appState aboutModalMsg model.aboutModalModel
+            in
+            ( { model | aboutModalModel = newAboutModalModel }
+            , Cmd.map AboutModalMsg cmd
             )
 
         _ ->
@@ -424,6 +437,7 @@ view model =
             [ header model
             , div [ class "container" ]
                 [ content ]
+            , Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
             ]
     in
     { title = gettext "DSW Registry" model.appState.locale
@@ -482,16 +496,23 @@ loggedInHeaderNavigation appState =
         [ li [ class "nav-item" ]
             [ a
                 [ href <| Routing.toString Routing.Organization
-                , class "nav-link"
+                , class "nav-link btn btn-link"
                 ]
                 [ text (gettext "Profile" appState.locale) ]
             ]
         , li [ class "nav-item" ]
             [ a
                 [ onClick <| SetCredentials Nothing
-                , class "nav-link"
+                , class "nav-link btn btn-link"
                 ]
                 [ text (gettext "Log Out" appState.locale) ]
+            ]
+        , li [ class "nav-item" ]
+            [ button
+                [ onClick <| AboutModalMsg (AboutModal.SetOpen True)
+                , class "nav-link btn btn-link"
+                ]
+                [ text (gettext "About" appState.locale) ]
             ]
         ]
 
@@ -500,12 +521,19 @@ publicHeaderNavigation : AppState -> Html Msg
 publicHeaderNavigation appState =
     ul [ class "nav navbar-nav ms-auto" ]
         [ li [ class "nav-item" ]
-            [ a [ href <| Routing.toString Routing.Login, class "nav-link" ]
+            [ a [ href <| Routing.toString Routing.Login, class "nav-link btn btn-link" ]
                 [ text (gettext "Log In" appState.locale) ]
             ]
         , li [ class "nav-item" ]
-            [ a [ href <| Routing.toString Routing.Signup, class "nav-link" ]
+            [ a [ href <| Routing.toString Routing.Signup, class "nav-link btn btn-link" ]
                 [ text (gettext "Sign Up" appState.locale) ]
+            ]
+        , li [ class "nav-item" ]
+            [ button
+                [ onClick <| AboutModalMsg (AboutModal.SetOpen True)
+                , class "nav-link btn btn-link"
+                ]
+                [ text (gettext "About" appState.locale) ]
             ]
         ]
 

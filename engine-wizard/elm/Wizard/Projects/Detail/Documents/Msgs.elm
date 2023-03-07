@@ -5,6 +5,7 @@ import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.Common.Components.Listing.Msgs as Listing
+import Wizard.Common.FileDownloader as FileDownloader
 
 
 type Msg
@@ -20,3 +21,4 @@ type Msg
     | SetDocumentErrorModal (Maybe String)
     | SetSubmissionErrorModal (Maybe String)
     | DownloadDocument Document
+    | FileDownloaderMsg FileDownloader.Msg

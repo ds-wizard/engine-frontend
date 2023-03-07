@@ -4,7 +4,7 @@ import Html exposing (Html, div, img, span, text)
 import Html.Attributes exposing (class, src)
 import Shared.Data.PersistentCommand as PersistentCommand exposing (PersistentCommand)
 import Shared.Data.User as User
-import Shared.Html exposing (faSet)
+import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
@@ -94,10 +94,15 @@ listingDescription appState persistentCommand =
             "Attempts: " ++ String.fromInt persistentCommand.attempts ++ "/" ++ String.fromInt persistentCommand.maxAttempts
 
         createdByFragment =
-            span [ class "fragment" ]
-                [ img [ src (User.imageUrlOrGravatar persistentCommand.createdBy), class "user-icon user-icon-small" ] []
-                , text <| User.fullName persistentCommand.createdBy
-                ]
+            case persistentCommand.createdBy of
+                Just createdBy ->
+                    span [ class "fragment" ]
+                        [ img [ src (User.imageUrlOrGravatar createdBy), class "user-icon user-icon-small" ] []
+                        , text <| User.fullName createdBy
+                        ]
+
+                Nothing ->
+                    emptyNode
     in
     span []
         [ linkTo appState (Routes.appsDetail persistentCommand.app.uuid) [ class "fragment" ] [ text persistentCommand.app.name ]

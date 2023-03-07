@@ -7,10 +7,9 @@ module Shared.Api.DocumentTemplateDrafts exposing
     , getDrafts
     , getFileContent
     , getFiles
-    , headPreview
+    , getPreview
     , postDraft
     , postFile
-    , previewUrl
     , putDraft
     , putFileContent
     , putPreviewSettings
@@ -22,7 +21,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizationHeaders, authorizedUrl, expectMetadata, jwtDelete, jwtFetch, jwtFetchFileWithData, jwtFetchPut, jwtGet, jwtGetString, jwtPutString)
+import Shared.Api exposing (ToMsg, authorizationHeaders, expectMetadataAndJson, jwtDelete, jwtFetch, jwtFetchFileWithData, jwtFetchPut, jwtGet, jwtGetString, jwtPutString)
 import Shared.Data.DocumentTemplate.DocumentTemplateAsset as DocumentTemplateAsset exposing (DocumentTemplateAsset)
 import Shared.Data.DocumentTemplate.DocumentTemplateFile as DocumentTemplateFile exposing (DocumentTemplateFile)
 import Shared.Data.DocumentTemplateDraft as DocumentTemplateDraft exposing (DocumentTemplateDraft)
@@ -30,6 +29,7 @@ import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
 import Uuid exposing (Uuid)
 
 
@@ -75,9 +75,9 @@ getFileContent templateId fileUuid =
     jwtGetString ("/document-template-drafts/" ++ templateId ++ "/files/" ++ Uuid.toString fileUuid ++ "/content")
 
 
-postFile : String -> DocumentTemplateFile -> AbstractAppState a -> ToMsg DocumentTemplateFile msg -> Cmd msg
-postFile templateId file =
-    jwtFetch ("/document-template-drafts/" ++ templateId ++ "/files") DocumentTemplateFile.decoder (DocumentTemplateFile.encode file)
+postFile : String -> DocumentTemplateFile -> String -> AbstractAppState a -> ToMsg DocumentTemplateFile msg -> Cmd msg
+postFile templateId file fileContent =
+    jwtFetch ("/document-template-drafts/" ++ templateId ++ "/files") DocumentTemplateFile.decoder (DocumentTemplateFile.encode file fileContent)
 
 
 putFileContent : String -> Uuid -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
@@ -107,22 +107,17 @@ putPreviewSettings templateId previewSettings =
         (DocumentTemplateDraftPreviewSettings.encode previewSettings)
 
 
-headPreview : String -> AbstractAppState a -> ToMsg Http.Metadata msg -> Cmd msg
-headPreview templateId appState toMsg =
+getPreview : String -> AbstractAppState a -> ToMsg ( Http.Metadata, Maybe UrlResponse ) msg -> Cmd msg
+getPreview templateId appState toMsg =
     Http.request
         { method = "GET"
         , headers = authorizationHeaders appState
         , url = appState.apiUrl ++ "/document-template-drafts/" ++ templateId ++ "/documents/preview"
         , body = Http.emptyBody
-        , expect = expectMetadata toMsg
+        , expect = expectMetadataAndJson toMsg UrlResponse.decoder
         , timeout = Nothing
         , tracker = Nothing
         }
-
-
-previewUrl : String -> AbstractAppState a -> String
-previewUrl templateId =
-    authorizedUrl ("/document-template-drafts/" ++ templateId ++ "/documents/preview")
 
 
 uploadAsset : String -> String -> File -> AbstractAppState a -> ToMsg DocumentTemplateAsset msg -> Cmd msg

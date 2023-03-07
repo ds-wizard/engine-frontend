@@ -8,6 +8,8 @@ module Wizard.Routes exposing
     , devOperations
     , documentTemplateEditorCreate
     , documentTemplateEditorDetail
+    , documentTemplateEditorDetailFiles
+    , documentTemplateEditorDetailPreview
     , documentTemplateEditorsIndex
     , documentTemplateEditorsIndexWithFilters
     , documentTemplatesDetail
@@ -19,6 +21,7 @@ module Wizard.Routes exposing
     , isAppIndex
     , isDevOperations
     , isDevSubroute
+    , isDocumentTemplateEditor
     , isDocumentTemplateEditorsIndex
     , isDocumentTemplatesIndex
     , isDocumentTemplatesSubroute
@@ -91,9 +94,11 @@ import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
+import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Apps.Routes
 import Wizard.Dev.Routes
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute
 import Wizard.DocumentTemplateEditors.Routes
 import Wizard.DocumentTemplates.Routes
 import Wizard.Documents.Routes
@@ -290,7 +295,15 @@ isDocumentTemplatesIndex route =
 
 isDocumentTemplatesSubroute : Route -> Bool
 isDocumentTemplatesSubroute route =
-    isDocumentTemplatesIndex route || isDocumentTemplateEditorsIndex route
+    case route of
+        DocumentTemplatesRoute _ ->
+            True
+
+        DocumentTemplateEditorsRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -304,7 +317,17 @@ documentTemplateEditorCreate mbBasedOn mbEdit =
 
 documentTemplateEditorDetail : String -> Route
 documentTemplateEditorDetail =
-    DocumentTemplateEditorsRoute << Wizard.DocumentTemplateEditors.Routes.EditorRoute
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Template
+
+
+documentTemplateEditorDetailFiles : String -> Route
+documentTemplateEditorDetailFiles =
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Files
+
+
+documentTemplateEditorDetailPreview : String -> Route
+documentTemplateEditorDetailPreview =
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
 
 
 documentTemplateEditorsIndex : Route
@@ -322,6 +345,16 @@ isDocumentTemplateEditorsIndex route =
     case route of
         DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute _) ->
             True
+
+        _ ->
+            False
+
+
+isDocumentTemplateEditor : String -> Route -> Bool
+isDocumentTemplateEditor id route =
+    case route of
+        DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.EditorRoute documentTemplateId _) ->
+            id == documentTemplateId
 
         _ ->
             False
@@ -495,9 +528,9 @@ projectsCreateMigration =
     ProjectsRoute << Wizard.Projects.Routes.CreateMigrationRoute
 
 
-projectsDetailQuestionnaire : Uuid -> Route
-projectsDetailQuestionnaire uuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire
+projectsDetailQuestionnaire : Uuid -> Maybe String -> Route
+projectsDetailQuestionnaire uuid mbQuestionUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire mbQuestionUuid
 
 
 projectsDetailDocuments : Uuid -> Route
@@ -621,7 +654,18 @@ isSettingsRoute route =
 
 isSettingsSubroute : Route -> Bool
 isSettingsSubroute route =
-    isSettingsRoute route || isUsersIndex route || isLocalesRoute route
+    case route of
+        SettingsRoute _ ->
+            True
+
+        UsersRoute _ ->
+            True
+
+        LocalesRoute _ ->
+            True
+
+        _ ->
+            False
 
 
 settingsAuthentication : Route
@@ -693,7 +737,7 @@ isUsersIndex route =
 isLocalesRoute : Route -> Bool
 isLocalesRoute route =
     case route of
-        LocalesRoute _ ->
+        LocalesRoute (Wizard.Locales.Routes.IndexRoute _) ->
             True
 
         _ ->

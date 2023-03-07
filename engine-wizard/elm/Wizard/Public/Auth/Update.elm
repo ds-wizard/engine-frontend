@@ -1,7 +1,9 @@
 module Wizard.Public.Auth.Update exposing (fetchData, update)
 
+import ActionResult
 import Gettext exposing (gettext)
 import Shared.Api.Auth as AuthApi
+import Shared.Data.TokenResponse as TokenResponse
 import Shared.Error.ApiError as ApiError
 import Shared.Utils exposing (dispatch)
 import Wizard.Auth.Msgs
@@ -21,8 +23,13 @@ update msg appState model =
     case msg of
         AuthenticationCompleted result ->
             case result of
-                Ok token ->
-                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token Nothing) )
+                Ok tokenReponse ->
+                    case TokenResponse.toToken tokenReponse of
+                        Just token ->
+                            ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token Nothing) )
+
+                        Nothing ->
+                            ( { model | authenticating = ActionResult.Success (gettext "Login failed." appState.locale) }, Cmd.none )
 
                 Err error ->
                     ( { model | authenticating = ApiError.toActionResult appState (gettext "Login failed." appState.locale) error }, Cmd.none )

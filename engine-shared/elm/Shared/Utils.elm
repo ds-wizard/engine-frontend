@@ -49,12 +49,8 @@ getUuidString =
 
 
 getUuid : Seed -> ( Uuid, Seed )
-getUuid seed =
-    let
-        ( uuid, newSeed ) =
-            step Uuid.uuidGenerator seed
-    in
-    ( uuid, newSeed )
+getUuid =
+    step Uuid.uuidGenerator
 
 
 nilUuid : String

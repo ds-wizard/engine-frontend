@@ -2,12 +2,14 @@ module Shared.Data.PackageSuggestion exposing
     ( PackageSuggestion
     , decoder
     , fromPackage
+    , getLatestPackageId
     , isSamePackage
     , packageIdAll
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.Package exposing (Package)
 import Version exposing (Version)
@@ -72,3 +74,18 @@ getPackageIdValues packageId =
 
         _ ->
             ( Nothing, Nothing )
+
+
+getLatestVersion : PackageSuggestion -> Maybe Version
+getLatestVersion =
+    List.last << List.sortWith Version.compare << .versions
+
+
+getLatestPackageId : PackageSuggestion -> Maybe String
+getLatestPackageId packageSuggestion =
+    case ( String.split ":" packageSuggestion.id, getLatestVersion packageSuggestion ) of
+        ( orgId :: kmId :: _, Just latestVersion ) ->
+            Just (orgId ++ ":" ++ kmId ++ ":" ++ Version.toString latestVersion)
+
+        _ ->
+            Nothing

@@ -19,16 +19,12 @@ type alias Model =
 
 initialModel : AppState -> Maybe String -> Model
 initialModel appState packageId =
-    if appState.config.owl.enabled then
-        { importModel = OwlImportModel <| OwlImportModels.initialModel appState }
+    case appState.config.registry of
+        RegistryEnabled _ ->
+            { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }
 
-    else
-        case appState.config.registry of
-            RegistryEnabled _ ->
-                { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }
-
-            _ ->
-                { importModel = FileImportModel <| FileImportModels.initialModel }
+        _ ->
+            { importModel = FileImportModel <| FileImportModels.initialModel }
 
 
 isFileImportModel : Model -> Bool

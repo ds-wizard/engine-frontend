@@ -6,6 +6,7 @@ module Wizard.DocumentTemplateEditors.Models exposing
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.DocumentTemplateEditors.Create.Models
+import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute
 import Wizard.DocumentTemplateEditors.Editor.Models
 import Wizard.DocumentTemplateEditors.Index.Models
 import Wizard.DocumentTemplateEditors.Routes exposing (Route(..))
@@ -22,7 +23,7 @@ initialModel : Model
 initialModel =
     { createModel = Wizard.DocumentTemplateEditors.Create.Models.initialModel Nothing Nothing
     , indexModel = Wizard.DocumentTemplateEditors.Index.Models.initialModel PaginationQueryString.empty
-    , editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel ""
+    , editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel "" DTEditorRoute.Template
     }
 
 
@@ -35,5 +36,9 @@ initLocalModel route model =
         IndexRoute paginationQueryString ->
             { model | indexModel = Wizard.DocumentTemplateEditors.Index.Models.initialModel paginationQueryString }
 
-        EditorRoute documentTemplateId ->
-            { model | editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel documentTemplateId }
+        EditorRoute documentTemplateId subroute ->
+            if documentTemplateId == model.editorModel.documentTemplateId then
+                { model | editorModel = Wizard.DocumentTemplateEditors.Editor.Models.setEditorFromRoute subroute model.editorModel }
+
+            else
+                { model | editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel documentTemplateId subroute }

@@ -33,6 +33,7 @@ viewProject appState model questionnaireModel =
                     , commentsEnabled = False
                     , readonly = True
                     , toolbarEnabled = False
+                    , questionLinksEnabled = False
                     }
                 , renderer = DefaultQuestionnaireRenderer.create appState questionnaireModel.questionnaire.knowledgeModel
                 , wrapMsg = QuestionnaireMsg

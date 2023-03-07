@@ -68,6 +68,6 @@ importPackageCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | importing = ApiError.toActionResult appState (gettext "Importing the package failed." appState.locale) error }
+            ( { model | importing = ApiError.toActionResult appState (gettext "Importing the knowledge model failed." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )

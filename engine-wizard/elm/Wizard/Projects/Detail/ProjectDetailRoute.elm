@@ -5,7 +5,7 @@ import Uuid exposing (Uuid)
 
 
 type ProjectDetailRoute
-    = Questionnaire
+    = Questionnaire (Maybe String)
     | Preview
     | Metrics
     | Documents PaginationQueryString

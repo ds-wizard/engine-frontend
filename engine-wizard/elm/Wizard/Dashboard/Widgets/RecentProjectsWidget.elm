@@ -6,6 +6,7 @@ import Html exposing (Html, br, div, h2, p, strong, text)
 import Html.Attributes exposing (class, style)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (faSet)
+import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -62,14 +63,14 @@ viewProject appState questionnaire =
             inWordsWithConfig { withAffix = True } (locale appState) questionnaire.updatedAt appState.currentTime
     in
     linkTo appState
-        (Routes.projectsDetailQuestionnaire questionnaire.uuid)
+        (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
         [ class "p-2 py-3 d-flex rounded-3" ]
         [ ItemIcon.view { text = questionnaire.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]
             [ strong [] [ text questionnaire.name ]
             , div [ class "d-flex align-items-center" ]
                 [ projectProgressView
-                , div [ class "flex-grow-1 ps-4 text-lighter fst-italic" ] [ text ("Updated " ++ updatedText) ]
+                , div [ class "flex-grow-1 ps-4 text-lighter fst-italic" ] [ text (String.format (gettext "Updated %s" appState.locale) [ updatedText ]) ]
                 ]
             ]
         ]

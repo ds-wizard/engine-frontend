@@ -11,10 +11,10 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setTemplate)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Msgs
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -58,7 +58,10 @@ update msg wrapMsg appState model =
                 }
 
         ExportTemplate template ->
-            ( model, Ports.downloadFile (DocumentTemplatesApi.exportTemplateUrl template.id appState) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl template.id appState)) )
+
+        FileDownloaderMsg fileDownloaderMsg ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

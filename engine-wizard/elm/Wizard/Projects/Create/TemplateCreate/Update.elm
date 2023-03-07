@@ -77,7 +77,7 @@ handlePostQuestionnaireCompleted appState model result =
     case result of
         Ok questionnaire ->
             ( model
-            , cmdNavigate appState <| Routes.projectsDetailQuestionnaire questionnaire.uuid
+            , cmdNavigate appState <| Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing
             )
 
         Err error ->

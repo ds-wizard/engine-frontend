@@ -23,6 +23,7 @@ import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
+import Wizard.Settings.Common.FontAwesome as FontAwesome
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Settings.LookAndFeel.LogoUploadModal as LogoUploadModal
 import Wizard.Settings.LookAndFeel.Models exposing (Model)
@@ -93,9 +94,6 @@ formView appState form =
 
         colorPicker colorOptions field =
             div [ class "color-picker" ] (List.map (colorButtonView field) colorOptions)
-
-        fontAwesomeLink =
-            "https://fontawesome.com/v5/search?o=r&m=free"
 
         clientCustomizations =
             if appState.config.feature.clientCustomizationEnabled then
@@ -180,7 +178,7 @@ formView appState form =
                             , Markdown.toHtml [ class "form-text text-muted" ]
                                 (String.format
                                     (gettext "Configure additional links in the menu. Choose any free icon from the [Font Awesome](%s), e.g. *fas fa-magic*. Check *New window* if you want to open the link in a new window." appState.locale)
-                                    [ fontAwesomeLink ]
+                                    [ FontAwesome.fontAwesomeLink ]
                                 )
                             ]
                         , div [ class "col-4" ]

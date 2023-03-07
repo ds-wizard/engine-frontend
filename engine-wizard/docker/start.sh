@@ -35,6 +35,12 @@ if [[ $(find /src/scss/customizations -name "*.scss" | xargs cat | wc -l) -gt 0 
   find /usr/share/nginx/html -name "*.css" -exec /usr/bin/sass -I /src -s compressed /src/scss/main.scss {} \;
 fi
 
+# check for custom scripts block
+scriptsFile=/src/scripts.html
+if [ -f "$scriptsFile" ]; then
+    scripts=`cat $scriptsFile`
+    sed -i "s~</script>~</script>$scripts~g" /usr/share/nginx/html/index.html
+fi
 
 # start nginx
 nginx -g 'daemon off;'

@@ -22,6 +22,7 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent 
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet)
+import Shared.Utils exposing (flip)
 import Triple
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -75,7 +76,7 @@ update msg questionnaire appState model =
                     let
                         questionnaireModel =
                             QuestionnaireDetail.updateContent questionnaire content
-                                |> Questionnaire.init appState
+                                |> flip (Questionnaire.init appState) Nothing
                                 |> Tuple.first
                                 |> Success
                     in
@@ -157,6 +158,7 @@ viewContent appState qm =
             , commentsEnabled = False
             , readonly = True
             , toolbarEnabled = False
+            , questionLinksEnabled = False
             }
         , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
         , wrapMsg = QuestionnaireMsg

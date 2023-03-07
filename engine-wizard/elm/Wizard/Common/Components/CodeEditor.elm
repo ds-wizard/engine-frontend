@@ -1,4 +1,4 @@
-module Wizard.Common.Components.CodeEditor exposing (chooseLanguage, codeEditor, language, onChange, value)
+module Wizard.Common.Components.CodeEditor exposing (chooseLanguage, codeEditor, language, onChange, onFocus, value)
 
 import Html exposing (Html)
 import Html.Attributes
@@ -28,6 +28,12 @@ onChange toMsg =
         D.map toMsg <|
             D.at [ "target", "editorValue" ] <|
                 D.string
+
+
+onFocus : msg -> Html.Attribute msg
+onFocus toMsg =
+    Html.Events.on "focus" <|
+        D.succeed toMsg
 
 
 chooseLanguage : String -> String

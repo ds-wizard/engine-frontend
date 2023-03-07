@@ -269,7 +269,7 @@ handleFinalizeMigrationCompleted appState model result =
                 route =
                     case model.questionnaireMigration of
                         Success questionnaireMigration ->
-                            Routes.projectsDetailQuestionnaire questionnaireMigration.oldQuestionnaire.uuid
+                            Routes.projectsDetailQuestionnaire questionnaireMigration.oldQuestionnaire.uuid Nothing
 
                         _ ->
                             Routes.projectsIndex appState
@@ -306,7 +306,7 @@ setResult appState migration model =
         questionnaireModel =
             case migration of
                 Success m ->
-                    Just <| Tuple.first <| Questionnaire.init appState m.newQuestionnaire
+                    Just <| Tuple.first <| Questionnaire.init appState m.newQuestionnaire Nothing
 
                 _ ->
                     Nothing

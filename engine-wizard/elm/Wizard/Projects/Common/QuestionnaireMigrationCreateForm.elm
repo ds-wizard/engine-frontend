@@ -1,11 +1,13 @@
 module Wizard.Projects.Common.QuestionnaireMigrationCreateForm exposing
     ( QuestionnaireMigrationCreateForm
     , encode
+    , init
     , initEmpty
     , validation
     )
 
 import Form exposing (Form)
+import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
@@ -19,6 +21,15 @@ type alias QuestionnaireMigrationCreateForm =
 initEmpty : Form FormError QuestionnaireMigrationCreateForm
 initEmpty =
     Form.initial [] validation
+
+
+init : String -> Form FormError QuestionnaireMigrationCreateForm
+init packageId =
+    let
+        initials =
+            [ ( "packageId", Field.string packageId ) ]
+    in
+    Form.initial initials validation
 
 
 validation : Validation FormError QuestionnaireMigrationCreateForm

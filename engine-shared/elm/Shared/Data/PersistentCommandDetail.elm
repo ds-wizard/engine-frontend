@@ -22,7 +22,7 @@ type alias PersistentCommandDetail =
     , lastErrorMessage : Maybe String
     , attempts : Int
     , maxAttempts : Int
-    , createdBy : UserSuggestion
+    , createdBy : Maybe UserSuggestion
     , app : AppSuggestion
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
@@ -40,7 +40,7 @@ decoder =
         |> D.required "lastErrorMessage" (D.maybe D.string)
         |> D.required "attempts" D.int
         |> D.required "maxAttempts" D.int
-        |> D.required "createdBy" UserSuggestion.decoder
+        |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
         |> D.required "app" AppSuggestion.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "updatedAt" D.datetime

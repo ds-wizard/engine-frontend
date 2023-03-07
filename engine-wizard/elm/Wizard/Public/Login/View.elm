@@ -1,9 +1,11 @@
 module Wizard.Public.Login.View exposing (view)
 
 import Gettext exposing (gettext)
-import Html exposing (Html, div, form, input, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_)
+import Html exposing (Html, div, form, input, p, span, text)
+import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
+import Html.Keyed
+import Maybe.Extra as Maybe
 import Shared.Html exposing (fa)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
@@ -21,7 +23,11 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         form =
-            formView appState model
+            if model.codeRequired then
+                ( "code", codeFormView appState model )
+
+            else
+                ( "login", loginFormView appState model )
 
         content =
             case appState.config.lookAndFeel.loginInfo of
@@ -30,24 +36,30 @@ view appState model =
                         splitScreenClass =
                             "col-12 d-flex align-items-center"
                     in
-                    [ div
-                        [ class <| splitScreenClass ++ " justify-content-start col-lg-7 col-md-6 side-info"
-                        , dataCy "login_side-info"
-                        ]
-                        [ Markdown.toHtml [] loginInfo ]
-                    , div [ class <| splitScreenClass ++ " justify-content-center col-lg-5 col-md-6 side-login" ]
-                        [ form ]
+                    [ ( "side-info"
+                      , div
+                            [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 col-md-6 side-info"
+                            , dataCy "login_side-info"
+                            ]
+                            [ Markdown.toHtml [] loginInfo ]
+                      )
+                    , ( "login-form"
+                      , Html.Keyed.node "div"
+                            [ class <| splitScreenClass ++ " justify-content-center col-xl-4 col-lg-5 col-md-6 side-login" ]
+                            [ form ]
+                      )
                     ]
 
                 Nothing ->
                     [ form ]
     in
-    div [ class "row justify-content-center Public__Login" ]
+    Html.Keyed.node "div"
+        [ class "row justify-content-center Public__Login" ]
         content
 
 
-formView : AppState -> Model -> Html Msg
-formView appState model =
+loginFormView : AppState -> Model -> Html Msg
+loginFormView appState model =
     let
         loginForm =
             [ div [ class "form-group" ]
@@ -81,5 +93,38 @@ formView appState model =
                     :: loginForm
                     ++ externalLogin
                 )
+            ]
+        ]
+
+
+codeFormView : AppState -> Model -> Html Msg
+codeFormView appState model =
+    div [ class "align-self-center col-xs-10 col-sm-8 col-md-6 col-lg-4" ]
+        [ form [ onSubmit DoLogin, class "card bg-light" ]
+            [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
+            , div [ class "card-body" ]
+                [ FormResult.view appState model.loggingIn
+                , p [] [ text (gettext "Please enter the authentication code from your email to verify your identity." appState.locale) ]
+                , div [ class "form-group" ]
+                    [ span [ class "input-icon" ] [ fa "fas fa-unlock-alt" ]
+                    , input
+                        [ onInput Code
+                        , id "code"
+                        , type_ "text"
+                        , attribute "inputmode" "numeric"
+                        , pattern "[0-9]*"
+                        , class "form-control"
+                        , placeholder <| gettext "Authentication Code" appState.locale
+                        ]
+                        []
+                    ]
+                , div [ class "form-group mt-0" ]
+                    [ ActionButton.submitWithAttrs appState
+                        { label = gettext "Verify" appState.locale
+                        , result = model.loggingIn
+                        , attrs = [ class "w-100", disabled (Maybe.isNothing (String.toInt model.code)) ]
+                        }
+                    ]
+                ]
             ]
         ]

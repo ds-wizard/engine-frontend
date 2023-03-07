@@ -159,6 +159,7 @@ questionnaireView appState model migration =
                     , commentsEnabled = False
                     , readonly = True
                     , toolbarEnabled = False
+                    , questionLinksEnabled = False
                     }
                 , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel model.selectedChange
                 , wrapMsg = QuestionnaireMsg
