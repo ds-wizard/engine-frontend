@@ -2,12 +2,12 @@ module Wizard.KnowledgeModels.Import.FileImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import File
+import File.Extra as File
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, input, label, p, text)
 import Html.Attributes exposing (accept, class, disabled, id, type_)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
-import List.Extra as List
 import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -42,9 +42,9 @@ warningView appState model =
         ( Unset, Just file ) ->
             let
                 ext =
-                    Maybe.withDefault "" (List.last <| String.split "." <| File.name file)
+                    File.ext file
             in
-            if ext == "km" || ext == "json" then
+            if ext == Just "km" || ext == Just "json" then
                 emptyNode
 
             else

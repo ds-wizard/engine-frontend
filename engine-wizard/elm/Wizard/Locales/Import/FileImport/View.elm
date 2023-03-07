@@ -2,6 +2,7 @@ module Wizard.Locales.Import.FileImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import File
+import File.Extra as File
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, input, label, p, text)
 import Html.Attributes exposing (accept, class, disabled, id, type_)
@@ -39,7 +40,7 @@ warningView : AppState -> Model -> Html msg
 warningView appState model =
     case ( model.importing, model.file ) of
         ( Unset, Just file ) ->
-            if File.mime file == "application/zip" then
+            if File.mime file == "application/zip" || File.ext file == Just "zip" then
                 emptyNode
 
             else
