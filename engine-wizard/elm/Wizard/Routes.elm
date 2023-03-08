@@ -90,6 +90,7 @@ module Wizard.Routes exposing
     , usersIndexWithFilters
     )
 
+import Shared.Auth.Role as Role
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -568,7 +569,11 @@ projectsIndex : { a | session : Session } -> Route
 projectsIndex appState =
     let
         mbUserUuid =
-            Session.getUserUuid appState.session
+            if Session.getUserRole appState.session == Role.admin then
+                Nothing
+
+            else
+                Session.getUserUuid appState.session
     in
     ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
 
