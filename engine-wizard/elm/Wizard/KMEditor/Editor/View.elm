@@ -15,6 +15,7 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Editor.Common.EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
@@ -166,6 +167,15 @@ viewKMEditorNavigationNav appState route editorBranch =
             , dataCy = "km-editor_nav_km"
             }
 
+        phasesLink =
+            { route = Routes.kmEditorEditorPhases branchUuid
+            , label = gettext "Phases" appState.locale
+            , icon = faSet "km.phase" appState
+            , isActive = route == KMEditorRoute.Phases
+            , isVisible = True
+            , dataCy = "km-editor_nav_phases"
+            }
+
         questionTagsLink =
             { route = Routes.kmEditorEditorQuestionTags branchUuid
             , label = gettext "Question Tags" appState.locale
@@ -195,6 +205,7 @@ viewKMEditorNavigationNav appState route editorBranch =
 
         links =
             [ editorLink
+            , phasesLink
             , questionTagsLink
             , previewLink
             , settingsLink
@@ -212,6 +223,9 @@ viewKMEditorContent appState route model editorBranch =
     case route of
         KMEditorRoute.Edit _ ->
             KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) editorBranch
+
+        KMEditorRoute.Phases ->
+            PhaseEditor.view appState PhaseEditorMsg EventMsg editorBranch model.phaseEditorModel
 
         KMEditorRoute.QuestionTags ->
             TagEditor.view appState TagEditorMsg EventMsg editorBranch model.tagEditorModel

@@ -18,6 +18,7 @@ import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
@@ -171,6 +172,13 @@ update wrapMsg msg appState model =
 
                 _ ->
                     withSeed ( model, Cmd.none )
+
+        PhaseEditorMsg phaseEditorMsg ->
+            let
+                ( phaseEditorModel, cmd ) =
+                    PhaseEditor.update phaseEditorMsg model.phaseEditorModel
+            in
+            withSeed ( { model | phaseEditorModel = phaseEditorModel }, Cmd.map (wrapMsg << PhaseEditorMsg) cmd )
 
         TagEditorMsg tagEditorMsg ->
             let

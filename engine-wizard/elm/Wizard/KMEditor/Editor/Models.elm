@@ -15,6 +15,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
@@ -33,6 +34,7 @@ type alias Model =
     , savingModel : ProjectSaving.Model
     , branchModel : ActionResult EditorBranch
     , kmEditorModel : KMEditor.Model
+    , phaseEditorModel : PhaseEditor.Model
     , tagEditorModel : TagEditor.Model
     , previewModel : Preview.Model
     , settingsModel : Settings.Model
@@ -52,6 +54,7 @@ init appState uuid mbEditorUuid =
     , savingModel = ProjectSaving.init
     , branchModel = ActionResult.Loading
     , kmEditorModel = KMEditor.initialModel
+    , phaseEditorModel = PhaseEditor.initialModel
     , tagEditorModel = TagEditor.initialModel
     , previewModel = Preview.initialModel appState ""
     , settingsModel = Settings.initialModel
