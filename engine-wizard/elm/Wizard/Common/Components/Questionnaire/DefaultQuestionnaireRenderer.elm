@@ -65,8 +65,8 @@ renderAnswerLabel answer =
     text answer.label
 
 
-renderAnswerBadges : List Metric -> Answer -> Html msg
-renderAnswerBadges metrics answer =
+renderAnswerBadges : List Metric -> Bool -> Answer -> Html msg
+renderAnswerBadges metrics viewValue answer =
     let
         getMetricName uuid =
             List.find ((==) uuid << .uuid) metrics
@@ -79,10 +79,19 @@ renderAnswerBadges metrics answer =
         metricExists measure =
             List.find ((==) measure.metricUuid << .uuid) metrics /= Nothing
 
+        metricValue metricMeasure =
+            if viewValue then
+                span [ class "ms-1" ] [ text (String.fromInt (round (100 * metricMeasure.measure)) ++ "%") ]
+
+            else
+                emptyNode
+
         createBadge metricMeasure =
             Badge.badge
                 [ class (getBadgeClass metricMeasure.measure) ]
-                [ text <| getMetricName metricMeasure.metricUuid ]
+                [ text <| getMetricName metricMeasure.metricUuid
+                , metricValue metricMeasure
+                ]
     in
     if List.isEmpty answer.metricMeasures then
         emptyNode
