@@ -41,6 +41,7 @@ module Wizard.Routes exposing
     , isUsersIndex
     , kmEditorCreate
     , kmEditorEditor
+    , kmEditorEditorPhases
     , kmEditorEditorPreview
     , kmEditorEditorQuestionTags
     , kmEditorEditorSettings
@@ -382,6 +383,11 @@ isKmEditorEditor uuid route =
 
         _ ->
             False
+
+
+kmEditorEditorPhases : Uuid -> Route
+kmEditorEditorPhases branchUuid =
+    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.Phases)
 
 
 kmEditorEditorQuestionTags : Uuid -> Route
