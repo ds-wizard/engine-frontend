@@ -193,7 +193,7 @@ init appState questionnaire mbPath =
             , typeHints = Nothing
             , typeHintsDebounce = Debounce.init
             , feedbackModalModel = FeedbackModal.init
-            , viewSettings = QuestionnaireViewSettings.all
+            , viewSettings = QuestionnaireViewSettings.default
             , viewSettingsDropdown = Dropdown.initialState
             , historyModel = History.init appState
             , versionModalModel = VersionModal.init
@@ -225,6 +225,7 @@ init appState questionnaire mbPath =
     , Cmd.batch
         [ scrollCmd
         , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
+        , Ports.localStorageGet localStorageViewSettingsKey
         ]
     )
 
@@ -334,7 +335,7 @@ type alias QuestionnaireRenderer msg =
     , renderQuestionDescription : QuestionnaireViewSettings -> Question -> Html msg
     , getQuestionExtraClass : Question -> Maybe String
     , renderAnswerLabel : Answer -> Html msg
-    , renderAnswerBadges : Answer -> Html msg
+    , renderAnswerBadges : Bool -> Answer -> Html msg
     , renderAnswerAdvice : Answer -> Html msg
     , renderChoiceLabel : Choice -> Html msg
     }
@@ -349,6 +350,24 @@ type QuestionViewState
     = Default
     | Answered
     | Desirable
+
+
+localStorageViewSettingsKey : String
+localStorageViewSettingsKey =
+    "project-view-settings"
+
+
+localStorageViewSettingsDecoder : Decoder (LocalStorageData QuestionnaireViewSettings)
+localStorageViewSettingsDecoder =
+    LocalStorageData.decoder QuestionnaireViewSettings.decoder
+
+
+localStorageViewSettingsEncode : QuestionnaireViewSettings -> E.Value
+localStorageViewSettingsEncode qvs =
+    LocalStorageData.encode QuestionnaireViewSettings.encode
+        { key = localStorageViewSettingsKey
+        , value = qvs
+        }
 
 
 localStorageCollapsedItemKey : Uuid -> String
@@ -425,7 +444,7 @@ type Msg
     | ImportersDropdownMsg Dropdown.State
     | CollapseItem String
     | ExpandItem String
-    | GotCollapsedItems E.Value
+    | GotLocalStorageData E.Value
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
 
@@ -615,7 +634,10 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | viewSettingsDropdown = state }
 
         SetViewSettings viewSettings ->
-            wrap { model | viewSettings = viewSettings }
+            withSeed
+                ( { model | viewSettings = viewSettings }
+                , Ports.localStorageSet (localStorageViewSettingsEncode viewSettings)
+                )
 
         GetQuestionnaireEventsComplete result ->
             wrap <|
@@ -793,11 +815,24 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
                 )
 
-        GotCollapsedItems value ->
-            case decodeValue localStorageCollapsedItemsDecoder value of
-                Ok data ->
-                    if data.key == localStorageCollapsedItemKey model.uuid then
-                        wrap { model | collapsedItems = data.value }
+        GotLocalStorageData value ->
+            case decodeValue (D.field "key" D.string) value of
+                Ok key ->
+                    if key == localStorageViewSettingsKey then
+                        case decodeValue localStorageViewSettingsDecoder value of
+                            Ok data ->
+                                wrap { model | viewSettings = data.value }
+
+                            Err _ ->
+                                wrap model
+
+                    else if key == localStorageCollapsedItemKey model.uuid then
+                        case decodeValue localStorageCollapsedItemsDecoder value of
+                            Ok data ->
+                                wrap { model | collapsedItems = data.value }
+
+                            Err _ ->
+                                wrap model
 
                     else
                         wrap model
@@ -1013,7 +1048,7 @@ subscriptions model =
                 SplitPane.subscriptions model.splitPane
 
         collapsedItemsSub =
-            Ports.localStorageData GotCollapsedItems
+            Ports.localStorageData GotLocalStorageData
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
@@ -1129,6 +1164,16 @@ viewQuestionnaireToolbar appState cfg model =
                             , onClick (SetViewSettings (QuestionnaireViewSettings.toggleTags viewSettings))
                             ]
                             [ settingsIcon viewSettings.tags, text (gettext "Question tags" appState.locale) ]
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon"
+                            , onClick (SetViewSettings (QuestionnaireViewSettings.toggleNonDesirableQuestions viewSettings))
+                            ]
+                            [ settingsIcon viewSettings.nonDesirableQuestions, text (gettext "Non-desirable questions" appState.locale) ]
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon"
+                            , onClick (SetViewSettings (QuestionnaireViewSettings.toggleMetricValues viewSettings))
+                            ]
+                            [ settingsIcon viewSettings.metricValues, text (gettext "Metric values" appState.locale) ]
                         ]
                     }
                 ]
@@ -2083,8 +2128,33 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
 
+        isDesirable =
+            Question.isDesirable
+                model.questionnaire.knowledgeModel.phaseUuids
+                (Uuid.toString <| Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid)
+                question
+
+        ( questionClass, questionState ) =
+            case
+                ( QuestionnaireDetail.hasReply (pathToString newPath) model.questionnaire
+                , isDesirable
+                )
+            of
+                ( True, _ ) ->
+                    ( "question-answered", Answered )
+
+                ( _, True ) ->
+                    ( "question-desirable", Desirable )
+
+                _ ->
+                    if model.viewSettings.nonDesirableQuestions then
+                        ( "question-default", Default )
+
+                    else
+                        ( "question-hidden", Default )
+
         viewLabel =
-            viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question
+            viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question questionState
 
         viewTags =
             if model.viewSettings.tags then
@@ -2140,36 +2210,26 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
             Maybe.withDefault "" (cfg.renderer.getQuestionExtraClass question)
     in
     div
-        [ class ("form-group " ++ questionExtraClass)
+        [ class ("form-group " ++ questionClass ++ " " ++ questionExtraClass)
         , id ("question-" ++ Question.getUuid question)
         , attribute "data-path" (pathToString newPath)
         ]
         content
 
 
-viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
-viewQuestionLabel appState cfg _ model path humanIdentifiers question =
+viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> QuestionViewState -> Html Msg
+viewQuestionLabel appState cfg _ model path humanIdentifiers question questionState =
     let
-        isDesirable =
-            Question.isDesirable
-                model.questionnaire.knowledgeModel.phaseUuids
-                (Uuid.toString <| Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid)
-                question
+        ( icon, tooltipText ) =
+            case questionState of
+                Answered ->
+                    ( "fas fa-check", gettext "This question has been answered" appState.locale )
 
-        questionState =
-            case
-                ( QuestionnaireDetail.hasReply (pathToString path) model.questionnaire
-                , isDesirable
-                )
-            of
-                ( True, _ ) ->
-                    Answered
+                Desirable ->
+                    ( "fas fa-pen", gettext "This question should be answered now" appState.locale )
 
-                ( _, True ) ->
-                    Desirable
-
-                _ ->
-                    Default
+                Default ->
+                    ( "far fa-hourglass", gettext "This question can be answered later" appState.locale )
     in
     label []
         [ span []
@@ -2180,7 +2240,10 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question =
                     , ( "bg-danger", questionState == Desirable )
                     ]
                 ]
-                [ text (String.join "." humanIdentifiers) ]
+                [ span (tooltipRight tooltipText)
+                    [ fa (icon ++ " fa-fw") ]
+                , text (String.join "." humanIdentifiers)
+                ]
             , span
                 [ classList
                     [ ( "text-success", questionState == Answered )
@@ -2223,7 +2286,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
                 mbSelectedAnswer
     in
     ( div []
-        (List.indexedMap (viewAnswer appState cfg model.questionnaire.knowledgeModel path selectedAnswerUuid) answers
+        (List.indexedMap (viewAnswer appState cfg model model.questionnaire.knowledgeModel path selectedAnswerUuid) answers
             ++ [ clearReplyButton ]
         )
     , [ advice, followUps ]
@@ -2719,8 +2782,8 @@ viewChoice appState cfg path selectedChoicesUuids order choice =
         ]
 
 
-viewAnswer : AppState -> Config msg -> KnowledgeModel -> List String -> Maybe String -> Int -> Answer -> Html Msg
-viewAnswer appState cfg km path selectedAnswerUuid order answer =
+viewAnswer : AppState -> Config msg -> Model -> KnowledgeModel -> List String -> Maybe String -> Int -> Answer -> Html Msg
+viewAnswer appState cfg model km path selectedAnswerUuid order answer =
     let
         radioName =
             pathToString (path ++ [ answer.uuid ])
@@ -2759,7 +2822,7 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
             , text humanIdentifier
             , cfg.renderer.renderAnswerLabel answer
             , followUpsIndicator
-            , cfg.renderer.renderAnswerBadges answer
+            , cfg.renderer.renderAnswerBadges model.viewSettings.metricValues answer
             ]
         ]
 

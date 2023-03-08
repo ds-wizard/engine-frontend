@@ -633,6 +633,14 @@ $toolbar-height: 40px;
             margin-bottom: 60px;
             position: relative;
 
+            &.question-default {
+                opacity: 0.6;
+            }
+
+            &.question-hidden {
+                display: none;
+            }
+
             &:last-child {
                 margin-bottom: 5px;
             }
@@ -641,7 +649,7 @@ $toolbar-height: 40px;
                 display: flex;
                 width: 100%;
                 justify-content: space-between;
-                align-items: center;
+                align-items: flex-start;
                 font-size: 120%;
             }
 
