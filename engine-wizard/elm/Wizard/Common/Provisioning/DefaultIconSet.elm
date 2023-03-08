@@ -12,6 +12,7 @@ iconSet =
         , ( "_global.chevronLeft", "fas fa-chevron-left" )
         , ( "_global.chevronRight", "fas fa-chevron-right" )
         , ( "_global.close", "fas fa-times" )
+        , ( "_global.copy", "fas fa-paste" )
         , ( "_global.delete", "fas fa-trash" )
         , ( "_global.disable", "fas fa-toggle-off" )
         , ( "_global.download", "fas fa-download" )

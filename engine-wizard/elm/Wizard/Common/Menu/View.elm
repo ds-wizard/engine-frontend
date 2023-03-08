@@ -20,7 +20,7 @@ import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Common.View.Modal as Modal
@@ -538,25 +538,53 @@ viewReportIssueModal appState isOpen =
     Modal.confirm appState modalConfig
 
 
-viewAboutModal : AppState -> Bool -> ActionResult BuildInfo -> Html Wizard.Msgs.Msg
-viewAboutModal appState isOpen serverBuildInfoActionResult =
+viewAboutModal : AppState -> Bool -> Bool -> ActionResult BuildInfo -> Html Wizard.Msgs.Msg
+viewAboutModal appState isOpen recentlyCopied serverBuildInfoActionResult =
     let
+        copyButton =
+            if ActionResult.isSuccess serverBuildInfoActionResult then
+                let
+                    copyButtonTooltip =
+                        if recentlyCopied then
+                            tooltip (gettext "Copied!" appState.locale)
+
+                        else
+                            []
+                in
+                button
+                    (class "btn btn-link with-icon"
+                        :: onClick (Wizard.Msgs.MenuMsg CopyAbout)
+                        :: onMouseLeave (Wizard.Msgs.MenuMsg ClearRecentlyCopied)
+                        :: copyButtonTooltip
+                    )
+                    [ faSet "_global.copy" appState, text (gettext "Copy" appState.locale) ]
+
+            else
+                emptyNode
+
         modalContent =
-            Page.actionResultView appState (viewAboutModalContent appState) serverBuildInfoActionResult
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text (gettext "About" appState.locale) ]
+                , copyButton
+                ]
+            , div [ class "modal-body" ]
+                [ Page.actionResultView appState (viewAboutModalContent appState) serverBuildInfoActionResult ]
+            , div [ class "modal-footer" ]
+                [ button
+                    [ class "btn btn-primary"
+                    , onClick (Wizard.Msgs.MenuMsg (SetAboutOpen False))
+                    ]
+                    [ text (gettext "OK" appState.locale) ]
+                ]
+            ]
 
         modalConfig =
-            { modalTitle = gettext "About" appState.locale
-            , modalContent = [ modalContent ]
+            { modalContent = modalContent
             , visible = isOpen
-            , actionResult = Unset
-            , actionName = gettext "OK" appState.locale
-            , actionMsg = Wizard.Msgs.MenuMsg <| SetAboutOpen False
-            , cancelMsg = Nothing
-            , dangerous = False
             , dataCy = "about"
             }
     in
-    Modal.confirm appState modalConfig
+    Modal.simple modalConfig
 
 
 viewAboutModalContent : AppState -> BuildInfo -> Html Wizard.Msgs.Msg
@@ -573,14 +601,22 @@ viewAboutModalContent appState serverBuildInfo =
             [ ( gettext "API URL" appState.locale, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
             , ( gettext "API Docs" appState.locale, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
             ]
+
+        viewComponentVersion component =
+            viewBuildInfo appState component.name component []
+
+        componentVersions =
+            List.map viewComponentVersion (List.sortBy .name serverBuildInfo.components)
     in
     div []
-        [ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client extraClientInfo
-        , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
-        ]
+        ([ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client extraClientInfo
+         , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
+         ]
+            ++ componentVersions
+        )
 
 
-viewBuildInfo : AppState -> String -> BuildInfo -> List ( String, Html msg ) -> Html msg
+viewBuildInfo : AppState -> String -> { a | version : String, builtAt : String } -> List ( String, Html msg ) -> Html msg
 viewBuildInfo appState name buildInfo extra =
     let
         viewExtraRow ( title, value ) =

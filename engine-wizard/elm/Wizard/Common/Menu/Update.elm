@@ -5,6 +5,8 @@ import Browser.Dom as Dom
 import Dict
 import Gettext exposing (gettext)
 import Shared.Api.BuildInfo as BuildInfoApi
+import Shared.Copy as Copy
+import Shared.Data.BuildInfo as BuildInfo
 import Shared.Error.ApiError as ApiError
 import Task
 import Wizard.Common.AppState exposing (AppState)
@@ -29,6 +31,29 @@ update wrapMsg msg appState model =
                         ( Unset, Cmd.none )
             in
             ( { model | aboutOpen = open, apiBuildInfo = apiBuildInfo }, cmd )
+
+        CopyAbout ->
+            case model.apiBuildInfo of
+                Success apiBuildInfo ->
+                    let
+                        componentToString name component =
+                            name ++ "\nVersion: " ++ component.version ++ "\nBuilt at: " ++ component.builtAt
+
+                        parts =
+                            componentToString (gettext "Client" appState.locale) BuildInfo.client
+                                :: componentToString (gettext "Server" appState.locale) apiBuildInfo
+                                :: List.map (\c -> componentToString c.name c) (List.sortBy .name apiBuildInfo.components)
+
+                        aboutString =
+                            String.join "\n---\n" parts
+                    in
+                    ( { model | recentlyCopied = True }, Copy.copyToClipboard aboutString )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ClearRecentlyCopied ->
+            ( { model | recentlyCopied = False }, Cmd.none )
 
         SetLanguagesOpen open ->
             ( { model | languagesOpen = open }, Cmd.none )

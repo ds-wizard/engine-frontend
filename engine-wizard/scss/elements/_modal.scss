@@ -23,9 +23,13 @@
 
     .modal-dialog {
         opacity: 1;
-        margin-top: -20px;
+        margin-top: -$modal-dialog-margin-y-sm-up;
         min-width: 500px;
         @include transition(margin-top 0.2s ease-in);
+
+        .modal-content {
+            max-height: calc(100vh - 2 * $modal-dialog-margin);
+        }
     }
 
 
@@ -40,7 +44,18 @@
         max-height: 999999px;
 
         .modal-dialog {
-            margin-top: 0;
+            margin-top: $modal-dialog-margin-y-sm-up;
+        }
+    }
+
+    .modal-header {
+        .btn-link {
+            color: $gray-600;
+            text-decoration: none;
+
+            &:hover {
+                color: $gray-700;
+            }
         }
     }
 
@@ -59,6 +74,8 @@
     }
 
     .modal-body {
+        overflow: auto;
+
         .btn:not(.btn-link) {
             min-width: 100px;
         }

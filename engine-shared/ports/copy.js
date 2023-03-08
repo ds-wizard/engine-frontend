@@ -2,7 +2,7 @@ module.exports = function (app) {
     app.ports.copyToClipboard.subscribe(copyToClipboard)
 
     function copyToClipboard(string) {
-        var input = document.createElement('input')
+        var input = document.createElement('textarea')
         input.style.cssText = 'position: absolute; left: -99999em';
         document.body.appendChild(input)
         input.value = string

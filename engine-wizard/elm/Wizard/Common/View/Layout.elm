@@ -147,7 +147,7 @@ app model content =
                 , div [ class "page row justify-content-center" ]
                     [ content ]
                 , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
-                , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.apiBuildInfo
+                , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.recentlyCopied model.menuModel.apiBuildInfo
                 , viewLanguagesModal model.appState model.menuModel.languagesOpen
                 ]
     in
