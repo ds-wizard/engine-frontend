@@ -97,6 +97,7 @@ import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
+import Wizard.Common.ElementScrollTop as ElementScrollTop
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
@@ -145,6 +146,7 @@ type alias Model =
     , questionnaireImporters : List QuestionnaireImporter
     , collapsedItems : Set String
     , recentlyCopied : Bool
+    , contentScrollTop : Maybe Int
     }
 
 
@@ -211,6 +213,7 @@ init appState questionnaire mbPath =
             , questionnaireImporters = []
             , collapsedItems = Set.empty
             , recentlyCopied = False
+            , contentScrollTop = Nothing
             }
 
         ( model, scrollCmd ) =
@@ -385,6 +388,11 @@ localStorageCollapsedItemsEncode =
     LocalStorageData.encode (E.list E.string << Set.toList)
 
 
+contentElementSelector : String
+contentElementSelector =
+    ".questionnaire__content"
+
+
 
 -- UPDATE
 
@@ -394,6 +402,8 @@ type Msg
     | SetRightPanel RightPanel
     | SetFullscreen Bool
     | ScrollToPath String
+    | UpdateContentScroll
+    | GotContentScroll E.Value
     | ShowTypeHints (List String) Bool String String
     | HideTypeHints
     | TypeHintInput (List String) Bool Reply
@@ -470,8 +480,12 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             model.navigationTreeModel
             in
             withSeed <|
-                ( { model | activePage = activePage, navigationTreeModel = newNavigationTreeModel }
-                , Ports.scrollToTop ".questionnaire__content"
+                ( { model
+                    | activePage = activePage
+                    , navigationTreeModel = newNavigationTreeModel
+                    , contentScrollTop = Nothing
+                  }
+                , Ports.scrollToTop contentElementSelector
                 )
 
         SetRightPanel rightPanel ->
@@ -495,6 +509,39 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         ScrollToPath path ->
             withSeed <| handleScrollToPath model path
+
+        UpdateContentScroll ->
+            let
+                subscribeCmd =
+                    Ports.subscribeScrollTop contentElementSelector
+            in
+            case model.contentScrollTop of
+                Just value ->
+                    withSeed
+                        ( model
+                        , Cmd.batch
+                            [ subscribeCmd
+                            , Ports.setScrollTop
+                                { selector = contentElementSelector
+                                , scrollTop = value
+                                }
+                            ]
+                        )
+
+                Nothing ->
+                    withSeed ( model, subscribeCmd )
+
+        GotContentScroll value ->
+            case decodeValue ElementScrollTop.decoder value of
+                Ok elementScrollTop ->
+                    if elementScrollTop.selector == contentElementSelector then
+                        wrap { model | contentScrollTop = Just elementScrollTop.scrollTop }
+
+                    else
+                        wrap model
+
+                Err _ ->
+                    wrap model
 
         ShowTypeHints path emptySearch questionUuid value ->
             withSeed <| handleShowTypeHints appState ctx model path emptySearch questionUuid value
@@ -1049,6 +1096,9 @@ subscriptions model =
 
         collapsedItemsSub =
             Ports.localStorageData GotLocalStorageData
+
+        contentScrollSub =
+            Ports.gotScrollTop GotContentScroll
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
@@ -1058,6 +1108,7 @@ subscriptions model =
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
          , splitPaneSubscriptions
          , collapsedItemsSub
+         , contentScrollSub
          ]
             ++ commentDropdownSubs
         )

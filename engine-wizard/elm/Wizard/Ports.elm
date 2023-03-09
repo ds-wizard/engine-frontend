@@ -13,6 +13,7 @@ port module Wizard.Ports exposing
     , focus
     , gotImporterData
     , gotIntegrationWidgetValue
+    , gotScrollTop
     , localStorageData
     , localStorageGet
     , localStorageSet
@@ -22,11 +23,14 @@ port module Wizard.Ports exposing
     , refresh
     , scrollIntoView
     , scrollToTop
+    , setScrollTop
     , setUnloadMessage
     , storeSession
+    , subscribeScrollTop
     )
 
 import Json.Encode as E
+import Wizard.Common.ElementScrollTop as ElementScrollTop exposing (ElementScrollTop)
 
 
 
@@ -79,6 +83,20 @@ port scrollIntoView : String -> Cmd msg
 
 
 port scrollToTop : String -> Cmd msg
+
+
+setScrollTop : ElementScrollTop -> Cmd msg
+setScrollTop =
+    setScrollTopPort << ElementScrollTop.encode
+
+
+port setScrollTopPort : E.Value -> Cmd msg
+
+
+port subscribeScrollTop : String -> Cmd msg
+
+
+port gotScrollTop : (E.Value -> msg) -> Sub msg
 
 
 
