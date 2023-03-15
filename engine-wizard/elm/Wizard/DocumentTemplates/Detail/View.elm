@@ -1,5 +1,6 @@
 module Wizard.DocumentTemplates.Detail.View exposing (view)
 
+import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
@@ -13,11 +14,12 @@ import Shared.Data.DocumentTemplateDetail as DocumentTemplateDetail exposing (Do
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust, listInsertIf)
+import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
+import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -31,62 +33,79 @@ import Wizard.Routes as Routes
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewPackage appState model) model.template
+    Page.actionResultView appState (viewDocumentTemplate appState model) model.template
 
 
-viewPackage : AppState -> Model -> DocumentTemplateDetail -> Html Msg
-viewPackage appState model template =
+viewDocumentTemplate : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+viewDocumentTemplate appState model template =
     DetailPage.container
-        [ header appState template
+        [ header appState model template
         , readme appState template
         , sidePanel appState template
         , deleteVersionModal appState model template
         ]
 
 
-header : AppState -> DocumentTemplateDetail -> Html Msg
-header appState template =
+header : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+header appState model template =
     let
+        deprecatedBadge =
+            if template.phase == DocumentTemplatePhase.Deprecated then
+                Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
+
+            else
+                emptyNode
+
         createEditorAction =
-            linkTo appState
-                (Routes.documentTemplateEditorCreate (Just template.id) (Just True))
-                [ dataCy "dt-detail_create-editor-link" ]
-                [ faSet "_global.edit" appState
-                , text (gettext "Create editor" appState.locale)
-                ]
+            ListingDropdown.linkAnchorItem appState
+                { route = Routes.documentTemplateEditorCreate (Just template.id) (Just True)
+                , icon = faSet "_global.edit" appState
+                , label = gettext "Create editor" appState.locale
+                , dataCy = "dt-detail_create-editor-link"
+                }
 
         createEditorActionVisible =
             Feature.templatesView appState
 
         setDeprecatedAction =
-            a [ onClick (UpdatePhase DocumentTemplatePhase.Deprecated) ]
-                [ faSet "documentTemplate.setDeprecated" appState
-                , text (gettext "Set deprecated" appState.locale)
-                ]
+            ListingDropdown.msgAnchorItem
+                { msg = UpdatePhase DocumentTemplatePhase.Deprecated
+                , icon = faSet "documentTemplate.setDeprecated" appState
+                , label = gettext "Set deprecated" appState.locale
+                , dataCy = "dt-detail_set-deprecated"
+                }
 
         setDeprecatedActionVisible =
             template.phase == DocumentTemplatePhase.Released
 
         restoreAction =
-            a [ onClick (UpdatePhase DocumentTemplatePhase.Released) ]
-                [ faSet "documentTemplate.restore" appState
-                , text (gettext "Restore" appState.locale)
-                ]
+            ListingDropdown.msgAnchorItem
+                { msg = UpdatePhase DocumentTemplatePhase.Released
+                , icon = faSet "documentTemplate.restore" appState
+                , label = gettext "Restore" appState.locale
+                , dataCy = "dt-detail_restore"
+                }
 
         restoreActionVisible =
             template.phase == DocumentTemplatePhase.Deprecated
 
         exportAction =
-            a [ onClick (ExportTemplate template) ]
-                [ faSet "_global.export" appState
-                , text (gettext "Export" appState.locale)
-                ]
+            ListingDropdown.msgAnchorItem
+                { msg = ExportTemplate template
+                , icon = faSet "_global.export" appState
+                , label = gettext "Export" appState.locale
+                , dataCy = "dt-detail_export-link"
+                }
 
         exportActionVisible =
             Feature.templatesExport appState
 
         deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
+            Dropdown.anchorItem
+                [ onClick <| ShowDeleteDialog True
+                , class "text-danger"
+                , dataCy "dt-detail_delete-link"
+                ]
                 [ faSet "_global.delete" appState
                 , text (gettext "Delete" appState.locale)
                 ]
@@ -94,22 +113,23 @@ header appState template =
         deleteActionVisible =
             Feature.templatesDelete appState
 
-        actions =
-            []
-                |> listInsertIf createEditorAction createEditorActionVisible
-                |> listInsertIf setDeprecatedAction setDeprecatedActionVisible
-                |> listInsertIf restoreAction restoreActionVisible
-                |> listInsertIf exportAction exportActionVisible
-                |> listInsertIf deleteAction deleteActionVisible
+        groups =
+            [ [ ( createEditorAction, createEditorActionVisible ) ]
+            , [ ( exportAction, exportActionVisible ) ]
+            , [ ( setDeprecatedAction, setDeprecatedActionVisible )
+              , ( restoreAction, restoreActionVisible )
+              , ( deleteAction, deleteActionVisible )
+              ]
+            ]
 
-        deprecatedBadge =
-            if template.phase == DocumentTemplatePhase.Deprecated then
-                Badge.danger [] [ text "deprecated" ]
-
-            else
-                emptyNode
+        dropdownActions =
+            ListingDropdown.dropdown appState
+                { dropdownState = model.dropdownState
+                , toggleMsg = DropdownMsg
+                , items = ListingDropdown.itemsFromGroups Dropdown.divider groups
+                }
     in
-    DetailPage.header (span [] [ text template.name, deprecatedBadge ]) actions
+    DetailPage.header (span [] [ text template.name, deprecatedBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> DocumentTemplateDetail -> Html msg

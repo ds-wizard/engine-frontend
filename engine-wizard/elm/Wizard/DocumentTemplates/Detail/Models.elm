@@ -4,11 +4,13 @@ module Wizard.DocumentTemplates.Detail.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Dropdown as Dropdown
 import Shared.Data.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 
 
 type alias Model =
     { template : ActionResult DocumentTemplateDetail
+    , dropdownState : Dropdown.State
     , deletingVersion : ActionResult String
     , showDeleteDialog : Bool
     }
@@ -17,6 +19,7 @@ type alias Model =
 initialModel : Model
 initialModel =
     { template = Loading
+    , dropdownState = Dropdown.initialState
     , deletingVersion = Unset
     , showDeleteDialog = False
     }

@@ -4,12 +4,14 @@ module Wizard.Locales.Detail.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Dropdown as Dropdown
 import Shared.Data.LocaleDetail exposing (LocaleDetail)
 
 
 type alias Model =
     { id : String
     , locale : ActionResult LocaleDetail
+    , dropdownState : Dropdown.State
     , deletingVersion : ActionResult String
     , showDeleteDialog : Bool
     }
@@ -19,6 +21,7 @@ initialModel : String -> Model
 initialModel id =
     { id = id
     , locale = Loading
+    , dropdownState = Dropdown.initialState
     , deletingVersion = Unset
     , showDeleteDialog = False
     }

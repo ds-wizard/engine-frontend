@@ -36,6 +36,9 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
+        DropdownMsg state ->
+            ( { model | dropdownState = state }, Cmd.none )
+
         ShowDeleteDialog visible ->
             ( { model | showDeleteDialog = visible, deletingVersion = Unset }, Cmd.none )
 
@@ -46,7 +49,7 @@ update msg wrapMsg appState model =
             handleDeleteVersionCompleted appState model result
 
         UpdatePhase phase ->
-            handleSetDeprecated wrapMsg appState model phase
+            handleSetUpdatePhase wrapMsg appState model phase
 
         UpdatePhaseCompleted result ->
             applyResult appState
@@ -88,8 +91,8 @@ handleDeleteVersionCompleted appState model result =
             )
 
 
-handleSetDeprecated : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> DocumentTemplatePhase -> ( Model, Cmd Wizard.Msgs.Msg )
-handleSetDeprecated wrapMsg appState model phase =
+handleSetUpdatePhase : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> DocumentTemplatePhase -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSetUpdatePhase wrapMsg appState model phase =
     case model.template of
         Success documentTemplate ->
             let

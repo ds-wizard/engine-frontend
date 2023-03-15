@@ -17,6 +17,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
 import Shared.Form.FormError exposing (FormError)
 import String.Normalize as Normalize
+import Version exposing (Version)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -43,6 +44,9 @@ update msg wrapMsg appState model =
     case msg of
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model
+
+        FormSetVersion version ->
+            handleFormSetVersion version model
 
         PostBranchCompleted result ->
             handlePostBranchCompleted appState model result
@@ -101,6 +105,18 @@ handleFormMsg wrapMsg formMsg appState model =
                             newForm
             in
             ( { model | form = formWithKmId }, Cmd.none )
+
+
+handleFormSetVersion : Version -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleFormSetVersion version model =
+    let
+        form =
+            model.form
+                |> setBranchCreateFormValue "versionMajor" (String.fromInt (Version.getMajor version))
+                |> setBranchCreateFormValue "versionMinor" (String.fromInt (Version.getMinor version))
+                |> setBranchCreateFormValue "versionPatch" (String.fromInt (Version.getPatch version))
+    in
+    ( { model | form = form }, Cmd.none )
 
 
 handlePostBranchCompleted : AppState -> Model -> Result ApiError Branch -> ( Model, Cmd Wizard.Msgs.Msg )

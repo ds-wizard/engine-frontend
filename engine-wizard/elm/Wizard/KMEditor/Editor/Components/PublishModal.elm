@@ -1,4 +1,4 @@
-module Wizard.DocumentTemplateEditors.Editor.Components.PublishModal exposing
+module Wizard.KMEditor.Editor.Components.PublishModal exposing
     ( Model
     , Msg
     , UpdateConfig
@@ -12,15 +12,15 @@ module Wizard.DocumentTemplateEditors.Editor.Components.PublishModal exposing
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, strong, text)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Shared.Api.Packages as Packages
+import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.Package exposing (Package)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import String.Format as String
+import Uuid exposing (Uuid)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
-import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor.DocumentTemplateForm as DocumentTemplateForm exposing (DocumentTemplateForm)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -49,7 +49,7 @@ initialModel =
 type Msg
     = SetOpen Bool
     | Publish
-    | PublishCompleted (Result ApiError DocumentTemplateDraftDetail)
+    | PublishCompleted (Result ApiError Package)
 
 
 openMsg : Msg
@@ -63,8 +63,7 @@ openMsg =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , documentTemplateId : String
-    , documentTemplateForm : Maybe DocumentTemplateForm
+    , branchUuid : Uuid
     }
 
 
@@ -75,25 +74,17 @@ update cfg appState msg model =
             ( { model | open = open }, Cmd.none )
 
         Publish ->
-            case cfg.documentTemplateForm of
-                Just documentTemplateForm ->
-                    ( { model | publishing = ActionResult.Loading }
-                    , DocumentTemplateDraftsApi.putDraft cfg.documentTemplateId
-                        (DocumentTemplateForm.encode DocumentTemplatePhase.Released documentTemplateForm)
-                        appState
-                        (cfg.wrapMsg << PublishCompleted)
-                    )
-
-                Nothing ->
-                    ( model, Cmd.none )
+            ( { model | publishing = ActionResult.Loading }
+            , Packages.postFromBranch cfg.branchUuid appState (cfg.wrapMsg << PublishCompleted)
+            )
 
         PublishCompleted result ->
             case result of
-                Ok documentTemplate ->
-                    ( model, cmdNavigate appState (Routes.documentTemplatesDetail documentTemplate.id) )
+                Ok package ->
+                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail package.id) )
 
                 Err error ->
-                    ( { model | publishing = ApiError.toActionResult appState (gettext "Unable to publish document template" appState.locale) error }
+                    ( { model | publishing = ApiError.toActionResult appState (gettext "Unable to publish knowledge model" appState.locale) error }
                     , Cmd.none
                     )
 
@@ -103,7 +94,7 @@ update cfg appState msg model =
 
 
 type alias ViewConfig =
-    { documentTemplate : DocumentTemplateDraftDetail }
+    { branch : BranchDetail }
 
 
 view : ViewConfig -> AppState -> Model -> Html Msg
@@ -112,8 +103,8 @@ view cfg appState model =
         { modalTitle = gettext "Publish" appState.locale
         , modalContent =
             String.formatHtml (gettext "Are you sure you want to publish %s, version %s?" appState.locale)
-                [ strong [] [ text cfg.documentTemplate.name ]
-                , strong [] [ text (Version.toString cfg.documentTemplate.version) ]
+                [ strong [] [ text cfg.branch.name ]
+                , strong [] [ text (Version.toString cfg.branch.version) ]
                 ]
         , visible = model.open
         , actionResult = model.publishing
@@ -121,5 +112,5 @@ view cfg appState model =
         , actionMsg = Publish
         , cancelMsg = Just (SetOpen False)
         , dangerous = False
-        , dataCy = "document-template-editor_publish"
+        , dataCy = "km-editor_publish"
         }
