@@ -22,10 +22,12 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Package exposing (Package)
+import Shared.Data.Package.PackagePhase as PackagePhase
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
@@ -296,6 +298,7 @@ type alias ViewConfig =
     , package : Package
     , packageVersions : List Version
     , templateState : Maybe DocumentTemplateState
+    , templatePhase : Maybe DocumentTemplatePhase
     , tags : List Tag
     }
 
@@ -326,16 +329,19 @@ formView appState cfg model =
 
         typeHintInput isInvalid =
             let
-                unsupportedError =
-                    case cfg.templateState of
-                        Just DocumentTemplateState.UnsupportedMetamodelVersion ->
+                templateFlash =
+                    case ( cfg.templateState, cfg.templatePhase ) of
+                        ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
                             Flash.error appState (gettext "This document template is no longer supported." appState.locale)
+
+                        ( _, Just DocumentTemplatePhase.Deprecated ) ->
+                            Flash.warning appState (gettext "This document template is now deprecated." appState.locale)
 
                         _ ->
                             emptyNode
             in
             div []
-                [ unsupportedError
+                [ templateFlash
                 , TypeHintInput.view appState typeHintInputConfig model.templateTypeHintInputModel isInvalid
                 ]
 
@@ -480,9 +486,17 @@ knowledgeModel appState cfg =
 
             else
                 Tag.viewList cfg.tags
+
+        deprecatedWarning =
+            if cfg.package.phase == PackagePhase.Deprecated then
+                Flash.warning appState (gettext "This knowledge model is now deprecated." appState.locale)
+
+            else
+                emptyNode
     in
     div []
         [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
+        , deprecatedWarning
         , linkTo appState
             (Routes.knowledgeModelsDetail cfg.package.id)
             [ class "package-link mb-2" ]

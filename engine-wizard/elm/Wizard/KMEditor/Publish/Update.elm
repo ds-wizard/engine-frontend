@@ -10,6 +10,7 @@ import Gettext exposing (gettext)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Uuid exposing (Uuid)
@@ -71,7 +72,7 @@ handleGetBranchCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | branch = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
+            ( { model | branch = ApiError.toActionResult appState (gettext "Unable to get the knowledge model details." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
 
@@ -103,12 +104,12 @@ handleFormMsg formMsg wrapMsg appState model =
     case ( formMsg, Form.getOutput model.form, model.branch ) of
         ( Form.Submit, Just form, Success branch ) ->
             let
-                ( version, body ) =
-                    BranchPublishForm.encode form
+                body =
+                    BranchPublishForm.encode branch.uuid form
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        BranchesApi.putVersion branch.uuid version body appState PutBranchCompleted
+                        PackagesApi.postFromMigration body appState PutBranchCompleted
             in
             ( { model | publishingBranch = Loading }, cmd )
 
@@ -135,11 +136,11 @@ handleFormSetVersion version model =
     ( { model | form = form }, Cmd.none )
 
 
-handlePutBranchCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePutBranchCompleted : AppState -> Model -> Result ApiError Package -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePutBranchCompleted appState model result =
     case result of
-        Ok _ ->
-            ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
+        Ok package ->
+            ( model, cmdNavigate appState (Routes.knowledgeModelsDetail package.id) )
 
         Err error ->
             ( { model | publishingBranch = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }

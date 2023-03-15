@@ -69,11 +69,31 @@ formView appState model =
                             TypeHintInput.view appState cfg model.packageTypeHintInputModel
                     in
                     FormGroup.formGroupCustom typeHintInput appState model.form "previousPackageId"
+
+        previousVersion =
+            if model.edit then
+                model.package
+                    |> ActionResult.toMaybe
+                    |> Maybe.map .version
+
+            else
+                Nothing
+
+        versionInputConfig =
+            { label = gettext "New version" appState.locale
+            , majorField = "versionMajor"
+            , minorField = "versionMinor"
+            , patchField = "versionPatch"
+            , currentVersion = previousVersion
+            , wrapFormMsg = FormMsg
+            , setVersionMsg = Just FormSetVersion
+            }
     in
     div []
         [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
         , Html.map FormMsg <| FormGroup.input appState model.form "kmId" <| gettext "Knowledge Model ID" appState.locale
         , FormExtra.textAfter <| gettext "Knowledge Model ID can contain alphanumeric characters and dashes but cannot start or end with a dash." appState.locale
+        , FormGroup.version appState versionInputConfig model.form
         , parentInput <| gettext "Based on" appState.locale
         , FormExtra.textAfter <| gettext "You can create a new Knowledge Model based on the existing one or start from scratch." appState.locale
         ]

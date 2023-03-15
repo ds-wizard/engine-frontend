@@ -10,12 +10,17 @@ import Shared.Data.Event as Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.Package as Package exposing (Package)
 import Uuid exposing (Uuid)
+import Version exposing (Version)
 
 
 type alias BranchDetail =
     { uuid : Uuid
     , name : String
+    , description : String
     , kmId : String
+    , license : String
+    , readme : String
+    , version : Version
     , knowledgeModel : KnowledgeModel
     , forkOfPackageId : Maybe String
     , forkOfPackage : Maybe Package
@@ -30,7 +35,11 @@ decoder =
     D.succeed BranchDetail
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
+        |> D.required "description" D.string
         |> D.required "kmId" D.string
+        |> D.required "license" D.string
+        |> D.required "readme" D.string
+        |> D.required "version" Version.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "forkOfPackageId" (D.nullable D.string)
         |> D.required "forkOfPackage" (D.nullable Package.decoder)

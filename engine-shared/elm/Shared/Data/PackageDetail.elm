@@ -2,13 +2,16 @@ module Shared.Data.PackageDetail exposing
     ( PackageDetail
     , createFormOptions
     , decoder
+    , encode
     , toPackage
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Json.Encode as E
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package exposing (Package)
+import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
 import Time
 import Version exposing (Version)
@@ -31,6 +34,7 @@ type alias PackageDetail =
     , registryLink : Maybe String
     , remoteLatestVersion : Maybe Version
     , state : PackageState
+    , phase : PackagePhase
     }
 
 
@@ -53,6 +57,13 @@ decoder =
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "state" PackageState.decoder
+        |> D.required "phase" PackagePhase.decoder
+
+
+encode : PackageDetail -> E.Value
+encode package =
+    E.object
+        [ ( "phase", PackagePhase.encode package.phase ) ]
 
 
 createFormOptions : PackageDetail -> List ( String, String )
@@ -74,6 +85,7 @@ toPackage package =
     , organization = package.organization
     , remoteLatestVersion = Maybe.map Version.toString package.remoteLatestVersion
     , state = package.state
+    , phase = package.phase
     , createdAt = Time.millisToPosix 0
     }
 

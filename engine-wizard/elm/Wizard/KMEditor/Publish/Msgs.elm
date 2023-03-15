@@ -2,6 +2,7 @@ module Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
 
 import Form
 import Shared.Data.BranchDetail exposing (BranchDetail)
+import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Error.ApiError exposing (ApiError)
 import Version exposing (Version)
@@ -12,4 +13,4 @@ type Msg
     | GetPreviousPackageCompleted (Result ApiError PackageDetail)
     | FormMsg Form.Msg
     | FormSetVersion Version
-    | PutBranchCompleted (Result ApiError ())
+    | PutBranchCompleted (Result ApiError Package)

@@ -1,7 +1,8 @@
 module Wizard.Locales.Detail.View exposing (view)
 
+import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
-import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
+import Html exposing (Html, code, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
@@ -11,13 +12,15 @@ import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust, listInsertIf)
+import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
+import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -34,66 +37,16 @@ view appState model =
 viewLocale : AppState -> Model -> LocaleDetail -> Html Msg
 viewLocale appState model locale =
     DetailPage.container
-        [ header appState locale
+        [ header appState model locale
         , readme appState locale
         , sidePanel appState locale
         , deleteVersionModal appState model locale
         ]
 
 
-header : AppState -> LocaleDetail -> Html Msg
-header appState locale =
+header : AppState -> Model -> LocaleDetail -> Html Msg
+header appState model locale =
     let
-        exportAction =
-            a [ onClick (ExportLocale locale) ]
-                [ faSet "_global.export" appState
-                , text (gettext "Export" appState.locale)
-                ]
-
-        exportActionVisible =
-            Feature.localeExport appState locale
-
-        setDefaultAction =
-            a [ onClick <| SetDefault, class "with-icon" ]
-                [ faSet "locale.default" appState
-                , text (gettext "Set default" appState.locale)
-                ]
-
-        setDefaultActionVisible =
-            Feature.localeSetDefault appState locale
-
-        enableAction =
-            if locale.enabled then
-                a [ onClick <| SetEnabled False, class "with-icon" ]
-                    [ faSet "_global.disable" appState
-                    , text (gettext "Disable" appState.locale)
-                    ]
-
-            else
-                a [ onClick <| SetEnabled True, class "with-icon" ]
-                    [ faSet "_global.enable" appState
-                    , text (gettext "Enable" appState.locale)
-                    ]
-
-        enableActionVisible =
-            Feature.localeChangeEnabled appState locale
-
-        deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
-                [ faSet "_global.delete" appState
-                , text (gettext "Delete" appState.locale)
-                ]
-
-        deleteActionVisible =
-            Feature.localeDelete appState locale
-
-        actions =
-            []
-                |> listInsertIf exportAction exportActionVisible
-                |> listInsertIf setDefaultAction setDefaultActionVisible
-                |> listInsertIf enableAction enableActionVisible
-                |> listInsertIf deleteAction deleteActionVisible
-
         defaultBadge =
             if locale.defaultLocale then
                 Badge.info [] [ text (gettext "default" appState.locale) ]
@@ -106,8 +59,79 @@ header appState locale =
                 [ text locale.name
                 , defaultBadge
                 ]
+
+        exportAction =
+            ListingDropdown.msgAnchorItem
+                { msg = ExportLocale locale
+                , icon = faSet "_global.export" appState
+                , label = gettext "Export" appState.locale
+                , dataCy = "locale-detail_export-link"
+                }
+
+        exportActionVisible =
+            Feature.localeExport appState locale
+
+        setDefaultAction =
+            ListingDropdown.msgAnchorItem
+                { msg = SetDefault
+                , icon = faSet "locale.default" appState
+                , label = gettext "Set default" appState.locale
+                , dataCy = "locale-detail_set-default"
+                }
+
+        setDefaultActionVisible =
+            Feature.localeSetDefault appState locale
+
+        enableAction =
+            if locale.enabled then
+                ListingDropdown.msgAnchorItem
+                    { msg = SetEnabled False
+                    , icon = faSet "_global.disable" appState
+                    , label = gettext "Disable" appState.locale
+                    , dataCy = "locale-detail_disable"
+                    }
+
+            else
+                ListingDropdown.msgAnchorItem
+                    { msg = SetEnabled True
+                    , icon = faSet "_global.enable" appState
+                    , label = gettext "Enable" appState.locale
+                    , dataCy = "locale-detail_enable"
+                    }
+
+        enableActionVisible =
+            Feature.localeChangeEnabled appState locale
+
+        deleteAction =
+            Dropdown.anchorItem
+                [ onClick <| ShowDeleteDialog True
+                , class "text-danger"
+                , dataCy "locale-detail_delete-link"
+                ]
+                [ faSet "_global.delete" appState
+                , text (gettext "Delete" appState.locale)
+                ]
+
+        deleteActionVisible =
+            Feature.localeDelete appState locale
+
+        groups =
+            [ [ ( setDefaultAction, setDefaultActionVisible )
+              ]
+            , [ ( exportAction, exportActionVisible ) ]
+            , [ ( enableAction, enableActionVisible )
+              , ( deleteAction, deleteActionVisible )
+              ]
+            ]
+
+        dropdownActions =
+            ListingDropdown.dropdown appState
+                { dropdownState = model.dropdownState
+                , toggleMsg = DropdownMsg
+                , items = ListingDropdown.itemsFromGroups Dropdown.divider groups
+                }
     in
-    DetailPage.header headerText actions
+    DetailPage.header headerText [ dropdownActions ]
 
 
 readme : AppState -> LocaleDetail -> Html msg

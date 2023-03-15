@@ -5,6 +5,7 @@ import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
 import Shared.Data.Package exposing (Package)
+import Shared.Data.Package.PackagePhase as PackagePhase
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (listInsertIf)
@@ -81,6 +82,7 @@ listingTitle appState package =
         , Badge.light
             (tooltip <| gettext "Latest version" appState.locale)
             [ text <| Version.toString package.version ]
+        , listingTitleDeprecatedBadge appState package
         , listingTitleOutdatedBadge appState package
         ]
 
@@ -96,6 +98,15 @@ listingTitleOutdatedBadge appState package =
             (Routes.knowledgeModelsImport packageId)
             [ class Badge.warningClass ]
             [ text (gettext "update available" appState.locale) ]
+
+    else
+        emptyNode
+
+
+listingTitleDeprecatedBadge : AppState -> Package -> Html Msg
+listingTitleDeprecatedBadge appState package =
+    if package.phase == PackagePhase.Deprecated then
+        Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
     else
         emptyNode

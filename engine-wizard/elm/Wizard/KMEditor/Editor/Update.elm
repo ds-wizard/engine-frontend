@@ -20,6 +20,7 @@ import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (Edit
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.PublishModal as PublishModal
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
@@ -211,6 +212,18 @@ update wrapMsg msg appState model =
                     Settings.update updateConfig appState settingsMsg model.settingsModel
             in
             withSeed ( { model | settingsModel = settingsModel }, cmd )
+
+        PublishModalMsg publishModalMsg ->
+            let
+                publishModalUpdateConfig =
+                    { wrapMsg = wrapMsg << PublishModalMsg
+                    , branchUuid = model.uuid
+                    }
+
+                ( publishModalModel, publishModalCmd ) =
+                    PublishModal.update publishModalUpdateConfig appState publishModalMsg model.publishModalModel
+            in
+            withSeed ( { model | publishModalModel = publishModalModel }, publishModalCmd )
 
         EventMsg parentUuid mbEntityUuid createEvent ->
             let

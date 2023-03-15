@@ -10,13 +10,13 @@ import Shared.Undraw as Undraw
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.DetailNavigation as DetailNavigation
-import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Editor.Common.EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.PublishModal as PublishModal
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute(..))
@@ -81,10 +81,14 @@ viewKMEditor route appState model branch =
 
             else
                 viewKMEditorNavigation appState route model branch
+
+        publishModalViewConfig =
+            { branch = branch.branch }
     in
     div [ class "KMEditor__Editor col-full flex-column", dataCy "km-editor" ]
         [ navigation
         , viewKMEditorContent appState route model branch
+        , Html.map PublishModalMsg <| PublishModal.view publishModalViewConfig appState model.publishModalModel
         ]
 
 
@@ -114,9 +118,9 @@ viewKMEditorNavigationTitleRow appState model branch =
         , DetailNavigation.section
             [ DetailNavigation.onlineUsers appState model.onlineUsers
             , DetailNavigation.sectionActions
-                [ linkTo appState
-                    (Routes.kmEditorPublish branch.branch.uuid)
+                [ button
                     [ class "btn btn-primary with-icon"
+                    , onClick (PublishModalMsg PublishModal.openMsg)
                     , dataCy "km-editor_publish-button"
                     ]
                     [ faSet "kmEditorList.publish" appState

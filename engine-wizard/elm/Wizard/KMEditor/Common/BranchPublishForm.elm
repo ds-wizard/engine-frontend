@@ -11,6 +11,7 @@ import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as Validate
 import String exposing (fromInt)
+import Uuid exposing (Uuid)
 
 
 type alias BranchPublishForm =
@@ -19,7 +20,6 @@ type alias BranchPublishForm =
     , patch : Int
     , description : String
     , readme : String
-    , license : String
     }
 
 
@@ -30,26 +30,23 @@ init =
 
 validation : Validation FormError BranchPublishForm
 validation =
-    Validate.map6 BranchPublishForm
+    Validate.map5 BranchPublishForm
         (Validate.field "major" Validate.versionNumber)
         (Validate.field "minor" Validate.versionNumber)
         (Validate.field "patch" Validate.versionNumber)
         (Validate.field "description" Validate.string)
         (Validate.field "readme" Validate.string)
-        (Validate.field "license" Validate.string)
 
 
-encode : BranchPublishForm -> ( String, E.Value )
-encode form =
+encode : Uuid -> BranchPublishForm -> E.Value
+encode branchUuid form =
     let
         version =
             String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
-
-        object =
-            E.object
-                [ ( "description", E.string form.description )
-                , ( "readme", E.string form.readme )
-                , ( "license", E.string form.license )
-                ]
     in
-    ( version, object )
+    E.object
+        [ ( "branchUuid", Uuid.encode branchUuid )
+        , ( "version", E.string version )
+        , ( "description", E.string form.description )
+        , ( "readme", E.string form.readme )
+        ]
