@@ -88,4 +88,4 @@ toUrl appState route =
 
 isAllowed : AppState -> Bool
 isAllowed appState =
-    Feature.templatesView appState
+    Feature.documentTemplatesView appState

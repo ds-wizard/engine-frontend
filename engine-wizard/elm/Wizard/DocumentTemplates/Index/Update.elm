@@ -34,23 +34,42 @@ update msg wrapMsg appState model =
             ( { model | documentTemplateToBeDeleted = template, deletingDocumentTemplate = Unset }, Cmd.none )
 
         DeleteDocumentTemplate ->
-            handleDeleteTemplate wrapMsg appState model
+            handleDeleteDocumentTemplate wrapMsg appState model
 
         DeleteDocumentTemplateCompleted result ->
-            deleteTemplateCompleted appState model result
+            deleteDocumentTemplateCompleted appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
-        ExportDocumentTemplate template ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl template.id appState)) )
+        UpdatePhase documentTemplate documentTemplatePhase ->
+            let
+                newDocumentTemplate =
+                    { documentTemplate | phase = documentTemplatePhase }
+            in
+            ( model, DocumentTemplatesApi.putTemplate newDocumentTemplate appState (wrapMsg << UpdatePhaseCompleted) )
+
+        UpdatePhaseCompleted result ->
+            case result of
+                Ok _ ->
+                    ( model
+                    , cmdNavigate appState (Listing.toRouteAfterDelete Routes.documentTemplatesIndexWithFilters model.documentTemplates)
+                    )
+
+                Err error ->
+                    ( { model | deletingDocumentTemplate = ApiError.toActionResult appState (gettext "Document template could not be updated." appState.locale) error }
+                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    )
+
+        ExportDocumentTemplate documentTemplate ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl documentTemplate.id appState)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
-handleDeleteTemplate : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteTemplate wrapMsg appState model =
+handleDeleteDocumentTemplate : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteDocumentTemplate wrapMsg appState model =
     case model.documentTemplateToBeDeleted of
         Just template ->
             ( { model | deletingDocumentTemplate = Loading }
@@ -62,8 +81,8 @@ handleDeleteTemplate wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deleteTemplateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deleteTemplateCompleted appState model result =
+deleteDocumentTemplateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deleteDocumentTemplateCompleted appState model result =
     case result of
         Ok _ ->
             ( model

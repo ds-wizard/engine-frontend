@@ -7,17 +7,17 @@ import Shared.Components.Badge as Badge
 import Shared.Data.Locale exposing (Locale)
 import Shared.Data.Locale.LocaleState as LocaleState
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (listInsertIf)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass, tooltip)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.Locales.Common.LocaleActionsDropdown as LocaleActionDropdown
 import Wizard.Locales.Index.Models exposing (Model)
 import Wizard.Locales.Index.Msgs exposing (Msg(..))
 import Wizard.Locales.Routes exposing (Route(..))
@@ -39,7 +39,14 @@ listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
-    , dropdownItems = listingActions appState
+    , dropdownItems =
+        LocaleActionDropdown.actions appState
+            { exportMsg = ExportLocale
+            , setDefaultMsg = SetDefault
+            , setEnabledMsg = SetEnabled
+            , deleteMsg = ShowHideDeleteLocale << Just
+            , viewActionVisible = True
+            }
     , textTitle = .name
     , emptyText = gettext "Click \"Import\" or \"Create\" button to add a new locale." appState.locale
     , updated =
@@ -132,89 +139,6 @@ listingDescription appState locale =
         , organizationFragment
         , span [ class "fragment" ] [ text locale.description ]
         ]
-
-
-listingActions : AppState -> Locale -> List (ListingDropdownItem Msg)
-listingActions appState locale =
-    let
-        viewAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "_global.view" appState
-                , label = gettext "View detail" appState.locale
-                , msg = ListingActionLink (Routes.localesDetail locale.id)
-                , dataCy = "view"
-                }
-
-        viewActionVisible =
-            Feature.localeView appState
-
-        exportAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "_global.export" appState
-                , label = gettext "Export" appState.locale
-                , msg = ListingActionMsg (ExportLocale locale)
-                , dataCy = "export"
-                }
-
-        exportActionVisible =
-            Feature.localeExport appState locale
-
-        setDefaultAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "locale.default" appState
-                , label = gettext "Set default" appState.locale
-                , msg = ListingActionMsg (SetDefault locale)
-                , dataCy = "set-default"
-                }
-
-        setDefaultActionVisible =
-            Feature.localeSetDefault appState locale
-
-        changeEnabledAction =
-            if locale.enabled then
-                Listing.dropdownAction
-                    { extraClass = Nothing
-                    , icon = faSet "_global.disable" appState
-                    , label = gettext "Disable" appState.locale
-                    , msg = ListingActionMsg (SetEnabled False locale)
-                    , dataCy = "disable"
-                    }
-
-            else
-                Listing.dropdownAction
-                    { extraClass = Nothing
-                    , icon = faSet "_global.enable" appState
-                    , label = gettext "Enable" appState.locale
-                    , msg = ListingActionMsg (SetEnabled True locale)
-                    , dataCy = "enable"
-                    }
-
-        changeEnabledActionVisible =
-            Feature.localeChangeEnabled appState locale
-
-        deleteAction =
-            Listing.dropdownAction
-                { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
-                , label = gettext "Delete" appState.locale
-                , msg = ListingActionMsg <| ShowHideDeleteLocale <| Just locale
-                , dataCy = "delete"
-                }
-
-        deleteActionVisible =
-            Feature.localeDelete appState locale && not locale.defaultLocale
-    in
-    []
-        |> listInsertIf viewAction viewActionVisible
-        |> listInsertIf exportAction exportActionVisible
-        |> listInsertIf Listing.dropdownSeparator setDefaultActionVisible
-        |> listInsertIf setDefaultAction setDefaultActionVisible
-        |> listInsertIf changeEnabledAction changeEnabledActionVisible
-        |> listInsertIf Listing.dropdownSeparator deleteActionVisible
-        |> listInsertIf deleteAction deleteActionVisible
 
 
 buttons : AppState -> Html Msg

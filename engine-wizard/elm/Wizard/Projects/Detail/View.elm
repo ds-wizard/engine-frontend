@@ -352,7 +352,7 @@ viewProjectContent appState route model qm =
                         , package = qm.questionnaire.package
                         , packageVersions = qm.questionnaire.packageVersions
                         , templateState = qm.questionnaire.documentTemplateState
-                        , templatePhase = Maybe.map .phase qm.questionnaire.documentTemplate
+                        , templatePhase = qm.questionnaire.documentTemplatePhase
                         , tags = KnowledgeModel.getTags qm.questionnaire.knowledgeModel
                         }
                         model.settingsModel

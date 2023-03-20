@@ -60,7 +60,7 @@ decoder =
         |> D.required "phase" PackagePhase.decoder
 
 
-encode : PackageDetail -> E.Value
+encode : { a | phase : PackagePhase } -> E.Value
 encode package =
     E.object
         [ ( "phase", PackagePhase.encode package.phase ) ]

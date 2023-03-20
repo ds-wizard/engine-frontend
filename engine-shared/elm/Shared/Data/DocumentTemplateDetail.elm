@@ -66,12 +66,12 @@ decoder =
         |> D.required "versions" (D.list Version.decoder)
 
 
-encode : DocumentTemplateDetail -> E.Value
-encode template =
+encode : { a | phase : DocumentTemplatePhase } -> E.Value
+encode documentTemplate =
     E.object
-        [ ( "phase", DocumentTemplatePhase.encode template.phase ) ]
+        [ ( "phase", DocumentTemplatePhase.encode documentTemplate.phase ) ]
 
 
 isLatestVersion : DocumentTemplateDetail -> Bool
-isLatestVersion template =
-    List.isEmpty <| List.filter (Version.greaterThan template.version) template.versions
+isLatestVersion documentTemplate =
+    List.isEmpty <| List.filter (Version.greaterThan documentTemplate.version) documentTemplate.versions

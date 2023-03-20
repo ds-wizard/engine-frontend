@@ -147,7 +147,7 @@ viewEditorNavigationNav appState route model =
         previewLink =
             { route = Routes.documentTemplateEditorDetailPreview model.documentTemplateId
             , label = gettext "Preview" appState.locale
-            , icon = faSet "documentTemplateEditor.preview" appState
+            , icon = faSet "_global.preview" appState
             , isActive = route == DTEditorRoute.Preview
             , isVisible = True
             , dataCy = "dt-editor_nav_preview"

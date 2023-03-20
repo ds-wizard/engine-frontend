@@ -18,12 +18,12 @@ import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listInsertIf)
 import String.Format as String
 import Time.Distance as TimeDistance
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
@@ -182,7 +182,7 @@ listingActions appState cfg document =
             document.state == DoneDocumentState
 
         download =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = gettext "Download" appState.locale
@@ -194,7 +194,7 @@ listingActions appState cfg document =
             Feature.documentSubmit appState document && cfg.questionnaireEditable
 
         submit =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.submit" appState
                 , label = gettext "Submit" appState.locale
@@ -205,7 +205,7 @@ listingActions appState cfg document =
         ( viewQuestionnaire, viewQuestionnaireEnabled ) =
             case ( document.questionnaireEventUuid, cfg.previewQuestionnaireEventMsg ) of
                 ( Just questionnaireEventUuid, Just previewQuestionnaireEventMsg ) ->
-                    ( Listing.dropdownAction
+                    ( ListingDropdown.dropdownAction
                         { extraClass = Nothing
                         , icon = faSet "_global.questionnaire" appState
                         , label = gettext "View questionnaire" appState.locale
@@ -216,16 +216,16 @@ listingActions appState cfg document =
                     )
 
                 _ ->
-                    ( Listing.dropdownSeparator, False )
+                    ( ListingDropdown.dropdownSeparator, False )
 
         viewErrorEnabled =
             Maybe.isJust document.workerLog && document.state == ErrorDocumentState
 
         viewError =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.viewError" appState
-                , label = "View error"
+                , label = gettext "View error" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| SetDocumentErrorModal document.workerLog)
                 , dataCy = "view-error"
                 }
@@ -234,22 +234,24 @@ listingActions appState cfg document =
             cfg.questionnaireEditable && Session.exists appState.session
 
         delete =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
+
+        groups =
+            [ [ ( download, downloadEnabled )
+              , ( submit, submitEnabled )
+              ]
+            , [ ( viewError, viewErrorEnabled ) ]
+            , [ ( viewQuestionnaire, viewQuestionnaireEnabled ) ]
+            , [ ( delete, deleteEnabled ) ]
+            ]
     in
-    []
-        |> listInsertIf download downloadEnabled
-        |> listInsertIf submit submitEnabled
-        |> listInsertIf viewError viewErrorEnabled
-        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled || viewErrorEnabled) && viewQuestionnaireEnabled)
-        |> listInsertIf viewQuestionnaire viewQuestionnaireEnabled
-        |> listInsertIf Listing.dropdownSeparator deleteEnabled
-        |> listInsertIf delete deleteEnabled
+    ListingDropdown.itemsFromGroups groups
 
 
 stateBadge : AppState -> DocumentState -> Html msg

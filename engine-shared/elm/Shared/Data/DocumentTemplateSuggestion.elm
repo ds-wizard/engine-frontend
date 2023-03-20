@@ -8,7 +8,6 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple as DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Utils exposing (getOrganizationAndItemId)
 import Version exposing (Version)
 
@@ -19,7 +18,6 @@ type alias DocumentTemplateSuggestion =
     , description : String
     , version : Version
     , formats : List DocumentTemplateFormatSimple
-    , phase : DocumentTemplatePhase
     }
 
 
@@ -31,7 +29,6 @@ decoder =
         |> D.required "description" D.string
         |> D.required "version" Version.decoder
         |> D.required "formats" (D.list DocumentTemplateFormatSimple.decoder)
-        |> D.required "phase" DocumentTemplatePhase.decoder
 
 
 createOptions : List DocumentTemplateSuggestion -> List ( String, String )

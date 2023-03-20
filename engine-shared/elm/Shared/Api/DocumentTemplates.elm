@@ -18,7 +18,7 @@ import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetchPut, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Data.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
@@ -101,7 +101,7 @@ getTemplatesSuggestions includeUnsupportedMetamodelVersion qs =
     jwtGet url (Pagination.decoder "documentTemplates" DocumentTemplateSuggestion.decoder)
 
 
-putTemplate : DocumentTemplateDetail -> AbstractAppState a -> ToMsg DocumentTemplateDetail msg -> Cmd msg
+putTemplate : { t | id : String, phase : DocumentTemplatePhase } -> AbstractAppState a -> ToMsg DocumentTemplateDetail msg -> Cmd msg
 putTemplate documentTemplate =
     let
         body =

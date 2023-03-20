@@ -21,7 +21,7 @@ import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
 import Shared.Data.Package as Package exposing (Package)
-import Shared.Data.Package.PackagePhase as PackagePhase
+import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
@@ -102,7 +102,7 @@ postFromMigration =
     jwtFetch "/packages/from-migration" Package.decoder
 
 
-putPackage : PackageDetail -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putPackage : { p | id : String, phase : PackagePhase } -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putPackage package =
     let
         body =

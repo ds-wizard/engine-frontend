@@ -37,9 +37,8 @@ import String.Format as String
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.ListingDropdown as ListingDropdown
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
-import Wizard.Common.Html.Attribute exposing (linkToAttributes)
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 
@@ -268,99 +267,104 @@ viewEventHeader appState cfg model questionnaireEvents event =
 viewEventHeaderDropdown : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
 viewEventHeaderDropdown appState cfg model questionnaireEvents event =
     let
-        divider previousActions =
-            if List.length previousActions > 0 then
-                [ Dropdown.divider ]
-
-            else
-                []
-
         eventUuid =
             QuestionnaireEvent.getUuid event
 
         isOwner =
             QuestionnaireDetail.isOwner appState cfg.questionnaire
 
-        versionActions =
-            if isOwner then
-                let
-                    mbVersion =
-                        QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid
-                in
-                case mbVersion of
-                    Just version ->
-                        [ Dropdown.anchorItem [ onClick (cfg.renameVersionMsg version) ]
-                            [ faSet "_global.edit" appState
-                            , text (gettext "Rename this version" appState.locale)
-                            ]
-                        , Dropdown.anchorItem [ onClick (cfg.deleteVersionMsg version), class "text-danger" ]
-                            [ faSet "_global.delete" appState
-                            , text (gettext "Delete this version" appState.locale)
-                            ]
-                        ]
+        mbVersion =
+            QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid
 
-                    Nothing ->
-                        [ Dropdown.anchorItem [ onClick (cfg.createVersionMsg eventUuid) ]
-                            [ faSet "_global.edit" appState
-                            , text (gettext "Name this version" appState.locale)
-                            ]
-                        ]
+        versionGroup =
+            case mbVersion of
+                Just version ->
+                    [ ( ListingDropdown.dropdownAction
+                            { extraClass = Nothing
+                            , icon = faSet "_global.edit" appState
+                            , label = gettext "Rename this version" appState.locale
+                            , msg = ListingActionMsg (cfg.renameVersionMsg version)
+                            , dataCy = "rename"
+                            }
+                      , isOwner
+                      )
+                    , ( ListingDropdown.dropdownAction
+                            { extraClass = Just "text-danger"
+                            , icon = faSet "_global.delete" appState
+                            , label = gettext "Delete this version" appState.locale
+                            , msg = ListingActionMsg (cfg.deleteVersionMsg version)
+                            , dataCy = "delete"
+                            }
+                      , isOwner
+                      )
+                    ]
 
-            else
-                []
+                Nothing ->
+                    [ ( ListingDropdown.dropdownAction
+                            { extraClass = Nothing
+                            , icon = faSet "_global.edit" appState
+                            , label = gettext "Name this version" appState.locale
+                            , msg = ListingActionMsg (cfg.createVersionMsg eventUuid)
+                            , dataCy = "view"
+                            }
+                      , isOwner
+                      )
+                    ]
 
-        previewAction =
+        previewGroup =
             case ( cfg.previewQuestionnaireEventMsg, QuestionnaireDetail.isCurrentVersion questionnaireEvents eventUuid ) of
                 ( Just viewMsg, False ) ->
                     let
                         viewQuestionnaireAction =
-                            [ Dropdown.anchorItem [ onClick (viewMsg eventUuid) ]
-                                [ faSet "_global.questionnaire" appState
-                                , text (gettext "View questionnaire" appState.locale)
-                                ]
-                            ]
+                            ListingDropdown.dropdownAction
+                                { extraClass = Nothing
+                                , icon = faSet "_global.questionnaire" appState
+                                , label = gettext "View questionnaire" appState.locale
+                                , msg = ListingActionMsg (viewMsg eventUuid)
+                                , dataCy = "view-questionnaire"
+                                }
 
                         createDocumentAction =
-                            if Session.exists appState.session then
-                                let
-                                    newDocumentRoute =
-                                        Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuid)
-
-                                    createDocumentAttributes =
-                                        linkToAttributes appState newDocumentRoute
-                                in
-                                [ Dropdown.anchorItem createDocumentAttributes
-                                    [ faSet "questionnaire.history.createDocument" appState
-                                    , text (gettext "Create document" appState.locale)
-                                    ]
-                                ]
-
-                            else
-                                []
+                            ListingDropdown.dropdownAction
+                                { extraClass = Nothing
+                                , icon = faSet "questionnaire.history.createDocument" appState
+                                , label = gettext "Create document" appState.locale
+                                , msg = ListingActionLink (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuid))
+                                , dataCy = "create-document"
+                                }
                     in
-                    divider versionActions ++ viewQuestionnaireAction ++ createDocumentAction
+                    [ ( viewQuestionnaireAction, True )
+                    , ( createDocumentAction, Session.exists appState.session )
+                    ]
 
                 _ ->
                     []
 
-        revertActionEnabled =
-            not (QuestionnaireDetail.isCurrentVersion questionnaireEvents eventUuid) && isOwner
+        revertGroup =
+            case cfg.revertQuestionnaireMsg of
+                Just revertMsg ->
+                    [ ( ListingDropdown.dropdownAction
+                            { extraClass = Just "text-danger"
+                            , icon = faSet "questionnaire.history.revert" appState
+                            , label = gettext "Revert to this version" appState.locale
+                            , msg = ListingActionMsg (revertMsg event)
+                            , dataCy = "revert"
+                            }
+                      , not (QuestionnaireDetail.isCurrentVersion questionnaireEvents eventUuid) && isOwner
+                      )
+                    ]
 
-        revertAction =
-            case ( cfg.revertQuestionnaireMsg, revertActionEnabled ) of
-                ( Just revertMsg, True ) ->
-                    divider previewAction
-                        ++ [ Dropdown.anchorItem [ onClick (revertMsg event), class "text-danger" ]
-                                [ faSet "questionnaire.history.revert" appState
-                                , text (gettext "Revert to this version" appState.locale)
-                                ]
-                           ]
-
-                _ ->
+                Nothing ->
                     []
+
+        groups =
+            [ versionGroup
+            , previewGroup
+            , revertGroup
+            ]
 
         items =
-            versionActions ++ previewAction ++ revertAction
+            ListingDropdown.itemsFromGroups groups
     in
     if List.length items > 0 then
         let

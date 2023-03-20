@@ -23,7 +23,8 @@ import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Features
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
@@ -590,7 +591,7 @@ listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)
 listingActions appState questionnaire =
     let
         openProject =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "project.open" appState
                 , label = gettext "Open project" appState.locale
@@ -602,7 +603,7 @@ listingActions appState questionnaire =
             Features.projectOpen appState questionnaire
 
         clone =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.clone" appState
                 , label = gettext "Clone" appState.locale
@@ -619,7 +620,7 @@ listingActions appState questionnaire =
             Features.projectClone appState questionnaire
 
         createMigration =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = gettext "Create migration" appState.locale
@@ -631,7 +632,7 @@ listingActions appState questionnaire =
             Features.projectCreateMigration appState questionnaire
 
         continueMigration =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "questionnaireList.createMigration" appState
                 , label = gettext "Continue migration" appState.locale
@@ -643,7 +644,7 @@ listingActions appState questionnaire =
             Features.projectContinueMigration appState questionnaire
 
         cancelMigration =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.cancel" appState
                 , label = gettext "Cancel migration" appState.locale
@@ -655,7 +656,7 @@ listingActions appState questionnaire =
             Features.projectCancelMigration appState questionnaire
 
         delete =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = gettext "Delete" appState.locale
@@ -670,16 +671,18 @@ listingActions appState questionnaire =
 
         deleteVisible =
             Features.projectDelete appState questionnaire
+
+        groups =
+            [ [ ( openProject, openProjectVisible ) ]
+            , [ ( clone, cloneVisible )
+              , ( continueMigration, continueMigrationVisible )
+              , ( cancelMigration, cancelMigrationVisible )
+              , ( createMigration, createMigrationVisible )
+              ]
+            , [ ( delete, deleteVisible ) ]
+            ]
     in
-    []
-        |> listInsertIf openProject openProjectVisible
-        |> listInsertIf Listing.dropdownSeparator openProjectVisible
-        |> listInsertIf clone cloneVisible
-        |> listInsertIf continueMigration continueMigrationVisible
-        |> listInsertIf cancelMigration cancelMigrationVisible
-        |> listInsertIf createMigration createMigrationVisible
-        |> listInsertIf Listing.dropdownSeparator ((cloneVisible || continueMigrationVisible || cancelMigrationVisible || createMigrationVisible) && deleteVisible)
-        |> listInsertIf delete deleteVisible
+    ListingDropdown.itemsFromGroups groups
 
 
 stateBadge : AppState -> Questionnaire -> Html msg
