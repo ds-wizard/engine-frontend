@@ -1523,7 +1523,7 @@ viewQuestionnaireRightPanelTodos appState model =
 
         viewTodo todo =
             li []
-                [ span [ class "fa-li" ] [ fa "far fa-check-square" ]
+                [ span [ class "fa-li" ] [ fa "fas fa-edit" ]
                 , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
                 ]
     in
