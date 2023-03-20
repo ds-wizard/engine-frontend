@@ -593,7 +593,7 @@ listingActions appState questionnaire =
         openProject =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "project.open" appState
+                , icon = faSet "_global.open" appState
                 , label = gettext "Open project" appState.locale
                 , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
                 , dataCy = "open"

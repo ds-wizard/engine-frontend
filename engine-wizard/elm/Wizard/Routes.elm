@@ -10,6 +10,7 @@ module Wizard.Routes exposing
     , documentTemplateEditorDetail
     , documentTemplateEditorDetailFiles
     , documentTemplateEditorDetailPreview
+    , documentTemplateEditorDetailSettings
     , documentTemplateEditorsIndex
     , documentTemplateEditorsIndexWithFilters
     , documentTemplatesDetail
@@ -319,7 +320,7 @@ documentTemplateEditorCreate mbBasedOn mbEdit =
 
 documentTemplateEditorDetail : String -> Route
 documentTemplateEditorDetail =
-    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Template
+    documentTemplateEditorDetailFiles
 
 
 documentTemplateEditorDetailFiles : String -> Route
@@ -330,6 +331,11 @@ documentTemplateEditorDetailFiles =
 documentTemplateEditorDetailPreview : String -> Route
 documentTemplateEditorDetailPreview =
     DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
+
+
+documentTemplateEditorDetailSettings : String -> Route
+documentTemplateEditorDetailSettings =
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Settings
 
 
 documentTemplateEditorsIndex : Route
