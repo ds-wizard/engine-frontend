@@ -2,6 +2,6 @@ module Wizard.DocumentTemplateEditors.Editor.DTEditorRoute exposing (DTEditorRou
 
 
 type DTEditorRoute
-    = Template
-    | Files
+    = Files
     | Preview
+    | Settings

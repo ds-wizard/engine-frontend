@@ -201,7 +201,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         settingsLink =
             { route = Routes.kmEditorEditorSettings branchUuid
             , label = gettext "Settings" appState.locale
-            , icon = faSet "kmEditor.settings" appState
+            , icon = faSet "_global.settings" appState
             , isActive = route == KMEditorRoute.Settings
             , isVisible = True
             , dataCy = "km-editor_nav_settings"
