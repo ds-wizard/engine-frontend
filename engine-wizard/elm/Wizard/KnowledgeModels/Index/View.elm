@@ -8,17 +8,17 @@ import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackagePhase as PackagePhase
 import Shared.Data.Package.PackageState as PackageState
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (listInsertIf)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass, tooltip)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.KnowledgeModels.Common.KnowledgeModelActionsDropdown as KnowledgeModelActionsDropdown
 import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
@@ -29,7 +29,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "" ]
         [ Page.header (gettext "Knowledge Models" appState.locale) []
-        , FormResult.successOnlyView appState model.deletingPackage
+        , FormResult.view appState model.deletingPackage
         , Listing.view appState (listingConfig appState) model.packages
         , deleteModal appState model
         ]
@@ -54,7 +54,13 @@ listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
-    , dropdownItems = listingActions appState
+    , dropdownItems =
+        KnowledgeModelActionsDropdown.actions appState
+            { exportMsg = ExportPackage
+            , updatePhaseMsg = UpdatePhase
+            , deleteMsg = ShowHideDeletePackage << Just
+            , viewActionVisible = True
+            }
     , textTitle = .name
     , emptyText = gettext "Click \"Import\" button to import a new Knowledge Model." appState.locale
     , updated =
@@ -140,92 +146,6 @@ listingDescription appState package =
         , organizationFragment
         , span [ class "fragment" ] [ text package.description ]
         ]
-
-
-listingActions : AppState -> Package -> List (ListingDropdownItem Msg)
-listingActions appState package =
-    let
-        viewAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "_global.view" appState
-                , label = gettext "View detail" appState.locale
-                , msg = ListingActionLink (Routes.knowledgeModelsDetail package.id)
-                , dataCy = "view"
-                }
-
-        viewActionVisible =
-            Feature.knowledgeModelsView appState
-
-        exportAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "_global.export" appState
-                , label = gettext "Export" appState.locale
-                , msg = ListingActionMsg (ExportPackage package)
-                , dataCy = "export"
-                }
-
-        exportActionVisible =
-            Feature.knowledgeModelsExport appState
-
-        createKMEditor =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "kmDetail.createKMEditor" appState
-                , label = gettext "Create KM editor" appState.locale
-                , msg = ListingActionLink (Routes.kmEditorCreate (Just package.id) (Just True))
-                , dataCy = "create-km-editor"
-                }
-
-        createKMEditorVisible =
-            Feature.knowledgeModelEditorsCreate appState
-
-        forkAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "kmDetail.fork" appState
-                , label = gettext "Fork KM" appState.locale
-                , msg = ListingActionLink (Routes.kmEditorCreate (Just package.id) Nothing)
-                , dataCy = "fork"
-                }
-
-        forkActionVisible =
-            Feature.knowledgeModelEditorsCreate appState
-
-        questionnaireAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "kmDetail.createQuestionnaire" appState
-                , label = gettext "Create project" appState.locale
-                , msg = ListingActionLink (Routes.projectsCreateCustom <| Just package.id)
-                , dataCy = "create-project"
-                }
-
-        questionnaireActionVisible =
-            Feature.projectsCreateCustom appState
-
-        deleteAction =
-            Listing.dropdownAction
-                { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
-                , label = gettext "Delete" appState.locale
-                , msg = ListingActionMsg <| ShowHideDeletePackage <| Just package
-                , dataCy = "delete"
-                }
-
-        deleteActionVisible =
-            Feature.knowledgeModelsDelete appState
-    in
-    []
-        |> listInsertIf viewAction viewActionVisible
-        |> listInsertIf exportAction exportActionVisible
-        |> listInsertIf Listing.dropdownSeparator (createKMEditorVisible || forkActionVisible || questionnaireActionVisible)
-        |> listInsertIf createKMEditor createKMEditorVisible
-        |> listInsertIf forkAction forkActionVisible
-        |> listInsertIf questionnaireAction questionnaireActionVisible
-        |> listInsertIf Listing.dropdownSeparator deleteActionVisible
-        |> listInsertIf deleteAction deleteActionVisible
 
 
 deleteModal : AppState -> Model -> Html Msg

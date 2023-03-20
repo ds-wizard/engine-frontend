@@ -6,9 +6,9 @@ import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.Html exposing (faSet)
-import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
@@ -88,7 +88,7 @@ listingActions appState questionnaireImporter =
                 )
 
         toggleEnabledAction =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = actionIcon
                 , label = actionLabel
@@ -98,6 +98,8 @@ listingActions appState questionnaireImporter =
 
         toggleEnabledVisible =
             Feature.projectImporters appState
+
+        groups =
+            [ [ ( toggleEnabledAction, toggleEnabledVisible ) ] ]
     in
-    []
-        |> listInsertIf toggleEnabledAction toggleEnabledVisible
+    ListingDropdown.itemsFromGroups groups

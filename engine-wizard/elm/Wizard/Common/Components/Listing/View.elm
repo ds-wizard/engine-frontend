@@ -1,15 +1,10 @@
 module Wizard.Common.Components.Listing.View exposing
     ( CustomFilterConfig
     , Filter(..)
-    , ListingActionConfig
-    , ListingActionType(..)
-    , ListingDropdownItem
     , SimpleFilterConfig
     , SimpleMultiFilterConfig
     , UpdatedTimeConfig
     , ViewConfig
-    , dropdownAction
-    , dropdownSeparator
     , view
     )
 
@@ -19,7 +14,7 @@ import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, href, id, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Events exposing (onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
@@ -36,13 +31,13 @@ import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Item, Model)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
-import Wizard.Common.Components.ListingDropdown as ListingDropdown
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
-import Wizard.Routes as Routes exposing (Route)
+import Wizard.Routes exposing (Route)
 import Wizard.Routing as Routing
 
 
@@ -93,35 +88,6 @@ type alias CustomFilterConfig msg =
     { label : List (Html msg)
     , items : List (Dropdown.DropdownItem msg)
     }
-
-
-type ListingDropdownItem msg
-    = ListingDropdownAction (ListingActionConfig msg)
-    | ListingDropdownSeparator
-
-
-type alias ListingActionConfig msg =
-    { extraClass : Maybe String
-    , icon : Html msg
-    , label : String
-    , msg : ListingActionType msg
-    , dataCy : String
-    }
-
-
-type ListingActionType msg
-    = ListingActionMsg msg
-    | ListingActionLink Routes.Route
-
-
-dropdownAction : ListingActionConfig msg -> ListingDropdownItem msg
-dropdownAction =
-    ListingDropdownAction
-
-
-dropdownSeparator : ListingDropdownItem msg
-dropdownSeparator =
-    ListingDropdownSeparator
 
 
 view : AppState -> ViewConfig a msg -> Model a -> Html msg
@@ -524,7 +490,7 @@ viewItem appState config index item =
                 ListingDropdown.dropdown appState
                     { dropdownState = item.dropdownState
                     , toggleMsg = config.wrapMsg << ItemDropdownMsg index
-                    , items = List.map (viewAction appState) actions
+                    , items = actions
                     }
 
             else
@@ -573,28 +539,3 @@ viewUpdated appState config item =
 
         Nothing ->
             emptyNode
-
-
-viewAction : AppState -> ListingDropdownItem msg -> Dropdown.DropdownItem msg
-viewAction appState dropdownItem =
-    case dropdownItem of
-        ListingDropdownAction action ->
-            let
-                attrs =
-                    case action.msg of
-                        ListingActionLink route ->
-                            [ href <| Routing.toUrl appState route ]
-
-                        ListingActionMsg msg ->
-                            [ onClick msg ]
-            in
-            Dropdown.anchorItem
-                ([ class <| Maybe.withDefault "" action.extraClass
-                 , dataCy ("listing-item_action_" ++ action.dataCy)
-                 ]
-                    ++ attrs
-                )
-                [ action.icon, text action.label ]
-
-        ListingDropdownSeparator ->
-            Dropdown.divider

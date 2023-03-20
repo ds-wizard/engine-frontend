@@ -5,6 +5,10 @@ module Wizard.Common.Feature exposing
     , documentDelete
     , documentDownload
     , documentSubmit
+    , documentTemplatesDelete
+    , documentTemplatesExport
+    , documentTemplatesImport
+    , documentTemplatesView
     , documentsView
     , knowledgeModelEditorCancelMigration
     , knowledgeModelEditorContinueMigration
@@ -55,10 +59,6 @@ module Wizard.Common.Feature exposing
     , projectsCreateFromTemplate
     , projectsView
     , settings
-    , templatesDelete
-    , templatesExport
-    , templatesImport
-    , templatesView
     , userEdit
     , usersCreate
     , usersView
@@ -173,26 +173,26 @@ knowledgeModelsPreview _ =
 
 
 
--- Templates
+-- Document Templates
 
 
-templatesView : AppState -> Bool
-templatesView =
+documentTemplatesView : AppState -> Bool
+documentTemplatesView =
     adminOr Perm.documentTemplates
 
 
-templatesImport : AppState -> Bool
-templatesImport =
+documentTemplatesImport : AppState -> Bool
+documentTemplatesImport =
     adminOr Perm.packageManagementWrite
 
 
-templatesExport : AppState -> Bool
-templatesExport =
+documentTemplatesExport : AppState -> Bool
+documentTemplatesExport =
     adminOr Perm.documentTemplates
 
 
-templatesDelete : AppState -> Bool
-templatesDelete =
+documentTemplatesDelete : AppState -> Bool
+documentTemplatesDelete =
     adminOr Perm.packageManagementWrite
 
 

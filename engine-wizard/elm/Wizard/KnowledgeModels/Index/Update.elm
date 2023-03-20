@@ -42,6 +42,21 @@ update msg wrapMsg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
+        UpdatePhase package phase ->
+            ( model, PackagesApi.putPackage { package | phase = phase } appState (wrapMsg << UpdatePhaseCompleted) )
+
+        UpdatePhaseCompleted result ->
+            case result of
+                Ok _ ->
+                    ( model
+                    , cmdNavigate appState (Listing.toRouteAfterDelete Routes.knowledgeModelsIndexWithFilters model.packages)
+                    )
+
+                Err error ->
+                    ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge Model could not be updated." appState.locale) error }
+                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    )
+
         ExportPackage package ->
             ( model, Ports.downloadFile (PackagesApi.exportPackageUrl package.id appState) )
 

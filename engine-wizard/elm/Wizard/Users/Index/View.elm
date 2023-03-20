@@ -9,7 +9,8 @@ import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (emptyNode, faSet)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
@@ -140,22 +141,31 @@ listingDescription appState user =
 
 listingActions : AppState -> User -> List (ListingDropdownItem Msg)
 listingActions appState user =
-    [ Listing.dropdownAction
-        { extraClass = Nothing
-        , icon = faSet "_global.edit" appState
-        , label = gettext "Edit" appState.locale
-        , msg = ListingActionLink (Routes.usersEdit (Uuid.toString user.uuid))
-        , dataCy = "edit"
-        }
-    , Listing.dropdownSeparator
-    , Listing.dropdownAction
-        { extraClass = Just "text-danger"
-        , icon = faSet "_global.delete" appState
-        , label = gettext "Delete" appState.locale
-        , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
-        , dataCy = "delete"
-        }
-    ]
+    let
+        editAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "_global.edit" appState
+                , label = gettext "Edit" appState.locale
+                , msg = ListingActionLink (Routes.usersEdit (Uuid.toString user.uuid))
+                , dataCy = "edit"
+                }
+
+        deleteAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Just "text-danger"
+                , icon = faSet "_global.delete" appState
+                , label = gettext "Delete" appState.locale
+                , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
+                , dataCy = "delete"
+                }
+
+        groups =
+            [ [ ( editAction, True ) ]
+            , [ ( deleteAction, True ) ]
+            ]
+    in
+    ListingDropdown.itemsFromGroups groups
 
 
 deleteModal : AppState -> Model -> Html Msg

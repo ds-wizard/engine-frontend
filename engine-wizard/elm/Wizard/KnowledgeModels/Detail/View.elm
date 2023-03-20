@@ -1,10 +1,8 @@
 module Wizard.KnowledgeModels.Detail.View exposing (view)
 
-import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
-import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
@@ -18,13 +16,12 @@ import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
-import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.KnowledgeModels.Common.KnowledgeModelActionsDropdown as KnowledgeModelActionsDropdown
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -55,115 +52,17 @@ header appState model package =
             else
                 emptyNode
 
-        previewAction =
-            ListingDropdown.linkAnchorItem appState
-                { route = Routes.knowledgeModelsPreview package.id Nothing
-                , icon = faSet "kmDetail.preview" appState
-                , label = gettext "Preview" appState.locale
-                , dataCy = "km-detail_preview-link"
-                }
-
-        previewActionVisible =
-            Feature.knowledgeModelsPreview appState
-
-        createEditorAction =
-            ListingDropdown.linkAnchorItem appState
-                { route = Routes.kmEditorCreate (Just package.id) (Just True)
-                , icon = faSet "kmDetail.createKMEditor" appState
-                , label = gettext "Create KM editor" appState.locale
-                , dataCy = "km-detail_create-editor-link"
-                }
-
-        createEditorActionVisible =
-            Feature.knowledgeModelEditorsCreate appState
-
-        forkAction =
-            ListingDropdown.linkAnchorItem appState
-                { route = Routes.kmEditorCreate (Just package.id) Nothing
-                , icon = faSet "kmDetail.fork" appState
-                , label = gettext "Fork KM" appState.locale
-                , dataCy = "km-detail_fork-link"
-                }
-
-        forkActionVisible =
-            Feature.knowledgeModelEditorsCreate appState
-
-        createProjectAction =
-            ListingDropdown.linkAnchorItem appState
-                { route = Routes.projectsCreateCustom (Just package.id)
-                , icon = faSet "kmDetail.createQuestionnaire" appState
-                , label = gettext "Create project" appState.locale
-                , dataCy = "km-detail_create-project-link"
-                }
-
-        createProjectActionVisible =
-            Feature.projectsCreateCustom appState
-
-        setDeprecatedAction =
-            ListingDropdown.msgAnchorItem
-                { msg = UpdatePhase PackagePhase.Deprecated
-                , icon = faSet "documentTemplate.setDeprecated" appState
-                , label = gettext "Set deprecated" appState.locale
-                , dataCy = "km-detail_set-deprecated"
-                }
-
-        setDeprecatedActionVisible =
-            package.phase == PackagePhase.Released
-
-        restoreAction =
-            ListingDropdown.msgAnchorItem
-                { msg = UpdatePhase PackagePhase.Released
-                , icon = faSet "documentTemplate.restore" appState
-                , label = gettext "Restore" appState.locale
-                , dataCy = "km-detail_restore"
-                }
-
-        restoreActionVisible =
-            package.phase == PackagePhase.Deprecated
-
-        exportAction =
-            ListingDropdown.msgAnchorItem
-                { msg = ExportPackage package
-                , icon = faSet "_global.export" appState
-                , label = gettext "Export" appState.locale
-                , dataCy = "km-detail_export-link"
-                }
-
-        exportActionVisible =
-            Feature.knowledgeModelsExport appState
-
-        deleteAction =
-            Dropdown.anchorItem
-                [ onClick <| ShowDeleteDialog True
-                , class "text-danger"
-                , dataCy "km-detail_delete-link"
-                ]
-                [ faSet "_global.delete" appState
-                , text (gettext "Delete" appState.locale)
-                ]
-
-        deleteActionVisible =
-            Feature.knowledgeModelsDelete appState
-
-        groups =
-            [ [ ( previewAction, previewActionVisible ) ]
-            , [ ( createEditorAction, createEditorActionVisible )
-              , ( forkAction, forkActionVisible )
-              ]
-            , [ ( createProjectAction, createProjectActionVisible ) ]
-            , [ ( exportAction, exportActionVisible ) ]
-            , [ ( setDeprecatedAction, setDeprecatedActionVisible )
-              , ( restoreAction, restoreActionVisible )
-              , ( deleteAction, deleteActionVisible )
-              ]
-            ]
-
         dropdownActions =
-            ListingDropdown.dropdown appState
+            KnowledgeModelActionsDropdown.dropdown appState
                 { dropdownState = model.dropdownState
                 , toggleMsg = DropdownMsg
-                , items = ListingDropdown.itemsFromGroups Dropdown.divider groups
                 }
+                { exportMsg = ExportPackage
+                , updatePhaseMsg = \_ phase -> UpdatePhase phase
+                , deleteMsg = always (ShowDeleteDialog True)
+                , viewActionVisible = False
+                }
+                package
     in
     DetailPage.header (span [] [ text package.name, deprecatedBadge ]) [ dropdownActions ]
 

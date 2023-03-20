@@ -1,10 +1,8 @@
 module Wizard.DocumentTemplates.Detail.View exposing (view)
 
-import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
-import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage
@@ -19,13 +17,13 @@ import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
-import Wizard.Common.Components.ListingDropdown as ListingDropdown
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.DocumentTemplates.Common.DocumentTemplateActionsDropdown as DocumentTemplateActionsDropdown
 import Wizard.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -56,78 +54,17 @@ header appState model template =
             else
                 emptyNode
 
-        createEditorAction =
-            ListingDropdown.linkAnchorItem appState
-                { route = Routes.documentTemplateEditorCreate (Just template.id) (Just True)
-                , icon = faSet "_global.edit" appState
-                , label = gettext "Create editor" appState.locale
-                , dataCy = "dt-detail_create-editor-link"
-                }
-
-        createEditorActionVisible =
-            Feature.templatesView appState
-
-        setDeprecatedAction =
-            ListingDropdown.msgAnchorItem
-                { msg = UpdatePhase DocumentTemplatePhase.Deprecated
-                , icon = faSet "documentTemplate.setDeprecated" appState
-                , label = gettext "Set deprecated" appState.locale
-                , dataCy = "dt-detail_set-deprecated"
-                }
-
-        setDeprecatedActionVisible =
-            template.phase == DocumentTemplatePhase.Released
-
-        restoreAction =
-            ListingDropdown.msgAnchorItem
-                { msg = UpdatePhase DocumentTemplatePhase.Released
-                , icon = faSet "documentTemplate.restore" appState
-                , label = gettext "Restore" appState.locale
-                , dataCy = "dt-detail_restore"
-                }
-
-        restoreActionVisible =
-            template.phase == DocumentTemplatePhase.Deprecated
-
-        exportAction =
-            ListingDropdown.msgAnchorItem
-                { msg = ExportTemplate template
-                , icon = faSet "_global.export" appState
-                , label = gettext "Export" appState.locale
-                , dataCy = "dt-detail_export-link"
-                }
-
-        exportActionVisible =
-            Feature.templatesExport appState
-
-        deleteAction =
-            Dropdown.anchorItem
-                [ onClick <| ShowDeleteDialog True
-                , class "text-danger"
-                , dataCy "dt-detail_delete-link"
-                ]
-                [ faSet "_global.delete" appState
-                , text (gettext "Delete" appState.locale)
-                ]
-
-        deleteActionVisible =
-            Feature.templatesDelete appState
-
-        groups =
-            [ [ ( createEditorAction, createEditorActionVisible ) ]
-            , [ ( exportAction, exportActionVisible ) ]
-            , [ ( setDeprecatedAction, setDeprecatedActionVisible )
-              , ( restoreAction, restoreActionVisible )
-              , ( deleteAction, deleteActionVisible )
-              ]
-            ]
-
         dropdownActions =
-            ListingDropdown.dropdown appState
+            DocumentTemplateActionsDropdown.dropdown appState
                 { dropdownState = model.dropdownState
                 , toggleMsg = DropdownMsg
-                , items = ListingDropdown.itemsFromGroups Dropdown.divider groups
                 }
+                { exportMsg = ExportTemplate
+                , updatePhaseMsg = \_ phase -> UpdatePhase phase
+                , deleteMsg = always (ShowDeleteDialog True)
+                , viewActionVisible = False
+                }
+                template
     in
     DetailPage.header (span [] [ text template.name, deprecatedBadge ]) [ dropdownActions ]
 
@@ -161,7 +98,7 @@ newVersionInRegistryWarning appState template =
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 importLink =
-                    if Feature.templatesImport appState && Version.greaterThan template.version remoteLatestVersion then
+                    if Feature.documentTemplatesImport appState && Version.greaterThan template.version remoteLatestVersion then
                         let
                             latestPackageId =
                                 template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
@@ -197,7 +134,7 @@ unsupportedMetamodelVersionWarning appState template =
                         if Version.greaterThan template.version remoteLatestVersion then
                             let
                                 importLink =
-                                    if Feature.templatesImport appState then
+                                    if Feature.documentTemplatesImport appState then
                                         let
                                             latestPackageId =
                                                 template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion

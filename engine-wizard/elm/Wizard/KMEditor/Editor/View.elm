@@ -192,7 +192,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         previewLink =
             { route = Routes.kmEditorEditorPreview branchUuid
             , label = gettext "Preview" appState.locale
-            , icon = faSet "kmEditor.preview" appState
+            , icon = faSet "_global.preview" appState
             , isActive = route == KMEditorRoute.Preview
             , isVisible = True
             , dataCy = "km-editor_nav_preview"

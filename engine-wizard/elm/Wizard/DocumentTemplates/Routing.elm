@@ -51,7 +51,7 @@ isAllowed : Route -> AppState -> Bool
 isAllowed route appState =
     case route of
         ImportRoute _ ->
-            Feature.templatesImport appState
+            Feature.documentTemplatesImport appState
 
         _ ->
-            Feature.templatesView appState
+            Feature.documentTemplatesView appState
