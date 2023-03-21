@@ -1,9 +1,11 @@
 module Shared.Data.PersistentCommand.PersistentCommandState exposing
     ( PersistentCommandState(..)
     , decoder
+    , encode
     )
 
 import Json.Decode as D exposing (Decoder)
+import Json.Encode as E
 
 
 type PersistentCommandState
@@ -32,6 +34,22 @@ fromString str =
             Nothing
 
 
+toString : PersistentCommandState -> String
+toString state =
+    case state of
+        New ->
+            "NewPersistentCommandState"
+
+        Done ->
+            "DonePersistentCommandState"
+
+        Error ->
+            "ErrorPersistentCommandState"
+
+        Ignore ->
+            "IgnorePersistentCommandState"
+
+
 decoder : Decoder PersistentCommandState
 decoder =
     D.string
@@ -44,3 +62,8 @@ decoder =
                     Nothing ->
                         D.fail <| "Unknown persistent command state: " ++ str
             )
+
+
+encode : PersistentCommandState -> E.Value
+encode =
+    E.string << toString

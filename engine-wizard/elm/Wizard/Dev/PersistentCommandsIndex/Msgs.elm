@@ -9,3 +9,6 @@ type Msg
     = ListingMsg (Listing.Msg PersistentCommand)
     | RetryFailed
     | RetryFailedComplete (Result ApiError ())
+    | RerunCommand PersistentCommand
+    | SetIgnored PersistentCommand
+    | UpdateComplete (Result ApiError ())
