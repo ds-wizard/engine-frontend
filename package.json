@@ -40,7 +40,7 @@
     "sass-loader": "^13.2.1",
     "terser-webpack-plugin": "^5.3.7",
     "uglify-js": "^3.17.4",
-    "webpack": "^5.76.1",
+    "webpack": "^5.76.2",
     "webpack-cli": "^5.0.1",
     "webpack-dev-server": "^4.11.1"
   },
