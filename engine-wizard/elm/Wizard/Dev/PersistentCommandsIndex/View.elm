@@ -14,6 +14,7 @@ import Wizard.Common.View.AppIcon as AppIcon
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.PersistentCommandBadge as PersistentCommandBadge
+import Wizard.Dev.Common.PersistentCommandActionsDropdown as PersistentCommandActionsDropdown
 import Wizard.Dev.PersistentCommandsIndex.Models exposing (Model)
 import Wizard.Dev.PersistentCommandsIndex.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -23,7 +24,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "PersistentCommands__Index" ]
         [ Page.header "Persistent Commands" []
-        , FormResult.errorOnlyView appState model.retryFailed
+        , FormResult.errorOnlyView appState model.updating
         , Listing.view appState (listingConfig appState model) model.persistentCommands
         ]
 
@@ -37,7 +38,7 @@ listingConfig appState model =
                     [ faSet "persistentCommand.retry" appState
                     , text "Retry failed"
                     ]
-                , result = model.retryFailed
+                , result = model.updating
                 , msg = RetryFailed
                 , btnClass = "btn-outline-secondary with-icon"
                 }
@@ -45,7 +46,12 @@ listingConfig appState model =
     { title = listingTitle appState
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
-    , dropdownItems = always []
+    , dropdownItems =
+        PersistentCommandActionsDropdown.actions appState
+            { retryMsg = RerunCommand
+            , setIgnoredMsg = SetIgnored
+            , viewActionVisible = True
+            }
     , textTitle = PersistentCommand.visibleName
     , emptyText = "There are no persistent commands"
     , updated =

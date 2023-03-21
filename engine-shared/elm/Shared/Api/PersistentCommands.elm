@@ -1,10 +1,19 @@
-module Shared.Api.PersistentCommands exposing (GetPersistentCommandsFilters, getPersistentCommand, getPersistentCommands, retry, retryAllFailed)
+module Shared.Api.PersistentCommands exposing
+    ( GetPersistentCommandsFilters
+    , getPersistentCommand
+    , getPersistentCommands
+    , retry
+    , retryAllFailed
+    , updateState
+    )
 
+import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtGet, jwtPostEmpty)
+import Shared.Api exposing (ToMsg, jwtGet, jwtPostEmpty, jwtPut)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.PersistentCommand as PersistentCommand exposing (PersistentCommand)
+import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Shared.Data.PersistentCommandDetail as PersistentCommandDetail exposing (PersistentCommandDetail)
 import Uuid exposing (Uuid)
 
@@ -32,6 +41,15 @@ getPersistentCommands filters qs =
 getPersistentCommand : Uuid -> AbstractAppState a -> ToMsg PersistentCommandDetail msg -> Cmd msg
 getPersistentCommand uuid =
     jwtGet ("/persistent-commands/" ++ Uuid.toString uuid) PersistentCommandDetail.decoder
+
+
+updateState : Uuid -> PersistentCommandState -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+updateState uuid newState =
+    let
+        body =
+            E.object [ ( "state", PersistentCommandState.encode newState ) ]
+    in
+    jwtPut ("/persistent-commands/" ++ Uuid.toString uuid) body
 
 
 retry : Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg

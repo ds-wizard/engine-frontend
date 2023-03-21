@@ -5,6 +5,8 @@ module Wizard.Dev.PersistentCommandsDetail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.PersistentCommands as PersistentCommandsApi
+import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState
+import Shared.Error.ApiError as ApiError
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, applyResultTransform)
 import Wizard.Common.AppState exposing (AppState)
@@ -30,17 +32,45 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
+        DropdownMsg state ->
+            ( { model | dropdownState = state }, Cmd.none )
+
         RerunCommand ->
-            ( { model | rerunning = Loading }
+            ( { model | updating = Loading }
             , PersistentCommandsApi.retry model.uuid appState (wrapMsg << RerunCommandComplete)
             )
 
         RerunCommandComplete result ->
             applyResultTransform appState
-                { setResult = \res m -> { m | rerunning = res }
+                { setResult = \res m -> { m | updating = res }
                 , defaultError = "Unable to rerun persistent command."
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always "Persistent command has been scheduled for the rerun."
                 }
+
+        SetIgnored ->
+            ( { model | updating = Loading }
+            , PersistentCommandsApi.updateState model.uuid PersistentCommandState.Ignore appState (wrapMsg << SetIgnoredComplete)
+            )
+
+        SetIgnoredComplete result ->
+            case model.persistentCommand of
+                Success persistentCommand ->
+                    case result of
+                        Ok _ ->
+                            ( { model
+                                | persistentCommand = Success { persistentCommand | state = PersistentCommandState.Ignore }
+                                , updating = Success "Persistent command is now being ignored."
+                              }
+                            , Cmd.none
+                            )
+
+                        Err error ->
+                            ( { model | updating = ApiError.toActionResult appState "Unable to set persistent command ignored." error }
+                            , Cmd.none
+                            )
+
+                _ ->
+                    ( model, Cmd.none )

@@ -13,7 +13,7 @@ import Wizard.Dev.Routes exposing (persistentCommandIndexRouteStateFilterId)
 
 type alias Model =
     { persistentCommands : Listing.Model PersistentCommand
-    , retryFailed : ActionResult String
+    , updating : ActionResult String
     }
 
 
@@ -26,5 +26,5 @@ initialModel paginationQueryString mbState =
                 []
     in
     { persistentCommands = Listing.initialModelWithFilters paginationQueryString paginationQueryFilters
-    , retryFailed = Unset
+    , updating = Unset
     }
