@@ -148,14 +148,14 @@ view appState model =
                         options =
                             case model.package of
                                 Success package ->
-                                    ( "", gettext "- select parent package -" appState.locale ) :: PackageDetail.createFormOptions package
+                                    ( "", gettext "- select parent knowledge model -" appState.locale ) :: PackageDetail.createFormOptions package
 
                                 _ ->
                                     []
                     in
                     [ p [ class "alert alert-info" ]
                         (String.formatHtml (gettext "Select the new parent knowledge model for %s." appState.locale) [ strong [] [ text name ] ])
-                    , FormGroup.select appState options model.branchUpgradeForm "targetPackageId" (gettext "New parent package" appState.locale)
+                    , FormGroup.select appState options model.branchUpgradeForm "targetPackageId" (gettext "New parent knowledge model" appState.locale)
                         |> Html.map FormMsg
                     ]
 
