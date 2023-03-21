@@ -52,7 +52,7 @@ formView templates appState form =
 
         servicesInput =
             if enabled then
-                FormGroup.list appState (serviceFormView appState templates) form "services" (gettext "Services" appState.locale)
+                FormGroup.list appState (serviceFormView appState templates) form "services" (gettext "Services" appState.locale) (gettext "Add service" appState.locale)
 
             else
                 emptyNode
@@ -106,12 +106,12 @@ serviceFormView appState templates form i =
             , div [ class "input-table" ]
                 [ label [] [ text (gettext "Supported Formats" appState.locale) ]
                 , p [ class "text-muted" ] [ text (gettext "Select document templates and formats that can be submitted using this submission service." appState.locale) ]
-                , FormGroup.list appState (supportedFormatFormView appState templates supportedFormatsField) form supportedFormatsField ""
+                , FormGroup.list appState (supportedFormatFormView appState templates supportedFormatsField) form supportedFormatsField "" (gettext "Add format" appState.locale)
                 ]
             , div [ class "input-table" ]
                 [ label [] [ text (gettext "User Properties" appState.locale) ]
                 , Markdown.toHtml [ class "text-muted text-justify" ] (gettext "You can create properties that can be set by each user in their profile. Then, you can use these properties in the request settings. For example, if you want each user to use their own authorization token, you can create a property called `Token` and use it in request headers as `${Token}`. Users will be able to set the token in their profile settings." appState.locale)
-                , FormGroup.list appState (propFormView appState propsField) form propsField ""
+                , FormGroup.list appState (propFormView appState propsField) form propsField "" (gettext "Add property" appState.locale)
                 ]
             , requestFormView appState form requestField
             ]
@@ -226,7 +226,7 @@ requestFormView appState form prefix =
         , div [ class "nested-group mt-2" ]
             [ FormGroup.select appState httpMethodOptions form methodField (gettext "Method" appState.locale)
             , FormGroup.input appState form urlField (gettext "URL" appState.locale)
-            , FormGroup.list appState (headerFormView appState headersField) form headersField (gettext "Headers" appState.locale)
+            , FormGroup.list appState (headerFormView appState headersField) form headersField (gettext "Headers" appState.locale) (gettext "Add header" appState.locale)
             , FormGroup.toggle form multipartEnabledField (gettext "Multipart" appState.locale)
             , FormExtra.mdAfter (gettext "If enabled, file will be sent using multipart request. Otherwise, it will be directly in the request body." appState.locale)
             , multipartFileNameInput

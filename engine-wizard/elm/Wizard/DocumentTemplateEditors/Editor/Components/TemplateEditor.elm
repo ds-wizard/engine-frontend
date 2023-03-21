@@ -292,7 +292,7 @@ formViewKnowledgeModel appState model =
     in
     Html.map FormMsg <|
         div []
-            [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) model.form "allowedPackages" (gettext "Allowed Knowledge Models" appState.locale)
+            [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) model.form "allowedPackages" (gettext "Allowed Knowledge Models" appState.locale) (gettext "Add knoweldge model" appState.locale)
             ]
 
 
@@ -328,7 +328,8 @@ allowedPackageFormView appState form index =
 formViewFormats : AppState -> Model -> Html Msg
 formViewFormats appState model =
     Html.map FormMsg <|
-        div [] [ FormGroup.list appState (formatFormView appState) model.form "formats" (gettext "Formats" appState.locale) ]
+        div []
+            [ FormGroup.list appState (formatFormView appState) model.form "formats" (gettext "Formats" appState.locale) (gettext "Add format" appState.locale) ]
 
 
 formatFormView : AppState -> Form FormError DocumentTemplateForm -> Int -> Html Form.Msg
@@ -375,7 +376,7 @@ formatFormView appState form index =
                         (gettext "Preview" appState.locale)
                     ]
                 ]
-            , FormGroup.list appState (stepFormView appState stepsField) form stepsField (gettext "Steps" appState.locale)
+            , FormGroup.list appState (stepFormView appState stepsField) form stepsField (gettext "Steps" appState.locale) (gettext "Add step" appState.locale)
             ]
         ]
 
@@ -407,7 +408,7 @@ stepFormView appState prefix form index =
             , div [ class "input-table" ]
                 [ label [] [ text (gettext "Options" appState.locale) ]
                 , serviceParametersHeader appState optionsField form
-                , FormGroup.list appState (stepOptionFormView appState optionsField) form optionsField ""
+                , FormGroup.list appState (stepOptionFormView appState optionsField) form optionsField "" (gettext "Add option" appState.locale)
                 ]
             ]
         ]

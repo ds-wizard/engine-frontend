@@ -32,14 +32,14 @@ import Form exposing (Form, Msg(..))
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, code, div, label, li, p, span, text, ul)
+import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, fa)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Uuid
 import Version exposing (Version)
@@ -294,8 +294,8 @@ toggle form fieldName labelText =
         ]
 
 
-list : AppState -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg
-list appState itemView form fieldName labelText =
+list : AppState -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> String -> Html Form.Msg
+list appState itemView form fieldName labelText addLabel =
     let
         field =
             Form.getFieldAsString fieldName form
@@ -314,17 +314,19 @@ list appState itemView form fieldName labelText =
         [ listLabel
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
-        , button
-            [ class "btn btn-secondary"
+        , a
+            [ class "with-icon"
             , onClick (Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ text (gettext "Add" appState.locale) ]
+            [ faSet "_global.add" appState
+            , text addLabel
+            ]
         ]
 
 
-listWithCustomMsg : AppState -> (Form.Msg -> msg) -> (Form FormError o -> Int -> Html msg) -> Form FormError o -> String -> String -> Html msg
-listWithCustomMsg appState wrapMsg itemView form fieldName labelText =
+listWithCustomMsg : AppState -> (Form.Msg -> msg) -> (Form FormError o -> Int -> Html msg) -> Form FormError o -> String -> String -> String -> Html msg
+listWithCustomMsg appState wrapMsg itemView form fieldName labelText addLabel =
     let
         field =
             Form.getFieldAsString fieldName form
@@ -336,17 +338,19 @@ listWithCustomMsg appState wrapMsg itemView form fieldName labelText =
         [ label [] [ text labelText ]
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
-        , button
-            [ class "btn btn-secondary"
+        , a
+            [ class "with-icon"
             , onClick (wrapMsg <| Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ text (gettext "Add" appState.locale) ]
+            [ faSet "_global.add" appState
+            , text addLabel
+            ]
         ]
 
 
-listWithHeader : AppState -> Html Form.Msg -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> Html Form.Msg
-listWithHeader appState header itemView form fieldName labelText =
+listWithHeader : AppState -> Html Form.Msg -> (Form FormError o -> Int -> Html Form.Msg) -> Form FormError o -> String -> String -> String -> Html Form.Msg
+listWithHeader appState header itemView form fieldName labelText addLabel =
     let
         field =
             Form.getFieldAsString fieldName form
@@ -359,12 +363,14 @@ listWithHeader appState header itemView form fieldName labelText =
         , header
         , div [] (List.map (itemView form) (Form.getListIndexes fieldName form))
         , div [ class "form-list-error" ] [ error ]
-        , button
-            [ class "btn btn-secondary"
+        , a
+            [ class "with-icon"
             , onClick (Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ text (gettext "Add" appState.locale) ]
+            [ faSet "_global.add" appState
+            , text addLabel
+            ]
         ]
 
 

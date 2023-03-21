@@ -74,7 +74,7 @@ formView openIDPrefabs appState form =
         , FormExtra.mdAfter (gettext "If enabled, users first enter a username and password at login, and then they receive a one-time code to confirm the login on their email." appState.locale)
         , twoFactorInputs
         , h3 [] [ text (gettext "External" appState.locale) ]
-        , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (gettext "OpenID Services" appState.locale)
+        , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (gettext "OpenID Services" appState.locale) (gettext "Add service" appState.locale)
         ]
 
 
@@ -180,7 +180,7 @@ serviceFormView appState openIDPrefabs form i =
             , div [ class "input-table", dataCy "settings_authentication_service_parameters" ]
                 [ label [] [ text (gettext "Parameters" appState.locale) ]
                 , serviceParametersHeader appState parametersField form
-                , mapFormMsg <| FormGroup.list appState (serviceParameterView appState parametersField) form parametersField ""
+                , mapFormMsg <| FormGroup.list appState (serviceParameterView appState parametersField) form parametersField "" (gettext "Add parameter" appState.locale)
                 ]
             , hr [] []
             , div [ class "row" ]
