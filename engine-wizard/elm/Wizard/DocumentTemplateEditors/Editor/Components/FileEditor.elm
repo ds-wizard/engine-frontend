@@ -1162,7 +1162,7 @@ viewAddFileModal appState model =
         , modalContent = modalContent
         , visible = model.addFileModalOpen
         , actionResult = model.addingFile
-        , actionName = gettext "Add" appState.locale
+        , actionName = gettext "Add file" appState.locale
         , actionMsg = AddFileModalSubmit
         , cancelMsg = Just (SetAddFileModalOpen False)
         , dangerous = False
@@ -1191,7 +1191,7 @@ viewAddFolderModal appState model =
                     , class "btn btn-primary"
                     , dataCy "modal_action-button"
                     ]
-                    [ text (gettext "Add" appState.locale) ]
+                    [ text (gettext "Add folder" appState.locale) ]
                 , button
                     [ onClick (SetAddFolderModalOpen False)
                     , class "btn btn-secondary"

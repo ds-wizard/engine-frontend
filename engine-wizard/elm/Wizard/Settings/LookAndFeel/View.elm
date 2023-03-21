@@ -187,7 +187,7 @@ formView appState form =
                     , div [ class "row mt-3" ]
                         [ div [ class "col" ]
                             [ customMenuLinksHeader appState form
-                            , formWrap <| FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" ""
+                            , formWrap <| FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" "" (gettext "Add link" appState.locale)
                             ]
                         ]
                     ]

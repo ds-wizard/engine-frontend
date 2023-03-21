@@ -713,7 +713,7 @@ headers appState config =
                 , dataCy "integration-input_add-button"
                 ]
                 [ faSet "_global.add" appState
-                , text (gettext "Add" appState.locale)
+                , text (gettext "Add header" appState.locale)
                 ]
     in
     div [ class "form-group" ]

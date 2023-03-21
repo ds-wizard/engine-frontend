@@ -50,7 +50,7 @@ formView appState form =
                             ]
                 in
                 div [ class "nested-group" ]
-                    [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) form "publicPackages" (gettext "Allowed Packages" appState.locale)
+                    [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) form "publicPackages" (gettext "Allowed Packages" appState.locale) (gettext "Add knowledge model" appState.locale)
                     ]
 
             else
