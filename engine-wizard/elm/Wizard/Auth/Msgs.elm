@@ -10,3 +10,4 @@ type Msg
     | Logout
     | LogoutDone
     | GotToken Token (Maybe String)
+    | UpdateUser User

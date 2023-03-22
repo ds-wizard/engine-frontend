@@ -1,9 +1,11 @@
 module Wizard.Msgs exposing
     ( Msg(..)
     , logoutMsg
+    , updateUserMsg
     )
 
 import Browser exposing (UrlRequest)
+import Shared.Data.User exposing (User)
 import Time
 import Url exposing (Url)
 import Wizard.Apps.Msgs
@@ -56,3 +58,8 @@ type Msg
 logoutMsg : Msg
 logoutMsg =
     AuthMsg Wizard.Auth.Msgs.Logout
+
+
+updateUserMsg : User -> Msg
+updateUserMsg =
+    AuthMsg << Wizard.Auth.Msgs.UpdateUser

@@ -9,7 +9,7 @@ import Wizard.Users.Edit.Models exposing (View)
 type Msg
     = GetUserCompleted (Result ApiError User)
     | EditFormMsg Form.Msg
-    | PutUserCompleted (Result ApiError ())
+    | PutUserCompleted (Result ApiError User)
     | PasswordFormMsg Form.Msg
     | PutUserPasswordCompleted (Result ApiError ())
     | ChangeView View
