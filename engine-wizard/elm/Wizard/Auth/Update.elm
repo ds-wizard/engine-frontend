@@ -37,6 +37,15 @@ update msg model =
         AuthMsgs.LogoutDone ->
             ( model, Cmd.none )
 
+        AuthMsgs.UpdateUser user ->
+            let
+                session =
+                    Session.setUser model.appState.session (User.toUserInfo user)
+            in
+            ( setSession session model
+            , Ports.storeSession (Session.encode session)
+            )
+
 
 getCurrentUserCompleted : Model -> Maybe String -> Result ApiError User -> ( Model, Cmd Msg )
 getCurrentUserCompleted model mbOriginalUrl result =
@@ -56,7 +65,7 @@ getCurrentUserCompleted model mbOriginalUrl result =
             in
             ( setSession session model
             , Cmd.batch
-                [ Ports.storeSession <| Session.encode session
+                [ Ports.storeSession (Session.encode session)
                 , cmd
                 ]
             )
