@@ -22,6 +22,7 @@ import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
+import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
@@ -469,22 +470,27 @@ update wrapMsg msg appState model =
                         )
 
                 Err error ->
+                    let
+                        questionnaireRoute =
+                            Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+
+                        loginRoute =
+                            Routes.publicLogin (Just questionnaireRoute)
+                    in
                     case ( error, Session.exists appState.session ) of
                         ( BadStatus 403 _, False ) ->
-                            let
-                                questionnaireRoute =
-                                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+                            withSeed ( model, cmdNavigate appState loginRoute )
 
-                                loginRoute =
-                                    Routes.publicLogin (Just questionnaireRoute)
-                            in
-                            withSeed <|
-                                ( model, cmdNavigate appState loginRoute )
+                        ( BadStatus 401 _, False ) ->
+                            withSeed ( model, cmdNavigate appState loginRoute )
+
+                        ( BadStatus 401 _, True ) ->
+                            withSeed ( model, dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
 
                         _ ->
                             withSeed <|
                                 ( { model | questionnaireModel = ApiError.toActionResult appState (gettext "Unable to get the project." appState.locale) error }
-                                , Cmd.none
+                                , getResultCmd Wizard.Msgs.logoutMsg result
                                 )
 
         GetQuestionnaireImportersComplete result ->
