@@ -102,6 +102,8 @@
             background: $white;
             max-height: 250px;
             overflow-y: auto;
+            border-bottom-left-radius: 0.25rem;
+            border-bottom-right-radius: 0.25rem;
 
             li {
                 list-style: none;
