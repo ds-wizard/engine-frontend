@@ -1368,8 +1368,8 @@ viewQuestionnaireToolbar appState cfg model =
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
-            , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton todosButton todosButtonVisible
+            , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
             , div [ class "item-group" ]
                 [ a [ class "item", onClick expandMsg ] [ expandIcon ]
@@ -2941,13 +2941,12 @@ viewTodoAction appState cfg model path =
                     |> Maybe.unwrap False (List.member QuestionnaireDetail.todoUuid)
         in
         if hasTodo then
-            span [ class "action action-todo" ]
+            a
+                [ class "action action-todo"
+                , onClick (SetLabels currentPath [])
+                ]
                 [ span [] [ text (gettext "TODO" appState.locale) ]
-                , a
-                    ((onClick <| SetLabels currentPath [])
-                        :: class "text-danger"
-                        :: tooltip (gettext "Remove TODO" appState.locale)
-                    )
+                , a (class "text-danger" :: tooltip (gettext "Remove TODO" appState.locale))
                     [ faSet "_global.remove" appState ]
                 ]
 
