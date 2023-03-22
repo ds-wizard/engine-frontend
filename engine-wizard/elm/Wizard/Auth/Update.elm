@@ -34,6 +34,9 @@ update msg model =
         AuthMsgs.Logout ->
             logout model
 
+        AuthMsgs.LogoutTo route ->
+            logoutTo route model
+
         AuthMsgs.LogoutDone ->
             ( model, Cmd.none )
 
@@ -82,13 +85,18 @@ getCurrentUserCompleted model mbOriginalUrl result =
 
 
 logout : Model -> ( Model, Cmd Msg )
-logout model =
+logout =
+    logoutTo Routes.publicHome
+
+
+logoutTo : Routes.Route -> Model -> ( Model, Cmd Msg )
+logoutTo route model =
     let
         cmd =
             Cmd.batch
                 [ Ports.clearSession ()
                 , UsersApi.deleteToken model.appState (Wizard.Msgs.AuthMsg << always AuthMsgs.LogoutDone)
-                , cmdNavigate model.appState Routes.publicHome
+                , cmdNavigate model.appState route
                 ]
     in
     ( setSession Session.init model, cmd )
