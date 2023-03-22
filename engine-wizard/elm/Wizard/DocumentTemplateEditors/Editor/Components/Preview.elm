@@ -26,7 +26,7 @@ import Shared.Data.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Shared.Data.UrlResponse exposing (UrlResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
-import Shared.Html exposing (faSet)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Setters exposing (setFormatUuid, setQuestionnaireUuid, setSelected)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch)
@@ -38,8 +38,10 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.ContentType as ContentType
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.Page as Page
+import Wizard.Routes as Routes
 
 
 
@@ -240,6 +242,17 @@ view cfg appState model =
             , clearEnabled = False
             }
 
+        projectLink =
+            case model.typeHintInputModel.selected of
+                Just questionnaireSuggestion ->
+                    linkTo appState
+                        (Routes.projectsDetailQuestionnaire questionnaireSuggestion.uuid Nothing)
+                        (class "project-link" :: target "_blank" :: tooltip (gettext "Open project" appState.locale))
+                        [ fa "fa-external-link-alt" ]
+
+                Nothing ->
+                    emptyNode
+
         content =
             if DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
                 Page.actionResultViewWithError appState (viewContent appState) viewError model.urlResponse
@@ -251,6 +264,7 @@ view cfg appState model =
         [ div [ class "DocumentTemplateEditor__PreviewEditor__Toolbar bg-light d-flex align-items-center" ]
             [ text "Project:"
             , TypeHintInput.view appState typeHintInputCfg model.typeHintInputModel False
+            , projectLink
             , text "Format:"
             , select [ class "form-select", onInput FormatSelected, id "format", name "format" ]
                 (option [ value "" ] [ text "--" ] :: List.map formatOption cfg.documentTemplate.formats)

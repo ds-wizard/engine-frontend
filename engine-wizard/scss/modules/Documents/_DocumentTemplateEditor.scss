@@ -159,6 +159,12 @@ $content-height: calc(100vh - #{$header-height});
                 margin-right: $spacer-3;
             }
 
+            .project-link {
+                margin-left: -$spacer-1;
+                margin-right: $spacer-3;
+            }
+
+
             .form-select {
                 width: auto;
                 margin-left: $spacer-1;
