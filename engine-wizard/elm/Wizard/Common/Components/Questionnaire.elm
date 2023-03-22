@@ -1343,7 +1343,7 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
 
         warningsButtonVisible =
-            warningsLength > 0 || warningsOpen
+            warningsLength > 0
 
         versionHistoryButtonVisible =
             Feature.projectVersionHitory appState model.questionnaire
@@ -1501,8 +1501,12 @@ viewQuestionnaireRightPanel appState cfg model =
                 ]
 
         RightPanelWarnings ->
-            wrapPanel <|
-                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings appState model ]
+            if QuestionnaireDetail.warningsLength model.questionnaire > 0 then
+                wrapPanel <|
+                    [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings model ]
+
+            else
+                emptyNode
 
 
 
@@ -1540,8 +1544,8 @@ viewQuestionnaireRightPanelTodos appState model =
 -- QUESTIONNAIRE - RIGHT PANEL - WARNINGS
 
 
-viewQuestionnaireRightPanelWarnings : AppState -> Model -> Html Msg
-viewQuestionnaireRightPanelWarnings appState model =
+viewQuestionnaireRightPanelWarnings : Model -> Html Msg
+viewQuestionnaireRightPanelWarnings model =
     let
         warnings =
             QuestionnaireDetail.getWarnings model.questionnaire
@@ -1558,13 +1562,8 @@ viewQuestionnaireRightPanelWarnings appState model =
                 , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
                 ]
     in
-    if List.isEmpty warnings then
-        div [ class "todos todos-empty" ] <|
-            [ illustratedMessage Undraw.feelingHappy (gettext "There are no more warnings." appState.locale) ]
-
-    else
-        div [ class "todos" ] <|
-            List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
+    div [ class "todos" ] <|
+        List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
 
 
 
