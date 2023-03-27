@@ -54,7 +54,7 @@ renderQuestionDescription appState km qvs question =
         extraData =
             viewExtraData appState qvs phases <| createQuestionExtraData km question
     in
-    div []
+    div [ class "description" ]
         [ description
         , extraData
         ]

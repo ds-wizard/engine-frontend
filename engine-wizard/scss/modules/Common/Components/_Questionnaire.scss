@@ -634,7 +634,11 @@ $toolbar-height: 40px;
             position: relative;
 
             &.question-default {
-                opacity: 0.6;
+                label,
+                .tag-list,
+                .description {
+                    opacity: 0.6;
+                }
             }
 
             &.question-hidden {
