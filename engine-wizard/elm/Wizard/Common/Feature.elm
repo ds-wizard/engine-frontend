@@ -10,6 +10,7 @@ module Wizard.Common.Feature exposing
     , documentTemplatesImport
     , documentTemplatesView
     , documentsView
+    , isDefaultLanguage
     , knowledgeModelEditorCancelMigration
     , knowledgeModelEditorContinueMigration
     , knowledgeModelEditorDelete
