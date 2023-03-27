@@ -150,7 +150,7 @@ viewEditorNavigationNav appState route model =
             , icon = faSet "_global.settings" appState
             , isActive = route == DTEditorRoute.Settings
             , isVisible = True
-            , dataCy = "dt-editor_nav_template"
+            , dataCy = "dt-editor_nav_settings"
             }
 
         links =
