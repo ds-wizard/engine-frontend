@@ -71,7 +71,7 @@ actions appState cfg template =
                 , icon = faSet "_global.edit" appState
                 , label = gettext "Create editor" appState.locale
                 , msg = ListingActionLink (Routes.documentTemplateEditorCreate (Just template.id) (Just True))
-                , dataCy = "dt-detail_create-editor-link"
+                , dataCy = "create-editor"
                 }
 
         createEditorActionVisible =
@@ -83,7 +83,7 @@ actions appState cfg template =
                 , icon = faSet "documentTemplate.setDeprecated" appState
                 , label = gettext "Set deprecated" appState.locale
                 , msg = ListingActionMsg (cfg.updatePhaseMsg template DocumentTemplatePhase.Deprecated)
-                , dataCy = "dt-detail_set-deprecated"
+                , dataCy = "set-deprecated"
                 }
 
         setDeprecatedActionVisible =
@@ -95,7 +95,7 @@ actions appState cfg template =
                 , icon = faSet "documentTemplate.restore" appState
                 , label = gettext "Restore" appState.locale
                 , msg = ListingActionMsg (cfg.updatePhaseMsg template DocumentTemplatePhase.Released)
-                , dataCy = "dt-detail_restore"
+                , dataCy = "restore"
                 }
 
         restoreActionVisible =
