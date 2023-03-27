@@ -190,15 +190,6 @@ listingActions appState branch =
                 , dataCy = "open-editor"
                 }
 
-        publish =
-            ListingDropdown.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "kmEditorList.publish" appState
-                , label = gettext "Publish" appState.locale
-                , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute branch.uuid
-                , dataCy = "publish"
-                }
-
         upgrade =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
@@ -238,9 +229,6 @@ listingActions appState branch =
         showOpenEditor =
             Feature.knowledgeModelEditorOpen appState branch
 
-        showPublish =
-            Feature.knowledgeModelEditorPublish appState branch
-
         showUpgrade =
             Feature.knowledgeModelEditorUpgrade appState branch
 
@@ -255,7 +243,6 @@ listingActions appState branch =
 
         groups =
             [ [ ( openEditor, showOpenEditor ) ]
-            , [ ( publish, showPublish ) ]
             , [ ( upgrade, showUpgrade )
               , ( continueMigration, showContinueMigration )
               , ( cancelMigration, showCancelMigration )
