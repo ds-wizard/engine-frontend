@@ -150,14 +150,22 @@ sidePanelLocaleInfo appState locale =
             else
                 Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
 
+        dswVersion =
+            if Feature.isDefaultLanguage locale then
+                []
+
+            else
+                [ ( gettext "DSW Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion ) ]
+
         localeInfoList =
             [ ( gettext "ID" appState.locale, "id", text locale.id )
             , ( gettext "Language Code" appState.locale, "code", code [] [ text locale.code ] )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString locale.version )
-            , ( gettext "DSW Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion )
-            , ( gettext "License" appState.locale, "license", text locale.license )
-            , ( gettext "Enabled" appState.locale, "license", enabledBadge )
             ]
+                ++ dswVersion
+                ++ [ ( gettext "License" appState.locale, "license", text locale.license )
+                   , ( gettext "Enabled" appState.locale, "license", enabledBadge )
+                   ]
     in
     Just ( gettext "Locale" appState.locale, "locale", DetailPage.sidePanelList 4 8 localeInfoList )
 
