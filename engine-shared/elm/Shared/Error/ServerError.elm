@@ -187,6 +187,42 @@ messageToReadable appState message =
                             (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale)
                             [ gettext "storage" appState.locale, parseBytes current, parseBytes limit ]
 
+                what :: current :: limit :: [] ->
+                    let
+                        whatTranslated =
+                            case what of
+                                "users" ->
+                                    gettext "users" appState.locale
+
+                                "active users" ->
+                                    gettext "active users" appState.locale
+
+                                "branches" ->
+                                    gettext "knowledge model editors" appState.locale
+
+                                "knowledge models" ->
+                                    gettext "knowledge models" appState.locale
+
+                                "questionnaires" ->
+                                    gettext "projects" appState.locale
+
+                                "document templates" ->
+                                    gettext "document templates" appState.locale
+
+                                "document template drafts" ->
+                                    gettext "document template editors" appState.locale
+
+                                "documents" ->
+                                    gettext "documents" appState.locale
+
+                                "locales" ->
+                                    gettext "locales" appState.locale
+
+                                _ ->
+                                    what
+                    in
+                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) [ whatTranslated, current, limit ]
+
                 _ ->
                     Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
 
