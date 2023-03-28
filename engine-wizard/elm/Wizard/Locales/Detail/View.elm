@@ -1,8 +1,8 @@
 module Wizard.Locales.Detail.View exposing (view)
 
 import Gettext exposing (gettext)
-import Html exposing (Html, code, div, li, p, span, strong, text, ul)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
+import Html.Attributes exposing (class, href, target)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.Locale.LocaleState as LocaleState
@@ -134,6 +134,7 @@ sidePanel appState locale =
             [ sidePanelLocaleInfo appState locale
             , sidePanelOtherVersions appState locale
             , sidePanelOrganizationInfo appState locale
+            , sidePanelRegistryLink appState locale
             ]
     in
     DetailPage.sidePanel
@@ -205,6 +206,21 @@ viewOrganization organization =
     DetailPage.sidePanelItemWithIcon organization.name
         (text organization.organizationId)
         (ItemIcon.view { text = organization.name, image = organization.logo })
+
+
+sidePanelRegistryLink : AppState -> LocaleDetail -> Maybe ( String, String, Html msg )
+sidePanelRegistryLink appState locale =
+    let
+        toRegistryLinkInfo registryLink =
+            ( gettext "Registry Link" appState.locale
+            , "registry-link"
+            , a [ href registryLink, target "_blank", class "with-icon" ]
+                [ faSet "kmDetail.registryLink" appState
+                , text (gettext "View in registry" appState.locale)
+                ]
+            )
+    in
+    Maybe.map toRegistryLinkInfo locale.registryLink
 
 
 deleteVersionModal : AppState -> Model -> { a | id : String } -> Html Msg
