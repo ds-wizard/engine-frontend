@@ -1,6 +1,5 @@
 #!/bin/sh
 
-
 # load defaults from profile
 file=/usr/share/nginx/html/main.*.js
 source /configuration/profile.sh
@@ -10,36 +9,36 @@ sed -i "s#{defaultSupportEmail}#$DEFAULT_SUPPORT_EMAIL#g" $file
 sed -i "s#{defaultSupportRepositoryName}#$DEFAULT_SUPPORT_REPOSITORY_NAME#g" $file
 sed -i "s#{defaultSupportRepositoryUrl}#$DEFAULT_SUPPORT_REPOSITORY_URL#g" $file
 
-
 # create config
 config=/usr/share/nginx/html/config.js
-echo -n "window.wizard={apiUrl:'"$API_URL"'" > ${config}
+echo -n "window.wizard={apiUrl:'"$API_URL"'" >${config}
 if [[ ! -z "$PROVISIONING_URL" ]]; then
-  echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >> ${config}
+  echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >>${config}
 fi
 if [[ ! -z "$GA_ID" ]]; then
-  echo -n ",gaID:'"$GA_ID"'" >> ${config}
+  echo -n ",gaID:'"$GA_ID"'" >>${config}
 fi
 provisioning=/configuration/provisioning.json
 if [[ -f "$provisioning" ]]; then
-  echo -n ",provisioning:" >> ${config}
-  cat $provisioning >> ${config}
+  echo -n ",provisioning:" >>${config}
+  cat $provisioning >>${config}
 fi
-echo -n "};" >> ${config}
-
+echo -n "};" >>${config}
 
 # check if customizations exist
-if [[ $(find /src/scss/customizations -name "*.scss" | xargs cat | wc -l) -gt 0 ]]; then
-  # regenerate styles
-  echo '$fa-font-path: "";' >> /src/scss/customizations/_variables-app.scss
-  find /usr/share/nginx/html -name "*.css" -exec /usr/bin/sass -I /src -s compressed /src/scss/main.scss {} \;
+if [ -f /usr/bin/sass ]; then
+  if [[ $(find /src/scss/customizations -name "*.scss" | xargs cat | wc -l) -gt 0 ]]; then
+    # regenerate styles
+    echo '$fa-font-path: "";' >>/src/scss/customizations/_variables-app.scss
+    find /usr/share/nginx/html -name "*.css" -exec /usr/bin/sass -I /src -s compressed /src/scss/main.scss {} \;
+  fi
 fi
 
 # check for custom scripts block
 scriptsFile=/src/scripts.html
 if [ -f "$scriptsFile" ]; then
-    scripts=`cat $scriptsFile`
-    sed -i "s~</script>~</script>$scripts~g" /usr/share/nginx/html/index.html
+  scripts=$(cat $scriptsFile)
+  sed -i "s~</script>~</script>$scripts~g" /usr/share/nginx/html/index.html
 fi
 
 # start nginx
