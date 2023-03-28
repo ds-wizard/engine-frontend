@@ -29,6 +29,7 @@ type alias LocaleDetail =
     , state : LocaleState
     , remoteLatestVersion : Maybe Version
     , organization : Maybe OrganizationInfo
+    , registryLink : Maybe String
     , license : String
     , readme : String
     , recommendedAppVersion : Version
@@ -52,6 +53,7 @@ decoder =
         |> D.required "state" LocaleState.decoder
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
+        |> D.required "registryLink" (D.maybe D.string)
         |> D.required "license" D.string
         |> D.required "readme" D.string
         |> D.required "recommendedAppVersion" Version.decoder
