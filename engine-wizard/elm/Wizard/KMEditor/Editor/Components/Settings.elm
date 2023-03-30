@@ -209,7 +209,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
 
 dangerZone : AppState -> BranchDetail -> Html Msg
 dangerZone appState branchDetail =
-    div []
+    div [ class "pb-5" ]
         [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger mt-3" ]
             [ div [ class "card-body d-flex justify-content-between align-items-center" ]
