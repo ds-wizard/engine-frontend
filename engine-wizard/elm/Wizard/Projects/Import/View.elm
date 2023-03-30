@@ -2,7 +2,7 @@ module Wizard.Projects.Import.View exposing (view)
 
 import ActionResult
 import Gettext exposing (gettext, ngettext)
-import Html exposing (Html, a, div, em, h5, li, span, strong, text, ul)
+import Html exposing (Html, a, div, h5, li, span, strong, text, ul)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import List.Extra as List
@@ -220,10 +220,8 @@ viewReply appState questionnaire question data =
     let
         eventView replies =
             div [ class "EventDetail" ]
-                [ em []
-                    [ a [ onClick (QuestionnaireMsg (Questionnaire.ScrollToPath path)) ]
-                        [ text (Question.getTitle question) ]
-                    ]
+                [ a [ class "question-link", onClick (QuestionnaireMsg (Questionnaire.ScrollToPath path)) ]
+                    [ text (Question.getTitle question) ]
                 , ul [ class "fa-ul" ]
                     (List.map replyView replies)
                 ]
