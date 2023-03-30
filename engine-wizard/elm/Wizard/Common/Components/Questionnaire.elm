@@ -174,8 +174,7 @@ init : AppState -> QuestionnaireDetail -> Maybe String -> ( Model, Cmd Msg )
 init appState questionnaire mbPath =
     let
         mbChapterUuid =
-            Maybe.map .uuid <|
-                List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel)
+            List.head questionnaire.knowledgeModel.chapterUuids
 
         activePage =
             Maybe.unwrap PageNone PageChapter mbChapterUuid

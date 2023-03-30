@@ -80,9 +80,15 @@ initPageModel appState route model =
                         |> Maybe.withDefault ""
 
                 firstChapterUuid =
-                    model.branchModel
-                        |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .chapterUuids >> List.head)
-                        |> Maybe.withDefault ""
+                    case model.branchModel of
+                        ActionResult.Success editorBranch ->
+                            editorBranch.branch.knowledgeModel.chapterUuids
+                                |> EditorBranch.filterDeleted editorBranch
+                                |> List.head
+                                |> Maybe.withDefault ""
+
+                        _ ->
+                            ""
 
                 defaultPhaseUuid =
                     model.branchModel
