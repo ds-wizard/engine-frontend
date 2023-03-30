@@ -86,7 +86,7 @@ iconSet =
         , ( "kmEditorList.edit", "fas fa-pen" )
         , ( "kmEditorList.edited", "fas fa-pen" )
         , ( "kmEditorList.publish", "fas fa-cloud-upload-alt" )
-        , ( "kmEditorList.upgrade", "fas fa-sort-amount-up" )
+        , ( "kmEditorList.update", "fas fa-sort-amount-up" )
         , ( "kmDetail.createKMEditor", "fas fa-edit" )
         , ( "kmDetail.createQuestionnaire", "far fa-list-alt" )
         , ( "kmDetail.fork", "fas fa-code-branch" )

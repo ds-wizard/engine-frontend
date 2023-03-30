@@ -168,7 +168,7 @@ view appState model =
             , actionMsg = FormMsg Form.Submit
             , cancelMsg = Just Close
             , dangerous = False
-            , dataCy = "km-editor-upgrade"
+            , dataCy = "km-editor-update"
             }
     in
     Modal.confirm appState modalConfig

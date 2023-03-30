@@ -193,10 +193,10 @@ listingActions appState branch =
         upgrade =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "kmEditorList.upgrade" appState
-                , label = gettext "Upgrade" appState.locale
+                , icon = faSet "kmEditorList.update" appState
+                , label = gettext "Update" appState.locale
                 , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId))
-                , dataCy = "upgrade"
+                , dataCy = "update"
                 }
 
         continueMigration =
