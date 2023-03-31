@@ -634,10 +634,14 @@ $toolbar-height: 40px;
             position: relative;
 
             &.question-default {
-                label,
+                label .bg-secondary {
+                    background: transparentize($secondary, 0.5);
+                }
+
+                label .badge + span,
                 .tag-list,
                 .description {
-                    opacity: 0.6;
+                    opacity: 0.5;
                 }
             }
 
