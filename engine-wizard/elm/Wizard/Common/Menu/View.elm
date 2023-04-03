@@ -6,8 +6,11 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import Json.Decode as D
+import Json.Decode.Extra as D
 import List.Extra as List
 import Shared.Auth.Role as Role
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
@@ -624,6 +627,11 @@ viewBuildInfo appState name buildInfo extra =
                 [ td [] [ text title ]
                 , td [] [ value ]
                 ]
+
+        buildAtValue =
+            D.decodeString D.datetime ("\"" ++ buildInfo.builtAt ++ "\"")
+                |> Result.map (TimeUtils.toReadableDateTime appState.timeZone)
+                |> Result.withDefault buildInfo.builtAt
     in
     table [ class "table table-borderless table-build-info" ]
         [ thead []
@@ -637,7 +645,7 @@ viewBuildInfo appState name buildInfo extra =
                 ]
              , tr []
                 [ td [] [ text (gettext "Built at" appState.locale) ]
-                , td [] [ em [] [ text buildInfo.builtAt ] ]
+                , td [] [ em [] [ text buildAtValue ] ]
                 ]
              ]
                 ++ List.map viewExtraRow extra
