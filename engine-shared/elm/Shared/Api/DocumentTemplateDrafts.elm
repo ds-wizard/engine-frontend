@@ -2,6 +2,7 @@ module Shared.Api.DocumentTemplateDrafts exposing
     ( deleteAsset
     , deleteDraft
     , deleteFile
+    , getAsset
     , getAssets
     , getDraft
     , getDrafts
@@ -93,6 +94,11 @@ deleteFile templateId fileUuid =
 getAssets : String -> AbstractAppState a -> ToMsg (List DocumentTemplateAsset) msg -> Cmd msg
 getAssets templateId =
     jwtGet ("/document-template-drafts/" ++ templateId ++ "/assets") (D.list DocumentTemplateAsset.decoder)
+
+
+getAsset : String -> Uuid -> AbstractAppState a -> ToMsg DocumentTemplateAsset msg -> Cmd msg
+getAsset templateId assetUuid =
+    jwtGet ("/document-template-drafts/" ++ templateId ++ "/assets/" ++ Uuid.toString assetUuid) DocumentTemplateAsset.decoder
 
 
 deleteAsset : String -> Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
