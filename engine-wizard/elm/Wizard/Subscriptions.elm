@@ -32,7 +32,7 @@ subscriptions model =
                     Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions model.documentsModel
 
                 Routes.DocumentTemplateEditorsRoute route ->
-                    Sub.map DocumentTemplateEditorsMsg <| Wizard.DocumentTemplateEditors.Subscriptions.subscriptions route model.documentTemplateEditorsModel
+                    Wizard.DocumentTemplateEditors.Subscriptions.subscriptions DocumentTemplateEditorsMsg OnTime route model.documentTemplateEditorsModel
 
                 Routes.DocumentTemplatesRoute route ->
                     Sub.map DocumentTemplatesMsg <| Wizard.DocumentTemplates.Subscriptions.subscriptions route model.documentTemplatesModel

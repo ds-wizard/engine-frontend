@@ -4,7 +4,9 @@ module Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing
     )
 
 import Json.Decode as D exposing (Decoder)
+import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import Time
 import Uuid exposing (Uuid)
 
 
@@ -13,6 +15,7 @@ type alias DocumentTemplateAsset =
     , fileName : String
     , contentType : String
     , url : String
+    , urlExpiration : Time.Posix
     }
 
 
@@ -23,3 +26,4 @@ decoder =
         |> D.required "fileName" D.string
         |> D.required "contentType" D.string
         |> D.required "url" D.string
+        |> D.required "urlExpiration" D.datetime

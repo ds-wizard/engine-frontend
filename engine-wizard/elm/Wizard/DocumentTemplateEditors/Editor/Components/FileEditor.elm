@@ -1,5 +1,6 @@
 module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor exposing
-    ( Model
+    ( AssetCacheItem
+    , Model
     , Msg
     , Selected
     , UpdateConfig
@@ -37,6 +38,7 @@ import Shared.Setters exposing (setAssets, setFiles)
 import Shared.Utils exposing (dispatch, flip, listFilterJust)
 import SplitPane
 import String.Format as String
+import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -67,6 +69,7 @@ type alias Model =
     , editorGroup1 : EditorGroup
     , editorGroup2 : EditorGroup
     , fileContents : Dict String (ActionResult String)
+    , assetCache : Dict String (ActionResult AssetCacheItem)
     , changedFiles : Set String
     , savingFiles : Dict String (ActionResult ())
     , newFolders : List String
@@ -81,6 +84,12 @@ type alias Model =
     , deleteModalOpen : Bool
     , deleting : ActionResult String
     , assetUploadModal : AssetUploadModal.Model
+    }
+
+
+type alias AssetCacheItem =
+    { url : String
+    , urlExpiration : Time.Posix
     }
 
 
@@ -101,6 +110,7 @@ initialModel =
     , editorGroup1 = EditorGroup.init 1
     , editorGroup2 = EditorGroup.init 2
     , fileContents = Dict.empty
+    , assetCache = Dict.empty
     , changedFiles = Set.empty
     , savingFiles = Dict.empty
     , newFolders = []
@@ -210,6 +220,7 @@ type Msg
     = GetTemplateFilesCompleted (Result ApiError (List DocumentTemplateFile))
     | GetTemplateAssetsCompleted (Result ApiError (List DocumentTemplateAsset))
     | GetTemplateFileContentCompleted Uuid (Result ApiError String)
+    | GetTemplateAssetDetailCompleted Uuid (Result ApiError DocumentTemplateAsset)
     | FilesSplitPaneMsg SplitPane.Msg
     | EditorSplitPaneMsg SplitPane.Msg
     | OpenFile Int Uuid String
@@ -248,24 +259,32 @@ saveMsg =
 -- SUBSCRIPTIONS
 
 
-subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions : (Msg -> msg) -> (Time.Posix -> msg) -> Model -> Sub msg
+subscriptions wrapMsg onTime model =
     let
         filesSplitPaneSub =
-            Sub.map FilesSplitPaneMsg <|
+            Sub.map (wrapMsg << FilesSplitPaneMsg) <|
                 SplitPane.subscriptions model.filesSplitPane
 
         editorSplitPaneSub =
-            Sub.map EditorSplitPaneMsg <|
+            Sub.map (wrapMsg << EditorSplitPaneMsg) <|
                 SplitPane.subscriptions model.editorSplitPane
 
         addDropdownSub =
-            Dropdown.subscriptions model.addDropdownState AddDropdownMsg
+            Dropdown.subscriptions model.addDropdownState (wrapMsg << AddDropdownMsg)
+
+        timeSub =
+            if Dict.isEmpty model.assetCache then
+                Sub.none
+
+            else
+                Time.every 1000 onTime
     in
     Sub.batch
         [ filesSplitPaneSub
         , editorSplitPaneSub
         , addDropdownSub
+        , timeSub
         ]
 
 
@@ -376,6 +395,24 @@ update cfg appState msg model =
                 , logoutMsg = cfg.logoutMsg
                 }
 
+        GetTemplateAssetDetailCompleted uuid result ->
+            let
+                toAssetCacheItem r =
+                    { url = r.url
+                    , urlExpiration = r.urlExpiration
+                    }
+
+                setResult r m =
+                    { m | assetCache = Dict.insert (Uuid.toString uuid) (ActionResult.map toAssetCacheItem r) m.assetCache }
+            in
+            applyResult appState
+                { setResult = setResult
+                , defaultError = gettext "Unable to get asset" appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = cfg.logoutMsg
+                }
+
         OpenFile groupId uuid path ->
             case getFile uuid model of
                 Just file ->
@@ -420,14 +457,36 @@ update cfg appState msg model =
                     let
                         editor =
                             Editor.Asset asset
+
+                        shouldLoadAsset =
+                            case Dict.get (Uuid.toString asset.uuid) model.assetCache of
+                                Just assetCacheItemActionResult ->
+                                    case assetCacheItemActionResult of
+                                        Success assetCacheItem ->
+                                            Time.posixToMillis assetCacheItem.urlExpiration - 5 * 1000 < Time.posixToMillis appState.currentTime
+
+                                        _ ->
+                                            True
+
+                                _ ->
+                                    True
+
+                        ( newModel, getAssetCmd ) =
+                            if shouldLoadAsset then
+                                ( { model | assetCache = Dict.insert (Uuid.toString asset.uuid) ActionResult.Loading model.assetCache }
+                                , DocumentTemplateDraftsApi.getAsset cfg.documentTemplateId asset.uuid appState (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
+                                )
+
+                            else
+                                ( model, Cmd.none )
                     in
                     ( openEditor groupId
                         editor
-                        { model
+                        { newModel
                             | selected = SelectedAsset path
                             , activeEditor = editor
                         }
-                    , Cmd.none
+                    , getAssetCmd
                     )
 
                 Nothing ->
@@ -1022,11 +1081,34 @@ viewEditorGroup appState model editorGroup =
         editorContent =
             case editorGroup.currentEditor of
                 Editor.Asset asset ->
-                    Html.Keyed.node "div" [ class "w-100" ] <|
-                        [ ( Uuid.toString asset.uuid
-                          , viewAssetContent appState asset
-                          )
-                        ]
+                    case Dict.get (Uuid.toString asset.uuid) model.assetCache of
+                        Just assetActionResult ->
+                            case assetActionResult of
+                                ActionResult.Success assetItem ->
+                                    let
+                                        key =
+                                            Uuid.toString asset.uuid ++ "-" ++ String.fromInt (Time.posixToMillis assetItem.urlExpiration)
+                                    in
+                                    Html.Keyed.node "div" [ class "w-100 overflow-hidden" ] <|
+                                        [ ( key
+                                          , viewAssetContent appState asset assetItem
+                                          )
+                                        ]
+
+                                ActionResult.Loading ->
+                                    div [ class "w-100" ]
+                                        [ Page.loader appState
+                                        ]
+
+                                ActionResult.Error error ->
+                                    div [ class "m-3" ]
+                                        [ Flash.error appState error ]
+
+                                _ ->
+                                    viewEmptyEditor appState
+
+                        Nothing ->
+                            viewEmptyEditor appState
 
                 Editor.File file ->
                     case Dict.get (Uuid.toString file.uuid) model.fileContents of
@@ -1102,13 +1184,13 @@ viewTabs appState model editorGroup =
     div [ class "tabs" ] (List.map viewTabWrapper editorGroup.tabs)
 
 
-viewAssetContent : AppState -> DocumentTemplateAsset -> Html Msg
-viewAssetContent appState asset =
+viewAssetContent : AppState -> DocumentTemplateAsset -> AssetCacheItem -> Html Msg
+viewAssetContent appState asset assetCacheItem =
     if ContentType.isImage asset.contentType then
-        div [ class "DocumentTemplateEditor__Asset DocumentTemplateEditor__Asset--Image" ] [ img [ src asset.url ] [] ]
+        div [ class "DocumentTemplateEditor__Asset DocumentTemplateEditor__Asset--Image" ] [ img [ src assetCacheItem.url ] [] ]
 
     else if asset.contentType == "application/pdf" && appState.navigator.pdf then
-        div [ class "DocumentTemplateEditor__Asset DocumentTemplateEditor__Asset--Pdf" ] [ iframe [ src asset.url ] [] ]
+        div [ class "DocumentTemplateEditor__Asset DocumentTemplateEditor__Asset--Pdf" ] [ iframe [ src assetCacheItem.url ] [] ]
 
     else
         let
@@ -1122,7 +1204,7 @@ viewAssetContent appState asset =
                 [ div [ class "icon" ] [ fa "far fa-file" ] ]
             , div []
                 [ div [ class "filename" ] [ text fileName ]
-                , a [ class "btn btn-outline-secondary with-icon", href asset.url, target "_blank" ]
+                , a [ class "btn btn-outline-secondary with-icon", href assetCacheItem.url, target "_blank" ]
                     [ faSet "_global.download" appState
                     , text (gettext "Download" appState.locale)
                     ]
