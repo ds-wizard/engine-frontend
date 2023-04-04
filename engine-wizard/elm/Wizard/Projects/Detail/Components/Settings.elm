@@ -40,7 +40,6 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Setters exposing (setSelected)
 import Shared.Utils exposing (dispatch, listFilterJust)
 import Uuid exposing (Uuid)
-import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -296,7 +295,6 @@ subscriptions model =
 type alias ViewConfig =
     { questionnaire : QuestionnaireDescriptor
     , package : Package
-    , packageVersions : List Version
     , templateState : Maybe DocumentTemplateState
     , templatePhase : Maybe DocumentTemplatePhase
     , tags : List Tag
@@ -500,7 +498,7 @@ knowledgeModel appState cfg =
         , linkTo appState
             (Routes.knowledgeModelsDetail cfg.package.id)
             [ class "package-link mb-2" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package cfg.packageVersions) ]
+            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package) ]
         , tagList
         , div [ class "text-end" ]
             [ linkTo appState

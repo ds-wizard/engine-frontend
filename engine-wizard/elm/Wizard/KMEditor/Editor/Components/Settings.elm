@@ -202,7 +202,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         , linkTo appState
             (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage []) ]
+            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
         , outdatedWarning
         ]
 
