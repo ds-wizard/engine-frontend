@@ -1,5 +1,6 @@
 module Wizard.Projects.CreateMigration.View exposing (view)
 
+import ActionResult exposing (ActionResult(..))
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
@@ -69,8 +70,13 @@ createMigrationView appState model questionnaire =
 
         versionSelect =
             case model.selectedPackage of
-                Just package ->
-                    FormGroup.select appState (createOptions package) model.form "packageId"
+                Just _ ->
+                    case model.selectedPackageDetail of
+                        Success selectedPackageDetail ->
+                            FormGroup.select appState (createOptions selectedPackageDetail) model.form "packageId"
+
+                        _ ->
+                            always (Flash.loader appState)
 
                 Nothing ->
                     FormGroup.textView "km" <| gettext "Select Knowledge Model first" appState.locale
@@ -83,7 +89,7 @@ createMigrationView appState model questionnaire =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package questionnaire.packageVersions))
+                    (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
                     (gettext "Original Knowledge Model" appState.locale)
                 , FormGroup.codeView (Version.toString questionnaire.package.version) <| gettext "Original version" appState.locale
                 , originalTagList

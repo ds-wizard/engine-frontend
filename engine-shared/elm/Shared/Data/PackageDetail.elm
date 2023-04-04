@@ -3,16 +3,20 @@ module Shared.Data.PackageDetail exposing
     , createFormOptions
     , decoder
     , encode
+    , getLatestPackageId
     , toPackage
+    , toPackageSuggestion
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import List.Extra as List
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
+import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Time
 import Version exposing (Version)
 
@@ -90,6 +94,15 @@ toPackage package =
     }
 
 
+toPackageSuggestion : PackageDetail -> PackageSuggestion
+toPackageSuggestion package =
+    { id = package.id
+    , name = package.name
+    , description = package.description
+    , version = package.version
+    }
+
+
 createFormOption : PackageDetail -> Version -> ( String, String )
 createFormOption package version =
     let
@@ -100,3 +113,18 @@ createFormOption package version =
             package.name ++ " " ++ Version.toString version ++ " (" ++ id ++ ")"
     in
     ( id, optionText )
+
+
+getLatestVersion : PackageDetail -> Maybe Version
+getLatestVersion =
+    List.last << List.sortWith Version.compare << .versions
+
+
+getLatestPackageId : PackageDetail -> Maybe String
+getLatestPackageId package =
+    case ( String.split ":" package.id, getLatestVersion package ) of
+        ( orgId :: kmId :: _, Just latestVersion ) ->
+            Just (orgId ++ ":" ++ kmId ++ ":" ++ Version.toString latestVersion)
+
+        _ ->
+            Nothing

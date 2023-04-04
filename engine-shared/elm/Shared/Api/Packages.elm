@@ -4,6 +4,7 @@ module Shared.Api.Packages exposing
     , exportPackageUrl
     , getOutdatedPackages
     , getPackage
+    , getPackageWithoutDeprecatedVersions
     , getPackages
     , getPackagesSuggestions
     , getPackagesSuggestionsWithOptions
@@ -86,6 +87,11 @@ getPackagesSuggestionsWithOptions qs select exclude =
 getPackage : String -> AbstractAppState a -> ToMsg PackageDetail msg -> Cmd msg
 getPackage packageId =
     jwtOrHttpGet ("/packages/" ++ packageId) PackageDetail.decoder
+
+
+getPackageWithoutDeprecatedVersions : String -> AbstractAppState a -> ToMsg PackageDetail msg -> Cmd msg
+getPackageWithoutDeprecatedVersions packageId =
+    jwtGet ("/packages/" ++ packageId ++ "?excludeDeprecatedVersions=true") PackageDetail.decoder
 
 
 postFromBranch : Uuid -> AbstractAppState a -> ToMsg Package msg -> Cmd msg

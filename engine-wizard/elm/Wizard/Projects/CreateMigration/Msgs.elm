@@ -2,6 +2,7 @@ module Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
 
 import Form
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
@@ -15,6 +16,8 @@ type Msg
     | SelectPackage PackageSuggestion
     | PostMigrationCompleted (Result ApiError QuestionnaireMigration)
     | GetKnowledgeModelPreviewCompleted (Result ApiError KnowledgeModel)
+    | GetCurrentPackageCompleted (Result ApiError PackageDetail)
+    | GetSelectedPackageCompleted (Result ApiError PackageDetail)
     | AddTag String
     | RemoveTag String
     | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)
