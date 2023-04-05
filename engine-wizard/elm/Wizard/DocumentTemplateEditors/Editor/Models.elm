@@ -52,7 +52,7 @@ setEditorFromRoute editorRoute model =
     let
         currentEditor =
             case editorRoute of
-                DTEditorRoute.Template ->
+                DTEditorRoute.Settings ->
                     TemplateEditor
 
                 DTEditorRoute.Files ->

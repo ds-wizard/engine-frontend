@@ -15,7 +15,9 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.PublishModal as PublishModal
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute)
@@ -33,10 +35,12 @@ type alias Model =
     , savingModel : ProjectSaving.Model
     , branchModel : ActionResult EditorBranch
     , kmEditorModel : KMEditor.Model
+    , phaseEditorModel : PhaseEditor.Model
     , tagEditorModel : TagEditor.Model
     , previewModel : Preview.Model
     , settingsModel : Settings.Model
     , integrationPrefabs : ActionResult (List Integration)
+    , publishModalModel : PublishModal.Model
     }
 
 
@@ -52,10 +56,12 @@ init appState uuid mbEditorUuid =
     , savingModel = ProjectSaving.init
     , branchModel = ActionResult.Loading
     , kmEditorModel = KMEditor.initialModel
+    , phaseEditorModel = PhaseEditor.initialModel
     , tagEditorModel = TagEditor.initialModel
     , previewModel = Preview.initialModel appState ""
     , settingsModel = Settings.initialModel
     , integrationPrefabs = ActionResult.Loading
+    , publishModalModel = PublishModal.initialModel
     }
 
 
@@ -74,9 +80,15 @@ initPageModel appState route model =
                         |> Maybe.withDefault ""
 
                 firstChapterUuid =
-                    model.branchModel
-                        |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .chapterUuids >> List.head)
-                        |> Maybe.withDefault ""
+                    case model.branchModel of
+                        ActionResult.Success editorBranch ->
+                            editorBranch.branch.knowledgeModel.chapterUuids
+                                |> EditorBranch.filterDeleted editorBranch
+                                |> List.head
+                                |> Maybe.withDefault ""
+
+                        _ ->
+                            ""
 
                 defaultPhaseUuid =
                     model.branchModel

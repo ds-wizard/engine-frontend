@@ -82,9 +82,12 @@ update cfg appState msg model =
             case ( formMsg, Form.getOutput model.form ) of
                 ( Form.Submit, Just form ) ->
                     let
+                        body =
+                            BranchEditForm.encode form
+
                         cmd =
                             Cmd.map cfg.wrapMsg <|
-                                BranchesApi.putBranch cfg.branchUuid form.name form.kmId appState PutBranchComplete
+                                BranchesApi.putBranch cfg.branchUuid body appState PutBranchComplete
                     in
                     ( { model | savingBranch = ActionResult.Loading }, cmd )
 
@@ -140,6 +143,16 @@ view appState branchDetail model =
 
                 Nothing ->
                     []
+
+        versionInputConfig =
+            { label = gettext "Version" appState.locale
+            , majorField = "versionMajor"
+            , minorField = "versionMinor"
+            , patchField = "versionPatch"
+            , currentVersion = Nothing
+            , wrapFormMsg = FormMsg
+            , setVersionMsg = Nothing
+            }
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]
         [ div [ detailClass "" ]
@@ -147,7 +160,11 @@ view appState branchDetail model =
              , div []
                 [ FormResult.errorOnlyView appState model.savingBranch
                 , Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)
+                , Html.map FormMsg <| FormGroup.input appState model.form "description" (gettext "Description" appState.locale)
                 , Html.map FormMsg <| FormGroup.input appState model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
+                , FormGroup.version appState versionInputConfig model.form
+                , Html.map FormMsg <| FormGroup.input appState model.form "license" <| gettext "License" appState.locale
+                , Html.map FormMsg <| FormGroup.markdownEditor appState model.form "readme" <| gettext "Readme" appState.locale
                 , FormActions.viewActionOnly appState
                     (ActionButton.ButtonConfig (gettext "Save" appState.locale) model.savingBranch (FormMsg Form.Submit) False)
                 ]
@@ -185,14 +202,14 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         , linkTo appState
             (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage []) ]
+            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
         , outdatedWarning
         ]
 
 
 dangerZone : AppState -> BranchDetail -> Html Msg
 dangerZone appState branchDetail =
-    div []
+    div [ class "pb-5" ]
         [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger mt-3" ]
             [ div [ class "card-body d-flex justify-content-between align-items-center" ]

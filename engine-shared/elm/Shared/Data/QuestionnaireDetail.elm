@@ -47,6 +47,7 @@ import Regex
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
 import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
+import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -76,7 +77,6 @@ import String.Extra as String
 import Time
 import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
-import Version exposing (Version)
 
 
 type alias QuestionnaireDetail =
@@ -86,7 +86,6 @@ type alias QuestionnaireDetail =
     , projectTags : List String
     , isTemplate : Bool
     , package : Package
-    , packageVersions : List Version
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
     , commentThreadsMap : Dict String (List CommentThread)
@@ -97,6 +96,7 @@ type alias QuestionnaireDetail =
     , selectedQuestionTagUuids : List String
     , documentTemplateId : Maybe String
     , documentTemplate : Maybe DocumentTemplateSuggestion
+    , documentTemplatePhase : Maybe DocumentTemplatePhase
     , documentTemplateState : Maybe DocumentTemplateState
     , formatUuid : Maybe Uuid
     , format : Maybe DocumentTemplateFormat
@@ -115,7 +115,6 @@ decoder =
         |> D.required "projectTags" (D.list D.string)
         |> D.required "isTemplate" D.bool
         |> D.required "package" Package.decoder
-        |> D.required "packageVersions" (D.list Version.decoder)
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
         |> D.required "commentThreadsMap" (D.dict (D.list CommentThread.decoder))
@@ -126,6 +125,7 @@ decoder =
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "documentTemplateId" (D.maybe D.string)
         |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)
+        |> D.required "documentTemplatePhase" (D.maybe DocumentTemplatePhase.decoder)
         |> D.required "documentTemplateState" (D.maybe DocumentTemplateState.decoder)
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
@@ -170,7 +170,6 @@ createQuestionnaireDetail package km =
     , sharing = RestrictedQuestionnaire
     , permissions = []
     , package = package
-    , packageVersions = []
     , knowledgeModel = km
     , replies = Dict.empty
     , commentThreadsMap = Dict.empty
@@ -178,6 +177,7 @@ createQuestionnaireDetail package km =
     , selectedQuestionTagUuids = []
     , documentTemplateId = Nothing
     , documentTemplate = Nothing
+    , documentTemplatePhase = Nothing
     , documentTemplateState = Nothing
     , formatUuid = Nothing
     , format = Nothing

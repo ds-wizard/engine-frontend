@@ -2,6 +2,8 @@ module.exports = function (app) {
     app.ports.focus.subscribe(focus)
     app.ports.scrollIntoView.subscribe(scrollIntoView)
     app.ports.scrollToTop.subscribe(scrollToTop)
+    app.ports.setScrollTopPort.subscribe(setScrollTopPort)
+    app.ports.subscribeScrollTop.subscribe(subscribeScrollTop)
 
     function focus(elementSelector) {
         waitForElement(elementSelector, function ($element) {
@@ -21,6 +23,24 @@ module.exports = function (app) {
     function scrollToTop(elementSelector) {
         waitForElement(elementSelector, function ($element) {
             $element.scrollTop = 0
+        })
+    }
+
+    function setScrollTopPort(data) {
+        waitForElement(data.selector, function ($element) {
+            $element.scrollTop = data.scrollTop
+        })
+    }
+
+    function subscribeScrollTop(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
+            $element.addEventListener('scroll', function () {
+                app.ports.gotScrollTop.send({
+                    selector: elementSelector,
+                    scrollTop: $element.scrollTop
+                })
+
+            })
         })
     }
 

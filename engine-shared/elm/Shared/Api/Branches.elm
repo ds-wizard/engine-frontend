@@ -9,7 +9,6 @@ module Shared.Api.Branches exposing
     , postMigrationConflict
     , postMigrationConflictApplyAll
     , putBranch
-    , putVersion
     , websocket
     )
 
@@ -46,15 +45,8 @@ postBranch =
     jwtFetch "/branches" Branch.decoder
 
 
-putBranch : Uuid -> String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putBranch uuid name kmId =
-    let
-        body =
-            E.object
-                [ ( "name", E.string name )
-                , ( "kmId", E.string kmId )
-                ]
-    in
+putBranch : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putBranch uuid body =
     jwtPut ("/branches/" ++ Uuid.toString uuid) body
 
 
@@ -66,11 +58,6 @@ deleteBranch uuid =
 websocket : Uuid -> AbstractAppState a -> String
 websocket uuid =
     wsUrl ("/branches/" ++ Uuid.toString uuid ++ "/websocket")
-
-
-putVersion : Uuid -> String -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putVersion kmUuid version =
-    jwtPut ("/branches/" ++ Uuid.toString kmUuid ++ "/versions/" ++ version)
 
 
 getMigration : Uuid -> AbstractAppState a -> ToMsg Migration msg -> Cmd msg

@@ -11,6 +11,7 @@ $content-height: calc(100vh - #{$header-height});
             display: flex;
 
             .questionnaire {
+                width: 0;
                 height: $content-height;
                 flex-grow: 1;
             }
@@ -32,6 +33,19 @@ $content-height: calc(100vh - #{$header-height});
                     background: $white;
                     border-radius: $border-radius;
                     border: 1px solid $gray-400;
+
+                    .question-link {
+                        font-style: italic;
+                    }
+
+                    .question-link, .fa-ul .fa-li-content {
+                        white-space: nowrap;
+                        display: inline-block;
+                        max-width: 100%;
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                        line-height: 1;
+                    }
 
                     .fa-ul {
                         margin-top: $spacer-1;

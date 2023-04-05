@@ -4,23 +4,30 @@ module Shared.Api.Packages exposing
     , exportPackageUrl
     , getOutdatedPackages
     , getPackage
+    , getPackageWithoutDeprecatedVersions
     , getPackages
     , getPackagesSuggestions
     , getPackagesSuggestionsWithOptions
     , importFromOwl
     , importPackage
+    , postFromBranch
+    , postFromMigration
     , pullPackage
+    , putPackage
     )
 
 import File exposing (File)
 import Http
+import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
 import Shared.Data.Package as Package exposing (Package)
+import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Uuid exposing (Uuid)
 
 
 getPackages : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
@@ -53,7 +60,7 @@ getPackagesSuggestions : PaginationQueryString -> AbstractAppState a -> ToMsg (P
 getPackagesSuggestions qs =
     let
         queryString =
-            PaginationQueryString.toApiUrl qs
+            PaginationQueryString.toApiUrlWith [ ( "phase", PackagePhase.toString PackagePhase.Released ) ] qs
 
         url =
             "/packages/suggestions" ++ queryString
@@ -80,6 +87,34 @@ getPackagesSuggestionsWithOptions qs select exclude =
 getPackage : String -> AbstractAppState a -> ToMsg PackageDetail msg -> Cmd msg
 getPackage packageId =
     jwtOrHttpGet ("/packages/" ++ packageId) PackageDetail.decoder
+
+
+getPackageWithoutDeprecatedVersions : String -> AbstractAppState a -> ToMsg PackageDetail msg -> Cmd msg
+getPackageWithoutDeprecatedVersions packageId =
+    jwtGet ("/packages/" ++ packageId ++ "?excludeDeprecatedVersions=true") PackageDetail.decoder
+
+
+postFromBranch : Uuid -> AbstractAppState a -> ToMsg Package msg -> Cmd msg
+postFromBranch uuid =
+    let
+        body =
+            E.object [ ( "branchUuid", Uuid.encode uuid ) ]
+    in
+    jwtFetch "/packages/from-branch" Package.decoder body
+
+
+postFromMigration : E.Value -> AbstractAppState a -> ToMsg Package msg -> Cmd msg
+postFromMigration =
+    jwtFetch "/packages/from-migration" Package.decoder
+
+
+putPackage : { p | id : String, phase : PackagePhase } -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putPackage package =
+    let
+        body =
+            PackageDetail.encode package
+    in
+    jwtPut ("/packages/" ++ package.id) body
 
 
 deletePackage : String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg

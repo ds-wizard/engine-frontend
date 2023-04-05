@@ -17,6 +17,7 @@ type alias Model =
     , profileMenuDropdownState : Dropdown.State
     , aboutOpen : Bool
     , apiBuildInfo : ActionResult BuildInfo
+    , recentlyCopied : Bool
     , submenuPositions : Dict String Dom.Element
     , languagesOpen : Bool
     }
@@ -30,6 +31,7 @@ initialModel =
     , profileMenuDropdownState = Dropdown.initialState
     , aboutOpen = False
     , apiBuildInfo = Unset
+    , recentlyCopied = False
     , submenuPositions = Dict.empty
     , languagesOpen = False
     }

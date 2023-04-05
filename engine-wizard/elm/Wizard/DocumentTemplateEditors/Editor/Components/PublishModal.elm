@@ -109,7 +109,7 @@ type alias ViewConfig =
 view : ViewConfig -> AppState -> Model -> Html Msg
 view cfg appState model =
     Modal.confirm appState
-        { modalTitle = "Publish"
+        { modalTitle = gettext "Publish" appState.locale
         , modalContent =
             String.formatHtml (gettext "Are you sure you want to publish %s, version %s?" appState.locale)
                 [ strong [] [ text cfg.documentTemplate.name ]

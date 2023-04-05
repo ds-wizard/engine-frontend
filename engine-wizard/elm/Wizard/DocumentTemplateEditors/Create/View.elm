@@ -42,7 +42,7 @@ viewCreate appState model _ =
             [ FormResult.errorOnlyView appState model.savingDocumentTemplate
             , formView appState model
             , FormActions.viewSubmit appState
-                Routes.kmEditorIndex
+                Routes.documentTemplateEditorsIndex
                 (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingDocumentTemplate)
             ]
         ]

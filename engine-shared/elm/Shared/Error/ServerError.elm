@@ -12,6 +12,8 @@ import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Maybe.Extra as Maybe
+import Shared.Common.ByteUnits as ByteUnits
 import String.Format as String
 
 
@@ -174,7 +176,55 @@ messageToReadable appState message =
             Just <| gettext "Document template metamodel version is not supported." appState.locale
 
         "error.service.app.limit_exceeded" ->
-            Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
+            case message.params of
+                "storage" :: current :: limit :: [] ->
+                    let
+                        parseBytes =
+                            Maybe.unwrap "0" ByteUnits.toReadable << String.toInt
+                    in
+                    Just <|
+                        String.format
+                            (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale)
+                            [ gettext "storage" appState.locale, parseBytes current, parseBytes limit ]
+
+                what :: current :: limit :: [] ->
+                    let
+                        whatTranslated =
+                            case what of
+                                "users" ->
+                                    gettext "users" appState.locale
+
+                                "active users" ->
+                                    gettext "active users" appState.locale
+
+                                "branches" ->
+                                    gettext "knowledge model editors" appState.locale
+
+                                "knowledge models" ->
+                                    gettext "knowledge models" appState.locale
+
+                                "questionnaires" ->
+                                    gettext "projects" appState.locale
+
+                                "document templates" ->
+                                    gettext "document templates" appState.locale
+
+                                "document template drafts" ->
+                                    gettext "document template editors" appState.locale
+
+                                "documents" ->
+                                    gettext "documents" appState.locale
+
+                                "locales" ->
+                                    gettext "locales" appState.locale
+
+                                _ ->
+                                    what
+                    in
+                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) [ whatTranslated, current, limit ]
+
+                _ ->
+                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
 
         "error.service.lb.missing_locale_json" ->
             Just <| gettext "\"locale.json\" was not found in archive." appState.locale

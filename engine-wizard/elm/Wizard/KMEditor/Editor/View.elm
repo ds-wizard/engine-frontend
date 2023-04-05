@@ -10,12 +10,13 @@ import Shared.Undraw as Undraw
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.DetailNavigation as DetailNavigation
-import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Editor.Common.EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.PublishModal as PublishModal
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute(..))
@@ -80,10 +81,14 @@ viewKMEditor route appState model branch =
 
             else
                 viewKMEditorNavigation appState route model branch
+
+        publishModalViewConfig =
+            { branch = branch.branch }
     in
     div [ class "KMEditor__Editor col-full flex-column", dataCy "km-editor" ]
         [ navigation
         , viewKMEditorContent appState route model branch
+        , Html.map PublishModalMsg <| PublishModal.view publishModalViewConfig appState model.publishModalModel
         ]
 
 
@@ -113,9 +118,9 @@ viewKMEditorNavigationTitleRow appState model branch =
         , DetailNavigation.section
             [ DetailNavigation.onlineUsers appState model.onlineUsers
             , DetailNavigation.sectionActions
-                [ linkTo appState
-                    (Routes.kmEditorPublish branch.branch.uuid)
+                [ button
                     [ class "btn btn-primary with-icon"
+                    , onClick (PublishModalMsg PublishModal.openMsg)
                     , dataCy "km-editor_publish-button"
                     ]
                     [ faSet "kmEditorList.publish" appState
@@ -166,6 +171,15 @@ viewKMEditorNavigationNav appState route editorBranch =
             , dataCy = "km-editor_nav_km"
             }
 
+        phasesLink =
+            { route = Routes.kmEditorEditorPhases branchUuid
+            , label = gettext "Phases" appState.locale
+            , icon = faSet "km.phase" appState
+            , isActive = route == KMEditorRoute.Phases
+            , isVisible = True
+            , dataCy = "km-editor_nav_phases"
+            }
+
         questionTagsLink =
             { route = Routes.kmEditorEditorQuestionTags branchUuid
             , label = gettext "Question Tags" appState.locale
@@ -178,7 +192,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         previewLink =
             { route = Routes.kmEditorEditorPreview branchUuid
             , label = gettext "Preview" appState.locale
-            , icon = faSet "kmEditor.preview" appState
+            , icon = faSet "_global.preview" appState
             , isActive = route == KMEditorRoute.Preview
             , isVisible = True
             , dataCy = "km-editor_nav_preview"
@@ -187,7 +201,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         settingsLink =
             { route = Routes.kmEditorEditorSettings branchUuid
             , label = gettext "Settings" appState.locale
-            , icon = faSet "kmEditor.settings" appState
+            , icon = faSet "_global.settings" appState
             , isActive = route == KMEditorRoute.Settings
             , isVisible = True
             , dataCy = "km-editor_nav_settings"
@@ -195,6 +209,7 @@ viewKMEditorNavigationNav appState route editorBranch =
 
         links =
             [ editorLink
+            , phasesLink
             , questionTagsLink
             , previewLink
             , settingsLink
@@ -212,6 +227,9 @@ viewKMEditorContent appState route model editorBranch =
     case route of
         KMEditorRoute.Edit _ ->
             KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) editorBranch
+
+        KMEditorRoute.Phases ->
+            PhaseEditor.view appState PhaseEditorMsg EventMsg editorBranch model.phaseEditorModel
 
         KMEditorRoute.QuestionTags ->
             TagEditor.view appState TagEditorMsg EventMsg editorBranch model.tagEditorModel

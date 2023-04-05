@@ -6,11 +6,11 @@ import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
 import Shared.Data.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Shared.Html exposing (faSet)
-import Shared.Utils exposing (listInsertIf)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass, tooltip)
@@ -82,7 +82,7 @@ listingActions : AppState -> DocumentTemplateDraft -> List (ListingDropdownItem 
 listingActions appState template =
     let
         viewAction =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.edit" appState
                 , label = gettext "Open editor" appState.locale
@@ -91,10 +91,10 @@ listingActions appState template =
                 }
 
         viewActionVisible =
-            Feature.templatesView appState
+            Feature.documentTemplatesView appState
 
         deleteAction =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = gettext "Delete" appState.locale
@@ -103,12 +103,14 @@ listingActions appState template =
                 }
 
         deleteActionVisible =
-            Feature.templatesDelete appState
+            Feature.documentTemplatesDelete appState
+
+        groups =
+            [ [ ( viewAction, viewActionVisible ) ]
+            , [ ( deleteAction, deleteActionVisible ) ]
+            ]
     in
-    []
-        |> listInsertIf viewAction viewActionVisible
-        |> listInsertIf Listing.dropdownSeparator deleteActionVisible
-        |> listInsertIf deleteAction deleteActionVisible
+    ListingDropdown.itemsFromGroups groups
 
 
 createButton : AppState -> Html Msg

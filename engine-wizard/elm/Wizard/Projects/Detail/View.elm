@@ -10,7 +10,7 @@ import Shared.Components.Badge as Badge
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Html exposing (emptyNode, fa)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
@@ -223,7 +223,7 @@ viewProjectNavigationNav appState route model qm =
         questionnaireLink =
             { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing)
             , label = gettext "Questionnaire" appState.locale
-            , icon = fa "fa far fa-list-alt"
+            , icon = faSet "project.questionnaire" appState
             , isActive = isQuestionnaireRoute
             , isVisible = True
             , dataCy = "project_nav_questionnaire"
@@ -232,7 +232,7 @@ viewProjectNavigationNav appState route model qm =
         metricsLink =
             { route = projectRoute ProjectDetailRoute.Metrics
             , label = gettext "Metrics" appState.locale
-            , icon = fa "fa far fa-chart-bar"
+            , icon = faSet "project.metrics" appState
             , isActive = route == ProjectDetailRoute.Metrics
             , isVisible = Features.projectMetrics appState questionnaire
             , dataCy = "project_nav_metrics"
@@ -241,7 +241,7 @@ viewProjectNavigationNav appState route model qm =
         previewLink =
             { route = projectRoute ProjectDetailRoute.Preview
             , label = gettext "Preview" appState.locale
-            , icon = fa "fa far fa-eye"
+            , icon = faSet "_global.preview" appState
             , isActive = route == ProjectDetailRoute.Preview
             , isVisible = Features.projectPreview appState questionnaire
             , dataCy = "project_nav_preview"
@@ -250,7 +250,7 @@ viewProjectNavigationNav appState route model qm =
         documentsLink =
             { route = projectRoute (ProjectDetailRoute.Documents PaginationQueryString.empty)
             , label = gettext "Documents" appState.locale
-            , icon = fa "fa far fa-copy"
+            , icon = faSet "project.documents" appState
             , isActive = isDocumentRoute
             , isVisible = Features.projectDocumentsView appState questionnaire
             , dataCy = "project_nav_documents"
@@ -259,7 +259,7 @@ viewProjectNavigationNav appState route model qm =
         settingsLink =
             { route = projectRoute ProjectDetailRoute.Settings
             , label = gettext "Settings" appState.locale
-            , icon = fa "fa fas fa-cogs"
+            , icon = faSet "_global.settings" appState
             , isActive = route == ProjectDetailRoute.Settings
             , isVisible = Features.projectSettings appState questionnaire
             , dataCy = "project_nav_settings"
@@ -350,8 +350,8 @@ viewProjectContent appState route model qm =
                     Settings.view appState
                         { questionnaire = QuestionnaireDescriptor.fromQuestionnaireDetail qm.questionnaire
                         , package = qm.questionnaire.package
-                        , packageVersions = qm.questionnaire.packageVersions
                         , templateState = qm.questionnaire.documentTemplateState
+                        , templatePhase = qm.questionnaire.documentTemplatePhase
                         , tags = KnowledgeModel.getTags qm.questionnaire.knowledgeModel
                         }
                         model.settingsModel

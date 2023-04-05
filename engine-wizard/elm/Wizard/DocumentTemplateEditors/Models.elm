@@ -23,7 +23,7 @@ initialModel : Model
 initialModel =
     { createModel = Wizard.DocumentTemplateEditors.Create.Models.initialModel Nothing Nothing
     , indexModel = Wizard.DocumentTemplateEditors.Index.Models.initialModel PaginationQueryString.empty
-    , editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel "" DTEditorRoute.Template
+    , editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel "" DTEditorRoute.Settings
     }
 
 

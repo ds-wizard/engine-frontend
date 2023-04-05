@@ -4,6 +4,7 @@ module Wizard.Dev.PersistentCommandsDetail.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Dropdown as Dropdown
 import Shared.Data.PersistentCommandDetail exposing (PersistentCommandDetail)
 import Uuid exposing (Uuid)
 
@@ -11,7 +12,8 @@ import Uuid exposing (Uuid)
 type alias Model =
     { uuid : Uuid
     , persistentCommand : ActionResult PersistentCommandDetail
-    , rerunning : ActionResult String
+    , updating : ActionResult String
+    , dropdownState : Dropdown.State
     }
 
 
@@ -19,5 +21,6 @@ initialModel : Uuid -> Model
 initialModel uuid =
     { uuid = uuid
     , persistentCommand = Loading
-    , rerunning = Unset
+    , updating = Unset
+    , dropdownState = Dropdown.initialState
     }

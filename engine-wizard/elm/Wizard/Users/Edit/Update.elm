@@ -8,6 +8,7 @@ import Shared.Api.Users as UsersApi
 import Shared.Data.User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
@@ -110,12 +111,23 @@ handlePasswordForm formMsg wrapMsg appState model =
             ( { model | passwordForm = passwordForm }, Cmd.none )
 
 
-putUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+putUserCompleted : AppState -> Model -> Result ApiError User -> ( Model, Cmd Wizard.Msgs.Msg )
 putUserCompleted appState model result =
     case result of
-        Ok _ ->
+        Ok user ->
+            let
+                updateCmd =
+                    if Just user.uuid == Maybe.map .uuid appState.session.user then
+                        dispatch (Wizard.Msgs.updateUserMsg user)
+
+                    else
+                        Cmd.none
+            in
             ( { model | savingUser = Success <| gettext "Profile was successfully updated." appState.locale }
-            , Ports.scrollToTop ".Users__Edit__content"
+            , Cmd.batch
+                [ Ports.scrollToTop ".Users__Edit__content"
+                , updateCmd
+                ]
             )
 
         Err err ->

@@ -97,6 +97,7 @@ import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
+import Wizard.Common.ElementScrollTop as ElementScrollTop
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
@@ -145,6 +146,7 @@ type alias Model =
     , questionnaireImporters : List QuestionnaireImporter
     , collapsedItems : Set String
     , recentlyCopied : Bool
+    , contentScrollTop : Maybe Int
     }
 
 
@@ -172,8 +174,7 @@ init : AppState -> QuestionnaireDetail -> Maybe String -> ( Model, Cmd Msg )
 init appState questionnaire mbPath =
     let
         mbChapterUuid =
-            Maybe.map .uuid <|
-                List.head (KnowledgeModel.getChapters questionnaire.knowledgeModel)
+            List.head questionnaire.knowledgeModel.chapterUuids
 
         activePage =
             Maybe.unwrap PageNone PageChapter mbChapterUuid
@@ -193,7 +194,7 @@ init appState questionnaire mbPath =
             , typeHints = Nothing
             , typeHintsDebounce = Debounce.init
             , feedbackModalModel = FeedbackModal.init
-            , viewSettings = QuestionnaireViewSettings.all
+            , viewSettings = QuestionnaireViewSettings.default
             , viewSettingsDropdown = Dropdown.initialState
             , historyModel = History.init appState
             , versionModalModel = VersionModal.init
@@ -211,6 +212,7 @@ init appState questionnaire mbPath =
             , questionnaireImporters = []
             , collapsedItems = Set.empty
             , recentlyCopied = False
+            , contentScrollTop = Nothing
             }
 
         ( model, scrollCmd ) =
@@ -225,6 +227,7 @@ init appState questionnaire mbPath =
     , Cmd.batch
         [ scrollCmd
         , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
+        , Ports.localStorageGet localStorageViewSettingsKey
         ]
     )
 
@@ -334,7 +337,7 @@ type alias QuestionnaireRenderer msg =
     , renderQuestionDescription : QuestionnaireViewSettings -> Question -> Html msg
     , getQuestionExtraClass : Question -> Maybe String
     , renderAnswerLabel : Answer -> Html msg
-    , renderAnswerBadges : Answer -> Html msg
+    , renderAnswerBadges : Bool -> Answer -> Html msg
     , renderAnswerAdvice : Answer -> Html msg
     , renderChoiceLabel : Choice -> Html msg
     }
@@ -349,6 +352,24 @@ type QuestionViewState
     = Default
     | Answered
     | Desirable
+
+
+localStorageViewSettingsKey : String
+localStorageViewSettingsKey =
+    "project-view-settings"
+
+
+localStorageViewSettingsDecoder : Decoder (LocalStorageData QuestionnaireViewSettings)
+localStorageViewSettingsDecoder =
+    LocalStorageData.decoder QuestionnaireViewSettings.decoder
+
+
+localStorageViewSettingsEncode : QuestionnaireViewSettings -> E.Value
+localStorageViewSettingsEncode qvs =
+    LocalStorageData.encode QuestionnaireViewSettings.encode
+        { key = localStorageViewSettingsKey
+        , value = qvs
+        }
 
 
 localStorageCollapsedItemKey : Uuid -> String
@@ -366,6 +387,11 @@ localStorageCollapsedItemsEncode =
     LocalStorageData.encode (E.list E.string << Set.toList)
 
 
+contentElementSelector : String
+contentElementSelector =
+    ".questionnaire__content"
+
+
 
 -- UPDATE
 
@@ -375,6 +401,8 @@ type Msg
     | SetRightPanel RightPanel
     | SetFullscreen Bool
     | ScrollToPath String
+    | UpdateContentScroll
+    | GotContentScroll E.Value
     | ShowTypeHints (List String) Bool String String
     | HideTypeHints
     | TypeHintInput (List String) Bool Reply
@@ -425,7 +453,7 @@ type Msg
     | ImportersDropdownMsg Dropdown.State
     | CollapseItem String
     | ExpandItem String
-    | GotCollapsedItems E.Value
+    | GotLocalStorageData E.Value
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
 
@@ -451,8 +479,12 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             model.navigationTreeModel
             in
             withSeed <|
-                ( { model | activePage = activePage, navigationTreeModel = newNavigationTreeModel }
-                , Ports.scrollToTop ".questionnaire__content"
+                ( { model
+                    | activePage = activePage
+                    , navigationTreeModel = newNavigationTreeModel
+                    , contentScrollTop = Nothing
+                  }
+                , Ports.scrollToTop contentElementSelector
                 )
 
         SetRightPanel rightPanel ->
@@ -476,6 +508,39 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         ScrollToPath path ->
             withSeed <| handleScrollToPath model path
+
+        UpdateContentScroll ->
+            let
+                subscribeCmd =
+                    Ports.subscribeScrollTop contentElementSelector
+            in
+            case model.contentScrollTop of
+                Just value ->
+                    withSeed
+                        ( model
+                        , Cmd.batch
+                            [ subscribeCmd
+                            , Ports.setScrollTop
+                                { selector = contentElementSelector
+                                , scrollTop = value
+                                }
+                            ]
+                        )
+
+                Nothing ->
+                    withSeed ( model, subscribeCmd )
+
+        GotContentScroll value ->
+            case decodeValue ElementScrollTop.decoder value of
+                Ok elementScrollTop ->
+                    if elementScrollTop.selector == contentElementSelector then
+                        wrap { model | contentScrollTop = Just elementScrollTop.scrollTop }
+
+                    else
+                        wrap model
+
+                Err _ ->
+                    wrap model
 
         ShowTypeHints path emptySearch questionUuid value ->
             withSeed <| handleShowTypeHints appState ctx model path emptySearch questionUuid value
@@ -615,7 +680,10 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | viewSettingsDropdown = state }
 
         SetViewSettings viewSettings ->
-            wrap { model | viewSettings = viewSettings }
+            withSeed
+                ( { model | viewSettings = viewSettings }
+                , Ports.localStorageSet (localStorageViewSettingsEncode viewSettings)
+                )
 
         GetQuestionnaireEventsComplete result ->
             wrap <|
@@ -793,11 +861,24 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
                 )
 
-        GotCollapsedItems value ->
-            case decodeValue localStorageCollapsedItemsDecoder value of
-                Ok data ->
-                    if data.key == localStorageCollapsedItemKey model.uuid then
-                        wrap { model | collapsedItems = data.value }
+        GotLocalStorageData value ->
+            case decodeValue (D.field "key" D.string) value of
+                Ok key ->
+                    if key == localStorageViewSettingsKey then
+                        case decodeValue localStorageViewSettingsDecoder value of
+                            Ok data ->
+                                wrap { model | viewSettings = data.value }
+
+                            Err _ ->
+                                wrap model
+
+                    else if key == localStorageCollapsedItemKey model.uuid then
+                        case decodeValue localStorageCollapsedItemsDecoder value of
+                            Ok data ->
+                                wrap { model | collapsedItems = data.value }
+
+                            Err _ ->
+                                wrap model
 
                     else
                         wrap model
@@ -1013,7 +1094,10 @@ subscriptions model =
                 SplitPane.subscriptions model.splitPane
 
         collapsedItemsSub =
-            Ports.localStorageData GotCollapsedItems
+            Ports.localStorageData GotLocalStorageData
+
+        contentScrollSub =
+            Ports.gotScrollTop GotContentScroll
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
@@ -1023,6 +1107,7 @@ subscriptions model =
          , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
          , splitPaneSubscriptions
          , collapsedItemsSub
+         , contentScrollSub
          ]
             ++ commentDropdownSubs
         )
@@ -1129,6 +1214,16 @@ viewQuestionnaireToolbar appState cfg model =
                             , onClick (SetViewSettings (QuestionnaireViewSettings.toggleTags viewSettings))
                             ]
                             [ settingsIcon viewSettings.tags, text (gettext "Question tags" appState.locale) ]
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon"
+                            , onClick (SetViewSettings (QuestionnaireViewSettings.toggleNonDesirableQuestions viewSettings))
+                            ]
+                            [ settingsIcon viewSettings.nonDesirableQuestions, text (gettext "Non-desirable questions" appState.locale) ]
+                        , Dropdown.anchorItem
+                            [ class "dropdown-item-icon"
+                            , onClick (SetViewSettings (QuestionnaireViewSettings.toggleMetricValues viewSettings))
+                            ]
+                            [ settingsIcon viewSettings.metricValues, text (gettext "Metric values" appState.locale) ]
                         ]
                     }
                 ]
@@ -1247,7 +1342,7 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
 
         warningsButtonVisible =
-            warningsLength > 0 || warningsOpen
+            warningsLength > 0
 
         versionHistoryButtonVisible =
             Feature.projectVersionHitory appState model.questionnaire
@@ -1272,8 +1367,8 @@ viewQuestionnaireToolbar appState cfg model =
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
-            , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton todosButton todosButtonVisible
+            , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
             , div [ class "item-group" ]
                 [ a [ class "item", onClick expandMsg ] [ expandIcon ]
@@ -1405,8 +1500,12 @@ viewQuestionnaireRightPanel appState cfg model =
                 ]
 
         RightPanelWarnings ->
-            wrapPanel <|
-                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings appState model ]
+            if QuestionnaireDetail.warningsLength model.questionnaire > 0 then
+                wrapPanel <|
+                    [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings model ]
+
+            else
+                emptyNode
 
 
 
@@ -1427,7 +1526,7 @@ viewQuestionnaireRightPanelTodos appState model =
 
         viewTodo todo =
             li []
-                [ span [ class "fa-li" ] [ fa "far fa-check-square" ]
+                [ span [ class "fa-li" ] [ fa "fas fa-edit" ]
                 , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
                 ]
     in
@@ -1444,8 +1543,8 @@ viewQuestionnaireRightPanelTodos appState model =
 -- QUESTIONNAIRE - RIGHT PANEL - WARNINGS
 
 
-viewQuestionnaireRightPanelWarnings : AppState -> Model -> Html Msg
-viewQuestionnaireRightPanelWarnings appState model =
+viewQuestionnaireRightPanelWarnings : Model -> Html Msg
+viewQuestionnaireRightPanelWarnings model =
     let
         warnings =
             QuestionnaireDetail.getWarnings model.questionnaire
@@ -1462,13 +1561,8 @@ viewQuestionnaireRightPanelWarnings appState model =
                 , a [ onClick (ScrollToPath todo.path) ] [ text <| Question.getTitle todo.question ]
                 ]
     in
-    if List.isEmpty warnings then
-        div [ class "todos todos-empty" ] <|
-            [ illustratedMessage Undraw.feelingHappy (gettext "There are no more warnings." appState.locale) ]
-
-    else
-        div [ class "todos" ] <|
-            List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
+    div [ class "todos" ] <|
+        List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
 
 
 
@@ -2083,8 +2177,33 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
 
+        isDesirable =
+            Question.isDesirable
+                model.questionnaire.knowledgeModel.phaseUuids
+                (Uuid.toString <| Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid)
+                question
+
+        ( questionClass, questionState ) =
+            case
+                ( QuestionnaireDetail.hasReply (pathToString newPath) model.questionnaire
+                , isDesirable
+                )
+            of
+                ( True, _ ) ->
+                    ( "question-answered", Answered )
+
+                ( _, True ) ->
+                    ( "question-desirable", Desirable )
+
+                _ ->
+                    if model.viewSettings.nonDesirableQuestions then
+                        ( "question-default", Default )
+
+                    else
+                        ( "question-hidden", Default )
+
         viewLabel =
-            viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question
+            viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question questionState
 
         viewTags =
             if model.viewSettings.tags then
@@ -2140,36 +2259,26 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
             Maybe.withDefault "" (cfg.renderer.getQuestionExtraClass question)
     in
     div
-        [ class ("form-group " ++ questionExtraClass)
+        [ class ("form-group " ++ questionClass ++ " " ++ questionExtraClass)
         , id ("question-" ++ Question.getUuid question)
         , attribute "data-path" (pathToString newPath)
         ]
         content
 
 
-viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
-viewQuestionLabel appState cfg _ model path humanIdentifiers question =
+viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> QuestionViewState -> Html Msg
+viewQuestionLabel appState cfg _ model path humanIdentifiers question questionState =
     let
-        isDesirable =
-            Question.isDesirable
-                model.questionnaire.knowledgeModel.phaseUuids
-                (Uuid.toString <| Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid)
-                question
+        ( icon, tooltipText ) =
+            case questionState of
+                Answered ->
+                    ( "fas fa-check", gettext "This question has been answered" appState.locale )
 
-        questionState =
-            case
-                ( QuestionnaireDetail.hasReply (pathToString path) model.questionnaire
-                , isDesirable
-                )
-            of
-                ( True, _ ) ->
-                    Answered
+                Desirable ->
+                    ( "fas fa-pen", gettext "This question should be answered now" appState.locale )
 
-                ( _, True ) ->
-                    Desirable
-
-                _ ->
-                    Default
+                Default ->
+                    ( "far fa-hourglass", gettext "This question can be answered later" appState.locale )
     in
     label []
         [ span []
@@ -2180,7 +2289,10 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question =
                     , ( "bg-danger", questionState == Desirable )
                     ]
                 ]
-                [ text (String.join "." humanIdentifiers) ]
+                [ span (tooltipRight tooltipText)
+                    [ fa (icon ++ " fa-fw") ]
+                , text (String.join "." humanIdentifiers)
+                ]
             , span
                 [ classList
                     [ ( "text-success", questionState == Answered )
@@ -2223,7 +2335,7 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
                 mbSelectedAnswer
     in
     ( div []
-        (List.indexedMap (viewAnswer appState cfg model.questionnaire.knowledgeModel path selectedAnswerUuid) answers
+        (List.indexedMap (viewAnswer appState cfg model model.questionnaire.knowledgeModel path selectedAnswerUuid) answers
             ++ [ clearReplyButton ]
         )
     , [ advice, followUps ]
@@ -2719,8 +2831,8 @@ viewChoice appState cfg path selectedChoicesUuids order choice =
         ]
 
 
-viewAnswer : AppState -> Config msg -> KnowledgeModel -> List String -> Maybe String -> Int -> Answer -> Html Msg
-viewAnswer appState cfg km path selectedAnswerUuid order answer =
+viewAnswer : AppState -> Config msg -> Model -> KnowledgeModel -> List String -> Maybe String -> Int -> Answer -> Html Msg
+viewAnswer appState cfg model km path selectedAnswerUuid order answer =
     let
         radioName =
             pathToString (path ++ [ answer.uuid ])
@@ -2759,7 +2871,7 @@ viewAnswer appState cfg km path selectedAnswerUuid order answer =
             , text humanIdentifier
             , cfg.renderer.renderAnswerLabel answer
             , followUpsIndicator
-            , cfg.renderer.renderAnswerBadges answer
+            , cfg.renderer.renderAnswerBadges model.viewSettings.metricValues answer
             ]
         ]
 
@@ -2827,13 +2939,12 @@ viewTodoAction appState cfg model path =
                     |> Maybe.unwrap False (List.member QuestionnaireDetail.todoUuid)
         in
         if hasTodo then
-            span [ class "action action-todo" ]
+            a
+                [ class "action action-todo"
+                , onClick (SetLabels currentPath [])
+                ]
                 [ span [] [ text (gettext "TODO" appState.locale) ]
-                , a
-                    ((onClick <| SetLabels currentPath [])
-                        :: class "text-danger"
-                        :: tooltip (gettext "Remove TODO" appState.locale)
-                    )
+                , a (class "text-danger" :: tooltip (gettext "Remove TODO" appState.locale))
                     [ faSet "_global.remove" appState ]
                 ]
 

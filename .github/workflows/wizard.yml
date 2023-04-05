@@ -1,0 +1,202 @@
+name: Wizard Client CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  btp:
+    name: Build-Tag-Push
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [ 18.1.0 ]
+    
+    env:
+      COMPONENT: wizard
+      IMAGE_NAME: wizard-client
+      PUBLIC_IMAGE_PREFIX: datastewardshipwizard
+      DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+      DOCKER_META_CONTEXT: '.'
+      DOCKER_META_FILE: './engine-wizard/docker/Dockerfile'
+      DOCKER_META_FILE_NO_SASS: './engine-wizard/docker/nosass.Dockerfile'
+      DOCKER_META_SUFFIX: ''
+      DOCKER_META_SUFFIX_NO_SASS: '-no-sass'
+      DOCKER_META_PLATFORMS: 'linux/amd64'
+      DOCKER_META_PLATFORMS_NO_SASS: 'linux/amd64,linux/arm64'
+
+    steps:
+      - name: '[setup] Checkout Project'
+        uses: actions/checkout@v3
+
+      - name: '[setup] QEMU'
+        uses: docker/setup-qemu-action@v2
+
+      - name: '[setup] Docker Buildx'
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: '[setup] Node.js ${{ matrix.node-version }}'
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: '[app] Install'
+        run: npm ci
+
+      - name: '[app] Test'
+        run: |
+          npm run test:$COMPONENT
+
+      - name: '[app] Build'
+        run: |
+          ./scripts/build.sh
+          ./scripts/replace_version.sh
+
+      - name: '[docker] Meta (default)'
+        id: meta-default
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+          flavor: |
+            suffix=${{ env.DOCKER_META_SUFFIX }}
+
+      - name: '[docker] Build (default)'
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ env.DOCKER_META_CONTEXT }}
+          file: ${{ env.DOCKER_META_FILE }}
+          platforms: ${{ env.DOCKER_META_PLATFORMS }}
+          push: false
+          tags: ${{ steps.meta-default.outputs.tags }}
+          labels: ${{ steps.meta-default.outputs.labels }}
+
+      - name: '[docker] Meta (no-sass)'
+        id: meta-no-sass
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=sha
+          flavor: |
+            suffix=${{ env.DOCKER_META_SUFFIX_NO_SASS }}
+
+      - name: '[docker] Build (no-sass)'
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ env.DOCKER_META_CONTEXT }}
+          file: ${{ env.DOCKER_META_FILE_NO_SASS }}
+          platforms: ${{ env.DOCKER_META_PLATFORMS_NO_SASS }}
+          push: false
+          tags: ${{ steps.meta-no-sass.outputs.tags }}
+          labels: ${{ steps.meta-no-sass.outputs.labels }}
+
+      - name: '[docker] Login'
+        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
+
+      - name: '[docker-dev] Meta (default)'
+        id: meta-dev-default
+        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+          flavor: |
+            suffix=${{ env.DOCKER_META_SUFFIX }}
+
+      - name: '[docker-dev] Build + Push (default)'
+        uses: docker/build-push-action@v4
+        if: github.event_name != 'pull_request' && steps.meta-dev-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
+        with:
+          context: ${{ env.DOCKER_META_CONTEXT }}
+          file: ${{ env.DOCKER_META_FILE }}
+          platforms: ${{ env.DOCKER_META_PLATFORMS }}
+          push: true
+          tags: ${{ steps.meta-dev-default.outputs.tags }}
+          labels: ${{ steps.meta-dev-default.outputs.labels }}
+
+      - name: '[docker-dev] Meta (no-sass)'
+        id: meta-dev-no-sass
+        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=ref,event=branch
+          flavor: |
+            suffix=${{ env.DOCKER_META_SUFFIX_NO_SASS }}
+
+      - name: '[docker-dev] Build + Push (no-sass)'
+        uses: docker/build-push-action@v4
+        if: github.event_name != 'pull_request' && steps.meta-dev-no-sass.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
+        with:
+          context: ${{ env.DOCKER_META_CONTEXT }}
+          file: ${{ env.DOCKER_META_FILE_NO_SASS }}
+          platforms: ${{ env.DOCKER_META_PLATFORMS_NO_SASS }}
+          push: true
+          tags: ${{ steps.meta-dev-no-sass.outputs.tags }}
+          labels: ${{ steps.meta-dev-no-sass.outputs.labels }}
+
+      - name: '[docker-public] Meta (default)'
+        id: meta-public-default
+        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
+          flavor: |
+            suffix=${{ env.DOCKER_META_SUFFIX }}
+
+      - name: '[docker-public] Build + Push (default)'
+        uses: docker/build-push-action@v4
+        if: github.event_name != 'pull_request' && steps.meta-public-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
+        with:
+          context: ${{ env.DOCKER_META_CONTEXT }}
+          file: ${{ env.DOCKER_META_FILE }}
+          platforms: ${{ env.DOCKER_META_PLATFORMS }}
+          push: true
+          tags: ${{ steps.meta-public-default.outputs.tags }}
+          labels: ${{ steps.meta-public-default.outputs.labels }}
+
+      - name: '[docker-public] Meta (no-sass)'
+        id: meta-public-no-sass
+        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
+        uses: docker/metadata-action@v4
+        with:
+          images: |
+            ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
+          flavor: |
+            suffix=${{ env.DOCKER_META_SUFFIX_NO_SASS }}
+
+      - name: '[docker-public] Build + Push (no-sass)'
+        uses: docker/build-push-action@v4
+        if: github.event_name != 'pull_request' && steps.meta-public-no-sass.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
+        with:
+          context: ${{ env.DOCKER_META_CONTEXT }}
+          file: ${{ env.DOCKER_META_FILE_NO_SASS }}
+          platforms: ${{ env.DOCKER_META_PLATFORMS_NO_SASS }}
+          push: true
+          tags: ${{ steps.meta-public-no-sass.outputs.tags }}
+          labels: ${{ steps.meta-public-no-sass.outputs.labels }}

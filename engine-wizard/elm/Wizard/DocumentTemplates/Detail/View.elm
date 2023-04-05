@@ -3,7 +3,6 @@ module Wizard.DocumentTemplates.Detail.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
-import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage
@@ -13,7 +12,7 @@ import Shared.Data.DocumentTemplateDetail as DocumentTemplateDetail exposing (Do
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust, listInsertIf)
+import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -24,6 +23,7 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.DocumentTemplates.Common.DocumentTemplateActionsDropdown as DocumentTemplateActionsDropdown
 import Wizard.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -31,85 +31,42 @@ import Wizard.Routes as Routes
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewPackage appState model) model.template
+    Page.actionResultView appState (viewDocumentTemplate appState model) model.template
 
 
-viewPackage : AppState -> Model -> DocumentTemplateDetail -> Html Msg
-viewPackage appState model template =
+viewDocumentTemplate : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+viewDocumentTemplate appState model template =
     DetailPage.container
-        [ header appState template
+        [ header appState model template
         , readme appState template
         , sidePanel appState template
         , deleteVersionModal appState model template
         ]
 
 
-header : AppState -> DocumentTemplateDetail -> Html Msg
-header appState template =
+header : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+header appState model template =
     let
-        createEditorAction =
-            linkTo appState
-                (Routes.documentTemplateEditorCreate (Just template.id) (Just True))
-                [ dataCy "dt-detail_create-editor-link" ]
-                [ faSet "_global.edit" appState
-                , text (gettext "Create editor" appState.locale)
-                ]
-
-        createEditorActionVisible =
-            Feature.templatesView appState
-
-        setDeprecatedAction =
-            a [ onClick (UpdatePhase DocumentTemplatePhase.Deprecated) ]
-                [ faSet "documentTemplate.setDeprecated" appState
-                , text (gettext "Set deprecated" appState.locale)
-                ]
-
-        setDeprecatedActionVisible =
-            template.phase == DocumentTemplatePhase.Released
-
-        restoreAction =
-            a [ onClick (UpdatePhase DocumentTemplatePhase.Released) ]
-                [ faSet "documentTemplate.restore" appState
-                , text (gettext "Restore" appState.locale)
-                ]
-
-        restoreActionVisible =
-            template.phase == DocumentTemplatePhase.Deprecated
-
-        exportAction =
-            a [ onClick (ExportTemplate template) ]
-                [ faSet "_global.export" appState
-                , text (gettext "Export" appState.locale)
-                ]
-
-        exportActionVisible =
-            Feature.templatesExport appState
-
-        deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
-                [ faSet "_global.delete" appState
-                , text (gettext "Delete" appState.locale)
-                ]
-
-        deleteActionVisible =
-            Feature.templatesDelete appState
-
-        actions =
-            []
-                |> listInsertIf createEditorAction createEditorActionVisible
-                |> listInsertIf setDeprecatedAction setDeprecatedActionVisible
-                |> listInsertIf restoreAction restoreActionVisible
-                |> listInsertIf exportAction exportActionVisible
-                |> listInsertIf deleteAction deleteActionVisible
-
         deprecatedBadge =
             if template.phase == DocumentTemplatePhase.Deprecated then
-                Badge.danger [] [ text "deprecated" ]
+                Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
             else
                 emptyNode
+
+        dropdownActions =
+            DocumentTemplateActionsDropdown.dropdown appState
+                { dropdownState = model.dropdownState
+                , toggleMsg = DropdownMsg
+                }
+                { exportMsg = ExportTemplate
+                , updatePhaseMsg = \_ phase -> UpdatePhase phase
+                , deleteMsg = always (ShowDeleteDialog True)
+                , viewActionVisible = False
+                }
+                template
     in
-    DetailPage.header (span [] [ text template.name, deprecatedBadge ]) actions
+    DetailPage.header (span [] [ text template.name, deprecatedBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> DocumentTemplateDetail -> Html msg
@@ -141,7 +98,7 @@ newVersionInRegistryWarning appState template =
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 importLink =
-                    if Feature.templatesImport appState && Version.greaterThan template.version remoteLatestVersion then
+                    if Feature.documentTemplatesImport appState && Version.greaterThan template.version remoteLatestVersion then
                         let
                             latestPackageId =
                                 template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
@@ -177,7 +134,7 @@ unsupportedMetamodelVersionWarning appState template =
                         if Version.greaterThan template.version remoteLatestVersion then
                             let
                                 importLink =
-                                    if Feature.templatesImport appState then
+                                    if Feature.documentTemplatesImport appState then
                                         let
                                             latestPackageId =
                                                 template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion

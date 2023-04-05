@@ -22,6 +22,7 @@ import Shared.Utils exposing (dispatch, getUuid)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
+import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
@@ -38,7 +39,7 @@ import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Update as Documents
 import Wizard.Projects.Detail.Models exposing (Model, addQuestionnaireEvent, addSavingActionUuid, hasTemplate, initPageModel, removeSavingActionUuid)
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
+import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
@@ -64,19 +65,22 @@ fetchSubrouteData appState model =
     case appState.route of
         ProjectsRoute (DetailRoute uuid route) ->
             case route of
-                PlanDetailRoute.Preview ->
+                ProjectDetailRoute.Questionnaire _ ->
+                    dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
+
+                ProjectDetailRoute.Preview ->
                     Cmd.map PreviewMsg <|
                         Preview.fetchData appState uuid (hasTemplate model)
 
-                PlanDetailRoute.Metrics ->
+                ProjectDetailRoute.Metrics ->
                     Cmd.map SummaryReportMsg <|
                         SummaryReport.fetchData appState uuid
 
-                PlanDetailRoute.Documents _ ->
+                ProjectDetailRoute.Documents _ ->
                     Cmd.map DocumentsMsg <|
                         Documents.fetchData
 
-                PlanDetailRoute.NewDocument mbEventUuid ->
+                ProjectDetailRoute.NewDocument mbEventUuid ->
                     Cmd.map NewDocumentMsg <|
                         NewDocument.fetchData appState uuid mbEventUuid
 
@@ -466,22 +470,27 @@ update wrapMsg msg appState model =
                         )
 
                 Err error ->
+                    let
+                        questionnaireRoute =
+                            Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+
+                        loginRoute =
+                            Routes.publicLogin (Just questionnaireRoute)
+                    in
                     case ( error, Session.exists appState.session ) of
                         ( BadStatus 403 _, False ) ->
-                            let
-                                questionnaireRoute =
-                                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+                            withSeed ( model, cmdNavigate appState loginRoute )
 
-                                loginRoute =
-                                    Routes.publicLogin (Just questionnaireRoute)
-                            in
-                            withSeed <|
-                                ( model, cmdNavigate appState loginRoute )
+                        ( BadStatus 401 _, False ) ->
+                            withSeed ( model, cmdNavigate appState loginRoute )
+
+                        ( BadStatus 401 _, True ) ->
+                            withSeed ( model, dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
 
                         _ ->
                             withSeed <|
                                 ( { model | questionnaireModel = ApiError.toActionResult appState (gettext "Unable to get the project." appState.locale) error }
-                                , Cmd.none
+                                , getResultCmd Wizard.Msgs.logoutMsg result
                                 )
 
         GetQuestionnaireImportersComplete result ->

@@ -2,6 +2,7 @@ module Wizard.Subscriptions exposing (subscriptions)
 
 import Wizard.Apps.Subscriptions
 import Wizard.Common.Menu.Subscriptions
+import Wizard.Dev.Subscriptions
 import Wizard.DocumentTemplateEditors.Subscriptions
 import Wizard.DocumentTemplates.Subscriptions
 import Wizard.Documents.Subscriptions
@@ -24,11 +25,14 @@ subscriptions model =
                 Routes.AppsRoute route ->
                     Sub.map AppsMsg <| Wizard.Apps.Subscriptions.subscriptions route model.appsModel
 
+                Routes.DevRoute route ->
+                    Sub.map AdminMsg <| Wizard.Dev.Subscriptions.subscriptions route model.adminModel
+
                 Routes.DocumentsRoute _ ->
                     Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions model.documentsModel
 
                 Routes.DocumentTemplateEditorsRoute route ->
-                    Sub.map DocumentTemplateEditorsMsg <| Wizard.DocumentTemplateEditors.Subscriptions.subscriptions route model.documentTemplateEditorsModel
+                    Wizard.DocumentTemplateEditors.Subscriptions.subscriptions DocumentTemplateEditorsMsg OnTime route model.documentTemplateEditorsModel
 
                 Routes.DocumentTemplatesRoute route ->
                     Sub.map DocumentTemplatesMsg <| Wizard.DocumentTemplates.Subscriptions.subscriptions route model.documentTemplatesModel

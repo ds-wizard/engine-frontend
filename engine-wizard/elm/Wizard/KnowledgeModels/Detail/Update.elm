@@ -6,9 +6,10 @@ module Wizard.KnowledgeModels.Detail.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Api.Packages as PackagesApi
+import Shared.Data.Package.PackagePhase exposing (PackagePhase)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setPackage)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
@@ -35,6 +36,9 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
+        DropdownMsg state ->
+            ( { model | dropdownState = state }, Cmd.none )
+
         ShowDeleteDialog visible ->
             ( { model | showDeleteDialog = visible, deletingVersion = Unset }, Cmd.none )
 
@@ -43,6 +47,24 @@ update msg wrapMsg appState model =
 
         DeleteVersionCompleted result ->
             deleteVersionCompleted appState model result
+
+        UpdatePhase phase ->
+            handleSetUpdatePhase wrapMsg appState model phase
+
+        UpdatePhaseCompleted phase result ->
+            case model.package of
+                Success package ->
+                    applyResultTransform appState
+                        { setResult = setPackage
+                        , defaultError = gettext "Unable to update the knowledge model." appState.locale
+                        , model = model
+                        , result = result
+                        , logoutMsg = Wizard.Msgs.logoutMsg
+                        , transform = always { package | phase = phase }
+                        }
+
+                _ ->
+                    ( model, Cmd.none )
 
         ExportPackage package ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (PackagesApi.exportPackageUrl package.id appState)) )
@@ -73,3 +95,17 @@ deleteVersionCompleted appState model result =
             ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
+
+
+handleSetUpdatePhase : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> PackagePhase -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSetUpdatePhase wrapMsg appState model phase =
+    case model.package of
+        Success package ->
+            let
+                newPackage =
+                    { package | phase = phase }
+            in
+            ( model, PackagesApi.putPackage newPackage appState (wrapMsg << UpdatePhaseCompleted phase) )
+
+        _ ->
+            ( model, Cmd.none )

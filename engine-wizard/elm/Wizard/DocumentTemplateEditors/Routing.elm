@@ -24,9 +24,9 @@ parsers appState wrapRoute =
     in
     [ map (createRoute wrapRoute) (s moduleRoot </> s "create" <?> Query.string "selected" <?> Query.bool "edit")
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
-    , map (wrapRoute << flip EditorRoute DTEditorRoute.Template) (s moduleRoot </> string)
-    , map (wrapRoute << flip EditorRoute DTEditorRoute.Files) (s moduleRoot </> string </> s "files")
+    , map (wrapRoute << flip EditorRoute DTEditorRoute.Files) (s moduleRoot </> string)
     , map (wrapRoute << flip EditorRoute DTEditorRoute.Preview) (s moduleRoot </> string </> s "preview")
+    , map (wrapRoute << flip EditorRoute DTEditorRoute.Settings) (s moduleRoot </> string </> s "settings")
     ]
 
 
@@ -76,16 +76,16 @@ toUrl appState route =
                     [ moduleRoot, templateId ]
             in
             case subroute of
-                DTEditorRoute.Template ->
-                    base
-
                 DTEditorRoute.Files ->
-                    base ++ [ "files" ]
+                    base
 
                 DTEditorRoute.Preview ->
                     base ++ [ "preview" ]
 
+                DTEditorRoute.Settings ->
+                    base ++ [ "settings" ]
+
 
 isAllowed : AppState -> Bool
 isAllowed appState =
-    Feature.templatesView appState
+    Feature.documentTemplatesView appState

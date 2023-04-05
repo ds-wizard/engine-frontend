@@ -15,28 +15,25 @@ jobs:
         node-version: [ 18.1.0 ]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: '[setup] Checkout Project'
+        uses: actions/checkout@v3
 
-      # (1) -> Preparations
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: '[setup] Node.js ${{ matrix.node-version }}'
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      # (2) -> Install dependencies
-      - name: Install
+      - name: '[app] Install'
         run: |
           npm ci
           cd wizard-style-builder
           npm install fs-extra@10.1.0 sass@1.54.0
 
-      # (3) -> Build app and Docker image
-      - name: Build
+      - name: '[app] Create .pot File'
         run: |
           npm run pot
 
-      # (4) -> Check prerelease
-      - name: Check Prerelease
+      - name: '[release] Check Prerelease'
         id: check_prerelease
         run: |
           GITHUB_TAG=`echo $GITHUB_REF | cut -d/ -f3`
@@ -46,8 +43,8 @@ jobs:
             echo "::set-output name=is_prerelease::true"
           fi
 
-      # (5) -> Create release & upload artifacts
-      - uses: ncipollo/release-action@v1
+      - name: '[release] Create & Upload Artifacts'
+        uses: ncipollo/release-action@v1
         with:
           allowUpdates: true
           artifactErrorsFailBuild: true

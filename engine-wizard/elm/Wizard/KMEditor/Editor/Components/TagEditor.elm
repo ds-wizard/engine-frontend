@@ -12,7 +12,6 @@ import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (checked, class, classList, style, type_)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
-import Shared.Copy as Copy
 import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditEventSetters exposing (setTagUuids)
@@ -48,7 +47,6 @@ initialModel =
 type Msg
     = Highlight String
     | CancelHighlight
-    | CopyUuid String
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -59,9 +57,6 @@ update msg model =
 
         CancelHighlight ->
             ( { model | highlightedTagUuid = Nothing }, Cmd.none )
-
-        CopyUuid uuid ->
-            ( model, Copy.copyToClipboard uuid )
 
 
 type alias EventMsg msg =
@@ -121,7 +116,7 @@ view appState wrapMsg eventMsg editorBranch model =
                 in
                 tagEditorTable appState props model
     in
-    div [ class "KMEditor__Editor__TagEditor", dataCy "km-editor_tags" ]
+    div [ class "KMEditor__Editor__TableEditor", dataCy "km-editor_tags" ]
         [ content ]
 
 
@@ -170,7 +165,7 @@ thTag appState model tag =
             else
                 ( False, tag.name )
     in
-    th [ class "th-tag", classList [ ( "highlighted", model.highlightedTagUuid == Just tag.uuid ) ] ]
+    th [ class "th-item", classList [ ( "highlighted", model.highlightedTagUuid == Just tag.uuid ) ] ]
         [ div []
             [ div attributes [ text tagName ]
             ]
@@ -255,7 +250,7 @@ trQuestion appState props model indent tags question =
             String.withDefault (gettext "Untitled question" appState.locale) (Question.getTitle question)
     in
     tr []
-        (th [ onClick <| props.wrapMsg <| CopyUuid <| Question.getUuid question ]
+        (th []
             [ div [ indentClass indent ]
                 [ faSet "km.question" appState
                 , text questionTitle
@@ -306,7 +301,6 @@ tdQuestionTagCheckbox props model question tag =
 trChapter : AppState -> Props msg -> Chapter -> List Tag -> Html msg
 trChapter appState props chapter =
     trSeparator props
-        (Just chapter.uuid)
         (String.withDefault (gettext "Untitled chapter" appState.locale) chapter.title)
         (faSet "km.chapter" appState)
         "separator-chapter"
@@ -316,7 +310,6 @@ trChapter appState props chapter =
 trAnswer : AppState -> Props msg -> Answer -> Int -> List Tag -> Html msg
 trAnswer appState props answer =
     trSeparator props
-        (Just answer.uuid)
         (String.withDefault (gettext "Untitled answer" appState.locale) answer.label)
         (faSet "km.answer" appState)
         ""
@@ -325,25 +318,15 @@ trAnswer appState props answer =
 trItemTemplate : AppState -> Props msg -> Int -> List Tag -> Html msg
 trItemTemplate appState props =
     trSeparator props
-        Nothing
         (gettext "Item Template" appState.locale)
         (faSet "km.itemTemplate" appState)
         ""
 
 
-trSeparator : Props msg -> Maybe String -> String -> Html msg -> String -> Int -> List Tag -> Html msg
-trSeparator props mbUuid title icon extraClass indent tags =
-    let
-        thAttributes =
-            case mbUuid of
-                Just uuid ->
-                    [ onClick <| props.wrapMsg <| CopyUuid uuid ]
-
-                Nothing ->
-                    []
-    in
+trSeparator : Props msg -> String -> Html msg -> String -> Int -> List Tag -> Html msg
+trSeparator props title icon extraClass indent tags =
     tr [ class <| "separator " ++ extraClass ]
-        (th thAttributes
+        (th []
             [ div [ indentClass indent ]
                 [ icon
                 , text title

@@ -5,6 +5,7 @@ import Uuid exposing (Uuid)
 
 type KMEditorRoute
     = Edit (Maybe Uuid)
+    | Phases
     | QuestionTags
     | Preview
     | Settings

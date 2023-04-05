@@ -8,7 +8,9 @@ import Shared.Data.Prefab exposing (Prefab)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.WebSocket as WebSocket
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
+import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
+import Wizard.KMEditor.Editor.Components.PublishModal as PublishModal
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
@@ -22,8 +24,10 @@ type Msg
     | SavingMsg ProjectSaving.Msg
     | Refresh
     | KMEditorMsg KMEditor.Msg
+    | PhaseEditorMsg PhaseEditor.Msg
     | TagEditorMsg TagEditor.Msg
     | PreviewMsg Preview.Msg
     | SettingsMsg Settings.Msg
+    | PublishModalMsg PublishModal.Msg
     | EventMsg String (Maybe String) (CommonEventData -> Event)
     | ResetModel

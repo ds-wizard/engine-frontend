@@ -126,15 +126,6 @@ viewEditorNavigation appState route model =
 viewEditorNavigationNav : AppState -> DTEditorRoute -> Model -> Html Msg
 viewEditorNavigationNav appState route model =
     let
-        templateLink =
-            { route = Routes.documentTemplateEditorDetail model.documentTemplateId
-            , label = gettext "Template" appState.locale
-            , icon = faSet "documentTemplateEditor.template" appState
-            , isActive = route == DTEditorRoute.Template
-            , isVisible = True
-            , dataCy = "dt-editor_nav_template"
-            }
-
         filesLink =
             { route = Routes.documentTemplateEditorDetailFiles model.documentTemplateId
             , label = gettext "Files" appState.locale
@@ -147,16 +138,25 @@ viewEditorNavigationNav appState route model =
         previewLink =
             { route = Routes.documentTemplateEditorDetailPreview model.documentTemplateId
             , label = gettext "Preview" appState.locale
-            , icon = faSet "documentTemplateEditor.preview" appState
+            , icon = faSet "_global.preview" appState
             , isActive = route == DTEditorRoute.Preview
             , isVisible = True
             , dataCy = "dt-editor_nav_preview"
             }
 
+        settingsLink =
+            { route = Routes.documentTemplateEditorDetailSettings model.documentTemplateId
+            , label = gettext "Settings" appState.locale
+            , icon = faSet "_global.settings" appState
+            , isActive = route == DTEditorRoute.Settings
+            , isVisible = True
+            , dataCy = "dt-editor_nav_settings"
+            }
+
         links =
-            [ templateLink
-            , filesLink
+            [ filesLink
             , previewLink
+            , settingsLink
             ]
     in
     DetailNavigation.navigation appState links

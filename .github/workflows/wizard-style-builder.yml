@@ -1,4 +1,4 @@
-name: Style Builder CI
+name: Wizard Style Builder CI
 
 on:
   push:
@@ -14,24 +14,22 @@ jobs:
         node-version: [18.1.0]
 
     steps:
-      - uses: actions/checkout@v3
+      - name: '[setup] Checkout Project'
+        uses: actions/checkout@v3
 
-      # (1) -> Preparations
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: '[setup] Node.js ${{ matrix.node-version }}'
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      # (2) -> Install and initialize
-      - name: Install
+      - name: '[app] Install'
         run: |
           npm install
           cd wizard-style-builder
           npm install
           npm run init
 
-      # (3) -> Run tests
-      - name: Test
+      - name: '[app] Test'
         run: |
           cd wizard-style-builder
           npm run test
@@ -51,33 +49,37 @@ jobs:
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_META_CONTEXT: 'wizard-style-builder'
       DOCKER_META_FILE: './wizard-style-builder/docker/Dockerfile'
-      DOCKER_META_PLATFORMS: 'linux/amd64'
+      DOCKER_META_PLATFORMS: 'linux/amd64,linux/arm64'
 
     steps:
-      - uses: actions/checkout@v3
+      - name: '[setup] Checkout project'
+        uses: actions/checkout@v3
 
-      # (1) -> Preparations
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: '[setup] QEMU'
+        uses: docker/setup-qemu-action@v2
+
+      - name: '[setup] Docker Buildx'
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: '[setup] Node.js ${{ matrix.node-version }}'
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
 
-      # (2) -> Install dependencies
-      - name: Install
+      - name: '[app] Install'
         run: |
           npm ci
           cd wizard-style-builder
           npm ci
 
-      # (3) -> Build app and Docker image
-      - name: Build
+      - name: '[app] Build'
         run: |
           cd wizard-style-builder
           npm run init
 
-      # (4.1) -> Docker build (test)
-      - name: Docker meta [test]
-        id: meta-test
+      - name: '[docker] Meta'
+        id: meta
         uses: docker/metadata-action@v4
         with:
           images: |
@@ -85,26 +87,24 @@ jobs:
           tags: |
             type=sha
 
-      - name: Docker build [test]
+      - name: '[docker] Build'
         uses: docker/build-push-action@v4
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE }}
           platforms: ${{ env.DOCKER_META_PLATFORMS }}
           push: false
-          tags: ${{ steps.meta-test.outputs.tags }}
-          labels: ${{ steps.meta-test.outputs.labels }}
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
 
-      # (4.2) -> Docker login
-      - name: Docker login [docker.io]
+      - name: '[docker] Login'
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_HUB_USERNAME }}
           password: ${{ secrets.DOCKER_HUB_PASSWORD }}
 
-      # (4.3) -> Docker build+push (dev)
-      - name: Docker meta [dev]
+      - name: '[docker-dev] Meta'
         id: meta-dev
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
         uses: docker/metadata-action@v4
@@ -114,7 +114,7 @@ jobs:
           tags: |
             type=ref,event=branch
 
-      - name: Docker build+push [dev]
+      - name: '[docker-dev] Build + Push'
         uses: docker/build-push-action@v4
         if: github.event_name != 'pull_request' && steps.meta-dev.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
@@ -125,8 +125,7 @@ jobs:
           tags: ${{ steps.meta-dev.outputs.tags }}
           labels: ${{ steps.meta-dev.outputs.labels }}
 
-      # (4.4) -> Docker build+push (public)
-      - name: Docker meta [public]
+      - name: '[docker-public] Meta'
         id: meta-public
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
         uses: docker/metadata-action@v4
@@ -139,7 +138,7 @@ jobs:
             type=semver,pattern={{major}}.{{minor}}
             type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
 
-      - name: Docker build+push [public]
+      - name: '[docker-public] Build + Push'
         uses: docker/build-push-action@v4
         if: github.event_name != 'pull_request' && steps.meta-public.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:

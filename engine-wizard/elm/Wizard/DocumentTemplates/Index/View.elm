@@ -8,17 +8,17 @@ import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (listInsertIf)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass, tooltip)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.DocumentTemplates.Common.DocumentTemplateActionsDropdown as DocumentTemplateActionsDropdown
 import Wizard.DocumentTemplates.Index.Models exposing (Model)
 import Wizard.DocumentTemplates.Index.Msgs exposing (Msg(..))
 import Wizard.DocumentTemplates.Routes exposing (Route(..))
@@ -29,7 +29,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "" ]
         [ Page.header (gettext "Document Templates" appState.locale) []
-        , FormResult.successOnlyView appState model.deletingDocumentTemplate
+        , FormResult.view appState model.deletingDocumentTemplate
         , Listing.view appState (listingConfig appState) model.documentTemplates
         , deleteModal appState model
         ]
@@ -37,7 +37,7 @@ view appState model =
 
 importButton : AppState -> Html Msg
 importButton appState =
-    if Feature.templatesImport appState then
+    if Feature.documentTemplatesImport appState then
         linkTo appState
             (Routes.documentTemplatesImport Nothing)
             [ class "btn btn-primary with-icon" ]
@@ -54,7 +54,13 @@ listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
-    , dropdownItems = listingActions appState
+    , dropdownItems =
+        DocumentTemplateActionsDropdown.actions appState
+            { exportMsg = ExportDocumentTemplate
+            , updatePhaseMsg = UpdatePhase
+            , deleteMsg = ShowHideDeleteDocumentTemplate << Just
+            , viewActionVisible = True
+            }
     , textTitle = .name
     , emptyText = gettext "Click \"Import\" button to import a new document template." appState.locale
     , updated =
@@ -75,24 +81,24 @@ listingConfig appState =
 
 
 listingTitle : AppState -> DocumentTemplate -> Html Msg
-listingTitle appState template =
+listingTitle appState documentTemplate =
     span []
-        [ linkTo appState (Routes.documentTemplatesDetail template.id) [] [ text template.name ]
+        [ linkTo appState (Routes.documentTemplatesDetail documentTemplate.id) [] [ text documentTemplate.name ]
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
-            [ text <| Version.toString template.version ]
-        , listingTitleOutdatedBadge appState template
-        , listingTitleUnsupportedBadge appState template
-        , listingTitleDeprecatedBadge appState template
+            [ text <| Version.toString documentTemplate.version ]
+        , listingTitleOutdatedBadge appState documentTemplate
+        , listingTitleUnsupportedBadge appState documentTemplate
+        , listingTitleDeprecatedBadge appState documentTemplate
         ]
 
 
 listingTitleOutdatedBadge : AppState -> DocumentTemplate -> Html Msg
-listingTitleOutdatedBadge appState template =
-    if template.state == DocumentTemplateState.Outdated then
+listingTitleOutdatedBadge appState documentTemplate =
+    if documentTemplate.state == DocumentTemplateState.Outdated then
         let
             documentTemplateId =
-                Maybe.map ((++) (template.organizationId ++ ":" ++ template.templateId ++ ":")) template.remoteLatestVersion
+                Maybe.map ((++) (documentTemplate.organizationId ++ ":" ++ documentTemplate.templateId ++ ":")) documentTemplate.remoteLatestVersion
         in
         linkTo appState
             (Routes.documentTemplatesImport documentTemplateId)
@@ -104,8 +110,8 @@ listingTitleOutdatedBadge appState template =
 
 
 listingTitleUnsupportedBadge : AppState -> DocumentTemplate -> Html Msg
-listingTitleUnsupportedBadge appState template =
-    if template.state == DocumentTemplateState.UnsupportedMetamodelVersion then
+listingTitleUnsupportedBadge appState documentTemplate =
+    if documentTemplate.state == DocumentTemplateState.UnsupportedMetamodelVersion then
         Badge.danger [] [ text (gettext "unsupported metamodel" appState.locale) ]
 
     else
@@ -113,8 +119,8 @@ listingTitleUnsupportedBadge appState template =
 
 
 listingTitleDeprecatedBadge : AppState -> DocumentTemplate -> Html Msg
-listingTitleDeprecatedBadge appState template =
-    if template.phase == DocumentTemplatePhase.Deprecated then
+listingTitleDeprecatedBadge appState documentTemplate =
+    if documentTemplate.phase == DocumentTemplatePhase.Deprecated then
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
     else
@@ -122,10 +128,10 @@ listingTitleDeprecatedBadge appState template =
 
 
 listingDescription : AppState -> DocumentTemplate -> Html Msg
-listingDescription appState template =
+listingDescription appState documentTemplate =
     let
         organizationFragment =
-            case template.organization of
+            case documentTemplate.organization of
                 Just organization ->
                     let
                         logo =
@@ -145,65 +151,19 @@ listingDescription appState template =
                     emptyNode
     in
     span []
-        [ code [ class "fragment" ] [ text template.id ]
+        [ code [ class "fragment" ] [ text documentTemplate.id ]
         , organizationFragment
-        , span [ class "fragment" ] [ text template.description ]
+        , span [ class "fragment" ] [ text documentTemplate.description ]
         ]
-
-
-listingActions : AppState -> DocumentTemplate -> List (ListingDropdownItem Msg)
-listingActions appState template =
-    let
-        viewAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "_global.view" appState
-                , label = gettext "View detail" appState.locale
-                , msg = ListingActionLink (Routes.documentTemplatesDetail template.id)
-                , dataCy = "view"
-                }
-
-        viewActionVisible =
-            Feature.templatesView appState
-
-        exportAction =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "_global.export" appState
-                , label = gettext "Export" appState.locale
-                , msg = ListingActionMsg (ExportDocumentTemplate template)
-                , dataCy = "export"
-                }
-
-        exportActionVisible =
-            Feature.templatesExport appState
-
-        deleteAction =
-            Listing.dropdownAction
-                { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
-                , label = gettext "Delete" appState.locale
-                , msg = ListingActionMsg <| ShowHideDeleteDocumentTemplate <| Just template
-                , dataCy = "delete"
-                }
-
-        deleteActionVisible =
-            Feature.templatesDelete appState
-    in
-    []
-        |> listInsertIf viewAction viewActionVisible
-        |> listInsertIf exportAction exportActionVisible
-        |> listInsertIf Listing.dropdownSeparator deleteActionVisible
-        |> listInsertIf deleteAction deleteActionVisible
 
 
 deleteModal : AppState -> Model -> Html Msg
 deleteModal appState model =
     let
-        ( visible, templateName ) =
+        ( visible, documentTemplateName ) =
             case model.documentTemplateToBeDeleted of
-                Just template ->
-                    ( True, template.name )
+                Just documentTemplate ->
+                    ( True, documentTemplate.name )
 
                 Nothing ->
                     ( False, "" )
@@ -212,7 +172,7 @@ deleteModal appState model =
             [ p []
                 (String.formatHtml
                     (gettext "Are you sure you want to permanently delete %s and all its versions?" appState.locale)
-                    [ strong [] [ text templateName ] ]
+                    [ strong [] [ text documentTemplateName ] ]
                 )
             ]
 

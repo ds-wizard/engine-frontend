@@ -36,6 +36,9 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 }
 
+        DropdownMsg state ->
+            ( { model | dropdownState = state }, Cmd.none )
+
         ShowDeleteDialog visible ->
             ( { model | showDeleteDialog = visible, deletingVersion = Unset }, Cmd.none )
 

@@ -17,11 +17,11 @@ import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listInsertIf)
 import String.Format as String
 import Time.Distance as TimeDistance
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Common.Components.Listing.View as Listing
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass, tooltip, tooltipCustom)
@@ -186,7 +186,7 @@ listingActions appState document =
             Feature.documentDownload appState document
 
         download =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.download" appState
                 , label = gettext "Download" appState.locale
@@ -198,7 +198,7 @@ listingActions appState document =
             Feature.documentSubmit appState document
 
         submit =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.submit" appState
                 , label = gettext "Submit" appState.locale
@@ -210,7 +210,7 @@ listingActions appState document =
             Maybe.isJust document.workerLog && document.state == ErrorDocumentState
 
         viewError =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "documents.viewError" appState
                 , label = gettext "View error" appState.locale
@@ -222,20 +222,24 @@ listingActions appState document =
             Feature.documentDelete appState document
 
         delete =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
                 }
+
+        groups =
+            [ [ ( download, downloadEnabled )
+              , ( submit, submitEnabled )
+              , ( viewError, viewErrorEnabled )
+              ]
+            , [ ( delete, deleteEnabled )
+              ]
+            ]
     in
-    []
-        |> listInsertIf download downloadEnabled
-        |> listInsertIf submit submitEnabled
-        |> listInsertIf viewError viewErrorEnabled
-        |> listInsertIf Listing.dropdownSeparator ((downloadEnabled || submitEnabled || viewErrorEnabled) && deleteEnabled)
-        |> listInsertIf delete deleteEnabled
+    ListingDropdown.itemsFromGroups groups
 
 
 stateBadge : AppState -> DocumentState -> Html msg

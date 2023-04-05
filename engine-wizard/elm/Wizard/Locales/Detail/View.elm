@@ -2,8 +2,7 @@ module Wizard.Locales.Detail.View exposing (view)
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, href, target)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.Locale.LocaleState as LocaleState
@@ -11,7 +10,7 @@ import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust, listInsertIf)
+import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -21,6 +20,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
+import Wizard.Locales.Common.LocaleActionsDropdown as LocaleActionsDropdown
 import Wizard.Locales.Detail.Models exposing (Model)
 import Wizard.Locales.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -34,66 +34,16 @@ view appState model =
 viewLocale : AppState -> Model -> LocaleDetail -> Html Msg
 viewLocale appState model locale =
     DetailPage.container
-        [ header appState locale
+        [ header appState model locale
         , readme appState locale
         , sidePanel appState locale
         , deleteVersionModal appState model locale
         ]
 
 
-header : AppState -> LocaleDetail -> Html Msg
-header appState locale =
+header : AppState -> Model -> LocaleDetail -> Html Msg
+header appState model locale =
     let
-        exportAction =
-            a [ onClick (ExportLocale locale) ]
-                [ faSet "_global.export" appState
-                , text (gettext "Export" appState.locale)
-                ]
-
-        exportActionVisible =
-            Feature.localeExport appState locale
-
-        setDefaultAction =
-            a [ onClick <| SetDefault, class "with-icon" ]
-                [ faSet "locale.default" appState
-                , text (gettext "Set default" appState.locale)
-                ]
-
-        setDefaultActionVisible =
-            Feature.localeSetDefault appState locale
-
-        enableAction =
-            if locale.enabled then
-                a [ onClick <| SetEnabled False, class "with-icon" ]
-                    [ faSet "_global.disable" appState
-                    , text (gettext "Disable" appState.locale)
-                    ]
-
-            else
-                a [ onClick <| SetEnabled True, class "with-icon" ]
-                    [ faSet "_global.enable" appState
-                    , text (gettext "Enable" appState.locale)
-                    ]
-
-        enableActionVisible =
-            Feature.localeChangeEnabled appState locale
-
-        deleteAction =
-            a [ onClick <| ShowDeleteDialog True, class "text-danger with-icon" ]
-                [ faSet "_global.delete" appState
-                , text (gettext "Delete" appState.locale)
-                ]
-
-        deleteActionVisible =
-            Feature.localeDelete appState locale
-
-        actions =
-            []
-                |> listInsertIf exportAction exportActionVisible
-                |> listInsertIf setDefaultAction setDefaultActionVisible
-                |> listInsertIf enableAction enableActionVisible
-                |> listInsertIf deleteAction deleteActionVisible
-
         defaultBadge =
             if locale.defaultLocale then
                 Badge.info [] [ text (gettext "default" appState.locale) ]
@@ -106,8 +56,21 @@ header appState locale =
                 [ text locale.name
                 , defaultBadge
                 ]
+
+        dropdownActions =
+            LocaleActionsDropdown.dropdown appState
+                { dropdownState = model.dropdownState
+                , toggleMsg = DropdownMsg
+                }
+                { exportMsg = ExportLocale
+                , setDefaultMsg = always SetDefault
+                , setEnabledMsg = \enabled _ -> SetEnabled enabled
+                , deleteMsg = always (ShowDeleteDialog True)
+                , viewActionVisible = False
+                }
+                locale
     in
-    DetailPage.header headerText actions
+    DetailPage.header headerText [ dropdownActions ]
 
 
 readme : AppState -> LocaleDetail -> Html msg
@@ -171,6 +134,7 @@ sidePanel appState locale =
             [ sidePanelLocaleInfo appState locale
             , sidePanelOtherVersions appState locale
             , sidePanelOrganizationInfo appState locale
+            , sidePanelRegistryLink appState locale
             ]
     in
     DetailPage.sidePanel
@@ -187,14 +151,22 @@ sidePanelLocaleInfo appState locale =
             else
                 Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
 
+        dswVersion =
+            if Feature.isDefaultLanguage locale then
+                []
+
+            else
+                [ ( gettext "DSW Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion ) ]
+
         localeInfoList =
             [ ( gettext "ID" appState.locale, "id", text locale.id )
             , ( gettext "Language Code" appState.locale, "code", code [] [ text locale.code ] )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString locale.version )
-            , ( gettext "DSW Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion )
-            , ( gettext "License" appState.locale, "license", text locale.license )
-            , ( gettext "Enabled" appState.locale, "license", enabledBadge )
             ]
+                ++ dswVersion
+                ++ [ ( gettext "License" appState.locale, "license", text locale.license )
+                   , ( gettext "Enabled" appState.locale, "license", enabledBadge )
+                   ]
     in
     Just ( gettext "Locale" appState.locale, "locale", DetailPage.sidePanelList 4 8 localeInfoList )
 
@@ -234,6 +206,21 @@ viewOrganization organization =
     DetailPage.sidePanelItemWithIcon organization.name
         (text organization.organizationId)
         (ItemIcon.view { text = organization.name, image = organization.logo })
+
+
+sidePanelRegistryLink : AppState -> LocaleDetail -> Maybe ( String, String, Html msg )
+sidePanelRegistryLink appState locale =
+    let
+        toRegistryLinkInfo registryLink =
+            ( gettext "Registry Link" appState.locale
+            , "registry-link"
+            , a [ href registryLink, target "_blank", class "with-icon" ]
+                [ faSet "kmDetail.registryLink" appState
+                , text (gettext "View in registry" appState.locale)
+                ]
+            )
+    in
+    Maybe.map toRegistryLinkInfo locale.registryLink
 
 
 deleteVersionModal : AppState -> Model -> { a | id : String } -> Html Msg

@@ -8,6 +8,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
 import Time
 import Version exposing (Version)
@@ -23,6 +24,7 @@ type alias Package =
     , organization : Maybe OrganizationInfo
     , remoteLatestVersion : Maybe String
     , state : PackageState
+    , phase : PackagePhase
     , createdAt : Time.Posix
     }
 
@@ -39,6 +41,7 @@ decoder =
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "remoteLatestVersion" (D.maybe D.string)
         |> D.required "state" PackageState.decoder
+        |> D.required "phase" PackagePhase.decoder
         |> D.required "createdAt" D.datetime
 
 
@@ -53,5 +56,6 @@ dummy =
     , organization = Nothing
     , remoteLatestVersion = Nothing
     , state = PackageState.unknown
+    , phase = PackagePhase.Released
     , createdAt = Time.millisToPosix 0
     }

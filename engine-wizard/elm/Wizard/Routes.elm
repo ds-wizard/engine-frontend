@@ -10,6 +10,7 @@ module Wizard.Routes exposing
     , documentTemplateEditorDetail
     , documentTemplateEditorDetailFiles
     , documentTemplateEditorDetailPreview
+    , documentTemplateEditorDetailSettings
     , documentTemplateEditorsIndex
     , documentTemplateEditorsIndexWithFilters
     , documentTemplatesDetail
@@ -41,6 +42,7 @@ module Wizard.Routes exposing
     , isUsersIndex
     , kmEditorCreate
     , kmEditorEditor
+    , kmEditorEditorPhases
     , kmEditorEditorPreview
     , kmEditorEditorQuestionTags
     , kmEditorEditorSettings
@@ -89,6 +91,7 @@ module Wizard.Routes exposing
     , usersIndexWithFilters
     )
 
+import Shared.Auth.Role as Role
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -317,7 +320,7 @@ documentTemplateEditorCreate mbBasedOn mbEdit =
 
 documentTemplateEditorDetail : String -> Route
 documentTemplateEditorDetail =
-    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Template
+    documentTemplateEditorDetailFiles
 
 
 documentTemplateEditorDetailFiles : String -> Route
@@ -328,6 +331,11 @@ documentTemplateEditorDetailFiles =
 documentTemplateEditorDetailPreview : String -> Route
 documentTemplateEditorDetailPreview =
     DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
+
+
+documentTemplateEditorDetailSettings : String -> Route
+documentTemplateEditorDetailSettings =
+    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Settings
 
 
 documentTemplateEditorsIndex : Route
@@ -382,6 +390,11 @@ isKmEditorEditor uuid route =
 
         _ ->
             False
+
+
+kmEditorEditorPhases : Uuid -> Route
+kmEditorEditorPhases branchUuid =
+    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.Phases)
 
 
 kmEditorEditorQuestionTags : Uuid -> Route
@@ -562,7 +575,11 @@ projectsIndex : { a | session : Session } -> Route
 projectsIndex appState =
     let
         mbUserUuid =
-            Session.getUserUuid appState.session
+            if Session.getUserRole appState.session == Role.admin then
+                Nothing
+
+            else
+                Session.getUserUuid appState.session
     in
     ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
 

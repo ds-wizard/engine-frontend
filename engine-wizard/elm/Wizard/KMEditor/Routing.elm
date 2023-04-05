@@ -30,6 +30,7 @@ parsers appState wrapRoute =
     [ map (createRoute wrapRoute) (s moduleRoot </> s (lr "kmEditor.create" appState) <?> Query.string (lr "kmEditor.create.selected" appState) <?> Query.bool (lr "kmEditor.create.edit" appState))
     , map (wrapRoute << flip EditorRoute (KMEditorRoute.Edit Nothing)) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid)
     , map editorWithEntityRoute (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "edit" </> uuid)
+    , map (wrapRoute << flip EditorRoute KMEditorRoute.Phases) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "phases")
     , map (wrapRoute << flip EditorRoute KMEditorRoute.QuestionTags) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "question-tags")
     , map (wrapRoute << flip EditorRoute KMEditorRoute.Preview) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "preview")
     , map (wrapRoute << flip EditorRoute KMEditorRoute.Settings) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "settings")
@@ -89,6 +90,9 @@ toUrl appState route =
 
                         Nothing ->
                             base
+
+                KMEditorRoute.Phases ->
+                    base ++ [ "phases" ]
 
                 KMEditorRoute.QuestionTags ->
                     base ++ [ "question-tags" ]

@@ -2,7 +2,7 @@
 @import 'variables';
 
 $separator-color: $gray-300;
-$highlight-color: $gray-200;
+$highlight-color: $gray-100;
 $border-color: $gray-300;
 $border-thick-color: $gray-400;
 
@@ -16,7 +16,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
 
 
 .with-error {
-    .KMEditor__Editor__TagEditor {
+    .KMEditor__Editor__TableEditor {
         .editor-table-container {
             height: calc(100vh - #{$editor-header-height});
         }
@@ -24,8 +24,8 @@ $highlight-transition: background-color 0.1s ease-in-out;
 }
 
 
-.KMEditor__Editor__TagEditor {
-    &>.alert {
+.KMEditor__Editor__TableEditor {
+    & > .alert {
         margin: 1rem;
     }
 
@@ -72,7 +72,7 @@ $highlight-transition: background-color 0.1s ease-in-out;
                         }
                     }
 
-                    &.th-tag {
+                    &.th-item {
                         text-align: center;
                         white-space: nowrap;
 
@@ -92,10 +92,17 @@ $highlight-transition: background-color 0.1s ease-in-out;
                                 font-style: italic;
                             }
                         }
+
+                        .phase {
+                            min-width: 80px;
+                            padding: 5px 10px;
+
+                            &.untitled {
+                                font-style: italic;
+                            }
+                        }
                     }
                 }
-
-
             }
 
             tbody {

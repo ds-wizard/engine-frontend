@@ -1,24 +1,23 @@
 module Wizard.Dev.PersistentCommandsDetail.View exposing (view)
 
-import Html exposing (Html, a, code, div, h3, pre, span, text)
+import Html exposing (Html, code, div, h3, pre, span, text)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
 import Json.Print
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.PersistentCommand as PersistentCommand
 import Shared.Data.PersistentCommandDetail exposing (PersistentCommandDetail)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Html exposing (emptyNode)
 import SyntaxHighlight
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
-import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.AppIcon as AppIcon
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.PersistentCommandBadge as PersistentCommandBadge
 import Wizard.Common.View.UserIcon as UserIcon
+import Wizard.Dev.Common.PersistentCommandActionsDropdown as PersistentCommandActionDropdown
 import Wizard.Dev.PersistentCommandsDetail.Models exposing (Model)
 import Wizard.Dev.PersistentCommandsDetail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -32,14 +31,14 @@ view appState model =
 viewPersistentCommand : AppState -> Model -> PersistentCommandDetail -> Html Msg
 viewPersistentCommand appState model persistentCommand =
     DetailPage.container
-        [ header appState persistentCommand
+        [ header appState model persistentCommand
         , content appState model persistentCommand
         , sidePanel appState persistentCommand
         ]
 
 
-header : AppState -> PersistentCommandDetail -> Html Msg
-header appState persistentCommand =
+header : AppState -> Model -> PersistentCommandDetail -> Html Msg
+header appState model persistentCommand =
     let
         title =
             span []
@@ -47,16 +46,18 @@ header appState persistentCommand =
                 , PersistentCommandBadge.view persistentCommand
                 ]
 
-        rerunAction =
-            a
-                [ onClick RerunCommand
-                , dataCy "persistent-command-detail_rerun-link"
-                ]
-                [ faSet "persistentCommand.retry" appState
-                , text "Rerun"
-                ]
+        dropdownActions =
+            PersistentCommandActionDropdown.dropdown appState
+                { dropdownState = model.dropdownState
+                , toggleMsg = DropdownMsg
+                }
+                { retryMsg = always RerunCommand
+                , setIgnoredMsg = always SetIgnored
+                , viewActionVisible = False
+                }
+                persistentCommand
     in
-    DetailPage.header title [ rerunAction ]
+    DetailPage.header title [ dropdownActions ]
 
 
 content : AppState -> Model -> PersistentCommandDetail -> Html msg
@@ -99,7 +100,7 @@ content appState model persistentCommand =
                     []
     in
     DetailPage.content
-        [ FormResult.view appState model.rerunning
+        [ FormResult.view appState model.updating
         , div [ DetailPage.contentInnerFullClass ]
             (error ++ body)
         ]

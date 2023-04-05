@@ -20,7 +20,7 @@ fi
 
 
 # Get build timestamp
-builtAt=`date +"%Y/%m/%d %TZ"`
+builtAt=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
 
 # Replace values

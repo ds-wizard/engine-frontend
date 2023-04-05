@@ -6,8 +6,11 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import Json.Decode as D
+import Json.Decode.Extra as D
 import List.Extra as List
 import Shared.Auth.Role as Role
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
@@ -20,7 +23,7 @@ import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.Html.Events exposing (onLinkClick)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))
 import Wizard.Common.View.Modal as Modal
@@ -100,7 +103,7 @@ menuItems appState =
         , id = "document-templates"
         , route = Routes.documentTemplatesIndex
         , isActive = Routes.isDocumentTemplatesSubroute
-        , isVisible = Feature.templatesView
+        , isVisible = Feature.documentTemplatesView
         , items =
             [ { title = gettext "List" appState.locale
               , id = "documents-list"
@@ -538,25 +541,53 @@ viewReportIssueModal appState isOpen =
     Modal.confirm appState modalConfig
 
 
-viewAboutModal : AppState -> Bool -> ActionResult BuildInfo -> Html Wizard.Msgs.Msg
-viewAboutModal appState isOpen serverBuildInfoActionResult =
+viewAboutModal : AppState -> Bool -> Bool -> ActionResult BuildInfo -> Html Wizard.Msgs.Msg
+viewAboutModal appState isOpen recentlyCopied serverBuildInfoActionResult =
     let
+        copyButton =
+            if ActionResult.isSuccess serverBuildInfoActionResult then
+                let
+                    copyButtonTooltip =
+                        if recentlyCopied then
+                            tooltip (gettext "Copied!" appState.locale)
+
+                        else
+                            []
+                in
+                button
+                    (class "btn btn-link with-icon"
+                        :: onClick (Wizard.Msgs.MenuMsg CopyAbout)
+                        :: onMouseLeave (Wizard.Msgs.MenuMsg ClearRecentlyCopied)
+                        :: copyButtonTooltip
+                    )
+                    [ faSet "_global.copy" appState, text (gettext "Copy" appState.locale) ]
+
+            else
+                emptyNode
+
         modalContent =
-            Page.actionResultView appState (viewAboutModalContent appState) serverBuildInfoActionResult
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text (gettext "About" appState.locale) ]
+                , copyButton
+                ]
+            , div [ class "modal-body" ]
+                [ Page.actionResultView appState (viewAboutModalContent appState) serverBuildInfoActionResult ]
+            , div [ class "modal-footer" ]
+                [ button
+                    [ class "btn btn-primary"
+                    , onClick (Wizard.Msgs.MenuMsg (SetAboutOpen False))
+                    ]
+                    [ text (gettext "OK" appState.locale) ]
+                ]
+            ]
 
         modalConfig =
-            { modalTitle = gettext "About" appState.locale
-            , modalContent = [ modalContent ]
+            { modalContent = modalContent
             , visible = isOpen
-            , actionResult = Unset
-            , actionName = gettext "OK" appState.locale
-            , actionMsg = Wizard.Msgs.MenuMsg <| SetAboutOpen False
-            , cancelMsg = Nothing
-            , dangerous = False
             , dataCy = "about"
             }
     in
-    Modal.confirm appState modalConfig
+    Modal.simple modalConfig
 
 
 viewAboutModalContent : AppState -> BuildInfo -> Html Wizard.Msgs.Msg
@@ -573,14 +604,22 @@ viewAboutModalContent appState serverBuildInfo =
             [ ( gettext "API URL" appState.locale, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
             , ( gettext "API Docs" appState.locale, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
             ]
+
+        viewComponentVersion component =
+            viewBuildInfo appState component.name component []
+
+        componentVersions =
+            List.map viewComponentVersion (List.sortBy .name serverBuildInfo.components)
     in
     div []
-        [ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client extraClientInfo
-        , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
-        ]
+        ([ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client extraClientInfo
+         , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
+         ]
+            ++ componentVersions
+        )
 
 
-viewBuildInfo : AppState -> String -> BuildInfo -> List ( String, Html msg ) -> Html msg
+viewBuildInfo : AppState -> String -> { a | version : String, builtAt : String } -> List ( String, Html msg ) -> Html msg
 viewBuildInfo appState name buildInfo extra =
     let
         viewExtraRow ( title, value ) =
@@ -588,6 +627,11 @@ viewBuildInfo appState name buildInfo extra =
                 [ td [] [ text title ]
                 , td [] [ value ]
                 ]
+
+        buildAtValue =
+            D.decodeString D.datetime ("\"" ++ buildInfo.builtAt ++ "\"")
+                |> Result.map (TimeUtils.toReadableDateTime appState.timeZone)
+                |> Result.withDefault buildInfo.builtAt
     in
     table [ class "table table-borderless table-build-info" ]
         [ thead []
@@ -601,7 +645,7 @@ viewBuildInfo appState name buildInfo extra =
                 ]
              , tr []
                 [ td [] [ text (gettext "Built at" appState.locale) ]
-                , td [] [ em [] [ text buildInfo.builtAt ] ]
+                , td [] [ em [] [ text buildAtValue ] ]
                 ]
              ]
                 ++ List.map viewExtraRow extra

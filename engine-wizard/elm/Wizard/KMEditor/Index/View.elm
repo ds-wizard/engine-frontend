@@ -8,10 +8,11 @@ import Shared.Components.Badge as Badge
 import Shared.Data.Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (listInsertIf, packageIdToComponents)
+import Shared.Utils exposing (packageIdToComponents)
 import Version
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.View as Listing exposing (ListingActionType(..), ListingDropdownItem, ViewConfig)
+import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
+import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass, tooltip)
@@ -181,7 +182,7 @@ listingActions : AppState -> Branch -> List (ListingDropdownItem Msg)
 listingActions appState branch =
     let
         openEditor =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.edit" appState
                 , label = gettext "Open Editor" appState.locale
@@ -189,26 +190,17 @@ listingActions appState branch =
                 , dataCy = "open-editor"
                 }
 
-        publish =
-            Listing.dropdownAction
-                { extraClass = Nothing
-                , icon = faSet "kmEditorList.publish" appState
-                , label = gettext "Publish" appState.locale
-                , msg = ListingActionLink <| Routes.KMEditorRoute <| PublishRoute branch.uuid
-                , dataCy = "publish"
-                }
-
         upgrade =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "kmEditorList.upgrade" appState
-                , label = gettext "Upgrade" appState.locale
+                , icon = faSet "kmEditorList.update" appState
+                , label = gettext "Update" appState.locale
                 , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId))
-                , dataCy = "upgrade"
+                , dataCy = "update"
                 }
 
         continueMigration =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "kmEditorList.continueMigration" appState
                 , label = gettext "Continue migration" appState.locale
@@ -217,7 +209,7 @@ listingActions appState branch =
                 }
 
         cancelMigration =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faSet "_global.cancel" appState
                 , label = gettext "Cancel migration" appState.locale
@@ -226,7 +218,7 @@ listingActions appState branch =
                 }
 
         delete =
-            Listing.dropdownAction
+            ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faSet "_global.delete" appState
                 , label = gettext "Delete" appState.locale
@@ -236,9 +228,6 @@ listingActions appState branch =
 
         showOpenEditor =
             Feature.knowledgeModelEditorOpen appState branch
-
-        showPublish =
-            Feature.knowledgeModelEditorPublish appState branch
 
         showUpgrade =
             Feature.knowledgeModelEditorUpgrade appState branch
@@ -251,14 +240,14 @@ listingActions appState branch =
 
         showDelete =
             Feature.knowledgeModelEditorDelete appState branch
+
+        groups =
+            [ [ ( openEditor, showOpenEditor ) ]
+            , [ ( upgrade, showUpgrade )
+              , ( continueMigration, showContinueMigration )
+              , ( cancelMigration, showCancelMigration )
+              ]
+            , [ ( delete, showDelete ) ]
+            ]
     in
-    []
-        |> listInsertIf openEditor showOpenEditor
-        |> listInsertIf Listing.dropdownSeparator showPublish
-        |> listInsertIf publish showPublish
-        |> listInsertIf Listing.dropdownSeparator ((showOpenEditor || showPublish) && (showUpgrade || showContinueMigration || showCancelMigration))
-        |> listInsertIf upgrade showUpgrade
-        |> listInsertIf continueMigration showContinueMigration
-        |> listInsertIf cancelMigration showCancelMigration
-        |> listInsertIf Listing.dropdownSeparator showDelete
-        |> listInsertIf delete showDelete
+    ListingDropdown.itemsFromGroups groups
