@@ -295,7 +295,7 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
             List.length editorBranch.warnings
 
         warningsButton =
-            if warningsCount > 0 || model.warningsPanelOpen then
+            if warningsCount > 0 then
                 a
                     [ class "item"
                     , classList [ ( "selected", model.warningsPanelOpen ) ]
@@ -309,7 +309,7 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                 emptyNode
 
         warningsPanel =
-            if model.warningsPanelOpen then
+            if warningsCount > 0 && model.warningsPanelOpen then
                 Html.map wrapMsg <|
                     viewWarningsPanel appState editorBranch
 
