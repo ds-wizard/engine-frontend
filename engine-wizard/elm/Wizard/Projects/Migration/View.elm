@@ -140,11 +140,11 @@ changeView appState model migration =
     div [ class "change-view" ]
         [ div [ class "progress-view" ]
             [ text <| String.format (gettext "Resolved changes %s/%s" appState.locale) [ String.fromInt resolvedCount, String.fromInt changesCount ]
-            , div [ class "progress" ]
-                [ div [ class "progress-bar", classList [ ( "bg-success", resolvedCount == changesCount ) ], style "width" (progress ++ "%") ] [] ]
             ]
         , div [ class "controls-view d-flex" ]
             [ resolveAction, resolveAllAction ]
+        , div [ class "progress mt-2" ]
+            [ div [ class "progress-bar", classList [ ( "bg-success", resolvedCount == changesCount ) ], style "width" (progress ++ "%") ] [] ]
         ]
 
 
