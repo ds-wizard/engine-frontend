@@ -25,10 +25,10 @@
     "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js"
   },
   "devDependencies": {
+    "@lydell/elm": "^0.19.1-12",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.7.3",
     "css-minimizer-webpack-plugin": "^5.0.0",
-    "elm": "^0.19.1-5",
     "elm-review": "^2.9.2",
     "elm-test": "^0.19.1-revision12",
     "elm-webpack-loader": "^8.0.0",
@@ -63,5 +63,8 @@
     "prismjs": "^1.29.0",
     "stream-browserify": "^3.0.0",
     "util": "^0.12.5"
+  },
+  "overrides": {
+    "elm": "npm:@lydell/elm@0.19.1-12"
   }
 }
