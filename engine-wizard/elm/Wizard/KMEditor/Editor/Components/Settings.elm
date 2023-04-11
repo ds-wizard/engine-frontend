@@ -10,6 +10,7 @@ module Wizard.KMEditor.Editor.Components.Settings exposing
 
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
+import Form.Field as Field
 import Gettext exposing (gettext)
 import Html exposing (Html, br, button, div, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
@@ -23,6 +24,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
+import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Html exposing (linkTo)
@@ -33,6 +35,7 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
+import Wizard.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.KMEditor.Common.DeleteModal as DeleteModal
 import Wizard.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.Ports as Ports
@@ -63,6 +66,7 @@ setBranchDetail branch model =
 
 type Msg
     = FormMsg Form.Msg
+    | FormSetVersion Version
     | PutBranchComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
     | UpgradeModalMsg UpgradeModal.Msg
@@ -93,6 +97,19 @@ update cfg appState msg model =
 
                 _ ->
                     ( { model | form = Form.update BranchEditForm.validation formMsg model.form }, Cmd.none )
+
+        FormSetVersion version ->
+            let
+                setFormValue field value =
+                    Form.update BranchEditForm.validation (Form.Input field Form.Text (Field.String value))
+
+                form =
+                    model.form
+                        |> setFormValue "versionMajor" (String.fromInt (Version.getMajor version))
+                        |> setFormValue "versionMinor" (String.fromInt (Version.getMinor version))
+                        |> setFormValue "versionPatch" (String.fromInt (Version.getPatch version))
+            in
+            ( { model | form = form }, Cmd.none )
 
         PutBranchComplete result ->
             case result of
@@ -149,9 +166,9 @@ view appState branchDetail model =
             , majorField = "versionMajor"
             , minorField = "versionMinor"
             , patchField = "versionPatch"
-            , currentVersion = Nothing
+            , currentVersion = BranchUtils.lastVersion appState branchDetail
             , wrapFormMsg = FormMsg
-            , setVersionMsg = Nothing
+            , setVersionMsg = Just FormSetVersion
             }
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]

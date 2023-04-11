@@ -6,6 +6,23 @@ input[type=color] {
     min-height: 30px;
 }
 
+input:read-only, textarea:read-only, .form-control.disabled {
+    background-color: $gray-100;
+    color: $gray-600;
+    cursor: not-allowed;
+
+    &:focus {
+        background-color: $gray-100;
+        color: $gray-600;
+        box-shadow: none;
+        border-color: $gray-400;
+    }
+}
+
+.form-control.disabled {
+    min-height: 2.2rem;
+}
+
 label {
     font-weight: bold;
     margin-bottom: $spacer-2;

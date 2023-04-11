@@ -1,8 +1,10 @@
 module Wizard.Common.View.Modal exposing
     ( ConfirmConfig
+    , ConfirmExtraConfig
     , ErrorConfig
     , SimpleConfig
     , confirm
+    , confirmExtra
     , error
     , simple
     )
@@ -56,6 +58,36 @@ type alias ConfirmConfig msg =
 
 confirm : AppState -> ConfirmConfig msg -> Html msg
 confirm appState cfg =
+    confirmExtra appState
+        { modalTitle = cfg.modalTitle
+        , modalContent = cfg.modalContent
+        , visible = cfg.visible
+        , actionResult = cfg.actionResult
+        , actionName = cfg.actionName
+        , actionMsg = cfg.actionMsg
+        , cancelMsg = cfg.cancelMsg
+        , dangerous = cfg.dangerous
+        , extraClass = ""
+        , dataCy = cfg.dataCy
+        }
+
+
+type alias ConfirmExtraConfig msg =
+    { modalTitle : String
+    , modalContent : List (Html msg)
+    , visible : Bool
+    , actionResult : ActionResult String
+    , actionName : String
+    , actionMsg : msg
+    , cancelMsg : Maybe msg
+    , dangerous : Bool
+    , extraClass : String
+    , dataCy : String
+    }
+
+
+confirmExtra : AppState -> ConfirmExtraConfig msg -> Html msg
+confirmExtra appState cfg =
     let
         content =
             FormResult.view appState cfg.actionResult :: cfg.modalContent
@@ -78,7 +110,7 @@ confirm appState cfg =
                 Nothing ->
                     emptyNode
     in
-    div [ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ]
+    div [ class "modal modal-cover", class cfg.extraClass, classList [ ( "visible", cfg.visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 [ div [ class "modal-header" ]

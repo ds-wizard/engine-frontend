@@ -16,7 +16,7 @@ import Wizard.Common.View.Page as Page
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
-import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor as TemplateEditor
+import Wizard.DocumentTemplateEditors.Editor.Components.Settings as Settings
 import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute exposing (DTEditorRoute)
 import Wizard.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model, containsChanges)
 import Wizard.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
@@ -34,8 +34,8 @@ viewTemplateEditor appState route model documentTemplate =
         content =
             case model.currentEditor of
                 TemplateEditor ->
-                    Html.map TemplateEditorMsg <|
-                        TemplateEditor.view appState model.templateEditorModel
+                    Html.map SettingsMsg <|
+                        Settings.view appState model.settingsModel
 
                 FilesEditor ->
                     let
@@ -74,7 +74,7 @@ viewEditorNavigation appState route model =
                             { label = gettext "Save" appState.locale
                             , result =
                                 ActionResult.all
-                                    (ActionResult.map (always ()) model.templateEditorModel.savingForm
+                                    (ActionResult.map (always ()) model.settingsModel.savingForm
                                         :: Dict.values model.fileEditorModel.savingFiles
                                     )
                             , msg = Save
