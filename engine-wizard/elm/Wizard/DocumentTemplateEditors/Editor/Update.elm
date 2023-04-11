@@ -16,7 +16,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
-import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor as TemplateEditor
+import Wizard.DocumentTemplateEditors.Editor.Components.Settings as Settings
 import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute exposing (DTEditorRoute)
 import Wizard.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model, containsChanges)
 import Wizard.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
@@ -72,13 +72,13 @@ update appState wrapMsg msg model =
 
         saveForm : ( Model, Cmd Wizard.Msgs.Msg ) -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
         saveForm ( m, cmd ) =
-            if TemplateEditor.formChanged m.templateEditorModel && not (FileEditor.anyFileSaving m.fileEditorModel) then
+            if Settings.formChanged m.settingsModel && not (FileEditor.anyFileSaving m.fileEditorModel) then
                 let
                     ( newSeed, templateEditorModel, templateEditorCmd ) =
-                        TemplateEditor.update templateEditorUpdateConfig appState TemplateEditor.saveMsg model.templateEditorModel
+                        Settings.update templateEditorUpdateConfig appState Settings.saveMsg model.settingsModel
                 in
                 ( newSeed
-                , { model | templateEditorModel = templateEditorModel }
+                , { model | settingsModel = templateEditorModel }
                 , Cmd.batch [ cmd, templateEditorCmd ]
                 )
 
@@ -108,9 +108,9 @@ update appState wrapMsg msg model =
             else
                 ( seed, m, cmd )
 
-        templateEditorUpdateConfig : TemplateEditor.UpdateConfig Wizard.Msgs.Msg
+        templateEditorUpdateConfig : Settings.UpdateConfig Wizard.Msgs.Msg
         templateEditorUpdateConfig =
-            { wrapMsg = wrapMsg << TemplateEditorMsg
+            { wrapMsg = wrapMsg << SettingsMsg
             , logoutMsg = Wizard.Msgs.logoutMsg
             , documentTemplateId = model.documentTemplateId
             , updateDocumentTemplate = wrapMsg << UpdateDocumentTemplate
@@ -131,7 +131,7 @@ update appState wrapMsg msg model =
                     withSeed <|
                         ( { model
                             | documentTemplate = ActionResult.Success documentTemplate
-                            , templateEditorModel = TemplateEditor.setDocumentTemplate documentTemplate model.templateEditorModel
+                            , settingsModel = Settings.setDocumentTemplate documentTemplate model.settingsModel
                             , previewModel = Preview.setSelectedQuestionnaire documentTemplate.questionnaire model.previewModel
                           }
                         , Cmd.none
@@ -143,13 +143,13 @@ update appState wrapMsg msg model =
                         , getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
-        TemplateEditorMsg templateEditorMsg ->
+        SettingsMsg settingsMsg ->
             let
-                ( newSeed, templateEditorModel, templateEditorCmd ) =
-                    TemplateEditor.update templateEditorUpdateConfig appState templateEditorMsg model.templateEditorModel
+                ( newSeed, settingsModel, settingsCmd ) =
+                    Settings.update templateEditorUpdateConfig appState settingsMsg model.settingsModel
             in
             updateUnloadMessage <|
-                ( newSeed, { model | templateEditorModel = templateEditorModel }, templateEditorCmd )
+                ( newSeed, { model | settingsModel = settingsModel }, settingsCmd )
 
         FileEditorMsg fileEditorMsg ->
             let
@@ -180,7 +180,7 @@ update appState wrapMsg msg model =
                 publishModalUpdateConfig =
                     { wrapMsg = wrapMsg << PublishModalMsg
                     , documentTemplateId = model.documentTemplateId
-                    , documentTemplateForm = TemplateEditor.getFormOutput model.templateEditorModel
+                    , documentTemplateForm = Settings.getFormOutput model.settingsModel
                     }
 
                 ( publishModalModel, publishModalCmd ) =
@@ -212,7 +212,7 @@ update appState wrapMsg msg model =
             withSeed
                 ( { model
                     | fileEditorModel = FileEditor.initialModel
-                    , templateEditorModel = TemplateEditor.initialModel
+                    , settingsModel = Settings.initialModel
                   }
                 , Cmd.batch
                     [ DocumentTemplateDraftsApi.getDraft model.documentTemplateId appState (wrapMsg << GetTemplateCompleted)

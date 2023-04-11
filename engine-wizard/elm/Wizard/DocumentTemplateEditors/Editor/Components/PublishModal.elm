@@ -11,14 +11,20 @@ module Wizard.DocumentTemplateEditors.Editor.Components.PublishModal exposing
 
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, strong, text)
+import Html exposing (Html, div, text)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Html exposing (faSet)
+import Shared.Markdown as Markdown
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor.DocumentTemplateForm as DocumentTemplateForm exposing (DocumentTemplateForm)
 import Wizard.Routes as Routes
@@ -108,18 +114,36 @@ type alias ViewConfig =
 
 view : ViewConfig -> AppState -> Model -> Html Msg
 view cfg appState model =
-    Modal.confirm appState
+    let
+        info =
+            div [ class "alert alert-info" ]
+                (String.formatHtml (gettext "Check the document template's metadata before publishing. You change them in %s." appState.locale)
+                    [ linkTo appState
+                        (Routes.documentTemplateEditorDetailSettings cfg.documentTemplate.id)
+                        [ onClick (SetOpen False), class "btn-link with-icon" ]
+                        [ faSet "_global.settings" appState
+                        , text (gettext "Settings" appState.locale)
+                        ]
+                    ]
+                )
+    in
+    Modal.confirmExtra appState
         { modalTitle = gettext "Publish" appState.locale
         , modalContent =
-            String.formatHtml (gettext "Are you sure you want to publish %s, version %s?" appState.locale)
-                [ strong [] [ text cfg.documentTemplate.name ]
-                , strong [] [ text (Version.toString cfg.documentTemplate.version) ]
-                ]
+            [ info
+            , FormGroup.readOnlyInput cfg.documentTemplate.name (gettext "Name" appState.locale)
+            , FormGroup.readOnlyInput cfg.documentTemplate.description (gettext "Description" appState.locale)
+            , FormGroup.readOnlyInput cfg.documentTemplate.templateId (gettext "Template ID" appState.locale)
+            , FormGroup.readOnlyInput (Version.toString cfg.documentTemplate.version) (gettext "Version" appState.locale)
+            , FormGroup.readOnlyInput cfg.documentTemplate.license (gettext "License" appState.locale)
+            , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.documentTemplate.readme) (gettext "Readme" appState.locale)
+            ]
         , visible = model.open
         , actionResult = model.publishing
         , actionName = gettext "Publish" appState.locale
         , actionMsg = Publish
         , cancelMsg = Just (SetOpen False)
         , dangerous = False
+        , extraClass = "modal-wide"
         , dataCy = "document-template-editor_publish"
         }

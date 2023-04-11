@@ -6,12 +6,12 @@ import Shared.Error.ApiError exposing (ApiError)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
-import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor as TemplateEditor
+import Wizard.DocumentTemplateEditors.Editor.Components.Settings as Settings
 
 
 type Msg
     = GetTemplateCompleted (Result ApiError DocumentTemplateDraftDetail)
-    | TemplateEditorMsg TemplateEditor.Msg
+    | SettingsMsg Settings.Msg
     | FileEditorMsg FileEditor.Msg
     | PreviewMsg Preview.Msg
     | PublishModalMsg PublishModal.Msg

@@ -1,4 +1,4 @@
-module Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor exposing
+module Wizard.DocumentTemplateEditors.Editor.Components.Settings exposing
     ( CurrentTemplateEditor
     , Model
     , Msg
