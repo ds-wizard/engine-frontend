@@ -32,6 +32,12 @@
         }
     }
 
+    &.modal-wide {
+        .modal-dialog {
+            width: 100%;
+            max-width: $modal-lg;
+        }
+    }
 
     &.modal-error {
         .modal-dialog {

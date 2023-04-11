@@ -16,6 +16,7 @@ module Wizard.Common.View.FormGroup exposing
     , password
     , passwordWithStrength
     , plainGroup
+    , readOnlyInput
     , resizableTextarea
     , richRadioGroup
     , select
@@ -33,7 +34,7 @@ import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, rows, type_, value)
+import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, readonly, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
@@ -571,6 +572,14 @@ plainGroup valueHtml labelText =
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text labelText ]
         , valueHtml
+        ]
+
+
+readOnlyInput : String -> String -> Html msg
+readOnlyInput valueText labelText =
+    div [ class "form-group" ]
+        [ label [ class "control-label" ] [ text labelText ]
+        , Html.input [ type_ "text", value valueText, class "form-control", readonly True ] []
         ]
 
 
