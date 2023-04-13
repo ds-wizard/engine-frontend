@@ -1,6 +1,7 @@
 module Wizard.Common.View.FormGroup exposing
     ( VersionFormGroupConfig
     , codeView
+    , date
     , formGroupCustom
     , formatRadioGroup
     , getErrors
@@ -45,6 +46,7 @@ import Shared.Markdown as Markdown
 import Uuid
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.View.Flash as Flash
@@ -512,6 +514,28 @@ simpleDate appState form yearFieldName monthFieldName dayFieldName labelText =
             ]
         , error
         ]
+
+
+date : AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
+date appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        dateValue =
+            Maybe.withDefault "" field.value
+
+        toMsg =
+            Form.Input fieldName Form.Text << Field.String
+
+        inputFn isInvalid =
+            DatePicker.datePickerUtc
+                [ DatePicker.invalid isInvalid
+                , DatePicker.value dateValue
+                , DatePicker.onChange toMsg
+                ]
+    in
+    formGroupCustom inputFn appState form fieldName labelText
 
 
 {-| Create Html for a form field using the given input field.

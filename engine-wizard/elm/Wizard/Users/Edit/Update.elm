@@ -1,161 +1,81 @@
 module Wizard.Users.Edit.Update exposing (fetchData, update)
 
-import ActionResult exposing (ActionResult(..))
-import Form
-import Gettext exposing (gettext)
-import Result exposing (Result)
-import Shared.Api.Users as UsersApi
-import Shared.Data.User exposing (User)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
-import Shared.Utils exposing (dispatch)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Ports as Ports
-import Wizard.Users.Common.UserEditForm as UserEditForm
-import Wizard.Users.Common.UserPasswordForm as UserPasswordForm
+import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
+import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
+import Wizard.Users.Edit.Components.Password as Password
+import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Models exposing (Model)
 import Wizard.Users.Edit.Msgs exposing (Msg(..))
+import Wizard.Users.Edit.UserEditRoutes as UserEditRoute exposing (UserEditRoute)
 
 
-fetchData : AppState -> String -> Cmd Msg
-fetchData appState uuid =
-    UsersApi.getUser uuid appState GetUserCompleted
+fetchData : AppState -> UuidOrCurrent -> UserEditRoute -> Cmd Msg
+fetchData appState uuidOrCurrent subroute =
+    case subroute of
+        UserEditRoute.Profile ->
+            Cmd.map ProfileMsg (Profile.fetchData appState uuidOrCurrent)
+
+        UserEditRoute.Password ->
+            Cmd.none
+
+        UserEditRoute.ApiKeys ->
+            Cmd.map ApiKeysMsg (ApiKeys.fetchData appState)
+
+        UserEditRoute.ActiveSessions ->
+            Cmd.map ActiveSessionsMsg (ActiveSessions.fetchData appState)
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ChangeView view ->
-            ( { model | currentView = view }, Cmd.none )
-
-        EditFormMsg formMsg ->
-            handleUserForm formMsg wrapMsg appState model
-
-        GetUserCompleted result ->
-            getUserCompleted appState model result
-
-        PasswordFormMsg formMsg ->
-            handlePasswordForm formMsg wrapMsg appState model
-
-        PutUserCompleted result ->
-            putUserCompleted appState model result
-
-        PutUserPasswordCompleted result ->
-            putUserPasswordCompleted appState model result
-
-
-handleUserForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleUserForm formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.userForm ) of
-        ( Form.Submit, Just userForm ) ->
+        ProfileMsg profileMsg ->
             let
-                body =
-                    UserEditForm.encode model.uuid userForm
+                updateConfig =
+                    { wrapMsg = wrapMsg << ProfileMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    , updateUserMsg = Wizard.Msgs.updateUserMsg
+                    }
 
-                cmd =
-                    Cmd.map wrapMsg <|
-                        UsersApi.putUser model.uuid body appState PutUserCompleted
+                ( profileModel, profileCmd ) =
+                    Profile.update updateConfig appState profileMsg model.profileModel
             in
-            ( { model | savingUser = Loading }, cmd )
+            ( { model | profileModel = profileModel }, profileCmd )
 
-        _ ->
+        PasswordMsg passwordMsg ->
             let
-                userForm =
-                    Form.update UserEditForm.validation formMsg model.userForm
+                updateConfig =
+                    { wrapMsg = wrapMsg << PasswordMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( passwordModel, passwordCmd ) =
+                    Password.update updateConfig appState passwordMsg model.passwordModel
             in
-            ( { model | userForm = userForm }, Cmd.none )
+            ( { model | passwordModel = passwordModel }, passwordCmd )
 
-
-getUserCompleted : AppState -> Model -> Result ApiError User -> ( Model, Cmd Wizard.Msgs.Msg )
-getUserCompleted appState model result =
-    let
-        newModel =
-            case result of
-                Ok user ->
-                    let
-                        userForm =
-                            UserEditForm.init user
-                    in
-                    { model | userForm = userForm, user = Success user }
-
-                Err _ ->
-                    { model | user = Error <| gettext "Unable to get the user." appState.locale }
-
-        cmd =
-            getResultCmd Wizard.Msgs.logoutMsg result
-    in
-    ( newModel, cmd )
-
-
-handlePasswordForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePasswordForm formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.passwordForm ) of
-        ( Form.Submit, Just passwordForm ) ->
+        ApiKeysMsg apiKeysMsg ->
             let
-                body =
-                    UserPasswordForm.encode passwordForm
+                updateConfig =
+                    { wrapMsg = wrapMsg << ApiKeysMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
 
-                cmd =
-                    Cmd.map wrapMsg <|
-                        UsersApi.putUserPassword model.uuid body appState PutUserPasswordCompleted
+                ( apiKeysModel, apiKeysCmd ) =
+                    ApiKeys.update updateConfig appState apiKeysMsg model.apiKeysModel
             in
-            ( { model | savingPassword = Loading }, cmd )
+            ( { model | apiKeysModel = apiKeysModel }, apiKeysCmd )
 
-        _ ->
+        ActiveSessionsMsg activeSessionsMsg ->
             let
-                passwordForm =
-                    Form.update (UserPasswordForm.validation appState) formMsg model.passwordForm
+                updateConfig =
+                    { wrapMsg = wrapMsg << ActiveSessionsMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( activeSessionsModel, activeSessionCmd ) =
+                    ActiveSessions.update updateConfig appState activeSessionsMsg model.activeSessionsModel
             in
-            ( { model | passwordForm = passwordForm }, Cmd.none )
-
-
-putUserCompleted : AppState -> Model -> Result ApiError User -> ( Model, Cmd Wizard.Msgs.Msg )
-putUserCompleted appState model result =
-    case result of
-        Ok user ->
-            let
-                updateCmd =
-                    if Just user.uuid == Maybe.map .uuid appState.session.user then
-                        dispatch (Wizard.Msgs.updateUserMsg user)
-
-                    else
-                        Cmd.none
-            in
-            ( { model | savingUser = Success <| gettext "Profile was successfully updated." appState.locale }
-            , Cmd.batch
-                [ Ports.scrollToTop ".Users__Edit__content"
-                , updateCmd
-                ]
-            )
-
-        Err err ->
-            ( { model
-                | savingUser = ApiError.toActionResult appState (gettext "Profile could not be saved." appState.locale) err
-                , userForm = setFormErrors appState err model.userForm
-              }
-            , Cmd.batch
-                [ getResultCmd Wizard.Msgs.logoutMsg result
-                , Ports.scrollToTop ".Users__Edit__content"
-                ]
-            )
-
-
-putUserPasswordCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-putUserPasswordCompleted appState model result =
-    let
-        passwordResult =
-            case result of
-                Ok _ ->
-                    Success <| gettext "Password was successfully changed." appState.locale
-
-                Err error ->
-                    ApiError.toActionResult appState (gettext "Password could not be changed." appState.locale) error
-
-        cmd =
-            getResultCmd Wizard.Msgs.logoutMsg result
-    in
-    ( { model | savingPassword = passwordResult }
-    , Cmd.batch [ cmd, Ports.scrollToTop ".Users__Edit__content" ]
-    )
+            ( { model | activeSessionsModel = activeSessionsModel }, activeSessionCmd )

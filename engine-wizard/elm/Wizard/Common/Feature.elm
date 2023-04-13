@@ -61,11 +61,14 @@ module Wizard.Common.Feature exposing
     , projectsView
     , settings
     , userEdit
+    , userEditActiveSessions
+    , userEditApiKeys
     , usersCreate
     , usersView
     )
 
 import Shared.Auth.Permission as Perm
+import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Data.Document as Document exposing (Document)
@@ -393,9 +396,19 @@ usersCreate =
     adminOr Perm.userManagement
 
 
-userEdit : AppState -> String -> Bool
-userEdit appState uuid =
-    (uuid == "current") || adminOr Perm.userManagement appState
+userEdit : AppState -> UuidOrCurrent -> Bool
+userEdit appState uuidOrCurrent =
+    UuidOrCurrent.isCurrent uuidOrCurrent || adminOr Perm.userManagement appState
+
+
+userEditApiKeys : UuidOrCurrent -> Bool
+userEditApiKeys =
+    UuidOrCurrent.isCurrent
+
+
+userEditActiveSessions : UuidOrCurrent -> Bool
+userEditActiveSessions =
+    UuidOrCurrent.isCurrent
 
 
 

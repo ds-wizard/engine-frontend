@@ -33,6 +33,7 @@ iconSet =
         , ( "_global.success", "fas fa-check" )
         , ( "_global.view", "far fa-eye" )
         , ( "_global.warning", "fas fa-exclamation-triangle" )
+        , ( "activeSession.revoke", "fas fa-ban" )
         , ( "avatar.0", "fas fa-cat" )
         , ( "avatar.1", "fas fa-crow" )
         , ( "avatar.2", "fas fa-dog" )
@@ -150,4 +151,6 @@ iconSet =
         , ( "questionnaireMigration.resolve", "fas fa-check" )
         , ( "questionnaireMigration.resolveAll", "fas fa-check-double" )
         , ( "questionnaireMigration.undo", "fas fa-undo-alt" )
+        , ( "userAgent.desktop", "fas fa-desktop" )
+        , ( "userAgent.mobile", "fas fa-mobile-alt" )
         ]

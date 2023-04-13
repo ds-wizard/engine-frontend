@@ -1,0 +1,17 @@
+@import '../../../variables';
+
+.CopyableCodeBlock {
+    position: relative;
+
+    a.btn {
+        color: $secondary;
+        position: absolute;
+        right: 0;
+        top: -2.25rem;
+    }
+
+    code {
+        display: block;
+        padding: $spacer-2;
+    }
+}
