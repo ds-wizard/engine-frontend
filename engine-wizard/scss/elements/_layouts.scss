@@ -1,0 +1,7 @@
+@import '../variables';
+
+
+.col-border-left {
+    border-left: 1px solid $gray-300;
+    padding-left: $container-padding-x;
+}

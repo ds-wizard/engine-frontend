@@ -1,5 +1,7 @@
 module Shared.Setters exposing
-    ( setApp
+    ( setApiKey
+    , setApiKeys
+    , setApp
     , setAssets
     , setBookReference
     , setDropdownState
@@ -20,8 +22,19 @@ module Shared.Setters exposing
     , setSelected
     , setTemplate
     , setTemplates
+    , setTokens
     , setUsage
     )
+
+
+setApiKey : a -> { b | apiKey : a } -> { b | apiKey : a }
+setApiKey value record =
+    { record | apiKey = value }
+
+
+setApiKeys : a -> { b | apiKeys : a } -> { b | apiKeys : a }
+setApiKeys value record =
+    { record | apiKeys = value }
 
 
 setApp : a -> { b | app : a } -> { b | app : a }
@@ -127,6 +140,11 @@ setTemplate value record =
 setTemplates : a -> { b | templates : a } -> { b | templates : a }
 setTemplates value record =
     { record | templates = value }
+
+
+setTokens : a -> { b | tokens : a } -> { b | tokens : a }
+setTokens value record =
+    { record | tokens = value }
 
 
 setUsage : a -> { b | usage : a } -> { b | usage : a }

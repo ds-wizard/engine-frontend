@@ -86,13 +86,17 @@ module Wizard.Routes exposing
     , settingsRegistry
     , usersCreate
     , usersEdit
+    , usersEditActiveSessions
+    , usersEditApiKeys
     , usersEditCurrent
+    , usersEditPassword
     , usersIndex
     , usersIndexWithFilters
     )
 
 import Shared.Auth.Role as Role
 import Shared.Auth.Session as Session exposing (Session)
+import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -116,6 +120,7 @@ import Wizard.Projects.Routes
 import Wizard.Public.Routes
 import Wizard.Registry.Routes
 import Wizard.Settings.Routes
+import Wizard.Users.Edit.UserEditRoutes as UserEditRoute
 import Wizard.Users.Routes
 
 
@@ -714,14 +719,29 @@ usersCreate =
     UsersRoute Wizard.Users.Routes.CreateRoute
 
 
-usersEdit : String -> Route
+usersEdit : UuidOrCurrent -> Route
 usersEdit =
-    UsersRoute << Wizard.Users.Routes.EditRoute
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Profile
+
+
+usersEditPassword : UuidOrCurrent -> Route
+usersEditPassword =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Password
+
+
+usersEditApiKeys : UuidOrCurrent -> Route
+usersEditApiKeys =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ApiKeys
+
+
+usersEditActiveSessions : UuidOrCurrent -> Route
+usersEditActiveSessions =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ActiveSessions
 
 
 usersEditCurrent : Route
 usersEditCurrent =
-    usersEdit "current"
+    usersEdit UuidOrCurrent.current
 
 
 usersIndex : Route

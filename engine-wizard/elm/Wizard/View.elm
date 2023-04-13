@@ -144,6 +144,6 @@ notAllowedView appState =
     Page.illustratedMessage
         { image = Undraw.security
         , heading = gettext "Not Allowed" appState.locale
-        , lines = [ gettext "You don't have a permission to view this page." appState.locale ]
+        , lines = [ gettext "You don't have permission to view this page." appState.locale ]
         , cy = "not-allowed"
         }

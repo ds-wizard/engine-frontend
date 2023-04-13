@@ -27,7 +27,7 @@ import Wizard.Projects.Update
 import Wizard.Public.Update
 import Wizard.Registry.Update
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (parseLocation)
+import Wizard.Routing exposing (parseLocation, routeIfAllowed)
 import Wizard.Settings.Update
 import Wizard.Users.Update
 
@@ -146,7 +146,8 @@ update msg model =
             Wizard.Msgs.OnUrlChange location ->
                 let
                     nextRoute =
-                        parseLocation model.appState location
+                        routeIfAllowed model.appState <|
+                            parseLocation model.appState location
 
                     newModel =
                         setRoute nextRoute model

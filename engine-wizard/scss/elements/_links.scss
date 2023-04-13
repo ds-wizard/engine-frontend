@@ -24,6 +24,14 @@ a {
             text-decoration: underline;
             color: $link-hover-color;
         }
+
+        &.light-danger {
+            color: $gray-500;
+
+            &:hover {
+                color: $danger;
+            }
+        }
     }
 
     &.disabled {
