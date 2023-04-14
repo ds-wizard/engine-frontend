@@ -6,7 +6,7 @@ input[type=color] {
     min-height: 30px;
 }
 
-input:read-only:not(.form-control-flatpickr), textarea:read-only, .form-control.disabled {
+input[type=text]:read-only:not(.form-control-flatpickr), textarea:read-only, .form-control.disabled {
     background-color: $gray-100;
     color: $gray-600;
     cursor: not-allowed;

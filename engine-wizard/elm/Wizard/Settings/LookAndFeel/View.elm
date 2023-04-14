@@ -191,18 +191,6 @@ formView appState form =
                             ]
                         ]
                     ]
-               , hr [] []
-               , div [ class "row mt-5" ]
-                    [ div [ class "col-12" ]
-                        [ label [] [ text (gettext "Login Info" appState.locale) ] ]
-                    , div [ class "col-8" ]
-                        [ formWrap <| FormGroup.markdownEditor appState form "loginInfo" ""
-                        , FormExtra.mdAfter (gettext "Additional information displayed at the login screen." appState.locale)
-                        ]
-                    , div [ class "col-4" ]
-                        [ img [ class "settings-img", src "/img/settings/login-info-text.png" ] []
-                        ]
-                    ]
                ]
         )
 

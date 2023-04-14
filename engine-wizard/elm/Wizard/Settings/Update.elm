@@ -6,7 +6,7 @@ module Wizard.Settings.Update exposing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Authentication.Update
-import Wizard.Settings.Dashboard.Update
+import Wizard.Settings.DashboardAndLoginScreen.Update
 import Wizard.Settings.Generic.Update
 import Wizard.Settings.KnowledgeModels.Update
 import Wizard.Settings.LookAndFeel.Update
@@ -40,7 +40,7 @@ fetchData route appState _ =
         PrivacyAndSupportRoute ->
             genericFetch PrivacyAndSupportMsg
 
-        DashboardRoute ->
+        DashboardAndLoginScreenRoute ->
             genericFetch DashboardMsg
 
         LookAndFeelRoute ->
@@ -97,7 +97,7 @@ update wrapMsg msg appState model =
         DashboardMsg dashboardMsg ->
             let
                 ( dashboardModel, cmd ) =
-                    Wizard.Settings.Dashboard.Update.update (wrapMsg << DashboardMsg) dashboardMsg appState model.dashboardModel
+                    Wizard.Settings.DashboardAndLoginScreen.Update.update (wrapMsg << DashboardMsg) dashboardMsg appState model.dashboardModel
             in
             ( { model | dashboardModel = dashboardModel }, cmd )
 

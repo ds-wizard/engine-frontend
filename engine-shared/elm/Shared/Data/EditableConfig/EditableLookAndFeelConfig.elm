@@ -26,7 +26,6 @@ type alias EditableLookAndFeelConfig =
     , primaryColor : Maybe String
     , illustrationsColor : Maybe String
     , customMenuLinks : List CustomMenuLink
-    , loginInfo : Maybe String
     , logoUrl : Maybe String
     , styleUrl : Maybe String
     }
@@ -44,7 +43,6 @@ decoder =
         |> D.required "primaryColor" (D.maybe D.string)
         |> D.required "illustrationsColor" (D.maybe D.string)
         |> D.required "customMenuLinks" (D.list CustomMenuLink.decoder)
-        |> D.required "loginInfo" (D.maybe D.string)
         |> D.required "logoUrl" (D.maybe D.string)
         |> D.required "styleUrl" (D.maybe D.string)
 
@@ -57,7 +55,6 @@ encode config =
         , ( "primaryColor", E.maybe E.string config.primaryColor )
         , ( "illustrationsColor", E.maybe E.string config.illustrationsColor )
         , ( "customMenuLinks", E.list CustomMenuLink.encode config.customMenuLinks )
-        , ( "loginInfo", E.maybe E.string config.loginInfo )
         , ( "logoUrl", E.maybe E.string config.logoUrl )
         , ( "styleUrl", E.maybe E.string config.styleUrl )
         ]
@@ -75,7 +72,6 @@ validation =
         |> V.andMap (V.field "stylePrimaryColor" V.maybeString)
         |> V.andMap (V.field "styleIllustrationsColor" V.maybeString)
         |> V.andMap (V.field "customMenuLinks" (V.list CustomMenuLink.validation))
-        |> V.andMap (V.field "loginInfo" V.maybeString)
         |> V.andMap (V.field "logoUrl" V.maybeString)
         |> V.andMap (V.field "styleUrl" V.maybeString)
 
@@ -106,7 +102,6 @@ initForm config =
             , ( "stylePrimaryColor", Field.maybeString config.primaryColor )
             , ( "styleIllustrationsColor", Field.maybeString config.illustrationsColor )
             , ( "customMenuLinks", Field.list customMenuLinks )
-            , ( "loginInfo", Field.maybeString config.loginInfo )
             , ( "logoUrl", Field.maybeString config.logoUrl )
             , ( "styleUrl", Field.maybeString config.styleUrl )
             ]

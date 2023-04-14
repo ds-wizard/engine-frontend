@@ -1,4 +1,4 @@
-module Shared.Data.BootstrapConfig.DashboardConfig.DashboardType exposing
+module Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType exposing
     ( DashboardType(..)
     , decoder
     , encode

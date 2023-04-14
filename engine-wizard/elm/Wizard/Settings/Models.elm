@@ -2,7 +2,7 @@ module Wizard.Settings.Models exposing (Model, initLocalModel, initialModel)
 
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Authentication.Models
-import Wizard.Settings.Dashboard.Models
+import Wizard.Settings.DashboardAndLoginScreen.Models
 import Wizard.Settings.KnowledgeModels.Models
 import Wizard.Settings.LookAndFeel.Models
 import Wizard.Settings.Organization.Models
@@ -19,7 +19,7 @@ type alias Model =
     { organizationModel : Wizard.Settings.Organization.Models.Model
     , authenticationModel : Wizard.Settings.Authentication.Models.Model
     , privacyAndSupportModel : Wizard.Settings.PrivacyAndSupport.Models.Model
-    , dashboardModel : Wizard.Settings.Dashboard.Models.Model
+    , dashboardModel : Wizard.Settings.DashboardAndLoginScreen.Models.Model
     , lookAndFeelModel : Wizard.Settings.LookAndFeel.Models.Model
     , registryModel : Wizard.Settings.Registry.Models.Model
     , questionnairesModel : Wizard.Settings.Projects.Models.Model
@@ -35,7 +35,7 @@ initialModel appState =
     { organizationModel = Wizard.Settings.Organization.Models.initialModel
     , authenticationModel = Wizard.Settings.Authentication.Models.initialModel
     , privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel
-    , dashboardModel = Wizard.Settings.Dashboard.Models.initialModel
+    , dashboardModel = Wizard.Settings.DashboardAndLoginScreen.Models.initialModel
     , lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel
     , registryModel = Wizard.Settings.Registry.Models.initialModel
     , questionnairesModel = Wizard.Settings.Projects.Models.initialModel appState
@@ -58,7 +58,7 @@ initLocalModel appState route model =
         PrivacyAndSupportRoute ->
             { model | privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel }
 
-        DashboardRoute ->
+        DashboardAndLoginScreenRoute ->
             { model | privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel }
 
         LookAndFeelRoute ->

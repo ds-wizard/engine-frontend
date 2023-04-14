@@ -9,6 +9,7 @@ import Maybe.Extra as Maybe
 import Shared.Html exposing (fa)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Announcements as Announcements
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -30,7 +31,7 @@ view appState model =
                 ( "login", loginFormView appState model )
 
         content =
-            case appState.config.lookAndFeel.loginInfo of
+            case appState.config.dashboardAndLoginScreen.loginInfo of
                 Just loginInfo ->
                     let
                         splitScreenClass =
@@ -52,10 +53,13 @@ view appState model =
 
                 Nothing ->
                     [ form ]
+
+        announcements =
+            ( "announcements", Announcements.viewLoginScreen appState.config.dashboardAndLoginScreen.announcements )
     in
     Html.Keyed.node "div"
         [ class "row justify-content-center Public__Login" ]
-        content
+        (announcements :: content)
 
 
 loginFormView : AppState -> Model -> Html Msg
