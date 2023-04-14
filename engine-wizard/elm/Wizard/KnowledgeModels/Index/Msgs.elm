@@ -4,6 +4,7 @@ import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackagePhase exposing (PackagePhase)
 import Shared.Error.ApiError exposing (ApiError)
 import Wizard.Common.Components.Listing.Msgs as Listing
+import Wizard.Common.FileDownloader as FileDownloader
 
 
 type Msg
@@ -14,3 +15,4 @@ type Msg
     | UpdatePhase Package PackagePhase
     | UpdatePhaseCompleted (Result ApiError ())
     | ExportPackage Package
+    | FileDownloaderMsg FileDownloader.Msg
