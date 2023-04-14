@@ -1,5 +1,6 @@
 module Wizard.Common.View.FormGroup exposing
     ( VersionFormGroupConfig
+    , alertRadioGroup
     , codeView
     , date
     , formGroupCustom
@@ -248,6 +249,31 @@ htmlRadioGroup appState options =
                             ]
                             []
                         , html
+                        ]
+            in
+            div [ class "form-radio-group" ] (List.map buildOption options)
+    in
+    formGroup radioInput [] appState
+
+
+alertRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
+alertRadioGroup appState options =
+    let
+        radioInput state _ =
+            let
+                buildOption ( k, v, c ) =
+                    label [ class ("flex-grow-1 py-2 alert alert-" ++ c), classList [ ( "form-check-selected", state.value == Just k ) ] ]
+                        [ Html.input
+                            [ value k
+                            , checked (state.value == Just k)
+                            , class "form-check-input"
+                            , type_ "radio"
+                            , id k
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String k)
+                            ]
+                            []
+                        , span [ class "ms-2", for k ]
+                            [ text v ]
                         ]
             in
             div [ class "form-radio-group" ] (List.map buildOption options)

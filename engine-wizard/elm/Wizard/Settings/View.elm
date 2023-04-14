@@ -7,7 +7,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes as Routes
 import Wizard.Settings.Authentication.View
-import Wizard.Settings.Dashboard.View
+import Wizard.Settings.DashboardAndLoginScreen.View
 import Wizard.Settings.KnowledgeModels.View
 import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
@@ -39,9 +39,9 @@ view route appState model =
                     Html.map PrivacyAndSupportMsg <|
                         Wizard.Settings.PrivacyAndSupport.View.view appState model.privacyAndSupportModel
 
-                DashboardRoute ->
+                DashboardAndLoginScreenRoute ->
                     Html.map DashboardMsg <|
-                        Wizard.Settings.Dashboard.View.view appState model.dashboardModel
+                        Wizard.Settings.DashboardAndLoginScreen.View.view appState model.dashboardModel
 
                 LookAndFeelRoute ->
                     Html.map LookAndFeelMsg <|
@@ -114,7 +114,7 @@ navigationSystemLinks appState =
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
 navigationUserInterfaceLinks appState =
-    [ ( DashboardRoute, gettext "Dashboard" appState.locale )
+    [ ( DashboardAndLoginScreenRoute, gettext "Dashboard & Login Screen" appState.locale )
     , ( LookAndFeelRoute, gettext "Look & Feel" appState.locale )
     ]
 

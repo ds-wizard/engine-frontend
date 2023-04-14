@@ -8,7 +8,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
-import Shared.Data.BootstrapConfig.DashboardConfig as DashboardConfig exposing (DashboardConfig)
+import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
 import Shared.Data.BootstrapConfig.FeatureConfig as FeatureConfig exposing (FeatureConfig)
 import Shared.Data.BootstrapConfig.LocaleConfig as LocaleConfig exposing (LocaleConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
@@ -22,7 +22,7 @@ import Shared.Data.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing
 
 type alias BootstrapConfig =
     { authentication : AuthenticationConfig
-    , dashboard : DashboardConfig
+    , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , registry : RegistryConfig
     , lookAndFeel : LookAndFeelConfig
     , organization : OrganizationConfig
@@ -39,7 +39,7 @@ type alias BootstrapConfig =
 default : BootstrapConfig
 default =
     { authentication = AuthenticationConfig.default
-    , dashboard = DashboardConfig.default
+    , dashboardAndLoginScreen = DashboardAndLoginScreenConfig.default
     , registry = RegistryConfig.default
     , lookAndFeel = LookAndFeelConfig.default
     , organization = OrganizationConfig.default
@@ -57,7 +57,7 @@ decoder : Decoder BootstrapConfig
 decoder =
     D.succeed BootstrapConfig
         |> D.required "authentication" AuthenticationConfig.decoder
-        |> D.required "dashboard" DashboardConfig.decoder
+        |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "registry" RegistryConfig.decoder
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "organization" OrganizationConfig.decoder

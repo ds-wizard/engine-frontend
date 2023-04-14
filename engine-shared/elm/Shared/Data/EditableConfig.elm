@@ -3,7 +3,7 @@ module Shared.Data.EditableConfig exposing
     , decoder
     , encode
     , updateAuthentication
-    , updateDashboard
+    , updateDashboardAndLoginScreen
     , updateKnowledgeModel
     , updateLookAndFeel
     , updateOrganization
@@ -16,7 +16,7 @@ module Shared.Data.EditableConfig exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Data.BootstrapConfig.DashboardConfig as DashboardConfig exposing (DashboardConfig)
+import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
 import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Data.EditableConfig.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
@@ -31,7 +31,7 @@ type alias EditableConfig =
     { organization : OrganizationConfig
     , authentication : EditableAuthenticationConfig
     , privacyAndSupport : PrivacyAndSupportConfig
-    , dashboard : DashboardConfig
+    , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , lookAndFeel : EditableLookAndFeelConfig
     , registry : EditableRegistryConfig
     , questionnaires : EditableQuestionnairesConfig
@@ -55,9 +55,9 @@ updatePrivacyAndSupport privacyAndSupport config =
     { config | privacyAndSupport = privacyAndSupport }
 
 
-updateDashboard : DashboardConfig -> EditableConfig -> EditableConfig
-updateDashboard dashboard config =
-    { config | dashboard = dashboard }
+updateDashboardAndLoginScreen : DashboardAndLoginScreenConfig -> EditableConfig -> EditableConfig
+updateDashboardAndLoginScreen dashboard config =
+    { config | dashboardAndLoginScreen = dashboard }
 
 
 updateLookAndFeel : EditableLookAndFeelConfig -> EditableConfig -> EditableConfig
@@ -95,7 +95,7 @@ decoder =
         |> D.required "organization" OrganizationConfig.decoder
         |> D.required "authentication" EditableAuthenticationConfig.decoder
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
-        |> D.required "dashboard" DashboardConfig.decoder
+        |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "lookAndFeel" EditableLookAndFeelConfig.decoder
         |> D.required "registry" EditableRegistryConfig.decoder
         |> D.required "questionnaire" EditableQuestionnairesConfig.decoder
@@ -109,7 +109,7 @@ encode config =
         [ ( "organization", OrganizationConfig.encode config.organization )
         , ( "authentication", EditableAuthenticationConfig.encode config.authentication )
         , ( "privacyAndSupport", PrivacyAndSupportConfig.encode config.privacyAndSupport )
-        , ( "dashboard", DashboardConfig.encode config.dashboard )
+        , ( "dashboardAndLoginScreen", DashboardAndLoginScreenConfig.encode config.dashboardAndLoginScreen )
         , ( "lookAndFeel", EditableLookAndFeelConfig.encode config.lookAndFeel )
         , ( "registry", EditableRegistryConfig.encode config.registry )
         , ( "questionnaire", EditableQuestionnairesConfig.encode config.questionnaires )

@@ -2,10 +2,8 @@ module Wizard.Dashboard.View exposing (view)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (emptyNode)
-import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Components.Announcements as Announcements
 import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
 import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
 import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
@@ -32,18 +30,6 @@ view appState model =
                     AdminDashboard.view appState model.adminDashboardModel
     in
     div [ class "Dashboard" ]
-        [ viewAlert "warning" appState.config.dashboard.welcomeWarning
-        , viewAlert "info" appState.config.dashboard.welcomeInfo
+        [ Announcements.viewDashboard appState.config.dashboardAndLoginScreen.announcements
         , content
         ]
-
-
-viewAlert : String -> Maybe String -> Html Msg
-viewAlert alertClass mbMessage =
-    case mbMessage of
-        Just message ->
-            div [ class <| "alert alert-" ++ alertClass, dataCy ("dashboard_alert-" ++ alertClass) ]
-                [ Markdown.toHtml [] message ]
-
-        Nothing ->
-            emptyNode

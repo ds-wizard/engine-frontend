@@ -6,7 +6,7 @@ module Wizard.Dashboard.Models exposing
 
 import Shared.Auth.Role as Role
 import Shared.Auth.Session as Session
-import Shared.Data.BootstrapConfig.DashboardConfig.DashboardType as DashboardType
+import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
 import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
@@ -32,7 +32,7 @@ initialModel : AppState -> Model
 initialModel appState =
     let
         currentDashboard =
-            case appState.config.dashboard.dashboardType of
+            case appState.config.dashboardAndLoginScreen.dashboardType of
                 DashboardType.Welcome ->
                     WelcomeDashboard
 
