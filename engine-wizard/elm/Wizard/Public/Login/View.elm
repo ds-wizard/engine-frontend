@@ -6,8 +6,8 @@ import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeh
 import Html.Events exposing (onInput, onSubmit)
 import Html.Keyed
 import Maybe.Extra as Maybe
-import Shared.Html exposing (fa)
-import Shared.Markdown as Markdown
+import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
+import Shared.Html exposing (emptyNode, fa)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Announcements as Announcements
 import Wizard.Common.Html exposing (linkTo)
@@ -30,6 +30,11 @@ view appState model =
             else
                 ( "login", loginFormView appState model )
 
+        loginInfoSidebar =
+            ( "login-info-sidebar"
+            , Maybe.unwrap emptyNode (MarkdownOrHtml.view [ class "mt-4" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
+            )
+
         content =
             case appState.config.dashboardAndLoginScreen.loginInfo of
                 Just loginInfo ->
@@ -39,20 +44,23 @@ view appState model =
                     in
                     [ ( "side-info"
                       , div
-                            [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 col-md-6 side-info"
+                            [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 side-info"
                             , dataCy "login_side-info"
                             ]
-                            [ Markdown.toHtml [] loginInfo ]
+                            [ MarkdownOrHtml.view [ class "flex-grow-1" ] loginInfo ]
                       )
                     , ( "login-form"
                       , Html.Keyed.node "div"
-                            [ class <| splitScreenClass ++ " justify-content-center col-xl-4 col-lg-5 col-md-6 side-login" ]
-                            [ form ]
+                            [ class <| splitScreenClass ++ " justify-content-start align-items-stretch flex-column col-xl-4 col-lg-5 col-md-6 col-sm-8 side-login" ]
+                            [ form, loginInfoSidebar ]
                       )
                     ]
 
                 Nothing ->
-                    [ form ]
+                    [ ( "login-form-only"
+                      , Html.Keyed.node "div" [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8" ] [ form, loginInfoSidebar ]
+                      )
+                    ]
 
         announcements =
             ( "announcements", Announcements.viewLoginScreen appState.config.dashboardAndLoginScreen.announcements )
@@ -89,7 +97,7 @@ loginFormView appState model =
             else
                 []
     in
-    div [ class "align-self-center col-xs-10 col-sm-8 col-md-6 col-lg-4" ]
+    div []
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]

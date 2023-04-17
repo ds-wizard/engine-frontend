@@ -5,3 +5,8 @@
     border-left: 1px solid $gray-300;
     padding-left: $container-padding-x;
 }
+
+.container-max {
+    max-width: map-get($container-max-widths, 'xxl');
+}
+

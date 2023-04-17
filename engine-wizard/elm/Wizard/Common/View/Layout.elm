@@ -57,7 +57,7 @@ public model content =
         html =
             div [ class "public" ]
                 [ publicHeader False model
-                , div [ class "container" ] [ content ]
+                , div [ class "container-fluid container-max" ] [ content ]
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
@@ -83,7 +83,7 @@ publicApp model content =
 
 
 publicHeader : Bool -> Model -> Html Msg
-publicHeader fluid model =
+publicHeader fluidFull model =
     let
         links =
             if userLoggedIn model then
@@ -119,7 +119,7 @@ publicHeader fluid model =
                 ]
     in
     nav [ class "navbar navbar-expand-sm fixed-top px-3 top-navigation" ]
-        [ div [ classList [ ( "container-fluid", fluid ), ( "container", not fluid ) ] ]
+        [ div [ class "container-fluid", classList [ ( "container-max", not fluidFull ) ] ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState
                     Routes.publicHome

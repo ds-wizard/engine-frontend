@@ -157,7 +157,7 @@ select {
         }
     }
 
-    &-markdown {
+    &-markup-editor {
         &.is-invalid {
             .invalid-feedback {
                 display: block;
@@ -181,6 +181,8 @@ select {
                 padding: 1rem;
                 height: 100%;
                 min-height: 10rem;
+                font-family: $font-family-monospace;
+                white-space: nowrap;
             }
         }
 

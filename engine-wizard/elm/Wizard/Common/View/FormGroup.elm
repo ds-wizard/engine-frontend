@@ -6,6 +6,7 @@ module Wizard.Common.View.FormGroup exposing
     , formGroupCustom
     , formatRadioGroup
     , getErrors
+    , htmlOrMarkdownEditor
     , htmlRadioGroup
     , input
     , inputAttrs
@@ -39,6 +40,7 @@ import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, readonly, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
+import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
@@ -420,7 +422,34 @@ viewList appState itemView form fieldName labelText =
 
 
 markdownEditor : AppState -> Form FormError o -> String -> String -> Html Form.Msg
-markdownEditor appState form fieldName labelText =
+markdownEditor appState =
+    markupEditor
+        { toPreview = Markdown.toHtml []
+        , hint = gettext "You can use Markdown and see the result in the preview tab." appState.locale
+        , extraClass = "form-group-markdown"
+        }
+        appState
+
+
+htmlOrMarkdownEditor : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+htmlOrMarkdownEditor appState =
+    markupEditor
+        { toPreview = MarkdownOrHtml.view []
+        , hint = gettext "You can use HTML or Markdown and see the result in the preview tab." appState.locale
+        , extraClass = ""
+        }
+        appState
+
+
+type alias MarkupEditorConfig =
+    { toPreview : String -> Html Form.Msg
+    , extraClass : String
+    , hint : String
+    }
+
+
+markupEditor : MarkupEditorConfig -> AppState -> Form FormError o -> String -> String -> Html Form.Msg
+markupEditor cfg appState form fieldName labelText =
     let
         field =
             Form.getFieldAsString fieldName form
@@ -449,7 +478,7 @@ markdownEditor appState form fieldName labelText =
 
         content =
             if previewActive then
-                Markdown.toHtml [] valueString
+                cfg.toPreview valueString
 
             else
                 Input.textArea field
@@ -471,7 +500,7 @@ markdownEditor appState form fieldName labelText =
             else
                 label [ for fieldName ] [ text labelText ]
     in
-    div [ class <| "form-group form-group-markdown " ++ errorClass ]
+    div [ class <| "form-group form-group-markup-editor " ++ errorClass ++ " " ++ cfg.extraClass ]
         [ labelElement
         , div [ class <| "card " ++ cardErrorClass ]
             [ div [ class "card-header" ]
@@ -498,7 +527,7 @@ markdownEditor appState form fieldName labelText =
                 [ content
                 ]
             , div [ class "card-footer text-muted" ]
-                [ text (gettext "You can use Markdown and see the result in the preview tab." appState.locale) ]
+                [ text cfg.hint ]
             ]
         , error
         ]
