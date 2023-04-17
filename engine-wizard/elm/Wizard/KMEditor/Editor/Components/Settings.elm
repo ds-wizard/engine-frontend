@@ -208,7 +208,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
                             [ class "btn btn-warning"
                             , onClick (UpgradeModalMsg (UpgradeModal.open branchDetail.uuid branchDetail.name forkOfPackage.id))
                             ]
-                            [ text (gettext "Upgrade" appState.locale) ]
+                            [ text (gettext "Update" appState.locale) ]
                         ]
 
                 _ ->
