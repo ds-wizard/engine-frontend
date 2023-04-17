@@ -62,7 +62,7 @@ navigation appState subroute model =
             (Routes.usersEditPassword model.uuidOrCurrent)
             [ class "nav-link"
             , classList [ ( "active", subroute == UserEditRoutes.Password ) ]
-            , dataCy "user_nav_profile"
+            , dataCy "user_nav_password"
             ]
             [ text (gettext "Password" appState.locale)
             ]
@@ -71,7 +71,7 @@ navigation appState subroute model =
                 (Routes.usersEditApiKeys model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ApiKeys ) ]
-                , dataCy "user_nav_profile"
+                , dataCy "user_nav_api-keys"
                 ]
                 [ text (gettext "API Keys" appState.locale)
                 ]
@@ -81,7 +81,7 @@ navigation appState subroute model =
                 (Routes.usersEditActiveSessions model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ActiveSessions ) ]
-                , dataCy "user_nav_profile"
+                , dataCy "user_nav_active-sessions"
                 ]
                 [ text (gettext "Active Sessions" appState.locale)
                 ]
