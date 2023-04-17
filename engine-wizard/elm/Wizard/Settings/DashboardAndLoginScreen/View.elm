@@ -58,11 +58,20 @@ formView appState form =
         , hr [] []
         , div [ class "row mt-5" ]
             [ div [ class "col-8" ]
-                [ FormGroup.markdownEditor appState form "loginInfo" (gettext "Login Info" appState.locale)
-                , FormExtra.mdAfter (gettext "Additional information displayed at the login screen." appState.locale)
+                [ FormGroup.htmlOrMarkdownEditor appState form "loginInfo" (gettext "Login Info" appState.locale)
+                , FormExtra.mdAfter (gettext "Additional information displayed on the login screen next to the login form." appState.locale)
                 ]
             , div [ class "col-4" ]
                 [ img [ class "settings-img", src "/img/settings/login-info-text.png" ] []
+                ]
+            ]
+        , div [ class "row mt-5" ]
+            [ div [ class "col-8" ]
+                [ FormGroup.htmlOrMarkdownEditor appState form "loginInfoSidebar" (gettext "Sidebar Login Info" appState.locale)
+                , FormExtra.mdAfter (gettext "Additional information displayed on the login screen underneath the login form." appState.locale)
+                ]
+            , div [ class "col-4" ]
+                [ img [ class "settings-img", src "/img/settings/login-info-sidebar-text.png" ] []
                 ]
             ]
         , hr [] []
@@ -77,7 +86,7 @@ formView appState form =
                     (gettext "Add announcement" appState.locale)
                 ]
             , div [ class "col-4" ]
-                [ img [ class "settings-img", src "/img/settings/welcome-warning.png" ] []
+                [ img [ class "settings-img", src "/img/settings/announcements.png" ] []
                 ]
             ]
         ]

@@ -22,6 +22,7 @@ import Shared.Form.Validate as V
 type alias DashboardAndLoginScreenConfigForm =
     { dashboardType : String
     , loginInfo : Maybe String
+    , loginInfoSidebar : Maybe String
     , announcements : List Announcement
     }
 
@@ -48,6 +49,7 @@ init config =
         fields =
             [ ( "dashboardType", Field.string dashboardType )
             , ( "loginInfo", Field.maybeString config.loginInfo )
+            , ( "loginInfoSidebar", Field.maybeString config.loginInfoSidebar )
             , ( "announcements", Field.list announcements )
             ]
     in
@@ -59,6 +61,7 @@ validation =
     V.succeed DashboardAndLoginScreenConfigForm
         |> V.andMap (V.field "dashboardType" V.string)
         |> V.andMap (V.field "loginInfo" V.maybeString)
+        |> V.andMap (V.field "loginInfoSidebar" V.maybeString)
         |> V.andMap (V.field "announcements" (V.list Announcement.validation))
 
 
@@ -74,6 +77,7 @@ toDashboardConfig form =
     in
     { dashboardType = dashboardType
     , loginInfo = form.loginInfo
+    , loginInfoSidebar = form.loginInfoSidebar
     , announcements = form.announcements
     }
 
