@@ -73,6 +73,7 @@ listingConfig appState =
     , searchPlaceholderText = Just (gettext "Search..." appState.locale)
     , sortOptions =
         [ ( "name", gettext "Name" appState.locale )
+        , ( "createdAt", gettext "Created" appState.locale )
         ]
     , filters = []
     , toRoute = \_ -> Routes.DocumentTemplatesRoute << IndexRoute
