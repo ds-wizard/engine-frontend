@@ -73,7 +73,6 @@ viewDocuments appState model mbQuestionnaire =
     in
     div [ listClass "Documents__Index" ]
         [ Page.header (gettext "Documents" appState.locale) []
-        , FormResult.successOnlyView appState model.deletingDocument
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model

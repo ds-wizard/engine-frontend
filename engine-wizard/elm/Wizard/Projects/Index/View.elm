@@ -62,7 +62,6 @@ view appState model =
         content _ =
             div [ listClass "Questionnaires__Index" ]
                 [ Page.header (gettext "Projects" appState.locale) []
-                , FormResult.successOnlyView appState model.deleteModalModel.deletingQuestionnaire
                 , FormResult.view appState model.deletingMigration
                 , Listing.view appState (listingConfig appState model) model.questionnaires
                 , Html.map DeleteQuestionnaireModalMsg <| DeleteProjectModal.view appState model.deleteModalModel

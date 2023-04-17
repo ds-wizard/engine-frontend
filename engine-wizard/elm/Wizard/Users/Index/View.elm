@@ -14,7 +14,6 @@ import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (Lis
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
-import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.UserIcon as UserIcon
@@ -28,7 +27,6 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Users__Index" ]
         [ Page.header (gettext "Users" appState.locale) []
-        , FormResult.successOnlyView appState model.deletingUser
         , Listing.view appState (listingConfig appState) model.users
         , deleteModal appState model
         ]

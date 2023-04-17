@@ -64,7 +64,7 @@ handleDeleteQuestionnaireCompleted cfg appState model result =
     case result of
         Ok _ ->
             ( { model
-                | deletingQuestionnaire = Success <| gettext "Project was successfully deleted." appState.locale
+                | deletingQuestionnaire = Unset
                 , questionnaireToBeDeleted = Nothing
               }
             , cfg.deleteCompleteCmd
