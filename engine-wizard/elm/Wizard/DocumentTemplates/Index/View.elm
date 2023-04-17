@@ -15,7 +15,6 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass, tooltip)
-import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.DocumentTemplates.Common.DocumentTemplateActionsDropdown as DocumentTemplateActionsDropdown
@@ -29,7 +28,6 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "" ]
         [ Page.header (gettext "Document Templates" appState.locale) []
-        , FormResult.view appState model.deletingDocumentTemplate
         , Listing.view appState (listingConfig appState) model.documentTemplates
         , deleteModal appState model
         ]
