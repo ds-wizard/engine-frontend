@@ -23,6 +23,7 @@ import Wizard.Common.Components.CopyableCodeBlock as CopyableCodeBlock
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
+import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
@@ -243,6 +244,23 @@ viewApiKeysTable appState apiKeys =
 
         activeKeys =
             List.filter (ApiKey.isActive appState.currentTime) apiKeys
+
+        content =
+            if List.isEmpty activeKeys then
+                Flash.info appState (gettext "You have no active API keys." appState.locale)
+
+            else
+                table [ class "table table-hover" ]
+                    [ thead []
+                        [ tr []
+                            [ th [] [ text (gettext "API Key Name" appState.locale) ]
+                            , th [] [ text (gettext "Created" appState.locale) ]
+                            , th [] [ text (gettext "Expiration" appState.locale) ]
+                            , th [] []
+                            ]
+                        ]
+                    , tbody [] (List.map viewApiKeyRow (List.sortBy (String.toLower << .name) activeKeys))
+                    ]
     in
     div []
         [ h3 []
@@ -251,17 +269,7 @@ viewApiKeysTable appState apiKeys =
                     [ String.fromInt (List.length activeKeys) ]
                 )
             ]
-        , table [ class "table table-hover" ]
-            [ thead []
-                [ tr []
-                    [ th [] [ text (gettext "API Key Name" appState.locale) ]
-                    , th [] [ text (gettext "Created" appState.locale) ]
-                    , th [] [ text (gettext "Expiration" appState.locale) ]
-                    , th [] []
-                    ]
-                ]
-            , tbody [] (List.map viewApiKeyRow (List.sortBy (String.toLower << .name) activeKeys))
-            ]
+        , content
         ]
 
 
