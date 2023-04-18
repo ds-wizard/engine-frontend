@@ -153,4 +153,5 @@ iconSet =
         , ( "questionnaireMigration.undo", "fas fa-undo-alt" )
         , ( "userAgent.desktop", "fas fa-desktop" )
         , ( "userAgent.mobile", "fas fa-mobile-alt" )
+        , ( "userAgent.tdk", "fas fa-terminal" )
         ]

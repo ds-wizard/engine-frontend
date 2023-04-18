@@ -143,21 +143,31 @@ viewActiveSessions appState model token =
 viewActiveSession : AppState -> Token -> Html Msg
 viewActiveSession appState token =
     let
-        sessionOS =
-            UserAgent.getOS token.userAgent
+        isTDK =
+            String.startsWith "dsw-tdk/" token.userAgent
 
         icon =
-            if UserAgent.isMobile sessionOS then
+            if isTDK then
+                faSetFw "userAgent.tdk" appState
+
+            else if UserAgent.isMobile (UserAgent.getOS token.userAgent) then
                 faSetFw "userAgent.mobile" appState
 
             else
                 faSetFw "userAgent.desktop" appState
+
+        sessionLabel =
+            if isTDK then
+                strong [] [ text "DSW TDK" ]
+
+            else
+                tokenToHtml appState token
     in
     div [ class "list-group-item d-flex align-items-baseline" ]
         [ div [ class "me-2" ] [ icon ]
         , div [ class "flex-grow-1" ]
             [ div [ class "d-flex align-items-center" ]
-                [ tokenToHtml appState token
+                [ sessionLabel
                 , viewIf token.currentSession <|
                     Badge.info [ class "ms-2" ] [ text (gettext "current" appState.locale) ]
                 ]
