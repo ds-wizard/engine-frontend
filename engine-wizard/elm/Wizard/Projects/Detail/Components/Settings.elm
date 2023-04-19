@@ -15,11 +15,12 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, br, button, div, h2, hr, label, li, p, strong, text, ul)
-import Html.Attributes exposing (class, classList, disabled, id, name, style)
-import Html.Events exposing (onClick, onMouseDown)
+import Html exposing (Html, a, br, button, div, form, h2, hr, label, li, p, strong, text, ul)
+import Html.Attributes exposing (class, classList, disabled, id, name, style, type_)
+import Html.Events exposing (onClick, onMouseDown, onSubmit)
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Set
 import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
@@ -46,15 +47,15 @@ import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
-import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
+import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Ports as Ports
-import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
 import Wizard.Projects.Detail.Components.Settings.DeleteModal as DeleteModal
 import Wizard.Routes as Routes
@@ -182,7 +183,7 @@ handlePutQuestionnaireComplete : AppState -> Model -> Result ApiError () -> ( Mo
 handlePutQuestionnaireComplete appState model result =
     case result of
         Ok _ ->
-            ( { model | savingQuestionnaire = Unset }
+            ( { model | savingQuestionnaire = Success "" }
             , Ports.refresh ()
             )
 
@@ -293,7 +294,7 @@ subscriptions model =
 
 
 type alias ViewConfig =
-    { questionnaire : QuestionnaireDescriptor
+    { questionnaire : QuestionnaireDetail
     , package : Package
     , templateState : Maybe DocumentTemplateState
     , templatePhase : Maybe DocumentTemplatePhase
@@ -304,8 +305,9 @@ type alias ViewConfig =
 view : AppState -> ViewConfig -> Model -> Html Msg
 view appState cfg model =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Settings" ]
-        [ div [ detailClass "container" ]
-            [ formView appState cfg model
+        [ div [ detailClass "" ]
+            [ Page.header (gettext "Settings" appState.locale) []
+            , formView appState cfg model
             , hr [ class "separator" ] []
             , knowledgeModel appState cfg
             , hr [ class "separator" ] []
@@ -367,10 +369,28 @@ formView appState cfg model =
 
             else
                 emptyNode
+
+        originalTagCount =
+            List.length cfg.questionnaire.projectTags
+
+        currentTagCount =
+            List.length (Form.getListIndexes "projectTags" model.form) - 1
+
+        tagsChanged =
+            originalTagCount /= currentTagCount
+
+        formChanged =
+            (not << Set.isEmpty << Set.filter ((/=) (lastProjectTagFieldName model.form))) (Form.getChangedFields model.form)
+
+        formActionsConfig =
+            { text = Nothing
+            , actionResult = model.savingQuestionnaire
+            , formChanged = tagsChanged || formChanged
+            , wide = False
+            }
     in
-    div []
-        ([ h2 [] [ text (gettext "Settings" appState.locale) ]
-         , FormResult.errorOnlyView appState model.savingQuestionnaire
+    form [ onSubmit (FormMsg Form.Submit) ]
+        ([ FormResult.errorOnlyView appState model.savingQuestionnaire
          , Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
          , Html.map FormMsg <| FormGroup.input appState model.form "description" <| gettext "Description" appState.locale
          , Html.map FormMsg <| projectTagsInput
@@ -379,8 +399,7 @@ formView appState cfg model =
          , Html.map FormMsg <| formatInput
          ]
             ++ isTemplateInput
-            ++ [ FormActions.viewActionOnly appState
-                    (ActionButton.ButtonConfig (gettext "Save" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
+            ++ [ FormActions.viewDynamic formActionsConfig appState
                ]
         )
 
@@ -467,6 +486,7 @@ projectTagInput appState model =
             , disabled (isEmpty || hasError)
             , onClick (Form.Append "projectTags")
             , dataCy "project_settings_add-tag-button"
+            , type_ "button"
             ]
             [ text (gettext "Add" appState.locale) ]
         ]
@@ -511,7 +531,7 @@ knowledgeModel appState cfg =
 
 dangerZone : AppState -> ViewConfig -> Html Msg
 dangerZone appState cfg =
-    div []
+    div [ class "pb-6" ]
         [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger" ]
             [ div [ class "card-body" ]
@@ -522,7 +542,7 @@ dangerZone appState cfg =
                     ]
                 , button
                     [ class "btn btn-outline-danger"
-                    , onClick (DeleteModalMsg (DeleteModal.open cfg.questionnaire))
+                    , onClick (DeleteModalMsg (DeleteModal.open (QuestionnaireDescriptor.fromQuestionnaireDetail cfg.questionnaire)))
                     ]
                     [ text (gettext "Delete this project" appState.locale) ]
                 ]

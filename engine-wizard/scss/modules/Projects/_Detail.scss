@@ -104,6 +104,9 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
         }
 
         &--Settings {
+            display: flex;
+            justify-content: center;
+
             .form-group-project-tags {
                 .project-tag {
                     background: $gray-200;

@@ -62,6 +62,45 @@ select {
     }
 }
 
+.form-actions-dynamic {
+    @include transition(bottom 0.15s ease-in-out);
+    @include border-radius-top($card-border-radius);
+    bottom: -5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    background-color: $white;
+    box-shadow: $form-actions-dynamic-shadow;
+    width: 33rem + 2 * $spacer-3;
+    max-width: calc(100% - $side-navigation-width + $spacer-3);
+    padding: 1rem;
+    z-index: 900;
+    margin-left: -$spacer-3;
+    margin-right: -$spacer-3;
+
+    .side-navigation-collapsed & {
+        max-width: calc(100% - $side-navigation-width-collapsed + $spacer-3);
+    }
+
+    &-wide {
+        width: 50rem + 2 * $spacer-3;
+        max-width: calc(100% - $side-navigation-width - 21rem + $spacer-3);
+
+        .side-navigation-collapsed & {
+            max-width: calc(100% - $side-navigation-width-collapsed - 21rem + $spacer-3);
+        }
+    }
+
+    &-visible {
+        bottom: 0;
+    }
+
+    p {
+        margin: 0;
+    }
+}
+
 .form-text {
     text-align: justify;
     font-size: $font-size-base;

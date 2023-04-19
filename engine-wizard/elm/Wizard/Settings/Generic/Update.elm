@@ -118,7 +118,20 @@ handleForm props formMsg wrapMsg appState model =
 
         _ ->
             let
+                formRemoved =
+                    case formMsg of
+                        Form.RemoveItem _ _ ->
+                            True
+
+                        _ ->
+                            model.formRemoved
+
                 form =
                     Form.update props.formValidation formMsg model.form
             in
-            ( { model | form = form }, Cmd.none )
+            ( { model
+                | form = form
+                , formRemoved = formRemoved
+              }
+            , Cmd.none
+            )

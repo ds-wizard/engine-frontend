@@ -3,17 +3,19 @@ module Wizard.Settings.Registry.View exposing (view)
 import ActionResult
 import Form exposing (Form)
 import Gettext exposing (gettext)
-import Html exposing (Html, button, div, h5, text)
+import Html exposing (Html, button, div, form, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onSubmit)
+import Set
 import Shared.Data.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
+import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
@@ -31,20 +33,20 @@ view appState model =
 
 viewForm : AppState -> Model -> config -> Html Msg
 viewForm appState model _ =
+    let
+        formActionsConfig =
+            { text = Nothing
+            , actionResult = model.genericModel.savingConfig
+            , formChanged = model.genericModel.formRemoved || (not << Set.isEmpty) (Form.getChangedFields model.genericModel.form)
+            , wide = True
+            }
+    in
     div [ wideDetailClass "" ]
         [ Page.header (gettext "DSW Registry" appState.locale) []
-        , div []
+        , form [ onSubmit (GenericMsg <| GenericMsgs.FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.genericModel.savingConfig
             , formView appState model.genericModel.form
-            , div [ class "mt-5" ]
-                [ ActionButton.buttonWithAttrs appState
-                    (ActionButton.ButtonWithAttrsConfig (gettext "Save" appState.locale)
-                        model.genericModel.savingConfig
-                        (GenericMsg <| GenericMsgs.FormMsg Form.Submit)
-                        False
-                        [ dataCy "form_submit" ]
-                    )
-                ]
+            , FormActions.viewDynamic formActionsConfig appState
             ]
         , registrySignupModal appState model
         ]

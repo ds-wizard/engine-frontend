@@ -10,3 +10,6 @@
     max-width: map-get($container-max-widths, 'xxl');
 }
 
+.pb-6 {
+    padding-bottom: $spacer-6;
+}
