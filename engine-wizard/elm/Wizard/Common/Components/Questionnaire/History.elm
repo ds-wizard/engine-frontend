@@ -491,7 +491,7 @@ viewEventDetailSetLevel appState cfg data =
             List.find (.uuid >> Just >> (==) (Maybe.map Uuid.toString data.phaseUuid)) (KnowledgeModel.getPhases cfg.questionnaire.knowledgeModel)
 
         levelName =
-            Maybe.unwrap "" .title mbLevel
+            Maybe.unwrap (gettext "Unknown phase" appState.locale) .title mbLevel
     in
     div [ class "event-detail" ]
         [ em [] (String.formatHtml (gettext "Set phase to %s" appState.locale) [ strong [] [ text levelName ] ]) ]
