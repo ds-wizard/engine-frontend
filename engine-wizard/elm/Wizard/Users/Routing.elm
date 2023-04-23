@@ -73,10 +73,10 @@ isAllowed route appState =
         EditRoute uuidOrCurrent subroute ->
             case subroute of
                 UserEditRoute.ApiKeys ->
-                    Feature.userEditApiKeys uuidOrCurrent
+                    Feature.userEditApiKeys appState uuidOrCurrent
 
                 UserEditRoute.ActiveSessions ->
-                    Feature.userEditActiveSessions uuidOrCurrent
+                    Feature.userEditActiveSessions appState uuidOrCurrent
 
                 _ ->
                     Feature.userEdit appState uuidOrCurrent

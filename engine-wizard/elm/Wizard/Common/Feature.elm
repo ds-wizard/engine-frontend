@@ -67,6 +67,7 @@ module Wizard.Common.Feature exposing
     , usersView
     )
 
+import Maybe.Extra as Maybe
 import Shared.Auth.Permission as Perm
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Branch as Branch exposing (Branch)
@@ -80,6 +81,7 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
 import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.UserInfo as UserInfo
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -401,14 +403,14 @@ userEdit appState uuidOrCurrent =
     UuidOrCurrent.isCurrent uuidOrCurrent || adminOr Perm.userManagement appState
 
 
-userEditApiKeys : UuidOrCurrent -> Bool
-userEditApiKeys =
-    UuidOrCurrent.isCurrent
+userEditApiKeys : AppState -> UuidOrCurrent -> Bool
+userEditApiKeys appState uuidOrCurrent =
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
 
 
-userEditActiveSessions : UuidOrCurrent -> Bool
-userEditActiveSessions =
-    UuidOrCurrent.isCurrent
+userEditActiveSessions : AppState -> UuidOrCurrent -> Bool
+userEditActiveSessions appState uuidOrCurrent =
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
 
 
 

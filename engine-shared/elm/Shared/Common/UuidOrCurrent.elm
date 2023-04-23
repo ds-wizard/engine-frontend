@@ -4,6 +4,7 @@ module Shared.Common.UuidOrCurrent exposing
     , empty
     , encode
     , isCurrent
+    , matchUuid
     , parser
     , toString
     , uuid
@@ -71,6 +72,16 @@ isCurrent uuidOrCurrent =
 
         _ ->
             False
+
+
+matchUuid : UuidOrCurrent -> Uuid -> Bool
+matchUuid uuidOrCurrent testUuid =
+    case uuidOrCurrent of
+        Current ->
+            False
+
+        Uuid u ->
+            u == testUuid
 
 
 encode : UuidOrCurrent -> E.Value
