@@ -6,8 +6,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, form, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick, onSubmit)
-import Set
 import Shared.Data.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
@@ -37,7 +37,7 @@ viewForm appState model _ =
         formActionsConfig =
             { text = Nothing
             , actionResult = model.genericModel.savingConfig
-            , formChanged = model.genericModel.formRemoved || (not << Set.isEmpty) (Form.getChangedFields model.genericModel.form)
+            , formChanged = model.genericModel.formRemoved || Form.containsChanges model.genericModel.form
             , wide = True
             }
     in

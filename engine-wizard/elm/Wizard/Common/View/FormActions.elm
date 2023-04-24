@@ -59,8 +59,6 @@ type alias ViewDynamicConfig a =
 viewDynamic : ViewDynamicConfig a -> AppState -> Html msg
 viewDynamic cfg appState =
     let
-        --formChanged =
-        --    (not << Set.isEmpty) (Form.getChangedFields cfg.form)
         isVisible =
             cfg.formChanged || ActionResult.isLoading cfg.actionResult
 

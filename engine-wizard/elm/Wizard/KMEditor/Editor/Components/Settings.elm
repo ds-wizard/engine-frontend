@@ -15,13 +15,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, button, div, form, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
-import Set
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch.BranchState as BranchState exposing (BranchState)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
@@ -174,7 +174,7 @@ view appState branchDetail model =
         formActionsConfig =
             { text = Nothing
             , actionResult = model.savingBranch
-            , formChanged = (not << Set.isEmpty) (Form.getChangedFields model.form)
+            , formChanged = Form.containsChanges model.form
             , wide = False
             }
     in

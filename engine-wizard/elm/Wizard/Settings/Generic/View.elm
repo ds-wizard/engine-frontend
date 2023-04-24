@@ -8,7 +8,7 @@ import Gettext
 import Html exposing (Html, div, form)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Set
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
@@ -37,7 +37,7 @@ viewForm props appState model _ =
         formActionsConfig =
             { text = Nothing
             , actionResult = model.savingConfig
-            , formChanged = model.formRemoved || (not << Set.isEmpty) (Form.getChangedFields model.form)
+            , formChanged = model.formRemoved || Form.containsChanges model.form
             , wide = True
             }
     in

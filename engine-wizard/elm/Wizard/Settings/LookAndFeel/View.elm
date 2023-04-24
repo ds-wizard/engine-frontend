@@ -8,9 +8,9 @@ import Html exposing (Html, a, button, div, form, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src, style)
 import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
-import Set
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Markdown as Markdown
@@ -42,7 +42,7 @@ viewForm appState model _ =
         formActionsConfig =
             { text = Nothing
             , actionResult = model.genericModel.savingConfig
-            , formChanged = model.genericModel.formRemoved || (not << Set.isEmpty) (Form.getChangedFields model.genericModel.form)
+            , formChanged = model.genericModel.formRemoved || Form.containsChanges model.genericModel.form
             , wide = True
             }
     in
