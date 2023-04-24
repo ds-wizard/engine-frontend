@@ -259,8 +259,14 @@ htmlRadioGroup appState options =
 
 
 alertRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
-alertRadioGroup appState options =
+alertRadioGroup appState options form fieldName labelText =
     let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( _, errorClass ) =
+            getErrors appState field labelText
+
         radioInput state _ =
             let
                 buildOption ( k, v, c ) =
@@ -278,9 +284,9 @@ alertRadioGroup appState options =
                             [ text v ]
                         ]
             in
-            div [ class "form-radio-group" ] (List.map buildOption options)
+            div [ class "form-radio-group", class errorClass ] (List.map buildOption options)
     in
-    formGroup radioInput [] appState
+    formGroup radioInput [] appState form fieldName labelText
 
 
 {-| Helper for creating form group with textarea.
