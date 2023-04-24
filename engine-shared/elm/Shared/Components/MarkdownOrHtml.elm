@@ -3,6 +3,7 @@ module Shared.Components.MarkdownOrHtml exposing (view)
 import Html exposing (Html, div)
 import Html.Parser
 import Html.Parser.Util
+import Regex exposing (Regex)
 import Shared.Markdown as Markdown
 
 
@@ -25,5 +26,10 @@ view attributes str =
 
 
 detectHtml : String -> Bool
-detectHtml str =
-    String.startsWith "<" str
+detectHtml =
+    Regex.contains htmlTagRegex
+
+
+htmlTagRegex : Regex
+htmlTagRegex =
+    Maybe.withDefault Regex.never (Regex.fromString "<[^>]+>")
