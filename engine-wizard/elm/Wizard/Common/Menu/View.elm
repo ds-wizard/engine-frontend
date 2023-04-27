@@ -283,7 +283,7 @@ defaultMenuItem model item =
                 ( submenuStyle, submenuExtraClass ) =
                     case Dict.get menuItemId model.menuModel.submenuPositions of
                         Just element ->
-                            ( [ style "top" (String.fromFloat element.element.y ++ "px") ], "show" )
+                            ( [ style "top" (String.fromFloat (element.element.y - element.viewport.y) ++ "px") ], "show" )
 
                         _ ->
                             ( [], "" )
@@ -357,7 +357,7 @@ menuLinkSimple model link itemId itemIcon itemTitle isActive =
                 ( True, Just element ) ->
                     let
                         top =
-                            element.element.y + (element.element.height / 2)
+                            element.element.y - element.viewport.y + (element.element.height / 2)
                     in
                     ( [ style "top" (String.fromFloat top ++ "px") ], "show" )
 
@@ -394,7 +394,7 @@ viewProfileMenu model =
                 Just element ->
                     let
                         top =
-                            element.element.y + element.element.height
+                            element.element.y - element.viewport.y + element.element.height
                     in
                     ( [ style "top" (String.fromFloat top ++ "px") ], "show" )
 
