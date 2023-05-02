@@ -62,10 +62,13 @@ customElements.define('date-picker', class extends DatePicker {
 
 customElements.define('date-picker-utc', class extends DatePicker {
     constructor() {
+        let today = new Date()
+
         super({
             dateFormat: 'Z',
             altInput: true,
-            altFormat: 'Y-m-d'
+            altFormat: 'Y-m-d',
+            enable: [(date) => date > today]
         })
     }
 })
