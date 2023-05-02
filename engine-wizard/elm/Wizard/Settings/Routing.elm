@@ -20,7 +20,7 @@ parsers appState wrapRoute =
     [ map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))
     , map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s (lr "settings.authentication" appState))
     , map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s (lr "settings.privacyAndSupport" appState))
-    , map (wrapRoute <| DashboardRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))
+    , map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))
     , map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s (lr "settings.lookAndFeel" appState))
     , map (wrapRoute <| RegistryRoute) (s moduleRoot </> s (lr "settings.registry" appState))
     , map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s (lr "settings.projects" appState))
@@ -47,7 +47,7 @@ toUrl appState route =
         PrivacyAndSupportRoute ->
             [ moduleRoot, lr "settings.privacyAndSupport" appState ]
 
-        DashboardRoute ->
+        DashboardAndLoginScreenRoute ->
             [ moduleRoot, lr "settings.dashboard" appState ]
 
         LookAndFeelRoute ->

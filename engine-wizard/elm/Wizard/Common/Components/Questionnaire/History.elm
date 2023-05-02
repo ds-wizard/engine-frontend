@@ -487,14 +487,23 @@ viewEventDetailClearReply appState cfg data question =
 viewEventDetailSetLevel : AppState -> ViewConfig msg -> SetPhaseData -> Html msg
 viewEventDetailSetLevel appState cfg data =
     let
-        mbLevel =
-            List.find (.uuid >> Just >> (==) (Maybe.map Uuid.toString data.phaseUuid)) (KnowledgeModel.getPhases cfg.questionnaire.knowledgeModel)
+        phaseEventDescription =
+            case data.phaseUuid of
+                Nothing ->
+                    [ text (gettext "Unset phase" appState.locale) ]
 
-        levelName =
-            Maybe.unwrap "" .title mbLevel
+                Just phaseUuid ->
+                    let
+                        mbPhase =
+                            List.find (.uuid >> (==) (Uuid.toString phaseUuid)) (KnowledgeModel.getPhases cfg.questionnaire.knowledgeModel)
+
+                        phaseName =
+                            Maybe.unwrap (gettext "Unknown phase" appState.locale) .title mbPhase
+                    in
+                    String.formatHtml (gettext "Set phase to %s" appState.locale) [ strong [] [ text phaseName ] ]
     in
     div [ class "event-detail" ]
-        [ em [] (String.formatHtml (gettext "Set phase to %s" appState.locale) [ strong [] [ text levelName ] ]) ]
+        [ em [] phaseEventDescription ]
 
 
 viewEventUser : AppState -> Maybe UserSuggestion -> Html msg

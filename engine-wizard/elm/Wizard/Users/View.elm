@@ -17,9 +17,9 @@ view route appState model =
             Html.map CreateMsg <|
                 Wizard.Users.Create.View.view appState model.createModel
 
-        EditRoute _ ->
+        EditRoute _ subroute ->
             Html.map EditMsg <|
-                Wizard.Users.Edit.View.view appState model.editModel
+                Wizard.Users.Edit.View.view appState subroute model.editModel
 
         IndexRoute _ _ ->
             Html.map IndexMsg <|

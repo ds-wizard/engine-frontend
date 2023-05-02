@@ -1,15 +1,13 @@
 module Wizard.Users.Edit.Msgs exposing (Msg(..))
 
-import Form
-import Shared.Data.User exposing (User)
-import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Users.Edit.Models exposing (View)
+import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
+import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
+import Wizard.Users.Edit.Components.Password as Password
+import Wizard.Users.Edit.Components.Profile as Profile
 
 
 type Msg
-    = GetUserCompleted (Result ApiError User)
-    | EditFormMsg Form.Msg
-    | PutUserCompleted (Result ApiError User)
-    | PasswordFormMsg Form.Msg
-    | PutUserPasswordCompleted (Result ApiError ())
-    | ChangeView View
+    = ProfileMsg Profile.Msg
+    | PasswordMsg Password.Msg
+    | ApiKeysMsg ApiKeys.Msg
+    | ActiveSessionsMsg ActiveSessions.Msg

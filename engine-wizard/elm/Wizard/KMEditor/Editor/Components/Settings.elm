@@ -12,15 +12,16 @@ import ActionResult exposing (ActionResult)
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
-import Html exposing (Html, br, button, div, h2, hr, p, strong, text)
+import Html exposing (Html, br, button, div, form, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onSubmit)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch.BranchState as BranchState exposing (BranchState)
 import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
@@ -29,7 +30,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
-import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
@@ -114,7 +114,7 @@ update cfg appState msg model =
         PutBranchComplete result ->
             case result of
                 Ok _ ->
-                    ( { model | savingBranch = ActionResult.Unset }
+                    ( { model | savingBranch = ActionResult.Success "" }
                     , Ports.refresh ()
                     )
 
@@ -170,11 +170,18 @@ view appState branchDetail model =
             , wrapFormMsg = FormMsg
             , setVersionMsg = Just FormSetVersion
             }
+
+        formActionsConfig =
+            { text = Nothing
+            , actionResult = model.savingBranch
+            , formChanged = Form.containsChanges model.form
+            , wide = False
+            }
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]
         [ div [ detailClass "" ]
             ([ Page.header (gettext "Settings" appState.locale) []
-             , div []
+             , form [ onSubmit (FormMsg Form.Submit) ]
                 [ FormResult.errorOnlyView appState model.savingBranch
                 , Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)
                 , Html.map FormMsg <| FormGroup.input appState model.form "description" (gettext "Description" appState.locale)
@@ -182,8 +189,7 @@ view appState branchDetail model =
                 , FormGroup.version appState versionInputConfig model.form
                 , Html.map FormMsg <| FormGroup.input appState model.form "license" <| gettext "License" appState.locale
                 , Html.map FormMsg <| FormGroup.markdownEditor appState model.form "readme" <| gettext "Readme" appState.locale
-                , FormActions.viewActionOnly appState
-                    (ActionButton.ButtonConfig (gettext "Save" appState.locale) model.savingBranch (FormMsg Form.Submit) False)
+                , FormActions.viewDynamic formActionsConfig appState
                 ]
              ]
                 ++ parentKnowledgeModelView
@@ -208,7 +214,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
                             [ class "btn btn-warning"
                             , onClick (UpgradeModalMsg (UpgradeModal.open branchDetail.uuid branchDetail.name forkOfPackage.id))
                             ]
-                            [ text (gettext "Upgrade" appState.locale) ]
+                            [ text (gettext "Update" appState.locale) ]
                         ]
 
                 _ ->
@@ -226,7 +232,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
 
 dangerZone : AppState -> BranchDetail -> Html Msg
 dangerZone appState branchDetail =
-    div [ class "pb-5" ]
+    div [ class "pb-6" ]
         [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger mt-3" ]
             [ div [ class "card-body d-flex justify-content-between align-items-center" ]

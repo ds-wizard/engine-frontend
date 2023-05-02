@@ -4,12 +4,13 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, hr, img, label, span, text)
+import Html exposing (Html, a, button, div, form, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src, style)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Markdown as Markdown
@@ -17,8 +18,8 @@ import Shared.Undraw as Undraw
 import String.Extra as String
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
-import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.Html.Attribute exposing (wideDetailClass)
+import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
@@ -37,20 +38,20 @@ view appState model =
 
 viewForm : AppState -> Model -> config -> Html Msg
 viewForm appState model _ =
+    let
+        formActionsConfig =
+            { text = Nothing
+            , actionResult = model.genericModel.savingConfig
+            , formChanged = model.genericModel.formRemoved || Form.containsChanges model.genericModel.form
+            , wide = True
+            }
+    in
     div [ wideDetailClass "LookAndFeel" ]
         [ Page.header (gettext "Look & Feel" appState.locale) []
-        , div []
+        , form [ onSubmit (GenericMsg <| GenericMsgs.FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.genericModel.savingConfig
             , formView appState model.genericModel.form
-            , div [ class "mt-5" ]
-                [ ActionButton.buttonWithAttrs appState
-                    (ActionButton.ButtonWithAttrsConfig (gettext "Save" appState.locale)
-                        model.genericModel.savingConfig
-                        (GenericMsg <| GenericMsgs.FormMsg Form.Submit)
-                        False
-                        [ dataCy "form_submit" ]
-                    )
-                ]
+            , FormActions.viewDynamic formActionsConfig appState
             ]
         , Html.map LogoUploadModalMsg <| LogoUploadModal.view appState model.logoUploadModalModel
         ]
@@ -189,18 +190,6 @@ formView appState form =
                             [ customMenuLinksHeader appState form
                             , formWrap <| FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" "" (gettext "Add link" appState.locale)
                             ]
-                        ]
-                    ]
-               , hr [] []
-               , div [ class "row mt-5" ]
-                    [ div [ class "col-12" ]
-                        [ label [] [ text (gettext "Login Info" appState.locale) ] ]
-                    , div [ class "col-8" ]
-                        [ formWrap <| FormGroup.markdownEditor appState form "loginInfo" ""
-                        , FormExtra.mdAfter (gettext "Additional information displayed at the login screen." appState.locale)
-                        ]
-                    , div [ class "col-4" ]
-                        [ img [ class "settings-img", src "/img/settings/login-info-text.png" ] []
                         ]
                     ]
                ]

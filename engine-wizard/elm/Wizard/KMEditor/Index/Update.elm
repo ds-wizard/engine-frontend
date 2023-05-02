@@ -72,7 +72,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Migration could not be deleted." appState.locale) error }
+            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Migration could not be cancelled." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
 

@@ -17,7 +17,6 @@ type alias LookAndFeelConfig =
     { appTitle : Maybe String
     , appTitleShort : Maybe String
     , customMenuLinks : List CustomMenuLink
-    , loginInfo : Maybe String
     }
 
 
@@ -26,7 +25,6 @@ default =
     { appTitle = Nothing
     , appTitleShort = Nothing
     , customMenuLinks = []
-    , loginInfo = Nothing
     }
 
 
@@ -60,4 +58,3 @@ decoder =
         |> D.required "appTitle" (D.maybe D.string)
         |> D.required "appTitleShort" (D.maybe D.string)
         |> D.required "customMenuLinks" (D.list CustomMenuLink.decoder)
-        |> D.required "loginInfo" (D.maybe D.string)

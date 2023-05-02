@@ -8,7 +8,7 @@ type Route
     = OrganizationRoute
     | AuthenticationRoute
     | PrivacyAndSupportRoute
-    | DashboardRoute
+    | DashboardAndLoginScreenRoute
     | LookAndFeelRoute
     | RegistryRoute
     | ProjectsRoute

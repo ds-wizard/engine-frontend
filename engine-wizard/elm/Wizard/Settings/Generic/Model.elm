@@ -13,6 +13,7 @@ type alias Model form =
     { config : ActionResult EditableConfig
     , savingConfig : ActionResult ()
     , form : Form FormError form
+    , formRemoved : Bool
     }
 
 
@@ -21,4 +22,5 @@ initialModel form =
     { config = Loading
     , savingConfig = Unset
     , form = form
+    , formRemoved = False
     }

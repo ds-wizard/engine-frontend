@@ -14,9 +14,9 @@ import Wizard.Users.Routes exposing (Route(..))
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        EditRoute uuid ->
+        EditRoute uuidOrCurrent subroute ->
             Cmd.map EditMsg <|
-                Wizard.Users.Edit.Update.fetchData appState uuid
+                Wizard.Users.Edit.Update.fetchData appState uuidOrCurrent subroute
 
         IndexRoute _ _ ->
             Cmd.map IndexMsg <|

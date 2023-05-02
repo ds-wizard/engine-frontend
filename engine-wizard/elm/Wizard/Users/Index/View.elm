@@ -4,17 +4,16 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Shared.Auth.Role as Role
+import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Components.Badge as Badge
 import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (emptyNode, faSet)
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
-import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.UserIcon as UserIcon
@@ -28,7 +27,6 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "Users__Index" ]
         [ Page.header (gettext "Users" appState.locale) []
-        , FormResult.successOnlyView appState model.deletingUser
         , Listing.view appState (listingConfig appState) model.users
         , deleteModal appState model
         ]
@@ -77,7 +75,7 @@ listingConfig appState =
 listingTitle : AppState -> User -> Html Msg
 listingTitle appState user =
     span []
-        [ linkTo appState (Routes.usersEdit (Uuid.toString user.uuid)) [] [ text <| User.fullName user ]
+        [ linkTo appState (Routes.usersEdit (UuidOrCurrent.uuid user.uuid)) [] [ text <| User.fullName user ]
         , listingTitleBadge appState user
         ]
 
@@ -147,7 +145,7 @@ listingActions appState user =
                 { extraClass = Nothing
                 , icon = faSet "_global.edit" appState
                 , label = gettext "Edit" appState.locale
-                , msg = ListingActionLink (Routes.usersEdit (Uuid.toString user.uuid))
+                , msg = ListingActionLink (Routes.usersEdit (UuidOrCurrent.uuid user.uuid))
                 , dataCy = "edit"
                 }
 

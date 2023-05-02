@@ -194,7 +194,7 @@ markdown appState config =
                     ]
                     []
     in
-    div [ class "form-group form-group-markdown" ]
+    div [ class "form-group form-group-markup-editor" ]
         [ label [ for config.name ] [ text config.label ]
         , div [ class "card" ]
             [ div [ class "card-header" ]

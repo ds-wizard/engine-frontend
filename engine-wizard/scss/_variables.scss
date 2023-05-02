@@ -112,5 +112,10 @@ $spacer-2: map-get($spacers, 2); // 0.5rem
 $spacer-3: map-get($spacers, 3); // 1rem
 $spacer-4: map-get($spacers, 4); // 1.5rem
 $spacer-5: map-get($spacers, 5); // 3rem
+$spacer-6: 5rem;
+
+
+// forms
+$form-actions-dynamic-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
 @import '~bootstrap/scss/maps';

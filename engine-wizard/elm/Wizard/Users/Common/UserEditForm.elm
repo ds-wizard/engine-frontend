@@ -13,6 +13,7 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.User exposing (User)
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
@@ -91,8 +92,8 @@ validateSubmissionProps =
         |> V.andMap (V.field "values" (V.dict V.optionalString))
 
 
-encode : String -> UserEditForm -> E.Value
-encode uuid form =
+encode : UuidOrCurrent -> UserEditForm -> E.Value
+encode uuidOrCurrent form =
     let
         encodeSubmission : SubmissionProps -> E.Value
         encodeSubmission submission =
@@ -103,7 +104,7 @@ encode uuid form =
                 ]
     in
     E.object
-        [ ( "uuid", E.string uuid )
+        [ ( "uuid", UuidOrCurrent.encode uuidOrCurrent )
         , ( "email", E.string form.email )
         , ( "firstName", E.string form.firstName )
         , ( "lastName", E.string form.lastName )

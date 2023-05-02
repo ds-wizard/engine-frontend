@@ -18,6 +18,7 @@ module Shared.Api.Users exposing
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtFetchPut, jwtGet, jwtPost, jwtPut)
+import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.User as User exposing (User)
@@ -71,9 +72,9 @@ getUsersSuggestionsWithOptions qs select exclude =
     jwtGet url (Pagination.decoder "users" UserSuggestion.decoder)
 
 
-getUser : String -> AbstractAppState a -> ToMsg User msg -> Cmd msg
-getUser uuid =
-    jwtGet ("/users/" ++ uuid) User.decoder
+getUser : UuidOrCurrent -> AbstractAppState a -> ToMsg User msg -> Cmd msg
+getUser uuidOrCurrent =
+    jwtGet ("/users/" ++ UuidOrCurrent.toString uuidOrCurrent) User.decoder
 
 
 getCurrentUser : AbstractAppState a -> ToMsg User msg -> Cmd msg
@@ -91,14 +92,14 @@ postUserPublic =
     httpPost "/users"
 
 
-putUser : String -> E.Value -> AbstractAppState a -> ToMsg User msg -> Cmd msg
-putUser uuid =
-    jwtFetchPut ("/users/" ++ uuid) User.decoder
+putUser : UuidOrCurrent -> E.Value -> AbstractAppState a -> ToMsg User msg -> Cmd msg
+putUser uuidOrCurrent =
+    jwtFetchPut ("/users/" ++ UuidOrCurrent.toString uuidOrCurrent) User.decoder
 
 
-putUserPassword : String -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putUserPassword uuid =
-    jwtPut ("/users/" ++ uuid ++ "/password")
+putUserPassword : UuidOrCurrent -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putUserPassword uuidOrCurrent =
+    jwtPut ("/users/" ++ UuidOrCurrent.toString uuidOrCurrent ++ "/password")
 
 
 putUserPasswordPublic : String -> String -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg

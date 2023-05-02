@@ -6,7 +6,7 @@ input[type=color] {
     min-height: 30px;
 }
 
-input:read-only, textarea:read-only, .form-control.disabled {
+input[type=text]:read-only:not(.form-control-flatpickr), textarea:read-only, .form-control.disabled {
     background-color: $gray-100;
     color: $gray-600;
     cursor: not-allowed;
@@ -59,6 +59,45 @@ select {
 
     .extra-action {
         color: $gray-600;
+    }
+}
+
+.form-actions-dynamic {
+    @include transition(bottom 0.15s ease-in-out);
+    @include border-radius-top($card-border-radius);
+    bottom: -5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: fixed;
+    background-color: $white;
+    box-shadow: $form-actions-dynamic-shadow;
+    width: 33rem + 2 * $spacer-3;
+    max-width: calc(100% - $side-navigation-width + $spacer-3);
+    padding: 1rem;
+    z-index: 900;
+    margin-left: -$spacer-3;
+    margin-right: -$spacer-3;
+
+    .side-navigation-collapsed & {
+        max-width: calc(100% - $side-navigation-width-collapsed + $spacer-3);
+    }
+
+    &-wide {
+        width: 50rem + 2 * $spacer-3;
+        max-width: calc(100% - $side-navigation-width - 21rem + $spacer-3);
+
+        .side-navigation-collapsed & {
+            max-width: calc(100% - $side-navigation-width-collapsed - 21rem + $spacer-3);
+        }
+    }
+
+    &-visible {
+        bottom: 0;
+    }
+
+    p {
+        margin: 0;
     }
 }
 
@@ -157,7 +196,7 @@ select {
         }
     }
 
-    &-markdown {
+    &-markup-editor {
         &.is-invalid {
             .invalid-feedback {
                 display: block;
@@ -181,6 +220,7 @@ select {
                 padding: 1rem;
                 height: 100%;
                 min-height: 10rem;
+                font-family: $font-family-monospace;
             }
         }
 
@@ -462,6 +502,10 @@ select {
                 font-weight: normal;
             }
         }
+    }
+
+    .alert {
+        margin-bottom: 0;
     }
 }
 

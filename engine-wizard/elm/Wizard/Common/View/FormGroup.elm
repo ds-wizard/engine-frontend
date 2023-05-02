@@ -1,9 +1,12 @@
 module Wizard.Common.View.FormGroup exposing
     ( VersionFormGroupConfig
+    , alertRadioGroup
     , codeView
+    , date
     , formGroupCustom
     , formatRadioGroup
     , getErrors
+    , htmlOrMarkdownEditor
     , htmlRadioGroup
     , input
     , inputAttrs
@@ -37,6 +40,7 @@ import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, readonly, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
+import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
@@ -45,6 +49,7 @@ import Shared.Markdown as Markdown
 import Uuid
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.View.Flash as Flash
@@ -253,6 +258,37 @@ htmlRadioGroup appState options =
     formGroup radioInput [] appState
 
 
+alertRadioGroup : AppState -> List ( String, String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
+alertRadioGroup appState options form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( _, errorClass ) =
+            getErrors appState field labelText
+
+        radioInput state _ =
+            let
+                buildOption ( k, v, c ) =
+                    label [ class ("flex-grow-1 py-2 alert alert-" ++ c), classList [ ( "form-check-selected", state.value == Just k ) ] ]
+                        [ Html.input
+                            [ value k
+                            , checked (state.value == Just k)
+                            , class "form-check-input"
+                            , type_ "radio"
+                            , id k
+                            , onCheck (\_ -> Input state.path Form.Text <| Field.String k)
+                            ]
+                            []
+                        , span [ class "ms-2", for k ]
+                            [ text v ]
+                        ]
+            in
+            div [ class "form-radio-group", class errorClass ] (List.map buildOption options)
+    in
+    formGroup radioInput [] appState form fieldName labelText
+
+
 {-| Helper for creating form group with textarea.
 -}
 textarea : AppState -> Form FormError o -> String -> String -> Html Form.Msg
@@ -392,7 +428,34 @@ viewList appState itemView form fieldName labelText =
 
 
 markdownEditor : AppState -> Form FormError o -> String -> String -> Html Form.Msg
-markdownEditor appState form fieldName labelText =
+markdownEditor appState =
+    markupEditor
+        { toPreview = Markdown.toHtml []
+        , hint = gettext "You can use Markdown and see the result in the preview tab." appState.locale
+        , extraClass = "form-group-markdown"
+        }
+        appState
+
+
+htmlOrMarkdownEditor : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+htmlOrMarkdownEditor appState =
+    markupEditor
+        { toPreview = MarkdownOrHtml.view []
+        , hint = gettext "You can use HTML or Markdown and see the result in the preview tab." appState.locale
+        , extraClass = ""
+        }
+        appState
+
+
+type alias MarkupEditorConfig =
+    { toPreview : String -> Html Form.Msg
+    , extraClass : String
+    , hint : String
+    }
+
+
+markupEditor : MarkupEditorConfig -> AppState -> Form FormError o -> String -> String -> Html Form.Msg
+markupEditor cfg appState form fieldName labelText =
     let
         field =
             Form.getFieldAsString fieldName form
@@ -421,7 +484,7 @@ markdownEditor appState form fieldName labelText =
 
         content =
             if previewActive then
-                Markdown.toHtml [] valueString
+                cfg.toPreview valueString
 
             else
                 Input.textArea field
@@ -443,7 +506,7 @@ markdownEditor appState form fieldName labelText =
             else
                 label [ for fieldName ] [ text labelText ]
     in
-    div [ class <| "form-group form-group-markdown " ++ errorClass ]
+    div [ class <| "form-group form-group-markup-editor " ++ errorClass ++ " " ++ cfg.extraClass ]
         [ labelElement
         , div [ class <| "card " ++ cardErrorClass ]
             [ div [ class "card-header" ]
@@ -470,7 +533,7 @@ markdownEditor appState form fieldName labelText =
                 [ content
                 ]
             , div [ class "card-footer text-muted" ]
-                [ text (gettext "You can use Markdown and see the result in the preview tab." appState.locale) ]
+                [ text cfg.hint ]
             ]
         , error
         ]
@@ -512,6 +575,28 @@ simpleDate appState form yearFieldName monthFieldName dayFieldName labelText =
             ]
         , error
         ]
+
+
+date : AppState -> Form FormError o -> String -> String -> Html.Html Form.Msg
+date appState form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        dateValue =
+            Maybe.withDefault "" field.value
+
+        toMsg =
+            Form.Input fieldName Form.Text << Field.String
+
+        inputFn isInvalid =
+            DatePicker.datePickerUtc
+                [ DatePicker.invalid isInvalid
+                , DatePicker.value dateValue
+                , DatePicker.onChange toMsg
+                ]
+    in
+    formGroupCustom inputFn appState form fieldName labelText
 
 
 {-| Create Html for a form field using the given input field.

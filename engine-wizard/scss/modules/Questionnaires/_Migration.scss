@@ -1,6 +1,7 @@
 @import '../../variables';
 
 $migration-header-height: 100px;
+$change-header-height: 70px;
 
 .Questionnaire__Migration {
     width: 100%;
@@ -41,7 +42,7 @@ $migration-header-height: 100px;
     }
 
     .questionnaire {
-        height: calc(100vh - #{$migration-header-height} - 53px);
+        height: calc(100vh - #{$migration-header-height + $change-header-height});
     }
 
     .content {
@@ -85,12 +86,13 @@ $migration-header-height: 100px;
             overflow: hidden;
 
             .change-view {
-                flex: 0 0 50px;
-                height: 53px;
+                flex: 0 0 $change-header-height;
                 background: $gray-100;
                 border-bottom: 1px solid $gray-400;
                 display: flex;
+                flex-wrap: wrap;
                 justify-content: space-between;
+                align-items: center;
                 width: 100%;
                 padding: 0.5rem 1rem;
 
@@ -104,6 +106,10 @@ $migration-header-height: 100px;
                     }
                 }
 
+                .progress {
+                    width: 100%;
+                    height: 7px;
+                }
             }
 
             .questionnaire-view {

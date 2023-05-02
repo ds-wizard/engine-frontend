@@ -292,7 +292,7 @@ formViewKnowledgeModel appState model =
     in
     Html.map FormMsg <|
         div []
-            [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) model.form "allowedPackages" (gettext "Allowed Knowledge Models" appState.locale) (gettext "Add knoweldge model" appState.locale)
+            [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) model.form "allowedPackages" (gettext "Allowed Knowledge Models" appState.locale) (gettext "Add knowledge model" appState.locale)
             ]
 
 

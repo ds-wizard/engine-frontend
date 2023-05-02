@@ -22,12 +22,9 @@
         overflow: auto;
         padding: 1rem;
 
-        .col-user-image {
-            border-left: 1px solid $gray-300;
-            padding-left: 30px;
-
+        .col-border-left {
             img {
-                margin: 15px 0;
+                margin: $spacer-3 0;
             }
         }
 

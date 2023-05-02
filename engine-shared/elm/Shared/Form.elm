@@ -1,5 +1,6 @@
 module Shared.Form exposing
-    ( errorToString
+    ( containsChanges
+    , errorToString
     , setFormErrors
     )
 
@@ -8,6 +9,7 @@ import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation, customError)
 import Gettext exposing (gettext)
+import Set
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Form.FormError exposing (FormError(..))
@@ -81,3 +83,12 @@ createFieldValidation appState fieldName fieldError =
                 ServerError.messageToReadable appState fieldError
     in
     V.field fieldName (V.fail (customError (ServerValidationError error)))
+
+
+containsChanges : Form e a -> Bool
+containsChanges =
+    let
+        isNotPreviewActiveField =
+            not << String.contains "-preview-active"
+    in
+    not << Set.isEmpty << Set.filter isNotPreviewActiveField << Form.getChangedFields

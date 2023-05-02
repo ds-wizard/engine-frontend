@@ -21,7 +21,7 @@ class DatePicker extends HTMLElement {
 
     connectedCallback() {
         const wrapper = document.createElement('div')
-        wrapper.innerHTML = '<input type="text" class="form-control" data-input>'
+        wrapper.innerHTML = '<input type="text" class="form-control form-control-flatpickr" data-input>'
         this.appendChild(wrapper)
 
         this._options.wrap = true
@@ -57,6 +57,19 @@ class DatePicker extends HTMLElement {
 customElements.define('date-picker', class extends DatePicker {
     constructor() {
         super({})
+    }
+})
+
+customElements.define('date-picker-utc', class extends DatePicker {
+    constructor() {
+        let today = new Date()
+
+        super({
+            dateFormat: 'Z',
+            altInput: true,
+            altFormat: 'Y-m-d',
+            enable: [(date) => date > today]
+        })
     }
 })
 

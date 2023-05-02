@@ -1,5 +1,6 @@
 module Wizard.Users.Models exposing (Model, initLocalModel, initialModel)
 
+import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Users.Create.Models
@@ -18,7 +19,7 @@ type alias Model =
 initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Users.Create.Models.initialModel appState
-    , editModel = Wizard.Users.Edit.Models.initialModel appState ""
+    , editModel = Wizard.Users.Edit.Models.initialModel appState UuidOrCurrent.empty
     , indexModel = Wizard.Users.Index.Models.initialModel PaginationQueryString.empty Nothing
     }
 
@@ -29,8 +30,8 @@ initLocalModel appState route model =
         CreateRoute ->
             { model | createModel = Wizard.Users.Create.Models.initialModel appState }
 
-        EditRoute uuid ->
-            { model | editModel = Wizard.Users.Edit.Models.initialModel appState uuid }
+        EditRoute uuidOrCurrent _ ->
+            { model | editModel = Wizard.Users.Edit.Models.initialModel appState uuidOrCurrent }
 
         IndexRoute paginationQueryString mbRoute ->
             { model | indexModel = Wizard.Users.Index.Models.initialModel paginationQueryString mbRoute }
