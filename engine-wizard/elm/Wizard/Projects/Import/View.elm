@@ -274,4 +274,4 @@ viewReply appState questionnaire question data =
                     eventView [ ( fa "far fa-edit", text reply ) ]
 
                 IntegrationReplyType.IntegrationType _ reply ->
-                    eventView [ ( fa "fas fa-link", Markdown.toHtml [] reply ) ]
+                    eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
