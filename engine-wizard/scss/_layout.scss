@@ -121,7 +121,6 @@ body {
                 @include border-radius($border-radius);
                 @include transition($side-navigation-link-transition);
 
-
                 .sidebar-link {
                     margin-left: $side-navigation-icon-spacing;
                 }
@@ -133,10 +132,6 @@ body {
                 & > a {
                     color: $side-navigation-link-active-color;
                 }
-
-                .fa {
-                    color: $side-navigation-icon-active-color;
-                }
             }
 
             &:hover {
@@ -144,10 +139,6 @@ body {
                     background: $side-navigation-link-hover-bg;
                     color: $side-navigation-link-hover-color;
                     text-decoration: none !important;
-
-                    .fa {
-                        color: $side-navigation-icon-hover-color;
-                    }
                 }
             }
 
