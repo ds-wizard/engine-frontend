@@ -7,11 +7,10 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Api.Packages as PackagesApi
 import Shared.Data.Package exposing (Package)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Common.FileDownloader as FileDownloader
@@ -19,7 +18,6 @@ import Wizard.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : Cmd Msg
@@ -37,7 +35,7 @@ update msg wrapMsg appState model =
             handleDeletePackage wrapMsg appState model
 
         DeletePackageCompleted result ->
-            deletePackageCompleted appState model result
+            deletePackageCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -49,7 +47,7 @@ update msg wrapMsg appState model =
             case result of
                 Ok _ ->
                     ( model
-                    , cmdNavigate appState (Listing.toRouteAfterDelete Routes.knowledgeModelsIndexWithFilters model.packages)
+                    , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     )
 
                 Err error ->
@@ -77,12 +75,12 @@ handleDeletePackage wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deletePackageCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deletePackageCompleted appState model result =
+deletePackageCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deletePackageCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( model
-            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.knowledgeModelsIndexWithFilters model.packages)
+            ( { model | packageToBeDeleted = Nothing }
+            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
@@ -111,5 +109,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = PackagesApi.getPackages
     , getError = gettext "Unable to get Knowledge Models." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.knowledgeModelsIndexWithFilters PaginationQueryFilters.empty
+    , toRoute = Routes.knowledgeModelsIndexWithFilters
     }

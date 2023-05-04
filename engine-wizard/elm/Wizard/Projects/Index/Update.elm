@@ -7,19 +7,19 @@ import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debouncer
 import Dict
 import Gettext exposing (gettext)
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.Users as UsersApi
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
+import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch, flip, stringToBool)
+import Shared.Utils exposing (dispatch, flip)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
@@ -27,7 +27,7 @@ import Wizard.Projects.Common.CloneProjectModal.Update as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Projects.Routes exposing (indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -83,11 +83,31 @@ update wrapMsg msg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
+        ListingFilterAddSelectedPackage package listingMsg ->
+            let
+                updatePackages packages =
+                    { packages | items = List.uniqueBy (PackageSuggestion.packageIdAll << .id) (package :: packages.items) }
+
+                newModel =
+                    { model | packagesFilterSelectedPackages = ActionResult.map updatePackages model.packagesFilterSelectedPackages }
+            in
+            handleListingMsg wrapMsg appState listingMsg newModel
+
+        ListingFilterAddSelectedUser user listingMsg ->
+            let
+                updatePackages users =
+                    { users | items = List.uniqueBy .uuid (user :: users.items) }
+
+                newModel =
+                    { model | userFilterSelectedUsers = ActionResult.map updatePackages model.userFilterSelectedUsers }
+            in
+            handleListingMsg wrapMsg appState listingMsg newModel
+
         DeleteQuestionnaireModalMsg modalMsg ->
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << DeleteQuestionnaireModalMsg
-                    , deleteCompleteCmd = cmdNavigate appState (Listing.toRouteAfterDelete Routes.projectsIndexWithFilters model.questionnaires)
+                    , deleteCompleteCmd = dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     }
 
                 ( deleteModalModel, cmd ) =
@@ -272,7 +292,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
         Ok _ ->
             let
                 ( questionnaires, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState model) appState ListingMsgs.Reload model.questionnaires
+                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.questionnaires
             in
             ( { model
                 | deletingMigration = Success <| gettext "Project migration was successfully canceled." appState.locale
@@ -291,7 +311,7 @@ handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Quest
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( questionnaires, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState model) appState listingMsg model.questionnaires
+            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.questionnaires
     in
     ( { model | questionnaires = questionnaires }
     , cmd
@@ -302,43 +322,10 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig Questionnaire
-listingUpdateConfig wrapMsg appState model =
-    let
-        isTemplate =
-            Maybe.map stringToBool <|
-                PaginationQueryFilters.getValue indexRouteIsTemplateFilterId model.questionnaires.filters
-
-        users =
-            PaginationQueryFilters.getValue indexRouteUsersFilterId model.questionnaires.filters
-
-        usersOp =
-            PaginationQueryFilters.getOp indexRouteUsersFilterId model.questionnaires.filters
-
-        projectTags =
-            PaginationQueryFilters.getValue indexRouteProjectTagsFilterId model.questionnaires.filters
-
-        projectTagsOp =
-            PaginationQueryFilters.getOp indexRouteProjectTagsFilterId model.questionnaires.filters
-
-        packageIds =
-            PaginationQueryFilters.getValue indexRoutePackagesFilterId model.questionnaires.filters
-
-        packageIdsOp =
-            PaginationQueryFilters.getOp indexRoutePackagesFilterId model.questionnaires.filters
-    in
-    { getRequest =
-        QuestionnairesApi.getQuestionnaires
-            { isTemplate = isTemplate
-            , isMigrating = Nothing
-            , userUuids = users
-            , userUuidsOp = usersOp
-            , projectTags = projectTags
-            , projectTagsOp = projectTagsOp
-            , packageIds = packageIds
-            , packageIdsOp = packageIdsOp
-            }
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Questionnaire
+listingUpdateConfig wrapMsg appState =
+    { getRequest = QuestionnairesApi.getQuestionnaires
     , getError = gettext "Unable to get projects." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.projectsIndexWithFilters model.questionnaires.filters
+    , toRoute = Routes.projectsIndexWithFilters
     }

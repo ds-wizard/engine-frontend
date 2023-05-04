@@ -12,7 +12,6 @@ import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.Locales.Index.Models exposing (Model)
 import Wizard.Locales.Index.Msgs exposing (Msg(..))
-import Wizard.Locales.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Routes as Routes
@@ -26,8 +25,8 @@ fetchData =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ShowHideDeleteLocale package ->
-            ( { model | localeToBeDeleted = package, deletingLocale = ActionResult.Unset }, Cmd.none )
+        ShowHideDeleteLocale locale ->
+            ( { model | localeToBeDeleted = locale, deletingLocale = ActionResult.Unset }, Cmd.none )
 
         DeleteLocale ->
             handleDeleteLocale wrapMsg appState model
@@ -109,5 +108,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = LocalesApi.getLocales
     , getError = gettext "Unable to get locales." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.LocalesRoute << IndexRoute
+    , toRoute = Routes.localesIndexWithFilters
     }

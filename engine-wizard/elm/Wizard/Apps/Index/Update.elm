@@ -1,13 +1,10 @@
 module Wizard.Apps.Index.Update exposing (fetchData, update)
 
-import Dict
 import Gettext exposing (gettext)
 import Shared.Api.Apps as AppsApi
 import Shared.Data.App exposing (App)
-import Shared.Utils exposing (stringToBool)
 import Wizard.Apps.Index.Models exposing (Model)
 import Wizard.Apps.Index.Msgs exposing (Msg(..))
-import Wizard.Apps.Routes exposing (indexRouteEnabledFilterId)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -31,22 +28,17 @@ handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg App -
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( apps, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState model) appState listingMsg model.apps
+            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.apps
     in
     ( { model | apps = apps }
     , cmd
     )
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig App
-listingUpdateConfig wrapMsg appState model =
-    let
-        enabled =
-            Maybe.map stringToBool <|
-                Dict.get indexRouteEnabledFilterId model.apps.filters.values
-    in
-    { getRequest = AppsApi.getApps { enabled = enabled }
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig App
+listingUpdateConfig wrapMsg appState =
+    { getRequest = AppsApi.getApps
     , getError = gettext "Unable to get apps." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.appsIndexWithFilters model.apps.filters
+    , toRoute = Routes.appsIndexWithFilters
     }

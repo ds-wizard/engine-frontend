@@ -13,19 +13,17 @@ import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setQuestionnaire)
+import Shared.Utils exposing (dispatch)
 import Uuid
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.Documents.Index.Models exposing (Model, addDocumentSubmission)
 import Wizard.Documents.Index.Msgs exposing (Msg(..))
-import Wizard.Documents.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -58,7 +56,7 @@ update wrapMsg msg appState model =
             handleDeleteDocument wrapMsg appState model
 
         DeleteDocumentCompleted result ->
-            handleDeleteDocumentCompleted appState model result
+            handleDeleteDocumentCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -127,12 +125,12 @@ handleDeleteDocument wrapMsg appState model =
             ( model, Cmd.none )
 
 
-handleDeleteDocumentCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteDocumentCompleted appState model result =
+handleDeleteDocumentCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteDocumentCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( model
-            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.documentsIndexWithFilters model.documents)
+            ( { model | documentToBeDeleted = Nothing }
+            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
@@ -245,5 +243,5 @@ listingUpdateConfig wrapMsg appState model =
     { getRequest = DocumentsApi.getDocuments model.questionnaireUuid
     , getError = gettext "Unable to get documents." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
+    , toRoute = Routes.documentsIndexWithFilters model.questionnaireUuid
     }

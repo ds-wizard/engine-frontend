@@ -14,14 +14,15 @@ import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet)
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.SubmissionService as SubmissionService exposing (SubmissionService)
 import Uuid exposing (Uuid)
 
 
-getDocuments : Maybe Uuid -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Document) msg -> Cmd msg
-getDocuments questionnaireUuid qs =
+getDocuments : Maybe Uuid -> PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Document) msg -> Cmd msg
+getDocuments questionnaireUuid _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrlWith

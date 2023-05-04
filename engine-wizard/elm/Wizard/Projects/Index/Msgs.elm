@@ -16,6 +16,8 @@ type Msg
     = DeleteQuestionnaireMigration Uuid
     | DeleteQuestionnaireMigrationCompleted (Result ApiError ())
     | ListingMsg (Listing.Msg Questionnaire)
+    | ListingFilterAddSelectedPackage PackageSuggestion (Listing.Msg Questionnaire)
+    | ListingFilterAddSelectedUser UserSuggestion (Listing.Msg Questionnaire)
     | DeleteQuestionnaireModalMsg DeleteProjectModal.Msg
     | CloneQuestionnaireModalMsg CloneProjectModal.Msg
     | ProjectTagsFilterInput String

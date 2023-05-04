@@ -37,6 +37,7 @@ module Wizard.Routes exposing
     , isProjectSubroute
     , isProjectsDetail
     , isProjectsIndex
+    , isSameListingRoute
     , isSettingsRoute
     , isSettingsSubroute
     , isUsersIndex
@@ -59,17 +60,20 @@ module Wizard.Routes exposing
     , localesDetail
     , localesImport
     , localesIndex
+    , localesIndexWithFilters
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
     , projectImport
     , projectImportersIndex
+    , projectImportersIndexWithFilters
     , projectsCreate
     , projectsCreateCustom
     , projectsCreateMigration
     , projectsCreateTemplate
     , projectsDetailDocuments
     , projectsDetailDocumentsNew
+    , projectsDetailDocumentsWithFilters
     , projectsDetailQuestionnaire
     , projectsDetailSettings
     , projectsIndex
@@ -152,6 +156,35 @@ publicHome =
 appHome : Route
 appHome =
     DashboardRoute
+
+
+
+-- Helpers
+
+
+isSameListingRoute : Route -> Route -> Bool
+isSameListingRoute originalRoute nextRoute =
+    let
+        checkRoute matcher =
+            matcher originalRoute && matcher nextRoute
+    in
+    List.any checkRoute listingRouteMatchers
+
+
+listingRouteMatchers : List (Route -> Bool)
+listingRouteMatchers =
+    [ isAppIndex
+    , isDocumentsIndex
+    , isDocumentTemplateEditorsIndex
+    , isDocumentTemplatesIndex
+    , isKmEditorIndex
+    , isKnowledgeModelsIndex
+    , isLocalesIndex
+    , isPersistentCommandsIndex
+    , isProjectImportersIndex
+    , isProjectsIndex
+    , isUsersIndex
+    ]
 
 
 
@@ -252,9 +285,9 @@ documentsIndex =
     DocumentsRoute (Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
 
 
-documentsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
-documentsIndexWithFilters _ pagination =
-    DocumentsRoute (Wizard.Documents.Routes.IndexRoute Nothing pagination)
+documentsIndexWithFilters : Maybe Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
+documentsIndexWithFilters mbQuestionnaireUuid _ pagination =
+    DocumentsRoute (Wizard.Documents.Routes.IndexRoute mbQuestionnaireUuid pagination)
 
 
 isDocumentsIndex : Route -> Bool
@@ -508,6 +541,11 @@ projectImportersIndex =
     ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute PaginationQueryString.empty)
 
 
+projectImportersIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+projectImportersIndexWithFilters _ pagination =
+    ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute pagination)
+
+
 isProjectImportersIndex : Route -> Bool
 isProjectImportersIndex route =
     case route of
@@ -554,6 +592,11 @@ projectsDetailQuestionnaire uuid mbQuestionUuid =
 projectsDetailDocuments : Uuid -> Route
 projectsDetailDocuments uuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Documents PaginationQueryString.empty
+
+
+projectsDetailDocumentsWithFilters : Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
+projectsDetailDocumentsWithFilters uuid _ pagination =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Documents pagination
 
 
 projectsDetailDocumentsNew : Uuid -> Maybe Uuid -> Route
@@ -796,6 +839,21 @@ localesIndex =
     LocalesRoute (Wizard.Locales.Routes.IndexRoute PaginationQueryString.empty)
 
 
+localesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+localesIndexWithFilters _ pagination =
+    LocalesRoute (Wizard.Locales.Routes.IndexRoute pagination)
+
+
 localesDetail : String -> Route
 localesDetail =
     LocalesRoute << Wizard.Locales.Routes.DetailRoute
+
+
+isLocalesIndex : Route -> Bool
+isLocalesIndex route =
+    case route of
+        LocalesRoute (Wizard.Locales.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False

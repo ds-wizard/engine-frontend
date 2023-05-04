@@ -20,8 +20,6 @@ import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.Msgs
 import Wizard.Projects.Detail.Documents.Models exposing (Model, addDocumentSubmission)
 import Wizard.Projects.Detail.Documents.Msgs exposing (Msg(..))
-import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
-import Wizard.Projects.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -224,5 +222,5 @@ listingUpdateConfig wrapMsg appState questionnaireUuid =
     { getRequest = QuestionnairesApi.getDocuments questionnaireUuid
     , getError = gettext "Unable to get documents." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.ProjectsRoute << DetailRoute questionnaireUuid << PlanDetailRoute.Documents
+    , toRoute = Routes.projectsDetailDocumentsWithFilters questionnaireUuid
     }
