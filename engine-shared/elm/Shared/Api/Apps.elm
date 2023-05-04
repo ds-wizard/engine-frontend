@@ -1,6 +1,5 @@
 module Shared.Api.Apps exposing
-    ( GetAppsFilters
-    , deletePlan
+    ( deletePlan
     , getApp
     , getApps
     , getCurrentPlans
@@ -17,21 +16,19 @@ import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPost, jwtPut)
 import Shared.Data.App as App exposing (App)
 import Shared.Data.AppDetail as AppDetail exposing (AppDetail)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Plan as Plan exposing (Plan)
-import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 
 
-type alias GetAppsFilters =
-    { enabled : Maybe Bool }
-
-
-getApps : GetAppsFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination App) msg -> Cmd msg
+getApps : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination App) msg -> Cmd msg
 getApps filters qs =
     let
         extraParams =
-            PaginationQueryString.filterParams [ ( "enabled", Maybe.map boolToString filters.enabled ) ]
+            PaginationQueryString.filterParams
+                [ ( "enabled", PaginationQueryFilters.getValue "enabled" filters )
+                ]
 
         queryString =
             PaginationQueryString.toApiUrlWith extraParams qs

@@ -5,7 +5,7 @@ import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, input, span, text)
 import Html.Attributes exposing (class, classList, href, placeholder, src, style, title, type_, value)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -23,6 +23,7 @@ import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Features
@@ -139,35 +140,30 @@ listingConfig appState model =
 listingProjectTagsFilter : AppState -> Model -> Listing.Filter Msg
 listingProjectTagsFilter appState model =
     let
-        linkWithTags tags =
-            Routing.toUrl appState <|
-                Routes.projectsIndexWithFilters
-                    (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
-                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
+        updateTagsMsg tags =
+            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId))
+                (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
 
-        linkWithOp op =
-            Routing.toUrl appState <|
-                Routes.projectsIndexWithFilters
-                    (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
-                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
+        updateOpMsg op =
+            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId))
+                (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
 
-        removeTagLink tag =
-            linkWithTags <| List.filter ((/=) tag) selectedTags
+        removeTagMsg tag =
+            updateTagsMsg <| List.filter ((/=) tag) selectedTags
 
-        addTagLink tag =
-            linkWithTags <| tag :: selectedTags
+        addTagMsg tag =
+            updateTagsMsg <| tag :: selectedTags
 
-        viewTagItem link icon tag =
-            Dropdown.anchorItem
-                [ href (link tag)
+        viewTagItem updateMsg icon tag =
+            Dropdown.buttonItem
+                [ onClick (updateMsg tag)
                 , class "dropdown-item-icon"
                 , dataCy "project_filter_tags_option"
-                , alwaysStopPropagationOn "click" (D.succeed NoOp)
                 ]
                 [ icon, text tag ]
 
         selectedTagItem =
-            viewTagItem removeTagLink (faSet "listing.filter.multi.selected" appState)
+            viewTagItem removeTagMsg (faSet "listing.filter.multi.selected" appState)
 
         sortTags =
             List.sortBy String.toUpper
@@ -177,9 +173,12 @@ listingProjectTagsFilter appState model =
                 |> PaginationQueryFilter.getValue indexRouteProjectTagsFilterId
                 |> Maybe.unwrap [] (sortTags << String.split ",")
 
+        filterTags =
+            List.filter (not << flip List.member selectedTags)
+
         foundTags =
             model.projectTagsFilterTags
-                |> ActionResult.unwrap [] (sortTags << .items)
+                |> ActionResult.unwrap [] (sortTags << filterTags << .items)
 
         badge =
             filterBadge selectedTags
@@ -204,17 +203,15 @@ listingProjectTagsFilter appState model =
             , Dropdown.customItem <|
                 div [ class "dropdown-item-operator" ]
                     [ a
-                        [ href (linkWithOp FilterOperator.OR)
+                        [ onClick (updateOpMsg FilterOperator.OR)
                         , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
                         , dataCy "filter_projectTags_operator_OR"
-                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ text (gettext "OR" appState.locale) ]
                     , a
-                        [ href (linkWithOp FilterOperator.AND)
+                        [ onClick (updateOpMsg FilterOperator.AND)
                         , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_projectTags_operator_AND"
-                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
                         ]
                         [ text (gettext "AND" appState.locale) ]
                     ]
@@ -228,7 +225,7 @@ listingProjectTagsFilter appState model =
             if not (List.isEmpty foundTags) then
                 let
                     addTagItem =
-                        viewTagItem addTagLink (faSet "listing.filter.multi.notSelected" appState)
+                        viewTagItem addTagMsg (faSet "listing.filter.multi.notSelected" appState)
                 in
                 List.map addTagItem foundTags
 
@@ -258,31 +255,31 @@ listingProjectTagsFilter appState model =
 listingKMsFilter : AppState -> Model -> Listing.Filter Msg
 listingKMsFilter appState model =
     let
-        linkWithIds packageIds =
-            Routing.toUrl appState <|
-                Routes.projectsIndexWithFilters
-                    (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
-                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
+        updatePackagesMsg packageIds =
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRoutePackagesFilterId)
+                (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
 
-        removePackageLink packageId =
-            linkWithIds <| List.filter ((/=) (PackageSuggestion.packageIdAll packageId)) selectedPackageIds
+        removePackageMsg package =
+            List.filter ((/=) (PackageSuggestion.packageIdAll package.id)) selectedPackageIds
+                |> updatePackagesMsg
+                |> ListingMsg
 
-        addPackageLink packageId =
-            linkWithIds <| PackageSuggestion.packageIdAll packageId :: selectedPackageIds
+        addPackageMsg package =
+            ListingFilterAddSelectedPackage package
+                (updatePackagesMsg (PackageSuggestion.packageIdAll package.id :: selectedPackageIds))
 
-        viewPackageItem link icon package =
-            Dropdown.anchorItem
-                [ href (link package.id)
+        viewPackageItem updateMsg icon package =
+            Dropdown.buttonItem
+                [ onClick (updateMsg package)
                 , class "dropdown-item-icon"
                 , dataCy "project_filter_packages_option"
-                , alwaysStopPropagationOn "click" (D.succeed NoOp)
                 ]
                 [ icon
                 , text package.name
                 ]
 
         selectedPackageItem =
-            viewPackageItem removePackageLink (faSet "listing.filter.multi.selected" appState)
+            viewPackageItem removePackageMsg (faSet "listing.filter.multi.selected" appState)
 
         foundSelectedPackages =
             ActionResult.unwrap [] .items model.packagesFilterSelectedPackages
@@ -299,9 +296,12 @@ listingKMsFilter appState model =
                 |> listFilterJust
                 |> List.sortBy .name
 
+        filterPackages =
+            List.filter (Maybe.isNothing << (\package -> List.find (PackageSuggestion.isSamePackage package.id) selectedPackageIds))
+
         foundPackages =
             model.packagesFilterPackages
-                |> ActionResult.unwrap [] (List.sortBy .name << .items)
+                |> ActionResult.unwrap [] (List.sortBy .name << filterPackages << .items)
 
         badge =
             filterBadge selectedPackages
@@ -329,7 +329,7 @@ listingKMsFilter appState model =
             if not (List.isEmpty foundPackages) then
                 let
                     addPackageItem =
-                        viewPackageItem addPackageLink (faSet "listing.filter.multi.notSelected" appState)
+                        viewPackageItem addPackageMsg (faSet "listing.filter.multi.notSelected" appState)
                 in
                 List.map addPackageItem foundPackages
 
@@ -359,11 +359,9 @@ listingKMsFilter appState model =
 listingUsersFilter : AppState -> Model -> Listing.Filter Msg
 listingUsersFilter appState model =
     let
-        linkWithUuids userUuids =
-            Routing.toUrl appState <|
-                Routes.projectsIndexWithFilters
-                    (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
-                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
+        updateUserMsg userUuids =
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteUsersFilterId)
+                (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
 
         linkWithOp op =
             Routing.toUrl appState <|
@@ -371,18 +369,20 @@ listingUsersFilter appState model =
                     (PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters)
                     (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
 
-        removeUserLink userUuid =
-            linkWithUuids <| List.filter ((/=) (Uuid.toString userUuid)) selectedUserUuids
+        removeUserMsg user =
+            List.filter ((/=) (Uuid.toString user.uuid)) selectedUserUuids
+                |> updateUserMsg
+                |> ListingMsg
 
-        addUserLink userUuid =
-            linkWithUuids <| Uuid.toString userUuid :: selectedUserUuids
+        addUserMsg user =
+            ListingFilterAddSelectedUser user
+                (updateUserMsg (Uuid.toString user.uuid :: selectedUserUuids))
 
-        viewUserItem link icon user =
-            Dropdown.anchorItem
-                [ href (link user.uuid)
+        viewUserItem updateMsg icon user =
+            Dropdown.buttonItem
+                [ onClick (updateMsg user)
                 , class "dropdown-item-icon"
                 , dataCy "project_filter_users_option"
-                , alwaysStopPropagationOn "click" (D.succeed NoOp)
                 ]
                 [ icon
                 , UserIcon.viewSmall user
@@ -390,7 +390,7 @@ listingUsersFilter appState model =
                 ]
 
         selectedUserItem =
-            viewUserItem removeUserLink (faSet "listing.filter.multi.selected" appState)
+            viewUserItem removeUserMsg (faSet "listing.filter.multi.selected" appState)
 
         foundSelectedUsers =
             ActionResult.unwrap [] .items model.userFilterSelectedUsers
@@ -407,9 +407,12 @@ listingUsersFilter appState model =
                 |> listFilterJust
                 |> List.sortWith User.compare
 
+        filterUsers =
+            List.filter (not << flip List.member selectedUserUuids << Uuid.toString << .uuid)
+
         foundUsers =
             model.userFilterUsers
-                |> ActionResult.unwrap [] (List.sortWith User.compare << .items)
+                |> ActionResult.unwrap [] (List.sortWith User.compare << filterUsers << .items)
 
         badge =
             filterBadge selectedUsers
@@ -458,7 +461,7 @@ listingUsersFilter appState model =
             if not (List.isEmpty foundUsers) then
                 let
                     addUserItem =
-                        viewUserItem addUserLink (faSet "listing.filter.multi.notSelected" appState)
+                        viewUserItem addUserMsg (faSet "listing.filter.multi.notSelected" appState)
                 in
                 List.map addUserItem foundUsers
 

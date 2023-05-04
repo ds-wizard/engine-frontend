@@ -29,13 +29,14 @@ import Shared.Data.DocumentTemplateDraft as DocumentTemplateDraft exposing (Docu
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
 import Uuid exposing (Uuid)
 
 
-getDrafts : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplateDraft) msg -> Cmd msg
-getDrafts qs =
+getDrafts : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplateDraft) msg -> Cmd msg
+getDrafts _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs

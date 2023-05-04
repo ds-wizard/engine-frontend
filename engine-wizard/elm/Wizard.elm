@@ -23,26 +23,24 @@ import Wizard.View exposing (view)
 init : Value -> Url -> Key -> ( Model, Cmd Msg )
 init flags location key =
     let
-        originalRoute =
-            Routing.parseLocation appState location
-
-        route =
-            routeIfAllowed appState originalRoute
-
         ( appState, appStateCmd ) =
             AppState.init flags key
 
-        appStateWithRoute =
-            { appState | route = route }
-
         model =
-            initLocalModel <| initialModel appStateWithRoute
+            initLocalModel <| initialModel appState
 
         cmd =
             if appState.invalidSession then
                 Ports.clearSessionAndReload ()
 
             else
+                let
+                    originalRoute =
+                        Routing.parseLocation appState location
+
+                    route =
+                        routeIfAllowed appState originalRoute
+                in
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute
                     , Time.getTime

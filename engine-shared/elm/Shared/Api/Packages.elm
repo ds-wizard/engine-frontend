@@ -26,12 +26,13 @@ import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 
 
-getPackages : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
-getPackages qs =
+getPackages : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Package) msg -> Cmd msg
+getPackages _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs

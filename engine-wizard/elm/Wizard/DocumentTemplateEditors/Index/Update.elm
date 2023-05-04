@@ -5,17 +5,15 @@ import Gettext exposing (gettext)
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Data.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.DocumentTemplateEditors.Index.Models exposing (Model)
 import Wizard.DocumentTemplateEditors.Index.Msgs exposing (Msg(..))
-import Wizard.DocumentTemplateEditors.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : Cmd Msg
@@ -33,7 +31,7 @@ update msg wrapMsg appState model =
             handleDeleteTemplate wrapMsg appState model
 
         DeleteDocumentTemplateDraftCompleted result ->
-            deleteTemplateCompleted appState model result
+            deleteTemplateCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -52,12 +50,12 @@ handleDeleteTemplate wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deleteTemplateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deleteTemplateCompleted appState model result =
+deleteTemplateCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deleteTemplateCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( model
-            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.documentTemplateEditorsIndexWithFilters model.documentTemplateDrafts)
+            ( { model | documentTemplateDraftToBeDeleted = Nothing }
+            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
@@ -86,5 +84,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = DocumentTemplateDraftsApi.getDrafts
     , getError = gettext "Unable to get document templates." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.DocumentTemplateEditorsRoute << IndexRoute
+    , toRoute = Routes.documentTemplateEditorsIndexWithFilters
     }

@@ -1,23 +1,20 @@
 module Wizard.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Dict
 import Gettext exposing (gettext)
 import Shared.Api.Users as UsersApi
 import Shared.Data.User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Utils exposing (dispatch)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Users.Index.Models exposing (Model)
 import Wizard.Users.Index.Msgs exposing (Msg(..))
-import Wizard.Users.Routes exposing (indexRouteRoleFilterId)
 
 
 fetchData : Cmd Msg
@@ -35,7 +32,7 @@ update msg wrapMsg appState model =
             handleDeleteUser wrapMsg appState model
 
         DeleteUserCompleted result ->
-            deleteUserCompleted appState model result
+            deleteUserCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -54,12 +51,12 @@ handleDeleteUser wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deleteUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deleteUserCompleted appState model result =
+deleteUserCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deleteUserCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( model
-            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.usersIndexWithFilters model.users)
+            ( { model | userToBeDeleted = Nothing }
+            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
@@ -72,21 +69,17 @@ handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg User 
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( users, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState model) appState listingMsg model.users
+            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.users
     in
     ( { model | users = users }
     , cmd
     )
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig User
-listingUpdateConfig wrapMsg appState model =
-    let
-        role =
-            Dict.get indexRouteRoleFilterId model.users.filters.values
-    in
-    { getRequest = UsersApi.getUsers { role = role }
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig User
+listingUpdateConfig wrapMsg appState =
+    { getRequest = UsersApi.getUsers
     , getError = gettext "Unable to get users." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.usersIndexWithFilters model.users.filters
+    , toRoute = Routes.usersIndexWithFilters
     }

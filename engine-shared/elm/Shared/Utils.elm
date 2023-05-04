@@ -14,7 +14,6 @@ module Shared.Utils exposing
     , listInsertIf
     , nilUuid
     , packageIdToComponents
-    , stringToBool
     , tuplePrepend
     , withNoCmd
     )
@@ -88,11 +87,6 @@ boolToString bool =
 
     else
         "false"
-
-
-stringToBool : String -> Bool
-stringToBool str =
-    String.toLower str == "true"
 
 
 listFilterJust : List (Maybe a) -> List a

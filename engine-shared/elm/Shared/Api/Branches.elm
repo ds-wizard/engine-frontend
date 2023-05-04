@@ -19,12 +19,13 @@ import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
 import Shared.Data.Migration as Migration exposing (Migration)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 
 
-getBranches : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Branch) msg -> Cmd msg
-getBranches qs =
+getBranches : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Branch) msg -> Cmd msg
+getBranches _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs

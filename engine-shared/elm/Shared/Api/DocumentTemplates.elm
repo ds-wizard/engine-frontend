@@ -22,11 +22,12 @@ import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePha
 import Shared.Data.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 
 
-getTemplates : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplate) msg -> Cmd msg
-getTemplates qs =
+getTemplates : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplate) msg -> Cmd msg
+getTemplates _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs

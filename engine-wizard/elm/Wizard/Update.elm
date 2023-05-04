@@ -149,11 +149,21 @@ update msg model =
                         routeIfAllowed model.appState <|
                             parseLocation model.appState location
 
-                    newModel =
+                    modelWithRoute =
                         setRoute nextRoute model
-                            |> initLocalModel
+
+                    originalRoute =
+                        model.appState.route
                 in
-                ( newModel, Cmd.batch [ onUnload nextRoute model, fetchData newModel ] )
+                if Routes.isSameListingRoute originalRoute nextRoute then
+                    ( modelWithRoute, Cmd.none )
+
+                else
+                    let
+                        newModel =
+                            initLocalModel modelWithRoute
+                    in
+                    ( newModel, Cmd.batch [ onUnload nextRoute model, fetchData newModel ] )
 
             Wizard.Msgs.OnUrlRequest urlRequest ->
                 case urlRequest of

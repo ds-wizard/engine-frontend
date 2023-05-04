@@ -1,6 +1,5 @@
 module Shared.Api.Users exposing
-    ( GetUsersFilters
-    , deleteToken
+    ( deleteToken
     , deleteUser
     , getCurrentUser
     , getUser
@@ -20,20 +19,19 @@ import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtFetchPut, jwtGet, jwtPost, jwtPut)
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.User as User exposing (User)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
-type alias GetUsersFilters =
-    { role : Maybe String }
-
-
-getUsers : GetUsersFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination User) msg -> Cmd msg
+getUsers : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination User) msg -> Cmd msg
 getUsers filters qs =
     let
         extraParams =
-            PaginationQueryString.filterParams [ ( "role", filters.role ) ]
+            PaginationQueryString.filterParams
+                [ ( "role", PaginationQueryFilters.getValue "role" filters )
+                ]
 
         queryString =
             PaginationQueryString.toApiUrlWith extraParams qs

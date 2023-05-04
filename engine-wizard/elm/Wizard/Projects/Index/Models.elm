@@ -6,7 +6,7 @@ module Wizard.Projects.Index.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Debouncer.Extra as Debounce exposing (Debouncer)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
@@ -65,6 +65,13 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
 
         paginationQueryFilters =
             PaginationQueryFilters.create values operators
+
+        selectedValue filterId =
+            if PaginationQueryFilters.isFilterActive filterId paginationQueryFilters then
+                ActionResult.Loading
+
+            else
+                ActionResult.Success Pagination.empty
     in
     { questionnaires = Listing.initialModelWithFiltersAndStates paginationQueryString paginationQueryFilters (Maybe.map .questionnaires mbOldModel)
     , deletingMigration = Unset
@@ -75,9 +82,9 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
     , projectTagsFilterSearchValue = ""
     , projectTagsFilterTags = ActionResult.Loading
     , userFilterSearchValue = ""
-    , userFilterSelectedUsers = ActionResult.Loading
+    , userFilterSelectedUsers = selectedValue indexRouteUsersFilterId
     , userFilterUsers = ActionResult.Loading
     , packagesFilterSearchValue = ""
-    , packagesFilterSelectedPackages = ActionResult.Loading
+    , packagesFilterSelectedPackages = selectedValue indexRoutePackagesFilterId
     , packagesFilterPackages = ActionResult.Loading
     }

@@ -5,7 +5,6 @@ module Wizard.Common.Components.Listing.Models exposing
     , initialModelWithFilters
     , initialModelWithFiltersAndStates
     , setPagination
-    , toRouteAfterDelete
     , updateItems
     )
 
@@ -14,9 +13,10 @@ import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Dict exposing (Dict)
 import Maybe.Extra as Maybe
+import Set exposing (Set)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg)
 
 
@@ -29,6 +29,7 @@ type alias Model a =
     , sortDropdownState : Dropdown.State
     , filters : PaginationQueryFilters
     , filterDropdownStates : Dict String Dropdown.State
+    , filterKeepOpen : Set String
     }
 
 
@@ -48,6 +49,7 @@ initialModel paginationQueryString =
     , sortDropdownState = Dropdown.initialState
     , filters = PaginationQueryFilters.empty
     , filterDropdownStates = Dict.empty
+    , filterKeepOpen = Set.empty
     }
 
 
@@ -61,6 +63,7 @@ initialModelWithFilters paginationQueryString filters =
     , sortDropdownState = Dropdown.initialState
     , filters = filters
     , filterDropdownStates = Dict.empty
+    , filterKeepOpen = Set.empty
     }
 
 
@@ -74,6 +77,7 @@ initialModelWithFiltersAndStates paginationQueryString filters oldModel =
     , sortDropdownState = Dropdown.initialState
     , filters = filters
     , filterDropdownStates = Maybe.unwrap Dict.empty .filterDropdownStates oldModel
+    , filterKeepOpen = Set.empty
     }
 
 
@@ -94,28 +98,3 @@ setPagination pagination model =
         | pagination = Success pagination
         , items = List.map wrap pagination.items
     }
-
-
-toRouteAfterDelete : (PaginationQueryFilters -> PaginationQueryString -> b) -> Model a -> b
-toRouteAfterDelete toRoute model =
-    let
-        paginationQueryString =
-            case model.pagination of
-                Success pagination ->
-                    let
-                        isLastPage =
-                            pagination.page.number == (pagination.page.totalPages - 1)
-
-                        isLastElement =
-                            modBy pagination.page.size pagination.page.totalElements == 1
-                    in
-                    if isLastPage && isLastElement then
-                        PaginationQueryString.setPage model.paginationQueryString pagination.page.number
-
-                    else
-                        model.paginationQueryString
-
-                _ ->
-                    model.paginationQueryString
-    in
-    toRoute model.filters paginationQueryString

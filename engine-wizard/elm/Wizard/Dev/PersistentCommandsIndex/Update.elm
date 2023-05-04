@@ -5,21 +5,19 @@ module Wizard.Dev.PersistentCommandsIndex.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Api.PersistentCommands as PersistentCommandsApi
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PersistentCommand exposing (PersistentCommand)
 import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState
 import Shared.Error.ApiError as ApiError
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
+import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Dev.PersistentCommandsIndex.Models exposing (Model)
 import Wizard.Dev.PersistentCommandsIndex.Msgs exposing (Msg(..))
-import Wizard.Dev.Routes exposing (persistentCommandIndexRouteStateFilterId)
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : Cmd Msg
@@ -33,7 +31,7 @@ update msg wrapMsg appState model =
         ListingMsg listingMsg ->
             let
                 ( persistentCommands, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg model) appState listingMsg model.persistentCommands
+                    Listing.update (listingUpdateConfig wrapMsg) appState listingMsg model.persistentCommands
             in
             ( { model | persistentCommands = persistentCommands }
             , cmd
@@ -68,7 +66,7 @@ update msg wrapMsg appState model =
             case result of
                 Ok _ ->
                     ( model
-                    , cmdNavigate appState (Listing.toRouteAfterDelete Routes.persistentCommandsIndexWithFilters model.persistentCommands)
+                    , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     )
 
                 Err error ->
@@ -77,14 +75,10 @@ update msg wrapMsg appState model =
                     )
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> Model -> Listing.UpdateConfig PersistentCommand
-listingUpdateConfig wrapMsg model =
-    let
-        state =
-            PaginationQueryFilters.getValue persistentCommandIndexRouteStateFilterId model.persistentCommands.filters
-    in
-    { getRequest = PersistentCommandsApi.getPersistentCommands { state = state }
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> Listing.UpdateConfig PersistentCommand
+listingUpdateConfig wrapMsg =
+    { getRequest = PersistentCommandsApi.getPersistentCommands
     , getError = "Unable to get persistent commands"
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.persistentCommandsIndexWithFilters PaginationQueryFilters.empty
+    , toRoute = Routes.persistentCommandsIndexWithFilters
     }

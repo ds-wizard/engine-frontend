@@ -22,6 +22,7 @@ import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Shared.Data.UrlResponse exposing (UrlResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -133,17 +134,7 @@ update cfg appState msg model =
             let
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << QuestionnaireTypeHintInputMsg
-                    , getTypeHints =
-                        QuestionnairesApi.getQuestionnaireSuggestions
-                            { isTemplate = Just False
-                            , isMigrating = Just False
-                            , userUuids = Nothing
-                            , userUuidsOp = Nothing
-                            , projectTags = Nothing
-                            , projectTagsOp = Nothing
-                            , packageIds = Nothing
-                            , packageIdsOp = Nothing
-                            }
+                    , getTypeHints = QuestionnairesApi.getQuestionnaireSuggestions PaginationQueryFilters.empty
                     , getError = gettext "Unable to get projects." appState.locale
                     , setReply = cfg.wrapMsg << QuestionnaireTypeHintInputSelect << .uuid
                     , clearReply = Nothing
