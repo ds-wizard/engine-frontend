@@ -3,6 +3,9 @@ module Wizard.Common.AppState exposing
     , acceptCookies
     , init
     , isFullscreen
+    , sessionExpired
+    , sessionExpiresSoon
+    , sessionRemainingTime
     , setCurrentTime
     , setTimeZone
     )
@@ -45,6 +48,7 @@ type alias AppState =
     , cookieConsent : Bool
     , locale : Gettext.Locale
     , selectedLocale : Maybe String
+    , sessionExpiresSoonModalHidden : Bool
     }
 
 
@@ -102,6 +106,7 @@ init flagsValue key =
       , cookieConsent = flags.cookieConsent
       , locale = flags.locale
       , selectedLocale = flags.selectedLocale
+      , sessionExpiresSoonModalHidden = False
       }
     , flagsCmd
     )
@@ -137,3 +142,38 @@ isFullscreen appState =
                     False
     in
     allowedFullscreenRoute && appState.session.fullscreen
+
+
+sessionExpiresSoon : AppState -> Bool
+sessionExpiresSoon appState =
+    Session.expiresSoon appState.currentTime appState.session
+
+
+sessionExpired : AppState -> Bool
+sessionExpired appState =
+    Session.expired appState.currentTime appState.session
+
+
+sessionRemainingTime : AppState -> String
+sessionRemainingTime appState =
+    let
+        expiration =
+            Time.posixToMillis appState.session.token.expiresAt
+
+        currentTime =
+            Time.posixToMillis appState.currentTime
+
+        timeLeft =
+            max 0 (expiration - currentTime)
+
+        timeLeftMin =
+            timeLeft
+                // (60 * 1000)
+                |> String.fromInt
+
+        timeLeftSec =
+            modBy 60 (timeLeft // 1000)
+                |> String.fromInt
+                |> String.padLeft 2 '0'
+    in
+    timeLeftMin ++ ":" ++ timeLeftSec

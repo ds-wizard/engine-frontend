@@ -39,6 +39,7 @@ type Msg
     | SetSidebarCollapsed Bool
     | SetFullscreen Bool
     | SetLocale String
+    | HideSessionExpiresSoonModal
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | AdminMsg Wizard.Dev.Msgs.Msg
     | AppsMsg Wizard.Apps.Msgs.Msg
