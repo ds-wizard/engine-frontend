@@ -17,3 +17,4 @@ type Msg
     | UpdatePhaseCompleted PackagePhase (Result ApiError ())
     | ExportPackage PackageDetail
     | FileDownloaderMsg FileDownloader.Msg
+    | ShowAllVersions

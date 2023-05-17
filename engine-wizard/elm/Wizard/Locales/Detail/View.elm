@@ -214,9 +214,13 @@ sidePanelRegistryLink appState locale =
         toRegistryLinkInfo registryLink =
             ( gettext "Registry Link" appState.locale
             , "registry-link"
-            , a [ href registryLink, target "_blank", class "with-icon" ]
-                [ faSet "kmDetail.registryLink" appState
-                , text (gettext "View in registry" appState.locale)
+            , ul [ class "fa-ul" ]
+                [ li []
+                    [ a [ href registryLink, target "_blank" ]
+                        [ span [ class "fa-li" ] [ faSet "kmDetail.registryLink" appState ]
+                        , span [ class "fa-li-content" ] [ text (gettext "View in registry" appState.locale) ]
+                        ]
+                    ]
                 ]
             )
     in

@@ -72,6 +72,9 @@ update msg wrapMsg appState model =
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
+        ShowAllVersions ->
+            ( { model | showAllVersions = True }, Cmd.none )
+
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteVersion wrapMsg appState model =
