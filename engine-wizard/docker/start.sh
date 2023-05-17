@@ -26,11 +26,11 @@ fi
 echo -n "};" >>${config}
 
 # check if customizations exist
-if [ -f /usr/bin/sass ]; then
+if [ -f /usr/local/bin/sass ]; then
   if [[ $(find /src/scss/customizations -name "*.scss" | xargs cat | wc -l) -gt 0 ]]; then
     # regenerate styles
     echo '$fa-font-path: "";' >>/src/scss/customizations/_variables-app.scss
-    find /usr/share/nginx/html -name "*.css" -exec /usr/bin/sass -I /src -s compressed /src/scss/main.scss {} \;
+    find /usr/share/nginx/html -name "*.css" -exec /usr/local/bin/sass -I /src -s compressed /src/scss/main.scss {} \;
   fi
 fi
 

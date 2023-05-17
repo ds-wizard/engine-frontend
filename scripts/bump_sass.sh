@@ -2,6 +2,12 @@
 
 set -e
 
+# Bump sass in the frontend dockerfile
+DOCKERFILE=engine-wizard/docker/Dockerfile
+sed -i.bak -E "s#install -g sass@([0-9\.]+)#install -g sass@$1#g" $DOCKERFILE
+rm $DOCKERFILE".bak"
+
+
 # Bump sass for the frontend
 npm install -S sass@$1
 
