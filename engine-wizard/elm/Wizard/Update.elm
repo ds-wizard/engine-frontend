@@ -233,6 +233,15 @@ update msg model =
                     ]
                 )
 
+            Wizard.Msgs.HideSessionExpiresSoonModal ->
+                let
+                    appState =
+                        model.appState
+                in
+                ( { model | appState = { appState | sessionExpiresSoonModalHidden = True } }
+                , Cmd.none
+                )
+
             Wizard.Msgs.MenuMsg menuMsg ->
                 let
                     ( menuModel, cmd ) =

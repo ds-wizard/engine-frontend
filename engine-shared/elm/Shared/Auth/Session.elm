@@ -3,6 +3,9 @@ module Shared.Auth.Session exposing
     , decoder
     , encode
     , exists
+    , expirationWarningMins
+    , expired
+    , expiresSoon
     , getUserRole
     , getUserUuid
     , init
@@ -19,6 +22,7 @@ import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
 import Shared.Data.Token as Token exposing (Token)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
+import Time
 import Uuid
 
 
@@ -27,7 +31,7 @@ type alias Session =
     , user : Maybe UserInfo
     , sidebarCollapsed : Bool
     , fullscreen : Bool
-    , v6 : Bool
+    , v7 : Bool
     }
 
 
@@ -37,7 +41,7 @@ init =
     , user = Nothing
     , sidebarCollapsed = False
     , fullscreen = False
-    , v6 = True
+    , v7 = True
     }
 
 
@@ -78,7 +82,7 @@ decoder =
         |> D.required "user" (D.nullable UserInfo.decoder)
         |> D.optional "sidebarCollapsed" D.bool False
         |> D.optional "fullscreen" D.bool False
-        |> D.required "v6" D.bool
+        |> D.required "v7" D.bool
 
 
 encode : Session -> E.Value
@@ -88,10 +92,44 @@ encode session =
         , ( "user", E.maybe UserInfo.encode session.user )
         , ( "sidebarCollapsed", E.bool session.sidebarCollapsed )
         , ( "fullscreen", E.bool session.fullscreen )
-        , ( "v6", E.bool session.v6 )
+        , ( "v7", E.bool session.v7 )
         ]
 
 
 exists : Session -> Bool
 exists session =
     session.token.token /= ""
+
+
+expiresSoon : Time.Posix -> Session -> Bool
+expiresSoon currentTimePosix session =
+    let
+        expiration =
+            Time.posixToMillis session.token.expiresAt
+
+        currentTime =
+            Time.posixToMillis currentTimePosix
+    in
+    expiration - currentTime < expiresSoonTimeMillis
+
+
+expired : Time.Posix -> Session -> Bool
+expired currentTimePosix session =
+    let
+        expiration =
+            Time.posixToMillis session.token.expiresAt
+
+        currentTime =
+            Time.posixToMillis currentTimePosix
+    in
+    expiration < currentTime
+
+
+expiresSoonTimeMillis : Int
+expiresSoonTimeMillis =
+    expirationWarningMins * 60 * 1000
+
+
+expirationWarningMins : Int
+expirationWarningMins =
+    10

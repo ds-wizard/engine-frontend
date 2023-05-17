@@ -14,6 +14,7 @@ import Shared.Html exposing (emptyNode)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.CookieConsent as CookieConsent
+import Wizard.Common.Components.SessionModal as SessionModal
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Menu.View as Menu exposing (viewAboutModal, viewLanguagesModal, viewReportIssueModal)
@@ -149,6 +150,8 @@ app model content =
                 , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
                 , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.recentlyCopied model.menuModel.apiBuildInfo
                 , viewLanguagesModal model.appState model.menuModel.languagesOpen
+                , SessionModal.expiresSoonModal model.appState
+                , SessionModal.expiredModal model.appState
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel

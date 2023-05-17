@@ -234,6 +234,20 @@ body {
         }
     }
 
+    .session-warning {
+        margin: 0 10px;
+        padding: 10px;
+
+        .btn {
+            display: block;
+            width: 100%;
+        }
+    }
+
+    .session-warning-collapsed {
+        display: none;
+    }
+
     .profile-info {
         border: 1px solid $side-navigation-border-color;
         background: $white;
@@ -317,6 +331,7 @@ body {
                             width: 36px !important;
                             height: 36px !important;
                         }
+
                         .sidebar-link {
                             display: block !important;
                         }
@@ -405,6 +420,44 @@ body {
                         left: $side-navigation-width-collapsed - 10px;
                         padding-left: 15px;
                     }
+                }
+            }
+        }
+
+        .session-warning {
+            display: none;
+        }
+
+        .session-warning-collapsed {
+            display: block;
+            margin: 5px;
+            padding: 5px;
+            text-align: center;
+
+            .fa {
+                margin: 0;
+            }
+
+            .session-warning-submenu {
+                position: fixed;
+                left: $side-navigation-width-collapsed - 20px;
+                top: 0;
+                display: none;
+                padding-left: 25px;
+                transform: translateY(-100%);
+
+                .alert {
+                    width: $side-navigation-submenu-max-width;
+                    box-shadow: $side-navigation-floating-shadow;
+                    margin-bottom: 0;
+
+                    .btn {
+                        display: block;
+                    }
+                }
+
+                &.show {
+                    display: block;
                 }
             }
         }
