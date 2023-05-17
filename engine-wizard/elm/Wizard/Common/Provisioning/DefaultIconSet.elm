@@ -54,6 +54,7 @@ iconSet =
         , ( "avatar.17", "fas fa-snowman" )
         , ( "avatar.18", "fas fa-tree" )
         , ( "avatar.19", "fas fa-hat-cowboy" )
+        , ( "detail.showAll", "fas fa-angle-down" )
         , ( "documents.download", "fas fa-download" )
         , ( "documents.viewError", "fas fa-exclamation-circle" )
         , ( "documents.submit", "fas fa-paper-plane" )

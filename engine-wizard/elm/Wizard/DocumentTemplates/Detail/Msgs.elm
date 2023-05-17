@@ -17,3 +17,4 @@ type Msg
     | UpdatePhaseCompleted (Result ApiError DocumentTemplateDetail)
     | ExportTemplate DocumentTemplateDetail
     | FileDownloaderMsg FileDownloader.Msg
+    | ShowAllKms

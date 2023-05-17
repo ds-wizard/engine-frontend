@@ -3,6 +3,7 @@ module Wizard.KnowledgeModels.Detail.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
+import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
@@ -37,7 +38,7 @@ viewPackage appState model package =
     DetailPage.container
         [ header appState model package
         , readme appState package
-        , sidePanel appState package
+        , sidePanel appState model package
         , deleteVersionModal appState model package
         ]
 
@@ -120,14 +121,14 @@ newVersionInRegistryWarning appState package =
             emptyNode
 
 
-sidePanel : AppState -> PackageDetail -> Html msg
-sidePanel appState package =
+sidePanel : AppState -> Model -> PackageDetail -> Html Msg
+sidePanel appState model package =
     let
         sections =
             [ sidePanelKmInfo appState package
-            , sidePanelOtherVersions appState package
             , sidePanelOrganizationInfo appState package
             , sidePanelRegistryLink appState package
+            , sidePanelOtherVersions appState model package
             ]
     in
     DetailPage.sidePanel
@@ -159,8 +160,8 @@ sidePanelKmInfo appState package =
     Just ( gettext "Knowledge Model" appState.locale, "package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
 
 
-sidePanelOtherVersions : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
-sidePanelOtherVersions appState package =
+sidePanelOtherVersions : AppState -> Model -> PackageDetail -> Maybe ( String, String, Html Msg )
+sidePanelOtherVersions appState model package =
     let
         versionLink version =
             li []
@@ -170,15 +171,36 @@ sidePanelOtherVersions appState package =
                     [ text <| Version.toString version ]
                 ]
 
+        takeFirstVersions =
+            if model.showAllVersions then
+                identity
+
+            else
+                List.take 10
+
         versionLinks =
             package.versions
                 |> List.filter ((/=) package.version)
                 |> List.sortWith Version.compare
                 |> List.reverse
+                |> takeFirstVersions
                 |> List.map versionLink
     in
     if List.length versionLinks > 0 then
-        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
+        let
+            showAllLink =
+                if model.showAllVersions || List.length package.versions <= 10 then
+                    emptyNode
+
+                else
+                    li [ class "show-all-link" ]
+                        [ a [ onClick ShowAllVersions ]
+                            [ text (gettext "Show all" appState.locale)
+                            , faSet "detail.showAll" appState
+                            ]
+                        ]
+        in
+        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] (versionLinks ++ [ showAllLink ]) )
 
     else
         Nothing
@@ -199,9 +221,13 @@ sidePanelRegistryLink appState package =
         toRegistryLinkInfo registryLink =
             ( gettext "Registry Link" appState.locale
             , "registry-link"
-            , a [ href registryLink, target "_blank", class "with-icon" ]
-                [ faSet "kmDetail.registryLink" appState
-                , text (gettext "View in registry" appState.locale)
+            , ul [ class "fa-ul" ]
+                [ li []
+                    [ a [ href registryLink, target "_blank" ]
+                        [ span [ class "fa-li" ] [ faSet "kmDetail.registryLink" appState ]
+                        , span [ class "fa-li-content" ] [ text (gettext "View in registry" appState.locale) ]
+                        ]
+                    ]
                 ]
             )
     in
