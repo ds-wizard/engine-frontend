@@ -34,7 +34,7 @@
     "elm-webpack-loader": "^8.0.0",
     "html-webpack-plugin": "^5.5.1",
     "lodash": "^4.17.21",
-    "mini-css-extract-plugin": "^2.7.5",
+    "mini-css-extract-plugin": "^2.7.6",
     "sass": "^1.62.1",
     "sass-loader": "^13.2.2",
     "terser-webpack-plugin": "^5.3.7",
