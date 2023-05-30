@@ -14,7 +14,6 @@ import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
 import Wizard.ProjectImporters.Index.Models exposing (Model)
 import Wizard.ProjectImporters.Index.Msgs exposing (Msg(..))
-import Wizard.ProjectImporters.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 
 
@@ -70,5 +69,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = QuestionnaireImportersApi.getQuestionnaireImporters
     , getError = gettext "Unable to get project importers." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.ProjectImportersRoute << IndexRoute
+    , toRoute = Routes.projectImportersIndexWithFilters
     }

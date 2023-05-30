@@ -1,6 +1,7 @@
 module Wizard.Subscriptions exposing (subscriptions)
 
 import Wizard.Apps.Subscriptions
+import Wizard.Auth.Subscriptions
 import Wizard.Common.Menu.Subscriptions
 import Wizard.Dev.Subscriptions
 import Wizard.DocumentTemplateEditors.Subscriptions
@@ -58,7 +59,14 @@ subscriptions model =
                 _ ->
                     Sub.none
 
+        authSubscriptions =
+            Wizard.Auth.Subscriptions.subscriptions model
+
         menuSubscriptions =
             Wizard.Common.Menu.Subscriptions.subscriptions model.menuModel
     in
-    Sub.batch [ currentViewSubscriptions, menuSubscriptions ]
+    Sub.batch
+        [ currentViewSubscriptions
+        , authSubscriptions
+        , menuSubscriptions
+        ]

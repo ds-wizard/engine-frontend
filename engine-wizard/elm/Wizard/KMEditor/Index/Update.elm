@@ -4,12 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.Branch exposing (Branch)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Utils exposing (dispatch)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.KMEditor.Common.DeleteModal as DeleteModal
@@ -92,7 +91,7 @@ handleDeleteModalMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> DeleteModal.Msg -
 handleDeleteModalMsg wrapMsg appState deleteModalMsg model =
     let
         updateConfig =
-            { cmdDeleted = cmdNavigate appState (Listing.toRouteAfterDelete Routes.kmEditorIndexWithFilters model.branches)
+            { cmdDeleted = dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             , wrapMsg = wrapMsg << DeleteModalMsg
             }
 
@@ -125,5 +124,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = BranchesApi.getBranches
     , getError = gettext "Unable to get knowledge model editors." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.kmEditorIndexWithFilters PaginationQueryFilters.empty
+    , toRoute = Routes.kmEditorIndexWithFilters
     }

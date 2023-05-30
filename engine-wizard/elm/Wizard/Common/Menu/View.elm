@@ -20,7 +20,7 @@ import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet, faSetFw)
 import String.Format as String
 import Wizard.Auth.Msgs
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
@@ -31,6 +31,7 @@ import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model)
 import Wizard.Msgs
 import Wizard.Routes as Routes exposing (Route)
+import Wizard.Routing as Routing
 
 
 type MenuItem
@@ -206,6 +207,8 @@ view model =
     div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ viewLogo model
         , viewMenu model
+        , viewSessionWarning model
+        , viewSessionWarningCollapsed model
         , viewProfileMenu model
         , viewCollapseLink model
         ]
@@ -375,6 +378,82 @@ menuLinkSimple model link itemId itemIcon itemTitle isActive =
                 ]
             ]
         ]
+
+
+viewSessionWarning : Model -> Html Wizard.Msgs.Msg
+viewSessionWarning model =
+    if AppState.sessionExpiresSoon model.appState then
+        div [ class "session-warning alert alert-warning" ]
+            (viewSessionWarningContent model)
+
+    else
+        emptyNode
+
+
+viewSessionWarningCollapsed : Model -> Html Wizard.Msgs.Msg
+viewSessionWarningCollapsed model =
+    if AppState.sessionExpiresSoon model.appState then
+        let
+            itemId =
+                "menu_session-warning"
+
+            mouseenter =
+                onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement itemId))
+
+            mouseleave =
+                onMouseLeave (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.HideElement itemId))
+
+            ( submenuStyle, submenuClass ) =
+                case Dict.get itemId model.menuModel.submenuPositions of
+                    Just element ->
+                        let
+                            top =
+                                element.element.y - element.viewport.y + element.element.height
+                        in
+                        ( [ style "top" (String.fromFloat top ++ "px") ], "show" )
+
+                    _ ->
+                        ( [], "" )
+
+            sessionWarningSubmenu =
+                div ([ class "session-warning-submenu", class submenuClass ] ++ submenuStyle)
+                    [ div [ class "alert alert-warning" ]
+                        (viewSessionWarningContent model)
+                    ]
+        in
+        div
+            [ id itemId
+            , class "session-warning-collapsed alert alert-warning"
+            , mouseenter
+            , mouseleave
+            ]
+            [ faSet "_global.warning" model.appState
+            , sessionWarningSubmenu
+            ]
+
+    else
+        emptyNode
+
+
+viewSessionWarningContent : Model -> List (Html Wizard.Msgs.Msg)
+viewSessionWarningContent model =
+    let
+        logoutMsg =
+            Just (Routing.toUrl model.appState model.appState.route)
+                |> Routes.publicLogin
+                |> Wizard.Auth.Msgs.LogoutTo
+                |> Wizard.Msgs.AuthMsg
+    in
+    [ text
+        (String.format (gettext "Your session expires in %s" model.appState.locale)
+            [ AppState.sessionRemainingTime model.appState ]
+        )
+    , button
+        [ onClick logoutMsg
+        , class "btn btn-sm btn-warning mt-2"
+        ]
+        [ text (gettext "Log in again" model.appState.locale) ]
+    ]
 
 
 viewProfileMenu : Model -> Html Wizard.Msgs.Msg

@@ -8,18 +8,16 @@ import Gettext exposing (gettext)
 import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.DocumentTemplates.Index.Models exposing (Model)
 import Wizard.DocumentTemplates.Index.Msgs exposing (Msg(..))
-import Wizard.DocumentTemplates.Routes exposing (Route(..))
 import Wizard.Msgs
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : Cmd Msg
@@ -37,7 +35,7 @@ update msg wrapMsg appState model =
             handleDeleteDocumentTemplate wrapMsg appState model
 
         DeleteDocumentTemplateCompleted result ->
-            deleteDocumentTemplateCompleted appState model result
+            deleteDocumentTemplateCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
@@ -53,7 +51,7 @@ update msg wrapMsg appState model =
             case result of
                 Ok _ ->
                     ( model
-                    , cmdNavigate appState (Listing.toRouteAfterDelete Routes.documentTemplatesIndexWithFilters model.documentTemplates)
+                    , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     )
 
                 Err error ->
@@ -81,12 +79,12 @@ handleDeleteDocumentTemplate wrapMsg appState model =
             ( model, Cmd.none )
 
 
-deleteDocumentTemplateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deleteDocumentTemplateCompleted appState model result =
+deleteDocumentTemplateCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+deleteDocumentTemplateCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( model
-            , cmdNavigate appState (Listing.toRouteAfterDelete Routes.documentTemplatesIndexWithFilters model.documentTemplates)
+            ( { model | documentTemplateToBeDeleted = Nothing }
+            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
@@ -115,5 +113,5 @@ listingUpdateConfig wrapMsg appState =
     { getRequest = DocumentTemplatesApi.getTemplates
     , getError = gettext "Unable to get document templates." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.DocumentTemplatesRoute << IndexRoute
+    , toRoute = Routes.documentTemplatesIndexWithFilters
     }

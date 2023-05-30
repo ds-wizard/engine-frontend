@@ -3,7 +3,8 @@ FROM nginx:alpine
 RUN apk --purge del curl
 
 # Install dart-sass
-RUN apk add dart-sass=1.58.0-r0 --repository=http://dl-cdn.alpinelinux.org/alpine/edge/testing/
+RUN apk add --update npm
+RUN npm install -g sass@1.62.1
 
 # Dependencies needed to rebuild styles
 COPY node_modules/bootstrap src/~bootstrap

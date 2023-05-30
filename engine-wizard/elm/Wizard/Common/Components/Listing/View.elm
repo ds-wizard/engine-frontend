@@ -12,9 +12,9 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, input, li, nav, span, text, ul)
-import Html.Attributes exposing (class, classList, href, id, placeholder, type_, value)
-import Html.Events exposing (onInput)
+import Html exposing (Html, a, button, div, input, li, nav, span, text, ul)
+import Html.Attributes exposing (class, classList, id, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
@@ -22,7 +22,7 @@ import Shared.Components.Badge as Badge
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
+import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
 import String.Format as String
@@ -32,13 +32,11 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Item, Model)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingDropdownItem)
-import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.TimeDistance exposing (locale)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Page as Page
 import Wizard.Routes exposing (Route)
-import Wizard.Routing as Routing
 
 
 type alias ViewConfig a msg =
@@ -138,22 +136,25 @@ viewToolbarSort appState cfg model =
             List.find (\( k, _ ) -> paginationQueryString.sortBy == Just k) cfg.sortOptions
                 |> Maybe.unwrap "" Tuple.second
 
+        updateMsg =
+            cfg.wrapMsg << UpdatePaginationQueryString
+
         sortOption ( name, visibleName ) =
             let
-                route =
-                    cfg.toRoute model.filters { paginationQueryString | sortBy = Just name, page = Just 1 }
+                msg =
+                    updateMsg { paginationQueryString | sortBy = Just name, page = Just 1 }
             in
-            Dropdown.anchorItem [ href <| Routing.toUrl appState route ]
+            Dropdown.buttonItem [ onClick msg ]
                 [ text visibleName ]
 
-        ( sortDirectionButtonUrl, sortDirectionButtonIcon ) =
+        ( sortDirectionButtonMsg, sortDirectionButtonIcon ) =
             if paginationQueryString.sortDirection == SortASC then
-                ( cfg.toRoute model.filters { paginationQueryString | sortDirection = SortDESC, page = Just 1 }
+                ( updateMsg { paginationQueryString | sortDirection = SortDESC, page = Just 1 }
                 , faSet "_global.sortAsc" appState
                 )
 
             else
-                ( cfg.toRoute model.filters { paginationQueryString | sortDirection = SortASC, page = Just 1 }
+                ( updateMsg { paginationQueryString | sortDirection = SortASC, page = Just 1 }
                 , faSet "_global.sortDesc" appState
                 )
     in
@@ -166,9 +167,11 @@ viewToolbarSort appState cfg model =
             , items =
                 Dropdown.header [ text (gettext "Order by" appState.locale) ] :: List.map sortOption cfg.sortOptions
             }
-        , linkTo appState
-            sortDirectionButtonUrl
-            [ class "btn btn-outline-secondary", dataCy "listing_toolbar_sort-direction" ]
+        , button
+            [ class "btn btn-outline-secondary"
+            , dataCy "listing_toolbar_sort-direction"
+            , onClick sortDirectionButtonMsg
+            ]
             [ sortDirectionButtonIcon ]
         ]
 
@@ -196,10 +199,9 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
     let
         item ( value, visibleName ) =
             let
-                route =
-                    cfg.toRoute
+                newFiltersMsg =
+                    (cfg.wrapMsg << UpdatePaginationQueryFilters Nothing)
                         (PaginationQueryFilters.insertValue filterId value model.filters)
-                        (PaginationQueryString.resetPage model.paginationQueryString)
 
                 icon =
                     if Maybe.unwrap False ((==) value << Tuple.first) maybeFilterValue then
@@ -208,7 +210,7 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
                     else
                         faSet "listing.filter.single.notSelected" appState
             in
-            Dropdown.anchorItem [ href <| Routing.toUrl appState route, class "dropdown-item-icon" ]
+            Dropdown.buttonItem [ onClick newFiltersMsg, class "dropdown-item-icon" ]
                 [ icon, text visibleName ]
 
         maybeFilterValue =
@@ -245,12 +247,11 @@ viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
                         , addValue value
                         )
 
-                route =
-                    cfg.toRoute
+                newFiltersMsg =
+                    (cfg.wrapMsg << UpdatePaginationQueryFilters (Just filterId))
                         (PaginationQueryFilters.insertValue filterId newFilterValue model.filters)
-                        (PaginationQueryString.resetPage model.paginationQueryString)
             in
-            Dropdown.anchorItem [ href <| Routing.toUrl appState route, class "dropdown-item-icon" ]
+            Dropdown.buttonItem [ onClick newFiltersMsg, class "dropdown-item-icon" ]
                 [ icon, text visibleName ]
 
         addValue value =
@@ -322,14 +323,12 @@ viewFilter appState cfg model filterId label items =
         clearSelection =
             if filterActive then
                 let
-                    clearAllRoute =
-                        Routing.toUrl appState <|
-                            cfg.toRoute
-                                (PaginationQueryFilters.removeFilter filterId model.filters)
-                                (PaginationQueryString.resetPage model.paginationQueryString)
+                    clearAllMsg =
+                        (cfg.wrapMsg << UpdatePaginationQueryFilters Nothing)
+                            (PaginationQueryFilters.removeFilter filterId model.filters)
 
                     clearAllItem =
-                        Dropdown.anchorItem [ href clearAllRoute ]
+                        Dropdown.buttonItem [ onClick clearAllMsg ]
                             [ text (gettext "Clear selection" appState.locale) ]
                 in
                 [ Dropdown.divider
@@ -372,9 +371,10 @@ viewPagination appState cfg model page =
 
         viewPageLink pageNumber attributes content =
             li (class "page-item" :: attributes)
-                [ linkTo appState
-                    (cfg.toRoute model.filters { paginationQueryString | page = Just pageNumber })
-                    [ class "page-link" ]
+                [ button
+                    [ onClick (cfg.wrapMsg (UpdatePaginationQueryString { paginationQueryString | page = Just pageNumber }))
+                    , class "page-link"
+                    ]
                     content
                 ]
 

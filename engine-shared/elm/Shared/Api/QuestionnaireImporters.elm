@@ -9,13 +9,14 @@ import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtGet, jwtPut)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.QuestionnaireImporter as QuestionnaireImporter exposing (QuestionnaireImporter)
 import Uuid exposing (Uuid)
 
 
-getQuestionnaireImporters : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination QuestionnaireImporter) msg -> Cmd msg
-getQuestionnaireImporters qs =
+getQuestionnaireImporters : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination QuestionnaireImporter) msg -> Cmd msg
+getQuestionnaireImporters _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs

@@ -5,8 +5,10 @@ import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Utils exposing (boolToString)
 import Uuid
 import Wizard.Common.Api exposing (applyResultCmd, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -92,19 +94,16 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
         formMsg =
             wrapMsg << FormMsg << Form.Input "questionnaireUuid" Form.Select << Field.String
 
+        filters =
+            PaginationQueryFilters.create
+                [ ( "isTemplate", Just (boolToString True) )
+                , ( "isMigrating", Just (boolToString False) )
+                ]
+                []
+
         cfg =
             { wrapMsg = wrapMsg << QuestionnaireTypeHintInputMsg
-            , getTypeHints =
-                QuestionnairesApi.getQuestionnaires
-                    { isTemplate = Just True
-                    , isMigrating = Just False
-                    , userUuids = Nothing
-                    , userUuidsOp = Nothing
-                    , projectTags = Nothing
-                    , projectTagsOp = Nothing
-                    , packageIds = Nothing
-                    , packageIdsOp = Nothing
-                    }
+            , getTypeHints = QuestionnairesApi.getQuestionnaires filters
             , getError = gettext "Unable to get project templates." appState.locale
             , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""

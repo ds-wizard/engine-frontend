@@ -14,10 +14,12 @@ import Html.Attributes exposing (class)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Setters exposing (setQuestionnaires)
+import Shared.Utils exposing (boolToString)
 import Wizard.Common.Api exposing (applyResultTransform)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.CreateProjectWidget as CreateProjectWidget
@@ -48,17 +50,16 @@ fetchData appState =
 
         mbUserUuid =
             Session.getUserUuid appState.session
+
+        filters =
+            PaginationQueryFilters.create
+                [ ( "isTemplate", Just (boolToString False) )
+                , ( "userUuids", mbUserUuid )
+                ]
+                []
     in
     QuestionnairesApi.getQuestionnaires
-        { isTemplate = Just False
-        , isMigrating = Nothing
-        , userUuids = mbUserUuid
-        , userUuidsOp = Nothing
-        , projectTags = Nothing
-        , projectTagsOp = Nothing
-        , packageIds = Nothing
-        , packageIdsOp = Nothing
-        }
+        filters
         pagination
         appState
         GetQuestionnairesComplete

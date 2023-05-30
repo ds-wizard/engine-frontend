@@ -336,6 +336,10 @@
                 }
             }
 
+            &.disabled {
+                cursor: not-allowed;
+            }
+
             .page-link {
                 &:hover, &:active {
                     text-decoration: none !important;

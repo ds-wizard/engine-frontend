@@ -3,6 +3,7 @@ module Wizard.DocumentTemplates.Detail.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
+import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage
@@ -39,7 +40,7 @@ viewDocumentTemplate appState model template =
     DetailPage.container
         [ header appState model template
         , readme appState template
-        , sidePanel appState template
+        , sidePanel appState model template
         , deleteVersionModal appState model template
         ]
 
@@ -171,16 +172,16 @@ unsupportedMetamodelVersionWarning appState template =
         emptyNode
 
 
-sidePanel : AppState -> DocumentTemplateDetail -> Html msg
-sidePanel appState template =
+sidePanel : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+sidePanel appState model template =
     let
         sections =
             [ sidePanelKmInfo appState template
-            , sidePanelFormats appState template
-            , sidePanelOtherVersions appState template
             , sidePanelOrganizationInfo appState template
             , sidePanelRegistryLink appState template
-            , sidePanelUsableWith appState template
+            , sidePanelFormats appState template
+            , sidePanelOtherVersions appState template
+            , sidePanelUsableWith appState model template
             ]
     in
     DetailPage.sidePanel
@@ -204,7 +205,10 @@ sidePanelFormats : AppState -> DocumentTemplateDetail -> Maybe ( String, String,
 sidePanelFormats appState template =
     let
         formatView format =
-            li [] [ fa format.icon, text format.name ]
+            li []
+                [ span [ class "fa-li" ] [ fa format.icon ]
+                , span [ class "fa-li-content" ] [ text format.name ]
+                ]
 
         formats =
             template.formats
@@ -212,7 +216,7 @@ sidePanelFormats appState template =
                 |> List.map formatView
     in
     if List.length formats > 0 then
-        Just ( gettext "Formats" appState.locale, "formats", ul [ class "format-list" ] formats )
+        Just ( gettext "Formats" appState.locale, "formats", ul [ class "fa-ul" ] formats )
 
     else
         Nothing
@@ -252,19 +256,23 @@ sidePanelRegistryLink : AppState -> DocumentTemplateDetail -> Maybe ( String, St
 sidePanelRegistryLink appState template =
     let
         toRegistryLink registryLink =
-            ( gettext "Registry link" appState.locale
+            ( gettext "Registry Link" appState.locale
             , "registry-link"
-            , a [ href registryLink, target "_blank", class "with-icon" ]
-                [ faSet "kmDetail.registryLink" appState
-                , text (gettext "View in registry" appState.locale)
+            , ul [ class "fa-ul" ]
+                [ li []
+                    [ a [ href registryLink, target "_blank" ]
+                        [ span [ class "fa-li" ] [ faSet "kmDetail.registryLink" appState ]
+                        , span [ class "fa-li-content" ] [ text (gettext "View in registry" appState.locale) ]
+                        ]
+                    ]
                 ]
             )
     in
     Maybe.map toRegistryLink template.registryLink
 
 
-sidePanelUsableWith : AppState -> DocumentTemplateDetail -> Maybe ( String, String, Html msg )
-sidePanelUsableWith appState template =
+sidePanelUsableWith : AppState -> Model -> DocumentTemplateDetail -> Maybe ( String, String, Html Msg )
+sidePanelUsableWith appState model template =
     let
         packageLink package =
             li []
@@ -274,13 +282,34 @@ sidePanelUsableWith appState template =
                     [ text package.id ]
                 ]
 
+        takeFirstPackages =
+            if model.showAllKms then
+                identity
+
+            else
+                List.take 10
+
         packageLinks =
             template.usablePackages
                 |> List.sortWith DocumentTemplatePackage.compareById
+                |> takeFirstPackages
                 |> List.map packageLink
     in
     if List.length packageLinks > 0 then
-        Just ( gettext "Usable with" appState.locale, "usable-with", ul [] packageLinks )
+        let
+            showAllLink =
+                if model.showAllKms || List.length template.usablePackages <= 10 then
+                    emptyNode
+
+                else
+                    li [ class "show-all-link" ]
+                        [ a [ onClick ShowAllKms ]
+                            [ text (gettext "Show all" appState.locale)
+                            , faSet "detail.showAll" appState
+                            ]
+                        ]
+        in
+        Just ( gettext "Usable with" appState.locale, "usable-with", ul [] (packageLinks ++ [ showAllLink ]) )
 
     else
         Nothing

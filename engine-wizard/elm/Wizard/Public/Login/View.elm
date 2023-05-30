@@ -111,7 +111,7 @@ loginFormView appState model =
 
 codeFormView : AppState -> Model -> Html Msg
 codeFormView appState model =
-    div [ class "align-self-center col-xs-10 col-sm-8 col-md-6 col-lg-4" ]
+    div []
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]

@@ -56,7 +56,7 @@
     &__SidePanel {
         flex: 0 0 25rem;
         background: $gray-100;
-        padding: 1rem;
+        padding: 1rem 1rem 3rem 1rem;
         height: calc(100vh - #{$top-header-height});
         margin-top: $top-header-height;
         overflow-x: auto;
@@ -84,6 +84,20 @@
             }
         }
 
+        .fa-ul {
+            margin-left: 0.25rem;
+        }
+
+        .show-all-link {
+            margin-top: $spacer-2;
+            list-style-type: none;
+            margin-left: -1rem;
+
+            .fa {
+                margin-left: $spacer-1;
+            }
+        }
+
         &__ItemIcon {
             margin-top: .25rem;
             margin-bottom: .5rem;
@@ -91,19 +105,6 @@
 
             .ItemIcon {
                 margin-right: 0.5rem;
-            }
-        }
-
-        .format-list {
-            list-style: none;
-            padding-left: 0;
-
-            li {
-                margin-bottom: 0.25rem;
-            }
-
-            .fa {
-                margin-right: 0.25rem;
             }
         }
     }

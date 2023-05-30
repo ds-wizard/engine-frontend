@@ -54,8 +54,8 @@ loginCompleted appState model result =
     case result of
         Ok tokenResponse ->
             case tokenResponse of
-                TokenResponse.Token token ->
-                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.fromString token) model.originalUrl) )
+                TokenResponse.Token token expiresAt ->
+                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.create token expiresAt) model.originalUrl) )
 
                 TokenResponse.CodeRequired ->
                     ( { model | codeRequired = True, loggingIn = Unset }, Cmd.none )

@@ -13,6 +13,7 @@ type alias Model =
     , dropdownState : Dropdown.State
     , deletingVersion : ActionResult String
     , showDeleteDialog : Bool
+    , showAllKms : Bool
     }
 
 
@@ -22,4 +23,5 @@ initialModel =
     , dropdownState = Dropdown.initialState
     , deletingVersion = Unset
     , showDeleteDialog = False
+    , showAllKms = False
     }

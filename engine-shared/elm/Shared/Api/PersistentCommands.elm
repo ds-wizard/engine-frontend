@@ -1,6 +1,5 @@
 module Shared.Api.PersistentCommands exposing
-    ( GetPersistentCommandsFilters
-    , getPersistentCommand
+    ( getPersistentCommand
     , getPersistentCommands
     , retry
     , retryAllFailed
@@ -11,6 +10,7 @@ import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtGet, jwtPostEmpty, jwtPut)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.PersistentCommand as PersistentCommand exposing (PersistentCommand)
 import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
@@ -18,16 +18,12 @@ import Shared.Data.PersistentCommandDetail as PersistentCommandDetail exposing (
 import Uuid exposing (Uuid)
 
 
-type alias GetPersistentCommandsFilters =
-    { state : Maybe String }
-
-
-getPersistentCommands : GetPersistentCommandsFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination PersistentCommand) msg -> Cmd msg
+getPersistentCommands : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination PersistentCommand) msg -> Cmd msg
 getPersistentCommands filters qs =
     let
         extraParams =
-            PaginationQueryString.filterParams <|
-                [ ( "state", filters.state ) ]
+            PaginationQueryString.filterParams
+                [ ( "state", PaginationQueryFilters.getValue "state" filters ) ]
 
         queryString =
             PaginationQueryString.toApiUrlWith extraParams qs

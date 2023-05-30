@@ -18,11 +18,12 @@ import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile,
 import Shared.Data.Locale as Locale exposing (Locale)
 import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 
 
-getLocales : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Locale) msg -> Cmd msg
-getLocales qs =
+getLocales : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination Locale) msg -> Cmd msg
+getLocales _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs
