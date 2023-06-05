@@ -917,15 +917,42 @@ localStorageCollapsedItemsCmd uuid items =
 handleScrollToPath : Model -> String -> ( Model, Cmd Msg )
 handleScrollToPath model path =
     let
-        chapterUuid =
+        pathParts =
             String.split "." path
-                |> List.head
+
+        chapterUuid =
+            List.head pathParts
                 |> Maybe.withDefault ""
+
+        createSubpaths parts =
+            case parts of
+                [] ->
+                    []
+
+                _ ->
+                    let
+                        rest =
+                            List.unconsLast parts
+                                |> Maybe.unwrap [] Tuple.second
+                    in
+                    String.join "." parts :: createSubpaths rest
+
+        newCollapsedItems =
+            createSubpaths pathParts
+                |> List.foldl (\currentPath collapsedItems -> Set.remove currentPath collapsedItems) model.collapsedItems
 
         selector =
             "[data-path=\"" ++ path ++ "\"]"
     in
-    ( { model | activePage = PageChapter chapterUuid }, Ports.scrollIntoView selector )
+    ( { model
+        | activePage = PageChapter chapterUuid
+        , collapsedItems = newCollapsedItems
+      }
+    , Cmd.batch
+        [ Ports.scrollIntoView selector
+        , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
+        ]
+    )
 
 
 handleShowTypeHints : AppState -> Context -> Model -> List String -> Bool -> String -> String -> ( Model, Cmd Msg )
