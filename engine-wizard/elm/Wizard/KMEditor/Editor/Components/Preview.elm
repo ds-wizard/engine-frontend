@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.Components.Preview exposing
     ( Model
     , Msg
+    , generateReplies
     , initialModel
     , setActiveChapterIfNot
     , setPackageId
@@ -78,6 +79,28 @@ setPackageId appState packageId model =
             Questionnaire.init appState questionnaire Nothing
     in
     { model | questionnaireModel = questionnaireModel }
+
+
+generateReplies : AppState -> String -> KnowledgeModel -> Model -> Model
+generateReplies appState questionUuid knowledgeModel model =
+    let
+        questionnaireModel =
+            model.questionnaireModel
+
+        ( _, mbChapterUuid, questionnaireDetail ) =
+            questionnaireModel.questionnaire
+                |> QuestionnaireDetail.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel
+
+        activePage =
+            Maybe.unwrap questionnaireModel.activePage PageChapter mbChapterUuid
+    in
+    { model
+        | questionnaireModel =
+            { questionnaireModel
+                | activePage = activePage
+                , questionnaire = questionnaireDetail
+            }
+    }
 
 
 createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireDetail
