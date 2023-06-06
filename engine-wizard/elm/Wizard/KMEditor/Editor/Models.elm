@@ -11,6 +11,7 @@ import Shared.Api.Branches as BranchesApi
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
+import String.Extra as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
@@ -72,36 +73,45 @@ initPageModel appState route model =
             { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
 
         KMEditorRoute.Preview ->
-            let
-                packageId =
-                    ActionResult.map .branch model.branchModel
-                        |> ActionResult.toMaybe
-                        |> Maybe.andThen .previousPackageId
-                        |> Maybe.withDefault ""
+            case model.branchModel of
+                ActionResult.Success editorBranch ->
+                    let
+                        currentQuestionUuid =
+                            EditorBranch.getActiveQuestionUuid editorBranch
 
-                firstChapterUuid =
-                    case model.branchModel of
-                        ActionResult.Success editorBranch ->
+                        packageId =
+                            ActionResult.map .branch model.branchModel
+                                |> ActionResult.toMaybe
+                                |> Maybe.andThen .previousPackageId
+                                |> Maybe.withDefault ""
+
+                        firstChapterUuid =
                             editorBranch.branch.knowledgeModel.chapterUuids
                                 |> EditorBranch.filterDeleted editorBranch
                                 |> List.head
                                 |> Maybe.withDefault ""
 
-                        _ ->
-                            ""
+                        activeChapterUuid =
+                            EditorBranch.getChapterUuid editorBranch.activeUuid editorBranch
 
-                defaultPhaseUuid =
-                    model.branchModel
-                        |> ActionResult.unwrap Nothing (.branch >> .knowledgeModel >> .phaseUuids >> List.head)
-                        |> Maybe.andThen Uuid.fromString
+                        selectedChapterUuid =
+                            String.withDefault firstChapterUuid activeChapterUuid
 
-                previewModel =
-                    model.previewModel
-                        |> Preview.setPackageId appState packageId
-                        |> Preview.setActiveChapterIfNot firstChapterUuid
-                        |> Preview.setPhase defaultPhaseUuid
-            in
-            { model | previewModel = previewModel }
+                        defaultPhaseUuid =
+                            List.head editorBranch.branch.knowledgeModel.phaseUuids
+                                |> Maybe.andThen Uuid.fromString
+
+                        previewModel =
+                            model.previewModel
+                                |> Preview.setPackageId appState packageId
+                                |> Preview.generateReplies appState currentQuestionUuid editorBranch.branch.knowledgeModel
+                                |> Preview.setActiveChapterIfNot selectedChapterUuid
+                                |> Preview.setPhase defaultPhaseUuid
+                    in
+                    { model | previewModel = previewModel }
+
+                _ ->
+                    model
 
         _ ->
             model

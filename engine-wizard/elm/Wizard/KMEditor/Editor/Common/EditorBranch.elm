@@ -4,7 +4,9 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , applyEvent
     , filterDeleted
     , filterDeletedWith
+    , getActiveQuestionUuid
     , getAllUuids
+    , getChapterUuid
     , getEditUuid
     , getEditorName
     , getFilteredKM
@@ -358,6 +360,38 @@ updateActiveEditor editorBranch =
             getActiveEditor editorBranch.activeUuid editorBranch.activeUuid
     in
     setActiveEditor newActiveEditorUuid editorBranch
+
+
+getActiveQuestionUuid : EditorBranch -> String
+getActiveQuestionUuid editorBranch =
+    let
+        isQuestionEditor uuid =
+            Dict.member uuid editorBranch.branch.knowledgeModel.entities.questions
+
+        getParentQuestion uuid =
+            if String.isEmpty uuid || isQuestionEditor uuid then
+                uuid
+
+            else
+                getParentQuestion (getParentUuid uuid editorBranch)
+    in
+    getParentQuestion editorBranch.activeUuid
+
+
+getChapterUuid : String -> EditorBranch -> String
+getChapterUuid entityUuid editorBranch =
+    let
+        isChapter uuid =
+            List.member uuid editorBranch.branch.knowledgeModel.chapterUuids
+
+        getParent uuid =
+            if String.isEmpty uuid || isChapter uuid then
+                uuid
+
+            else
+                getParent (getParentUuid uuid editorBranch)
+    in
+    getParent entityUuid
 
 
 treeSetNodeOpen : String -> Bool -> EditorBranch -> EditorBranch

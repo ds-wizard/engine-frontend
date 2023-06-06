@@ -1,11 +1,18 @@
-module Wizard.KMEditor.Editor.Update exposing (fetchData, isGuarded, onUnload, update)
+module Wizard.KMEditor.Editor.Update exposing
+    ( fetchData
+    , isGuarded
+    , onUnload
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
+import Dict
 import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Prefabs as PrefabsApi
 import Shared.Data.Branch.BranchState as BranchState
+import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
 import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction
 import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
 import Shared.Data.WebSockets.ServerBranchAction as ServerBranchAction
@@ -49,11 +56,58 @@ fetchData appState uuid model =
             ]
 
 
-fetchSubrouteData : AppState -> model -> Cmd Msg
-fetchSubrouteData appState _ =
+fetchSubrouteData : AppState -> Model -> Cmd Msg
+fetchSubrouteData appState model =
     case appState.route of
         KMEditorRoute (EditorRoute _ (KMEditorRoute.Edit _)) ->
             Ports.scrollToTop "#editor-view"
+
+        KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
+            let
+                mbScrollPath =
+                    Dict.keys model.previewModel.questionnaireModel.questionnaire.replies
+                        |> List.sortBy String.length
+                        |> List.reverse
+                        |> List.head
+
+                mbActiveQuestionUuid =
+                    ActionResult.toMaybe model.branchModel
+                        |> Maybe.map EditorBranch.getActiveQuestionUuid
+
+                scrollIntoView parts =
+                    Ports.scrollIntoView ("[data-path=\"" ++ String.join "." parts ++ "\"]")
+            in
+            case ( mbScrollPath, mbActiveQuestionUuid ) of
+                -- Somewhere deep in the questionnaire
+                ( Just scrollPath, Just activeQuestionUuid ) ->
+                    let
+                        value =
+                            Dict.get scrollPath model.previewModel.questionnaireModel.questionnaire.replies
+
+                        answerPathUuid =
+                            Maybe.withDefault "" <|
+                                case Maybe.map .value value of
+                                    Just (AnswerReply answerUuid) ->
+                                        Just answerUuid
+
+                                    Just (ItemListReply itemUuids) ->
+                                        List.head itemUuids
+
+                                    _ ->
+                                        Nothing
+                    in
+                    scrollIntoView [ scrollPath, answerPathUuid, activeQuestionUuid ]
+
+                -- Top level question in a chapter
+                ( Nothing, Just activeQuestionUuid ) ->
+                    let
+                        chapterUuid =
+                            ActionResult.unwrap "" (EditorBranch.getChapterUuid activeQuestionUuid) model.branchModel
+                    in
+                    scrollIntoView [ chapterUuid, activeQuestionUuid ]
+
+                _ ->
+                    Cmd.none
 
         _ ->
             Cmd.none
@@ -63,7 +117,13 @@ fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( 
 fetchSubrouteDataFromAfter wrapMsg appState model =
     case ( model.branchModel, appState.route ) of
         ( Success _, KMEditorRoute (EditorRoute _ route) ) ->
-            ( initPageModel appState route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
+            let
+                newModel =
+                    initPageModel appState route model
+            in
+            ( newModel
+            , Cmd.map wrapMsg <| fetchSubrouteData appState newModel
+            )
 
         _ ->
             ( model, Cmd.none )
