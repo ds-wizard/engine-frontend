@@ -207,16 +207,20 @@ update wrapMsg msg appState model =
 
                 ( newSeed, newModel, newCmd ) =
                     case questionnaireMsg of
-                        Questionnaire.SetPhase phaseUuid ->
-                            applyAction questionnaireSeed identity <|
-                                \uuid ->
-                                    QuestionnaireEvent.SetPhase
-                                        { uuid = uuid
-                                        , phaseUuid = Uuid.fromString phaseUuid
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        , phasesAnsweredIndication = indications
-                                        }
+                        Questionnaire.PhaseModalUpdate _ mbPhaseUuid ->
+                            if Maybe.isJust mbPhaseUuid then
+                                applyAction questionnaireSeed identity <|
+                                    \uuid ->
+                                        QuestionnaireEvent.SetPhase
+                                            { uuid = uuid
+                                            , phaseUuid = mbPhaseUuid
+                                            , createdAt = createdAt
+                                            , createdBy = createdBy
+                                            , phasesAnsweredIndication = indications
+                                            }
+
+                            else
+                                ( appState.seed, newModel1, Cmd.none )
 
                         Questionnaire.SetReply path reply ->
                             applyAction questionnaireSeed identity <|
