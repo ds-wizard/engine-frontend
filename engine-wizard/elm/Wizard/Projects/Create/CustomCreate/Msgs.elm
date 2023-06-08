@@ -13,5 +13,6 @@ type Msg
     | GetKnowledgeModelPreviewCompleted (Result ApiError KnowledgeModel)
     | AddTag String
     | RemoveTag String
+    | ChangeUseAllQuestions Bool
     | PostQuestionnaireCompleted (Result ApiError Questionnaire)
     | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)

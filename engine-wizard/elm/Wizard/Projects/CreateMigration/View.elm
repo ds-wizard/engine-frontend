@@ -117,6 +117,13 @@ tagsView appState model =
             { selected = model.selectedTags
             , addMsg = AddTag
             , removeMsg = RemoveTag
+            , showDescription = True
+            }
+
+        selectionConfig =
+            { tagListConfig = tagListConfig
+            , useAllQuestions = model.useAllQuestions
+            , useAllQuestionsMsg = ChangeUseAllQuestions
             }
     in
-    Tag.selection appState tagListConfig model.knowledgeModelPreview
+    Tag.selection appState selectionConfig model.knowledgeModelPreview

@@ -44,6 +44,9 @@ update wrapMsg msg appState model =
         RemoveTag tagUuid ->
             handleRemoveTag model tagUuid
 
+        ChangeUseAllQuestions value ->
+            ( { model | useAllQuestions = value }, Cmd.none )
+
         GetKnowledgeModelPreviewCompleted result ->
             handleGetKnowledgeModelPreviewCompleted appState model result
 
@@ -95,8 +98,15 @@ handleForm wrapMsg formMsg appState model =
     case ( formMsg, Form.getOutput model.form ) of
         ( Form.Submit, Just form ) ->
             let
+                selectedTags =
+                    if model.useAllQuestions then
+                        []
+
+                    else
+                        model.selectedTags
+
                 body =
-                    QuestionnaireCreateForm.encode model.selectedTags form
+                    QuestionnaireCreateForm.encode selectedTags form
 
                 cmd =
                     Cmd.map wrapMsg <|

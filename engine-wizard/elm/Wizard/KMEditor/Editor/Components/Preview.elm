@@ -224,6 +224,7 @@ tagSelection appState selected knowledgeModel =
                 { selected = Set.toList selected
                 , addMsg = AddTag
                 , removeMsg = RemoveTag
+                , showDescription = False
                 }
         in
         div [ class "tag-selection" ]
