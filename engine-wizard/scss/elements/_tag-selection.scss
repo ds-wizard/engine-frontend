@@ -1,0 +1,30 @@
+@import '../variables';
+@import '../mixins';
+
+
+.tag-selection-form {
+    label {
+        @include transition(background 0.15s ease-in-out);
+        @include border-radius($border-radius);
+        display: block;
+        padding: $spacer-2 $spacer-3;
+        background: $gray-100;
+        cursor: pointer;
+
+        &:hover {
+            background: $gray-200;
+        }
+
+        input {
+            margin-right: $spacer-2;
+        }
+    }
+
+    .tag-list {
+        .tag {
+            display: block;
+            margin-right: 0;
+            margin-left: $spacer-3;
+        }
+    }
+}

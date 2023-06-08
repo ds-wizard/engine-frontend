@@ -1,16 +1,24 @@
-module Wizard.Common.View.Tag exposing (TagListConfig, list, readOnlyList, selection, viewList)
+module Wizard.Common.View.Tag exposing
+    ( SelectionConfig
+    , TagListConfig
+    , list
+    , readOnlyList
+    , selection
+    , viewList
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Html exposing (Html, div, i, input, label, text)
+import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, classList, disabled, style, type_)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode)
 import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltipCustom)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 
@@ -19,6 +27,7 @@ type alias TagListConfig msg =
     { selected : List String
     , addMsg : String -> msg
     , removeMsg : String -> msg
+    , showDescription : Bool
     }
 
 
@@ -54,8 +63,16 @@ tagView appState config tag =
 
             else
                 ( False, tag.name )
+
+        tooltipAttrs =
+            case ( tag.description, config.showDescription ) of
+                ( Just description, True ) ->
+                    tooltipCustom "with-tooltip-wide" description
+
+                _ ->
+                    []
     in
-    div [ class "tag" ]
+    div (class "tag" :: tooltipAttrs)
         [ label
             [ class "tag-label"
             , style "background" tag.color
@@ -74,8 +91,15 @@ tagView appState config tag =
         ]
 
 
-selection : AppState -> TagListConfig msg -> ActionResult KnowledgeModel -> Html msg
-selection appState tagListConfig knowledgeModelResult =
+type alias SelectionConfig msg =
+    { tagListConfig : TagListConfig msg
+    , useAllQuestions : Bool
+    , useAllQuestionsMsg : Bool -> msg
+    }
+
+
+selection : AppState -> SelectionConfig msg -> ActionResult KnowledgeModel -> Html msg
+selection appState selectionConfig knowledgeModelResult =
     let
         viewContent content =
             div [ class "form-group form-group-tags" ]
@@ -103,9 +127,26 @@ selection appState tagListConfig knowledgeModelResult =
             in
             if List.length tags > 0 then
                 viewContent <|
-                    div [ class "tag-selection" ]
-                        [ list appState tagListConfig tags
-                        , FormExtra.text <| gettext "You can filter questions in the questionnaire by question tags. If no question tags are selected, all questions will be used." appState.locale
+                    div [ class "tag-selection tag-selection-form" ]
+                        [ FormExtra.text <| gettext "You can either use all questions from the knowledge model or filter them by question tags." appState.locale
+                        , label [ onClick (selectionConfig.useAllQuestionsMsg True) ]
+                            [ input
+                                [ type_ "radio"
+                                , checked selectionConfig.useAllQuestions
+                                ]
+                                []
+                            , text (gettext "Use all questions" appState.locale)
+                            ]
+                        , label [ onClick (selectionConfig.useAllQuestionsMsg False) ]
+                            [ input
+                                [ type_ "radio"
+                                , checked (not selectionConfig.useAllQuestions)
+                                ]
+                                []
+                            , text (gettext "Filter by question tags" appState.locale)
+                            ]
+                        , Html.viewIf (not selectionConfig.useAllQuestions) <|
+                            list appState selectionConfig.tagListConfig tags
                         ]
 
             else
@@ -118,15 +159,16 @@ readOnlyList : AppState -> List String -> List Tag -> Html msg
 readOnlyList appState selected tags =
     let
         content =
-            if List.length tags > 0 then
-                List.map (readOnlyTagView selected) (List.sortBy .name tags)
+            if List.isEmpty tags then
+                [ Flash.info appState (gettext "There are no question tags for this knowledge model." appState.locale) ]
+
+            else if List.isEmpty selected then
+                [ Flash.info appState (gettext "All questions are used." appState.locale) ]
 
             else
-                [ div [ class "alert alert-light" ]
-                    [ i [] [ text (gettext "No question tags" appState.locale) ] ]
-                ]
+                List.map (readOnlyTagView selected) (List.sortBy .name tags)
     in
-    div [ class "tag-list" ] content
+    div [ class "tag-list tag-list-readonly" ] content
 
 
 readOnlyTagView : List String -> Tag -> Html msg

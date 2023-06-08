@@ -414,6 +414,7 @@ tags appState config =
             { selected = config.selected
             , addMsg = \value -> config.onChange <| value :: config.selected
             , removeMsg = \value -> config.onChange <| List.filter ((/=) value) config.selected
+            , showDescription = False
             }
     in
     div [ class "form-group" ]

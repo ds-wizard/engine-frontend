@@ -20,4 +20,5 @@ type Msg
     | GetSelectedPackageCompleted (Result ApiError PackageDetail)
     | AddTag String
     | RemoveTag String
+    | ChangeUseAllQuestions Bool
     | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)

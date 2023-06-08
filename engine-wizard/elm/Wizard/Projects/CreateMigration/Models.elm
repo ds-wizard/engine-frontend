@@ -24,6 +24,7 @@ type alias Model =
     , form : Form FormError QuestionnaireMigrationCreateForm
     , packageTypeHintInputModel : TypeHintInput.Model PackageSuggestion
     , selectedTags : List String
+    , useAllQuestions : Bool
     , savingMigration : ActionResult String
     , knowledgeModelPreview : ActionResult KnowledgeModel
     , lastFetchedPreview : Maybe String
@@ -40,6 +41,7 @@ initialModel uuid =
     , form = QuestionnaireMigrationCreateForm.initEmpty
     , packageTypeHintInputModel = TypeHintInput.init "package"
     , selectedTags = []
+    , useAllQuestions = True
     , savingMigration = Unset
     , knowledgeModelPreview = Unset
     , lastFetchedPreview = Nothing
