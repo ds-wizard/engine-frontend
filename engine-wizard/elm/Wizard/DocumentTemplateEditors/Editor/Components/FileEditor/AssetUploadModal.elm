@@ -8,6 +8,7 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUploadMo
     )
 
 import ActionResult exposing (ActionResult(..))
+import Dict exposing (Dict)
 import File exposing (File)
 import File.Select as Select
 import Gettext exposing (gettext)
@@ -20,7 +21,7 @@ import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
 import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
+import Shared.Html exposing (faSetFw)
 import Shared.Utils exposing (dispatch)
 import Task
 import Uuid
@@ -39,18 +40,22 @@ import Wizard.Common.View.Modal as Modal
 
 type alias Model =
     { hover : Bool
-    , file : Maybe File
+    , files : Maybe (List File)
+    , fileContents : Dict String String
     , open : Bool
-    , submitting : ActionResult ()
+    , submitting : Dict String (ActionResult ())
+    , count : Int
     }
 
 
 initialModel : Model
 initialModel =
     { hover = False
-    , file = Nothing
+    , files = Nothing
+    , fileContents = Dict.empty
     , open = False
-    , submitting = Unset
+    , submitting = Dict.empty
+    , count = 0
     }
 
 
@@ -62,12 +67,13 @@ type Msg
     = Pick
     | DragEnter
     | DragLeave
-    | GotFile File
-    | GotFileContent String
+    | PickedFiles File (List File)
+    | GotFiles (List File)
+    | GotFileContent String String
     | SetOpen Bool
     | Upload
-    | SubmitAssetComplete (Result ApiError DocumentTemplateAsset)
-    | SubmitFileComplete (Result ApiError DocumentTemplateFile)
+    | SubmitAssetComplete String (Result ApiError DocumentTemplateAsset)
+    | SubmitFileComplete String (Result ApiError DocumentTemplateFile)
 
 
 type alias UpdateConfig msg =
@@ -83,7 +89,7 @@ update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
 update cfg msg appState model =
     case msg of
         Pick ->
-            ( model, Cmd.map cfg.wrapMsg <| Select.file [ "*/*" ] GotFile )
+            ( model, Cmd.map cfg.wrapMsg <| Select.files [ "*/*" ] PickedFiles )
 
         DragEnter ->
             ( { model | hover = True }
@@ -95,86 +101,137 @@ update cfg msg appState model =
             , Cmd.none
             )
 
-        GotFile file ->
-            ( { model | hover = False, file = Just file }
+        PickedFiles file files ->
+            ( { model | hover = False, files = Just (file :: files) }
             , Cmd.none
             )
 
-        GotFileContent fileContent ->
-            case model.file of
-                Just file ->
-                    uploadFile cfg appState model file fileContent
+        GotFiles files ->
+            ( { model | hover = False, files = Just files }
+            , Cmd.none
+            )
+
+        GotFileContent file fileContent ->
+            let
+                fileContents =
+                    Dict.insert file fileContent model.fileContents
+            in
+            case ( Dict.size fileContents >= model.count, model.files ) of
+                ( True, Just files ) ->
+                    uploadFilesAndAssets cfg appState { model | fileContents = fileContents } files
 
                 _ ->
                     ( model, Cmd.none )
 
         SetOpen open ->
-            ( { model | hover = False, open = open, file = Nothing, submitting = Unset }
+            ( { model | hover = False, open = open, files = Nothing, submitting = Dict.empty }
             , Cmd.none
             )
 
         Upload ->
-            case model.file of
-                Just file ->
-                    if ContentType.isText (File.mime file) then
-                        ( { model | submitting = Loading }
-                        , Task.perform (cfg.wrapMsg << GotFileContent) (File.toString file)
-                        )
+            case model.files of
+                Just files ->
+                    let
+                        textFiles =
+                            List.filter (ContentType.isText << File.mime) files
+
+                        getContentCmd file =
+                            Task.perform (cfg.wrapMsg << GotFileContent (File.name file)) (File.toString file)
+
+                        textFilesCount =
+                            List.length textFiles
+                    in
+                    if textFilesCount > 0 then
+                        ( { model | count = textFilesCount }, Cmd.batch (List.map getContentCmd textFiles) )
 
                     else
-                        uploadAsset cfg appState model file
+                        uploadFilesAndAssets cfg appState model files
 
                 _ ->
                     ( model, Cmd.none )
 
-        SubmitAssetComplete result ->
-            handleSubmitComplete cfg.addAssetMsg appState model result
+        SubmitAssetComplete fileName result ->
+            handleSubmitComplete cfg.addAssetMsg appState model fileName result
 
-        SubmitFileComplete result ->
-            handleSubmitComplete cfg.addFileMsg appState model result
+        SubmitFileComplete fileName result ->
+            handleSubmitComplete cfg.addFileMsg appState model fileName result
 
 
-handleSubmitComplete : (a -> msg) -> AppState -> Model -> Result ApiError a -> ( Model, Cmd msg )
-handleSubmitComplete dispatchMsg appState model result =
+handleSubmitComplete : (a -> msg) -> AppState -> Model -> String -> Result ApiError a -> ( Model, Cmd msg )
+handleSubmitComplete dispatchMsg appState model fileName result =
     case result of
         Ok documentTemplateFile ->
-            ( { model | open = False }
+            let
+                submitting =
+                    Dict.insert fileName (Success ()) model.submitting
+
+                allSubmitted =
+                    List.all ActionResult.isSuccess (Dict.values submitting)
+            in
+            ( { model | open = not allSubmitted, submitting = submitting }
             , dispatch (dispatchMsg documentTemplateFile)
             )
 
         Err error ->
-            ( { model | submitting = ApiError.toActionResult appState (gettext "Unable to upload file." appState.locale) error }, Cmd.none )
+            ( { model
+                | submitting =
+                    Dict.insert
+                        fileName
+                        (ApiError.toActionResult appState (gettext "Unable to upload file." appState.locale) error)
+                        model.submitting
+              }
+            , Cmd.none
+            )
 
 
-uploadAsset : UpdateConfig msg -> AppState -> Model -> File -> ( Model, Cmd msg )
-uploadAsset cfg appState model file =
+uploadFilesAndAssets : UpdateConfig msg -> AppState -> Model -> List File -> ( Model, Cmd msg )
+uploadFilesAndAssets cfg appState model files =
     let
-        cmd =
-            DocumentTemplateDraftsApi.uploadAsset cfg.documentTemplateId
-                (getFileName cfg.path file)
-                file
-                appState
-                (cfg.wrapMsg << SubmitAssetComplete)
+        upload file ( actionResults, cmds ) =
+            let
+                fileName =
+                    File.name file
+
+                cmd =
+                    case Dict.get (File.name file) model.fileContents of
+                        Just fileContent ->
+                            uploadFile cfg appState file fileContent
+
+                        Nothing ->
+                            uploadAsset cfg appState file
+            in
+            ( Dict.insert fileName Loading actionResults
+            , cmd :: cmds
+            )
+
+        ( submitting, uploadCmds ) =
+            List.foldl upload ( Dict.empty, [] ) files
     in
-    ( { model | submitting = Loading }, cmd )
+    ( { model | submitting = submitting }, Cmd.batch uploadCmds )
 
 
-uploadFile : UpdateConfig msg -> AppState -> Model -> File -> String -> ( Model, Cmd msg )
-uploadFile cfg appState model file content =
+uploadAsset : UpdateConfig msg -> AppState -> File -> Cmd msg
+uploadAsset cfg appState file =
+    DocumentTemplateDraftsApi.uploadAsset cfg.documentTemplateId
+        (getFileName cfg.path file)
+        file
+        appState
+        (cfg.wrapMsg << SubmitAssetComplete (File.name file))
+
+
+uploadFile : UpdateConfig msg -> AppState -> File -> String -> Cmd msg
+uploadFile cfg appState file content =
     let
         documentTemplateFile =
             { uuid = Uuid.nil
             , fileName = getFileName cfg.path file
             }
-
-        cmd =
-            DocumentTemplateDraftsApi.postFile cfg.documentTemplateId
-                documentTemplateFile
-                content
-                appState
-                (cfg.wrapMsg << SubmitFileComplete)
     in
-    ( { model | submitting = Loading }, cmd )
+    DocumentTemplateDraftsApi.postFile cfg.documentTemplateId
+        documentTemplateFile
+        content
+        appState
+        (cfg.wrapMsg << SubmitFileComplete (File.name file))
 
 
 getFileName : String -> File -> String
@@ -189,35 +246,38 @@ getFileName path file =
 view : AppState -> Model -> Html Msg
 view appState model =
     let
+        actionResult =
+            ActionResult.all (Dict.values model.submitting)
+
         submitButtonDisabled =
-            Maybe.isNothing model.file
+            Maybe.isNothing model.files
 
         submitButton =
             ActionButton.buttonWithAttrs appState
                 { label = gettext "Upload" appState.locale
-                , result = model.submitting
+                , result = actionResult
                 , msg = Upload
                 , dangerous = False
                 , attrs = [ disabled submitButtonDisabled, dataCy "modal_action-button" ]
                 }
 
         cancelButton =
-            button [ class "btn btn-secondary", onClick (SetOpen False), disabled (ActionResult.isLoading model.submitting) ]
+            button [ class "btn btn-secondary", onClick (SetOpen False), disabled (ActionResult.isLoading actionResult) ]
                 [ text (gettext "Cancel" appState.locale) ]
 
         fileContent =
-            case model.file of
-                Just file ->
-                    fileView appState file
+            case model.files of
+                Just files ->
+                    filesView appState files
 
                 Nothing ->
                     dropzone appState model
 
         content =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text (gettext "Upload file" appState.locale) ] ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Upload files" appState.locale) ] ]
             , div [ class "modal-body logo-upload" ]
-                [ FormResult.errorOnlyView appState model.submitting
+                [ FormResult.errorOnlyView appState actionResult
                 , fileContent
                 ]
             , div [ class "modal-footer" ]
@@ -245,22 +305,25 @@ dropzone appState model =
         , alwaysPreventDefaultOn "dragleave" (D.succeed DragLeave)
         , alwaysPreventDefaultOn "drop" dropDecoder
         ]
-        [ button [ onClick Pick, class "btn btn-secondary" ] [ text (gettext "Choose file" appState.locale) ]
-        , p [] [ text (gettext "Or just drop it here" appState.locale) ]
+        [ button [ onClick Pick, class "btn btn-secondary" ] [ text (gettext "Choose files" appState.locale) ]
+        , p [] [ text (gettext "Or just drop them here" appState.locale) ]
         ]
 
 
 dropDecoder : D.Decoder Msg
 dropDecoder =
-    D.at [ "dataTransfer", "files", "0" ] (D.map GotFile File.decoder)
+    D.at [ "dataTransfer", "files" ] (D.map GotFiles (D.list File.decoder))
 
 
-fileView : AppState -> File -> Html Msg
-fileView appState file =
-    div [ class "rounded-3 file-view" ]
-        [ div [ class "file" ]
-            [ faSet "import.file" appState
-            , div [ class "filename" ]
-                [ text (File.name file) ]
-            ]
+filesView : AppState -> List File -> Html Msg
+filesView appState files =
+    let
+        fileView file =
+            div [ class "rounded-3 bg-light mb-1 px-3 py-2" ]
+                [ faSetFw "import.file" appState
+                , text (File.name file)
+                ]
+    in
+    div [ class "rounded-3" ]
+        [ div [] (List.map fileView files)
         ]
