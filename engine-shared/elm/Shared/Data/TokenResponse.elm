@@ -1,15 +1,18 @@
-module Shared.Data.TokenResponse exposing (TokenResponse(..), decoder, toToken)
+module Shared.Data.TokenResponse exposing
+    ( TokenResponse(..)
+    , decoder
+    )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
-import Shared.Data.Token as Token exposing (Token)
 import Time
 
 
 type TokenResponse
     = Token String Time.Posix
     | CodeRequired
+    | ConsentsRequired String
 
 
 decoder : Decoder TokenResponse
@@ -26,16 +29,10 @@ decoder =
                     "CodeRequired" ->
                         D.succeed CodeRequired
 
+                    "ConsentsRequired" ->
+                        D.succeed ConsentsRequired
+                            |> D.required "hash" D.string
+
                     _ ->
                         D.fail <| "Unexpected token response type " ++ type_
             )
-
-
-toToken : TokenResponse -> Maybe Token
-toToken response =
-    case response of
-        Token token expiresAt ->
-            Just (Token.create token expiresAt)
-
-        CodeRequired ->
-            Nothing
