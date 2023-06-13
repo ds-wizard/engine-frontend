@@ -1,6 +1,7 @@
 module Wizard.Auth.Update exposing (update)
 
 import Gettext exposing (gettext)
+import Shared.Api.Tokens as TokensApi
 import Shared.Api.Users as UsersApi
 import Shared.Auth.Session as Session
 import Shared.Data.User as User exposing (User)
@@ -95,7 +96,7 @@ logoutTo route model =
         cmd =
             Cmd.batch
                 [ Ports.clearSession ()
-                , UsersApi.deleteToken model.appState (Wizard.Msgs.AuthMsg << always AuthMsgs.LogoutDone)
+                , TokensApi.deleteCurrentToken model.appState (Wizard.Msgs.AuthMsg << always AuthMsgs.LogoutDone)
                 , cmdNavigate model.appState route
                 ]
     in

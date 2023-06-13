@@ -39,7 +39,7 @@ update msg wrapMsg appState model =
         AuthMsg authMsg ->
             let
                 ( authModel, cmd ) =
-                    Wizard.Public.Auth.Update.update authMsg appState model.authModel
+                    Wizard.Public.Auth.Update.update authMsg (wrapMsg << AuthMsg) appState model.authModel
             in
             ( { model | authModel = authModel }, cmd )
 

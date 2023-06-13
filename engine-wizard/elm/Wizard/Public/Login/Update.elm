@@ -60,5 +60,8 @@ loginCompleted appState model result =
                 TokenResponse.CodeRequired ->
                     ( { model | codeRequired = True, loggingIn = Unset }, Cmd.none )
 
+                TokenResponse.ConsentsRequired _ ->
+                    ( model, Cmd.none )
+
         Err error ->
             ( { model | loggingIn = ApiError.toActionResult appState (gettext "Login failed." appState.locale) error }, Cmd.none )

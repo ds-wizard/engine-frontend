@@ -24,7 +24,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { authModel = Wizard.Public.Auth.Models.initialModel
+    { authModel = Wizard.Public.Auth.Models.initialModel "" Nothing
     , bookReferenceModel = Wizard.Public.BookReference.Models.initialModel
     , forgottenPasswordModel = Wizard.Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Wizard.Public.ForgottenPasswordConfirmation.Models.initialModel appState "" ""
@@ -37,8 +37,8 @@ initialModel appState =
 initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
-        AuthCallback _ _ _ _ ->
-            { model | authModel = Wizard.Public.Auth.Models.initialModel }
+        AuthCallback id _ _ mbSessionState ->
+            { model | authModel = Wizard.Public.Auth.Models.initialModel id mbSessionState }
 
         BookReferenceRoute _ ->
             { model | bookReferenceModel = Wizard.Public.BookReference.Models.initialModel }
