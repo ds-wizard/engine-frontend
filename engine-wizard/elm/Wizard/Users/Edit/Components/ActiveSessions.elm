@@ -11,7 +11,7 @@ module Wizard.Users.Edit.Components.ActiveSessions exposing
 
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, span, strong, text)
+import Html exposing (Html, a, button, div, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewIf)
@@ -21,7 +21,7 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.ApiKey exposing (ApiKey)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet, faSetFw)
+import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Markdown as Markdown
 import Shared.Setters exposing (setTokens)
 import String.Format as String
@@ -42,6 +42,8 @@ type alias Model =
     { tokens : ActionResult (List Token)
     , tokenToRevoke : Maybe Token
     , revokingToken : ActionResult String
+    , revokeAllModalOpen : Bool
+    , revokingAll : ActionResult String
     }
 
 
@@ -50,6 +52,8 @@ initialModel =
     { tokens = ActionResult.Loading
     , tokenToRevoke = Nothing
     , revokingToken = ActionResult.Unset
+    , revokeAllModalOpen = False
+    , revokingAll = ActionResult.Unset
     }
 
 
@@ -58,6 +62,9 @@ type Msg
     | SetTokenToRevoke (Maybe Token)
     | RevokeToken
     | DeleteTokenComplete (Result ApiError ())
+    | RevokeAllModalOpen Bool
+    | RevokeAll
+    | DeleteTokensComplete (Result ApiError ())
 
 
 fetchData : AppState -> Cmd Msg
@@ -114,6 +121,32 @@ update cfg appState msg model =
                     , getResultCmd cfg.logoutMsg result
                     )
 
+        RevokeAllModalOpen value ->
+            ( { model | revokeAllModalOpen = value }, Cmd.none )
+
+        RevokeAll ->
+            ( { model | revokingAll = ActionResult.Loading }
+            , Cmd.map cfg.wrapMsg (TokensApi.deleteTokens appState DeleteTokensComplete)
+            )
+
+        DeleteTokensComplete result ->
+            case result of
+                Ok _ ->
+                    ( { model
+                        | revokeAllModalOpen = False
+                        , tokens = ActionResult.Loading
+                        , revokingAll = ActionResult.Unset
+                      }
+                    , Cmd.map cfg.wrapMsg <| TokensApi.getTokens appState GetTokensComplete
+                    )
+
+                Err error ->
+                    ( { model
+                        | revokingAll = ApiError.toActionResult appState (gettext "Failed to revoke all active sessions." appState.locale) error
+                      }
+                    , getResultCmd cfg.logoutMsg result
+                    )
+
 
 view : AppState -> Model -> Html Msg
 view appState model =
@@ -121,22 +154,40 @@ view appState model =
 
 
 viewActiveSessions : AppState -> Model -> List Token -> Html Msg
-viewActiveSessions appState model token =
+viewActiveSessions appState model tokens =
     let
         activeSessions =
-            List.sortBy (Time.posixToMillis << .createdAt) token
+            List.sortBy (Time.posixToMillis << .createdAt) tokens
+
+        revokeAllAction =
+            if List.length tokens > 1 then
+                button
+                    [ class "btn btn-outline-danger with-icon"
+                    , onClick (RevokeAllModalOpen True)
+                    ]
+                    [ faSet "activeSession.revoke" appState
+                    , text (gettext "Revoke all" appState.locale)
+                    ]
+
+            else
+                emptyNode
     in
     div [ wideDetailClass "" ]
-        [ Page.header (gettext "Active Sessions" appState.locale) []
+        [ div [ class "row" ]
+            [ div [ class "col" ]
+                [ Page.header (gettext "Active Sessions" appState.locale) [] ]
+            ]
         , div [ class "row" ]
-            [ div [ class "col-8 list-group" ] (List.map (viewActiveSession appState) activeSessions)
+            [ div [ class "col-8" ] [ div [ class "list-group" ] (List.map (viewActiveSession appState) activeSessions) ]
             , div [ class "col-4" ]
                 [ div [ class "col-border-left" ]
                     [ Markdown.toHtml [] (gettext "This is a list of active sessions logged into your account.\n\nIf you don't recognize any, you should revoke them." appState.locale)
+                    , revokeAllAction
                     ]
                 ]
             ]
         , viewActiveSessionRevokeModal appState model
+        , viewRevokeAllModal appState model
         ]
 
 
@@ -208,6 +259,25 @@ viewActiveSessionRevokeModal appState model =
         , cancelMsg = Just (SetTokenToRevoke Nothing)
         , dangerous = True
         , dataCy = "active-session_revoke"
+        }
+
+
+viewRevokeAllModal : AppState -> Model -> Html Msg
+viewRevokeAllModal appState model =
+    let
+        content =
+            [ text (gettext "Are you sure you want to revoke all active sessions? This will log you out of all devices except for the current one." appState.locale) ]
+    in
+    Modal.confirm appState
+        { modalTitle = gettext "Revoke All Active Sessions" appState.locale
+        , modalContent = content
+        , visible = model.revokeAllModalOpen
+        , actionResult = model.revokingAll
+        , actionName = gettext "Revoke all" appState.locale
+        , actionMsg = RevokeAll
+        , cancelMsg = Just (RevokeAllModalOpen False)
+        , dangerous = True
+        , dataCy = "active-session_revoke-all"
         }
 
 
