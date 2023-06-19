@@ -28,7 +28,7 @@
     "@lydell/elm": "^0.19.1-12",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
-    "css-minimizer-webpack-plugin": "^5.0.0",
+    "css-minimizer-webpack-plugin": "^5.0.1",
     "elm-review": "^2.10.2",
     "elm-test": "^0.19.1-revision12",
     "elm-webpack-loader": "^8.0.0",
