@@ -32,7 +32,7 @@
     "elm-review": "^2.10.2",
     "elm-test": "^0.19.1-revision12",
     "elm-webpack-loader": "^8.0.0",
-    "html-webpack-plugin": "^5.5.1",
+    "html-webpack-plugin": "^5.5.3",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.7.6",
     "sass": "^1.63.6",
