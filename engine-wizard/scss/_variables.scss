@@ -10,6 +10,7 @@ $cyan: #17a2b8 !default;
 $min-contrast-ratio: 3 !default;
 
 @import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/variables-dark';
 
 
 $primary-bg: mix($primary, $white, 10%) !default;
