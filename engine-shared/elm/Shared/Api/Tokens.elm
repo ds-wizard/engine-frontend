@@ -1,5 +1,7 @@
 module Shared.Api.Tokens exposing
-    ( deleteToken
+    ( deleteCurrentToken
+    , deleteToken
+    , deleteTokens
     , fetchToken
     , getTokens
     )
@@ -26,3 +28,13 @@ getTokens =
 deleteToken : Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 deleteToken uuid =
     jwtDelete ("/tokens/" ++ Uuid.toString uuid)
+
+
+deleteCurrentToken : AbstractAppState a -> ToMsg () msg -> Cmd msg
+deleteCurrentToken =
+    jwtDelete "/tokens/current"
+
+
+deleteTokens : AbstractAppState a -> ToMsg () msg -> Cmd msg
+deleteTokens =
+    jwtDelete "/tokens"

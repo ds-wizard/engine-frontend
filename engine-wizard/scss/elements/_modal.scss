@@ -27,6 +27,18 @@
         min-width: 500px;
         @include transition(margin-top 0.2s ease-in);
 
+        .modal-header {
+            .close {
+                outline: none;
+                border: none;
+                background: transparent;
+
+                &:hover {
+                    color: $primary;
+                }
+            }
+        }
+
         .modal-content {
             max-height: calc(100vh - 2 * $modal-dialog-margin);
         }

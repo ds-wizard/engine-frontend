@@ -35,8 +35,8 @@ import Browser.Events
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Gettext exposing (gettext, ngettext)
-import Html exposing (Html, a, button, div, h2, i, img, input, label, li, option, p, select, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
+import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, p, span, strong, text, ul)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Json.Decode as D exposing (Decoder, decodeValue)
 import Json.Decode.Extra as D
@@ -124,6 +124,7 @@ type alias Model =
     , rightPanel : RightPanel
     , questionnaire : QuestionnaireDetail
     , questionnaireEvents : ActionResult (List QuestionnaireEvent)
+    , phaseModalOpen : Bool
     , removeItem : Maybe ( String, String )
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
@@ -190,6 +191,7 @@ init appState questionnaire mbPath =
             , rightPanel = RightPanelNone
             , questionnaire = questionnaire
             , questionnaireEvents = ActionResult.Unset
+            , phaseModalOpen = False
             , removeItem = Nothing
             , typeHints = Nothing
             , typeHintsDebounce = Debounce.init
@@ -206,7 +208,7 @@ init appState questionnaire mbPath =
             , commentsViewResolved = False
             , commentsViewPrivate = False
             , commentDropdownStates = Dict.empty
-            , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
+            , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.1, 0.7 )))
             , navigationTreeModel = navigationTreeModel
             , questionnaireImportersDropdown = Dropdown.initialState
             , questionnaireImporters = []
@@ -409,7 +411,7 @@ type Msg
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
-    | SetPhase String
+    | PhaseModalUpdate Bool (Maybe Uuid)
     | SetReply String Reply
     | ClearReply String
     | AddItem String (List String)
@@ -560,8 +562,16 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         FeedbackModalMsg feedbackModalMsg ->
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
 
-        SetPhase phaseUuid ->
-            wrap <| setPhaseUuid (Uuid.fromString phaseUuid) model
+        PhaseModalUpdate open mbPhaseUuid ->
+            let
+                modelWithPhase =
+                    if Maybe.isJust mbPhaseUuid then
+                        setPhaseUuid mbPhaseUuid model
+
+                    else
+                        model
+            in
+            wrap { modelWithPhase | phaseModalOpen = open }
 
         SetReply path replyValue ->
             wrap <| setReply path replyValue model
@@ -917,15 +927,42 @@ localStorageCollapsedItemsCmd uuid items =
 handleScrollToPath : Model -> String -> ( Model, Cmd Msg )
 handleScrollToPath model path =
     let
-        chapterUuid =
+        pathParts =
             String.split "." path
-                |> List.head
+
+        chapterUuid =
+            List.head pathParts
                 |> Maybe.withDefault ""
+
+        createSubpaths parts =
+            case parts of
+                [] ->
+                    []
+
+                _ ->
+                    let
+                        rest =
+                            List.unconsLast parts
+                                |> Maybe.unwrap [] Tuple.second
+                    in
+                    String.join "." parts :: createSubpaths rest
+
+        newCollapsedItems =
+            createSubpaths pathParts
+                |> List.foldl (\currentPath collapsedItems -> Set.remove currentPath collapsedItems) model.collapsedItems
 
         selector =
             "[data-path=\"" ++ path ++ "\"]"
     in
-    ( { model | activePage = PageChapter chapterUuid }, Ports.scrollIntoView selector )
+    ( { model
+        | activePage = PageChapter chapterUuid
+        , collapsedItems = newCollapsedItems
+      }
+    , Cmd.batch
+        [ Ports.scrollIntoView selector
+        , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
+        ]
+    )
 
 
 handleShowTypeHints : AppState -> Context -> Model -> List String -> Bool -> String -> String -> ( Model, Cmd Msg )
@@ -1162,6 +1199,7 @@ view appState cfg ctx model =
                 model.splitPane
             , viewQuestionnaireRightPanel appState cfg model
             ]
+        , Html.map cfg.wrapMsg <| viewPhaseModal appState model
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
         , Html.map cfg.wrapMsg <| viewRemoveItemModal appState model
         ]
@@ -1401,30 +1439,103 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
     in
     if List.length phases > 0 then
         let
-            selectAttrs =
+            selectedPhaseTitle =
+                List.find ((==) (Maybe.map Uuid.toString model.questionnaire.phaseUuid) << Just << .uuid) phases
+                    |> Maybe.orElse (List.head phases)
+                    |> Maybe.unwrap "" .title
+
+            phaseButtonOnClick =
                 if cfg.features.readonly then
-                    [ disabled True ]
+                    []
 
                 else
-                    [ onInput SetPhase ]
+                    [ onClick (PhaseModalUpdate True Nothing) ]
+
+            phaseButton =
+                button
+                    ([ class "btn btn-input w-100"
+                     , onClick (PhaseModalUpdate True Nothing)
+                     , dataCy "phase-selection"
+                     , disabled cfg.features.readonly
+                     ]
+                        ++ phaseButtonOnClick
+                    )
+                    [ text selectedPhaseTitle ]
         in
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ text (gettext "Current Phase" appState.locale) ]
-            , select (class "form-select" :: selectAttrs)
-                (List.map (viewQuestionnaireLeftPanelPhaseSelectionOption model.questionnaire.phaseUuid) phases)
+            , phaseButton
             ]
 
     else
         emptyNode
 
 
-viewQuestionnaireLeftPanelPhaseSelectionOption : Maybe Uuid -> Phase -> Html Msg
-viewQuestionnaireLeftPanelPhaseSelectionOption mbSelectedPhaseUuid phase =
-    option
-        [ value phase.uuid
-        , selected (Maybe.unwrap False (Uuid.toString >> (==) phase.uuid) mbSelectedPhaseUuid)
-        ]
-        [ text phase.title ]
+viewPhaseModal : AppState -> Model -> Html Msg
+viewPhaseModal appState model =
+    let
+        phases =
+            KnowledgeModel.getPhases model.questionnaire.knowledgeModel
+
+        currentPhaseIndex =
+            case model.questionnaire.phaseUuid of
+                Just phaseUuid ->
+                    List.map .uuid phases
+                        |> List.elemIndex (Uuid.toString phaseUuid)
+                        |> Maybe.withDefault 0
+
+                Nothing ->
+                    0
+
+        viewPhase : Int -> Phase -> Html Msg
+        viewPhase index phase =
+            let
+                descriptionElement =
+                    case phase.description of
+                        Just description ->
+                            div [ class "phase-description" ] [ text description ]
+
+                        Nothing ->
+                            emptyNode
+
+                clickAttribute =
+                    if index == currentPhaseIndex then
+                        []
+
+                    else
+                        [ onClick (PhaseModalUpdate False (Uuid.fromString phase.uuid)) ]
+            in
+            div
+                ([ class "phase"
+                 , classList
+                    [ ( "phase-done", index < currentPhaseIndex )
+                    , ( "phase-active", index == currentPhaseIndex )
+                    ]
+                 , dataCy "phase-option"
+                 ]
+                    ++ clickAttribute
+                )
+                [ div [ class "phase-title" ] [ text phase.title ]
+                , descriptionElement
+                ]
+    in
+    Modal.simpleWithAttrs [ class "PhaseSelectionModal modal-wide" ]
+        { modalContent =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] [ text "Select phase" ]
+                , button
+                    [ class "close"
+                    , onClick (PhaseModalUpdate False Nothing)
+                    ]
+                    [ faSet "_global.close" appState ]
+                ]
+            , div [ class "modal-body" ]
+                [ div [] (List.indexedMap viewPhase phases)
+                ]
+            ]
+        , visible = model.phaseModalOpen
+        , dataCy = "phase-selection"
+        }
 
 
 

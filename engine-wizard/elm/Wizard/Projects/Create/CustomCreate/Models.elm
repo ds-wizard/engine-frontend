@@ -19,6 +19,7 @@ type alias Model =
     , packageTypeHintInputModel : TypeHintInput.Model PackageSuggestion
     , selectedPackage : Maybe String
     , selectedTags : List String
+    , useAllQuestions : Bool
     , lastFetchedPreview : Maybe String
     , knowledgeModelPreview : ActionResult KnowledgeModel
     }
@@ -31,6 +32,7 @@ initialModel appState selectedPackage =
     , packageTypeHintInputModel = TypeHintInput.init "packageId"
     , selectedPackage = selectedPackage
     , selectedTags = []
+    , useAllQuestions = True
     , lastFetchedPreview = selectedPackage
     , knowledgeModelPreview = Unset
     }

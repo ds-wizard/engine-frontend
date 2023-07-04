@@ -3,15 +3,25 @@ module Wizard.Public.Auth.Models exposing
     , initialModel
     )
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
 
 
 type alias Model =
-    { authenticating : ActionResult String
+    { id : String
+    , sessionState : Maybe String
+    , consent : Bool
+    , authenticating : ActionResult String
+    , hash : Maybe String
+    , submittingConsent : ActionResult String
     }
 
 
-initialModel : Model
-initialModel =
-    { authenticating = Loading
+initialModel : String -> Maybe String -> Model
+initialModel id sessionState =
+    { id = id
+    , sessionState = sessionState
+    , consent = False
+    , authenticating = ActionResult.Loading
+    , hash = Nothing
+    , submittingConsent = ActionResult.Unset
     }

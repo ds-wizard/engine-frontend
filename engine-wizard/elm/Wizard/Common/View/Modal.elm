@@ -7,6 +7,7 @@ module Wizard.Common.View.Modal exposing
     , confirmExtra
     , error
     , simple
+    , simpleWithAttrs
     )
 
 import ActionResult exposing (ActionResult)

@@ -4,8 +4,7 @@ module Wizard.KnowledgeModels.Preview.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Dict exposing (Dict)
-import Dict.Extra as Dict
+import Dict
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
@@ -13,19 +12,15 @@ import Random exposing (Seed)
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Question as Question
 import Shared.Data.PackageDetail as PackageDetail
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
-import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Error.ApiError as ApiError
 import Shared.Setters exposing (setKnowledgeModel, setPackage)
-import Shared.Utils exposing (getUuid, getUuidString)
+import Shared.Utils exposing (getUuid)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
@@ -160,7 +155,7 @@ initQuestionnaireModel appState ( model, cmd ) =
                 ( ( newSeed, mbChapterUuid, questionnaireWithReplies ), scrollCmd ) =
                     case model.mbQuestionUuid of
                         Just questionUuid ->
-                            ( generateReplies appState questionUuid knowledgeModel questionnaire
+                            ( QuestionnaireDetail.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaire
                             , Ports.scrollIntoView ("#question-" ++ questionUuid)
                             )
 
@@ -185,93 +180,6 @@ initQuestionnaireModel appState ( model, cmd ) =
 
         _ ->
             ( appState.seed, model, cmd )
-
-
-generateReplies : AppState -> String -> KnowledgeModel -> QuestionnaireDetail -> ( Seed, Maybe String, QuestionnaireDetail )
-generateReplies appState questionUuid km questionnaireDetail =
-    let
-        parentMap =
-            KnowledgeModel.createParentMap km
-
-        ( newSeed, mbChapterUuid, replies ) =
-            foldReplies appState km parentMap appState.seed questionUuid Dict.empty
-    in
-    ( newSeed
-    , mbChapterUuid
-    , { questionnaireDetail | replies = replies }
-    )
-
-
-foldReplies : AppState -> KnowledgeModel -> KnowledgeModel.ParentMap -> Seed -> String -> Dict String Reply -> ( Seed, Maybe String, Dict String Reply )
-foldReplies appState km parentMap seed questionUuid replies =
-    let
-        parentUuid =
-            KnowledgeModel.getParent parentMap questionUuid
-
-        prefixPaths prefix repliesDict =
-            Dict.mapKeys (\k -> prefix ++ "." ++ k) repliesDict
-
-        foldReplies_ =
-            foldReplies appState km parentMap
-    in
-    case
-        ( KnowledgeModel.getChapter parentUuid km
-        , KnowledgeModel.getQuestion parentUuid km
-        , KnowledgeModel.getAnswer parentUuid km
-        )
-    of
-        ( Just chapter, Nothing, Nothing ) ->
-            -- just prefix replies with chapter uuid
-            ( seed, Just chapter.uuid, prefixPaths chapter.uuid replies )
-
-        ( Nothing, Just question, Nothing ) ->
-            -- add item to question, get parent question and continue
-            let
-                ( itemUuid, newSeed ) =
-                    getUuidString seed
-
-                reply =
-                    { value = ReplyValue.ItemListReply [ itemUuid ]
-                    , createdAt = appState.currentTime
-                    , createdBy = Nothing
-                    }
-
-                listQuestionUuid =
-                    Question.getUuid question
-            in
-            foldReplies_ newSeed
-                listQuestionUuid
-                (Dict.insert listQuestionUuid reply (prefixPaths listQuestionUuid (prefixPaths itemUuid replies)))
-
-        ( Nothing, Nothing, Just answer ) ->
-            -- select answer, get parent question and continue
-            let
-                answerParentQuestionUuid =
-                    KnowledgeModel.getParent parentMap answer.uuid
-            in
-            case KnowledgeModel.getQuestion answerParentQuestionUuid km of
-                Just question ->
-                    let
-                        reply =
-                            { value = ReplyValue.AnswerReply answer.uuid
-                            , createdAt = appState.currentTime
-                            , createdBy = Nothing
-                            }
-
-                        answerQuestionUuid =
-                            Question.getUuid question
-                    in
-                    foldReplies_ seed
-                        answerQuestionUuid
-                        (Dict.insert answerQuestionUuid reply (prefixPaths answerQuestionUuid (prefixPaths answer.uuid replies)))
-
-                Nothing ->
-                    -- should not happen
-                    ( seed, Nothing, replies )
-
-        _ ->
-            -- should not happen
-            ( seed, Nothing, replies )
 
 
 handleQuestionnaireMsg : Questionnaire.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

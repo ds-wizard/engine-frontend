@@ -1163,7 +1163,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
 
 
 viewPhaseEditor : EditorConfig msg -> Phase -> Html msg
-viewPhaseEditor { appState, wrapMsg, eventMsg, model, editorBranch } phase =
+viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
     let
         parentUuid =
             EditorBranch.getParentUuid phase.uuid editorBranch
@@ -1192,14 +1192,11 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, model, editorBranch } phase =
                 }
 
         descriptionInput =
-            Input.markdown appState
+            Input.textarea
                 { name = "description"
                 , label = gettext "Description" appState.locale
                 , value = Maybe.withDefault "" phase.description
                 , onInput = createEditEvent setDescription << String.toMaybe
-                , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
-                , entityUuid = phase.uuid
-                , markdownPreviews = model.markdownPreviews
                 }
 
         annotationsInput =

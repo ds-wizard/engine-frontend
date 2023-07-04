@@ -73,4 +73,18 @@
             padding-right: $spacer-5;
         }
     }
+
+    &-input {
+        background: $white;
+        border: 1px solid $gray-400;
+        text-align: left;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+
+        &:hover, &:active, &:focus {
+            background: $white !important;
+            border: 1px solid $gray-400 !important;
+        }
+    }
 }

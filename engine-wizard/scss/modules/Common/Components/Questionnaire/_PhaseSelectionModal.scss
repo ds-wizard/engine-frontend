@@ -1,0 +1,73 @@
+@import '../../../../variables';
+@import '../../../../mixins';
+
+.PhaseSelectionModal {
+    .phase {
+        @include border-radius($border-radius-lg);
+        border: 1px solid $white;
+        padding: $spacer-2 $spacer-3;
+        cursor: pointer;
+        margin-left: 3rem;
+        position: relative;
+
+        &::before {
+            @include border-radius(100%);
+            content: ' ';
+            position: absolute;
+            left: -2rem;
+            top: $spacer-2;
+            width: 1rem;
+            height: 1rem;
+            background: $gray-300;
+        }
+
+        &:not(:last-child)::after {
+            content: ' ';
+            position: absolute;
+            width: 0.25rem;
+            left: -1.625rem;
+            top: $spacer-2 + 1rem;
+            bottom: -$spacer-2 - $spacer-3 - .2rem;
+            background: $gray-300;
+        }
+
+        &-done {
+            .phase-title, .phase-description {
+                opacity: 0.7;
+            }
+
+            &::before, &::after {
+                background: $primary !important;
+            }
+        }
+
+        &-active {
+            border-color: $primary !important;
+            cursor: default !important;
+
+            &::before {
+                background: $primary !important;
+            }
+        }
+
+        &:not(.phase-active):hover {
+            background: $gray-100;
+            border-color: $gray-400;
+            opacity: 1;
+        }
+
+        &:not(:last-child) {
+            margin-bottom: $spacer-3;
+        }
+
+        &-title {
+            font-weight: 500;
+        }
+
+        &-description {
+            font-size: $font-size-sm;
+            color: $gray-700;
+            margin-top: $spacer-1;
+        }
+    }
+}

@@ -13,6 +13,7 @@ module Shared.Data.QuestionnaireDetail exposing
     , deleteComment
     , deleteCommentThread
     , editComment
+    , generateReplies
     , getCommentCount
     , getComments
     , getItemTitle
@@ -39,10 +40,12 @@ module Shared.Data.QuestionnaireDetail exposing
     )
 
 import Dict exposing (Dict)
+import Dict.Extra as Dict
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Random exposing (Seed)
 import Regex
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
@@ -72,7 +75,7 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils exposing (boolToInt)
+import Shared.Utils exposing (boolToInt, getUuidString)
 import String.Extra as String
 import Time
 import Tuple.Extra as Tuple
@@ -768,6 +771,97 @@ evaluateAnswerItem questionnaire path questions uuid =
     questions
         |> List.map (evaluateQuestion questionnaire currentPath)
         |> List.foldl Tuple.sum ( 0, 0 )
+
+
+
+-- Generating Replies
+
+
+generateReplies : Time.Posix -> Seed -> String -> KnowledgeModel -> QuestionnaireDetail -> ( Seed, Maybe String, QuestionnaireDetail )
+generateReplies currentTime seed questionUuid km questionnaireDetail =
+    let
+        parentMap =
+            KnowledgeModel.createParentMap km
+
+        ( newSeed, mbChapterUuid, replies ) =
+            foldReplies currentTime km parentMap seed questionUuid Dict.empty
+    in
+    ( newSeed
+    , mbChapterUuid
+    , { questionnaireDetail | replies = replies }
+    )
+
+
+foldReplies : Time.Posix -> KnowledgeModel -> KnowledgeModel.ParentMap -> Seed -> String -> Dict String Reply -> ( Seed, Maybe String, Dict String Reply )
+foldReplies currentTime km parentMap seed questionUuid replies =
+    let
+        parentUuid =
+            KnowledgeModel.getParent parentMap questionUuid
+
+        prefixPaths prefix repliesDict =
+            Dict.mapKeys (\k -> prefix ++ "." ++ k) repliesDict
+
+        foldReplies_ =
+            foldReplies currentTime km parentMap
+    in
+    case
+        ( KnowledgeModel.getChapter parentUuid km
+        , KnowledgeModel.getQuestion parentUuid km
+        , KnowledgeModel.getAnswer parentUuid km
+        )
+    of
+        ( Just chapter, Nothing, Nothing ) ->
+            -- just prefix replies with chapter uuid
+            ( seed, Just chapter.uuid, prefixPaths chapter.uuid replies )
+
+        ( Nothing, Just question, Nothing ) ->
+            -- add item to question, get parent question and continue
+            let
+                ( itemUuid, newSeed ) =
+                    getUuidString seed
+
+                reply =
+                    { value = ReplyValue.ItemListReply [ itemUuid ]
+                    , createdAt = currentTime
+                    , createdBy = Nothing
+                    }
+
+                listQuestionUuid =
+                    Question.getUuid question
+            in
+            foldReplies_ newSeed
+                listQuestionUuid
+                (Dict.insert listQuestionUuid reply (prefixPaths listQuestionUuid (prefixPaths itemUuid replies)))
+
+        ( Nothing, Nothing, Just answer ) ->
+            -- select answer, get parent question and continue
+            let
+                answerParentQuestionUuid =
+                    KnowledgeModel.getParent parentMap answer.uuid
+            in
+            case KnowledgeModel.getQuestion answerParentQuestionUuid km of
+                Just question ->
+                    let
+                        reply =
+                            { value = ReplyValue.AnswerReply answer.uuid
+                            , createdAt = currentTime
+                            , createdBy = Nothing
+                            }
+
+                        answerQuestionUuid =
+                            Question.getUuid question
+                    in
+                    foldReplies_ seed
+                        answerQuestionUuid
+                        (Dict.insert answerQuestionUuid reply (prefixPaths answerQuestionUuid (prefixPaths answer.uuid replies)))
+
+                Nothing ->
+                    -- should not happen
+                    ( seed, Nothing, replies )
+
+        _ ->
+            -- should not happen
+            ( seed, Nothing, replies )
 
 
 
