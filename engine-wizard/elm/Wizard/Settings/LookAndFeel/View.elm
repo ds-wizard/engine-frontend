@@ -5,7 +5,7 @@ import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, form, hr, img, label, span, text)
-import Html.Attributes exposing (attribute, class, placeholder, src, style)
+import Html.Attributes exposing (attribute, class, placeholder, src, style, type_)
 import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
@@ -114,6 +114,7 @@ formView appState form =
                             , div [ class "mt-2" ]
                                 [ button
                                     [ class "btn btn-secondary"
+                                    , type_ "button"
                                     , onClick (LogoUploadModalMsg (LogoUploadModal.SetOpen True))
                                     ]
                                     [ text (gettext "Change" appState.locale) ]
