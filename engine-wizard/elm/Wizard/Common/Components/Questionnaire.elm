@@ -1307,6 +1307,9 @@ viewQuestionnaireToolbar appState cfg model =
                 RightPanelCommentsOverview ->
                     ( RightPanelNone, True )
 
+                RightPanelComments _ ->
+                    ( RightPanelNone, True )
+
                 _ ->
                     ( RightPanelCommentsOverview, False )
 
