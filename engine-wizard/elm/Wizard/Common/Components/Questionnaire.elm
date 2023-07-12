@@ -2184,12 +2184,19 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
             KnowledgeModel.getChapterQuestions chapter.uuid model.questionnaire.knowledgeModel
 
         questionViews =
-            List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
+            if List.isEmpty questions then
+                div [ class "flex-grow-1" ]
+                    [ Flash.info appState (gettext "This chapter contains no questions." appState.locale)
+                    ]
+
+            else
+                div [ class "flex-grow-1" ] <|
+                    List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
     in
     div [ class "questionnaire__form container" ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
         , Markdown.toHtml [ class "chapter-description" ] (Maybe.withDefault "" chapter.text)
-        , div [ class "flex-grow-1" ] questionViews
+        , questionViews
         , viewPrevAndNextChapterLinks appState chapters chapter
         ]
 
