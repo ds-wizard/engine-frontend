@@ -12,6 +12,7 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Dict exposing (Dict)
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
 import Shared.Data.Pagination exposing (Pagination)
@@ -86,11 +87,19 @@ updateItems updateItem model =
     { model | items = List.map (\item -> { item | item = updateItem item.item }) model.items }
 
 
-setPagination : Pagination a -> Model a -> Model a
-setPagination pagination model =
+setPagination : Bool -> Pagination a -> Model a -> Model a
+setPagination useOriginalState pagination model =
     let
+        getState item =
+            if useOriginalState then
+                List.find (\i -> i.item == item) model.items
+                    |> Maybe.unwrap Dropdown.initialState .dropdownState
+
+            else
+                Dropdown.initialState
+
         wrap item =
-            { dropdownState = Dropdown.initialState
+            { dropdownState = getState item
             , item = item
             }
     in
