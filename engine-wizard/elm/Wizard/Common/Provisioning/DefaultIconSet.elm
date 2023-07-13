@@ -62,7 +62,7 @@ iconSet =
         , ( "documentTemplate.setDeprecated", "fas fa-ban" )
         , ( "documentTemplateEditor.files", "far fa-file-code" )
         , ( "documentTemplateEditor.publish", "fas fa-cloud-upload-alt" )
-        , ( "import.file", "fas fa-file" )
+        , ( "import.file", "far fa-file" )
         , ( "km.answer", "far fa-dot-circle" )
         , ( "km.choice", "far fa-check-square" )
         , ( "km.chapter", "far fa-file" )
