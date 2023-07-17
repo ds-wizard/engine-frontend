@@ -81,26 +81,28 @@ setPackageId appState packageId model =
     { model | questionnaireModel = questionnaireModel }
 
 
-generateReplies : AppState -> String -> KnowledgeModel -> Model -> Model
+generateReplies : AppState -> String -> KnowledgeModel -> Model -> ( Seed, Model )
 generateReplies appState questionUuid knowledgeModel model =
     let
         questionnaireModel =
             model.questionnaireModel
 
-        ( _, mbChapterUuid, questionnaireDetail ) =
+        ( newSeed, mbChapterUuid, questionnaireDetail ) =
             questionnaireModel.questionnaire
                 |> QuestionnaireDetail.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel
 
         activePage =
             Maybe.unwrap questionnaireModel.activePage PageChapter mbChapterUuid
     in
-    { model
+    ( newSeed
+    , { model
         | questionnaireModel =
             { questionnaireModel
                 | activePage = activePage
                 , questionnaire = questionnaireDetail
             }
-    }
+      }
+    )
 
 
 createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireDetail

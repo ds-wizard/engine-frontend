@@ -7,6 +7,7 @@ module Wizard.KMEditor.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
@@ -66,11 +67,13 @@ init appState uuid mbEditorUuid =
     }
 
 
-initPageModel : AppState -> KMEditorRoute -> Model -> Model
+initPageModel : AppState -> KMEditorRoute -> Model -> ( Seed, Model )
 initPageModel appState route model =
     case route of
         KMEditorRoute.Edit mbEditorUuid ->
-            { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
+            ( appState.seed
+            , { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
+            )
 
         KMEditorRoute.Preview ->
             case model.branchModel of
@@ -101,20 +104,20 @@ initPageModel appState route model =
                             List.head editorBranch.branch.knowledgeModel.phaseUuids
                                 |> Maybe.andThen Uuid.fromString
 
-                        previewModel =
+                        ( newSeed, previewModel ) =
                             model.previewModel
                                 |> Preview.setPackageId appState packageId
                                 |> Preview.generateReplies appState currentQuestionUuid editorBranch.branch.knowledgeModel
-                                |> Preview.setActiveChapterIfNot selectedChapterUuid
-                                |> Preview.setPhase defaultPhaseUuid
+                                |> Tuple.mapSecond (Preview.setActiveChapterIfNot selectedChapterUuid)
+                                |> Tuple.mapSecond (Preview.setPhase defaultPhaseUuid)
                     in
-                    { model | previewModel = previewModel }
+                    ( newSeed, { model | previewModel = previewModel } )
 
                 _ ->
-                    model
+                    ( appState.seed, model )
 
         _ ->
-            model
+            ( appState.seed, model )
 
 
 addSavingActionUuid : Uuid -> Model -> Model
