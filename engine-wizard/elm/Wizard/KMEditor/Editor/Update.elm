@@ -113,20 +113,21 @@ fetchSubrouteData appState model =
             Cmd.none
 
 
-fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 fetchSubrouteDataFromAfter wrapMsg appState model =
     case ( model.branchModel, appState.route ) of
         ( Success _, KMEditorRoute (EditorRoute _ route) ) ->
             let
-                newModel =
+                ( newSeed, newModel ) =
                     initPageModel appState route model
             in
-            ( newModel
+            ( newSeed
+            , newModel
             , Cmd.map wrapMsg <| fetchSubrouteData appState newModel
             )
 
         _ ->
-            ( model, Cmd.none )
+            ( appState.seed, model, Cmd.none )
 
 
 isGuarded : AppState -> Routes.Route -> Model -> Maybe String
@@ -177,7 +178,7 @@ update wrapMsg msg appState model =
                 Ok branch ->
                     if BranchState.isEditable branch.state then
                         let
-                            ( newModel, fetchCmd ) =
+                            ( newSeed, newModel, fetchCmd ) =
                                 fetchSubrouteDataFromAfter wrapMsg
                                     appState
                                     { model
@@ -185,13 +186,13 @@ update wrapMsg msg appState model =
                                         , settingsModel = Settings.setBranchDetail branch model.settingsModel
                                     }
                         in
-                        withSeed
-                            ( newModel
-                            , Cmd.batch
-                                [ WebSocket.open model.websocket
-                                , fetchCmd
-                                ]
-                            )
+                        ( newSeed
+                        , newModel
+                        , Cmd.batch
+                            [ WebSocket.open model.websocket
+                            , fetchCmd
+                            ]
+                        )
 
                     else
                         withSeed ( model, cmdNavigate appState (Routes.kmEditorMigration model.uuid) )

@@ -131,7 +131,14 @@ initLocalModel model =
             { model | documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initLocalModel route model.documentTemplateEditorsModel }
 
         Routes.KMEditorRoute route ->
-            { model | kmEditorModel = Wizard.KMEditor.Models.initLocalModel model.appState route model.kmEditorModel }
+            let
+                ( newSeed, kmEditorModel ) =
+                    Wizard.KMEditor.Models.initLocalModel model.appState route model.kmEditorModel
+            in
+            setSeed newSeed
+                { model
+                    | kmEditorModel = kmEditorModel
+                }
 
         Routes.KnowledgeModelsRoute route ->
             { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }

@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Models exposing (Model, initLocalModel, initialModel)
 
+import Random exposing (Seed)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
@@ -31,15 +32,25 @@ initialModel appState =
     }
 
 
-initLocalModel : AppState -> Route -> Model -> Model
+initLocalModel : AppState -> Route -> Model -> ( Seed, Model )
 initLocalModel appState route model =
+    let
+        withSeed m =
+            ( appState.seed, m )
+    in
     case route of
         CreateRoute selectedPackage edit ->
-            { model | createModel = Wizard.KMEditor.Create.Models.initialModel selectedPackage edit }
+            withSeed { model | createModel = Wizard.KMEditor.Create.Models.initialModel selectedPackage edit }
 
         EditorRoute uuid subroute ->
             if uuid == model.editorModel.uuid then
-                { model | editorModel = Editor.initPageModel appState subroute model.editorModel }
+                let
+                    ( newSeed, editorModel ) =
+                        Editor.initPageModel appState subroute model.editorModel
+                in
+                ( newSeed
+                , { model | editorModel = editorModel }
+                )
 
             else
                 let
@@ -50,14 +61,19 @@ initLocalModel appState route model =
 
                             _ ->
                                 Nothing
+
+                    ( newSeed, editorModel ) =
+                        Editor.initPageModel appState subroute <| Editor.init appState uuid mbEditorUuid
                 in
-                { model | editorModel = Editor.initPageModel appState subroute <| Editor.init appState uuid mbEditorUuid }
+                ( newSeed
+                , { model | editorModel = editorModel }
+                )
 
         IndexRoute paginationQueryString ->
-            { model | indexModel = Wizard.KMEditor.Index.Models.initialModel paginationQueryString }
+            withSeed { model | indexModel = Wizard.KMEditor.Index.Models.initialModel paginationQueryString }
 
         MigrationRoute uuid ->
-            { model | migrationModel = Wizard.KMEditor.Migration.Models.initialModel uuid }
+            withSeed { model | migrationModel = Wizard.KMEditor.Migration.Models.initialModel uuid }
 
         PublishRoute _ ->
-            { model | publishModel = Wizard.KMEditor.Publish.Models.initialModel }
+            withSeed { model | publishModel = Wizard.KMEditor.Publish.Models.initialModel }
