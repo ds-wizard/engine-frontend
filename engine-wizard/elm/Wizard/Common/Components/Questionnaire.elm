@@ -32,6 +32,7 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Browser.Events
+import CharIdentifier
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Gettext exposing (gettext, ngettext)
@@ -2479,7 +2480,7 @@ viewQuestionOptionsFollowUps : AppState -> Config msg -> Context -> Model -> Lis
 viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifiers answer =
     let
         index =
-            Maybe.unwrap "a" identifierToChar <|
+            Maybe.unwrap "a" CharIdentifier.fromInt <|
                 List.findIndex (.uuid >> (==) answer.uuid) answers
 
         newPath =
@@ -2578,7 +2579,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
             else
                 let
                     newHumanIdentifiers =
-                        humanIdentifiers ++ [ identifierToChar index ]
+                        humanIdentifiers ++ [ CharIdentifier.fromInt index ]
                 in
                 List.indexedMap (viewQuestion appState cfg ctx model itemPath newHumanIdentifiers) questions
 
@@ -2920,7 +2921,7 @@ viewChoice appState cfg path selectedChoicesUuids order choice =
             pathToString (path ++ [ choice.uuid ])
 
         humanIdentifier =
-            identifierToChar order ++ ". "
+            CharIdentifier.fromInt order ++ ". "
 
         isSelected =
             List.member choice.uuid selectedChoicesUuids
@@ -2959,7 +2960,7 @@ viewAnswer appState cfg model km path selectedAnswerUuid order answer =
             pathToString (path ++ [ answer.uuid ])
 
         humanIdentifier =
-            identifierToChar order ++ ". "
+            CharIdentifier.fromInt order ++ ". "
 
         extraArgs =
             if cfg.features.readonly then
@@ -3148,11 +3149,6 @@ viewRemoveItemModal appState model =
 pathToString : List String -> String
 pathToString =
     String.join "."
-
-
-identifierToChar : Int -> String
-identifierToChar =
-    (+) 97 >> Char.fromCode >> String.fromChar
 
 
 createReply : AppState -> ReplyValue -> Reply
