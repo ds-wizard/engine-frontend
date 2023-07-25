@@ -2191,8 +2191,22 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
                     ]
 
             else
-                div [ class "flex-grow-1" ] <|
-                    List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
+                let
+                    isDesirable =
+                        Question.isDesirable model.questionnaire.knowledgeModel.phaseUuids
+                            (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
+
+                    desirableQuestions =
+                        List.filter isDesirable questions
+                in
+                if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
+                    div [ class "flex-grow-1" ]
+                        [ Flash.info appState (gettext "There are no questions in this phase." appState.locale)
+                        ]
+
+                else
+                    div [ class "flex-grow-1" ] <|
+                        List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
     in
     div [ class "questionnaire__form container" ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
