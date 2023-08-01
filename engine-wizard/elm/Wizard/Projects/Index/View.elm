@@ -141,8 +141,18 @@ listingProjectTagsFilter : AppState -> Model -> Listing.Filter Msg
 listingProjectTagsFilter appState model =
     let
         updateTagsMsg tags =
-            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId))
-                (PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId (String.join "," (List.unique tags)) model.questionnaires.filters)
+            let
+                value =
+                    String.join "," (List.unique tags)
+
+                filters =
+                    if String.isEmpty value then
+                        PaginationQueryFilter.removeFilter indexRouteProjectTagsFilterId model.questionnaires.filters
+
+                    else
+                        PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId value model.questionnaires.filters
+            in
+            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId)) filters
 
         updateOpMsg op =
             (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId))
