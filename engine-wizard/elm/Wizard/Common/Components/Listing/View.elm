@@ -247,9 +247,15 @@ viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
                         , addValue value
                         )
 
+                newFilters =
+                    if String.isEmpty newFilterValue then
+                        PaginationQueryFilters.removeFilter filterId model.filters
+
+                    else
+                        PaginationQueryFilters.insertValue filterId newFilterValue model.filters
+
                 newFiltersMsg =
-                    (cfg.wrapMsg << UpdatePaginationQueryFilters (Just filterId))
-                        (PaginationQueryFilters.insertValue filterId newFilterValue model.filters)
+                    (cfg.wrapMsg << UpdatePaginationQueryFilters (Just filterId)) newFilters
             in
             Dropdown.buttonItem [ onClick newFiltersMsg, class "dropdown-item-icon" ]
                 [ icon, text visibleName ]
