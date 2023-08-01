@@ -14,7 +14,7 @@ type Msg a
     | FilterDropdownMsg String Dropdown.State
     | Reload
     | ReloadBackground
-    | GetItemsComplete PaginationQueryString (Result ApiError (Pagination a))
+    | GetItemsComplete Bool PaginationQueryString (Result ApiError (Pagination a))
     | UpdatePaginationQueryString PaginationQueryString
     | UpdatePaginationQueryFilters (Maybe String) PaginationQueryFilters
     | QueryInput String

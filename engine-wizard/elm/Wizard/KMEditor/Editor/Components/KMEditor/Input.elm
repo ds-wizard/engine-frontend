@@ -219,7 +219,7 @@ markdown appState config =
                 ]
             , div [ class "card-body" ] [ content ]
             , div [ class "card-footer text-muted" ]
-                [ text (gettext "You can use markdown and see the result in the preview tab." appState.locale) ]
+                [ text (gettext "You can use Markdown and see the result in the preview tab." appState.locale) ]
             ]
         ]
 

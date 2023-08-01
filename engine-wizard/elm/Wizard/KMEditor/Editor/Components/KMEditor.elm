@@ -453,6 +453,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 { title = gettext "Knowledge Model" appState.locale
                 , uuid = kmUuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = False
                 , mbDeleteModalState = Nothing
                 , mbMovingEntity = Nothing
                 }
@@ -607,6 +608,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 { title = gettext "Chapter" appState.locale
                 , uuid = chapter.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just ChapterState
                 , mbMovingEntity = Nothing
                 }
@@ -759,6 +761,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { title = gettext "Question" appState.locale
                 , uuid = Question.getUuid question
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just QuestionState
                 , mbMovingEntity = Just TreeInput.MovingQuestion
                 }
@@ -1116,6 +1119,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
                 { title = gettext "Metric" appState.locale
                 , uuid = metric.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just MetricState
                 , mbMovingEntity = Nothing
                 }
@@ -1179,6 +1183,7 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
                 { title = gettext "Phase" appState.locale
                 , uuid = phase.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just PhaseState
                 , mbMovingEntity = Nothing
                 }
@@ -1230,6 +1235,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
                 { title = gettext "Tag" appState.locale
                 , uuid = tag.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just TagState
                 , mbMovingEntity = Nothing
                 }
@@ -1352,6 +1358,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                 { title = gettext "Integration" appState.locale
                 , uuid = integrationUuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just IntegrationState
                 , mbMovingEntity = Nothing
                 }
@@ -1629,6 +1636,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 { title = gettext "Answer" appState.locale
                 , uuid = answer.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just AnswerState
                 , mbMovingEntity = Just TreeInput.MovingAnswer
                 }
@@ -1717,6 +1725,7 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
                 { title = gettext "Choice" appState.locale
                 , uuid = choice.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just ChoiceState
                 , mbMovingEntity = Just TreeInput.MovingChoice
                 }
@@ -1772,6 +1781,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                 { title = gettext "Reference" appState.locale
                 , uuid = Reference.getUuid reference
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just ReferenceState
                 , mbMovingEntity = Just TreeInput.MovingReference
                 }
@@ -1874,6 +1884,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
                 { title = gettext "Expert" appState.locale
                 , uuid = expert.uuid
                 , wrapMsg = wrapMsg
+                , copyUuidButton = True
                 , mbDeleteModalState = Just ExpertState
                 , mbMovingEntity = Just TreeInput.MovingExpert
                 }
@@ -1929,6 +1940,7 @@ type alias EditorTitleConfig msg =
     { title : String
     , uuid : String
     , wrapMsg : Msg -> msg
+    , copyUuidButton : Bool
     , mbDeleteModalState : Maybe (String -> DeleteModalState)
     , mbMovingEntity : Maybe TreeInput.MovingEntity
     }
@@ -1938,15 +1950,19 @@ editorTitle : AppState -> EditorTitleConfig msg -> Html msg
 editorTitle appState config =
     let
         copyUuidButton =
-            a
-                ([ class "btn btn-link with-icon"
-                 , onClick <| config.wrapMsg <| CopyUuid config.uuid
-                 ]
-                    ++ tooltip (gettext "Click to copy UUID" appState.locale)
-                )
-                [ faSet "kmEditor.copyUuid" appState
-                , small [] [ text <| String.slice 0 8 config.uuid ]
-                ]
+            if config.copyUuidButton then
+                a
+                    ([ class "btn btn-link with-icon"
+                     , onClick <| config.wrapMsg <| CopyUuid config.uuid
+                     ]
+                        ++ tooltip (gettext "Click to copy UUID" appState.locale)
+                    )
+                    [ faSet "kmEditor.copyUuid" appState
+                    , small [] [ text <| String.slice 0 8 config.uuid ]
+                    ]
+
+            else
+                emptyNode
 
         moveButton =
             case config.mbMovingEntity of

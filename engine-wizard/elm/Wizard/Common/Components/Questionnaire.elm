@@ -32,6 +32,7 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Browser.Events
+import CharIdentifier
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Gettext exposing (gettext, ngettext)
@@ -1307,6 +1308,9 @@ viewQuestionnaireToolbar appState cfg model =
                 RightPanelCommentsOverview ->
                     ( RightPanelNone, True )
 
+                RightPanelComments _ ->
+                    ( RightPanelNone, True )
+
                 _ ->
                     ( RightPanelCommentsOverview, False )
 
@@ -2181,12 +2185,33 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
             KnowledgeModel.getChapterQuestions chapter.uuid model.questionnaire.knowledgeModel
 
         questionViews =
-            List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
+            if List.isEmpty questions then
+                div [ class "flex-grow-1" ]
+                    [ Flash.info appState (gettext "This chapter contains no questions." appState.locale)
+                    ]
+
+            else
+                let
+                    isDesirable =
+                        Question.isDesirable model.questionnaire.knowledgeModel.phaseUuids
+                            (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
+
+                    desirableQuestions =
+                        List.filter isDesirable questions
+                in
+                if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
+                    div [ class "flex-grow-1" ]
+                        [ Flash.info appState (gettext "There are no questions in this phase." appState.locale)
+                        ]
+
+                else
+                    div [ class "flex-grow-1" ] <|
+                        List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
     in
     div [ class "questionnaire__form container" ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
         , Markdown.toHtml [ class "chapter-description" ] (Maybe.withDefault "" chapter.text)
-        , div [ class "flex-grow-1" ] questionViews
+        , questionViews
         , viewPrevAndNextChapterLinks appState chapters chapter
         ]
 
@@ -2469,7 +2494,7 @@ viewQuestionOptionsFollowUps : AppState -> Config msg -> Context -> Model -> Lis
 viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifiers answer =
     let
         index =
-            Maybe.unwrap "a" identifierToChar <|
+            Maybe.unwrap "a" CharIdentifier.fromInt <|
                 List.findIndex (.uuid >> (==) answer.uuid) answers
 
         newPath =
@@ -2568,7 +2593,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
             else
                 let
                     newHumanIdentifiers =
-                        humanIdentifiers ++ [ identifierToChar index ]
+                        humanIdentifiers ++ [ CharIdentifier.fromInt index ]
                 in
                 List.indexedMap (viewQuestion appState cfg ctx model itemPath newHumanIdentifiers) questions
 
@@ -2910,7 +2935,7 @@ viewChoice appState cfg path selectedChoicesUuids order choice =
             pathToString (path ++ [ choice.uuid ])
 
         humanIdentifier =
-            identifierToChar order ++ ". "
+            CharIdentifier.fromInt order ++ ". "
 
         isSelected =
             List.member choice.uuid selectedChoicesUuids
@@ -2949,7 +2974,7 @@ viewAnswer appState cfg model km path selectedAnswerUuid order answer =
             pathToString (path ++ [ answer.uuid ])
 
         humanIdentifier =
-            identifierToChar order ++ ". "
+            CharIdentifier.fromInt order ++ ". "
 
         extraArgs =
             if cfg.features.readonly then
@@ -3138,11 +3163,6 @@ viewRemoveItemModal appState model =
 pathToString : List String -> String
 pathToString =
     String.join "."
-
-
-identifierToChar : Int -> String
-identifierToChar =
-    (+) 97 >> Char.fromCode >> String.fromChar
 
 
 createReply : AppState -> ReplyValue -> Reply
