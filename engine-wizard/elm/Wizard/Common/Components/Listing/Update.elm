@@ -45,7 +45,7 @@ update cfg appState msg model =
         updatePagination mbFilterId pqf pqs =
             let
                 loadCmd =
-                    Cmd.map cfg.wrapMsg <| cfg.getRequest pqf pqs appState (GetItemsComplete False pqs)
+                    Cmd.map cfg.wrapMsg <| cfg.getRequest pqf pqs appState (GetItemsComplete False pqs pqf)
 
                 replaceUrlCmd =
                     Navigation.replaceUrl appState.key (Routing.toUrl appState (cfg.toRoute pqf pqs))
@@ -87,18 +87,18 @@ update cfg appState msg model =
 
         Reload ->
             ( { model | pagination = Loading, items = [] }
-            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString appState (GetItemsComplete False model.paginationQueryString)
+            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString appState (GetItemsComplete False model.paginationQueryString model.filters)
             )
 
         ReloadBackground ->
             ( model
-            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString appState (GetItemsComplete True model.paginationQueryString)
+            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString appState (GetItemsComplete True model.paginationQueryString model.filters)
             )
 
-        GetItemsComplete useOriginalState paginationQueryString result ->
+        GetItemsComplete useOriginalState paginationQueryString paginationQueryFilters result ->
             case result of
                 Ok pagination ->
-                    if model.paginationQueryString == paginationQueryString then
+                    if model.paginationQueryString == paginationQueryString && model.filters == paginationQueryFilters then
                         ( setPagination useOriginalState pagination model, Cmd.none )
 
                     else
