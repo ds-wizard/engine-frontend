@@ -8,6 +8,10 @@
     height: 1rem;
     background-size: contain;
     margin-bottom: -2px;
+
+    .badge & {
+        height: 0.65rem;
+    }
 }
 
 
