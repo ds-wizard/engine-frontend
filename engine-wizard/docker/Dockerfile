@@ -4,7 +4,7 @@ RUN apk --purge del curl
 
 # Install dart-sass
 RUN apk add --update npm
-RUN npm install -g sass@1.64.2
+RUN npm install -g sass@1.65.1
 
 # Dependencies needed to rebuild styles
 COPY node_modules/bootstrap src/~bootstrap
