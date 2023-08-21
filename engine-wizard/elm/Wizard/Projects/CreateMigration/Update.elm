@@ -230,7 +230,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         cfg =
             { wrapMsg = wrapMsg << PackageTypeHintInputMsg
-            , getTypeHints = PackagesApi.getPackagesSuggestions
+            , getTypeHints = PackagesApi.getPackagesSuggestions Nothing
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = wrapMsg << SelectPackage
             , clearReply = Nothing

@@ -86,6 +86,7 @@ listingTitle appState package =
         , Badge.light
             (tooltip <| gettext "Latest version" appState.locale)
             [ text <| Version.toString package.version ]
+        , listingTitleNonEditableBadge appState package
         , listingTitleDeprecatedBadge appState package
         , listingTitleOutdatedBadge appState package
         ]
@@ -111,6 +112,15 @@ listingTitleDeprecatedBadge : AppState -> Package -> Html Msg
 listingTitleDeprecatedBadge appState package =
     if package.phase == PackagePhase.Deprecated then
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
+
+    else
+        emptyNode
+
+
+listingTitleNonEditableBadge : AppState -> Package -> Html Msg
+listingTitleNonEditableBadge appState package =
+    if package.nonEditable then
+        Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
     else
         emptyNode

@@ -19,6 +19,7 @@ module Shared.Api.Packages exposing
 import File exposing (File)
 import Http
 import Json.Encode as E
+import Maybe.Extra as Maybe
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
 import Shared.Data.Package as Package exposing (Package)
@@ -28,6 +29,7 @@ import Shared.Data.PackageSuggestion as PackageSuggestion exposing (PackageSugge
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 
 
@@ -57,11 +59,15 @@ getOutdatedPackages =
     jwtGet url (Pagination.decoder "packages" Package.decoder)
 
 
-getPackagesSuggestions : PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination PackageSuggestion) msg -> Cmd msg
-getPackagesSuggestions qs =
+getPackagesSuggestions : Maybe Bool -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination PackageSuggestion) msg -> Cmd msg
+getPackagesSuggestions nonEditable qs =
     let
         queryString =
-            PaginationQueryString.toApiUrlWith [ ( "phase", PackagePhase.toString PackagePhase.Released ) ] qs
+            PaginationQueryString.toApiUrlWith
+                [ ( "phase", PackagePhase.toString PackagePhase.Released )
+                , ( "nonEditable", Maybe.unwrap "" boolToString nonEditable )
+                ]
+                qs
 
         url =
             "/packages/suggestions" ++ queryString

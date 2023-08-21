@@ -76,6 +76,16 @@ readme appState template =
         containsNewerVersions =
             not <| DocumentTemplateDetail.isLatestVersion template
 
+        nonEditableInfo =
+            if template.nonEditable then
+                div [ class "alert alert-info" ]
+                    [ faSet "_global.info" appState
+                    , text (gettext "This is a non-editable document template, i.e., it cannot be edited, or exported." appState.locale)
+                    ]
+
+            else
+                emptyNode
+
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
@@ -87,7 +97,8 @@ readme appState template =
                 newVersionInRegistryWarning appState template
     in
     DetailPage.content
-        [ warning
+        [ nonEditableInfo
+        , warning
         , unsupportedMetamodelVersionWarning appState template
         , Markdown.toHtml [ DetailPage.contentInnerClass ] template.readme
         ]

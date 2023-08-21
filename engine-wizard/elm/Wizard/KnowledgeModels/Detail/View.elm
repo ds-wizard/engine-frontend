@@ -53,6 +53,13 @@ header appState model package =
             else
                 emptyNode
 
+        nonEditableBadge =
+            if package.nonEditable then
+                Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
+
+            else
+                emptyNode
+
         dropdownActions =
             KnowledgeModelActionsDropdown.dropdown appState
                 { dropdownState = model.dropdownState
@@ -65,7 +72,7 @@ header appState model package =
                 }
                 package
     in
-    DetailPage.header (span [] [ text package.name, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.header (span [] [ text package.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> PackageDetail -> Html msg
@@ -73,6 +80,16 @@ readme appState package =
     let
         containsNewerVersions =
             (List.length <| List.filter (Version.greaterThan package.version) package.versions) > 0
+
+        nonEditableInfo =
+            if package.nonEditable then
+                div [ class "alert alert-info" ]
+                    [ faSet "_global.info" appState
+                    , text (gettext "This is a non-editable knowledge model, i.e., it cannot be edited, forked, or exported." appState.locale)
+                    ]
+
+            else
+                emptyNode
 
         warning =
             if containsNewerVersions then
@@ -83,7 +100,8 @@ readme appState package =
                 newVersionInRegistryWarning appState package
     in
     DetailPage.content
-        [ warning
+        [ nonEditableInfo
+        , warning
         , Markdown.toHtml [ DetailPage.contentInnerClass ] package.readme
         ]
 
