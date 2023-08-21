@@ -26,6 +26,7 @@ type alias Package =
     , state : PackageState
     , phase : PackagePhase
     , createdAt : Time.Posix
+    , nonEditable : Bool
     }
 
 
@@ -43,6 +44,7 @@ decoder =
         |> D.required "state" PackageState.decoder
         |> D.required "phase" PackagePhase.decoder
         |> D.required "createdAt" D.datetime
+        |> D.required "nonEditable" D.bool
 
 
 dummy : Package
@@ -58,4 +60,5 @@ dummy =
     , state = PackageState.unknown
     , phase = PackagePhase.Released
     , createdAt = Time.millisToPosix 0
+    , nonEditable = True
     }

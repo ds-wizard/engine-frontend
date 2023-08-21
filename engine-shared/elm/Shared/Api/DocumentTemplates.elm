@@ -15,6 +15,7 @@ module Shared.Api.DocumentTemplates exposing
 
 import File exposing (File)
 import Json.Decode as D
+import Maybe.Extra as Maybe
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetchPut, jwtGet, jwtOrHttpGet, jwtPostEmpty, jwtPostFile)
 import Shared.Data.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
@@ -24,6 +25,7 @@ import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion expo
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Utils exposing (boolToString)
 
 
 getTemplates : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplate) msg -> Cmd msg
@@ -78,20 +80,21 @@ getTemplatesFor pkgId qs =
     jwtGet url (Pagination.decoder "documentTemplates" DocumentTemplateSuggestion.decoder)
 
 
-getTemplatesSuggestions : Bool -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplateSuggestion) msg -> Cmd msg
-getTemplatesSuggestions includeUnsupportedMetamodelVersion qs =
+getTemplatesSuggestions : Maybe Bool -> Bool -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination DocumentTemplateSuggestion) msg -> Cmd msg
+getTemplatesSuggestions nonEditable includeUnsupportedMetamodelVersion qs =
     let
-        phaseParam =
-            ( "phase", DocumentTemplatePhase.toString DocumentTemplatePhase.Released )
-
-        params =
+        includeUnsupportedMetamodelVersionValue =
             if includeUnsupportedMetamodelVersion then
-                [ ( "includeUnsupportedMetamodelVersion", "true" )
-                , phaseParam
-                ]
+                "true"
 
             else
-                [ phaseParam ]
+                ""
+
+        params =
+            [ ( "phase", DocumentTemplatePhase.toString DocumentTemplatePhase.Released )
+            , ( "includeUnsupportedMetamodelVersion", includeUnsupportedMetamodelVersionValue )
+            , ( "nonEditable", Maybe.unwrap "" boolToString nonEditable )
+            ]
 
         queryString =
             PaginationQueryString.toApiUrlWith params qs

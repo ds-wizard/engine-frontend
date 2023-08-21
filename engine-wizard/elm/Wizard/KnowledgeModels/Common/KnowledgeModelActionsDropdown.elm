@@ -21,6 +21,7 @@ type alias PackageLike a =
     { a
         | id : String
         , phase : PackagePhase
+        , nonEditable : Bool
     }
 
 
@@ -75,7 +76,7 @@ actions appState cfg package =
                 }
 
         exportActionVisible =
-            Feature.knowledgeModelsExport appState
+            Feature.knowledgeModelsExport appState && not package.nonEditable
 
         createEditorAction =
             ListingDropdown.dropdownAction
@@ -87,7 +88,7 @@ actions appState cfg package =
                 }
 
         createEditorActionVisible =
-            Feature.knowledgeModelEditorsCreate appState
+            Feature.knowledgeModelEditorsCreate appState && not package.nonEditable
 
         forkAction =
             ListingDropdown.dropdownAction
@@ -99,7 +100,7 @@ actions appState cfg package =
                 }
 
         forkActionVisible =
-            Feature.knowledgeModelEditorsCreate appState
+            Feature.knowledgeModelEditorsCreate appState && not package.nonEditable
 
         createProjectAction =
             ListingDropdown.dropdownAction

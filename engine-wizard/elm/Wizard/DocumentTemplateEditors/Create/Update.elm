@@ -146,7 +146,7 @@ handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 
         cfg =
             { wrapMsg = wrapMsg << DocumentTemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesSuggestions True
+            , getTypeHints = DocumentTemplatesApi.getTemplatesSuggestions (Just False) True
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""

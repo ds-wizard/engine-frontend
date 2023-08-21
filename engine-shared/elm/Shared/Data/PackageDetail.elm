@@ -39,6 +39,7 @@ type alias PackageDetail =
     , remoteLatestVersion : Maybe Version
     , state : PackageState
     , phase : PackagePhase
+    , nonEditable : Bool
     }
 
 
@@ -62,6 +63,7 @@ decoder =
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "state" PackageState.decoder
         |> D.required "phase" PackagePhase.decoder
+        |> D.required "nonEditable" D.bool
 
 
 encode : { a | phase : PackagePhase } -> E.Value
@@ -91,6 +93,7 @@ toPackage package =
     , state = package.state
     , phase = package.phase
     , createdAt = Time.millisToPosix 0
+    , nonEditable = True
     }
 
 
