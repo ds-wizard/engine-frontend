@@ -58,7 +58,12 @@ getValue filterId pqf =
 
 isFilterActive : String -> PaginationQueryFilters -> Bool
 isFilterActive filterId pqf =
-    Dict.member filterId pqf.values
+    case Dict.get filterId pqf.values of
+        Just value ->
+            not (String.isEmpty value)
+
+        Nothing ->
+            False
 
 
 insertOp : String -> FilterOperator -> PaginationQueryFilters -> PaginationQueryFilters
