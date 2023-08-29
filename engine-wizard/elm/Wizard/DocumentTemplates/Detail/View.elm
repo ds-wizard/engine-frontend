@@ -55,6 +55,13 @@ header appState model template =
             else
                 emptyNode
 
+        nonEditableBadge =
+            if template.nonEditable then
+                Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
+
+            else
+                emptyNode
+
         dropdownActions =
             DocumentTemplateActionsDropdown.dropdown appState
                 { dropdownState = model.dropdownState
@@ -67,7 +74,7 @@ header appState model template =
                 }
                 template
     in
-    DetailPage.header (span [] [ text template.name, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.header (span [] [ text template.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> DocumentTemplateDetail -> Html msg
