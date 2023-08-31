@@ -96,6 +96,7 @@ module Wizard.Routes exposing
     , usersEditApiKeys
     , usersEditCurrent
     , usersEditPassword
+    , usersEditSubmissionSettings
     , usersIndex
     , usersIndexWithFilters
     )
@@ -792,6 +793,11 @@ usersEditApiKeys =
 usersEditActiveSessions : UuidOrCurrent -> Route
 usersEditActiveSessions =
     UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ActiveSessions
+
+
+usersEditSubmissionSettings : UuidOrCurrent -> Route
+usersEditSubmissionSettings =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.SubmissionSettings
 
 
 usersEditCurrent : Route

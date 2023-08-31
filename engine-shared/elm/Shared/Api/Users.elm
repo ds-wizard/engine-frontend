@@ -1,18 +1,21 @@
 module Shared.Api.Users exposing
     ( deleteUser
     , getCurrentUser
+    , getCurrentUserSubmissionProps
     , getUser
     , getUsers
     , getUsersSuggestions
     , getUsersSuggestionsWithOptions
     , postUser
     , postUserPublic
+    , putCurrentUserSubmissionProps
     , putUser
     , putUserActivation
     , putUserPassword
     , putUserPasswordPublic
     )
 
+import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, httpPost, httpPut, jwtDelete, jwtFetchPut, jwtGet, jwtPost, jwtPut)
@@ -20,6 +23,7 @@ import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.SubmissionProps as SubmissionProps exposing (SubmissionProps)
 import Shared.Data.User as User exposing (User)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
@@ -79,6 +83,11 @@ getCurrentUser =
     jwtGet "/users/current" User.decoder
 
 
+getCurrentUserSubmissionProps : AbstractAppState a -> ToMsg (List SubmissionProps) msg -> Cmd msg
+getCurrentUserSubmissionProps =
+    jwtGet "/users/current/submission-props" (D.list SubmissionProps.decoder)
+
+
 postUser : E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 postUser =
     jwtPost "/users"
@@ -111,6 +120,11 @@ putUserActivation uuid hash =
             E.object [ ( "active", E.bool True ) ]
     in
     httpPut ("/users/" ++ uuid ++ "/state?hash=" ++ hash) body
+
+
+putCurrentUserSubmissionProps : E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putCurrentUserSubmissionProps =
+    jwtPut "/users/current/submission-props"
 
 
 deleteUser : String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
