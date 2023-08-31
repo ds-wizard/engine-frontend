@@ -15,6 +15,7 @@ import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
+import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
 import Wizard.Users.Edit.Models exposing (Model)
 import Wizard.Users.Edit.Msgs exposing (Msg(..))
 import Wizard.Users.Edit.UserEditRoutes as UserEditRoutes exposing (UserEditRoute)
@@ -40,6 +41,10 @@ view appState subroute model =
                 UserEditRoutes.ActiveSessions ->
                     Html.map ActiveSessionsMsg <|
                         ActiveSessions.view appState model.activeSessionsModel
+
+                UserEditRoutes.SubmissionSettings ->
+                    Html.map SubmissionSettingsMsg <|
+                        SubmissionSettings.view appState model.submissionSettingsModel
     in
     div [ class "Users__Edit col-full" ]
         [ div [ class "Users__Edit__navigation" ] [ navigation appState subroute model ]
@@ -90,6 +95,16 @@ navigation appState subroute model =
                 , dataCy "user_nav_active-sessions"
                 ]
                 [ text (gettext "Active Sessions" appState.locale)
+                ]
+            )
+        , Html.viewIf isCurrent
+            (linkTo appState
+                (Routes.usersEditSubmissionSettings model.uuidOrCurrent)
+                [ class "nav-link"
+                , classList [ ( "active", subroute == UserEditRoutes.SubmissionSettings ) ]
+                , dataCy "user_nav_submission-settings"
+                ]
+                [ text (gettext "Submission Settings" appState.locale)
                 ]
             )
         ]

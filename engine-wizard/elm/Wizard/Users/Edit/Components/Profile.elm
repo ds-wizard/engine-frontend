@@ -10,9 +10,8 @@ module Wizard.Users.Edit.Components.Profile exposing
 
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
-import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, div, h4, img, p, strong, text)
+import Html exposing (Html, div, img, strong, text)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onSubmit)
 import Shared.Api.Users as UsersApi
@@ -25,7 +24,6 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (dispatch)
-import String.Format as String
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
@@ -206,59 +204,6 @@ userFormView appState user form isCurrent =
 
             else
                 FormGroup.toggle form "active" <| gettext "Active" appState.locale
-
-        submissionPropsIndexes =
-            Form.getListIndexes "submissionProps" form
-
-        submissionSettings =
-            if isCurrent && appState.config.submission.enabled && List.length submissionPropsIndexes > 0 then
-                div [ class "mt-5" ]
-                    (h4 [] [ text (gettext "Submission Settings" appState.locale) ]
-                        :: List.map submissionSettingsSection submissionPropsIndexes
-                    )
-
-            else
-                emptyNode
-
-        submissionSettingsSection i =
-            let
-                field name =
-                    "submissionProps." ++ String.fromInt i ++ "." ++ name
-
-                sectionName =
-                    Maybe.withDefault "" (Form.getFieldAsString (field "name") form).value
-
-                valueIndexes =
-                    Form.getListIndexes (field "values") form
-
-                sectionContent =
-                    if List.length valueIndexes > 0 then
-                        div []
-                            (List.map (submissionSettingsSectionProp (field "values")) valueIndexes)
-
-                    else
-                        p [ class "text-muted" ] [ text <| String.format (gettext "There is no settings for %s." appState.locale) [ sectionName ] ]
-            in
-            div [ class "mb-4" ]
-                [ strong [] [ text sectionName ]
-                , sectionContent
-                ]
-
-        submissionSettingsSectionProp prefix i =
-            let
-                field name =
-                    prefix ++ "." ++ String.fromInt i ++ "." ++ name
-
-                valueField =
-                    Form.getFieldAsString (field "value") form
-
-                propName =
-                    Maybe.withDefault "" (Form.getFieldAsString (field "key") form).value
-            in
-            div [ class "row mb-1" ]
-                [ div [ class "col-4 d-flex align-items-center" ] [ text propName ]
-                , div [ class "col-8" ] [ Input.textInput valueField [ class "form-control" ] ]
-                ]
     in
     div []
         [ FormGroup.input appState form "email" <| gettext "Email" appState.locale
@@ -268,5 +213,4 @@ userFormView appState user form isCurrent =
         , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| gettext "Affiliation" appState.locale
         , roleSelect
         , activeToggle
-        , submissionSettings
         ]

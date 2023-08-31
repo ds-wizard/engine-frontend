@@ -1,6 +1,5 @@
 module Shared.Data.User exposing
-    ( SubmissionProps
-    , User
+    ( User
     , compare
     , decoder
     , defaultGravatar
@@ -10,7 +9,6 @@ module Shared.Data.User exposing
     , toUserInfo
     )
 
-import Dict exposing (Dict)
 import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -29,14 +27,6 @@ type alias User =
     , permissions : List String
     , active : Bool
     , sources : List String
-    , submissionProps : List SubmissionProps
-    }
-
-
-type alias SubmissionProps =
-    { id : String
-    , name : String
-    , values : Dict String String
     }
 
 
@@ -53,15 +43,6 @@ decoder =
         |> D.required "permissions" (D.list D.string)
         |> D.required "active" D.bool
         |> D.required "sources" (D.list D.string)
-        |> D.optional "submissionProps" (D.list decodeSubmissionProps) []
-
-
-decodeSubmissionProps : Decoder SubmissionProps
-decodeSubmissionProps =
-    D.succeed SubmissionProps
-        |> D.required "id" D.string
-        |> D.required "name" D.string
-        |> D.required "values" (D.dict D.string)
 
 
 compare : { a | firstName : String, lastName : String } -> { a | firstName : String, lastName : String } -> Order
