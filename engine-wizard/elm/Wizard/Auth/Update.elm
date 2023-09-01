@@ -87,7 +87,7 @@ getCurrentUserCompleted model mbOriginalUrl result =
 
 logout : Model -> ( Model, Cmd Msg )
 logout =
-    logoutTo Routes.publicHome
+    logoutTo Routes.publicLogoutSuccessful
 
 
 logoutTo : Routes.Route -> Model -> ( Model, Cmd Msg )

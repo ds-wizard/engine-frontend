@@ -7,6 +7,7 @@ import Wizard.Public.BookReference.View
 import Wizard.Public.ForgottenPassword.View
 import Wizard.Public.ForgottenPasswordConfirmation.View
 import Wizard.Public.Login.View
+import Wizard.Public.LogoutSuccessful.View
 import Wizard.Public.Models exposing (Model)
 import Wizard.Public.Msgs exposing (Msg(..))
 import Wizard.Public.Routes exposing (Route(..))
@@ -36,6 +37,9 @@ view route appState model =
         LoginRoute _ ->
             Html.map LoginMsg <|
                 Wizard.Public.Login.View.view appState model.loginModel
+
+        LogoutSuccessful ->
+            Wizard.Public.LogoutSuccessful.View.view appState
 
         SignupRoute ->
             Html.map SignupMsg <|
