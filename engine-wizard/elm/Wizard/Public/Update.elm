@@ -26,6 +26,9 @@ fetchData route appState =
             Cmd.map BookReferenceMsg <|
                 Wizard.Public.BookReference.Update.fetchData uuid appState
 
+        LoginRoute _ ->
+            Wizard.Public.Login.Update.fetchData appState
+
         LogoutSuccessful ->
             Wizard.Public.LogoutSuccessful.Update.fetchData appState
 

@@ -1,10 +1,13 @@
-module Wizard.Public.Login.Update exposing (update)
+module Wizard.Public.Login.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Api.Auth as AuthApi
 import Shared.Api.Tokens as TokensApi
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Token as Token
 import Shared.Data.TokenResponse as TokenResponse exposing (TokenResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -15,6 +18,20 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
+
+
+fetchData : AppState -> Cmd msg
+fetchData appState =
+    if Admin.isEnabled appState.config.admin then
+        case List.head appState.config.authentication.external.services of
+            Just service ->
+                Navigation.load (AuthApi.authRedirectUrl service appState)
+
+            Nothing ->
+                Cmd.none
+
+    else
+        Cmd.none
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
