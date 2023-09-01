@@ -9,6 +9,7 @@ import Browser exposing (Document)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, li, nav, text, ul)
 import Html.Attributes exposing (class, classList)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Html exposing (emptyNode)
 import Shared.Undraw as Undraw
@@ -99,7 +100,7 @@ publicHeader fluidFull model =
             else
                 let
                     signUpLink =
-                        if model.appState.config.authentication.internal.registration.enabled then
+                        if model.appState.config.authentication.internal.registration.enabled && not (Admin.isEnabled model.appState.config.admin) then
                             li [ class "nav-item" ]
                                 [ linkTo model.appState
                                     Routes.publicSignup
