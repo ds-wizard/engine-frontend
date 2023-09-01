@@ -84,6 +84,7 @@ module Wizard.Routes exposing
     , publicForgottenPassword
     , publicHome
     , publicLogin
+    , publicLogoutSuccessful
     , publicSignup
     , settingsAuthentication
     , settingsDefault
@@ -709,6 +710,11 @@ publicLogin originalUrl =
 publicSignup : Route
 publicSignup =
     PublicRoute Wizard.Public.Routes.SignupRoute
+
+
+publicLogoutSuccessful : Route
+publicLogoutSuccessful =
+    PublicRoute Wizard.Public.Routes.LogoutSuccessful
 
 
 

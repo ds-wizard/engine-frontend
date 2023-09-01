@@ -7,6 +7,7 @@ import Wizard.Public.BookReference.Update
 import Wizard.Public.ForgottenPassword.Update
 import Wizard.Public.ForgottenPasswordConfirmation.Update
 import Wizard.Public.Login.Update
+import Wizard.Public.LogoutSuccessful.Update
 import Wizard.Public.Models exposing (Model)
 import Wizard.Public.Msgs exposing (Msg(..))
 import Wizard.Public.Routes exposing (Route(..))
@@ -24,6 +25,9 @@ fetchData route appState =
         BookReferenceRoute uuid ->
             Cmd.map BookReferenceMsg <|
                 Wizard.Public.BookReference.Update.fetchData uuid appState
+
+        LogoutSuccessful ->
+            Wizard.Public.LogoutSuccessful.Update.fetchData appState
 
         SignupConfirmationRoute userId hash ->
             Cmd.map SignupConfirmationMsg <|

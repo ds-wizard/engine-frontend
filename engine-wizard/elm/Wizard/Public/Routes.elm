@@ -7,5 +7,6 @@ type Route
     | ForgottenPasswordRoute
     | ForgottenPasswordConfirmationRoute String String
     | LoginRoute (Maybe String)
+    | LogoutSuccessful
     | SignupRoute
     | SignupConfirmationRoute String String
