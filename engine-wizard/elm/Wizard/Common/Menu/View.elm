@@ -12,6 +12,7 @@ import List.Extra as List
 import Shared.Auth.Role as Role
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
@@ -191,22 +192,28 @@ menuItems appState =
         , isActive = Routes.isSettingsSubroute
         , isVisible = Feature.settings
         , items =
-            [ { title = gettext "Settings" appState.locale
-              , id = "system-settings"
-              , route = Routes.settingsDefault
-              , isActive = Routes.isSettingsRoute
-              }
-            , { title = gettext "Users" appState.locale
-              , id = "users"
-              , route = Routes.usersIndex
-              , isActive = Routes.isUsersIndex
-              }
-            , { title = gettext "Locales" appState.locale
-              , id = "system-locales"
-              , route = Routes.localesIndex
-              , isActive = Routes.isLocalesRoute
-              }
-            ]
+            { title = gettext "Settings" appState.locale
+            , id = "system-settings"
+            , route = Routes.settingsDefault
+            , isActive = Routes.isSettingsRoute
+            }
+                :: (if Admin.isEnabled appState.config.admin then
+                        []
+
+                    else
+                        [ { title = gettext "Users" appState.locale
+                          , id = "users"
+                          , route = Routes.usersIndex
+                          , isActive = Routes.isUsersIndex
+                          }
+                        ]
+                   )
+                ++ [ { title = gettext "Locales" appState.locale
+                     , id = "system-locales"
+                     , route = Routes.localesIndex
+                     , isActive = Routes.isLocalesRoute
+                     }
+                   ]
         }
     ]
 

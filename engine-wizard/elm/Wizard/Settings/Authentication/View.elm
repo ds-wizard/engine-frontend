@@ -7,6 +7,7 @@ import Html exposing (Html, a, div, h3, hr, label, strong, text)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
 import Shared.Auth.Role as Role
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
@@ -46,36 +47,54 @@ viewProps openIDPrefabs =
 formView : List EditableOpenIDServiceConfig -> AppState -> Form FormError AuthenticationConfigForm -> Html Msg
 formView openIDPrefabs appState form =
     let
-        twoFactorAuthEnabled =
-            Maybe.withDefault False (Form.getFieldAsBool "twoFactorAuthEnabled" form).value
-
-        twoFactorInputs =
-            if twoFactorAuthEnabled then
-                let
-                    formWrap =
-                        Html.map (GenericMsg << GenericMsgs.FormMsg)
-                in
-                div [ class "nested-group" ]
-                    [ formWrap <| FormGroup.input appState form "twoFactorAuthCodeLength" (gettext "Code Length" appState.locale)
-                    , formWrap <| FormGroup.input appState form "twoFactorAuthExpiration" (gettext "Expiration" appState.locale)
-                    , FormExtra.mdAfter (gettext "Expiration time of the authentication code in **seconds**." appState.locale)
-                    ]
+        internalAuthentication =
+            if Admin.isEnabled appState.config.admin then
+                []
 
             else
-                emptyNode
+                let
+                    twoFactorAuthEnabled =
+                        Maybe.withDefault False (Form.getFieldAsBool "twoFactorAuthEnabled" form).value
+
+                    twoFactorInputs =
+                        if twoFactorAuthEnabled then
+                            let
+                                formWrap =
+                                    Html.map (GenericMsg << GenericMsgs.FormMsg)
+                            in
+                            div [ class "nested-group" ]
+                                [ formWrap <| FormGroup.input appState form "twoFactorAuthCodeLength" (gettext "Code Length" appState.locale)
+                                , formWrap <| FormGroup.input appState form "twoFactorAuthExpiration" (gettext "Expiration" appState.locale)
+                                , FormExtra.mdAfter (gettext "Expiration time of the authentication code in **seconds**." appState.locale)
+                                ]
+
+                        else
+                            emptyNode
+                in
+                [ h3 [] [ text (gettext "Internal" appState.locale) ]
+                , mapFormMsg <| FormGroup.toggle form "registrationEnabled" (gettext "Registration" appState.locale)
+                , FormExtra.mdAfter (gettext "If enabled, users can create new internal accounts directly in the instance." appState.locale)
+                , mapFormMsg <| FormGroup.toggle form "twoFactorAuthEnabled" (gettext "Two-Factor Authentication" appState.locale)
+                , FormExtra.mdAfter (gettext "If enabled, users first enter a username and password at login, and then they receive a one-time code to confirm the login on their email." appState.locale)
+                , twoFactorInputs
+                ]
+
+        externalAuthentication =
+            if Admin.isEnabled appState.config.admin then
+                []
+
+            else
+                [ h3 [] [ text (gettext "External" appState.locale) ]
+                , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (gettext "OpenID Services" appState.locale) (gettext "Add service" appState.locale)
+                ]
     in
     div [ class "Authentication" ]
-        [ mapFormMsg <| FormGroup.select appState (Role.options appState) form "defaultRole" (gettext "Default role" appState.locale)
-        , FormExtra.mdAfter (gettext "Define the role that is assigned to new users." appState.locale)
-        , h3 [] [ text (gettext "Internal" appState.locale) ]
-        , mapFormMsg <| FormGroup.toggle form "registrationEnabled" (gettext "Registration" appState.locale)
-        , FormExtra.mdAfter (gettext "If enabled, users can create new internal accounts directly in the instance." appState.locale)
-        , mapFormMsg <| FormGroup.toggle form "twoFactorAuthEnabled" (gettext "Two-Factor Authentication" appState.locale)
-        , FormExtra.mdAfter (gettext "If enabled, users first enter a username and password at login, and then they receive a one-time code to confirm the login on their email." appState.locale)
-        , twoFactorInputs
-        , h3 [] [ text (gettext "External" appState.locale) ]
-        , FormGroup.listWithCustomMsg appState formMsg (serviceFormView appState openIDPrefabs) form "services" (gettext "OpenID Services" appState.locale) (gettext "Add service" appState.locale)
-        ]
+        ([ mapFormMsg <| FormGroup.select appState (Role.options appState) form "defaultRole" (gettext "Default role" appState.locale)
+         , FormExtra.mdAfter (gettext "Define the role that is assigned to new users." appState.locale)
+         ]
+            ++ internalAuthentication
+            ++ externalAuthentication
+        )
 
 
 serviceFormView : AppState -> List EditableOpenIDServiceConfig -> Form FormError AuthenticationConfigForm -> Int -> Html Msg

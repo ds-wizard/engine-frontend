@@ -11,17 +11,19 @@ module Wizard.Users.Edit.Components.Profile exposing
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
 import Gettext exposing (gettext)
-import Html exposing (Html, div, img, strong, text)
-import Html.Attributes exposing (class, src)
+import Html exposing (Html, a, div, img, strong, text)
+import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
+import Maybe.Extra as Maybe
 import Shared.Api.Users as UsersApi
 import Shared.Auth.Role as Role
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.User as User exposing (User)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
+import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
@@ -166,15 +168,19 @@ view appState model =
 
 userView : AppState -> Model -> User -> Html Msg
 userView appState model user =
+    let
+        content =
+            if Admin.isEnabled appState.config.admin then
+                readOnlyView appState user
+
+            else
+                Html.map EditFormMsg <|
+                    userFormView appState model user (UuidOrCurrent.isCurrent model.uuidOrCurrent)
+    in
     div [ wideDetailClass "" ]
         [ Page.header (gettext "Profile" appState.locale) []
         , div [ class "row" ]
-            [ Html.form [ onSubmit (EditFormMsg Form.Submit), class "col-8" ]
-                [ FormResult.view appState model.savingUser
-                , Html.map EditFormMsg <| userFormView appState user model.userForm (UuidOrCurrent.isCurrent model.uuidOrCurrent)
-                , div [ class "mt-5" ]
-                    [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
-                ]
+            [ content
             , div [ class "col-4" ]
                 [ div [ class "col-border-left" ]
                     [ strong [] [ text (gettext "User Image" appState.locale) ]
@@ -188,29 +194,61 @@ userView appState model user =
         ]
 
 
-userFormView : AppState -> User -> Form FormError UserEditForm -> Bool -> Html Form.Msg
-userFormView appState user form isCurrent =
+userFormView : AppState -> Model -> User -> Bool -> Html Form.Msg
+userFormView appState model user isCurrent =
     let
         roleSelect =
             if isCurrent then
                 emptyNode
 
             else
-                FormGroup.select appState (Role.options appState) form "role" <| gettext "Role" appState.locale
+                FormGroup.select appState (Role.options appState) model.userForm "role" <| gettext "Role" appState.locale
 
         activeToggle =
             if isCurrent then
                 emptyNode
 
             else
-                FormGroup.toggle form "active" <| gettext "Active" appState.locale
+                FormGroup.toggle model.userForm "active" <| gettext "Active" appState.locale
     in
-    div []
-        [ FormGroup.input appState form "email" <| gettext "Email" appState.locale
+    Html.form [ onSubmit Form.Submit, class "col-8" ]
+        [ FormResult.view appState model.savingUser
+        , FormGroup.input appState model.userForm "email" <| gettext "Email" appState.locale
         , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
-        , FormGroup.input appState form "firstName" <| gettext "First name" appState.locale
-        , FormGroup.input appState form "lastName" <| gettext "Last name" appState.locale
-        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState form "affiliation" <| gettext "Affiliation" appState.locale
+        , FormGroup.input appState model.userForm "firstName" <| gettext "First name" appState.locale
+        , FormGroup.input appState model.userForm "lastName" <| gettext "Last name" appState.locale
+        , FormGroup.inputWithTypehints appState.config.organization.affiliations appState model.userForm "affiliation" <| gettext "Affiliation" appState.locale
         , roleSelect
         , activeToggle
+        , div [ class "mt-5" ]
+            [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+        ]
+
+
+readOnlyView : AppState -> User -> Html msg
+readOnlyView appState user =
+    let
+        editProfileUrl base =
+            base ++ "/users/edit/current"
+
+        readOnlyInfo =
+            div [ class "alert alert-info" ]
+                [ faSet "_global.info" appState
+                , text (gettext "Your profile is managed elsewhere." appState.locale)
+                , a
+                    [ class "btn btn-primary ms-2"
+                    , href (Maybe.unwrap "" editProfileUrl (Admin.getClientUrl appState.config.admin))
+                    ]
+                    [ text (gettext "Edit profile" appState.locale)
+                    , fa "fas fa-external-link-alt ms-2"
+                    ]
+                ]
+    in
+    div [ class "col-8" ]
+        [ readOnlyInfo
+        , FormGroup.readOnlyInput user.email (gettext "Email" appState.locale)
+        , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
+        , FormGroup.readOnlyInput user.firstName (gettext "First name" appState.locale)
+        , FormGroup.readOnlyInput user.lastName (gettext "Last name" appState.locale)
+        , FormGroup.readOnlyInput (Maybe.withDefault "" user.affiliation) (gettext "Affiliation" appState.locale)
         ]
