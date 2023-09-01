@@ -45,7 +45,7 @@ matchers appState =
                 ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Registry.Routing.parsers appState Routes.RegistryRoute
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
-                ++ Wizard.Users.Routing.parsers Routes.UsersRoute
+                ++ Wizard.Users.Routing.parsers appState Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
     in

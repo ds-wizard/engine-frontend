@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, classList)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Common.UuidOrCurrent as UuidOrCurrent
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -69,14 +70,16 @@ navigation appState subroute model =
             ]
             [ text (gettext "Profile" appState.locale)
             ]
-        , linkTo appState
-            (Routes.usersEditPassword model.uuidOrCurrent)
-            [ class "nav-link"
-            , classList [ ( "active", subroute == UserEditRoutes.Password ) ]
-            , dataCy "user_nav_password"
-            ]
-            [ text (gettext "Password" appState.locale)
-            ]
+        , Html.viewIf (not (Admin.isEnabled appState.config.admin))
+            (linkTo appState
+                (Routes.usersEditPassword model.uuidOrCurrent)
+                [ class "nav-link"
+                , classList [ ( "active", subroute == UserEditRoutes.Password ) ]
+                , dataCy "user_nav_password"
+                ]
+                [ text (gettext "Password" appState.locale)
+                ]
+            )
         , Html.viewIf isCurrent
             (linkTo appState
                 (Routes.usersEditApiKeys model.uuidOrCurrent)
