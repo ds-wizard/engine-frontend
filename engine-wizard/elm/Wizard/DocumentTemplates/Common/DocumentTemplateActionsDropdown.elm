@@ -21,6 +21,7 @@ type alias DocumentTemplateLike a =
     { a
         | id : String
         , phase : DocumentTemplatePhase
+        , nonEditable : Bool
     }
 
 
@@ -63,7 +64,7 @@ actions appState cfg template =
                 }
 
         exportActionVisible =
-            Feature.documentTemplatesExport appState
+            Feature.documentTemplatesExport appState && not template.nonEditable
 
         createEditorAction =
             ListingDropdown.dropdownAction
@@ -75,7 +76,7 @@ actions appState cfg template =
                 }
 
         createEditorActionVisible =
-            Feature.documentTemplatesView appState
+            Feature.documentTemplatesView appState && not template.nonEditable
 
         setDeprecatedAction =
             ListingDropdown.dropdownAction

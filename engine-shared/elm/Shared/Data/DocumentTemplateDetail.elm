@@ -39,6 +39,7 @@ type alias DocumentTemplateDetail =
     , usablePackages : List DocumentTemplatePackage
     , version : Version
     , versions : List Version
+    , nonEditable : Bool
     }
 
 
@@ -64,6 +65,7 @@ decoder =
         |> D.required "usablePackages" (D.list DocumentTemplatePackage.decoder)
         |> D.required "version" Version.decoder
         |> D.required "versions" (D.list Version.decoder)
+        |> D.required "nonEditable" D.bool
 
 
 encode : { a | phase : DocumentTemplatePhase } -> E.Value

@@ -55,6 +55,13 @@ header appState model template =
             else
                 emptyNode
 
+        nonEditableBadge =
+            if template.nonEditable then
+                Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
+
+            else
+                emptyNode
+
         dropdownActions =
             DocumentTemplateActionsDropdown.dropdown appState
                 { dropdownState = model.dropdownState
@@ -67,7 +74,7 @@ header appState model template =
                 }
                 template
     in
-    DetailPage.header (span [] [ text template.name, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.header (span [] [ text template.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> DocumentTemplateDetail -> Html msg
@@ -75,6 +82,16 @@ readme appState template =
     let
         containsNewerVersions =
             not <| DocumentTemplateDetail.isLatestVersion template
+
+        nonEditableInfo =
+            if template.nonEditable then
+                div [ class "alert alert-info" ]
+                    [ faSet "_global.info" appState
+                    , text (gettext "This is a non-editable document template, i.e., it cannot be edited, or exported." appState.locale)
+                    ]
+
+            else
+                emptyNode
 
         warning =
             if containsNewerVersions then
@@ -87,7 +104,8 @@ readme appState template =
                 newVersionInRegistryWarning appState template
     in
     DetailPage.content
-        [ warning
+        [ nonEditableInfo
+        , warning
         , unsupportedMetamodelVersionWarning appState template
         , Markdown.toHtml [ DetailPage.contentInnerClass ] template.readme
         ]

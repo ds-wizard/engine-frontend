@@ -86,9 +86,10 @@ listingTitle appState documentTemplate =
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString documentTemplate.version ]
-        , listingTitleOutdatedBadge appState documentTemplate
+        , listingTitleNonEditableBadge appState documentTemplate
         , listingTitleUnsupportedBadge appState documentTemplate
         , listingTitleDeprecatedBadge appState documentTemplate
+        , listingTitleOutdatedBadge appState documentTemplate
         ]
 
 
@@ -121,6 +122,15 @@ listingTitleDeprecatedBadge : AppState -> DocumentTemplate -> Html Msg
 listingTitleDeprecatedBadge appState documentTemplate =
     if documentTemplate.phase == DocumentTemplatePhase.Deprecated then
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
+
+    else
+        emptyNode
+
+
+listingTitleNonEditableBadge : AppState -> DocumentTemplate -> Html Msg
+listingTitleNonEditableBadge appState documentTemplate =
+    if documentTemplate.nonEditable then
+        Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
     else
         emptyNode

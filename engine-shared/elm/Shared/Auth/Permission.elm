@@ -23,7 +23,7 @@ import Shared.Auth.Session exposing (Session)
 
 hasPerm : Session -> String -> Bool
 hasPerm session perm =
-    List.any ((==) perm) (Maybe.unwrap [] .permissions session.user)
+    List.member perm (Maybe.unwrap [] .permissions session.user)
 
 
 apps : String

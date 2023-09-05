@@ -27,6 +27,7 @@ type alias DocumentTemplate =
     , state : DocumentTemplateState
     , templateId : String
     , version : Version
+    , nonEditable : Bool
     }
 
 
@@ -45,3 +46,4 @@ decoder =
         |> D.required "state" DocumentTemplateState.decoder
         |> D.required "templateId" D.string
         |> D.required "version" Version.decoder
+        |> D.required "nonEditable" D.bool

@@ -2590,12 +2590,27 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
             if isCollapsed then
                 []
 
+            else if List.isEmpty questions then
+                [ Flash.info appState (gettext "This item contains no questions." appState.locale) ]
+
             else
                 let
-                    newHumanIdentifiers =
-                        humanIdentifiers ++ [ CharIdentifier.fromInt index ]
+                    isDesirable =
+                        Question.isDesirable model.questionnaire.knowledgeModel.phaseUuids
+                            (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
+
+                    desirableQuestions =
+                        List.filter isDesirable questions
                 in
-                List.indexedMap (viewQuestion appState cfg ctx model itemPath newHumanIdentifiers) questions
+                if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
+                    [ Flash.info appState (gettext "There are no questions in this phase." appState.locale) ]
+
+                else
+                    let
+                        newHumanIdentifiers =
+                            humanIdentifiers ++ [ CharIdentifier.fromInt index ]
+                    in
+                    List.indexedMap (viewQuestion appState cfg ctx model itemPath newHumanIdentifiers) questions
 
         buttons =
             if cfg.features.readonly then

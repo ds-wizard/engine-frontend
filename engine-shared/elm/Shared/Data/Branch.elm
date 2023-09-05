@@ -37,4 +37,4 @@ decoder =
 
 matchState : List BranchState -> Branch -> Bool
 matchState states branch =
-    List.any ((==) branch.state) states
+    List.member branch.state states
