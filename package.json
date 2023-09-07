@@ -51,7 +51,7 @@
     "@codemirror/language": "^6.9.0",
     "@codemirror/legacy-modes": "^6.3.3",
     "@codemirror/state": "^6.2.1",
-    "@codemirror/view": "^6.17.1",
+    "@codemirror/view": "^6.18.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "axios": "1.4.0",
     "axios-retry": "^3.7.0",
