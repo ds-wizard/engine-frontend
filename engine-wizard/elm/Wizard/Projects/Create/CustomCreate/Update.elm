@@ -135,7 +135,13 @@ handleForm wrapMsg formMsg appState model =
                         ( newModel, Cmd.none )
 
                 Nothing ->
-                    ( { newModel | knowledgeModelPreview = Unset, selectedTags = [] }, Cmd.none )
+                    ( { newModel
+                        | lastFetchedPreview = Nothing
+                        , knowledgeModelPreview = Unset
+                        , selectedTags = []
+                      }
+                    , Cmd.none
+                    )
 
 
 handlePostQuestionnaireCompleted : AppState -> Model -> Result ApiError Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
