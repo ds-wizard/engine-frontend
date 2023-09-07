@@ -3,7 +3,7 @@ FROM nginx:alpine
 RUN apk --purge del curl
 
 # Install dart-sass
-RUN apk add --update npm
+RUN apk add --update npm --repository=https://dl-cdn.alpinelinux.org/alpine/edge/community
 RUN npm install -g sass@1.66.1
 
 # Dependencies needed to rebuild styles
