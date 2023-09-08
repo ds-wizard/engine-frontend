@@ -5,6 +5,7 @@ module Wizard.Routes exposing
     , appsDetail
     , appsIndex
     , appsIndexWithFilters
+    , dashboard
     , devOperations
     , documentTemplateEditorCreate
     , documentTemplateEditorDetail
@@ -20,6 +21,7 @@ module Wizard.Routes exposing
     , documentsIndex
     , documentsIndexWithFilters
     , isAppIndex
+    , isDashboard
     , isDevOperations
     , isDevSubroute
     , isDocumentTemplateEditor
@@ -156,6 +158,16 @@ publicHome =
 appHome : Route
 appHome =
     DashboardRoute
+
+
+dashboard : Route
+dashboard =
+    DashboardRoute
+
+
+isDashboard : Route -> Bool
+isDashboard =
+    (==) DashboardRoute
 
 
 

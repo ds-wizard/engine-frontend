@@ -6,6 +6,7 @@ module Shared.Data.BootstrapConfig exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
@@ -33,6 +34,7 @@ type alias BootstrapConfig =
     , cloud : CloudConfig
     , owl : OwlConfig
     , locales : List LocaleConfig
+    , modules : List AppSwitcherItem
     }
 
 
@@ -50,6 +52,7 @@ default =
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
     , locales = []
+    , modules = []
     }
 
 
@@ -68,3 +71,4 @@ decoder =
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder
         |> D.required "locales" (D.list LocaleConfig.decoder)
+        |> D.required "modules" (D.list AppSwitcherItem.decoder)
