@@ -265,9 +265,15 @@ listingProjectTagsFilter appState model =
 listingKMsFilter : AppState -> Model -> Listing.Filter Msg
 listingKMsFilter appState model =
     let
-        updatePackagesMsg packageIds =
+        filterMsg =
             ListingMsgs.UpdatePaginationQueryFilters (Just indexRoutePackagesFilterId)
-                (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
+
+        updatePackagesMsg packageIds =
+            if List.isEmpty packageIds then
+                filterMsg (PaginationQueryFilter.removeFilter indexRoutePackagesFilterId model.questionnaires.filters)
+
+            else
+                filterMsg (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
 
         removePackageMsg package =
             List.filter ((/=) (PackageSuggestion.packageIdAll package.id)) selectedPackageIds
@@ -369,9 +375,15 @@ listingKMsFilter appState model =
 listingUsersFilter : AppState -> Model -> Listing.Filter Msg
 listingUsersFilter appState model =
     let
-        updateUserMsg userUuids =
+        filterMsg =
             ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteUsersFilterId)
-                (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
+
+        updateUserMsg userUuids =
+            if List.isEmpty userUuids then
+                filterMsg (PaginationQueryFilter.removeFilter indexRouteUsersFilterId model.questionnaires.filters)
+
+            else
+                filterMsg (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
 
         linkWithOp op =
             Routing.toUrl appState <|
