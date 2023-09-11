@@ -6,11 +6,13 @@ import Gettext exposing (gettext)
 import Random exposing (Seed, step)
 import Shared.Api.Users as UsersApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Utils exposing (tuplePrepend)
 import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Users.Common.UserCreateForm as UserCreateForm
@@ -60,6 +62,12 @@ postUserCompleted appState model result =
             ( model, cmdNavigate appState Routes.usersIndex )
 
         Err error ->
-            ( { model | savingUser = ApiError.toActionResult appState (gettext "User could not be created." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            ( { model
+                | savingUser = ApiError.toActionResult appState (gettext "User could not be created." appState.locale) error
+                , form = Form.setFormErrors appState error model.form
+              }
+            , Cmd.batch
+                [ getResultCmd Wizard.Msgs.logoutMsg result
+                , Ports.scrollToTop "html"
+                ]
             )
