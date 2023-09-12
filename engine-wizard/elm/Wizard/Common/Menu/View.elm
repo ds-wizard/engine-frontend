@@ -263,7 +263,7 @@ viewLogo model =
                     _ ->
                         ( [], "" )
 
-            viewMenuItem : AppSwitcherItem -> Html msg
+            viewMenuItem : AppSwitcherItem -> Html Wizard.Msgs.Msg
             viewMenuItem item =
                 let
                     icon =
@@ -276,7 +276,7 @@ viewLogo model =
                 in
                 li []
                     [ a
-                        [ href item.url
+                        [ onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.OpenAppSwitcherLink item.url))
                         , classList
                             [ ( "internal", not item.external )
                             , ( "external", item.external )
