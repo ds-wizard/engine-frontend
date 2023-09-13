@@ -445,7 +445,7 @@ view model =
             , Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
             ]
     in
-    { title = gettext "DSW Registry" model.appState.locale
+    { title = model.appState.appTitle
     , body = html
     }
 
@@ -465,7 +465,7 @@ header model =
         [ div [ class "container" ]
             [ a [ class "navbar-brand", href <| Routing.toString Routing.Index ]
                 [ img [ class "logo", src "/img/logo.svg" ] []
-                , text (gettext "DSW Registry" appState.locale)
+                , text model.appState.appTitle
                 ]
             , ul [ class "nav navbar-nav" ]
                 [ li

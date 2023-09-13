@@ -21,13 +21,13 @@ function apiUrl() {
     return 'http://localhost:3000'
 }
 
-function configUrl() {
-    return apiUrl() + '/configs/bootstrap'
+function appTitle() {
+    if (window.registry && window.registry['appTitle']) return window.registry['appTitle']
+    return null
 }
 
-function localProvisioning() {
-    if (window.wizard && window.wizard['provisioning']) return window.wizard['provisioning']
-    return null
+function configUrl() {
+    return apiUrl() + '/configs/bootstrap'
 }
 
 function bootstrapErrorHTML(errorCode) {
@@ -41,9 +41,9 @@ function loadApp(config) {
     var app = program.Elm.Registry.init({
         flags: {
             apiUrl: apiUrl(),
+            appTitle: appTitle(),
             config: config,
             credentials: JSON.parse(localStorage.getItem('credentials')),
-            localProvisioning: localProvisioning(),
         }
     })
 
@@ -64,27 +64,4 @@ window.onload = function () {
             const errorCode = err.response ? err.response.status : null
             document.body.innerHTML = bootstrapErrorHTML(errorCode)
         })
-
-
-    // const promises = [axios.get(configUrl())]
-    //
-    // const hasProvisioning = !!provisioningUrl()
-    // if (hasProvisioning) {
-    //     promises.push(axios.get(provisioningUrl()))
-    // }
-    //
-    //
-    //
-    // if (provisioningUrl !== false) {
-    //     var provisioningCallbackMethod = 'provisioningCallback'
-    //     var provisioningScript = jsonp(provisioningUrl + '?callback=' + provisioningCallbackMethod)
-    //
-    //     window[provisioningCallbackMethod] = function (provisioning) {
-    //         delete window[provisioningCallbackMethod]
-    //         document.head.removeChild(provisioningScript)
-    //         loadApp(provisioning)
-    //     }
-    // } else {
-    //     loadApp(null)
-    // }
 }
