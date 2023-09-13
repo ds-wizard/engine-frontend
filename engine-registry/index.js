@@ -1,32 +1,49 @@
 'use strict'
 
-var program = require('./elm/Registry.elm')
 
-var registerCopyPorts = require('../engine-shared/ports/copy')
+const axios = require('axios').default
+const axiosRetry = require('axios-retry')
 
-function getApiUrl() {
+const program = require('./elm/Registry.elm')
+
+const registerCopyPorts = require('../engine-shared/ports/copy')
+
+
+axiosRetry(axios, {
+    retries: 3,
+    retryDelay: function (retryCount) {
+        return retryCount * 1000
+    }
+})
+
+function apiUrl() {
     if (window.registry && window.registry['apiUrl']) return window.registry['apiUrl']
     return 'http://localhost:3000'
 }
 
-function getProvisioningUrl() {
-    if (window.wizard && window.wizard['provisioningUrl']) return window.wizard['provisioningUrl']
-    return false
+function configUrl() {
+    return apiUrl() + '/configs/bootstrap'
 }
 
-function getLocalProvisioning() {
+function localProvisioning() {
     if (window.wizard && window.wizard['provisioning']) return window.wizard['provisioning']
     return null
 }
 
+function bootstrapErrorHTML(errorCode) {
+    const title = 'Bootstrap Error'
+    const message = errorCode ? 'Server responded with an error code ' + errorCode + '.' : 'Configuration cannot be loaded due to server unavailable.'
+    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+}
 
-function loadApp(provisioning) {
+
+function loadApp(config) {
     var app = program.Elm.Registry.init({
         flags: {
-            apiUrl: getApiUrl(),
+            apiUrl: apiUrl(),
+            config: config,
             credentials: JSON.parse(localStorage.getItem('credentials')),
-            provisioning: provisioning,
-            localProvisioning: getLocalProvisioning(),
+            localProvisioning: localProvisioning(),
         }
     })
 
@@ -37,26 +54,37 @@ function loadApp(provisioning) {
     registerCopyPorts(app)
 }
 
-function jsonp(src) {
-    var script = document.createElement('script')
-    script.src = src
-    document.head.appendChild(script)
-    return script
-}
-
 
 window.onload = function () {
-    var provisioningUrl = getProvisioningUrl()
-    if (provisioningUrl !== false) {
-        var provisioningCallbackMethod = 'provisioningCallback'
-        var provisioningScript = jsonp(provisioningUrl + '?callback=' + provisioningCallbackMethod)
+    axios.get(configUrl())
+        .then(function (config) {
+            loadApp(config.data)
+        })
+        .catch(function (err) {
+            const errorCode = err.response ? err.response.status : null
+            document.body.innerHTML = bootstrapErrorHTML(errorCode)
+        })
 
-        window[provisioningCallbackMethod] = function (provisioning) {
-            delete window[provisioningCallbackMethod]
-            document.head.removeChild(provisioningScript)
-            loadApp(provisioning)
-        }
-    } else {
-        loadApp(null)
-    }
+
+    // const promises = [axios.get(configUrl())]
+    //
+    // const hasProvisioning = !!provisioningUrl()
+    // if (hasProvisioning) {
+    //     promises.push(axios.get(provisioningUrl()))
+    // }
+    //
+    //
+    //
+    // if (provisioningUrl !== false) {
+    //     var provisioningCallbackMethod = 'provisioningCallback'
+    //     var provisioningScript = jsonp(provisioningUrl + '?callback=' + provisioningCallbackMethod)
+    //
+    //     window[provisioningCallbackMethod] = function (provisioning) {
+    //         delete window[provisioningCallbackMethod]
+    //         document.head.removeChild(provisioningScript)
+    //         loadApp(provisioning)
+    //     }
+    // } else {
+    //     loadApp(null)
+    // }
 }

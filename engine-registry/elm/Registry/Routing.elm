@@ -1,5 +1,6 @@
 module Registry.Routing exposing (Route(..), toRoute, toString)
 
+import Registry.Common.Entities.BootstrapConfig exposing (BootstrapConfig)
 import Url
 import Url.Parser exposing ((</>), Parser, map, oneOf, parse, s, string, top)
 
@@ -22,29 +23,39 @@ type Route
     | NotFound
 
 
-routeParser : Parser (Route -> a) a
-routeParser =
+routeParser : BootstrapConfig -> Parser (Route -> a) a
+routeParser config =
+    let
+        authRoutes =
+            if config.authentication.publicRegistrationEnabled then
+                [ map ForgottenToken (s "forgotten-token")
+                , map ForgottenTokenConfirmation (s "forgotten-token" </> string </> string)
+                , map Login (s "login")
+                , map Signup (s "signup")
+                , map SignupConfirmation (s "signup" </> string </> string)
+                ]
+
+            else
+                []
+    in
     oneOf
-        [ map ForgottenToken (s "forgotten-token")
-        , map ForgottenTokenConfirmation (s "forgotten-token" </> string </> string)
-        , map Index top
-        , map KMDetail (s "knowledge-models" </> string)
-        , map Login (s "login")
-        , map Organization (s "organization")
-        , map Signup (s "signup")
-        , map SignupConfirmation (s "signup" </> string </> string)
-        , map DocumentTemplates (s "document-templates")
-        , map DocumentTemplateDetail (s "document-templates" </> string)
-        , map Locales (s "locales")
-        , map LocaleDetail (s "locales" </> string)
-        , map DeprecatedTemplates (s "templates")
-        , map DeprecatedTemplateDetail (s "templates" </> string)
-        ]
+        ([ map Index top
+         , map KMDetail (s "knowledge-models" </> string)
+         , map Organization (s "organization")
+         , map DocumentTemplates (s "document-templates")
+         , map DocumentTemplateDetail (s "document-templates" </> string)
+         , map Locales (s "locales")
+         , map LocaleDetail (s "locales" </> string)
+         , map DeprecatedTemplates (s "templates")
+         , map DeprecatedTemplateDetail (s "templates" </> string)
+         ]
+            ++ authRoutes
+        )
 
 
-toRoute : Url.Url -> Route
-toRoute url =
-    Maybe.withDefault NotFound (parse routeParser url)
+toRoute : BootstrapConfig -> Url.Url -> Route
+toRoute cfg url =
+    Maybe.withDefault NotFound (parse (routeParser cfg) url)
 
 
 toString : Route -> String

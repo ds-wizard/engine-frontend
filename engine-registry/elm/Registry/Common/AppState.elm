@@ -7,6 +7,7 @@ module Registry.Common.AppState exposing
 import Gettext
 import Json.Decode as D
 import Registry.Common.Credentials exposing (Credentials)
+import Registry.Common.Entities.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Registry.Common.Flags as Flags
 import Registry.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Registry.Common.Provisioning.DefaultLocale as DefaultLocale
@@ -16,6 +17,7 @@ import Shared.Provisioning as Provisioning exposing (Provisioning)
 type alias AppState =
     { apiUrl : String
     , valid : Bool
+    , config : BootstrapConfig
     , credentials : Maybe Credentials
     , provisioning : Provisioning
     , locale : Gettext.Locale
@@ -40,13 +42,24 @@ init flagsValue =
                     Provisioning.foldl
                         [ defaultProvisioning
                         , flags.localProvisioning
-                        , flags.provisioning
                         ]
             in
-            AppState flags.apiUrl True flags.credentials provisioning Gettext.defaultLocale
+            { apiUrl = flags.apiUrl
+            , valid = True
+            , config = flags.config
+            , credentials = flags.credentials
+            , provisioning = provisioning
+            , locale = Gettext.defaultLocale
+            }
 
         Err _ ->
-            AppState "" False Nothing defaultProvisioning Gettext.defaultLocale
+            { apiUrl = ""
+            , valid = False
+            , config = BootstrapConfig.default
+            , credentials = Nothing
+            , provisioning = defaultProvisioning
+            , locale = Gettext.defaultLocale
+            }
 
 
 setCredentials : Maybe Credentials -> AppState -> AppState
