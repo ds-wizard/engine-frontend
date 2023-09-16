@@ -35,7 +35,7 @@ jobs:
 
       - name: '[setup] Docker Buildx'
         id: buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: '[setup] Node.js ${{ matrix.node-version }}'
         uses: actions/setup-node@v3
