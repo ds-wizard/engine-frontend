@@ -66,7 +66,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker] Build (default)'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE }}
@@ -87,7 +87,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX_NO_SASS }}
 
       - name: '[docker] Build (no-sass)'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE_NO_SASS }}
@@ -116,7 +116,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker-dev] Build + Push (default)'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         if: github.event_name != 'pull_request' && steps.meta-dev-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
@@ -139,7 +139,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX_NO_SASS }}
 
       - name: '[docker-dev] Build + Push (no-sass)'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         if: github.event_name != 'pull_request' && steps.meta-dev-no-sass.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
@@ -165,7 +165,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker-public] Build + Push (default)'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         if: github.event_name != 'pull_request' && steps.meta-public-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
@@ -191,7 +191,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX_NO_SASS }}
 
       - name: '[docker-public] Build + Push (no-sass)'
-        uses: docker/build-push-action@v4
+        uses: docker/build-push-action@v5
         if: github.event_name != 'pull_request' && steps.meta-public-no-sass.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
