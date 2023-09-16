@@ -80,7 +80,7 @@ jobs:
 
       - name: '[docker] Meta'
         id: meta
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
@@ -107,7 +107,7 @@ jobs:
       - name: '[docker-dev] Meta'
         id: meta-dev
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
@@ -128,7 +128,7 @@ jobs:
       - name: '[docker-public] Meta'
         id: meta-public
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/metadata-action@v4
+        uses: docker/metadata-action@v5
         with:
           images: |
             ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
