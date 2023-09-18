@@ -12,7 +12,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [ 18.1.0 ]
+        node-version: [ 20 ]
 
     steps:
       - name: '[setup] Checkout Project'
