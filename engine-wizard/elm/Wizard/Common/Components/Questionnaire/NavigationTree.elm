@@ -24,6 +24,7 @@ import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (Question
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -64,6 +65,7 @@ update msg model =
 
 type alias ViewConfig msg =
     { activeChapterUuid : Maybe String
+    , nonDesirableQuestions : Bool
     , questionnaire : QuestionnaireDetail
     , openChapter : String -> msg
     , scrollToPath : String -> msg
@@ -90,8 +92,17 @@ viewChapter appState cfg model order chapter =
         currentPath =
             [ chapter.uuid ]
 
+        isDesirable =
+            if cfg.nonDesirableQuestions then
+                always True
+
+            else
+                Question.isDesirable cfg.questionnaire.knowledgeModel.phaseUuids
+                    (Uuid.toString (Maybe.withDefault Uuid.nil cfg.questionnaire.phaseUuid))
+
         chapterQuestions =
             KnowledgeModel.getChapterQuestions chapter.uuid cfg.questionnaire.knowledgeModel
+                |> List.filter isDesirable
 
         questionList =
             if List.isEmpty chapterQuestions || not (isOpen currentPath model) then

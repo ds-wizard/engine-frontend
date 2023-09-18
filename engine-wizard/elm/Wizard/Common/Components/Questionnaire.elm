@@ -1559,6 +1559,7 @@ viewQuestionnaireLeftPanelChapters appState model =
 
         navigationTreeConfig =
             { activeChapterUuid = mbActiveChapterUuid
+            , nonDesirableQuestions = model.viewSettings.nonDesirableQuestions
             , questionnaire = model.questionnaire
             , openChapter = SetActivePage << PageChapter
             , scrollToPath = ScrollToPath
