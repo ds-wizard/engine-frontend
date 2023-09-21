@@ -244,12 +244,20 @@ view appState cfg model isInvalid =
 
                 Nothing ->
                     [ cfg.nothingSelectedItem ]
+
+        onClickMsg =
+            case model.typehints of
+                Just _ ->
+                    cfg.wrapMsg HideTypeHints
+
+                Nothing ->
+                    cfg.wrapMsg ShowTypeHints
     in
     div [ class "TypeHintInput", classList [ ( "is-invalid", isInvalid ) ], id model.fieldId ]
         [ div
             [ class "TypeHintInput__Value form-control"
             , classList [ ( "is-invalid", isInvalid ) ]
-            , onClick (cfg.wrapMsg ShowTypeHints)
+            , onClick onClickMsg
             ]
             value
         , viewTypeHints appState cfg model

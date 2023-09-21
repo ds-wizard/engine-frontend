@@ -3,6 +3,7 @@ module Wizard.Projects.Detail.Subscriptions exposing (subscriptions)
 import ActionResult exposing (ActionResult(..))
 import Shared.WebSocket as WebSocket
 import Wizard.Common.Components.Questionnaire as Questionnaire
+import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
@@ -29,6 +30,10 @@ subscriptions route model =
                 ProjectDetailRoute.Documents _ ->
                     Sub.map DocumentsMsg <|
                         Documents.subscriptions model.documentsModel
+
+                ProjectDetailRoute.NewDocument _ ->
+                    Sub.map NewDocumentMsg <|
+                        NewDocument.subscriptions model.newDocumentModel
 
                 ProjectDetailRoute.Settings ->
                     Sub.map SettingsMsg <|

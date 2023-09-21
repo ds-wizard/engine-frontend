@@ -5,6 +5,7 @@ module Wizard.Projects.Detail.Components.NewDocument exposing
     , fetchData
     , initEmpty
     , initialModel
+    , subscriptions
     , update
     , view
     )
@@ -228,6 +229,16 @@ handlePostDocumentCompleted cfg appState model result =
 
         Err error ->
             ( { model | savingDocument = ApiError.toActionResult appState (gettext "Document could not be created." appState.locale) error }, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map TemplateTypeHintInputMsg <|
+        TypeHintInput.subscriptions model.templateTypeHintInputModel
 
 
 
