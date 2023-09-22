@@ -185,10 +185,13 @@ richRadioGroup appState options =
 
 
 formatRadioGroup : AppState -> List DocumentTemplateFormatSimple -> Form FormError o -> String -> String -> Html Form.Msg
-formatRadioGroup appState options =
+formatRadioGroup appState options form fieldName labelText =
     let
         radioInput state _ =
             let
+                ( _, errorClass ) =
+                    getErrors appState (Form.getFieldAsString fieldName form) labelText
+
                 buildOption : DocumentTemplateFormatSimple -> Html Form.Msg
                 buildOption format =
                     let
@@ -222,12 +225,12 @@ formatRadioGroup appState options =
                     else
                         emptyNode
             in
-            div []
+            div [ class errorClass ]
                 [ pdfOnlyInfo
                 , div [ class "export-formats" ] (List.map buildOption options)
                 ]
     in
-    formGroup radioInput [] appState
+    formGroup radioInput [] appState form fieldName labelText
 
 
 htmlRadioGroup : AppState -> List ( String, Html Form.Msg ) -> Form FormError o -> String -> String -> Html Form.Msg

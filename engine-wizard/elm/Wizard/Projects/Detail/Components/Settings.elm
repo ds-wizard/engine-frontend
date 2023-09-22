@@ -219,7 +219,7 @@ handleSetTemplateTypeHintInputReplyMsg appState model value =
 
         form =
             model.form
-                |> Form.update (QuestionnaireEditForm.validation appState) (formMsg "templateId" value)
+                |> Form.update (QuestionnaireEditForm.validation appState) (formMsg "documentTemplateId" value)
                 |> Form.update (QuestionnaireEditForm.validation appState) (formMsg "formatUuid" "")
     in
     ( { model | form = form }, Cmd.none )
