@@ -197,10 +197,18 @@ handleSetTemplateTypeHintInputReplyMsg model value =
         formMsg field =
             Form.Input field Form.Select << Field.String
 
+        updateFormatUuid =
+            case (Form.getFieldAsString "formatUuid" model.form).value of
+                Just "" ->
+                    identity
+
+                _ ->
+                    Form.update DocumentCreateForm.validation (formMsg "formatUuid" "")
+
         form =
             model.form
                 |> Form.update DocumentCreateForm.validation (formMsg "documentTemplateId" value)
-                |> Form.update DocumentCreateForm.validation (formMsg "formatUuid" "")
+                |> updateFormatUuid
     in
     ( { model | form = form }, Cmd.none )
 
