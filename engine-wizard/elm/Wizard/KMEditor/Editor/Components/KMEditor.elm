@@ -1559,7 +1559,9 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
 
         questionsWithIntegration =
             KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
+                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
                 |> List.filter ((==) (Just integrationUuid) << Question.getIntegrationUuid)
+                |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
                 |> List.sortBy Question.getTitle
                 |> List.map viewQuestionLink
                 |> wrapQuestionsWithIntegration

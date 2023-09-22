@@ -17,6 +17,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , isDeleted
     , isEdited
     , isEmptyIntegrationEditorUuid
+    , isReachable
     , setActiveEditor
     , sortDeleted
     , treeCollapseAll
@@ -225,6 +226,53 @@ setKnowledgeModel km editorBranch =
             editorBranch.branch
     in
     { editorBranch | branch = { branch | knowledgeModel = km } }
+
+
+isReachable : EditorBranch -> String -> Bool
+isReachable editorBranch entityUuid =
+    let
+        parentUuid =
+            getParentUuid entityUuid editorBranch
+
+        getEntity getter isEntityReachable =
+            getter editorBranch.branch.knowledgeModel.entities
+                |> Dict.get parentUuid
+                |> Maybe.map isEntityReachable
+
+        isInChapterReachable : Chapter -> Bool
+        isInChapterReachable chapter =
+            List.member entityUuid chapter.questionUuids && isReachable editorBranch chapter.uuid
+
+        isInQuestionReachable : Question -> Bool
+        isInQuestionReachable question =
+            case question of
+                OptionsQuestion _ data ->
+                    List.member entityUuid data.answerUuids && isReachable editorBranch parentUuid
+
+                ListQuestion _ data ->
+                    List.member entityUuid data.itemTemplateQuestionUuids && isReachable editorBranch parentUuid
+
+                MultiChoiceQuestion _ data ->
+                    List.member entityUuid data.choiceUuids && isReachable editorBranch parentUuid
+
+                _ ->
+                    False
+
+        isInAnswerReachable : Answer -> Bool
+        isInAnswerReachable answer =
+            List.member entityUuid answer.followUpUuids && isReachable editorBranch parentUuid
+    in
+    if isDeleted entityUuid editorBranch then
+        False
+
+    else if String.isEmpty parentUuid then
+        True
+
+    else
+        getEntity .chapters isInChapterReachable
+            |> Maybe.orElse (getEntity .questions isInQuestionReachable)
+            |> Maybe.orElse (getEntity .answers isInAnswerReachable)
+            |> Maybe.withDefault False
 
 
 getEditorName : AppState -> String -> EditorBranch -> String
