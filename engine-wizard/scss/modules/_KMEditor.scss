@@ -148,6 +148,16 @@
                     color: $gray-500 !important;
                 }
             }
+
+            &.add-entity {
+                a {
+                    padding: $spacer-1 0 $spacer-2 0;
+
+                    &:hover {
+                        color: $primary !important;
+                    }
+                }
+            }
         }
     }
 }

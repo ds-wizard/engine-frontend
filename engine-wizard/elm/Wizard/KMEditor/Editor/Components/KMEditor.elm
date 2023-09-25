@@ -283,6 +283,18 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
             { expandAll = wrapMsg ExpandAll
             , collapseAll = wrapMsg CollapseAll
             , setTreeOpen = compose2 wrapMsg SetTreeOpen
+            , createEvents =
+                { createChapter = \kmUuid -> eventMsg kmUuid Nothing (AddChapterEvent AddChapterEventData.init)
+                , createQuestion = \parentUuid -> eventMsg parentUuid Nothing (AddQuestionEvent AddQuestionEventData.init)
+                , createAnswer = \questionUuid -> eventMsg questionUuid Nothing (AddAnswerEvent AddAnswerEventData.init)
+                , createChoice = \questionUuid -> eventMsg questionUuid Nothing (AddChoiceEvent AddChoiceEventData.init)
+                , createExpert = \questionUuid -> eventMsg questionUuid Nothing (AddExpertEvent AddExpertEventData.init)
+                , createReference = \questionUuid -> eventMsg questionUuid Nothing (AddReferenceEvent AddReferenceEventData.init)
+                , createIntegration = \kmUuid -> eventMsg kmUuid Nothing (AddIntegrationEvent AddIntegrationEventData.init)
+                , createTag = \kmUuid -> eventMsg kmUuid Nothing (AddTagEvent AddTagEventData.init)
+                , createMetric = \kmUuid -> eventMsg kmUuid Nothing (AddMetricEvent AddMetricEventData.init)
+                , createPhase = \kmUuid -> eventMsg kmUuid Nothing (AddPhaseEvent AddPhaseEventData.init)
+                }
             }
 
         splitPaneConfig =
