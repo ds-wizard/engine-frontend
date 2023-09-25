@@ -33,7 +33,7 @@ viewBookReference appState bookReference =
         [ div [ class "px-4 py-5 bg-light rounded-3 book-title" ]
             [ div [ class "book-name" ]
                 [ a [ href bookUrl, target "_blank" ]
-                    [ img [ src "/img/book-preview.png", alt "Data Stewardship for Open Science Book Cover" ] []
+                    [ img [ src "/wizard/img/book-preview.png", alt "Data Stewardship for Open Science Book Cover" ] []
                     , text (gettext "Data Stewardship for Open Science" appState.locale)
                     ]
                 , text <| ": " ++ String.format (gettext "Chapter %s" appState.locale) [ bookReference.bookChapter ]
@@ -41,7 +41,7 @@ viewBookReference appState bookReference =
             , div [ class "book-crc" ]
                 [ div [] [ text (gettext "With kind permission of" appState.locale) ]
                 , a [ href crcUrl, target "_blank" ]
-                    [ img [ src "/img/crc-logo.png", alt "CRC Press" ] []
+                    [ img [ src "/wizard/img/crc-logo.png", alt "CRC Press" ] []
                     ]
                 ]
             ]

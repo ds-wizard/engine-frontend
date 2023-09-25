@@ -127,7 +127,7 @@ formView appState form =
                         , FormExtra.mdAfter (gettext "Logo is used next to the application name in the menu. It is recommended to use a square image." appState.locale)
                         ]
                     , div [ class "col-4" ]
-                        [ img [ class "settings-img", src "/img/settings/logo.png" ] []
+                        [ img [ class "settings-img", src "/wizard/img/settings/logo.png" ] []
                         ]
                     ]
                 , div [ class "row mt-5" ]
@@ -158,7 +158,7 @@ formView appState form =
                 ]
             , div
                 [ class "col-4" ]
-                [ img [ class "settings-img", src "/img/settings/app-title.png" ] []
+                [ img [ class "settings-img", src "/wizard/img/settings/app-title.png" ] []
                 ]
             ]
          , div [ class "row mt-5" ]
@@ -167,7 +167,7 @@ formView appState form =
                 , FormExtra.mdAfter (gettext "Short name of the DSW instance (displayed, for example, on top of the navigation bar). Short title can be the same as the application title if it is short enough." appState.locale)
                 ]
             , div [ class "col-4" ]
-                [ img [ class "settings-img", src "/img/settings/app-title-short.png" ] []
+                [ img [ class "settings-img", src "/wizard/img/settings/app-title-short.png" ] []
                 ]
             ]
          ]
@@ -184,7 +184,7 @@ formView appState form =
                                 )
                             ]
                         , div [ class "col-4" ]
-                            [ img [ class "settings-img", src "/img/settings/custom-menu-links.png" ] [] ]
+                            [ img [ class "settings-img", src "/wizard/img/settings/custom-menu-links.png" ] [] ]
                         ]
                     , div [ class "row mt-3" ]
                         [ div [ class "col" ]

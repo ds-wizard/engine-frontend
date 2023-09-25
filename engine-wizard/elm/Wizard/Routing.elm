@@ -9,7 +9,7 @@ module Wizard.Routing exposing
 import Browser.Navigation exposing (pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
-import Url.Parser exposing (Parser, map, oneOf, s)
+import Url.Parser exposing ((</>), Parser, map, oneOf, s)
 import Wizard.Apps.Routing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.Routing
@@ -48,8 +48,11 @@ matchers appState =
                 ++ Wizard.Users.Routing.parsers appState Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
+
+        parsersWithPrefix =
+            List.map (\p -> map identity (s "wizard" </> p)) parsers
     in
-    oneOf parsers
+    oneOf parsersWithPrefix
 
 
 routeIfAllowed : AppState -> Routes.Route -> Routes.Route
@@ -169,7 +172,7 @@ toUrl appState route =
                 _ ->
                     []
     in
-    "/"
+    "/wizard/"
         ++ String.join "/" parts
         |> String.split "/?"
         |> String.join "?"

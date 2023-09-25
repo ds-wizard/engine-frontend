@@ -16,7 +16,7 @@ COPY engine-wizard/docker/profile.sh /configuration/profile.sh
 COPY engine-wizard/docker/start.sh /start.sh
 
 COPY engine-wizard/scss /src/scss
-COPY dist/engine-wizard /usr/share/nginx/html
+COPY dist/engine-wizard /usr/share/nginx/html/wizard
 
 RUN chown -R nginx:nginx /src && chmod -R 755 /src && \
         chown -R nginx:nginx /usr/share/nginx/html && chmod -R 755 /usr/share/nginx/html && \

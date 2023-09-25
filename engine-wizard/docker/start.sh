@@ -10,7 +10,7 @@ sed -i "s#{defaultSupportRepositoryName}#$DEFAULT_SUPPORT_REPOSITORY_NAME#g" $fi
 sed -i "s#{defaultSupportRepositoryUrl}#$DEFAULT_SUPPORT_REPOSITORY_URL#g" $file
 
 # create config
-config=/usr/share/nginx/html/config.js
+config=/usr/share/nginx/html/wizard/config.js
 echo -n "window.wizard={apiUrl:'"$API_URL"'" >${config}
 if [[ ! -z "$PROVISIONING_URL" ]]; then
   echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >>${config}
@@ -38,7 +38,7 @@ fi
 scriptsFile=/src/scripts.html
 if [ -f "$scriptsFile" ]; then
   scripts=$(cat $scriptsFile)
-  sed -i "s~</script>~</script>$scripts~g" /usr/share/nginx/html/index.html
+  sed -i "s~</script>~</script>$scripts~g" /usr/share/nginx/html/wizard/index.html
 fi
 
 # start nginx

@@ -58,13 +58,13 @@ function apiUrl() {
 }
 
 function configUrl() {
-    const clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
+    const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
     return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
 function localeUrl() {
     const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
-    const clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
+    const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
     return apiUrl() + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
@@ -81,7 +81,7 @@ function localProvisioning() {
 function bootstrapErrorHTML(errorCode) {
     const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
     const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
-    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
 }
 
 function clientUrl() {
@@ -111,9 +111,10 @@ function getApiUrl(config) {
 
 function loadApp(config, locale, provisioning) {
     setStyles(config, function () {
+        const sessionKey = 'session/wizard'
         const flags = {
             seed: Math.floor(Math.random() * 0xFFFFFFFF),
-            session: JSON.parse(localStorage.session || null),
+            session: JSON.parse(localStorage.getItem(sessionKey)),
             selectedLocale: JSON.parse(localStorage.locale || null),
             apiUrl: getApiUrl(config),
             clientUrl: clientUrl(),
@@ -146,7 +147,7 @@ function loadApp(config, locale, provisioning) {
         registerLocalStoragePorts(app)
         registerPageUnloadPorts(app)
         registerRefreshPorts(app)
-        registerSessionPorts(app)
+        registerSessionPorts(app, sessionKey)
         registerWebsocketPorts(app)
         cookies.registerCookiePorts(app)
 

@@ -158,7 +158,7 @@ view appState model =
 
         preview =
             if model.defaultLogo then
-                viewPreview "/img/logo.svg"
+                viewPreview "/wizard/img/logo.svg"
 
             else
                 Maybe.unwrap emptyNode viewPreview model.preview
