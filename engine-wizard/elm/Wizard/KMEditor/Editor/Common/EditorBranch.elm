@@ -265,7 +265,7 @@ isReachable editorBranch entityUuid =
     if isDeleted entityUuid editorBranch then
         False
 
-    else if String.isEmpty parentUuid then
+    else if parentUuid == Uuid.toString editorBranch.branch.knowledgeModel.uuid then
         True
 
     else

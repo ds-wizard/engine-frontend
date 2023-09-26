@@ -1555,11 +1555,22 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                     ]
 
         viewQuestionLink question =
+            let
+                questionTitle =
+                    Question.getTitle question
+
+                questionTitleNode =
+                    if String.isEmpty questionTitle then
+                        i [] [ text (gettext "Untitled question" appState.locale) ]
+
+                    else
+                        text questionTitle
+            in
             li []
                 [ linkTo appState
                     (editorRoute editorBranch (Question.getUuid question))
                     []
-                    [ text (Question.getTitle question) ]
+                    [ questionTitleNode ]
                 ]
 
         wrapQuestionsWithIntegration questions =
