@@ -18,8 +18,8 @@
 .flatpickr-day.selected.nextMonthDay,
 .flatpickr-day.startRange.nextMonthDay,
 .flatpickr-day.endRange.nextMonthDay {
-    background: $primary;
-    border-color: $primary;
+    background: var(--bs-primary);
+    border-color: var(--bs-primary);
 }
 
 .date-picker-invalid {

@@ -7,8 +7,8 @@ module Wizard.Common.View.Layout exposing
 
 import Browser exposing (Document)
 import Gettext exposing (gettext)
-import Html exposing (Html, div, li, nav, text, ul)
-import Html.Attributes exposing (class, classList)
+import Html exposing (Html, div, img, li, nav, text, ul)
+import Html.Attributes exposing (class, classList, src)
 import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Html exposing (emptyNode)
@@ -126,7 +126,8 @@ publicHeader fluidFull model =
                 [ linkTo model.appState
                     Routes.publicHome
                     [ class "navbar-brand", dataCy "nav_app-title" ]
-                    [ text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
+                    [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
+                    , text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
                     ]
                 ]
             , ul [ class "nav navbar-nav ms-auto flex-row" ] links

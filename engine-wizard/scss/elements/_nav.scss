@@ -24,8 +24,8 @@
         cursor: pointer;
 
         &.active, &.active:hover, &:hover {
-            color: $primary !important;
-            background: $primary-bg;
+            color: var(--bs-primary) !important;
+            background: var(--bs-primary-bg);
         }
 
         &.active {
@@ -78,7 +78,7 @@
 
             &.active {
                 font-weight: 500;
-                border-bottom-color: $primary;
+                border-bottom-color: var(--bs-primary);
 
                 .fa {
                     color: $body-color;

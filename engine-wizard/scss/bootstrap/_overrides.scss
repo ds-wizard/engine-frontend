@@ -1,0 +1,114 @@
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/functions';
+
+:root {
+    --bs-primary-bg: #{mix($primary, $white, 10%)};
+    --bs-primary-bg2: #{mix($primary, $white, 20%)};
+
+    --bs-btn-primary-color: #{$white};
+    --bs-btn-primary-hover-color: #{$white};
+    --bs-btn-primary-active-color: #{$white};
+    --bs-btn-primary-disabled-color: #{$white};
+    --bs-btn-primary-hover-bg: #{shade-color($primary, $btn-hover-bg-shade-amount)};
+    --bs-btn-primary-active-bg: #{shade-color($primary, $btn-active-bg-shade-amount)};
+
+    --bs-focus-ring-color: #{to-rgb(mix($white, $primary, 15%))};
+    --bs-bg-primary-color: #{white};
+
+    --bs-input-focus-border-color: #{tint-color($primary, 50%)};
+
+    --bs-code-bg: #{$code-block-bg};
+}
+
+
+a {
+    text-decoration: none;
+    cursor: pointer;
+
+    &:not([class]):hover {
+        text-decoration: underline;
+    }
+}
+
+body {
+    overscroll-behavior: none;
+}
+
+code {
+    background-color: var(--bs-code-bg);
+}
+
+
+.alert {
+    p:last-child {
+        margin-bottom: 0;
+    }
+}
+
+.btn-primary {
+    --bs-btn-color: var(--bs-btn-primary-color);
+    --bs-btn-bg: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+
+    --bs-btn-hover-color: var(--bs-btn-primary-color);
+    --bs-btn-hover-bg: var(--bs-btn-primary-hover-bg);
+    --bs-btn-hover-border-color: var(--bs-btn-primary-hover-bg);
+
+    --bs-btn-active-color: var(--bs-btn-primary-disabled-color);
+    --bs-btn-active-bg: var(--bs-btn-primary-active-bg);
+    --bs-btn-active-border-color: var(--bs-btn-primary-active-bg);
+
+    --bs-btn-disabled-color: var(--bs-btn-primary-disabled-color);
+    --bs-btn-disabled-bg: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+
+    --bs-btn-focus-shadow-rgb: var(--bs-focus-ring-color);
+}
+
+.bg-primary {
+    color: var(--bs-bg-primary-color);
+}
+
+@each $size, $width in $container-max-widths {
+    .container-max-#{$size} {
+        max-width: $width;
+    }
+}
+
+.dropdown-menu {
+    --bs-dropdown-link-active-bg: var(--bs-primary);
+    --bs-dropdown-link-active-color: var(--bs-btn-primary-color);
+
+    .dropdown-item {
+        cursor: pointer;
+    }
+}
+
+.dropdown-menu-right {
+    top: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: 0 !important;
+    transform: none !important;
+}
+
+.font-lg {
+    font-size: $font-size-base * 1.5;
+}
+
+.form-control {
+    &:focus {
+        border-color: var(--bs-input-focus-border-color);
+        box-shadow: 0 0 $focus-ring-blur $focus-ring-width #{rgba(var(--bs-focus-ring-color), $focus-ring-opacity)};
+    }
+}
+
+.nav-pills {
+    --bs-nav-pills-link-active-bg: var(--bs-primary);
+    --bs-nav-pills-link-active-color: var(--bs-btn-primary-color);
+}
+
+.pagination {
+    --bs-pagination-active-bg: var(--bs-primary);
+    --bs-pagination-active-border-color: var(--bs-primary);
+}

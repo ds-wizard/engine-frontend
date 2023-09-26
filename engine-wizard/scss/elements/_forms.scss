@@ -285,8 +285,8 @@ select {
         }
 
         &:hover, &-selected {
-            color: $primary;
-            border-color: $primary;
+            color: var(--bs-primary);
+            border-color: var(--bs-primary);
         }
 
         &.disabled {
@@ -321,7 +321,7 @@ select {
 
             &:hover {
                 color: $white;
-                background: $primary;
+                background: var(--bs-primary);
                 cursor: pointer;
             }
         }
@@ -467,14 +467,15 @@ select {
             }
 
             &:before {
-                background-color: $primary;
-                border-color: $primary;
+                background-color: var(--bs-primary);
+                border-color: var(--bs-primary);
                 transition: background 0.3s ease-in-out, border-color 0.3s ease-in-out;
             }
         }
 
         &:focus + span {
             &:before {
+                // TODO
                 border-color: lighten($primary, 25%);
                 box-shadow: 0 0 0 0.2rem transparentize($primary, 0.75);
             }

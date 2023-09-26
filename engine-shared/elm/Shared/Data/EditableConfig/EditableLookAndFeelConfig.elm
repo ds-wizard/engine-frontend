@@ -27,7 +27,6 @@ type alias EditableLookAndFeelConfig =
     , illustrationsColor : Maybe String
     , customMenuLinks : List CustomMenuLink
     , logoUrl : Maybe String
-    , styleUrl : Maybe String
     }
 
 
@@ -44,7 +43,6 @@ decoder =
         |> D.required "illustrationsColor" (D.maybe D.string)
         |> D.required "customMenuLinks" (D.list CustomMenuLink.decoder)
         |> D.required "logoUrl" (D.maybe D.string)
-        |> D.required "styleUrl" (D.maybe D.string)
 
 
 encode : EditableLookAndFeelConfig -> E.Value
@@ -56,7 +54,6 @@ encode config =
         , ( "illustrationsColor", E.maybe E.string config.illustrationsColor )
         , ( "customMenuLinks", E.list CustomMenuLink.encode config.customMenuLinks )
         , ( "logoUrl", E.maybe E.string config.logoUrl )
-        , ( "styleUrl", E.maybe E.string config.styleUrl )
         ]
 
 
@@ -73,7 +70,6 @@ validation =
         |> V.andMap (V.field "styleIllustrationsColor" V.maybeString)
         |> V.andMap (V.field "customMenuLinks" (V.list CustomMenuLink.validation))
         |> V.andMap (V.field "logoUrl" V.maybeString)
-        |> V.andMap (V.field "styleUrl" V.maybeString)
 
 
 initEmptyForm : Form FormError EditableLookAndFeelConfig
@@ -103,7 +99,6 @@ initForm config =
             , ( "styleIllustrationsColor", Field.maybeString config.illustrationsColor )
             , ( "customMenuLinks", Field.list customMenuLinks )
             , ( "logoUrl", Field.maybeString config.logoUrl )
-            , ( "styleUrl", Field.maybeString config.styleUrl )
             ]
     in
     Form.initial fields validation

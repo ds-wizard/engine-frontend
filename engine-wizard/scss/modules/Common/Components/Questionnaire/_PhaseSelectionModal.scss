@@ -37,16 +37,16 @@
             }
 
             &::before, &::after {
-                background: $primary !important;
+                background: var(--bs-primary) !important;
             }
         }
 
         &-active {
-            border-color: $primary !important;
+            border-color: var(--bs-primary) !important;
             cursor: default !important;
 
             &::before {
-                background: $primary !important;
+                background: var(--bs-primary) !important;
             }
         }
 

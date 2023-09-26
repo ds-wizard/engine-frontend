@@ -65,8 +65,8 @@ $toolbar-height: 40px;
             }
 
             &.selected {
-                background: $primary-bg;
-                color: $primary !important;
+                background: var(--bs-primary-bg);
+                color: var(--bs-primary) !important;
             }
         }
 
@@ -573,7 +573,7 @@ $toolbar-height: 40px;
 
                 &:hover {
                     text-decoration: none;
-                    color: $primary;
+                    color: var(--bs-primary);
                 }
 
                 p {
@@ -707,7 +707,7 @@ $toolbar-height: 40px;
                     text-decoration: underline;
 
                     &:hover {
-                        color: $primary;
+                        color: var(--bs-primary);
                     }
                 }
 

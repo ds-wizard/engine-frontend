@@ -233,12 +233,18 @@ view model =
 viewLogo : Model -> Html Wizard.Msgs.Msg
 viewLogo model =
     let
-        logoImg =
+        logoText =
             span [ class "logo-full", dataCy "nav_app-title-short" ]
-                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
+                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ]
+                ]
     in
     if List.isEmpty model.appState.config.modules then
-        linkTo model.appState Routes.appHome [ class "logo" ] [ logoImg ]
+        linkTo model.appState
+            Routes.appHome
+            [ class "logo" ]
+            [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
+            , logoText
+            ]
 
     else
         let
@@ -317,7 +323,8 @@ viewLogo model =
                     emptyNode
         in
         div [ id itemId, class "logo logo-app-switcher", mouseenter, mouseleave ]
-            [ logoImg
+            [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
+            , logoText
             , div ([ class "app-switcher-menu", class submenuClass ] ++ submenuStyle)
                 [ ul []
                     (switchToHeading

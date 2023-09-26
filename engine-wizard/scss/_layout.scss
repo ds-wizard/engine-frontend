@@ -73,15 +73,19 @@ body {
         text-decoration: none;
         justify-content: center;
         align-items: center;
-        background: $side-navigation-logo-url;
-        background-repeat: no-repeat;
-        background-size: $side-navigation-logo-width $side-navigation-logo-height;
-        background-position: 5px center;
         padding: 10px 0 10px (15px + $side-navigation-logo-width);
         flex: 0 0 50px;
         font-weight: 500;
         margin: 5px 10px $side-navigation-gap;
         @include border-radius($border-radius);
+        position: relative;
+
+        .logo-img {
+            position: absolute;
+            left: 5px;
+            width: $side-navigation-logo-width;
+            height: $side-navigation-logo-height;
+        }
 
         .side-navigation-collapsed & {
             width: calc($side-navigation-logo-width + 10px);
@@ -191,7 +195,7 @@ body {
 
                         &.internal {
                             .icon {
-                                background: $primary;
+                                background: var(--bs-primary);
 
                                 i {
                                     color: $white;
@@ -204,7 +208,7 @@ body {
                                 background: $gray-100;
 
                                 i {
-                                    color: $primary;
+                                    color: var(--bs-primary);
                                 }
                             }
 

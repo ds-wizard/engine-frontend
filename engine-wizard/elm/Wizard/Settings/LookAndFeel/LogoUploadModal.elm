@@ -10,8 +10,8 @@ import ActionResult exposing (ActionResult(..))
 import File exposing (File)
 import File.Select as Select
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, h5, hr, p, span, text)
-import Html.Attributes exposing (class, classList, disabled, style)
+import Html exposing (Html, a, button, div, h5, hr, img, p, text)
+import Html.Attributes exposing (class, classList, disabled, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
@@ -152,13 +152,13 @@ view appState model =
         viewPreview url =
             div
                 [ class "LogoPreview mt-4" ]
-                [ span [ class "LogoPreview__Logo", style "background-image" ("url('" ++ url ++ "')") ] []
+                [ img [ src url ] []
                 , text (LookAndFeelConfig.getAppTitleShort appState.config.lookAndFeel)
                 ]
 
         preview =
             if model.defaultLogo then
-                viewPreview "/wizard/img/logo.svg"
+                viewPreview LookAndFeelConfig.defaultLogoUrl
 
             else
                 Maybe.unwrap emptyNode viewPreview model.preview

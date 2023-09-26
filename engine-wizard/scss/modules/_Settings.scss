@@ -187,7 +187,6 @@
                     height: 50px;
                     justify-content: center;
                     align-items: center;
-                    background: $side-navigation-logo-url;
                     background-repeat: no-repeat;
                     background-size: $side-navigation-logo-width $side-navigation-logo-height;
                     background-position: 15px center;
@@ -207,7 +206,7 @@
                     margin: $side-navigation-gap 10px 0;
                     @include border-radius($border-radius);
                     position: relative;
-                    color: $primary;
+                    color: var(--bs-primary);
                     display: flex;
                     align-items: center;
                     font-weight: 500;
@@ -223,7 +222,7 @@
                         width: 100%;
                         height: 100%;
                         @include border-radius($border-radius);
-                        background-color: $primary;
+                        background-color: var(--bs-primary);
                     }
                 }
             }
@@ -259,18 +258,11 @@
             height: 50px;
             font-weight: 500;
 
-            &__Logo {
+            img {
                 display: block;
-                background-size: $side-navigation-logo-width $side-navigation-logo-height;
-                background-position: center;
-                background-repeat: no-repeat;
                 width: $side-navigation-logo-width;
                 height: $side-navigation-logo-height;
                 margin-right: 10px;
-
-                &--Original {
-                    background-image: $side-navigation-logo-url;
-                }
             }
         }
 
@@ -284,9 +276,10 @@
                 align-items: center;
                 flex-direction: column;
                 padding: 2rem;
+                height: 200px;
 
                 &.active {
-                    border: 10px dashed $primary;
+                    border: 10px dashed var(--bs-primary);
                 }
 
                 p {

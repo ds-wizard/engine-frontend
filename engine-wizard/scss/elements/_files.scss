@@ -12,7 +12,7 @@
     flex-direction: column;
 
     &.active {
-        border: 10px dashed $primary;
+        border: 10px dashed var(--bs-primary);
     }
 
     p {

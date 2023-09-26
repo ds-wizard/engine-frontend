@@ -108,7 +108,7 @@ formView appState form =
                         div []
                             [ div
                                 [ class "LogoPreview" ]
-                                [ span [ class "LogoPreview__Logo LogoPreview__Logo--Original" ] []
+                                [ img [ src (LookAndFeelConfig.getLogoUrl appState.config.lookAndFeel) ] []
                                 , text appTitleValue
                                 ]
                             , div [ class "mt-2" ]
@@ -241,7 +241,7 @@ viewAppPreview appState form =
     in
     div [ class "AppPreview" ]
         [ div [ class "AppPreview__Panel" ]
-            [ a [ class "logo" ] [ span [ class "logo-full" ] [ text appTitleValue ] ]
+            [ a [ class "logo", style "background-image" ("url('" ++ LookAndFeelConfig.getLogoUrl appState.config.lookAndFeel ++ "')") ] [ span [ class "logo-full" ] [ text appTitleValue ] ]
             , div [ class "menu-button", primaryColorStyle ]
                 [ div [ class "menu-button-color", primaryColorBackgroundStyle ] []
                 , faSetFw "menu.projects" appState

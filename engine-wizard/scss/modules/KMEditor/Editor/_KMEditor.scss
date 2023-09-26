@@ -43,7 +43,7 @@ $breadcrumbs-height: 40px;
             text-overflow: ellipsis;
 
             &.with-link {
-                color: $primary;
+                color: var(--bs-primary);
             }
         }
 
@@ -68,8 +68,8 @@ $breadcrumbs-height: 40px;
             }
 
             &.selected {
-                background: $primary-bg;
-                color: $primary !important;
+                background: var(--bs-primary-bg);
+                color: var(--bs-primary) !important;
             }
 
             .badge {
@@ -207,7 +207,7 @@ $breadcrumbs-height: 40px;
     }
 
     .input-child-placeholder {
-        border: 1px dashed $primary;
+        border: 1px dashed var(--bs-primary);
         background: $white;
         color: $white;
         @include not-selectable();
@@ -329,16 +329,16 @@ $breadcrumbs-height: 40px;
                     }
 
                     &:hover {
-                        border-color: $primary;
-                        color: $primary;
+                        border-color: var(--bs-primary);
+                        color: var(--bs-primary);
                         text-decoration: none;
 
                         span {
-                            background: $primary;
+                            background: var(--bs-primary);
                         }
 
                         .fa {
-                            color: $primary;
+                            color: var(--bs-primary);
                         }
                     }
 

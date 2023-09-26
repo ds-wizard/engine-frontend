@@ -21,9 +21,8 @@ const registerLocalStoragePorts = require('./js/ports/localStorage')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
 const registerSessionPorts = require('./js/ports/session')
+const registerThemePorts = require('../engine-shared/ports/theme')
 const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
-
-let defaultStyleUrl
 
 axiosRetry(axios, {
     retries: 3,
@@ -88,20 +87,6 @@ function clientUrl() {
     return window.location.protocol + '//' + window.location.host
 }
 
-function setStyles(config, cb) {
-    const customizationEnabled = config.feature && config.feature.clientCustomizationEnabled
-    const styleUrl = customizationEnabled && config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
-    const link = document.createElement('link')
-    link.setAttribute('rel', 'stylesheet')
-    link.setAttribute('type', 'text/css')
-    link.onload = cb
-    link.setAttribute('href', styleUrl)
-    document.getElementsByTagName('head')[0].appendChild(link)
-
-    if (!window.wizard) window.wizard = {}
-    window.wizard.styleUrl = styleUrl[0] === '/' ? window.location.origin + styleUrl : styleUrl
-}
-
 function getApiUrl(config) {
     if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
         return config.cloud.serverUrl
@@ -110,56 +95,51 @@ function getApiUrl(config) {
 }
 
 function loadApp(config, locale, provisioning) {
-    setStyles(config, function () {
-        const sessionKey = 'session/wizard'
-        const flags = {
-            seed: Math.floor(Math.random() * 0xFFFFFFFF),
-            session: JSON.parse(localStorage.getItem(sessionKey)),
-            selectedLocale: JSON.parse(localStorage.locale || null),
-            apiUrl: getApiUrl(config),
-            clientUrl: clientUrl(),
-            config: config,
-            provisioning: provisioning,
-            localProvisioning: localProvisioning(),
-            navigator: {
-                pdf: getPdfSupport()
-            },
-            gaEnabled: cookies.getGaEnabled(),
-            cookieConsent: cookies.getCookieConsent(),
-        }
+    const sessionKey = 'session/wizard'
+    const flags = {
+        seed: Math.floor(Math.random() * 0xFFFFFFFF),
+        session: JSON.parse(localStorage.getItem(sessionKey)),
+        selectedLocale: JSON.parse(localStorage.locale || null),
+        apiUrl: getApiUrl(config),
+        clientUrl: clientUrl(),
+        config: config,
+        provisioning: provisioning,
+        localProvisioning: localProvisioning(),
+        navigator: {
+            pdf: getPdfSupport()
+        },
+        gaEnabled: cookies.getGaEnabled(),
+        cookieConsent: cookies.getCookieConsent(),
+    }
 
-        if (Object.keys(locale).length > 0) {
-            flags.locale = locale
-        }
+    if (Object.keys(locale).length > 0) {
+        flags.locale = locale
+    }
 
-        const app = program.Elm.Wizard.init({
-            node: document.body,
-            flags: flags,
-        })
-
-        registerConsolePorts(app)
-        registerCopyPorts(app)
-        registerDomPorts(app)
-        registerDownloadPorts(app)
-        registerImportPorts(app)
-        registerImporterPorts(app)
-        registerIntegrationWidgetPorts(app)
-        registerLocalStoragePorts(app)
-        registerPageUnloadPorts(app)
-        registerRefreshPorts(app)
-        registerSessionPorts(app, sessionKey)
-        registerWebsocketPorts(app)
-        cookies.registerCookiePorts(app)
-
-        cookies.init()
+    const app = program.Elm.Wizard.init({
+        node: document.body,
+        flags: flags,
     })
+
+    registerConsolePorts(app)
+    registerCopyPorts(app)
+    registerDomPorts(app)
+    registerDownloadPorts(app)
+    registerImportPorts(app)
+    registerImporterPorts(app)
+    registerIntegrationWidgetPorts(app)
+    registerLocalStoragePorts(app)
+    registerPageUnloadPorts(app)
+    registerRefreshPorts(app)
+    registerSessionPorts(app, sessionKey)
+    registerThemePorts(app)
+    registerWebsocketPorts(app)
+    cookies.registerCookiePorts(app)
+
+    cookies.init()
 }
 
 window.onload = function () {
-    const style = document.querySelector('[rel="stylesheet"]')
-    defaultStyleUrl = style.getAttribute('href')
-    style.remove()
-
     const promises = [
         axios.get(configUrl()),
         axios.get(localeUrl()).catch(() => {
@@ -180,9 +160,6 @@ window.onload = function () {
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null
-
-            setStyles({}, function () {
-                document.body.innerHTML = bootstrapErrorHTML(errorCode)
-            })
+            document.body.innerHTML = bootstrapErrorHTML(errorCode)
         })
 }
