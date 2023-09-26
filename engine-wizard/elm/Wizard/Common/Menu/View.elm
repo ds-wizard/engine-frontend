@@ -75,7 +75,7 @@ menuItems appState =
     [ MenuItem
         { title = gettext "Dashboard" appState.locale
         , icon = faSetFw "menu.dashboard" appState
-        , id = "apps"
+        , id = "dashboard"
         , route = Routes.dashboard
         , isActive = Routes.isDashboard
         , isVisible = always True
