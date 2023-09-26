@@ -92,17 +92,9 @@ viewChapter appState cfg model order chapter =
         currentPath =
             [ chapter.uuid ]
 
-        isDesirable =
-            if cfg.nonDesirableQuestions then
-                always True
-
-            else
-                Question.isDesirable cfg.questionnaire.knowledgeModel.phaseUuids
-                    (Uuid.toString (Maybe.withDefault Uuid.nil cfg.questionnaire.phaseUuid))
-
         chapterQuestions =
             KnowledgeModel.getChapterQuestions chapter.uuid cfg.questionnaire.knowledgeModel
-                |> List.filter isDesirable
+                |> List.filter (isQuestionDesirable cfg)
 
         questionList =
             if List.isEmpty chapterQuestions || not (isOpen currentPath model) then
@@ -205,6 +197,7 @@ viewOptionsQuestionFollowUps appState cfg model questionUuid currentPath =
             let
                 followUpQuestions =
                     KnowledgeModel.getAnswerFollowupQuestions answer.uuid cfg.questionnaire.knowledgeModel
+                        |> List.filter (isQuestionDesirable cfg)
             in
             if List.isEmpty followUpQuestions then
                 Nothing
@@ -221,6 +214,7 @@ viewListQuestionItems appState cfg model questionUuid currentPath =
     let
         itemTemplateQuestions =
             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid cfg.questionnaire.knowledgeModel
+                |> List.filter (isQuestionDesirable cfg)
 
         items =
             Dict.get (pathToString currentPath) cfg.questionnaire.replies
@@ -302,3 +296,13 @@ viewCaret appState cfg =
 pathToString : List String -> String
 pathToString =
     String.join "."
+
+
+isQuestionDesirable : ViewConfig msg -> Question -> Bool
+isQuestionDesirable cfg =
+    if cfg.nonDesirableQuestions then
+        always True
+
+    else
+        Question.isDesirable cfg.questionnaire.knowledgeModel.phaseUuids
+            (Uuid.toString (Maybe.withDefault Uuid.nil cfg.questionnaire.phaseUuid))
