@@ -83,6 +83,15 @@ body {
         margin: 5px 10px $side-navigation-gap;
         @include border-radius($border-radius);
 
+        .side-navigation-collapsed & {
+            width: calc($side-navigation-logo-width + 10px);
+            flex-basis: calc($side-navigation-logo-height + 10px);
+            box-sizing: border-box;
+            padding: 5px;
+            margin: 10px 5px calc($side-navigation-gap + 5px);
+            background-position: center center;
+        }
+
         .logo-full {
             width: 100%;
             display: flex;
@@ -111,6 +120,11 @@ body {
 
             &.show {
                 display: block;
+            }
+
+            .side-navigation-collapsed & {
+                left: $side-navigation-width-collapsed - 20px;
+                padding-left: 25px;
             }
 
             ul {
