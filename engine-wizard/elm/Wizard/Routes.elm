@@ -1,10 +1,6 @@
 module Wizard.Routes exposing
     ( Route(..)
     , appHome
-    , appsCreate
-    , appsDetail
-    , appsIndex
-    , appsIndexWithFilters
     , dashboard
     , devOperations
     , documentTemplateEditorCreate
@@ -20,7 +16,6 @@ module Wizard.Routes exposing
     , documentTemplatesIndexWithFilters
     , documentsIndex
     , documentsIndexWithFilters
-    , isAppIndex
     , isDashboard
     , isDevOperations
     , isDevSubroute
@@ -42,6 +37,7 @@ module Wizard.Routes exposing
     , isSameListingRoute
     , isSettingsRoute
     , isSettingsSubroute
+    , isTenantIndex
     , isUsersIndex
     , kmEditorCreate
     , kmEditorEditor
@@ -91,6 +87,10 @@ module Wizard.Routes exposing
     , settingsLookAndFeel
     , settingsOrganization
     , settingsRegistry
+    , tenantsCreate
+    , tenantsDetail
+    , tenantsIndex
+    , tenantsIndexWithFilters
     , usersCreate
     , usersEdit
     , usersEditActiveSessions
@@ -111,7 +111,6 @@ import Shared.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
-import Wizard.Apps.Routes
 import Wizard.Dev.Routes
 import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute
 import Wizard.DocumentTemplateEditors.Routes
@@ -128,13 +127,13 @@ import Wizard.Projects.Routes
 import Wizard.Public.Routes
 import Wizard.Registry.Routes
 import Wizard.Settings.Routes
+import Wizard.Tenants.Routes
 import Wizard.Users.Edit.UserEditRoutes as UserEditRoute
 import Wizard.Users.Routes
 
 
 type Route
-    = AppsRoute Wizard.Apps.Routes.Route
-    | DashboardRoute
+    = DashboardRoute
     | DevRoute Wizard.Dev.Routes.Route
     | DocumentsRoute Wizard.Documents.Routes.Route
     | DocumentTemplateEditorsRoute Wizard.DocumentTemplateEditors.Routes.Route
@@ -147,6 +146,7 @@ type Route
     | PublicRoute Wizard.Public.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
     | SettingsRoute Wizard.Settings.Routes.Route
+    | TenantsRoute Wizard.Tenants.Routes.Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute
@@ -187,7 +187,7 @@ isSameListingRoute originalRoute nextRoute =
 
 listingRouteMatchers : List (Route -> Bool)
 listingRouteMatchers =
-    [ isAppIndex
+    [ isTenantIndex
     , isDocumentsIndex
     , isDocumentTemplateEditorsIndex
     , isDocumentTemplatesIndex
@@ -199,43 +199,6 @@ listingRouteMatchers =
     , isProjectsIndex
     , isUsersIndex
     ]
-
-
-
--- Apps
-
-
-appsCreate : Route
-appsCreate =
-    AppsRoute Wizard.Apps.Routes.CreateRoute
-
-
-appsDetail : Uuid -> Route
-appsDetail =
-    AppsRoute << Wizard.Apps.Routes.DetailRoute
-
-
-appsIndex : Route
-appsIndex =
-    AppsRoute (Wizard.Apps.Routes.IndexRoute PaginationQueryString.empty Nothing)
-
-
-appsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
-appsIndexWithFilters filters pagination =
-    AppsRoute
-        (Wizard.Apps.Routes.IndexRoute pagination
-            (PaginationQueryFilters.getValue Wizard.Apps.Routes.indexRouteEnabledFilterId filters)
-        )
-
-
-isAppIndex : Route -> Bool
-isAppIndex route =
-    case route of
-        AppsRoute (Wizard.Apps.Routes.IndexRoute _ _) ->
-            True
-
-        _ ->
-            False
 
 
 
@@ -770,6 +733,43 @@ settingsOrganization =
 settingsRegistry : Route
 settingsRegistry =
     SettingsRoute Wizard.Settings.Routes.RegistryRoute
+
+
+
+-- Tenants
+
+
+tenantsCreate : Route
+tenantsCreate =
+    TenantsRoute Wizard.Tenants.Routes.CreateRoute
+
+
+tenantsDetail : Uuid -> Route
+tenantsDetail =
+    TenantsRoute << Wizard.Tenants.Routes.DetailRoute
+
+
+tenantsIndex : Route
+tenantsIndex =
+    TenantsRoute (Wizard.Tenants.Routes.IndexRoute PaginationQueryString.empty Nothing)
+
+
+tenantsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+tenantsIndexWithFilters filters pagination =
+    TenantsRoute
+        (Wizard.Tenants.Routes.IndexRoute pagination
+            (PaginationQueryFilters.getValue Wizard.Tenants.Routes.indexRouteEnabledFilterId filters)
+        )
+
+
+isTenantIndex : Route -> Bool
+isTenantIndex route =
+    case route of
+        TenantsRoute (Wizard.Tenants.Routes.IndexRoute _ _) ->
+            True
+
+        _ ->
+            False
 
 
 

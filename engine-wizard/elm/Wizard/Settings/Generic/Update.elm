@@ -8,7 +8,7 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate exposing (Validation)
 import Gettext exposing (gettext)
-import Shared.Api.Configs as ConfigsApi
+import Shared.Api.Tenants as TenantsApi
 import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
@@ -29,7 +29,7 @@ type alias UpdateProps form =
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    ConfigsApi.getAppConfig appState GetConfigCompleted
+    TenantsApi.getCurrentConfig appState GetConfigCompleted
 
 
 update :
@@ -112,7 +112,7 @@ handleForm props formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        ConfigsApi.putAppConfig body appState PutConfigCompleted
+                        TenantsApi.putCurrentConfig body appState PutConfigCompleted
             in
             ( { model | savingConfig = Loading }, cmd )
 

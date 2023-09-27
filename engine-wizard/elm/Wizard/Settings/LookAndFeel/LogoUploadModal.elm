@@ -15,7 +15,7 @@ import Html.Attributes exposing (class, classList, disabled, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
-import Shared.Api.Configs as ConfigsApi
+import Shared.Api.Tenants as TenantsApi
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode)
@@ -96,7 +96,7 @@ update wrapMsg reloadCmd msg appState model =
                     let
                         cmd =
                             Cmd.map wrapMsg <|
-                                ConfigsApi.uploadLogo file appState SubmitComplete
+                                TenantsApi.uploadCurrentLogo file appState SubmitComplete
                     in
                     ( { model | submitting = Loading }, cmd )
 
@@ -110,7 +110,7 @@ update wrapMsg reloadCmd msg appState model =
             let
                 cmd =
                     Cmd.map wrapMsg <|
-                        ConfigsApi.deleteLogo appState SubmitComplete
+                        TenantsApi.deleteCurrentLogo appState SubmitComplete
             in
             ( { model | submitting = Loading }, cmd )
 

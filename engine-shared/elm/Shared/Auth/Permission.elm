@@ -1,6 +1,5 @@
 module Shared.Auth.Permission exposing
-    ( apps
-    , dev
+    ( dev
     , documentTemplates
     , hasPerm
     , knowledgeModel
@@ -14,6 +13,7 @@ module Shared.Auth.Permission exposing
     , questionnaireTemplate
     , settings
     , submission
+    , tenants
     , userManagement
     )
 
@@ -26,9 +26,9 @@ hasPerm session perm =
     List.member perm (Maybe.unwrap [] .permissions session.user)
 
 
-apps : String
-apps =
-    "APP_PERM"
+tenants : String
+tenants =
+    "TENANT_PERM"
 
 
 dev : String

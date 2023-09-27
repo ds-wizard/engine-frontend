@@ -7,8 +7,8 @@ module Shared.Data.PersistentCommand exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
-import Shared.Data.AppSuggestion as AppSuggestion exposing (AppSuggestion)
 import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
+import Shared.Data.TenantSuggestion as TenantSuggestion exposing (TenantSuggestion)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
 import Uuid exposing (Uuid)
@@ -22,7 +22,7 @@ type alias PersistentCommand =
     , attempts : Int
     , maxAttempts : Int
     , createdBy : Maybe UserSuggestion
-    , app : AppSuggestion
+    , tenant : TenantSuggestion
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
     }
@@ -38,7 +38,7 @@ decoder =
         |> D.required "attempts" D.int
         |> D.required "maxAttempts" D.int
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
-        |> D.required "app" AppSuggestion.decoder
+        |> D.required "tenant" TenantSuggestion.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "updatedAt" D.datetime
 

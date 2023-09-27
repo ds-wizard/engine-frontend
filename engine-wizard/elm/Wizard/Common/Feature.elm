@@ -1,6 +1,5 @@
 module Wizard.Common.Feature exposing
     ( LocaleLike
-    , apps
     , dev
     , documentDelete
     , documentDownload
@@ -60,6 +59,7 @@ module Wizard.Common.Feature exposing
     , projectsCreateFromTemplate
     , projectsView
     , settings
+    , tenants
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
@@ -479,12 +479,12 @@ localeDelete appState locale =
 
 
 
--- Apps
+-- Tenants
 
 
-apps : AppState -> Bool
-apps appState =
-    Perm.hasPerm appState.session Perm.apps
+tenants : AppState -> Bool
+tenants appState =
+    Perm.hasPerm appState.session Perm.tenants
 
 
 

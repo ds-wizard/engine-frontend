@@ -10,7 +10,6 @@ import Browser.Navigation exposing (pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, s)
-import Wizard.Apps.Routing
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.Routing
 import Wizard.DocumentTemplateEditors.Routing
@@ -25,6 +24,7 @@ import Wizard.Public.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
+import Wizard.Tenants.Routing
 import Wizard.Users.Routing
 
 
@@ -33,7 +33,7 @@ matchers appState =
     let
         parsers =
             Wizard.Dev.Routing.parsers appState Routes.DevRoute
-                ++ Wizard.Apps.Routing.parsers Routes.AppsRoute
+                ++ Wizard.Tenants.Routing.parsers Routes.TenantsRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.DocumentTemplateEditors.Routing.parsers appState Routes.DocumentTemplateEditorsRoute
                 ++ Wizard.DocumentTemplates.Routing.parsers appState Routes.DocumentTemplatesRoute
@@ -69,9 +69,6 @@ isAllowed route appState =
     case route of
         Routes.DevRoute adminRoute ->
             Wizard.Dev.Routing.isAllowed adminRoute appState
-
-        Routes.AppsRoute appsRoute ->
-            Wizard.Apps.Routing.isAllowed appsRoute appState
 
         Routes.DashboardRoute ->
             True
@@ -109,6 +106,9 @@ isAllowed route appState =
         Routes.SettingsRoute settingsRoute ->
             Wizard.Settings.Routing.isAllowed settingsRoute appState
 
+        Routes.TenantsRoute tenantsRoute ->
+            Wizard.Tenants.Routing.isAllowed tenantsRoute appState
+
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute appState
 
@@ -126,9 +126,6 @@ toUrl appState route =
             case route of
                 Routes.DevRoute adminRoute ->
                     Wizard.Dev.Routing.toUrl appState adminRoute
-
-                Routes.AppsRoute appsRoute ->
-                    Wizard.Apps.Routing.toUrl appsRoute
 
                 Routes.DashboardRoute ->
                     [ lr "dashboard" appState ]
@@ -165,6 +162,9 @@ toUrl appState route =
 
                 Routes.SettingsRoute settingsRoute ->
                     Wizard.Settings.Routing.toUrl appState settingsRoute
+
+                Routes.TenantsRoute tenantsRoute ->
+                    Wizard.Tenants.Routing.toUrl tenantsRoute
 
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute

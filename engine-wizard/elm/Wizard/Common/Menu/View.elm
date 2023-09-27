@@ -81,12 +81,12 @@ menuItems appState =
         , isVisible = always True
         }
     , MenuItem
-        { title = gettext "Apps" appState.locale
-        , icon = faSetFw "menu.apps" appState
-        , id = "apps"
-        , route = Routes.appsIndex
-        , isActive = Routes.isAppIndex
-        , isVisible = Feature.apps
+        { title = gettext "Tenants" appState.locale
+        , icon = faSetFw "menu.tenants" appState
+        , id = "tenants"
+        , route = Routes.tenantsIndex
+        , isActive = Routes.isTenantIndex
+        , isVisible = Feature.tenants
         }
     , MenuGroup
         { title = gettext "Knowledge Models" appState.locale
