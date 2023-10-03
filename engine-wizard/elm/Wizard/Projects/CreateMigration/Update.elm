@@ -14,7 +14,7 @@ import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setQuestionnaire, setSelected)
+import Shared.Setters exposing (setSelected)
 import Shared.Utils exposing (withNoCmd)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -88,9 +88,22 @@ handleRemoveTag model tagUuid =
 
 handleGetQuestionnaireCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState wrapMsg model result =
+    let
+        setResult q m =
+            case q of
+                Success questionnaire ->
+                    { m
+                        | questionnaire = Success questionnaire
+                        , selectedTags = questionnaire.selectedQuestionTagUuids
+                        , useAllQuestions = List.isEmpty questionnaire.selectedQuestionTagUuids
+                    }
+
+                _ ->
+                    { m | questionnaire = q }
+    in
     loadCurrentPackage appState wrapMsg <|
         applyResult appState
-            { setResult = setQuestionnaire
+            { setResult = setResult
             , defaultError = gettext "Unable to get the project." appState.locale
             , model = model
             , result = result

@@ -20,7 +20,7 @@ url =
 
 organizationId : Regex
 organizationId =
-    fromString "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"
+    fromString "^^(?![-.])(?!.*[-.]$)[a-zA-Z0-9-.]+$"
 
 
 kmId : Regex

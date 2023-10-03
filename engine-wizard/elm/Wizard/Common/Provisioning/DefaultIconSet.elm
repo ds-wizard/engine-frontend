@@ -111,6 +111,7 @@ iconSet =
         , ( "menu.administration", "fas fa-cog" )
         , ( "menu.apps", "fas fa-th" )
         , ( "menu.collapse", "fas fa-angle-double-left" )
+        , ( "menu.dashboard", "fas fa-home" )
         , ( "menu.dev", "fas fa-laptop-code" )
         , ( "menu.documents", "fas fa-layer-group" )
         , ( "menu.knowledgeModels", "fas fa-sitemap" )

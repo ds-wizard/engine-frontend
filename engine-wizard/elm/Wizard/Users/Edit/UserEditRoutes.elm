@@ -6,3 +6,4 @@ type UserEditRoute
     | Password
     | ApiKeys
     | ActiveSessions
+    | SubmissionSettings

@@ -6,6 +6,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, img, li, text, ul)
 import Html.Attributes exposing (class, classList, href, src)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Json.Decode as D
 import Json.Encode as E
 import Registry.Common.AboutModal as AboutModal
@@ -90,10 +91,14 @@ type Msg
 
 init : D.Value -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
+    let
+        appState =
+            AppState.init flags
+    in
     initChildModel
-        { route = Routing.toRoute url
+        { route = Routing.toRoute appState.config url
         , key = key
-        , appState = AppState.init flags
+        , appState = appState
         , pageModel = NotFoundModel
         , aboutModalModel = AboutModal.initialModel
         }
@@ -111,7 +116,7 @@ update msg model =
                     ( model, Nav.load href )
 
         ( UrlChanged url, _ ) ->
-            initChildModel { model | route = Routing.toRoute url }
+            initChildModel { model | route = Routing.toRoute model.appState.config url }
 
         ( SetCredentials mbCredentials, _ ) ->
             let
@@ -440,7 +445,7 @@ view model =
             , Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
             ]
     in
-    { title = gettext "DSW Registry" model.appState.locale
+    { title = model.appState.appTitle
     , body = html
     }
 
@@ -460,7 +465,7 @@ header model =
         [ div [ class "container" ]
             [ a [ class "navbar-brand", href <| Routing.toString Routing.Index ]
                 [ img [ class "logo", src "/img/logo.svg" ] []
-                , text (gettext "DSW Registry" appState.locale)
+                , text model.appState.appTitle
                 ]
             , ul [ class "nav navbar-nav" ]
                 [ li
@@ -503,6 +508,7 @@ loggedInHeaderNavigation appState =
         , li [ class "nav-item" ]
             [ a
                 [ onClick <| SetCredentials Nothing
+                , href "#"
                 , class "nav-link btn btn-link"
                 ]
                 [ text (gettext "Log Out" appState.locale) ]
@@ -520,14 +526,16 @@ loggedInHeaderNavigation appState =
 publicHeaderNavigation : AppState -> Html Msg
 publicHeaderNavigation appState =
     ul [ class "nav navbar-nav ms-auto" ]
-        [ li [ class "nav-item" ]
-            [ a [ href <| Routing.toString Routing.Login, class "nav-link btn btn-link" ]
-                [ text (gettext "Log In" appState.locale) ]
-            ]
-        , li [ class "nav-item" ]
-            [ a [ href <| Routing.toString Routing.Signup, class "nav-link btn btn-link" ]
-                [ text (gettext "Sign Up" appState.locale) ]
-            ]
+        [ Html.viewIf appState.config.authentication.publicRegistrationEnabled <|
+            li [ class "nav-item" ]
+                [ a [ href <| Routing.toString Routing.Login, class "nav-link btn btn-link" ]
+                    [ text (gettext "Log In" appState.locale) ]
+                ]
+        , Html.viewIf appState.config.authentication.publicRegistrationEnabled <|
+            li [ class "nav-item" ]
+                [ a [ href <| Routing.toString Routing.Signup, class "nav-link btn btn-link" ]
+                    [ text (gettext "Sign Up" appState.locale) ]
+                ]
         , li [ class "nav-item" ]
             [ button
                 [ onClick <| AboutModalMsg (AboutModal.SetOpen True)

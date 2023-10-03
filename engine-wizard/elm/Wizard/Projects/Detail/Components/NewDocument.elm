@@ -5,6 +5,7 @@ module Wizard.Projects.Detail.Components.NewDocument exposing
     , fetchData
     , initEmpty
     , initialModel
+    , subscriptions
     , update
     , view
     )
@@ -88,6 +89,7 @@ type Msg
     = GetSummaryReportComplete (Result ApiError SummaryReport)
     | GetQuestionnaireEventComplete (Result ApiError QuestionnaireEvent)
     | FormMsg Form.Msg
+    | SetTemplateTypeHintInputReply String
     | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | PostDocumentCompleted (Result ApiError Document)
 
@@ -128,6 +130,9 @@ update cfg msg appState model =
 
         FormMsg formMsg ->
             handleForm cfg formMsg appState model
+
+        SetTemplateTypeHintInputReply value ->
+            handleSetTemplateTypeHintInputReplyMsg model value
 
         TemplateTypeHintInputMsg typeHintInputMsg ->
             handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model
@@ -186,36 +191,44 @@ handleForm cfg formMsg appState model =
             ( newModel, Cmd.none )
 
 
+handleSetTemplateTypeHintInputReplyMsg : Model -> String -> ( Model, Cmd msg )
+handleSetTemplateTypeHintInputReplyMsg model value =
+    let
+        formMsg field =
+            Form.Input field Form.Select << Field.String
+
+        updateFormatUuid =
+            case (Form.getFieldAsString "formatUuid" model.form).value of
+                Just "" ->
+                    identity
+
+                _ ->
+                    Form.update DocumentCreateForm.validation (formMsg "formatUuid" "")
+
+        form =
+            model.form
+                |> Form.update DocumentCreateForm.validation (formMsg "documentTemplateId" value)
+                |> updateFormatUuid
+    in
+    ( { model | form = form }, Cmd.none )
+
+
 handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg DocumentTemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
 handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
-        formMsg =
-            cfg.wrapMsg << FormMsg << Form.Input "documentTemplateId" Form.Select << Field.String
-
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
             , getError = gettext "Unable to get document templates." appState.locale
-            , setReply = formMsg << .id
-            , clearReply = Just <| formMsg ""
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
+            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
             , filterResults = Nothing
             }
-
-        form =
-            case typeHintInputMsg of
-                TypeHintInput.SetReply _ ->
-                    Form.update DocumentCreateForm.validation (Form.Input "formatUuid" Form.Text (Field.String "")) model.form
-
-                _ ->
-                    model.form
 
         ( templateTypeHintInputModel, cmd ) =
             TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
     in
-    ( { model
-        | templateTypeHintInputModel = templateTypeHintInputModel
-        , form = form
-      }
+    ( { model | templateTypeHintInputModel = templateTypeHintInputModel }
     , cmd
     )
 
@@ -228,6 +241,16 @@ handlePostDocumentCompleted cfg appState model result =
 
         Err error ->
             ( { model | savingDocument = ApiError.toActionResult appState (gettext "Document could not be created." appState.locale) error }, Cmd.none )
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.map TemplateTypeHintInputMsg <|
+        TypeHintInput.subscriptions model.templateTypeHintInputModel
 
 
 

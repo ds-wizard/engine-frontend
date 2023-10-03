@@ -25,9 +25,10 @@ parsers appState wrapRoute =
     in
     [ map (authCallback wrapRoute) (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state")
     , map (wrapRoute << BookReferenceRoute) (s (lr "public.bookReferences" appState) </> string)
-    , map (wrapRoute <| ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
+    , map (wrapRoute ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
     , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
     , map (wrapRoute << LoginRoute) (top <?> Query.string (lr "login.originalUrl" appState))
+    , map (wrapRoute LogoutSuccessful) (s "logout-successful")
     ]
         ++ signUpRoutes
 
@@ -73,6 +74,9 @@ toUrl appState route =
 
                 Nothing ->
                     []
+
+        LogoutSuccessful ->
+            [ "logout-successful" ]
 
         SignupRoute ->
             [ lr "public.signup" appState ]

@@ -20,6 +20,7 @@ type alias PersistentCommandDetail =
     , state : PersistentCommandState
     , body : String
     , lastErrorMessage : Maybe String
+    , lastTraceUuid : Maybe Uuid
     , attempts : Int
     , maxAttempts : Int
     , createdBy : Maybe UserSuggestion
@@ -38,6 +39,7 @@ decoder =
         |> D.required "state" PersistentCommandState.decoder
         |> D.required "body" D.string
         |> D.required "lastErrorMessage" (D.maybe D.string)
+        |> D.required "lastTraceUuid" (D.maybe Uuid.decoder)
         |> D.required "attempts" D.int
         |> D.required "maxAttempts" D.int
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)

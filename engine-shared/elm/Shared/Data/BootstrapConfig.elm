@@ -6,6 +6,8 @@ module Shared.Data.BootstrapConfig exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.BootstrapConfig.Admin as AdminConfig exposing (Admin)
+import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
@@ -21,7 +23,8 @@ import Shared.Data.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing
 
 
 type alias BootstrapConfig =
-    { authentication : AuthenticationConfig
+    { admin : Admin
+    , authentication : AuthenticationConfig
     , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , registry : RegistryConfig
     , lookAndFeel : LookAndFeelConfig
@@ -33,12 +36,14 @@ type alias BootstrapConfig =
     , cloud : CloudConfig
     , owl : OwlConfig
     , locales : List LocaleConfig
+    , modules : List AppSwitcherItem
     }
 
 
 default : BootstrapConfig
 default =
-    { authentication = AuthenticationConfig.default
+    { admin = AdminConfig.default
+    , authentication = AuthenticationConfig.default
     , dashboardAndLoginScreen = DashboardAndLoginScreenConfig.default
     , registry = RegistryConfig.default
     , lookAndFeel = LookAndFeelConfig.default
@@ -50,12 +55,14 @@ default =
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
     , locales = []
+    , modules = []
     }
 
 
 decoder : Decoder BootstrapConfig
 decoder =
     D.succeed BootstrapConfig
+        |> D.required "admin" AdminConfig.decoder
         |> D.required "authentication" AuthenticationConfig.decoder
         |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "registry" RegistryConfig.decoder
@@ -68,3 +75,4 @@ decoder =
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder
         |> D.required "locales" (D.list LocaleConfig.decoder)
+        |> D.required "modules" (D.list AppSwitcherItem.decoder)

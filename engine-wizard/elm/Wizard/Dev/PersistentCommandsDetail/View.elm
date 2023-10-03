@@ -10,6 +10,7 @@ import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode)
 import SyntaxHighlight
+import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.View.AppIcon as AppIcon
@@ -114,16 +115,24 @@ sidePanel appState persistentCommand =
             , sidePanelAppInfo appState persistentCommand
             ]
 
-        sectionsWithCreatedBy =
-            case persistentCommand.createdBy of
-                Just createdBy ->
-                    sections ++ [ sidePanelCreatedByInfo createdBy ]
+        lastTraceUuidSection =
+            case persistentCommand.lastTraceUuid of
+                Just lastTraceUuid ->
+                    [ sidePanelLastTraceUuid lastTraceUuid ]
 
                 Nothing ->
-                    sections
+                    []
+
+        createdBySection =
+            case persistentCommand.createdBy of
+                Just createdBy ->
+                    [ sidePanelCreatedByInfo createdBy ]
+
+                Nothing ->
+                    []
     in
     DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 sectionsWithCreatedBy ]
+        [ DetailPage.sidePanelList 12 12 (sections ++ lastTraceUuidSection ++ createdBySection) ]
 
 
 sidePanelPersistentCommandInfo : AppState -> PersistentCommandDetail -> ( String, String, Html msg )
@@ -156,6 +165,15 @@ sidePanelAppInfo appState persistentCommand =
                 (AppIcon.view persistentCommand.app)
     in
     ( "App", "app", appView )
+
+
+sidePanelLastTraceUuid : Uuid -> ( String, String, Html msg )
+sidePanelLastTraceUuid uuid =
+    let
+        uuidView =
+            code [] [ text (Uuid.toString uuid) ]
+    in
+    ( "Last Trace UUID", "last-trace-uuid", uuidView )
 
 
 sidePanelCreatedByInfo : UserSuggestion -> ( String, String, Html msg )

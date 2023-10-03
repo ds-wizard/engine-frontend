@@ -12,6 +12,8 @@ import List.Extra as List
 import Shared.Auth.Role as Role
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Data.BootstrapConfig.Admin as Admin
+import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
@@ -71,6 +73,14 @@ type alias GroupItemData =
 menuItems : AppState -> List MenuItem
 menuItems appState =
     [ MenuItem
+        { title = gettext "Dashboard" appState.locale
+        , icon = faSetFw "menu.dashboard" appState
+        , id = "dashboard"
+        , route = Routes.dashboard
+        , isActive = Routes.isDashboard
+        , isVisible = always True
+        }
+    , MenuItem
         { title = gettext "Apps" appState.locale
         , icon = faSetFw "menu.apps" appState
         , id = "apps"
@@ -182,22 +192,28 @@ menuItems appState =
         , isActive = Routes.isSettingsSubroute
         , isVisible = Feature.settings
         , items =
-            [ { title = gettext "Settings" appState.locale
-              , id = "system-settings"
-              , route = Routes.settingsDefault
-              , isActive = Routes.isSettingsRoute
-              }
-            , { title = gettext "Users" appState.locale
-              , id = "users"
-              , route = Routes.usersIndex
-              , isActive = Routes.isUsersIndex
-              }
-            , { title = gettext "Locales" appState.locale
-              , id = "system-locales"
-              , route = Routes.localesIndex
-              , isActive = Routes.isLocalesRoute
-              }
-            ]
+            { title = gettext "Settings" appState.locale
+            , id = "system-settings"
+            , route = Routes.settingsDefault
+            , isActive = Routes.isSettingsRoute
+            }
+                :: (if Admin.isEnabled appState.config.admin then
+                        []
+
+                    else
+                        [ { title = gettext "Users" appState.locale
+                          , id = "users"
+                          , route = Routes.usersIndex
+                          , isActive = Routes.isUsersIndex
+                          }
+                        ]
+                   )
+                ++ [ { title = gettext "Locales" appState.locale
+                     , id = "system-locales"
+                     , route = Routes.localesIndex
+                     , isActive = Routes.isLocalesRoute
+                     }
+                   ]
         }
     ]
 
@@ -221,7 +237,96 @@ viewLogo model =
             span [ class "logo-full", dataCy "nav_app-title-short" ]
                 [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
     in
-    linkTo model.appState Routes.appHome [ class "logo" ] [ logoImg ]
+    if List.isEmpty model.appState.config.modules then
+        linkTo model.appState Routes.appHome [ class "logo" ] [ logoImg ]
+
+    else
+        let
+            itemId =
+                "app_switcher"
+
+            mouseenter =
+                onMouseEnter (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.GetElement itemId))
+
+            mouseleave =
+                onMouseLeave (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.HideElement itemId))
+
+            ( submenuStyle, submenuClass ) =
+                case Dict.get itemId model.menuModel.submenuPositions of
+                    Just element ->
+                        let
+                            top =
+                                element.element.y - element.viewport.y
+                        in
+                        ( [ style "top" (String.fromFloat top ++ "px") ], "show" )
+
+                    _ ->
+                        ( [], "" )
+
+            viewMenuItem : AppSwitcherItem -> Html Wizard.Msgs.Msg
+            viewMenuItem item =
+                let
+                    icon =
+                        case item.icon of
+                            AppSwitcherItem.ImageAppSwitcherItemIcon imageSrc ->
+                                img [ src imageSrc ] []
+
+                            AppSwitcherItem.FontAwesomeAppSwitcherItemIcon faIcon ->
+                                fa faIcon
+                in
+                li []
+                    [ a
+                        [ onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.OpenAppSwitcherLink item.url))
+                        , classList
+                            [ ( "internal", not item.external )
+                            , ( "external", item.external )
+                            ]
+                        ]
+                        [ span [ class "icon" ]
+                            [ icon
+                            ]
+                        , span [ class "content" ]
+                            [ span [ class "title" ] [ text item.title ]
+                            , span [ class "description" ] [ text item.description ]
+                            ]
+                        ]
+                    ]
+
+            internalItems =
+                model.appState.config.modules
+                    |> List.filter (not << .external)
+                    |> List.map viewMenuItem
+
+            externalItems =
+                model.appState.config.modules
+                    |> List.filter .external
+                    |> List.map viewMenuItem
+
+            switchToHeading =
+                if List.isEmpty internalItems then
+                    emptyNode
+
+                else
+                    li [ class "heading" ] [ text (gettext "Switch to" model.appState.locale) ]
+
+            moreHeading =
+                if not (List.isEmpty internalItems) && not (List.isEmpty externalItems) then
+                    li [ class "heading-2" ] [ text (gettext "More" model.appState.locale) ]
+
+                else
+                    emptyNode
+        in
+        div [ id itemId, class "logo logo-app-switcher", mouseenter, mouseleave ]
+            [ logoImg
+            , div ([ class "app-switcher-menu", class submenuClass ] ++ submenuStyle)
+                [ ul []
+                    (switchToHeading
+                        :: internalItems
+                        ++ [ moreHeading ]
+                        ++ externalItems
+                    )
+                ]
+            ]
 
 
 viewMenu : Model -> Html Wizard.Msgs.Msg

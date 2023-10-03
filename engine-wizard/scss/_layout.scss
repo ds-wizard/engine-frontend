@@ -67,9 +67,8 @@ body {
 
     .logo {
         color: $side-navigation-title-color;
-        font-size: 18px;
         display: flex;
-        width: 100%;
+        width: calc(100% - 20px);
         height: $side-navigation-logo-height;
         text-decoration: none;
         justify-content: center;
@@ -77,11 +76,21 @@ body {
         background: $side-navigation-logo-url;
         background-repeat: no-repeat;
         background-size: $side-navigation-logo-width $side-navigation-logo-height;
-        background-position: 10px center;
-        padding: 15px 10px 15px (20px + $side-navigation-logo-width);
+        background-position: 5px center;
+        padding: 10px 0 10px (15px + $side-navigation-logo-width);
         flex: 0 0 50px;
         font-weight: 500;
-        margin-bottom: $side-navigation-gap;
+        margin: 5px 10px $side-navigation-gap;
+        @include border-radius($border-radius);
+
+        .side-navigation-collapsed & {
+            width: calc($side-navigation-logo-width + 10px);
+            flex-basis: calc($side-navigation-logo-height + 10px);
+            box-sizing: border-box;
+            padding: 5px;
+            margin: 10px 5px calc($side-navigation-gap + 5px);
+            background-position: center center;
+        }
 
         .logo-full {
             width: 100%;
@@ -89,6 +98,135 @@ body {
             justify-content: space-between;
             white-space: nowrap;
             overflow: hidden;
+            font-size: 18px;
+        }
+
+        &-app-switcher {
+            cursor: pointer;
+
+            &:hover {
+                background-color: $side-navigation-link-hover-bg;
+            }
+        }
+
+        .app-switcher-menu {
+            position: fixed;
+            left: $side-navigation-width - 65px;
+            top: 0;
+
+            display: none;
+
+            padding-left: 55px;
+
+            &.show {
+                display: block;
+            }
+
+            .side-navigation-collapsed & {
+                left: $side-navigation-width-collapsed - 20px;
+                padding-left: 25px;
+            }
+
+            ul {
+                width: $side-navigation-app-switcher-max-width;
+                margin: 0;
+                padding: 5px 0;
+                border: 1px solid $side-navigation-border-color;
+                @include border-radius($border-radius);
+
+                background: $white;
+                box-shadow: $side-navigation-floating-shadow;
+
+                li {
+                    padding: 0 5px;
+
+                    list-style: none;
+
+                    &.heading {
+                        padding: 9px 14px 5px 14px;
+
+                        font-size: $font-size-lg;
+                        font-weight: bold;
+                    }
+
+                    &.heading-2 {
+                        padding: 5px 14px 0 14px;
+
+                        color: $gray-600;
+                        font-weight: bold;
+                    }
+
+                    a {
+                        display: flex;
+                        align-items: center;
+
+                        padding: 9px;
+                        @include border-radius($border-radius);
+                        @include transition($side-navigation-link-transition);
+
+                        &:hover {
+                            text-decoration: none;
+                            background: $side-navigation-link-hover-bg;
+                        }
+
+                        .icon {
+                            display: flex;
+                            justify-content: center;
+                            align-items: center;
+
+                            width: 2rem;
+                            height: 2rem;
+
+                            margin-right: $spacer-2;
+
+                            @include border-radius($border-radius);
+
+                            box-shadow: $side-navigation-app-switcher-icon-shadow;
+
+                            img {
+                                max-width: 1.5rem;
+                                max-height: 1.5rem;
+                            }
+                        }
+
+                        &.internal {
+                            .icon {
+                                background: $primary;
+
+                                i {
+                                    color: $white;
+                                }
+                            }
+                        }
+
+                        &.external {
+                            .icon {
+                                background: $gray-100;
+
+                                i {
+                                    color: $primary;
+                                }
+                            }
+
+                        }
+
+                        .content {
+                            display: flex;
+                            flex-direction: column;
+
+                            .title {
+                                font-weight: 500;
+                                color: $body-color;
+                            }
+
+                            .description {
+                                font-size: $font-size-sm;
+                                color: var(--bs-secondary-color);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 

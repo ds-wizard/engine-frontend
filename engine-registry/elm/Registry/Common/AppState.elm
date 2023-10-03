@@ -4,21 +4,24 @@ module Registry.Common.AppState exposing
     , setCredentials
     )
 
-import Gettext
+import Gettext exposing (gettext)
 import Json.Decode as D
 import Registry.Common.Credentials exposing (Credentials)
+import Registry.Common.Entities.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Registry.Common.Flags as Flags
 import Registry.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Registry.Common.Provisioning.DefaultLocale as DefaultLocale
-import Shared.Provisioning as Provisioning exposing (Provisioning)
+import Shared.Provisioning exposing (Provisioning)
 
 
 type alias AppState =
     { apiUrl : String
-    , valid : Bool
+    , appTitle : String
+    , config : BootstrapConfig
     , credentials : Maybe Credentials
-    , provisioning : Provisioning
     , locale : Gettext.Locale
+    , provisioning : Provisioning
+    , valid : Bool
     }
 
 
@@ -32,21 +35,33 @@ init flagsValue =
             { locale = DefaultLocale.locale
             , iconSet = DefaultIconSet.iconSet
             }
+
+        locale =
+            Gettext.defaultLocale
+
+        defaultAppTitle =
+            gettext "DSW Registry" locale
     in
     case flagsResult of
         Ok flags ->
-            let
-                provisioning =
-                    Provisioning.foldl
-                        [ defaultProvisioning
-                        , flags.localProvisioning
-                        , flags.provisioning
-                        ]
-            in
-            AppState flags.apiUrl True flags.credentials provisioning Gettext.defaultLocale
+            { apiUrl = flags.apiUrl
+            , appTitle = Maybe.withDefault defaultAppTitle flags.appTitle
+            , valid = True
+            , config = flags.config
+            , credentials = flags.credentials
+            , provisioning = defaultProvisioning
+            , locale = locale
+            }
 
         Err _ ->
-            AppState "" False Nothing defaultProvisioning Gettext.defaultLocale
+            { apiUrl = ""
+            , appTitle = defaultAppTitle
+            , valid = False
+            , config = BootstrapConfig.default
+            , credentials = Nothing
+            , provisioning = defaultProvisioning
+            , locale = locale
+            }
 
 
 setCredentials : Maybe Credentials -> AppState -> AppState

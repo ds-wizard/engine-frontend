@@ -5,6 +5,7 @@ module Wizard.Routes exposing
     , appsDetail
     , appsIndex
     , appsIndexWithFilters
+    , dashboard
     , devOperations
     , documentTemplateEditorCreate
     , documentTemplateEditorDetail
@@ -20,6 +21,7 @@ module Wizard.Routes exposing
     , documentsIndex
     , documentsIndexWithFilters
     , isAppIndex
+    , isDashboard
     , isDevOperations
     , isDevSubroute
     , isDocumentTemplateEditor
@@ -82,6 +84,7 @@ module Wizard.Routes exposing
     , publicForgottenPassword
     , publicHome
     , publicLogin
+    , publicLogoutSuccessful
     , publicSignup
     , settingsAuthentication
     , settingsDefault
@@ -94,6 +97,7 @@ module Wizard.Routes exposing
     , usersEditApiKeys
     , usersEditCurrent
     , usersEditPassword
+    , usersEditSubmissionSettings
     , usersIndex
     , usersIndexWithFilters
     )
@@ -156,6 +160,16 @@ publicHome =
 appHome : Route
 appHome =
     DashboardRoute
+
+
+dashboard : Route
+dashboard =
+    DashboardRoute
+
+
+isDashboard : Route -> Bool
+isDashboard =
+    (==) DashboardRoute
 
 
 
@@ -698,6 +712,11 @@ publicSignup =
     PublicRoute Wizard.Public.Routes.SignupRoute
 
 
+publicLogoutSuccessful : Route
+publicLogoutSuccessful =
+    PublicRoute Wizard.Public.Routes.LogoutSuccessful
+
+
 
 -- Settings
 
@@ -780,6 +799,11 @@ usersEditApiKeys =
 usersEditActiveSessions : UuidOrCurrent -> Route
 usersEditActiveSessions =
     UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ActiveSessions
+
+
+usersEditSubmissionSettings : UuidOrCurrent -> Route
+usersEditSubmissionSettings =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.SubmissionSettings
 
 
 usersEditCurrent : Route

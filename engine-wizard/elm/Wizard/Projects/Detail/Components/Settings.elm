@@ -98,6 +98,7 @@ type Msg
     = FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
+    | SetTemplateTypeHintInputReply String
     | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
     | ProjectTagsSearch String
     | ProjectTagsSearchComplete (Result ApiError (Pagination String))
@@ -124,6 +125,9 @@ update cfg msg appState model =
 
         DeleteModalMsg deleteModalMsg ->
             handleDeleteModalMsg cfg deleteModalMsg appState model
+
+        SetTemplateTypeHintInputReply value ->
+            handleSetTemplateTypeHintInputReplyMsg appState model value
 
         TemplateTypeHintInputMsg typeHintInputMsg ->
             handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model
@@ -207,18 +211,29 @@ handleDeleteModalMsg cfg deleteModalMsg appState model =
     ( { model | deleteModalModel = deleteModalModel }, cmd )
 
 
+handleSetTemplateTypeHintInputReplyMsg : AppState -> Model -> String -> ( Model, Cmd msg )
+handleSetTemplateTypeHintInputReplyMsg appState model value =
+    let
+        formMsg field =
+            Form.Input field Form.Select << Field.String
+
+        form =
+            model.form
+                |> Form.update (QuestionnaireEditForm.validation appState) (formMsg "documentTemplateId" value)
+                |> Form.update (QuestionnaireEditForm.validation appState) (formMsg "formatUuid" "")
+    in
+    ( { model | form = form }, Cmd.none )
+
+
 handleTemplateTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg DocumentTemplateSuggestion -> AppState -> Model -> ( Model, Cmd msg )
 handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
-        formMsg =
-            cfg.wrapMsg << FormMsg << Form.Input "documentTemplateId" Form.Select << Field.String
-
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
             , getError = gettext "Unable to get Knowledge Models." appState.locale
-            , setReply = formMsg << .id
-            , clearReply = Just <| formMsg ""
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
+            , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
             , filterResults = Nothing
             }
 
