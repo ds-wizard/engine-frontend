@@ -60,7 +60,10 @@ fetchSubrouteData : AppState -> Model -> Cmd Msg
 fetchSubrouteData appState model =
     case appState.route of
         KMEditorRoute (EditorRoute _ (KMEditorRoute.Edit _)) ->
-            Ports.scrollToTop "#editor-view"
+            Cmd.batch
+                [ Ports.scrollToTop "#editor-view"
+                , Ports.focus "#editor-view input"
+                ]
 
         KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
             let
