@@ -32,6 +32,7 @@ import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Markdown as Markdown
 import Shared.Utils exposing (flip)
 import String.Format as String
 import Time
@@ -472,7 +473,7 @@ viewEventDetailSetReply appState cfg data question =
                     eventView [ ( fa "far fa-edit", reply ) ]
 
                 IntegrationType _ reply ->
-                    eventView [ ( fa "fas fa-link", reply ) ]
+                    eventView [ ( fa "fas fa-link", Markdown.toString reply ) ]
 
         _ ->
             emptyNode
