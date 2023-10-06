@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # load defaults from profile
-file=/usr/share/nginx/html/main.*.js
+file=/usr/share/nginx/html/wizard/main.*.js
 source /configuration/profile.sh
 sed -i "s#{defaultAppTitle}#$DEFAULT_APP_TITLE#g" $file
 sed -i "s#{defaultAppTitleShort}#$DEFAULT_APP_TITLE_SHORT#g" $file
