@@ -24,5 +24,6 @@ default =
 decoder : Decoder FeatureConfig
 decoder =
     D.succeed FeatureConfig
-        |> D.required "clientCustomizationEnabled" D.bool
+        --|> D.required "clientCustomizationEnabled" D.bool
+        |> D.hardcoded True
         |> D.required "pdfOnlyEnabled" D.bool
