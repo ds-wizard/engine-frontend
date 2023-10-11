@@ -1,6 +1,5 @@
 module Shared.Api.Tenants exposing
-    ( deleteCurrentLogo
-    , deletePlan
+    ( deletePlan
     , getCurrentConfig
     , getCurrentPlans
     , getTenant
@@ -10,14 +9,12 @@ module Shared.Api.Tenants exposing
     , putCurrentConfig
     , putPlan
     , putTenant
-    , uploadCurrentLogo
     )
 
-import File exposing (File)
 import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPost, jwtPostFile, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPost, jwtPut)
 import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -88,13 +85,3 @@ getCurrentConfig =
 putCurrentConfig : E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putCurrentConfig =
     jwtPut "/tenants/current/config"
-
-
-uploadCurrentLogo : File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-uploadCurrentLogo =
-    jwtPostFile "/tenants/current/logo"
-
-
-deleteCurrentLogo : AbstractAppState a -> ToMsg () msg -> Cmd msg
-deleteCurrentLogo =
-    jwtDelete "/tenants/current/logo"

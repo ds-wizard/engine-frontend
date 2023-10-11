@@ -44,9 +44,10 @@ fetchData route appState _ =
             genericFetch DashboardMsg
 
         LookAndFeelRoute ->
-            Cmd.map LookAndFeelMsg <|
-                Wizard.Settings.LookAndFeel.Update.fetchData appState
+            genericFetch LookAndFeelMsg
 
+        --Cmd.map LookAndFeelMsg <|
+        --    Wizard.Settings.LookAndFeel.Update.fetchData appState
         RegistryRoute ->
             Cmd.map RegistryMsg <|
                 Wizard.Settings.Registry.Update.fetchData appState
