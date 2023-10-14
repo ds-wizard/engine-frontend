@@ -19,7 +19,7 @@
     "fs-extra": "^11.1.1",
     "helmet": "^7.0.0",
     "morgan": "^1.10.0",
-    "sass": "^1.68.0"
+    "sass": "^1.69.3"
   },
   "devDependencies": {
     "jest": "^29.7.0",
