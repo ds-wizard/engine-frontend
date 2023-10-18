@@ -7,8 +7,7 @@ import Uuid exposing (Uuid)
 
 
 type alias Permission =
-    { uuid : Uuid
-    , questionnaireUuid : Uuid
+    { questionnaireUuid : Uuid
     , member : Member
     , perms : List String
     }
@@ -17,7 +16,6 @@ type alias Permission =
 decoder : Decoder Permission
 decoder =
     D.succeed Permission
-        |> D.required "uuid" Uuid.decoder
         |> D.required "questionnaireUuid" Uuid.decoder
         |> D.required "member" Member.decoder
         |> D.required "perms" (D.list D.string)

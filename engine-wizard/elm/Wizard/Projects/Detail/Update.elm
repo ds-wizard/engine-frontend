@@ -18,7 +18,7 @@ import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAc
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Utils exposing (dispatch, getUuid)
+import Shared.Utils exposing (dispatch)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
@@ -623,12 +623,8 @@ update wrapMsg msg appState model =
                             , type_ = ""
                             }
 
-                        ( uuid, newSeed ) =
-                            getUuid appState.seed
-
                         permission =
-                            { uuid = uuid
-                            , questionnaireUuid = questionnaireDetail.uuid
+                            { questionnaireUuid = questionnaireDetail.uuid
                             , member = member
                             , perms = [ "VIEW", "EDIT", "ADMIN" ]
                             }
@@ -651,7 +647,7 @@ update wrapMsg msg appState model =
                                 _ ->
                                     Cmd.none
                     in
-                    ( newSeed, { model | addingToMyProjects = Loading }, cmd )
+                    withSeed ( { model | addingToMyProjects = Loading }, cmd )
 
                 _ ->
                     ( appState.seed, model, Cmd.none )

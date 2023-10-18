@@ -17,8 +17,7 @@ import Wizard.Projects.Common.QuestionnaireEditFormMemberPerms as QuestionnaireE
 
 
 type alias QuestionnaireEditFormPermission =
-    { uuid : Uuid
-    , questionnaireUuid : Uuid
+    { questionnaireUuid : Uuid
     , member : QuestionnaireEditFormMember
     , perms : QuestionnaireEditFormMemberPerms
     }
@@ -27,8 +26,7 @@ type alias QuestionnaireEditFormPermission =
 initFromPermission : Permission -> Field
 initFromPermission permission =
     Field.group
-        [ ( "uuid", Field.string (Uuid.toString permission.uuid) )
-        , ( "questionnaireUuid", Field.string (Uuid.toString permission.questionnaireUuid) )
+        [ ( "questionnaireUuid", Field.string (Uuid.toString permission.questionnaireUuid) )
         , ( "member", QuestionnaireEditFormUser.initFromMember permission.member )
         , ( "perms", QuestionnaireEditFormUserPerms.initFromPerms permission.perms )
         ]
@@ -36,8 +34,7 @@ initFromPermission permission =
 
 validation : Validation FormError QuestionnaireEditFormPermission
 validation =
-    V.map4 QuestionnaireEditFormPermission
-        (V.field "uuid" V.uuid)
+    V.map3 QuestionnaireEditFormPermission
         (V.field "questionnaireUuid" V.uuid)
         (V.field "member" QuestionnaireEditFormUser.validation)
         (V.field "perms" QuestionnaireEditFormUserPerms.validation)
@@ -46,8 +43,7 @@ validation =
 encode : QuestionnaireEditFormPermission -> E.Value
 encode permission =
     E.object
-        [ ( "uuid", Uuid.encode permission.uuid )
-        , ( "questionnaireUuid", Uuid.encode permission.questionnaireUuid )
+        [ ( "questionnaireUuid", Uuid.encode permission.questionnaireUuid )
         , ( "member", QuestionnaireEditFormUser.encode permission.member )
         , ( "perms", QuestionnaireEditFormUserPerms.encode permission.perms )
         ]
