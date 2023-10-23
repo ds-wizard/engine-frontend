@@ -313,12 +313,12 @@ projectCommentAdd appState questionnaire =
 
 projectCommentEdit : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
 projectCommentEdit appState questionnaire commentThread comment =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.session.user comment
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
 projectCommentDelete : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
 projectCommentDelete appState questionnaire commentThread comment =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.session.user comment
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
 projectCommentThreadResolve : AppState -> QuestionnaireDetail -> CommentThread -> Bool
@@ -333,7 +333,7 @@ projectCommentThreadReopen appState questionnaire commentThread =
 
 projectCommentThreadDelete : AppState -> QuestionnaireDetail -> CommentThread -> Bool
 projectCommentThreadDelete appState questionnaire commentThread =
-    QuestionnaireDetail.canComment appState questionnaire && CommentThread.isAuthor appState.session.user commentThread
+    QuestionnaireDetail.canComment appState questionnaire && CommentThread.isAuthor appState.config.user commentThread
 
 
 projectCommentPrivate : AppState -> QuestionnaireDetail -> Bool
@@ -406,17 +406,17 @@ userEdit appState uuidOrCurrent =
 
 userEditApiKeys : AppState -> UuidOrCurrent -> Bool
 userEditApiKeys appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 userEditActiveSessions : AppState -> UuidOrCurrent -> Bool
 userEditActiveSessions appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 userEditSubmissionSettings : AppState -> UuidOrCurrent -> Bool
 userEditSubmissionSettings appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 
@@ -484,7 +484,7 @@ localeDelete appState locale =
 
 tenants : AppState -> Bool
 tenants appState =
-    Perm.hasPerm appState.session Perm.tenants
+    Perm.hasPerm appState.config.user Perm.tenants
 
 
 
@@ -493,7 +493,7 @@ tenants appState =
 
 dev : AppState -> Bool
 dev appState =
-    Perm.hasPerm appState.session Perm.dev
+    Perm.hasPerm appState.config.user Perm.dev
 
 
 
@@ -502,9 +502,9 @@ dev appState =
 
 isAdmin : AppState -> Bool
 isAdmin appState =
-    UserInfo.isAdmin appState.session.user
+    UserInfo.isAdmin appState.config.user
 
 
 adminOr : String -> AppState -> Bool
 adminOr perm appState =
-    isAdmin appState || Perm.hasPerm appState.session perm
+    isAdmin appState || Perm.hasPerm appState.config.user perm

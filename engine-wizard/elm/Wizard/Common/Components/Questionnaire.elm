@@ -3187,5 +3187,5 @@ createReply : AppState -> ReplyValue -> Reply
 createReply appState value =
     { value = value
     , createdAt = appState.currentTime
-    , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+    , createdBy = Maybe.map UserInfo.toUserSuggestion appState.config.user
     }

@@ -103,7 +103,7 @@ module Wizard.Routes exposing
     )
 
 import Shared.Auth.Role as Role
-import Shared.Auth.Session as Session exposing (Session)
+import Shared.Auth.Session exposing (Session)
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -596,15 +596,20 @@ isProjectsDetail uuid route =
             False
 
 
-projectsIndex : { a | session : Session } -> Route
+projectsIndex : { a | session : Session, config : BootstrapConfig } -> Route
 projectsIndex appState =
     let
         mbUserUuid =
-            if Session.getUserRole appState.session == Role.admin then
-                Nothing
+            case appState.config.user of
+                Just user ->
+                    if user.role == Role.admin then
+                        Nothing
 
-            else
-                Session.getUserUuid appState.session
+                    else
+                        Just (Uuid.toString user.uuid)
+
+                Nothing ->
+                    Nothing
     in
     ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
 

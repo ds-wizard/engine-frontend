@@ -9,12 +9,14 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
+import Shared.Data.Member as Member
 import Shared.Data.PackageInfo as PackageInfo exposing (PackageInfo)
 import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
+import Shared.Utils exposing (flip)
 import Time
 import Uuid exposing (Uuid)
 
@@ -39,22 +41,22 @@ isEditable : AbstractAppState a -> Questionnaire -> Bool
 isEditable appState questionnaire =
     let
         isAdmin =
-            UserInfo.isAdmin appState.session.user
+            UserInfo.isAdmin appState.config.user
 
         isReadonly =
             if questionnaire.sharing == AnyoneWithLinkEditQuestionnaire then
                 False
 
             else if Session.exists appState.session then
-                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not isOwner)
+                questionnaire.visibility == VisibleViewQuestionnaire || (questionnaire.visibility == PrivateQuestionnaire && not isMember)
 
             else
                 questionnaire.sharing == AnyoneWithLinkViewQuestionnaire
 
-        isOwner =
-            matchOwner questionnaire appState.session.user
+        isMember =
+            matchMember questionnaire appState.config.user
     in
-    isAdmin || not isReadonly || isOwner
+    isAdmin || not isReadonly || isMember
 
 
 decoder : Decoder Questionnaire
@@ -74,6 +76,18 @@ decoder =
         |> D.required "unansweredQuestions" D.int
 
 
-matchOwner : Questionnaire -> Maybe UserInfo -> Bool
-matchOwner questionnaire mbUser =
-    List.any (.member >> .uuid >> Just >> (==) (Maybe.map .uuid mbUser)) questionnaire.permissions
+matchMember : Questionnaire -> Maybe UserInfo -> Bool
+matchMember questionnaire mbUser =
+    case mbUser of
+        Just user ->
+            let
+                userUuids =
+                    user.uuid :: user.userGroupUuids
+
+                memberUuids =
+                    List.map (Member.getUuid << .member) questionnaire.permissions
+            in
+            List.any (flip List.member memberUuids) userUuids
+
+        Nothing ->
+            False

@@ -4,17 +4,16 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
 import Shared.Auth.Role as Role
-import Shared.Auth.Session as Session
 import Shared.Undraw as Undraw
 import String.Format as String
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.AppState as AppState exposing (AppState)
 
 
 view : AppState -> Html msg
 view appState =
     let
         welcomeText =
-            case appState.session.user of
+            case appState.config.user of
                 Just user ->
                     String.format (gettext "Welcome, %s!" appState.locale) [ user.firstName ]
 
@@ -22,7 +21,7 @@ view appState =
                     gettext "Welcome!" appState.locale
 
         roleText =
-            Role.switch (Session.getUserRole appState.session)
+            Role.switch (AppState.getUserRole appState)
                 (gettext "As an admin, you configure the instance and manage user accounts." appState.locale)
                 (gettext "As a data steward, you prepare knowledge models, document templates, and project templates for researchers." appState.locale)
                 (gettext "As a researcher, you create and collaborate on data management plans." appState.locale)

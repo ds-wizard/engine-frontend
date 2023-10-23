@@ -183,10 +183,13 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
 
     .ShareModal__Users {
         .form-group {
-            max-height: 200px;
-            overflow-y: auto;
+            margin-top: 0.75rem;
             margin-left: -1rem;
             margin-right: -1rem;
+
+            label {
+                display: none;
+            }
         }
 
         .user-row {

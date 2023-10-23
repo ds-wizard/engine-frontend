@@ -34,7 +34,7 @@ type alias Document =
 
 isOwner : AbstractAppState a -> Document -> Bool
 isOwner appState document =
-    appState.session.user
+    appState.config.user
         |> Maybe.map (.uuid >> Just >> (==) document.createdBy)
         |> Maybe.withDefault False
 

@@ -40,7 +40,6 @@ update msg wrapMsg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << ProfileMsg
                     , logoutMsg = Wizard.Msgs.logoutMsg
-                    , updateUserMsg = Wizard.Msgs.updateUserMsg
                     }
 
                 ( profileModel, profileCmd ) =

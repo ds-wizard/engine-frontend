@@ -57,6 +57,7 @@ import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import Shared.Data.Member as Member
 import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
@@ -75,7 +76,7 @@ import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils exposing (boolToInt, getUuidString)
+import Shared.Utils exposing (boolToInt, flip, getUuidString)
 import String.Extra as String
 import Time
 import Tuple.Extra as Tuple
@@ -194,7 +195,7 @@ hasPerm : AbstractAppState a -> QuestionnaireDetail -> String -> Bool
 hasPerm appState questionnaire role =
     let
         mbUser =
-            appState.session.user
+            appState.config.user
 
         isAuthenticated =
             Session.exists appState.session
@@ -238,13 +239,22 @@ hasPerm appState questionnaire role =
                 RestrictedQuestionnaire ->
                     []
 
-        userPerms =
-            mbUser
-                |> Maybe.andThen (\u -> List.find (.member >> .uuid >> (==) u.uuid) questionnaire.permissions)
-                |> Maybe.unwrap [] .perms
+        memberPerms =
+            case mbUser of
+                Just user ->
+                    let
+                        userUuids =
+                            user.uuid :: user.userGroupUuids
+                    in
+                    questionnaire.permissions
+                        |> List.filter (flip List.member userUuids << Member.getUuid << .member)
+                        |> List.concatMap .perms
+
+                Nothing ->
+                    []
 
         appliedPerms =
-            globalPerms ++ visibilityPerms ++ sharingPerms ++ userPerms
+            List.unique <| globalPerms ++ visibilityPerms ++ sharingPerms ++ memberPerms
     in
     List.member role appliedPerms
 

@@ -24,6 +24,9 @@ const registerSessionPorts = require('./js/ports/session')
 const registerThemePorts = require('../engine-shared/ports/theme')
 const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 
+
+const sessionKey = 'session/wizard'
+
 axiosRetry(axios, {
     retries: 3,
     retryDelay: function (retryCount) {
@@ -51,20 +54,20 @@ function getPdfSupport() {
 }
 
 
-function apiUrl() {
+function defaultApiUrl() {
     if (window.wizard && window.wizard['apiUrl']) return window.wizard['apiUrl']
     return 'http://localhost:3000'
 }
 
-function configUrl() {
+function configUrl(apiUrl) {
     const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
-    return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
+    return (apiUrl || defaultApiUrl()) + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
-function localeUrl() {
+function localeUrl(apiUrl) {
     const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
     const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
-    return apiUrl() + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
+    return (apiUrl || defaultApiUrl()) + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
 function provisioningUrl() {
@@ -95,7 +98,6 @@ function getApiUrl(config) {
 }
 
 function loadApp(config, locale, provisioning) {
-    const sessionKey = 'session/wizard'
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
         session: JSON.parse(localStorage.getItem(sessionKey)),
@@ -140,9 +142,14 @@ function loadApp(config, locale, provisioning) {
 }
 
 window.onload = function () {
+    const session = JSON.parse(localStorage.getItem(sessionKey))
+    const token = session?.token?.token
+    const headers = token ? { headers: {'Authorization': `Bearer ${token}`}} : {}
+    const apiUrl = session?.apiUrl
+
     const promises = [
-        axios.get(configUrl()),
-        axios.get(localeUrl()).catch(() => {
+        axios.get(configUrl(apiUrl), headers),
+        axios.get(localeUrl(apiUrl)).catch(() => {
             return {data: {}}
         })
     ]
@@ -160,6 +167,11 @@ window.onload = function () {
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null
-            document.body.innerHTML = bootstrapErrorHTML(errorCode)
+            if (Math.floor(errorCode / 100) === 4) {
+                localStorage.removeItem(sessionKey)
+                window.location.reload()
+            } else {
+                document.body.innerHTML = bootstrapErrorHTML(errorCode)
+            }
         })
 }

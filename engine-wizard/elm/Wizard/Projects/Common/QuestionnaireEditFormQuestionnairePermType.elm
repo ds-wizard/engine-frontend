@@ -1,4 +1,4 @@
-module Wizard.Projects.Common.QuestionnaireEditFormMemberPerms exposing
+module Wizard.Projects.Common.QuestionnaireEditFormQuestionnairePermType exposing
     ( QuestionnaireEditFormMemberPerms(..)
     , encode
     , formOptions

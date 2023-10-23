@@ -18,12 +18,12 @@ module Shared.Auth.Permission exposing
     )
 
 import Maybe.Extra as Maybe
-import Shared.Auth.Session exposing (Session)
+import Shared.Data.UserInfo exposing (UserInfo)
 
 
-hasPerm : Session -> String -> Bool
-hasPerm session perm =
-    List.member perm (Maybe.unwrap [] .permissions session.user)
+hasPerm : Maybe UserInfo -> String -> Bool
+hasPerm mbUserInfo perm =
+    List.member perm (Maybe.unwrap [] .permissions mbUserInfo)
 
 
 tenants : String

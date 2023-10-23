@@ -1,6 +1,5 @@
 module Wizard.Routing exposing
     ( cmdNavigate
-    , cmdNavigateRaw
     , parseLocation
     , routeIfAllowed
     , toUrl
@@ -191,8 +190,3 @@ parseLocation appState url =
 cmdNavigate : AppState -> Routes.Route -> Cmd msg
 cmdNavigate appState =
     pushUrl appState.key << toUrl appState
-
-
-cmdNavigateRaw : AppState -> String -> Cmd msg
-cmdNavigateRaw appState =
-    pushUrl appState.key

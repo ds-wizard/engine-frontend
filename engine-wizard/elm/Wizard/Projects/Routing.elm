@@ -190,4 +190,4 @@ isAllowed route appState =
             True
 
         _ ->
-            Perm.hasPerm appState.session Perm.questionnaire
+            Perm.hasPerm appState.config.user Perm.questionnaire

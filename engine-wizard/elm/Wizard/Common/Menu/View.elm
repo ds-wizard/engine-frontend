@@ -593,7 +593,7 @@ viewProfileMenu model =
                     ( [], "" )
 
         ( name, role, imageUrl ) =
-            case model.appState.session.user of
+            case model.appState.config.user of
                 Just user ->
                     ( User.fullName user, Role.toReadableString model.appState user.role, User.imageUrl user )
 

@@ -46,7 +46,7 @@ misconfigured appState =
 
 mixedApp : Model -> Html Msg -> Document Msg
 mixedApp model =
-    if model.appState.session.user == Nothing then
+    if model.appState.config.user == Nothing then
         publicApp model
 
     else

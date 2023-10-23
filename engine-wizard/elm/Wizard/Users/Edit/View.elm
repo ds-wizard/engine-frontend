@@ -58,7 +58,7 @@ navigation : AppState -> UserEditRoute -> Model -> Html Msg
 navigation appState subroute model =
     let
         isCurrent =
-            UuidOrCurrent.isCurrent model.uuidOrCurrent || UuidOrCurrent.matchUuid model.uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+            UuidOrCurrent.isCurrent model.uuidOrCurrent || UuidOrCurrent.matchUuid model.uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
     in
     div [ class "nav nav-pills flex-column" ]
         [ strong [] [ text (gettext "User Settings" appState.locale) ]

@@ -163,7 +163,7 @@
             border-bottom: 1px solid rgba(0, 0, 0, .125);
         }
 
-        .ItemIcon {
+        & > .ItemIcon {
             margin-right: 1rem;
         }
 
@@ -248,7 +248,15 @@
                 text-overflow: ellipsis;
                 overflow: hidden;
 
+                & > span {
+                    display: inline-flex;
+                    align-items: center;
+                }
+
                 .fragment {
+                    display: inline-flex;
+                    align-items: center;
+
                     img {
                         margin-right: .25rem;
 

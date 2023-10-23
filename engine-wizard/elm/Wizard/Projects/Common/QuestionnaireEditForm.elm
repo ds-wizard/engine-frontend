@@ -1,7 +1,7 @@
 module Wizard.Projects.Common.QuestionnaireEditForm exposing
     ( QuestionnaireEditForm
     , encode
-    , getUserUuids
+    , getMemberUuids
     , init
     , initEmpty
     , validation
@@ -13,11 +13,11 @@ import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
+import Shared.Data.Member as Member
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
-import Shared.Data.User as User
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import Uuid
@@ -50,16 +50,16 @@ init appState questionnaire =
     Form.initial (questionnaireToFormInitials questionnaire) (validation appState)
 
 
-getUserUuids : Form FormError QuestionnaireEditForm -> List String
-getUserUuids form =
+getMemberUuids : Form FormError QuestionnaireEditForm -> List String
+getMemberUuids form =
     let
         indexes =
             Form.getListIndexes "permissions" form
 
-        toUserUuid index =
-            Maybe.withDefault "" (Form.getFieldAsString ("permissions." ++ String.fromInt index ++ ".member.uuid") form).value
+        toMemberUuid index =
+            Maybe.withDefault "" (Form.getFieldAsString ("permissions." ++ String.fromInt index ++ ".memberUuid") form).value
     in
-    List.map toUserUuid indexes
+    List.map toMemberUuid indexes
 
 
 questionnaireToFormInitials : QuestionnaireDetail -> List ( String, Field.Field )
@@ -73,7 +73,7 @@ questionnaireToFormInitials questionnaire =
 
         permissionFields =
             List.map QuestionnaireEditFormPermission.initFromPermission <|
-                List.sortWith (\p1 p2 -> User.compare p1.member p2.member) questionnaire.permissions
+                List.sortWith (\p1 p2 -> Member.compare p1.member p2.member) questionnaire.permissions
     in
     [ ( "name", Field.string questionnaire.name )
     , ( "description", Field.string (Maybe.withDefault "" questionnaire.description) )

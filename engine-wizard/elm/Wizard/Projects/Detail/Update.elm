@@ -8,10 +8,12 @@ import Random exposing (Seed)
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
+import Shared.Data.Member as Member
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
+import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
@@ -197,7 +199,7 @@ update wrapMsg msg appState model =
                     appState.currentTime
 
                 createdBy =
-                    Maybe.map UserInfo.toUserSuggestion appState.session.user
+                    Maybe.map UserInfo.toUserSuggestion appState.config.user
 
                 indications =
                     ActionResult.unwrap
@@ -615,18 +617,17 @@ update wrapMsg msg appState model =
                             questionnaireModel.questionnaire
 
                         member =
-                            { uuid = Maybe.unwrap Uuid.nil .uuid appState.session.user
-                            , firstName = ""
-                            , lastName = ""
-                            , gravatarHash = ""
-                            , imageUrl = Nothing
-                            , type_ = ""
-                            }
+                            Member.userMember
+                                { uuid = Maybe.unwrap Uuid.nil .uuid appState.config.user
+                                , firstName = ""
+                                , lastName = ""
+                                , gravatarHash = ""
+                                , imageUrl = Nothing
+                                }
 
                         permission =
-                            { questionnaireUuid = questionnaireDetail.uuid
-                            , member = member
-                            , perms = [ "VIEW", "EDIT", "ADMIN" ]
+                            { member = member
+                            , perms = QuestionnairePerm.all
                             }
 
                         detail =

@@ -25,7 +25,6 @@ import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (dispatch)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
@@ -70,7 +69,6 @@ fetchData appState uuidOrCurrent =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , logoutMsg : msg
-    , updateUserMsg : User -> msg
     }
 
 
@@ -136,8 +134,8 @@ putUserCompleted cfg appState model result =
         Ok user ->
             let
                 updateCmd =
-                    if Just user.uuid == Maybe.map .uuid appState.session.user then
-                        dispatch (cfg.updateUserMsg user)
+                    if Just user.uuid == Maybe.map .uuid appState.config.user then
+                        Ports.refresh ()
 
                     else
                         Cmd.none
