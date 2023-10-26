@@ -94,7 +94,7 @@ function getApiUrl(config) {
     if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
         return config.cloud.serverUrl
     }
-    return apiUrl()
+    return defaultApiUrl()
 }
 
 function loadApp(config, locale, provisioning) {
