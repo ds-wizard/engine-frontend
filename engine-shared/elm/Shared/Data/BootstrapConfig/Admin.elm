@@ -25,14 +25,14 @@ decoder =
     D.succeed Tuple.pair
         |> D.required "enabled" D.bool
         |> D.required "clientUrl" (D.maybe D.string)
-        |> D.andThen
+        |> D.map
             (\( enabled, mbClientUrl ) ->
                 case ( enabled, mbClientUrl ) of
                     ( True, Just clientUrl ) ->
-                        D.succeed <| AdminEnabled clientUrl
+                        AdminEnabled clientUrl
 
                     _ ->
-                        D.succeed AdminDisabled
+                        AdminDisabled
             )
 
 
