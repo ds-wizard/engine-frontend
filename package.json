@@ -25,7 +25,7 @@
     "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js"
   },
   "devDependencies": {
-    "@lydell/elm": "^0.19.1-13",
+    "@lydell/elm": "^0.19.1-14",
     "copy-webpack-plugin": "^11.0.0",
     "css-loader": "^6.8.1",
     "css-minimizer-webpack-plugin": "^5.0.1",
