@@ -167,7 +167,7 @@ window.onload = function () {
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null
-            if (Math.floor(errorCode / 100) === 4) {
+            if (Math.floor(errorCode / 100) === 4 && session !== null) {
                 localStorage.removeItem(sessionKey)
                 window.location.reload()
             } else {
