@@ -14,7 +14,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
-import Html.Attributes exposing (class, classList, disabled, id, src)
+import Html.Attributes exposing (attribute, class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
 import Html.Keyed
 import Maybe.Extra as Maybe
@@ -450,7 +450,7 @@ viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                 |> Maybe.withDefault emptyEditor
     in
     Html.Keyed.node "div"
-        [ class "editor-form-view", id "editor-view" ]
+        [ class "editor-form-view", id "editor-view", attribute "data-editor-uuid" editorBranch.activeUuid ]
         [ editorContent ]
 
 

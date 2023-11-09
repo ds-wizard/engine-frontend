@@ -59,10 +59,16 @@ fetchData appState uuid model =
 fetchSubrouteData : AppState -> Model -> Cmd Msg
 fetchSubrouteData appState model =
     case appState.route of
-        KMEditorRoute (EditorRoute _ (KMEditorRoute.Edit _)) ->
+        KMEditorRoute (EditorRoute _ (KMEditorRoute.Edit mbActiveUuid)) ->
+            let
+                activeEditorUuid =
+                    mbActiveUuid
+                        |> Maybe.withDefault Uuid.nil
+                        |> Uuid.toString
+            in
             Cmd.batch
                 [ Ports.scrollToTop "#editor-view"
-                , Ports.focus "#editor-view input"
+                , Ports.focus ("[data-editor-uuid=\"" ++ activeEditorUuid ++ "\"] input")
                 ]
 
         KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
