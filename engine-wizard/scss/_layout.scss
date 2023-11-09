@@ -248,6 +248,12 @@ body {
             margin-bottom: 1px;
             @include border-radius($border-radius);
 
+            &.heading {
+                color: $gray-600;
+                font-weight: 700;
+                padding: 0 10px 10px;
+            }
+
             &.empty {
                 height: $side-navigation-gap;
             }

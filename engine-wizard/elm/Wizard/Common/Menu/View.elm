@@ -339,6 +339,13 @@ viewLogo model =
 viewMenu : Model -> Html Wizard.Msgs.Msg
 viewMenu model =
     let
+        menuHeading =
+            if Admin.isEnabled model.appState.config.admin then
+                li [ class "heading" ] [ text (gettext "Wizard" model.appState.locale) ]
+
+            else
+                emptyNode
+
         filterMenuItem menuItem =
             case menuItem of
                 MenuGroup group ->
@@ -363,7 +370,7 @@ viewMenu model =
                 li [ class "empty" ] []
     in
     ul [ class "menu" ]
-        (defaultMenuItems ++ [ space ] ++ customMenuItems)
+        (menuHeading :: defaultMenuItems ++ [ space ] ++ customMenuItems)
 
 
 defaultMenuItem : Model -> MenuItem -> Html Wizard.Msgs.Msg
