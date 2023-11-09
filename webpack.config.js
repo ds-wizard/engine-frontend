@@ -131,7 +131,7 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 {from: `${component}/img`, to: 'img'},
-                {from: `${component}/favicon.ico`, to: 'favicon.ico'},
+                {from: `${component}/favicon.ico`, to: 'favicon.ico', noErrorOnMissing: true},
                 {from: `${component}/robots.txt`, to: 'robots.txt', noErrorOnMissing: true}
             ]
         }),
