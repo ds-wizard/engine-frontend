@@ -6,6 +6,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick, onSubmit)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Shared.Form as Form
@@ -55,49 +56,65 @@ formView appState form =
     let
         formWrap =
             Html.map GenericMsgs.FormMsg
+
+        appTitleSettings =
+            if Admin.isEnabled appState.config.admin then
+                let
+                    appTitleGroup =
+                        div [ class "row" ]
+                            [ div [ class "col-8" ]
+                                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (gettext "Application Title" appState.locale)
+                                , FormExtra.mdAfter (gettext "Full name of the DSW instance (displayed, for example, in the browser tab title or before login)." appState.locale)
+                                ]
+                            , div
+                                [ class "col-4" ]
+                                [ img [ class "settings-img", src "/wizard/img/settings/app-title.png" ] []
+                                ]
+                            ]
+
+                    appTitleShortGroup =
+                        div [ class "row mt-5" ]
+                            [ div [ class "col-8" ]
+                                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitleShort ] appState form "appTitleShort" (gettext "Short Application Title" appState.locale)
+                                , FormExtra.mdAfter (gettext "Short name of the DSW instance (displayed, for example, on top of the navigation bar). Short title can be the same as the application title if it is short enough." appState.locale)
+                                ]
+                            , div [ class "col-4" ]
+                                [ img [ class "settings-img", src "/wizard/img/settings/app-title-short.png" ] []
+                                ]
+                            ]
+                in
+                [ appTitleGroup
+                , appTitleShortGroup
+                , hr [] []
+                ]
+
+            else
+                []
     in
     div []
-        [ div [ class "row" ]
-            [ div [ class "col-8" ]
-                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitle ] appState form "appTitle" (gettext "Application Title" appState.locale)
-                , FormExtra.mdAfter (gettext "Full name of the DSW instance (displayed, for example, in the browser tab title or before login)." appState.locale)
-                ]
-            , div
-                [ class "col-4" ]
-                [ img [ class "settings-img", src "/wizard/img/settings/app-title.png" ] []
-                ]
-            ]
-        , div [ class "row mt-5" ]
-            [ div [ class "col-8" ]
-                [ formWrap <| FormGroup.inputAttrs [ placeholder LookAndFeelConfig.defaultAppTitleShort ] appState form "appTitleShort" (gettext "Short Application Title" appState.locale)
-                , FormExtra.mdAfter (gettext "Short name of the DSW instance (displayed, for example, on top of the navigation bar). Short title can be the same as the application title if it is short enough." appState.locale)
-                ]
-            , div [ class "col-4" ]
-                [ img [ class "settings-img", src "/wizard/img/settings/app-title-short.png" ] []
-                ]
-            ]
-        , hr [] []
-        , div [ class "input-table mt-5" ]
-            [ div [ class "row" ]
-                [ div [ class "col-8" ]
-                    [ label [] [ text (gettext "Custom Menu Links" appState.locale) ]
-                    , Markdown.toHtml [ class "form-text text-muted" ]
-                        (String.format
-                            (gettext "Configure additional links in the menu. Choose any free icon from the [Font Awesome](%s), e.g. *fas fa-magic*. Check *New window* if you want to open the link in a new window." appState.locale)
-                            [ FontAwesome.fontAwesomeLink ]
-                        )
+        (appTitleSettings
+            ++ [ div [ class "input-table mt-5" ]
+                    [ div [ class "row" ]
+                        [ div [ class "col-8" ]
+                            [ label [] [ text (gettext "Custom Menu Links" appState.locale) ]
+                            , Markdown.toHtml [ class "form-text text-muted" ]
+                                (String.format
+                                    (gettext "Configure additional links in the menu. Choose any free icon from the [Font Awesome](%s), e.g. *fas fa-magic*. Check *New window* if you want to open the link in a new window." appState.locale)
+                                    [ FontAwesome.fontAwesomeLink ]
+                                )
+                            ]
+                        , div [ class "col-4" ]
+                            [ img [ class "settings-img", src "/wizard/img/settings/custom-menu-links.png" ] [] ]
+                        ]
+                    , div [ class "row mt-3" ]
+                        [ div [ class "col" ]
+                            [ customMenuLinksHeader appState form
+                            , formWrap <| FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" "" (gettext "Add link" appState.locale)
+                            ]
+                        ]
                     ]
-                , div [ class "col-4" ]
-                    [ img [ class "settings-img", src "/wizard/img/settings/custom-menu-links.png" ] [] ]
-                ]
-            , div [ class "row mt-3" ]
-                [ div [ class "col" ]
-                    [ customMenuLinksHeader appState form
-                    , formWrap <| FormGroup.list appState (customMenuLinkItemView appState) form "customMenuLinks" "" (gettext "Add link" appState.locale)
-                    ]
-                ]
-            ]
-        ]
+               ]
+        )
 
 
 customMenuLinksHeader : AppState -> Form FormError EditableLookAndFeelConfig -> Html msg
