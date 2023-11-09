@@ -44,14 +44,10 @@ init flags location key =
                         routeIfAllowed appState originalRoute
 
                     setThemeCmd =
-                        if LookAndFeelConfig.anyColorSet appState.config.lookAndFeel then
-                            Theme.setTheme <|
-                                Theme.Theme
-                                    (LookAndFeelConfig.getPrimaryColor appState.config.lookAndFeel)
-                                    (LookAndFeelConfig.getIllustrationsColor appState.config.lookAndFeel)
-
-                        else
-                            Cmd.none
+                        Theme.setTheme <|
+                            Theme.Theme
+                                (LookAndFeelConfig.getPrimaryColor appState.config.lookAndFeel)
+                                (LookAndFeelConfig.getIllustrationsColor appState.config.lookAndFeel)
                 in
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute

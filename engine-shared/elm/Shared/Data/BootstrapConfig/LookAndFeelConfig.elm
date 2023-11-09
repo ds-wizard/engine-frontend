@@ -1,6 +1,5 @@
 module Shared.Data.BootstrapConfig.LookAndFeelConfig exposing
     ( LookAndFeelConfig
-    , anyColorSet
     , decoder
     , default
     , defaultAppTitle
@@ -14,6 +13,7 @@ module Shared.Data.BootstrapConfig.LookAndFeelConfig exposing
     )
 
 import Color exposing (Color)
+import Color.Convert as Convert
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Color as D
 import Json.Decode.Pipeline as D
@@ -52,9 +52,19 @@ defaultAppTitleShort =
     "{defaultAppTitleShort}"
 
 
+defaultPrimaryColorString : String
+defaultPrimaryColorString =
+    "{defaultPrimaryColor}"
+
+
 defaultPrimaryColor : Color
 defaultPrimaryColor =
     Color.rgb255 0 51 170
+
+
+defaultIllustrationsColorString : String
+defaultIllustrationsColorString =
+    "{defaultIllustrationsColor}"
 
 
 defaultIllustrationsColor : Color
@@ -79,17 +89,16 @@ getAppTitleShort config =
 
 getPrimaryColor : LookAndFeelConfig -> Color
 getPrimaryColor config =
-    Maybe.withDefault defaultPrimaryColor config.primaryColor
+    config.primaryColor
+        |> Maybe.orElse (Result.toMaybe (Convert.hexToColor defaultPrimaryColorString))
+        |> Maybe.withDefault defaultPrimaryColor
 
 
 getIllustrationsColor : LookAndFeelConfig -> Color
 getIllustrationsColor config =
-    Maybe.withDefault defaultIllustrationsColor config.illustrationsColor
-
-
-anyColorSet : LookAndFeelConfig -> Bool
-anyColorSet config =
-    Maybe.isJust config.primaryColor || Maybe.isJust config.illustrationsColor
+    config.illustrationsColor
+        |> Maybe.orElse (Result.toMaybe (Convert.hexToColor defaultIllustrationsColorString))
+        |> Maybe.withDefault defaultIllustrationsColor
 
 
 getLogoUrl : LookAndFeelConfig -> String
