@@ -26,8 +26,6 @@ jobs:
       - name: '[app] Install'
         run: |
           npm ci
-          cd wizard-style-builder
-          npm install fs-extra@10.1.0 sass@1.54.0
 
       - name: '[app] Create .pot File'
         run: |
