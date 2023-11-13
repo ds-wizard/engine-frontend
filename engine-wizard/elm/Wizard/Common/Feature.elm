@@ -33,6 +33,7 @@ module Wizard.Common.Feature exposing
     , localeImport
     , localeSetDefault
     , localeView
+    , plans
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -58,6 +59,7 @@ module Wizard.Common.Feature exposing
     , projectsCreateCustom
     , projectsCreateFromTemplate
     , projectsView
+    , registry
     , settings
     , tenants
     , userEdit
@@ -71,6 +73,7 @@ module Wizard.Common.Feature exposing
 import Maybe.Extra as Maybe
 import Shared.Auth.Permission as Perm
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Data.Document as Document exposing (Document)
@@ -383,6 +386,16 @@ documentSubmit appState document =
 settings : AppState -> Bool
 settings =
     adminOr Perm.settings
+
+
+plans : AppState -> Bool
+plans appState =
+    appState.config.cloud.enabled && not (Admin.isEnabled appState.config.admin)
+
+
+registry : AppState -> Bool
+registry appState =
+    not (Admin.isEnabled appState.config.admin)
 
 
 

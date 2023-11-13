@@ -5,6 +5,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, hr, img, p, strong, text)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
@@ -52,44 +54,53 @@ formView appState form =
                     ]
               )
             ]
+
+        loginInfos =
+            if Admin.isEnabled appState.config.admin then
+                []
+
+            else
+                [ hr [] []
+                , div [ class "row mt-5" ]
+                    [ div [ class "col-8" ]
+                        [ FormGroup.htmlOrMarkdownEditor appState form "loginInfo" (gettext "Login Info" appState.locale)
+                        , FormExtra.mdAfter (gettext "Additional information displayed on the login screen next to the login form." appState.locale)
+                        ]
+                    , div [ class "col-4" ]
+                        [ img [ class "settings-img", src "/wizard/img/settings/login-info-text.png" ] []
+                        ]
+                    ]
+                , div [ class "row mt-5" ]
+                    [ div [ class "col-8" ]
+                        [ FormGroup.htmlOrMarkdownEditor appState form "loginInfoSidebar" (gettext "Sidebar Login Info" appState.locale)
+                        , FormExtra.mdAfter (gettext "Additional information displayed on the login screen underneath the login form." appState.locale)
+                        ]
+                    , div [ class "col-4" ]
+                        [ img [ class "settings-img", src "/wizard/img/settings/login-info-sidebar-text.png" ] []
+                        ]
+                    ]
+                ]
     in
     div [ class "Dashboard" ]
-        [ FormGroup.htmlRadioGroup appState opts form "dashboardType" (gettext "Dashboard Style" appState.locale)
-        , hr [] []
-        , div [ class "row mt-5" ]
-            [ div [ class "col-8" ]
-                [ FormGroup.htmlOrMarkdownEditor appState form "loginInfo" (gettext "Login Info" appState.locale)
-                , FormExtra.mdAfter (gettext "Additional information displayed on the login screen next to the login form." appState.locale)
-                ]
-            , div [ class "col-4" ]
-                [ img [ class "settings-img", src "/wizard/img/settings/login-info-text.png" ] []
-                ]
-            ]
-        , div [ class "row mt-5" ]
-            [ div [ class "col-8" ]
-                [ FormGroup.htmlOrMarkdownEditor appState form "loginInfoSidebar" (gettext "Sidebar Login Info" appState.locale)
-                , FormExtra.mdAfter (gettext "Additional information displayed on the login screen underneath the login form." appState.locale)
-                ]
-            , div [ class "col-4" ]
-                [ img [ class "settings-img", src "/wizard/img/settings/login-info-sidebar-text.png" ] []
-                ]
-            ]
-        , hr [] []
-        , h3 [] [ text (gettext "Announcements" appState.locale) ]
-        , div [ class "row mt-5" ]
-            [ div [ class "col-8" ]
-                [ FormGroup.list appState
-                    (announcementFormView appState)
-                    form
-                    "announcements"
-                    (gettext "Announcements" appState.locale)
-                    (gettext "Add announcement" appState.locale)
-                ]
-            , div [ class "col-4" ]
-                [ img [ class "settings-img", src "/wizard/img/settings/announcements.png" ] []
-                ]
-            ]
-        ]
+        (FormGroup.htmlRadioGroup appState opts form "dashboardType" (gettext "Dashboard Style" appState.locale)
+            :: loginInfos
+            ++ [ hr [] []
+               , h3 [] [ text (gettext "Announcements" appState.locale) ]
+               , div [ class "row mt-5" ]
+                    [ div [ class "col-8" ]
+                        [ FormGroup.list appState
+                            (announcementFormView appState)
+                            form
+                            "announcements"
+                            (gettext "Announcements" appState.locale)
+                            (gettext "Add announcement" appState.locale)
+                        ]
+                    , div [ class "col-4" ]
+                        [ img [ class "settings-img", src "/wizard/img/settings/announcements.png" ] []
+                        ]
+                    ]
+               ]
+        )
 
 
 announcementFormView : AppState -> Form FormError DashboardAndLoginScreenConfigForm -> Int -> Html Form.Msg
@@ -133,7 +144,9 @@ announcementFormView appState form i =
             , FormGroup.markdownEditor appState form contentField (gettext "Content" appState.locale)
             , FormGroup.toggle form dashboardField (gettext "Dashboard" appState.locale)
             , FormExtra.textAfter (gettext "Display on the dashboard after users log in." appState.locale)
-            , FormGroup.toggle form loginScreenField (gettext "Login Screen" appState.locale)
-            , FormExtra.textAfter (gettext "Display on the login screen, visible to everybody." appState.locale)
+            , Html.viewIf (not (Admin.isEnabled appState.config.admin)) <|
+                FormGroup.toggle form loginScreenField (gettext "Login Screen" appState.locale)
+            , Html.viewIf (not (Admin.isEnabled appState.config.admin)) <|
+                FormExtra.textAfter (gettext "Display on the login screen, visible to everybody." appState.locale)
             ]
         ]
