@@ -10,7 +10,7 @@ import Shared.Auth.Session as Session
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Data.Document as Document exposing (Document)
+import Shared.Data.Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Submission as Submission exposing (Submission)
@@ -141,18 +141,18 @@ listingTitle cfg appState document =
 listingDescription : ViewConfig msg -> AppState -> Document -> Html msg
 listingDescription cfg _ document =
     let
-        ( icon, formatName ) =
-            case Document.getFormat document of
-                Just format ->
-                    ( fa format.icon, format.name )
-
-                Nothing ->
-                    ( emptyNode, "" )
-
         viewVersion version =
             span [ class "fragment" ]
                 [ QuestionnaireVersionTag.version version
                 ]
+
+        formatFragment =
+            case document.format of
+                Just format ->
+                    span [ class "fragment" ] [ fa format.icon, text format.name ]
+
+                Nothing ->
+                    emptyNode
 
         fileSizeFragment =
             case document.fileSize of
@@ -168,9 +168,9 @@ listingDescription cfg _ document =
                 |> Maybe.unwrap emptyNode viewVersion
     in
     span []
-        [ span [ class "fragment" ] [ icon, text formatName ]
+        [ formatFragment
         , fileSizeFragment
-        , span [ class "fragment" ] [ text document.documentTemplate.name ]
+        , span [ class "fragment" ] [ text document.documentTemplateName ]
         , versionFragment
         ]
 

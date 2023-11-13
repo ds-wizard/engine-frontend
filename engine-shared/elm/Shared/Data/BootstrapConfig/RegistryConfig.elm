@@ -19,14 +19,14 @@ decoder =
     D.succeed Tuple.pair
         |> D.required "enabled" D.bool
         |> D.required "url" (D.maybe D.string)
-        |> D.andThen
+        |> D.map
             (\( enabled, mbUrl ) ->
                 case ( enabled, mbUrl ) of
                     ( True, Just url ) ->
-                        D.succeed <| RegistryEnabled url
+                        RegistryEnabled url
 
                     _ ->
-                        D.succeed RegistryDisabled
+                        RegistryDisabled
             )
 
 

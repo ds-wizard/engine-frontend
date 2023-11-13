@@ -3,13 +3,14 @@ module Wizard.Projects.Index.View exposing (view)
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, img, input, span, text)
-import Html.Attributes exposing (class, classList, href, placeholder, src, style, title, type_, value)
+import Html exposing (Html, a, div, input, span, text)
+import Html.Attributes exposing (class, classList, href, placeholder, style, title, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
+import Shared.Data.Member as Member
 import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
@@ -31,6 +32,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
 import Wizard.Common.Html.Events exposing (alwaysStopPropagationOn)
 import Wizard.Common.View.FormResult as FormResult
+import Wizard.Common.View.MemberIcon as MemberIcon
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.KnowledgeModels.Routes
@@ -551,26 +553,18 @@ listingDescription appState questionnaire =
 
                 perm :: [] ->
                     span [ class "fragment" ]
-                        [ img [ src (User.imageUrlOrGravatar perm.member), class "user-icon user-icon-small" ] []
-                        , text <| User.fullName perm.member
+                        [ MemberIcon.view perm.member
+                        , text <| Member.visibleName perm.member
                         ]
 
                 perms ->
                     let
-                        ownerIcon member =
-                            img
-                                [ src (User.imageUrlOrGravatar member)
-                                , class "user-icon user-icon-small user-icon-only"
-                                , title <| User.fullName member
-                                ]
-                                []
-
                         users =
                             perms
                                 |> List.map .member
-                                |> List.sortWith User.compare
+                                |> List.sortWith Member.compare
                                 |> List.take 5
-                                |> List.map ownerIcon
+                                |> List.map MemberIcon.viewIconOnly
 
                         extraUsers =
                             if List.length perms > 5 then

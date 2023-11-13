@@ -73,5 +73,13 @@ toUrl appState route =
 
 
 isAllowed : Route -> AppState -> Bool
-isAllowed _ appState =
-    Feature.settings appState
+isAllowed route appState =
+    case route of
+        RegistryRoute ->
+            Feature.settings appState && Feature.registry appState
+
+        PlansRoute ->
+            Feature.settings appState && Feature.plans appState
+
+        _ ->
+            Feature.settings appState

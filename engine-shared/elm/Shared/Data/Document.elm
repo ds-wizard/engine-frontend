@@ -1,18 +1,15 @@
 module Shared.Data.Document exposing
     ( Document
     , decoder
-    , getFormat
     , isOwner
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
-import List.Extra as List
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Data.Document.DocumentState as DocumentState exposing (DocumentState)
-import Shared.Data.Document.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
-import Shared.Data.DocumentTemplate.DocumentTemplateFormat exposing (DocumentTemplateFormat)
+import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
 import Shared.Data.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Time
@@ -25,11 +22,11 @@ type alias Document =
     , createdAt : Time.Posix
     , questionnaire : Maybe QuestionnaireInfo
     , questionnaireEventUuid : Maybe Uuid
-    , documentTemplate : DocumentTemplate
-    , formatUuid : Uuid
+    , documentTemplateName : String
+    , format : Maybe DocumentTemplateFormat
     , state : DocumentState
     , submissions : List Submission
-    , creatorUuid : Maybe Uuid
+    , createdBy : Maybe Uuid
     , fileSize : Maybe Int
     , workerLog : Maybe String
     }
@@ -37,8 +34,8 @@ type alias Document =
 
 isOwner : AbstractAppState a -> Document -> Bool
 isOwner appState document =
-    appState.session.user
-        |> Maybe.map (.uuid >> Just >> (==) document.creatorUuid)
+    appState.config.user
+        |> Maybe.map (.uuid >> Just >> (==) document.createdBy)
         |> Maybe.withDefault False
 
 
@@ -50,15 +47,10 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.optional "questionnaire" (D.maybe QuestionnaireInfo.decoder) Nothing
         |> D.required "questionnaireEventUuid" (D.maybe Uuid.decoder)
-        |> D.required "documentTemplate" DocumentTemplate.decoder
-        |> D.required "formatUuid" Uuid.decoder
+        |> D.required "documentTemplateName" D.string
+        |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
         |> D.required "state" DocumentState.decoder
         |> D.required "submissions" (D.list Submission.decoder)
-        |> D.required "creatorUuid" (D.maybe Uuid.decoder)
+        |> D.required "createdBy" (D.maybe Uuid.decoder)
         |> D.required "fileSize" (D.maybe D.int)
         |> D.required "workerLog" (D.maybe D.string)
-
-
-getFormat : Document -> Maybe DocumentTemplateFormat
-getFormat document =
-    List.find (.uuid >> (==) document.formatUuid) document.documentTemplate.formats

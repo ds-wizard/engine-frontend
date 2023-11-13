@@ -3,7 +3,9 @@ module Wizard exposing (main)
 import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Utils exposing (dispatch)
+import Shared.Utils.Theme as Theme
 import Url exposing (Url)
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Time as Time
@@ -40,9 +42,16 @@ init flags location key =
 
                     route =
                         routeIfAllowed appState originalRoute
+
+                    setThemeCmd =
+                        Theme.setTheme <|
+                            Theme.Theme
+                                (LookAndFeelConfig.getPrimaryColor appState.config.lookAndFeel)
+                                (LookAndFeelConfig.getIllustrationsColor appState.config.lookAndFeel)
                 in
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute
+                    , setThemeCmd
                     , Time.getTime
                     , Time.getTimeZone
                     ]

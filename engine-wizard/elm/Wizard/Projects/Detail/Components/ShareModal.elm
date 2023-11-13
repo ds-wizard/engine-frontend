@@ -16,16 +16,21 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, hr, input, span, strong, text)
 import Html.Attributes exposing (class, classList, id, readonly, title, value)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.UserGroups as UserGroupsApi
 import Shared.Api.Users as UsersApi
+import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Member as Member
 import Shared.Data.Permission exposing (Permission)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnairePermission as QuestionnairePermission
 import Shared.Data.User as User
+import Shared.Data.UserGroupSuggestion exposing (UserGroupSuggestion)
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
@@ -38,11 +43,12 @@ import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintInput
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Common.View.MemberIcon as MemberIcon
 import Wizard.Common.View.Modal as Modal
-import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm exposing (QuestionnaireEditForm)
-import Wizard.Projects.Common.QuestionnaireEditFormMemberPerms as QuestionnaireEditFormMemberPerms
+import Wizard.Projects.Common.QuestionnaireEditFormMemberType as QuestionnaireEditFormMemberType exposing (QuestionnaireEditFormMemberType(..))
+import Wizard.Projects.Common.QuestionnaireEditFormQuestionnairePermType as QuestionnaireEditFormMemberPerms
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes as Routes
 import Wizard.Routes as Routes
@@ -59,7 +65,9 @@ type alias Model =
     , questionnaireEditForm : Form FormError QuestionnaireEditForm
     , questionnaireUuid : Uuid
     , userTypeHintInputModel : TypeHintInput.Model UserSuggestion
+    , userGroupTypeHintInputModel : TypeHintInput.Model UserGroupSuggestion
     , users : List UserSuggestion
+    , userGroups : List UserGroupSuggestion
     }
 
 
@@ -70,7 +78,9 @@ init appState =
     , questionnaireEditForm = QuestionnaireEditForm.initEmpty appState
     , questionnaireUuid = Uuid.nil
     , userTypeHintInputModel = TypeHintInput.init "memberId"
+    , userGroupTypeHintInputModel = TypeHintInput.init "userGroupUuid"
     , users = []
+    , userGroups = []
     }
 
 
@@ -79,7 +89,8 @@ setQuestionnaire appState questionnaire model =
     { model
         | questionnaireEditForm = QuestionnaireEditForm.init appState questionnaire
         , questionnaireUuid = questionnaire.uuid
-        , users = List.map (.member >> Member.toUserSuggestion) questionnaire.permissions
+        , users = List.filterMap (.member >> Member.toUserSuggestion) questionnaire.permissions
+        , userGroups = List.filterMap (.member >> Member.toUserGroupSuggestion) questionnaire.permissions
     }
 
 
@@ -91,7 +102,9 @@ type Msg
     = Open QuestionnaireDetail
     | Close
     | UserTypeHintInputMsg (TypeHintInput.Msg UserSuggestion)
+    | UserGroupTypeHintInputMsg (TypeHintInput.Msg UserGroupSuggestion)
     | AddUser UserSuggestion
+    | AddUserGroup UserGroupSuggestion
     | FormMsg Form.Msg
     | PutQuestionnaireComplete (Result ApiError ())
     | CopyPublicLink String
@@ -125,8 +138,14 @@ update cfg msg appState model =
         UserTypeHintInputMsg typeHintInputMsg ->
             withSeed <| handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
 
+        UserGroupTypeHintInputMsg typeHintInputMsg ->
+            withSeed <| handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model
+
         AddUser user ->
             handleAddUser appState model user
+
+        AddUserGroup userGroup ->
+            handleAddUserGroup appState model userGroup
 
         FormMsg formMsg ->
             withSeed <| handleFormMsg cfg formMsg appState model
@@ -141,11 +160,11 @@ update cfg msg appState model =
 handleUserTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserSuggestion -> AppState -> Model -> ( Model, Cmd msg )
 handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
-        projectUsersUuids =
-            QuestionnaireEditForm.getUserUuids model.questionnaireEditForm
+        projectMemberUuids =
+            QuestionnaireEditForm.getMemberUuids model.questionnaireEditForm
 
-        filterResults user =
-            not <| List.member (Uuid.toString user.uuid) projectUsersUuids
+        filterResults userSuggestion =
+            not <| List.member (Uuid.toString userSuggestion.uuid) projectMemberUuids
 
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << UserTypeHintInputMsg
@@ -160,6 +179,30 @@ handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
             TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.userTypeHintInputModel
     in
     ( { model | userTypeHintInputModel = userTypeHintInputModel }, cmd )
+
+
+handleUserGroupTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserGroupSuggestion -> AppState -> Model -> ( Model, Cmd msg )
+handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model =
+    let
+        projectMemberUuids =
+            QuestionnaireEditForm.getMemberUuids model.questionnaireEditForm
+
+        filterResults userGroupSuggestion =
+            not <| List.member (Uuid.toString userGroupSuggestion.uuid) projectMemberUuids
+
+        typeHintInputCfg =
+            { wrapMsg = cfg.wrapMsg << UserGroupTypeHintInputMsg
+            , getTypeHints = UserGroupsApi.getUserGroupsSuggestions
+            , getError = gettext "Unable to get user groups." appState.locale
+            , setReply = cfg.wrapMsg << AddUserGroup
+            , clearReply = Nothing
+            , filterResults = Just filterResults
+            }
+
+        ( userGroupTypeHintInputModel, cmd ) =
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.userGroupTypeHintInputModel
+    in
+    ( { model | userGroupTypeHintInputModel = userGroupTypeHintInputModel }, cmd )
 
 
 handleAddUser : AppState -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
@@ -183,8 +226,8 @@ handleAddUser appState model user =
         msgs =
             [ Form.Append "permissions"
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".uuid") (Uuid.toString newUuid)
-            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".questionnaireUuid") (Uuid.toString model.questionnaireUuid)
-            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".member.uuid") (Uuid.toString user.uuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberUuid") (Uuid.toString user.uuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberType") (QuestionnaireEditFormMemberType.toString UserQuestionnairePermType)
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".perms") (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Viewer)
             ]
 
@@ -196,6 +239,45 @@ handleAddUser appState model user =
         | userTypeHintInputModel = userTypeHintInputModel
         , questionnaireEditForm = newForm
         , users = List.uniqueBy (Uuid.toString << .uuid) (user :: model.users)
+      }
+    , Cmd.none
+    )
+
+
+handleAddUserGroup : AppState -> Model -> UserGroupSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUserGroup appState model userGroup =
+    let
+        userGroupTypeHintInputModel =
+            TypeHintInput.clear model.userGroupTypeHintInputModel
+
+        permissionsLength =
+            List.length <| Form.getListIndexes "permissions" model.questionnaireEditForm
+
+        formUpdate =
+            Form.update (QuestionnaireEditForm.validation appState)
+
+        createInputMessage field value =
+            Form.Input field Form.Text (Field.String value)
+
+        ( newUuid, newSeed ) =
+            getUuid appState.seed
+
+        msgs =
+            [ Form.Append "permissions"
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".uuid") (Uuid.toString newUuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberUuid") (Uuid.toString userGroup.uuid)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberType") (QuestionnaireEditFormMemberType.toString UserGroupQuestionnairePermType)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".perms") (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Viewer)
+            ]
+
+        newForm =
+            List.foldl formUpdate model.questionnaireEditForm msgs
+    in
+    ( newSeed
+    , { model
+        | userGroupTypeHintInputModel = userGroupTypeHintInputModel
+        , questionnaireEditForm = newForm
+        , userGroups = List.uniqueBy (Uuid.toString << .uuid) (userGroup :: model.userGroups)
       }
     , Cmd.none
     )
@@ -241,8 +323,16 @@ handlePutQuestionnaireComplete appState model result =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map UserTypeHintInputMsg <|
-        TypeHintInput.subscriptions model.userTypeHintInputModel
+    let
+        userTypeHintInputSub =
+            Sub.map UserTypeHintInputMsg <|
+                TypeHintInput.subscriptions model.userTypeHintInputModel
+
+        userGroupTypeHintInputSub =
+            Sub.map UserGroupTypeHintInputMsg <|
+                TypeHintInput.subscriptions model.userGroupTypeHintInputModel
+    in
+    Sub.batch [ userTypeHintInputSub, userGroupTypeHintInputSub ]
 
 
 
@@ -253,7 +343,8 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         modalContent =
-            [ usersView appState model
+            [ Html.viewIf (Admin.isEnabled appState.config.admin) <| userGroupsView appState model
+            , usersView appState model
             , formView appState model.questionnaireUuid model.questionnaireEditForm
             ]
 
@@ -272,18 +363,87 @@ view appState model =
     Modal.confirm appState modalConfig
 
 
+userGroupsView : AppState -> Model -> Html Msg
+userGroupsView appState model =
+    let
+        userGroupTypeHintInputCfg =
+            { viewItem = TypeHintInput.userGroupSuggestion appState
+            , wrapMsg = UserGroupTypeHintInputMsg
+            , nothingSelectedItem = span [ class "text-muted" ] [ text <| gettext "Add user group" appState.locale ]
+            , clearEnabled = False
+            }
+
+        userGroupTypeHintInput =
+            TypeHintInput.view appState userGroupTypeHintInputCfg model.userGroupTypeHintInputModel False
+    in
+    div [ class "ShareModal__Users" ]
+        [ div []
+            [ strong [] [ text (gettext "User Groups" appState.locale) ]
+            , userGroupTypeHintInput
+            ]
+        , Html.map FormMsg <| FormGroup.viewList appState (userGroupView appState model.userGroups) model.questionnaireEditForm "permissions" ""
+        , hr [] []
+        ]
+
+
+userGroupView : AppState -> List UserGroupSuggestion -> Form FormError QuestionnaireEditForm -> Int -> Html Form.Msg
+userGroupView appState userGroups form i =
+    let
+        memberUuid =
+            (Form.getFieldAsString ("permissions." ++ String.fromInt i ++ ".memberUuid") form).value
+
+        mbUserGroup =
+            List.find (.uuid >> Uuid.toString >> Just >> (==) memberUuid) userGroups
+    in
+    case mbUserGroup of
+        Just userGroup ->
+            let
+                roleOptions =
+                    QuestionnaireEditFormMemberPerms.formOptions appState
+
+                roleSelect =
+                    FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms")
+
+                privateBadge =
+                    if userGroup.private then
+                        Badge.dark [ class "ms-2" ] [ text (gettext "private" appState.locale) ]
+
+                    else
+                        emptyNode
+            in
+            div [ class "user-row" ]
+                [ div []
+                    [ MemberIcon.viewCustom { text = userGroup.name, image = Nothing }
+                    , text userGroup.name
+                    , privateBadge
+                    ]
+                , div []
+                    [ roleSelect
+                    , a
+                        [ class "text-danger"
+                        , onClick (Form.RemoveItem "permissions" i)
+                        , title (gettext "Remove" appState.locale)
+                        ]
+                        [ faSet "_global.remove" appState ]
+                    ]
+                ]
+
+        Nothing ->
+            emptyNode
+
+
 usersView : AppState -> Model -> Html Msg
 usersView appState model =
     let
-        cfg =
+        userTypeHintInputCfg =
             { viewItem = TypeHintInput.memberSuggestion
             , wrapMsg = UserTypeHintInputMsg
             , nothingSelectedItem = span [ class "text-muted" ] [ text <| gettext "Add users" appState.locale ]
             , clearEnabled = False
             }
 
-        typeHintInput =
-            TypeHintInput.view appState cfg model.userTypeHintInputModel False
+        userTypeHintInput =
+            TypeHintInput.view appState userTypeHintInputCfg model.userTypeHintInputModel False
 
         separator =
             if appState.config.questionnaire.questionnaireVisibility.enabled || appState.config.questionnaire.questionnaireSharing.enabled then
@@ -293,8 +453,10 @@ usersView appState model =
                 emptyNode
     in
     div [ class "ShareModal__Users" ]
-        [ strong [] [ text (gettext "Users" appState.locale) ]
-        , typeHintInput
+        [ div [ class "mt-2" ]
+            [ strong [] [ text (gettext "Users" appState.locale) ]
+            , userTypeHintInput
+            ]
         , Html.map FormMsg <| FormGroup.viewList appState (userView appState model.users) model.questionnaireEditForm "permissions" ""
         , separator
         ]
@@ -304,7 +466,7 @@ userView : AppState -> List UserSuggestion -> Form FormError QuestionnaireEditFo
 userView appState users form i =
     let
         memberUuid =
-            (Form.getFieldAsString ("permissions." ++ String.fromInt i ++ ".member.uuid") form).value
+            (Form.getFieldAsString ("permissions." ++ String.fromInt i ++ ".memberUuid") form).value
 
         mbUser =
             List.find (.uuid >> Uuid.toString >> Just >> (==) memberUuid) users
@@ -320,7 +482,7 @@ userView appState users form i =
             in
             div [ class "user-row" ]
                 [ div []
-                    [ UserIcon.viewSmall user
+                    [ MemberIcon.viewCustom { text = User.fullName user, image = Just (User.imageUrlOrGravatar user) }
                     , text <| User.fullName user
                     ]
                 , div []

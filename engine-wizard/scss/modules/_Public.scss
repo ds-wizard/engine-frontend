@@ -29,12 +29,17 @@
 
     .navbar-brand {
         color: $side-navigation-title-color;
-        background-image: $side-navigation-logo-url;
-        background-repeat: no-repeat;
-        background-size: $side-navigation-logo-width $side-navigation-logo-height;
-        background-position: left center;
         padding-left: 10px + $side-navigation-logo-width;
         font-weight: 500;
+        position: relative;
+
+        .logo-img {
+            width: $side-navigation-logo-width;
+            height: $side-navigation-logo-height;
+            position: absolute;
+            left: 0;
+            top: 1px;
+        }
     }
 
     .navbar-expand-sm {

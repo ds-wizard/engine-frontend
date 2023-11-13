@@ -4,12 +4,20 @@ module Shared.Data.BootstrapConfig.LookAndFeelConfig exposing
     , default
     , defaultAppTitle
     , defaultAppTitleShort
+    , defaultLogoUrl
     , getAppTitle
     , getAppTitleShort
+    , getIllustrationsColor
+    , getLogoUrl
+    , getPrimaryColor
     )
 
+import Color exposing (Color)
+import Color.Convert as Convert
 import Json.Decode as D exposing (Decoder)
+import Json.Decode.Color as D
 import Json.Decode.Pipeline as D
+import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink as CustomMenuLink exposing (CustomMenuLink)
 
 
@@ -17,6 +25,9 @@ type alias LookAndFeelConfig =
     { appTitle : Maybe String
     , appTitleShort : Maybe String
     , customMenuLinks : List CustomMenuLink
+    , illustrationsColor : Maybe Color
+    , logoUrl : Maybe String
+    , primaryColor : Maybe Color
     }
 
 
@@ -25,6 +36,9 @@ default =
     { appTitle = Nothing
     , appTitleShort = Nothing
     , customMenuLinks = []
+    , illustrationsColor = Nothing
+    , logoUrl = Nothing
+    , primaryColor = Nothing
     }
 
 
@@ -38,6 +52,31 @@ defaultAppTitleShort =
     "{defaultAppTitleShort}"
 
 
+defaultPrimaryColorString : String
+defaultPrimaryColorString =
+    "{defaultPrimaryColor}"
+
+
+defaultPrimaryColor : Color
+defaultPrimaryColor =
+    Color.rgb255 0 51 170
+
+
+defaultIllustrationsColorString : String
+defaultIllustrationsColorString =
+    "{defaultIllustrationsColor}"
+
+
+defaultIllustrationsColor : Color
+defaultIllustrationsColor =
+    Color.rgb255 0 51 170
+
+
+defaultLogoUrl : String
+defaultLogoUrl =
+    "/wizard/img/logo.svg"
+
+
 getAppTitle : LookAndFeelConfig -> String
 getAppTitle config =
     Maybe.withDefault defaultAppTitle config.appTitle
@@ -46,6 +85,25 @@ getAppTitle config =
 getAppTitleShort : LookAndFeelConfig -> String
 getAppTitleShort config =
     Maybe.withDefault defaultAppTitleShort config.appTitleShort
+
+
+getPrimaryColor : LookAndFeelConfig -> Color
+getPrimaryColor config =
+    config.primaryColor
+        |> Maybe.orElse (Result.toMaybe (Convert.hexToColor defaultPrimaryColorString))
+        |> Maybe.withDefault defaultPrimaryColor
+
+
+getIllustrationsColor : LookAndFeelConfig -> Color
+getIllustrationsColor config =
+    config.illustrationsColor
+        |> Maybe.orElse (Result.toMaybe (Convert.hexToColor defaultIllustrationsColorString))
+        |> Maybe.withDefault defaultIllustrationsColor
+
+
+getLogoUrl : LookAndFeelConfig -> String
+getLogoUrl config =
+    Maybe.withDefault defaultLogoUrl config.logoUrl
 
 
 
@@ -58,3 +116,6 @@ decoder =
         |> D.required "appTitle" (D.maybe D.string)
         |> D.required "appTitleShort" (D.maybe D.string)
         |> D.required "customMenuLinks" (D.list CustomMenuLink.decoder)
+        |> D.required "illustrationsColor" (D.maybe D.hexColor)
+        |> D.required "logoUrl" (D.maybe D.string)
+        |> D.required "primaryColor" (D.maybe D.hexColor)

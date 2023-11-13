@@ -22,6 +22,7 @@
         width: 100%;
         height: 100%;
         border-radius: 2.5rem;
+        margin: 0 !important;
     }
 
     &--App {
@@ -34,12 +35,24 @@
             height: 1.75rem;
             border-radius: unset;
         }
+    }
 
-        &--DefaultLogo {
-            background-image: $side-navigation-logo-url;
-            background-repeat: no-repeat;
-            background-size: 1.75rem 1.75rem;
-            background-position: center center;
+    &--Member {
+        @include border-radius(100%);
+        width: 1.5rem;
+        height: 1.5rem;
+        font-size: 0.75rem;
+        display: inline-flex;
+
+        &--Small {
+            width: 1.125rem;
+            height: 1.125rem;
+            font-size: 0.75rem;
+            margin-right: 0.25rem;
+        }
+
+        &--Large {
+            width: 5rem;
         }
     }
 }

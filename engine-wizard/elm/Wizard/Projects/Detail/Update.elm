@@ -8,17 +8,19 @@ import Random exposing (Seed)
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
+import Shared.Data.Member as Member
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
+import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Utils exposing (dispatch, getUuid)
+import Shared.Utils exposing (dispatch)
 import Shared.WebSocket as WebSocket
 import Triple
 import Uuid exposing (Uuid)
@@ -197,7 +199,7 @@ update wrapMsg msg appState model =
                     appState.currentTime
 
                 createdBy =
-                    Maybe.map UserInfo.toUserSuggestion appState.session.user
+                    Maybe.map UserInfo.toUserSuggestion appState.config.user
 
                 indications =
                     ActionResult.unwrap
@@ -615,22 +617,17 @@ update wrapMsg msg appState model =
                             questionnaireModel.questionnaire
 
                         member =
-                            { uuid = Maybe.unwrap Uuid.nil .uuid appState.session.user
-                            , firstName = ""
-                            , lastName = ""
-                            , gravatarHash = ""
-                            , imageUrl = Nothing
-                            , type_ = ""
-                            }
-
-                        ( uuid, newSeed ) =
-                            getUuid appState.seed
+                            Member.userMember
+                                { uuid = Maybe.unwrap Uuid.nil .uuid appState.config.user
+                                , firstName = ""
+                                , lastName = ""
+                                , gravatarHash = ""
+                                , imageUrl = Nothing
+                                }
 
                         permission =
-                            { uuid = uuid
-                            , questionnaireUuid = questionnaireDetail.uuid
-                            , member = member
-                            , perms = [ "VIEW", "EDIT", "ADMIN" ]
+                            { member = member
+                            , perms = QuestionnairePerm.all
                             }
 
                         detail =
@@ -651,7 +648,7 @@ update wrapMsg msg appState model =
                                 _ ->
                                     Cmd.none
                     in
-                    ( newSeed, { model | addingToMyProjects = Loading }, cmd )
+                    withSeed ( { model | addingToMyProjects = Loading }, cmd )
 
                 _ ->
                     ( appState.seed, model, Cmd.none )

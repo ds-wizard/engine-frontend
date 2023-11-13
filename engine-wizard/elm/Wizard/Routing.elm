@@ -1,6 +1,5 @@
 module Wizard.Routing exposing
     ( cmdNavigate
-    , cmdNavigateRaw
     , parseLocation
     , routeIfAllowed
     , toUrl
@@ -9,8 +8,7 @@ module Wizard.Routing exposing
 import Browser.Navigation exposing (pushUrl)
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
-import Url.Parser exposing (Parser, map, oneOf, s)
-import Wizard.Apps.Routing
+import Url.Parser exposing ((</>), Parser, map, oneOf, s)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.Routing
 import Wizard.DocumentTemplateEditors.Routing
@@ -25,6 +23,7 @@ import Wizard.Public.Routing
 import Wizard.Registry.Routing
 import Wizard.Routes as Routes
 import Wizard.Settings.Routing
+import Wizard.Tenants.Routing
 import Wizard.Users.Routing
 
 
@@ -33,7 +32,7 @@ matchers appState =
     let
         parsers =
             Wizard.Dev.Routing.parsers appState Routes.DevRoute
-                ++ Wizard.Apps.Routing.parsers Routes.AppsRoute
+                ++ Wizard.Tenants.Routing.parsers Routes.TenantsRoute
                 ++ Wizard.Documents.Routing.parsers appState Routes.DocumentsRoute
                 ++ Wizard.DocumentTemplateEditors.Routing.parsers appState Routes.DocumentTemplateEditorsRoute
                 ++ Wizard.DocumentTemplates.Routing.parsers appState Routes.DocumentTemplatesRoute
@@ -48,8 +47,11 @@ matchers appState =
                 ++ Wizard.Users.Routing.parsers appState Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
                    ]
+
+        parsersWithPrefix =
+            List.map (\p -> map identity (s "wizard" </> p)) parsers
     in
-    oneOf parsers
+    oneOf parsersWithPrefix
 
 
 routeIfAllowed : AppState -> Routes.Route -> Routes.Route
@@ -66,9 +68,6 @@ isAllowed route appState =
     case route of
         Routes.DevRoute adminRoute ->
             Wizard.Dev.Routing.isAllowed adminRoute appState
-
-        Routes.AppsRoute appsRoute ->
-            Wizard.Apps.Routing.isAllowed appsRoute appState
 
         Routes.DashboardRoute ->
             True
@@ -106,6 +105,9 @@ isAllowed route appState =
         Routes.SettingsRoute settingsRoute ->
             Wizard.Settings.Routing.isAllowed settingsRoute appState
 
+        Routes.TenantsRoute tenantsRoute ->
+            Wizard.Tenants.Routing.isAllowed tenantsRoute appState
+
         Routes.UsersRoute usersRoute ->
             Wizard.Users.Routing.isAllowed usersRoute appState
 
@@ -123,9 +125,6 @@ toUrl appState route =
             case route of
                 Routes.DevRoute adminRoute ->
                     Wizard.Dev.Routing.toUrl appState adminRoute
-
-                Routes.AppsRoute appsRoute ->
-                    Wizard.Apps.Routing.toUrl appsRoute
 
                 Routes.DashboardRoute ->
                     [ lr "dashboard" appState ]
@@ -163,13 +162,16 @@ toUrl appState route =
                 Routes.SettingsRoute settingsRoute ->
                     Wizard.Settings.Routing.toUrl appState settingsRoute
 
+                Routes.TenantsRoute tenantsRoute ->
+                    Wizard.Tenants.Routing.toUrl tenantsRoute
+
                 Routes.UsersRoute usersRoute ->
                     Wizard.Users.Routing.toUrl usersRoute
 
                 _ ->
                     []
     in
-    "/"
+    "/wizard/"
         ++ String.join "/" parts
         |> String.split "/?"
         |> String.join "?"
@@ -188,8 +190,3 @@ parseLocation appState url =
 cmdNavigate : AppState -> Routes.Route -> Cmd msg
 cmdNavigate appState =
     pushUrl appState.key << toUrl appState
-
-
-cmdNavigateRaw : AppState -> String -> Cmd msg
-cmdNavigateRaw appState =
-    pushUrl appState.key

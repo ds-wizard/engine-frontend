@@ -1,37 +1,17 @@
-module Wizard.Settings.LookAndFeel.Update exposing (fetchData, update)
+module Wizard.Settings.LookAndFeel.Update exposing (update)
 
 import Shared.Data.EditableConfig as EditableConfig
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Ports as Ports
+import Wizard.Settings.Generic.Msgs exposing (Msg)
 import Wizard.Settings.Generic.Update as GenericUpdate
-import Wizard.Settings.LookAndFeel.LogoUploadModal as LogoUploadModal
 import Wizard.Settings.LookAndFeel.Models exposing (Model)
-import Wizard.Settings.LookAndFeel.Msgs exposing (Msg(..))
-
-
-fetchData : AppState -> Cmd Msg
-fetchData =
-    Cmd.map GenericMsg << GenericUpdate.fetchData
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update wrapMsg msg appState model =
-    case msg of
-        GenericMsg genericMsg ->
-            let
-                ( genericModel, cmd ) =
-                    GenericUpdate.update updateProps (wrapMsg << GenericMsg) genericMsg appState model.genericModel
-            in
-            ( { model | genericModel = genericModel }, cmd )
-
-        LogoUploadModalMsg logoUploadModalMsg ->
-            let
-                ( logoUploadModalModel, cmd ) =
-                    LogoUploadModal.update (wrapMsg << LogoUploadModalMsg) (Ports.refresh ()) logoUploadModalMsg appState model.logoUploadModalModel
-            in
-            ( { model | logoUploadModalModel = logoUploadModalModel }, cmd )
+update =
+    GenericUpdate.update updateProps
 
 
 updateProps : GenericUpdate.UpdateProps EditableLookAndFeelConfig

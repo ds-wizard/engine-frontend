@@ -10,10 +10,10 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ActionButton as ActionButton
-import Wizard.Common.View.AppIcon as AppIcon
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.PersistentCommandBadge as PersistentCommandBadge
+import Wizard.Common.View.TenantIcon as TenantIcon
 import Wizard.Dev.Common.PersistentCommandActionsDropdown as PersistentCommandActionsDropdown
 import Wizard.Dev.PersistentCommandsIndex.Models exposing (Model)
 import Wizard.Dev.PersistentCommandsIndex.Msgs exposing (Msg(..))
@@ -60,7 +60,7 @@ listingConfig appState model =
             , currentTime = appState.currentTime
             }
     , wrapMsg = ListingMsg
-    , iconView = Just (AppIcon.view << .app)
+    , iconView = Just (TenantIcon.view << .tenant)
     , searchPlaceholderText = Just "Search commands..."
     , sortOptions =
         [ ( "createdAt", "Created" )
@@ -111,7 +111,7 @@ listingDescription appState persistentCommand =
                     emptyNode
     in
     span []
-        [ linkTo appState (Routes.appsDetail persistentCommand.app.uuid) [ class "fragment" ] [ text persistentCommand.app.name ]
+        [ linkTo appState (Routes.tenantsDetail persistentCommand.tenant.uuid) [ class "fragment" ] [ text persistentCommand.tenant.name ]
         , createdByFragment
         , span [ class "fragment" ] [ text attempts ]
         ]

@@ -6,7 +6,6 @@ module Shared.Data.DocumentTemplate exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
-import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
@@ -17,7 +16,6 @@ import Version exposing (Version)
 type alias DocumentTemplate =
     { createdAt : Time.Posix
     , description : String
-    , formats : List DocumentTemplateFormat
     , id : String
     , name : String
     , organization : Maybe OrganizationInfo
@@ -36,7 +34,6 @@ decoder =
     D.succeed DocumentTemplate
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
-        |> D.required "formats" (D.list DocumentTemplateFormat.decoder)
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing

@@ -11,6 +11,7 @@ docs
 
 # local config
 config.js
+engine-wizard/static/wizard/config.js
 
 # locale
 !*/locale

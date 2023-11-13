@@ -2,14 +2,11 @@ module Wizard.Msgs exposing
     ( Msg(..)
     , logoutMsg
     , logoutToMsg
-    , updateUserMsg
     )
 
 import Browser exposing (UrlRequest)
-import Shared.Data.User exposing (User)
 import Time
 import Url exposing (Url)
-import Wizard.Apps.Msgs
 import Wizard.Auth.Msgs
 import Wizard.Common.Menu.Msgs
 import Wizard.Dashboard.Msgs
@@ -26,6 +23,7 @@ import Wizard.Public.Msgs
 import Wizard.Registry.Msgs
 import Wizard.Routes as Routes
 import Wizard.Settings.Msgs
+import Wizard.Tenants.Msgs
 import Wizard.Users.Msgs
 
 
@@ -42,7 +40,6 @@ type Msg
     | HideSessionExpiresSoonModal
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | AdminMsg Wizard.Dev.Msgs.Msg
-    | AppsMsg Wizard.Apps.Msgs.Msg
     | DashboardMsg Wizard.Dashboard.Msgs.Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | DocumentTemplateEditorsMsg Wizard.DocumentTemplateEditors.Msgs.Msg
@@ -55,6 +52,7 @@ type Msg
     | PublicMsg Wizard.Public.Msgs.Msg
     | RegistryMsg Wizard.Registry.Msgs.Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
+    | TenantsMsg Wizard.Tenants.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg
 
 
@@ -66,8 +64,3 @@ logoutMsg =
 logoutToMsg : Routes.Route -> Msg
 logoutToMsg =
     AuthMsg << Wizard.Auth.Msgs.LogoutTo
-
-
-updateUserMsg : User -> Msg
-updateUserMsg =
-    AuthMsg << Wizard.Auth.Msgs.UpdateUser

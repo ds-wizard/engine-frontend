@@ -81,12 +81,12 @@ menuItems appState =
         , isVisible = always True
         }
     , MenuItem
-        { title = gettext "Apps" appState.locale
-        , icon = faSetFw "menu.apps" appState
-        , id = "apps"
-        , route = Routes.appsIndex
-        , isActive = Routes.isAppIndex
-        , isVisible = Feature.apps
+        { title = gettext "Tenants" appState.locale
+        , icon = faSetFw "menu.tenants" appState
+        , id = "tenants"
+        , route = Routes.tenantsIndex
+        , isActive = Routes.isTenantIndex
+        , isVisible = Feature.tenants
         }
     , MenuGroup
         { title = gettext "Knowledge Models" appState.locale
@@ -233,12 +233,18 @@ view model =
 viewLogo : Model -> Html Wizard.Msgs.Msg
 viewLogo model =
     let
-        logoImg =
+        logoText =
             span [ class "logo-full", dataCy "nav_app-title-short" ]
-                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ] ]
+                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ]
+                ]
     in
     if List.isEmpty model.appState.config.modules then
-        linkTo model.appState Routes.appHome [ class "logo" ] [ logoImg ]
+        linkTo model.appState
+            Routes.appHome
+            [ class "logo" ]
+            [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
+            , logoText
+            ]
 
     else
         let
@@ -317,7 +323,8 @@ viewLogo model =
                     emptyNode
         in
         div [ id itemId, class "logo logo-app-switcher", mouseenter, mouseleave ]
-            [ logoImg
+            [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
+            , logoText
             , div ([ class "app-switcher-menu", class submenuClass ] ++ submenuStyle)
                 [ ul []
                     (switchToHeading
@@ -332,6 +339,13 @@ viewLogo model =
 viewMenu : Model -> Html Wizard.Msgs.Msg
 viewMenu model =
     let
+        menuHeading =
+            if Admin.isEnabled model.appState.config.admin then
+                li [ class "heading" ] [ text (gettext "Wizard" model.appState.locale) ]
+
+            else
+                emptyNode
+
         filterMenuItem menuItem =
             case menuItem of
                 MenuGroup group ->
@@ -356,7 +370,7 @@ viewMenu model =
                 li [ class "empty" ] []
     in
     ul [ class "menu" ]
-        (defaultMenuItems ++ [ space ] ++ customMenuItems)
+        (menuHeading :: defaultMenuItems ++ [ space ] ++ customMenuItems)
 
 
 defaultMenuItem : Model -> MenuItem -> Html Wizard.Msgs.Msg
@@ -586,7 +600,7 @@ viewProfileMenu model =
                     ( [], "" )
 
         ( name, role, imageUrl ) =
-            case model.appState.session.user of
+            case model.appState.config.user of
                 Just user ->
                     ( User.fullName user, Role.toReadableString model.appState user.role, User.imageUrl user )
 
@@ -711,7 +725,7 @@ viewReportIssueModal appState isOpen =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Report issue" appState.locale
+            { modalTitle = gettext "Report Issue" appState.locale
             , modalContent = modalContent
             , visible = isOpen
             , actionResult = Unset

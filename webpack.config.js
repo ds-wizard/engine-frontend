@@ -13,11 +13,13 @@ const components = {
         port: 8080,
         extraEntries: [
             './node_modules/chart.js/dist/chart.js'
-        ]
+        ],
+        publicPath: '/wizard/'
     },
     'engine-registry': {
         port: 8081,
-        extraEntries: []
+        extraEntries: [],
+        publicPath: '/'
     }
 }
 
@@ -33,7 +35,7 @@ module.exports = {
     output: {
         path: path.resolve(`${__dirname}/dist/${component}/`),
         filename: '[name].[chunkhash].js',
-        publicPath: '/'
+        publicPath: components[component].publicPath
     },
 
     module: {
@@ -129,7 +131,7 @@ module.exports = {
         new CopyWebpackPlugin({
             patterns: [
                 {from: `${component}/img`, to: 'img'},
-                {from: `${component}/favicon.ico`, to: 'favicon.ico'},
+                {from: `${component}/favicon.ico`, to: 'favicon.ico', noErrorOnMissing: true},
                 {from: `${component}/robots.txt`, to: 'robots.txt', noErrorOnMissing: true}
             ]
         }),
@@ -139,10 +141,13 @@ module.exports = {
     ],
 
     devServer: {
-        historyApiFallback: {disableDotRule: true},
+        historyApiFallback: {
+            disableDotRule: true,
+            index: components[component].publicPath
+        },
         port: components[component].port,
         static: {
-            directory: __dirname
+            directory: component === 'engine-registry' ? __dirname : path.join(__dirname, component, 'static')
         }
     }
 }

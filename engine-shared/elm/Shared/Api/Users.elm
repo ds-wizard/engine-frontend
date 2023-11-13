@@ -1,6 +1,5 @@
 module Shared.Api.Users exposing
     ( deleteUser
-    , getCurrentUser
     , getCurrentUserSubmissionProps
     , getUser
     , getUsers
@@ -76,11 +75,6 @@ getUsersSuggestionsWithOptions qs select exclude =
 getUser : UuidOrCurrent -> AbstractAppState a -> ToMsg User msg -> Cmd msg
 getUser uuidOrCurrent =
     jwtGet ("/users/" ++ UuidOrCurrent.toString uuidOrCurrent) User.decoder
-
-
-getCurrentUser : AbstractAppState a -> ToMsg User msg -> Cmd msg
-getCurrentUser =
-    jwtGet "/users/current" User.decoder
 
 
 getCurrentUserSubmissionProps : AbstractAppState a -> ToMsg (List SubmissionProps) msg -> Cmd msg

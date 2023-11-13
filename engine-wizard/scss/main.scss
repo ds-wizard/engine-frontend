@@ -1,6 +1,8 @@
 @import 'variables';
 @import '~bootstrap/scss/bootstrap';
 
+@import 'bootstrap/overrides';
+
 @import 'customizations/extra-app';
 @import 'customizations/extra';
 
@@ -62,3 +64,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 
 @import 'customizations/overrides-app';
 @import 'customizations/overrides';
+
+:root {
+    --illustrations-color: #{$illustrations-color};
+}

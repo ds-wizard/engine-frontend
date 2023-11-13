@@ -20,11 +20,11 @@ default =
 decoder : Decoder TwoFactorAuthConfig
 decoder =
     D.field "enabled" D.bool
-        |> D.andThen
+        |> D.map
             (\enabled ->
                 if enabled then
-                    D.succeed TwoFactorAuthConfigEnabled
+                    TwoFactorAuthConfigEnabled
 
                 else
-                    D.succeed TwoFactorAuthConfigDisabled
+                    TwoFactorAuthConfigDisabled
             )

@@ -5,17 +5,21 @@ module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
     , questionnaireSuggestion
     , simple
     , templateSuggestion
+    , userGroupSuggestion
     )
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
 import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.User as User
+import Shared.Data.UserGroupSuggestion exposing (UserGroupSuggestion)
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode)
 import Version
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.UserIcon as UserIcon
@@ -84,6 +88,28 @@ templateSuggestion template =
                 , Badge.light [] [ text <| Version.toString template.version ]
                 ]
             , div [] [ text template.description ]
+            ]
+        ]
+
+
+userGroupSuggestion : AppState -> UserGroupSuggestion -> Html msg
+userGroupSuggestion appState userGroup =
+    let
+        privateBadge =
+            if userGroup.private then
+                Badge.dark [] [ text (gettext "private" appState.locale) ]
+
+            else
+                emptyNode
+    in
+    complexItem
+        [ div [] [ ItemIcon.view { text = userGroup.name, image = Nothing } ]
+        , div []
+            [ div []
+                [ strong [] [ text userGroup.name ]
+                , privateBadge
+                ]
+            , div [] [ text (Maybe.withDefault "-" userGroup.description) ]
             ]
         ]
 

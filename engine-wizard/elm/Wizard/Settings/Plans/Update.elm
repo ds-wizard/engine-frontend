@@ -1,7 +1,7 @@
 module Wizard.Settings.Plans.Update exposing (fetchData, update)
 
 import Gettext exposing (gettext)
-import Shared.Api.Apps as AppsApi
+import Shared.Api.Tenants as TenantsApi
 import Shared.Setters exposing (setPlans)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -12,7 +12,7 @@ import Wizard.Settings.Plans.Msgs exposing (Msg(..))
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    AppsApi.getCurrentPlans appState GetPlansComplete
+    TenantsApi.getCurrentPlans appState GetPlansComplete
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

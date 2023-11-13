@@ -20,7 +20,7 @@
             font-weight: 500;
 
             &:hover, &.active {
-                color: $primary;
+                color: var(--bs-primary);
             }
 
             &:not(.active) {
@@ -40,7 +40,7 @@
                 &:hover {
                     &:after {
                         opacity: 1;
-                        background-color: $primary-bg;
+                        background-color: var(--bs-primary-bg);
                     }
                 }
             }
@@ -81,7 +81,7 @@
                 padding: .2rem 0;
 
                 &:hover {
-                    color: $primary !important;
+                    color: var(--bs-primary) !important;
                     text-decoration: none !important;
                 }
 

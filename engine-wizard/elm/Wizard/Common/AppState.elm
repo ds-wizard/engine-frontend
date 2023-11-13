@@ -1,6 +1,7 @@
 module Wizard.Common.AppState exposing
     ( AppState
     , acceptCookies
+    , getUserRole
     , init
     , isFullscreen
     , sessionExpired
@@ -13,6 +14,7 @@ module Wizard.Common.AppState exposing
 import Browser.Navigation as Navigation exposing (Key)
 import Gettext
 import Json.Decode as D exposing (Error(..))
+import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Common.Navigator exposing (Navigator)
@@ -91,7 +93,7 @@ init flagsValue key =
     in
     ( { route = Routes.NotFoundRoute
       , seed = Random.initialSeed flags.seed
-      , session = Maybe.withDefault Session.init flags.session
+      , session = Maybe.withDefault (Session.init flags.apiUrl) flags.session
       , invalidSession = invalidSession
       , key = key
       , apiUrl = flags.apiUrl
@@ -110,6 +112,11 @@ init flagsValue key =
       }
     , flagsCmd
     )
+
+
+getUserRole : AppState -> String
+getUserRole =
+    Maybe.unwrap "" .role << .user << .config
 
 
 setCurrentTime : AppState -> Time.Posix -> AppState

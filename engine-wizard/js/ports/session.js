@@ -1,16 +1,16 @@
-module.exports = function (app) {
+module.exports = function (app, sessionKey) {
     app.ports.storeSession.subscribe(storeSession);
     app.ports.clearSession.subscribe(clearSession);
     app.ports.clearSessionAndReload.subscribe(clearSessionAndReload);
 
 
     function storeSession(session) {
-        localStorage.session = JSON.stringify(session);
+        localStorage[sessionKey] = JSON.stringify(session);
     }
 
 
     function clearSession() {
-        localStorage.removeItem('session');
+        localStorage.removeItem(sessionKey);
     }
 
 

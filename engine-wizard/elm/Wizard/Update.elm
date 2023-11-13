@@ -5,7 +5,6 @@ import Browser.Navigation exposing (load, pushUrl)
 import Json.Encode as E
 import Shared.Auth.Session as Session
 import Url
-import Wizard.Apps.Update
 import Wizard.Auth.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.LocalStorageData as LocalStorageData
@@ -29,6 +28,7 @@ import Wizard.Registry.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation, routeIfAllowed)
 import Wizard.Settings.Update
+import Wizard.Tenants.Update
 import Wizard.Users.Update
 
 
@@ -39,9 +39,9 @@ fetchData model =
             Cmd.map AdminMsg <|
                 Wizard.Dev.Update.fetchData route model.appState
 
-        Routes.AppsRoute route ->
-            Cmd.map AppsMsg <|
-                Wizard.Apps.Update.fetchData route model.appState
+        Routes.TenantsRoute route ->
+            Cmd.map TenantsMsg <|
+                Wizard.Tenants.Update.fetchData route model.appState
 
         Routes.DashboardRoute ->
             Cmd.map DashboardMsg <|
@@ -256,13 +256,6 @@ update msg model =
                 in
                 ( { model | adminModel = adminModel }, cmd )
 
-            Wizard.Msgs.AppsMsg appsMsg ->
-                let
-                    ( appsModel, cmd ) =
-                        Wizard.Apps.Update.update appsMsg Wizard.Msgs.AppsMsg model.appState model.appsModel
-                in
-                ( { model | appsModel = appsModel }, cmd )
-
             Wizard.Msgs.DashboardMsg dashboardMsg ->
                 let
                     ( dashboardModel, cmd ) =
@@ -346,6 +339,13 @@ update msg model =
                         Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
                 in
                 ( { model | settingsModel = settingsModel }, cmd )
+
+            Wizard.Msgs.TenantsMsg tenantsMsg ->
+                let
+                    ( tenantsModel, cmd ) =
+                        Wizard.Tenants.Update.update tenantsMsg Wizard.Msgs.TenantsMsg model.appState model.tenantsModel
+                in
+                ( { model | tenantsModel = tenantsModel }, cmd )
 
             Wizard.Msgs.UsersMsg usersMsg ->
                 let

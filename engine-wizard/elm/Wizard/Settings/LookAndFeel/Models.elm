@@ -5,17 +5,12 @@ module Wizard.Settings.LookAndFeel.Models exposing
 
 import Shared.Data.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Settings.Generic.Model as GenericModel
-import Wizard.Settings.LookAndFeel.LogoUploadModal as LogoUploadModal
 
 
 type alias Model =
-    { genericModel : GenericModel.Model EditableLookAndFeelConfig
-    , logoUploadModalModel : LogoUploadModal.Model
-    }
+    GenericModel.Model EditableLookAndFeelConfig
 
 
 initialModel : Model
 initialModel =
-    { genericModel = GenericModel.initialModel EditableLookAndFeelConfig.initEmptyForm
-    , logoUploadModalModel = LogoUploadModal.initialModel
-    }
+    GenericModel.initialModel EditableLookAndFeelConfig.initEmptyForm

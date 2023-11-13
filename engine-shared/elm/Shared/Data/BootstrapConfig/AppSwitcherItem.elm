@@ -35,11 +35,11 @@ decoder =
 appSwitcherItemIconDecoder : Decoder AppSwitcherItemIcon
 appSwitcherItemIconDecoder =
     D.string
-        |> D.andThen
+        |> D.map
             (\iconString ->
                 if String.startsWith "http" iconString then
-                    D.succeed (ImageAppSwitcherItemIcon iconString)
+                    ImageAppSwitcherItemIcon iconString
 
                 else
-                    D.succeed (FontAwesomeAppSwitcherItemIcon iconString)
+                    FontAwesomeAppSwitcherItemIcon iconString
             )

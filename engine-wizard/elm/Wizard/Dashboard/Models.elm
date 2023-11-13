@@ -5,9 +5,8 @@ module Wizard.Dashboard.Models exposing
     )
 
 import Shared.Auth.Role as Role
-import Shared.Auth.Session as Session
 import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
 import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
 import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
@@ -37,7 +36,7 @@ initialModel appState =
                     WelcomeDashboard
 
                 DashboardType.RoleBased ->
-                    Role.switch (Session.getUserRole appState.session)
+                    Role.switch (AppState.getUserRole appState)
                         AdminDashboard
                         DataStewardDashboard
                         ResearcherDashboard

@@ -154,7 +154,7 @@
                     padding: $spacer-1 0 $spacer-2 0;
 
                     &:hover {
-                        color: $primary !important;
+                        color: var(--bs-primary) !important;
                     }
                 }
             }

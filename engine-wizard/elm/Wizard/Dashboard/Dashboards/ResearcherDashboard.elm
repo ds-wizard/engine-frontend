@@ -12,7 +12,6 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Auth.Session as Session
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
@@ -20,6 +19,7 @@ import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Setters exposing (setQuestionnaires)
 import Shared.Utils exposing (boolToString)
+import Uuid
 import Wizard.Common.Api exposing (applyResultTransform)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.CreateProjectWidget as CreateProjectWidget
@@ -49,7 +49,7 @@ fetchData appState =
                 |> PaginationQueryString.withSize (Just 3)
 
         mbUserUuid =
-            Session.getUserUuid appState.session
+            Maybe.map (Uuid.toString << .uuid) appState.config.user
 
         filters =
             PaginationQueryFilters.create

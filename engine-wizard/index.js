@@ -21,9 +21,11 @@ const registerLocalStoragePorts = require('./js/ports/localStorage')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
 const registerSessionPorts = require('./js/ports/session')
+const registerThemePorts = require('../engine-shared/ports/theme')
 const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 
-let defaultStyleUrl
+
+const sessionKey = 'session/wizard'
 
 axiosRetry(axios, {
     retries: 3,
@@ -52,20 +54,20 @@ function getPdfSupport() {
 }
 
 
-function apiUrl() {
+function defaultApiUrl() {
     if (window.wizard && window.wizard['apiUrl']) return window.wizard['apiUrl']
     return 'http://localhost:3000'
 }
 
-function configUrl() {
-    const clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
-    return apiUrl() + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
+function configUrl(apiUrl) {
+    const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
+    return (apiUrl || defaultApiUrl()) + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
-function localeUrl() {
+function localeUrl(apiUrl) {
     const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
-    const clientUrl = (window.wizard && window.wizard['clientUrl']) || window.location.origin
-    return apiUrl() + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
+    const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
+    return (apiUrl || defaultApiUrl()) + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
 function provisioningUrl() {
@@ -81,87 +83,73 @@ function localProvisioning() {
 function bootstrapErrorHTML(errorCode) {
     const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
     const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
-    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
 }
 
 function clientUrl() {
     return window.location.protocol + '//' + window.location.host
 }
 
-function setStyles(config, cb) {
-    const customizationEnabled = config.feature && config.feature.clientCustomizationEnabled
-    const styleUrl = customizationEnabled && config.lookAndFeel && config.lookAndFeel.styleUrl ? config.lookAndFeel.styleUrl : defaultStyleUrl
-    const link = document.createElement('link')
-    link.setAttribute('rel', 'stylesheet')
-    link.setAttribute('type', 'text/css')
-    link.onload = cb
-    link.setAttribute('href', styleUrl)
-    document.getElementsByTagName('head')[0].appendChild(link)
-
-    if (!window.wizard) window.wizard = {}
-    window.wizard.styleUrl = styleUrl[0] === '/' ? window.location.origin + styleUrl : styleUrl
-}
-
 function getApiUrl(config) {
     if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
         return config.cloud.serverUrl
     }
-    return apiUrl()
+    return defaultApiUrl()
 }
 
 function loadApp(config, locale, provisioning) {
-    setStyles(config, function () {
-        const flags = {
-            seed: Math.floor(Math.random() * 0xFFFFFFFF),
-            session: JSON.parse(localStorage.session || null),
-            selectedLocale: JSON.parse(localStorage.locale || null),
-            apiUrl: getApiUrl(config),
-            clientUrl: clientUrl(),
-            config: config,
-            provisioning: provisioning,
-            localProvisioning: localProvisioning(),
-            navigator: {
-                pdf: getPdfSupport()
-            },
-            gaEnabled: cookies.getGaEnabled(),
-            cookieConsent: cookies.getCookieConsent(),
-        }
+    const flags = {
+        seed: Math.floor(Math.random() * 0xFFFFFFFF),
+        session: JSON.parse(localStorage.getItem(sessionKey)),
+        selectedLocale: JSON.parse(localStorage.locale || null),
+        apiUrl: getApiUrl(config),
+        clientUrl: clientUrl(),
+        config: config,
+        provisioning: provisioning,
+        localProvisioning: localProvisioning(),
+        navigator: {
+            pdf: getPdfSupport()
+        },
+        gaEnabled: cookies.getGaEnabled(),
+        cookieConsent: cookies.getCookieConsent(),
+    }
 
-        if (Object.keys(locale).length > 0) {
-            flags.locale = locale
-        }
+    if (Object.keys(locale).length > 0) {
+        flags.locale = locale
+    }
 
-        const app = program.Elm.Wizard.init({
-            node: document.body,
-            flags: flags,
-        })
-
-        registerConsolePorts(app)
-        registerCopyPorts(app)
-        registerDomPorts(app)
-        registerDownloadPorts(app)
-        registerImportPorts(app)
-        registerImporterPorts(app)
-        registerIntegrationWidgetPorts(app)
-        registerLocalStoragePorts(app)
-        registerPageUnloadPorts(app)
-        registerRefreshPorts(app)
-        registerSessionPorts(app)
-        registerWebsocketPorts(app)
-        cookies.registerCookiePorts(app)
-
-        cookies.init()
+    const app = program.Elm.Wizard.init({
+        node: document.body,
+        flags: flags,
     })
+
+    registerConsolePorts(app)
+    registerCopyPorts(app)
+    registerDomPorts(app)
+    registerDownloadPorts(app)
+    registerImportPorts(app)
+    registerImporterPorts(app)
+    registerIntegrationWidgetPorts(app)
+    registerLocalStoragePorts(app)
+    registerPageUnloadPorts(app)
+    registerRefreshPorts(app)
+    registerSessionPorts(app, sessionKey)
+    registerThemePorts(app)
+    registerWebsocketPorts(app)
+    cookies.registerCookiePorts(app)
+
+    cookies.init()
 }
 
 window.onload = function () {
-    const style = document.querySelector('[rel="stylesheet"]')
-    defaultStyleUrl = style.getAttribute('href')
-    style.remove()
+    const session = JSON.parse(localStorage.getItem(sessionKey))
+    const token = session?.token?.token
+    const headers = token ? { headers: {'Authorization': `Bearer ${token}`}} : {}
+    const apiUrl = session?.apiUrl
 
     const promises = [
-        axios.get(configUrl()),
-        axios.get(localeUrl()).catch(() => {
+        axios.get(configUrl(apiUrl), headers),
+        axios.get(localeUrl(apiUrl)).catch(() => {
             return {data: {}}
         })
     ]
@@ -179,9 +167,11 @@ window.onload = function () {
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null
-
-            setStyles({}, function () {
+            if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                localStorage.removeItem(sessionKey)
+                window.location.reload()
+            } else {
                 document.body.innerHTML = bootstrapErrorHTML(errorCode)
-            })
+            }
         })
 }

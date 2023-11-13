@@ -1,9 +1,11 @@
 module Wizard.Common.View.ItemIcon exposing
     ( Config
+    , ConfigExtra
     , view
+    , viewExtra
     )
 
-import Html exposing (Html, div, img, text)
+import Html exposing (Attribute, Html, div, img, text)
 import Html.Attributes exposing (class, src, style)
 
 
@@ -15,6 +17,22 @@ type alias Config =
 
 view : Config -> Html msg
 view config =
+    viewExtra
+        { text = config.text
+        , image = config.image
+        , attributes = []
+        }
+
+
+type alias ConfigExtra msg =
+    { text : String
+    , image : Maybe String
+    , attributes : List (Attribute msg)
+    }
+
+
+viewExtra : ConfigExtra msg -> Html msg
+viewExtra config =
     let
         ( backgroundColorStyle, content ) =
             case config.image of
@@ -53,5 +71,5 @@ view config =
                     , text <| String.fromChar letter
                     )
     in
-    div (class "ItemIcon" :: backgroundColorStyle)
+    div (class "ItemIcon" :: backgroundColorStyle ++ config.attributes)
         [ content ]

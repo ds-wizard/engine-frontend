@@ -10,7 +10,6 @@ module Wizard.Models exposing
 
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
-import Wizard.Apps.Models
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Menu.Models
 import Wizard.Dashboard.Models
@@ -27,6 +26,7 @@ import Wizard.Public.Models
 import Wizard.Registry.Models
 import Wizard.Routes as Routes
 import Wizard.Settings.Models
+import Wizard.Tenants.Models
 import Wizard.Users.Models
 
 
@@ -34,7 +34,6 @@ type alias Model =
     { appState : AppState
     , menuModel : Wizard.Common.Menu.Models.Model
     , adminModel : Wizard.Dev.Models.Model
-    , appsModel : Wizard.Apps.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
     , documentsModel : Wizard.Documents.Models.Model
     , documentTemplateEditorsModel : Wizard.DocumentTemplateEditors.Models.Model
@@ -47,6 +46,7 @@ type alias Model =
     , publicModel : Wizard.Public.Models.Model
     , registryModel : Wizard.Registry.Models.Model
     , settingsModel : Wizard.Settings.Models.Model
+    , tenantsModel : Wizard.Tenants.Models.Model
     , users : Wizard.Users.Models.Model
     }
 
@@ -56,7 +56,7 @@ initialModel appState =
     { appState = appState
     , menuModel = Wizard.Common.Menu.Models.initialModel
     , adminModel = Wizard.Dev.Models.initialModel
-    , appsModel = Wizard.Apps.Models.initialModel
+    , tenantsModel = Wizard.Tenants.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel appState
     , documentsModel = Wizard.Documents.Models.initialModel
     , documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initialModel
@@ -118,8 +118,8 @@ initLocalModel model =
         Routes.DevRoute route ->
             { model | adminModel = Wizard.Dev.Models.initLocalModel route model.adminModel }
 
-        Routes.AppsRoute route ->
-            { model | appsModel = Wizard.Apps.Models.initLocalModel route model.appsModel }
+        Routes.TenantsRoute route ->
+            { model | tenantsModel = Wizard.Tenants.Models.initLocalModel route model.tenantsModel }
 
         Routes.DocumentsRoute route ->
             { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }

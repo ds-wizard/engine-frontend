@@ -1,6 +1,5 @@
 module Wizard.Common.Feature exposing
     ( LocaleLike
-    , apps
     , dev
     , documentDelete
     , documentDownload
@@ -34,6 +33,7 @@ module Wizard.Common.Feature exposing
     , localeImport
     , localeSetDefault
     , localeView
+    , plans
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -59,7 +59,9 @@ module Wizard.Common.Feature exposing
     , projectsCreateCustom
     , projectsCreateFromTemplate
     , projectsView
+    , registry
     , settings
+    , tenants
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
@@ -71,6 +73,7 @@ module Wizard.Common.Feature exposing
 import Maybe.Extra as Maybe
 import Shared.Auth.Permission as Perm
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Data.Document as Document exposing (Document)
@@ -313,12 +316,12 @@ projectCommentAdd appState questionnaire =
 
 projectCommentEdit : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
 projectCommentEdit appState questionnaire commentThread comment =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.session.user comment
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
 projectCommentDelete : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
 projectCommentDelete appState questionnaire commentThread comment =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.session.user comment
+    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
 projectCommentThreadResolve : AppState -> QuestionnaireDetail -> CommentThread -> Bool
@@ -333,7 +336,7 @@ projectCommentThreadReopen appState questionnaire commentThread =
 
 projectCommentThreadDelete : AppState -> QuestionnaireDetail -> CommentThread -> Bool
 projectCommentThreadDelete appState questionnaire commentThread =
-    QuestionnaireDetail.canComment appState questionnaire && CommentThread.isAuthor appState.session.user commentThread
+    QuestionnaireDetail.canComment appState questionnaire && CommentThread.isAuthor appState.config.user commentThread
 
 
 projectCommentPrivate : AppState -> QuestionnaireDetail -> Bool
@@ -385,6 +388,16 @@ settings =
     adminOr Perm.settings
 
 
+plans : AppState -> Bool
+plans appState =
+    appState.config.cloud.enabled && not (Admin.isEnabled appState.config.admin)
+
+
+registry : AppState -> Bool
+registry appState =
+    not (Admin.isEnabled appState.config.admin)
+
+
 
 -- Users
 
@@ -406,17 +419,17 @@ userEdit appState uuidOrCurrent =
 
 userEditApiKeys : AppState -> UuidOrCurrent -> Bool
 userEditApiKeys appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 userEditActiveSessions : AppState -> UuidOrCurrent -> Bool
 userEditActiveSessions appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 userEditSubmissionSettings : AppState -> UuidOrCurrent -> Bool
 userEditSubmissionSettings appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.session.user)
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 
@@ -479,12 +492,12 @@ localeDelete appState locale =
 
 
 
--- Apps
+-- Tenants
 
 
-apps : AppState -> Bool
-apps appState =
-    Perm.hasPerm appState.session Perm.apps
+tenants : AppState -> Bool
+tenants appState =
+    Perm.hasPerm appState.config.user Perm.tenants
 
 
 
@@ -493,7 +506,7 @@ apps appState =
 
 dev : AppState -> Bool
 dev appState =
-    Perm.hasPerm appState.session Perm.dev
+    Perm.hasPerm appState.config.user Perm.dev
 
 
 
@@ -502,9 +515,9 @@ dev appState =
 
 isAdmin : AppState -> Bool
 isAdmin appState =
-    UserInfo.isAdmin appState.session.user
+    UserInfo.isAdmin appState.config.user
 
 
 adminOr : String -> AppState -> Bool
 adminOr perm appState =
-    isAdmin appState || Perm.hasPerm appState.session perm
+    isAdmin appState || Perm.hasPerm appState.config.user perm

@@ -9,7 +9,7 @@ import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Data.Document as Document exposing (Document)
+import Shared.Data.Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.Submission as Submission exposing (Submission)
@@ -155,6 +155,14 @@ listingDescription appState document =
                 Nothing ->
                     emptyNode
 
+        formatFragment =
+            case document.format of
+                Just format ->
+                    span [ class "fragment" ] [ fa format.icon, text format.name ]
+
+                Nothing ->
+                    emptyNode
+
         fileSizeFragment =
             case document.fileSize of
                 Just fileSize ->
@@ -162,17 +170,9 @@ listingDescription appState document =
 
                 Nothing ->
                     emptyNode
-
-        ( icon, formatName ) =
-            case Document.getFormat document of
-                Just format ->
-                    ( fa format.icon, format.name )
-
-                Nothing ->
-                    ( emptyNode, "" )
     in
     span []
-        [ span [ class "fragment" ] [ icon, text formatName ]
+        [ formatFragment
         , fileSizeFragment
         , questionnaireLink
         ]

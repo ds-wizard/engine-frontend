@@ -4,6 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes as Routes
 import Wizard.Settings.Authentication.View
@@ -121,11 +122,18 @@ navigationUserInterfaceLinks appState =
 
 navigationContentLinks : AppState -> List ( Route, String )
 navigationContentLinks appState =
-    [ ( RegistryRoute, gettext "DSW Registry" appState.locale )
-    , ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale )
-    , ( ProjectsRoute, gettext "Projects" appState.locale )
-    , ( SubmissionRoute, gettext "Document Submission" appState.locale )
-    ]
+    let
+        items =
+            [ ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale )
+            , ( ProjectsRoute, gettext "Projects" appState.locale )
+            , ( SubmissionRoute, gettext "Document Submission" appState.locale )
+            ]
+    in
+    if Feature.registry appState then
+        ( RegistryRoute, gettext "DSW Registry" appState.locale ) :: items
+
+    else
+        items
 
 
 navigationStatisticsLinks : AppState -> List ( Route, String )
@@ -135,7 +143,7 @@ navigationStatisticsLinks appState =
             [ ( UsageRoute, gettext "Usage" appState.locale )
             ]
     in
-    if appState.config.cloud.enabled then
+    if Feature.plans appState then
         ( PlansRoute, gettext "Plans" appState.locale ) :: items
 
     else

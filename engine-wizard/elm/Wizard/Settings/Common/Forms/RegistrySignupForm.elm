@@ -33,7 +33,7 @@ init : AppState -> OrganizationConfig -> Form FormError RegistrySignupForm
 init appState config =
     let
         email =
-            appState.session.user
+            appState.config.user
                 |> Maybe.map .email
                 |> Maybe.withDefault ""
 

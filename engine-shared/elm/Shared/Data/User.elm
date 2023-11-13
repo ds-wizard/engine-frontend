@@ -6,13 +6,11 @@ module Shared.Data.User exposing
     , fullName
     , imageUrl
     , imageUrlOrGravatar
-    , toUserInfo
     )
 
 import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.UserInfo exposing (UserInfo)
 import Uuid exposing (Uuid)
 
 
@@ -61,18 +59,6 @@ compare u1 u2 =
 fullName : { a | firstName : String, lastName : String } -> String
 fullName user =
     user.firstName ++ " " ++ user.lastName
-
-
-toUserInfo : User -> UserInfo
-toUserInfo user =
-    { uuid = user.uuid
-    , email = user.email
-    , firstName = user.firstName
-    , lastName = user.lastName
-    , role = user.role
-    , permissions = user.permissions
-    , imageUrl = user.imageUrl
-    }
 
 
 imageUrl : { a | email : String, imageUrl : Maybe String } -> String

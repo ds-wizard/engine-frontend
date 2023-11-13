@@ -13,10 +13,10 @@ import SyntaxHighlight
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
-import Wizard.Common.View.AppIcon as AppIcon
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.PersistentCommandBadge as PersistentCommandBadge
+import Wizard.Common.View.TenantIcon as TenantIcon
 import Wizard.Common.View.UserIcon as UserIcon
 import Wizard.Dev.Common.PersistentCommandActionsDropdown as PersistentCommandActionDropdown
 import Wizard.Dev.PersistentCommandsDetail.Models exposing (Model)
@@ -150,21 +150,21 @@ sidePanelPersistentCommandInfo appState persistentCommand =
 sidePanelAppInfo : AppState -> PersistentCommandDetail -> ( String, String, Html msg )
 sidePanelAppInfo appState persistentCommand =
     let
-        appUrl =
-            persistentCommand.app.clientUrl
+        tenantUrl =
+            persistentCommand.tenant.clientUrl
                 |> String.split "://"
                 |> List.drop 1
                 |> List.head
                 |> Maybe.withDefault ""
 
-        appView =
+        tenantView =
             DetailPage.sidePanelItemWithIconWithLink appState
-                (Routes.appsDetail persistentCommand.app.uuid)
-                persistentCommand.app.name
-                (text appUrl)
-                (AppIcon.view persistentCommand.app)
+                (Routes.tenantsDetail persistentCommand.tenant.uuid)
+                persistentCommand.tenant.name
+                (text tenantUrl)
+                (TenantIcon.view persistentCommand.tenant)
     in
-    ( "App", "app", appView )
+    ( "Tenant", "tenant", tenantView )
 
 
 sidePanelLastTraceUuid : Uuid -> ( String, String, Html msg )

@@ -64,7 +64,7 @@ $change-header-height: 70px;
                 margin-bottom: 2px;
 
                 &.selected {
-                    border-left: 5px solid $primary;
+                    border-left: 5px solid var(--bs-primary);
                     background: $gray-100;
                 }
 

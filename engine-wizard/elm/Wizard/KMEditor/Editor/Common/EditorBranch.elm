@@ -823,12 +823,15 @@ applyMove updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorBra
 computeWarnings : AppState -> EditorBranch -> EditorBranch
 computeWarnings appState editorBranch =
     let
+        filteredKM =
+            getFilteredKM editorBranch
+
         warnings =
-            List.concatMap (computeChapterWarnings appState (getFilteredKM editorBranch)) (KnowledgeModel.getChapters editorBranch.branch.knowledgeModel)
-                |> flip (++) (List.concatMap (computeMetricWarnings appState) (KnowledgeModel.getMetrics editorBranch.branch.knowledgeModel))
-                |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases editorBranch.branch.knowledgeModel))
-                |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags editorBranch.branch.knowledgeModel))
-                |> flip (++) (List.concatMap (computeIntegrationWarnings appState) (KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel))
+            List.concatMap (computeChapterWarnings appState filteredKM) (KnowledgeModel.getChapters filteredKM)
+                |> flip (++) (List.concatMap (computeMetricWarnings appState) (KnowledgeModel.getMetrics filteredKM))
+                |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases filteredKM))
+                |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags filteredKM))
+                |> flip (++) (List.concatMap (computeIntegrationWarnings appState) (KnowledgeModel.getIntegrations filteredKM))
     in
     { editorBranch | warnings = warnings }
 

@@ -175,7 +175,7 @@ messageToReadable appState message =
         "error.validation.tml_unsupported_metamodel_version" ->
             Just <| gettext "Document template metamodel version is not supported." appState.locale
 
-        "error.service.app.limit_exceeded" ->
+        "error.service.tenant.limit_exceeded" ->
             case message.params of
                 "storage" :: current :: limit :: [] ->
                     let

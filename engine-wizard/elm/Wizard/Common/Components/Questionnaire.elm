@@ -316,6 +316,12 @@ updateQuestionnaire fn model =
     { model | questionnaire = fn model.questionnaire }
 
 
+isQuestionDesirable : Model -> Question -> Bool
+isQuestionDesirable model =
+    Question.isDesirable model.questionnaire.knowledgeModel.phaseUuids
+        (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
+
+
 type alias Config msg =
     { features : FeaturesConfig
     , renderer : QuestionnaireRenderer Msg
@@ -2193,12 +2199,8 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
 
             else
                 let
-                    isDesirable =
-                        Question.isDesirable model.questionnaire.knowledgeModel.phaseUuids
-                            (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
-
                     desirableQuestions =
-                        List.filter isDesirable questions
+                        List.filter (isQuestionDesirable model) questions
                 in
                 if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
                     div [ class "flex-grow-1" ]
@@ -2314,16 +2316,10 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
 
-        isDesirable =
-            Question.isDesirable
-                model.questionnaire.knowledgeModel.phaseUuids
-                (Uuid.toString <| Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid)
-                question
-
         ( questionClass, questionState ) =
             case
                 ( QuestionnaireDetail.hasReply (pathToString newPath) model.questionnaire
-                , isDesirable
+                , isQuestionDesirable model question
                 )
             of
                 ( True, _ ) ->
@@ -2514,7 +2510,17 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
         emptyNode
 
     else
-        div [ class "followups-group" ] followUpQuestions
+        let
+            desirableQuestions =
+                List.filter (isQuestionDesirable model) questions
+        in
+        if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
+            div [ class "followups-group" ]
+                [ Flash.info appState (gettext "There are no follow up questions in this phase." appState.locale)
+                ]
+
+        else
+            div [ class "followups-group" ] followUpQuestions
 
 
 viewQuestionMultiChoice : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
@@ -2596,12 +2602,8 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
 
             else
                 let
-                    isDesirable =
-                        Question.isDesirable model.questionnaire.knowledgeModel.phaseUuids
-                            (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
-
                     desirableQuestions =
-                        List.filter isDesirable questions
+                        List.filter (isQuestionDesirable model) questions
                 in
                 if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
                     [ Flash.info appState (gettext "There are no questions in this phase." appState.locale) ]
@@ -3185,5 +3187,5 @@ createReply : AppState -> ReplyValue -> Reply
 createReply appState value =
     { value = value
     , createdAt = appState.currentTime
-    , createdBy = Maybe.map UserInfo.toUserSuggestion appState.session.user
+    , createdBy = Maybe.map UserInfo.toUserSuggestion appState.config.user
     }
