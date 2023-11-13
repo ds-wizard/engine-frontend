@@ -725,7 +725,7 @@ viewReportIssueModal appState isOpen =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Report issue" appState.locale
+            { modalTitle = gettext "Report Issue" appState.locale
             , modalContent = modalContent
             , visible = isOpen
             , actionResult = Unset
