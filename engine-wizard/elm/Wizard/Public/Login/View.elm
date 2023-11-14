@@ -95,9 +95,16 @@ loginFormView appState model =
 
         externalLogin =
             if List.length appState.config.authentication.external.services > 0 then
+                let
+                    viewExternalLoginButton service =
+                        ExternalLoginButton.view appState
+                            { onClick = ExternalLoginOpenId service
+                            , service = service
+                            }
+                in
                 div [ class "external-login-separator", dataCy "login_external_separator" ]
                     [ text (gettext "Or connect with" appState.locale) ]
-                    :: List.map (ExternalLoginButton.view appState) appState.config.authentication.external.services
+                    :: List.map viewExternalLoginButton appState.config.authentication.external.services
 
             else
                 []

@@ -62,6 +62,20 @@ update msg wrapMsg appState model =
         LoginCompleted result ->
             loginCompleted appState model result
 
+        ExternalLoginOpenId openIdServiceConfig ->
+            let
+                --openIdRequest =
+                --    { clientId = model.clientId
+                --    , redirectUri = Maybe.map Url.toString model.redirectUri
+                --    }
+                --
+                --saveCmd =
+                --    OpenId.saveOpenIdRequest (OpenIdRequest.encode openIdRequest)
+                redirectCmd =
+                    Navigation.load (AuthApi.authRedirectUrl openIdServiceConfig appState)
+            in
+            ( model, redirectCmd )
+
 
 loginCompleted : AppState -> Model -> Result ApiError TokenResponse -> ( Model, Cmd Wizard.Msgs.Msg )
 loginCompleted appState model result =
