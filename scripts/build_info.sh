@@ -5,7 +5,6 @@ set -e
 
 # File with build info
 BUILD_INFO_FILE=$(dirname $0)/../dist/engine-$COMPONENT/main.*.js
-STYLE_FILE=$(dirname $0)/../dist/engine-$COMPONENT/main.*.css
 
 
 # Create version based on git tag or branch
@@ -26,4 +25,3 @@ builtAt=`date -u +"%Y-%m-%dT%H:%M:%SZ"`
 # Replace values
 sed -i.bak "s#{version}#$version#" $BUILD_INFO_FILE && rm $BUILD_INFO_FILE".bak"
 sed -i.bak "s#{builtAt}#$builtAt#" $BUILD_INFO_FILE && rm $BUILD_INFO_FILE".bak"
-sed -i.bak "s#{version}#$version#" $STYLE_FILE && rm $STYLE_FILE".bak"

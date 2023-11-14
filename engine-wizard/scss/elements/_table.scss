@@ -1,5 +1,4 @@
 @import '../variables';
-@import '../version';
 
 .table-usage {
     tbody {
@@ -32,12 +31,6 @@
     tr {
         td:first-child {
             width: 25%;
-        }
-    }
-
-    #client-style-version {
-        &::after {
-            content: $version;
         }
     }
 }

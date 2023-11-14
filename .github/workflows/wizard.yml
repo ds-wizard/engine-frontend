@@ -49,7 +49,6 @@ jobs:
       - name: '[app] Build'
         run: |
           ./scripts/build.sh
-          ./scripts/replace_version.sh
 
       - name: '[docker] Meta (default)'
         id: meta-default
