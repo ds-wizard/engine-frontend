@@ -794,10 +794,6 @@ viewAboutModalContent appState serverBuildInfo =
         swaggerUrl =
             appState.apiUrl ++ "/swagger-ui/"
 
-        extraClientInfo =
-            [ ( gettext "Style Version" appState.locale, code [ id "client-style-version" ] [] )
-            ]
-
         extraServerInfo =
             [ ( gettext "API URL" appState.locale, a [ href appState.apiUrl, target "_blank" ] [ text appState.apiUrl ] )
             , ( gettext "API Docs" appState.locale, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
@@ -810,7 +806,7 @@ viewAboutModalContent appState serverBuildInfo =
             List.map viewComponentVersion (List.sortBy .name serverBuildInfo.components)
     in
     div []
-        ([ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client extraClientInfo
+        ([ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client []
          , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
          ]
             ++ componentVersions
