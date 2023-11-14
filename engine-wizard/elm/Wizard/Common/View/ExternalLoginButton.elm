@@ -1,5 +1,6 @@
 module Wizard.Common.View.ExternalLoginButton exposing
-    ( badgeWrapper
+    ( ViewConfig
+    , badgeWrapper
     , defaultBackground
     , defaultColor
     , defaultIcon
@@ -8,9 +9,9 @@ module Wizard.Common.View.ExternalLoginButton exposing
     )
 
 import Html exposing (Attribute, Html, a, text)
-import Html.Attributes exposing (class, href, style)
+import Html.Attributes exposing (class, style)
+import Html.Events exposing (onClick)
 import List.Extra as List
-import Shared.Api.Auth as AuthApi
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Html exposing (fa, faKey, faSet)
@@ -33,15 +34,21 @@ defaultIcon appState =
     Maybe.withDefault "" <| faKey "login.externalService" appState
 
 
-view : AppState -> OpenIDServiceConfig -> Html msg
-view appState config =
+type alias ViewConfig msg =
+    { onClick : msg
+    , service : OpenIDServiceConfig
+    }
+
+
+view : AppState -> ViewConfig msg -> Html msg
+view appState cfg =
     render
-        [ href <| AuthApi.authRedirectUrl config appState, dataCy ("login_external_" ++ config.id) ]
+        [ onClick cfg.onClick, dataCy ("login_external_" ++ cfg.service.id) ]
         appState
-        config.name
-        config.style.icon
-        config.style.color
-        config.style.background
+        cfg.service.name
+        cfg.service.style.icon
+        cfg.service.style.color
+        cfg.service.style.background
 
 
 badgeWrapper : AppState -> String -> Html msg
