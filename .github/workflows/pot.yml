@@ -36,9 +36,9 @@ jobs:
         run: |
           GITHUB_TAG=`echo $GITHUB_REF | cut -d/ -f3`
           if [[ $GITHUB_TAG =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-            echo "::set-output name=is_prerelease::false"
+            echo "is_prerelease=false" >> "$GITHUB_OUTPUT"
           else
-            echo "::set-output name=is_prerelease::true"
+            echo "is_prerelease=true" >> "$GITHUB_OUTPUT"
           fi
 
       - name: '[release] Create & Upload Artifacts'
