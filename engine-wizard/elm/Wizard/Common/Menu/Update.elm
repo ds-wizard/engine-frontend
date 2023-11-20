@@ -2,7 +2,6 @@ module Wizard.Common.Menu.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
-import Browser.Navigation as Navigation
 import Dict
 import Gettext exposing (gettext)
 import Shared.Api.BuildInfo as BuildInfoApi
@@ -91,9 +90,6 @@ update wrapMsg msg appState model =
 
         HideElement elementId ->
             ( { model | submenuPositions = Dict.remove elementId model.submenuPositions }, Cmd.none )
-
-        OpenAppSwitcherLink url ->
-            ( model, Navigation.load url )
 
 
 loadBuildInfo : (Msg -> Wizard.Msgs.Msg) -> AppState -> Cmd Wizard.Msgs.Msg
