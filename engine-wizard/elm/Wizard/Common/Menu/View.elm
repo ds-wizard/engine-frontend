@@ -282,7 +282,7 @@ viewLogo model =
                 in
                 li []
                     [ a
-                        [ onClick (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.OpenAppSwitcherLink item.url))
+                        [ href item.url
                         , classList
                             [ ( "internal", not item.external )
                             , ( "external", item.external )

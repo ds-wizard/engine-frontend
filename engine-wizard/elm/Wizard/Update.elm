@@ -169,15 +169,23 @@ update msg model =
                 case urlRequest of
                     Browser.Internal url ->
                         let
-                            nextRoute =
-                                parseLocation model.appState url
+                            isWizardRoute =
+                                String.startsWith "/wizard" url.path
                         in
-                        case isGuarded nextRoute model of
-                            Just guardMsg ->
-                                ( model, Ports.alert guardMsg )
+                        if isWizardRoute then
+                            let
+                                nextRoute =
+                                    parseLocation model.appState url
+                            in
+                            case isGuarded nextRoute model of
+                                Just guardMsg ->
+                                    ( model, Ports.alert guardMsg )
 
-                            Nothing ->
-                                ( model, pushUrl model.appState.key (Url.toString url) )
+                                Nothing ->
+                                    ( model, pushUrl model.appState.key (Url.toString url) )
+
+                        else
+                            ( model, load (Url.toString url) )
 
                     Browser.External url ->
                         if url == "" then

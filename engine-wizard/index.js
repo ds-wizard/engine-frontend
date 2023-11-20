@@ -133,7 +133,7 @@ function loadApp(config, locale, provisioning) {
     registerLocalStoragePorts(app)
     registerPageUnloadPorts(app)
     registerRefreshPorts(app)
-    registerSessionPorts(app, sessionKey)
+    registerSessionPorts(app, sessionKey, ['session/admin'])
     registerThemePorts(app)
     registerWebsocketPorts(app)
     cookies.registerCookiePorts(app)
