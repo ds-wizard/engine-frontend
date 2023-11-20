@@ -1,4 +1,4 @@
-module.exports = function (app, sessionKey) {
+module.exports = function (app, sessionKey, otherSessionKeys) {
     app.ports.storeSession.subscribe(storeSession);
     app.ports.clearSession.subscribe(clearSession);
     app.ports.clearSessionAndReload.subscribe(clearSessionAndReload);
@@ -11,6 +11,11 @@ module.exports = function (app, sessionKey) {
 
     function clearSession() {
         localStorage.removeItem(sessionKey);
+        if (otherSessionKeys) {
+            otherSessionKeys.forEach(function (otherSessionKey) {
+                localStorage.removeItem(otherSessionKey)
+            })
+        }
     }
 
 

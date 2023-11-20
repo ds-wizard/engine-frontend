@@ -19,4 +19,3 @@ type Msg
     | GetElement String
     | GotElement String (Result Dom.Error Dom.Element)
     | HideElement String
-    | OpenAppSwitcherLink String
