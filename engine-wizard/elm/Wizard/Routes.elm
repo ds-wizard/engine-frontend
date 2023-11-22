@@ -30,6 +30,7 @@ module Wizard.Routes exposing
     , isKnowledgeModelsSubroute
     , isLocalesRoute
     , isPersistentCommandsIndex
+    , isProjectActionsIndex
     , isProjectImportersIndex
     , isProjectSubroute
     , isProjectsDetail
@@ -62,6 +63,8 @@ module Wizard.Routes exposing
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
+    , projectActionsIndex
+    , projectActionsIndexWithFilters
     , projectImport
     , projectImportersIndex
     , projectImportersIndexWithFilters
@@ -120,6 +123,7 @@ import Wizard.KMEditor.Editor.KMEditorRoute
 import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Locales.Routes
+import Wizard.ProjectActions.Routes
 import Wizard.ProjectImporters.Routes
 import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Detail.ProjectDetailRoute
@@ -142,6 +146,7 @@ type Route
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
     | LocalesRoute Wizard.Locales.Routes.Route
     | ProjectsRoute Wizard.Projects.Routes.Route
+    | ProjectActionsRoute Wizard.ProjectActions.Routes.Route
     | ProjectImportersRoute Wizard.ProjectImporters.Routes.Route
     | PublicRoute Wizard.Public.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
@@ -503,6 +508,30 @@ isKnowledgeModelsSubroute route =
             True
 
         KMEditorRoute _ ->
+            True
+
+        _ ->
+            False
+
+
+
+-- Project Actions
+
+
+projectActionsIndex : Route
+projectActionsIndex =
+    ProjectActionsRoute (Wizard.ProjectActions.Routes.IndexRoute PaginationQueryString.empty)
+
+
+projectActionsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+projectActionsIndexWithFilters _ pagination =
+    ProjectActionsRoute (Wizard.ProjectActions.Routes.IndexRoute pagination)
+
+
+isProjectActionsIndex : Route -> Bool
+isProjectActionsIndex route =
+    case route of
+        ProjectActionsRoute (Wizard.ProjectActions.Routes.IndexRoute _) ->
             True
 
         _ ->

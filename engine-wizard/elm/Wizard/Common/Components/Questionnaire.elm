@@ -20,6 +20,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , setActiveChapterUuid
     , setLabels
     , setPhaseUuid
+    , setQuestionnaireActions
     , setQuestionnaireImporters
     , setReply
     , subscriptions
@@ -65,6 +66,7 @@ import Shared.Data.KnowledgeModel.Integration.WidgetIntegrationData exposing (Wi
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Comment exposing (Comment)
 import Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread)
@@ -102,7 +104,8 @@ import Wizard.Common.ElementScrollTop as ElementScrollTop
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
-import Wizard.Common.IntegrationWidgetValue as IntegrationWidgetValue
+import Wizard.Common.IntegrationWidgetValue exposing (IntegrationWidgetValue)
+import Wizard.Common.Integrations as Integrations
 import Wizard.Common.LocalStorageData as LocalStorageData exposing (LocalStorageData)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.Flash as Flash
@@ -146,6 +149,9 @@ type alias Model =
     , navigationTreeModel : NavigationTree.Model
     , questionnaireImportersDropdown : Dropdown.State
     , questionnaireImporters : List QuestionnaireImporter
+    , questionnaireActionsDropdown : Dropdown.State
+    , questionnaireActions : List QuestionnaireAction
+    , questionnaireActionResult : Maybe Integrations.ActionResult
     , collapsedItems : Set String
     , recentlyCopied : Bool
     , contentScrollTop : Maybe Int
@@ -213,6 +219,9 @@ init appState questionnaire mbPath =
             , navigationTreeModel = navigationTreeModel
             , questionnaireImportersDropdown = Dropdown.initialState
             , questionnaireImporters = []
+            , questionnaireActionsDropdown = Dropdown.initialState
+            , questionnaireActions = []
+            , questionnaireActionResult = Nothing
             , collapsedItems = Set.empty
             , recentlyCopied = False
             , contentScrollTop = Nothing
@@ -238,6 +247,11 @@ init appState questionnaire mbPath =
 setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
 setQuestionnaireImporters importers model =
     { model | questionnaireImporters = importers }
+
+
+setQuestionnaireActions : List QuestionnaireAction -> Model -> Model
+setQuestionnaireActions actions model =
+    { model | questionnaireActions = actions }
 
 
 addEvent : QuestionnaireEvent -> Model -> Model
@@ -428,7 +442,7 @@ type Msg
     | MoveItemUp String String
     | MoveItemDown String String
     | OpenIntegrationWidget String String
-    | GotIntegrationWidgetValue E.Value
+    | GotIntegrationWidgetValue (Result D.Error IntegrationWidgetValue)
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
@@ -460,6 +474,10 @@ type Msg
     | SplitPaneMsg SplitPane.Msg
     | NavigationTreeMsg NavigationTree.Msg
     | ImportersDropdownMsg Dropdown.State
+    | ActionsDropdownMsg Dropdown.State
+    | GotActionResult (Result D.Error Integrations.ActionResult)
+    | CloseActionResult
+    | OpenAction QuestionnaireAction
     | CollapseItem String
     | ExpandItem String
     | GotLocalStorageData E.Value
@@ -669,14 +687,17 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
 
         OpenIntegrationWidget path requestUrl ->
-            let
-                data =
-                    E.object [ ( "path", E.string path ), ( "requestUrl", E.string requestUrl ) ]
-            in
-            withSeed ( model, Ports.openIntegrationWidget data )
+            withSeed
+                ( model
+                , Integrations.openIntegrationWidget
+                    { url = requestUrl
+                    , theme = appState.theme
+                    , data = { path = path }
+                    }
+                )
 
-        GotIntegrationWidgetValue data ->
-            case D.decodeValue IntegrationWidgetValue.decoder data of
+        GotIntegrationWidgetValue result ->
+            case result of
                 Ok value ->
                     let
                         setReplyMsg =
@@ -857,6 +878,40 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         ImportersDropdownMsg state ->
             wrap { model | questionnaireImportersDropdown = state }
+
+        ActionsDropdownMsg state ->
+            wrap { model | questionnaireActionsDropdown = state }
+
+        GotActionResult result ->
+            case result of
+                Ok actionResult ->
+                    wrap { model | questionnaireActionResult = Just actionResult }
+
+                Err err ->
+                    wrap
+                        { model
+                            | questionnaireActionResult =
+                                Just
+                                    { success = False
+                                    , message = "```\n" ++ D.errorToString err ++ "\n```"
+                                    }
+                        }
+
+        CloseActionResult ->
+            wrap { model | questionnaireActionResult = Nothing }
+
+        OpenAction questionnaireAction ->
+            withSeed
+                ( model
+                , Integrations.openAction
+                    { url = questionnaireAction.url
+                    , theme = appState.theme
+                    , data =
+                        { projectUuid = model.uuid
+                        , userUuid = Maybe.map .uuid appState.config.user
+                        }
+                    }
+                )
 
         CollapseItem path ->
             let
@@ -1146,9 +1201,11 @@ subscriptions model =
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
          , Dropdown.subscriptions model.questionnaireImportersDropdown ImportersDropdownMsg
+         , Dropdown.subscriptions model.questionnaireActionsDropdown ActionsDropdownMsg
+         , Integrations.actionSub GotActionResult
+         , Integrations.integrationWidgetSub GotIntegrationWidgetValue
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
-         , Ports.gotIntegrationWidgetValue GotIntegrationWidgetValue
          , splitPaneSubscriptions
          , collapsedItemsSub
          , contentScrollSub
@@ -1206,6 +1263,7 @@ view appState cfg ctx model =
                 model.splitPane
             , viewQuestionnaireRightPanel appState cfg model
             ]
+        , Html.map cfg.wrapMsg <| viewActionResultModal appState model
         , Html.map cfg.wrapMsg <| viewPhaseModal appState model
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
         , Html.map cfg.wrapMsg <| viewRemoveItemModal appState model
@@ -1284,7 +1342,7 @@ viewQuestionnaireToolbar appState cfg model =
                         , toggleMsg = ImportersDropdownMsg
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                                [ text (gettext "Import answers" appState.locale) ]
+                                [ text (gettext "Import replies" appState.locale) ]
                         , items = List.map importerDropdownItem model.questionnaireImporters
                         }
                     ]
@@ -1293,6 +1351,29 @@ viewQuestionnaireToolbar appState cfg model =
             Dropdown.anchorItem
                 (class "dropdown-item" :: linkToAttributes appState (Routes.projectImport model.uuid importer.id))
                 [ text importer.name ]
+
+        actionsDropdown =
+            if cfg.features.readonly || List.isEmpty model.questionnaireActions then
+                emptyNode
+
+            else
+                div [ class "item-group" ]
+                    [ Dropdown.dropdown model.questionnaireActionsDropdown
+                        { options = []
+                        , toggleMsg = ActionsDropdownMsg
+                        , toggleButton =
+                            Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item item-actions" ] ]
+                                [ span [ class "icon" ] []
+                                , text (gettext "Actions" appState.locale)
+                                ]
+                        , items = List.map actionDropdownItem model.questionnaireActions
+                        }
+                    ]
+
+        actionDropdownItem action =
+            Dropdown.anchorItem
+                [ class "dropdown-item", onClick (OpenAction action) ]
+                [ text action.name ]
 
         navButton buttonElement visibleCondition =
             if visibleCondition then
@@ -1412,6 +1493,7 @@ viewQuestionnaireToolbar appState cfg model =
         [ div [ class "questionnaire__toolbar__left" ]
             [ viewDropdown
             , importersDropdown
+            , actionsDropdown
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
@@ -1423,6 +1505,41 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
             ]
         ]
+
+
+viewActionResultModal : AppState -> Model -> Html Msg
+viewActionResultModal appState model =
+    let
+        modalTitle actionResult =
+            if actionResult.success then
+                [ span [ class "text-success me-2" ] [ faSet "_global.success" appState ]
+                , text (gettext "Action succeeded!" appState.locale)
+                ]
+
+            else
+                [ span [ class "text-danger me-2" ] [ faSet "_global.error" appState ]
+                , text (gettext "Action failed!" appState.locale)
+                ]
+
+        modalBody =
+            Maybe.unwrap [] (List.singleton << Markdown.toHtml [] << .message) model.questionnaireActionResult
+
+        modalContent =
+            [ div [ class "modal-header" ]
+                [ h5 [ class "modal-title" ] (Maybe.unwrap [] modalTitle model.questionnaireActionResult)
+                ]
+            , div [ class "modal-body" ] modalBody
+            , div [ class "modal-footer" ]
+                [ button [ class "btn btn-primary", onClick CloseActionResult ]
+                    [ text (gettext "Ok" appState.locale) ]
+                ]
+            ]
+    in
+    Modal.simple
+        { modalContent = modalContent
+        , visible = Maybe.isJust model.questionnaireActionResult
+        , dataCy = "questionnaire-action-result"
+        }
 
 
 

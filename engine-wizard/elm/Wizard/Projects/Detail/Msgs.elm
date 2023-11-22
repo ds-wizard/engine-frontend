@@ -1,5 +1,6 @@
 module Wizard.Projects.Detail.Msgs exposing (Msg(..))
 
+import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
@@ -21,6 +22,7 @@ import Wizard.Projects.Detail.Documents.Msgs as Documents
 type Msg
     = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
     | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
+    | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing
     | ProjectSavingMsg ProjectSaving.Msg

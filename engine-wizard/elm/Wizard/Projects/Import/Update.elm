@@ -2,7 +2,6 @@ module Wizard.Projects.Import.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Json.Encode as E
 import Random exposing (Seed)
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
@@ -17,8 +16,8 @@ import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.Importer as Importer
+import Wizard.Common.Integrations as Integrations
 import Wizard.Msgs
-import Wizard.Ports as Ports
 import Wizard.Projects.Import.Models exposing (Model)
 import Wizard.Projects.Import.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -42,11 +41,13 @@ update wrapMsg msg appState model =
         openImporter newModel =
             case ( newModel.knowledgeModelString, newModel.questionnaireImporter ) of
                 ( Success knowledgeModelString, Success importer ) ->
-                    Ports.openImporter <|
-                        E.object
-                            [ ( "url", E.string importer.url )
-                            , ( "knowledgeModel", E.string knowledgeModelString )
-                            ]
+                    Integrations.openImporter
+                        { url = importer.url
+                        , theme = appState.theme
+                        , data =
+                            { knowledgeModel = knowledgeModelString
+                            }
+                        }
 
                 _ ->
                     Cmd.none
