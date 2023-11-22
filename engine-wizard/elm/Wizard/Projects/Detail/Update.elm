@@ -5,6 +5,7 @@ import Form
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
@@ -59,6 +60,7 @@ fetchData appState uuid model =
         Cmd.batch
             [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
             , QuestionnaireImportersApi.getQuestionnaireImportersFor uuid appState GetQuestionnaireImportersComplete
+            , QuestionnaireActionsApi.getQuestionnaireActionsFor uuid appState GetQuestionnaireActionsComplete
             ]
 
 
@@ -453,18 +455,22 @@ update wrapMsg msg appState model =
                         ( questionnaireModel, questionnaireCmd ) =
                             Questionnaire.init appState questionnaire model.mbSelectedPath
 
-                        questionnaireModelWithImporters =
-                            case model.questionnaireImporters of
-                                Success questionnaireImporters ->
-                                    Questionnaire.setQuestionnaireImporters questionnaireImporters questionnaireModel
+                        setImporters =
+                            ActionResult.unwrap identity Questionnaire.setQuestionnaireImporters model.questionnaireImporters
 
-                                _ ->
-                                    questionnaireModel
+                        setActions =
+                            ActionResult.unwrap identity Questionnaire.setQuestionnaireActions model.questionnaireActions
+
+                        newQuestionnaireModel =
+                            questionnaireModel
+                                |> setImporters
+                                |> setActions
+                                |> Success
 
                         ( newModel, fetchCmd ) =
                             fetchSubrouteDataFromAfter wrapMsg
                                 appState
-                                { model | questionnaireModel = Success questionnaireModelWithImporters }
+                                { model | questionnaireModel = newQuestionnaireModel }
                     in
                     withSeed <|
                         ( newModel
@@ -504,15 +510,31 @@ update wrapMsg msg appState model =
                 Ok questionnaireImporters ->
                     let
                         questionnaireModel =
-                            case model.questionnaireModel of
-                                Success qm ->
-                                    Success (Questionnaire.setQuestionnaireImporters questionnaireImporters qm)
-
-                                _ ->
-                                    model.questionnaireModel
+                            ActionResult.map (Questionnaire.setQuestionnaireImporters questionnaireImporters) model.questionnaireModel
 
                         newModel =
-                            { model | questionnaireImporters = Success questionnaireImporters, questionnaireModel = questionnaireModel }
+                            { model
+                                | questionnaireImporters = Success questionnaireImporters
+                                , questionnaireModel = questionnaireModel
+                            }
+                    in
+                    withSeed ( newModel, Cmd.none )
+
+                Err _ ->
+                    withSeed ( model, Cmd.none )
+
+        GetQuestionnaireActionsComplete result ->
+            case result of
+                Ok questionnaireActions ->
+                    let
+                        questionnaireModel =
+                            ActionResult.map (Questionnaire.setQuestionnaireActions questionnaireActions) model.questionnaireModel
+
+                        newModel =
+                            { model
+                                | questionnaireActions = Success questionnaireActions
+                                , questionnaireModel = questionnaireModel
+                            }
                     in
                     withSeed ( newModel, Cmd.none )
 

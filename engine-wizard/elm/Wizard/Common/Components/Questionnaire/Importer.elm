@@ -1,8 +1,10 @@
-module Wizard.Common.Components.Questionnaire.Importer exposing (ImporterResult, convertToQuestionnaireEvents)
+module Wizard.Common.Components.Questionnaire.Importer exposing
+    ( ImporterResult
+    , convertToQuestionnaireEvents
+    )
 
 import Dict exposing (Dict)
 import Json.Decode as D
-import Json.Encode as E
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
@@ -15,7 +17,7 @@ import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as 
 import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Utils exposing (flip, getUuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.Questionnaire.Importer.ImporterEvent as ImporterEvent exposing (ImporterEvent(..))
+import Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing (ImporterEvent(..))
 
 
 type alias ImporterResult =
@@ -31,9 +33,9 @@ initialResult =
     }
 
 
-convertToQuestionnaireEvents : AppState -> QuestionnaireDetail -> E.Value -> ( Seed, ImporterResult )
-convertToQuestionnaireEvents appState questionnaire data =
-    case D.decodeValue (D.list ImporterEvent.decoder) data of
+convertToQuestionnaireEvents : AppState -> QuestionnaireDetail -> Result D.Error (List ImporterEvent) -> ( Seed, ImporterResult )
+convertToQuestionnaireEvents appState questionnaire importerEventsResult =
+    case importerEventsResult of
         Ok importerEvents ->
             let
                 ( newSeed, _, importerResult ) =

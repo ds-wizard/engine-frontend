@@ -1,19 +1,19 @@
-module Wizard.ProjectImporters.Index.Update exposing
+module Wizard.ProjectActions.Index.Update exposing
     ( fetchData
     , update
     )
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
+import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Wizard.Common.Api exposing (applyResultTransformCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
 import Wizard.Msgs
-import Wizard.ProjectImporters.Index.Models exposing (Model)
-import Wizard.ProjectImporters.Index.Msgs exposing (Msg(..))
+import Wizard.ProjectActions.Index.Models exposing (Model)
+import Wizard.ProjectActions.Index.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 
 
@@ -28,11 +28,11 @@ update msg wrapMsg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
-        ToggleEnabled questionnaireImporter ->
+        ToggleEnabled questionnaireAction ->
             ( { model | togglingEnabled = Loading }
             , Cmd.map wrapMsg <|
-                QuestionnaireImportersApi.putQuestionnaireImporter
-                    { questionnaireImporter | enabled = not questionnaireImporter.enabled }
+                QuestionnaireActionsApi.putQuestionnaireAction
+                    { questionnaireAction | enabled = not questionnaireAction.enabled }
                     appState
                     ToggleEnabledComplete
             )
@@ -40,22 +40,22 @@ update msg wrapMsg appState model =
         ToggleEnabledComplete result ->
             applyResultTransformCmd appState
                 { setResult = \r m -> { m | togglingEnabled = r }
-                , defaultError = gettext "Unable to change project importer." appState.locale
+                , defaultError = gettext "Unable to change project action." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
-                , transform = always (gettext "Project importer was changed successfully." appState.locale)
+                , transform = always (gettext "Project action was changed successfully." appState.locale)
                 , cmd = Cmd.map (wrapMsg << ListingMsg) Listing.fetchData
                 }
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireImporter -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireAction -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
-        ( questionnaireImporters, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.questionnaireImporters
+        ( questionnaireActions, cmd ) =
+            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.questionnaireActions
     in
-    ( { model | questionnaireImporters = questionnaireImporters }
+    ( { model | questionnaireActions = questionnaireActions }
     , cmd
     )
 
@@ -64,10 +64,10 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireImporter
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireAction
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnaireImportersApi.getQuestionnaireImporters
-    , getError = gettext "Unable to get project importers." appState.locale
+    { getRequest = QuestionnaireActionsApi.getQuestionnaireActions
+    , getError = gettext "Unable to get project actions." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.projectImportersIndexWithFilters
+    , toRoute = Routes.projectActionsIndexWithFilters
     }

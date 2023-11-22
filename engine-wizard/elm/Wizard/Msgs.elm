@@ -17,6 +17,7 @@ import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
 import Wizard.KnowledgeModels.Msgs
 import Wizard.Locales.Msgs
+import Wizard.ProjectActions.Msgs
 import Wizard.ProjectImporters.Msgs
 import Wizard.Projects.Msgs
 import Wizard.Public.Msgs
@@ -47,6 +48,7 @@ type Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
     | LocaleMsg Wizard.Locales.Msgs.Msg
+    | ProjectActionsMsg Wizard.ProjectActions.Msgs.Msg
     | ProjectImportersMsg Wizard.ProjectImporters.Msgs.Msg
     | ProjectsMsg Wizard.Projects.Msgs.Msg
     | PublicMsg Wizard.Public.Msgs.Msg

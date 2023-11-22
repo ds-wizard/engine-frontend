@@ -1,6 +1,7 @@
 port module Shared.Utils.Theme exposing
     ( Theme
     , setTheme
+    , toStyleString
     )
 
 import Basics as Int

@@ -21,6 +21,7 @@ import Wizard.Locales.Update
 import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
+import Wizard.ProjectActions.Update
 import Wizard.ProjectImporters.Update
 import Wizard.Projects.Update
 import Wizard.Public.Update
@@ -70,6 +71,10 @@ fetchData model =
         Routes.LocalesRoute route ->
             Cmd.map Wizard.Msgs.LocaleMsg <|
                 Wizard.Locales.Update.fetchData route model.appState
+
+        Routes.ProjectActionsRoute _ ->
+            Cmd.map Wizard.Msgs.ProjectActionsMsg <|
+                Wizard.ProjectActions.Update.fetchData
 
         Routes.ProjectImportersRoute _ ->
             Cmd.map Wizard.Msgs.ProjectImportersMsg <|
@@ -312,6 +317,13 @@ update msg model =
                         Wizard.Locales.Update.update localeMsg Wizard.Msgs.LocaleMsg model.appState model.localeModel
                 in
                 ( { model | localeModel = localeModel }, cmd )
+
+            Wizard.Msgs.ProjectActionsMsg projectActionsMsg ->
+                let
+                    ( projectActionsModel, cmd ) =
+                        Wizard.ProjectActions.Update.update projectActionsMsg Wizard.Msgs.ProjectActionsMsg model.appState model.projectActionsModel
+                in
+                ( { model | projectActionsModel = projectActionsModel }, cmd )
 
             Wizard.Msgs.ProjectImportersMsg projectImporterMsg ->
                 let

@@ -17,6 +17,7 @@ import Wizard.KnowledgeModels.View
 import Wizard.Locales.View
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.ProjectActions.View
 import Wizard.ProjectImporters.View
 import Wizard.Projects.View
 import Wizard.Public.View
@@ -83,6 +84,12 @@ view model =
                 model.localeModel
                     |> Wizard.Locales.View.view route model.appState
                     |> Html.map LocaleMsg
+                    |> Layout.app model
+
+            Routes.ProjectActionsRoute _ ->
+                model.projectActionsModel
+                    |> Wizard.ProjectActions.View.view model.appState
+                    |> Html.map ProjectActionsMsg
                     |> Layout.app model
 
             Routes.ProjectImportersRoute _ ->

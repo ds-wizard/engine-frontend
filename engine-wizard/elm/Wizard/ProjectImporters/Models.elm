@@ -1,4 +1,8 @@
-module Wizard.ProjectImporters.Models exposing (Model, initLocalModel, initialModel)
+module Wizard.ProjectImporters.Models exposing
+    ( Model
+    , initLocalModel
+    , initialModel
+    )
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.ProjectImporters.Index.Models

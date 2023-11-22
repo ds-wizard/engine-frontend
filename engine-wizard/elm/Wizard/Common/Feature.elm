@@ -34,6 +34,7 @@ module Wizard.Common.Feature exposing
     , localeSetDefault
     , localeView
     , plans
+    , projectActions
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -342,6 +343,15 @@ projectCommentThreadDelete appState questionnaire commentThread =
 projectCommentPrivate : AppState -> QuestionnaireDetail -> Bool
 projectCommentPrivate appState questionnaire =
     QuestionnaireDetail.isEditor appState questionnaire
+
+
+
+-- Project Actions
+
+
+projectActions : AppState -> Bool
+projectActions =
+    adminOr Perm.questionnaireAction
 
 
 
