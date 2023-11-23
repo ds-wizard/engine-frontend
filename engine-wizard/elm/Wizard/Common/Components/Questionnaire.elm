@@ -88,6 +88,7 @@ import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
 import SplitPane
 import String
+import String.Extra as String
 import String.Format as String
 import Time
 import Time.Distance as Time
@@ -908,7 +909,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     , theme = appState.theme
                     , data =
                         { projectUuid = model.uuid
-                        , userUuid = Maybe.map .uuid appState.config.user
+                        , userToken = String.toMaybe appState.session.token.token
                         }
                     }
                 )

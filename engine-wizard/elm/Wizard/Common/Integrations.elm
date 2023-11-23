@@ -44,7 +44,7 @@ encodeIntegrationConfig encodeData openData =
 
 type alias ActionData =
     { projectUuid : Uuid
-    , userUuid : Maybe Uuid
+    , userToken : Maybe String
     }
 
 
@@ -52,7 +52,7 @@ encodeActionData : ActionData -> E.Value
 encodeActionData data =
     E.object
         [ ( "projectUuid", Uuid.encode data.projectUuid )
-        , ( "userUuid", E.maybe Uuid.encode data.userUuid )
+        , ( "userToken", E.maybe E.string data.userToken )
         ]
 
 
