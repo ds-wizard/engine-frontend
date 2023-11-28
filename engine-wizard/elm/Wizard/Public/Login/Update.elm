@@ -7,6 +7,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Api.Auth as AuthApi
 import Shared.Api.Tokens as TokensApi
+import Shared.Auth.Session as Session
 import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Token as Token
 import Shared.Data.TokenResponse as TokenResponse exposing (TokenResponse)
@@ -18,11 +19,16 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
+import Wizard.Routes as Routes
+import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Cmd msg
 fetchData appState =
-    if Admin.isEnabled appState.config.admin then
+    if Session.exists appState.session && not (Session.expired appState.currentTime appState.session) then
+        cmdNavigate appState Routes.appHome
+
+    else if Admin.isEnabled appState.config.admin then
         case List.head appState.config.authentication.external.services of
             Just service ->
                 Navigation.load (AuthApi.authRedirectUrl service appState)
