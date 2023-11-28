@@ -8,11 +8,12 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 
 
 type IntegrationReplyType
     = PlainType String
-    | IntegrationType String String
+    | IntegrationType (Maybe String) String
 
 
 decoder : Decoder IntegrationReplyType
@@ -37,7 +38,7 @@ decodePlainType =
 decodeIntegrationType : Decoder IntegrationReplyType
 decodeIntegrationType =
     D.succeed IntegrationType
-        |> D.required "id" D.string
+        |> D.required "id" (D.maybe D.string)
         |> D.required "value" D.string
 
 
@@ -61,7 +62,7 @@ encode replyType =
                 , ( "value"
                   , E.object
                         [ ( "type", E.string "IntegrationType" )
-                        , ( "id", E.string id )
+                        , ( "id", E.maybe E.string id )
                         , ( "value", E.string value )
                         ]
                   )

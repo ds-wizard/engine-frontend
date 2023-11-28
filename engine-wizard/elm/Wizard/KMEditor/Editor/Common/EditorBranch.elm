@@ -1063,13 +1063,6 @@ computeIntegrationWarnings appState integration =
             else
                 []
 
-        itemUrlWarning =
-            if String.isEmpty (Integration.getItemUrl integration) then
-                createError (gettext "Empty item URL for integration" appState.locale)
-
-            else
-                []
-
         typeWarnings =
             case integration of
                 Integration.ApiIntegration _ data ->
@@ -1088,13 +1081,6 @@ computeIntegrationWarnings appState integration =
                             else
                                 []
 
-                        responseItemId =
-                            if String.isEmpty data.responseItemId then
-                                createError (gettext "Empty response item ID for integration" appState.locale)
-
-                            else
-                                []
-
                         responseItemTemplate =
                             if String.isEmpty data.responseItemTemplate then
                                 createError (gettext "Empty response item template for integration" appState.locale)
@@ -1102,7 +1088,7 @@ computeIntegrationWarnings appState integration =
                             else
                                 []
                     in
-                    urlError ++ requestMethod ++ responseItemId ++ responseItemTemplate
+                    urlError ++ requestMethod ++ responseItemTemplate
 
                 Integration.WidgetIntegration _ data ->
                     if String.isEmpty data.widgetUrl then
@@ -1111,4 +1097,4 @@ computeIntegrationWarnings appState integration =
                     else
                         []
     in
-    idWarning ++ typeWarnings ++ itemUrlWarning
+    idWarning ++ typeWarnings

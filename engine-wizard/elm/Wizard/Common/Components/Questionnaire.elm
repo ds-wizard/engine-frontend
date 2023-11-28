@@ -705,7 +705,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             SetReply value.path <|
                                 createReply appState <|
                                     IntegrationReply <|
-                                        IntegrationType value.id value.value
+                                        IntegrationType (Just value.id) value.value
                     in
                     withSeed ( model, dispatch setReplyMsg )
 
@@ -3037,7 +3037,7 @@ viewQuestionIntegrationTypeHint appState cfg path typeHint =
             ]
 
 
-viewQuestionIntegrationIntegrationReply : CommonIntegrationData -> String -> String -> Html Msg
+viewQuestionIntegrationIntegrationReply : CommonIntegrationData -> Maybe String -> String -> Html Msg
 viewQuestionIntegrationIntegrationReply integration id value =
     div [ class "card" ]
         [ Markdown.toHtml [ class "card-body item-md" ] value
@@ -3045,23 +3045,29 @@ viewQuestionIntegrationIntegrationReply integration id value =
         ]
 
 
-viewQuestionIntegrationLink : CommonIntegrationData -> String -> Html Msg
-viewQuestionIntegrationLink integration id =
-    let
-        url =
-            String.replace "${id}" id integration.itemUrl
+viewQuestionIntegrationLink : CommonIntegrationData -> Maybe String -> Html Msg
+viewQuestionIntegrationLink integration mbId =
+    case ( integration.itemUrl, mbId ) of
+        ( Just itemUrl, Just id ) ->
+            let
+                url =
+                    String.replace "${id}" id itemUrl
 
-        logo =
-            if String.isEmpty integration.logo then
-                emptyNode
+                logo =
+                    case integration.logo of
+                        Just logoUrl ->
+                            img [ src logoUrl ] []
 
-            else
-                img [ src integration.logo ] []
-    in
-    div [ class "card-footer" ]
-        [ logo
-        , a [ href url, target "_blank" ] [ text url ]
-        ]
+                        Nothing ->
+                            emptyNode
+            in
+            div [ class "card-footer" ]
+                [ logo
+                , a [ href url, target "_blank" ] [ text url ]
+                ]
+
+        _ ->
+            emptyNode
 
 
 viewChoice : AppState -> Config msg -> List String -> List String -> Int -> Choice -> Html Msg

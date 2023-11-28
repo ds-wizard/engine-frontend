@@ -9,6 +9,7 @@ module Shared.Data.Event.AddIntegrationApiEventData exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
 import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
@@ -18,16 +19,16 @@ type alias AddIntegrationApiEventData =
     { id : String
     , name : String
     , props : List String
-    , logo : String
-    , itemUrl : String
+    , logo : Maybe String
+    , itemUrl : Maybe String
     , annotations : List Annotation
     , requestMethod : String
     , requestUrl : String
     , requestHeaders : List RequestHeader
     , requestBody : String
     , requestEmptySearch : Bool
-    , responseListField : String
-    , responseItemId : String
+    , responseListField : Maybe String
+    , responseItemId : Maybe String
     , responseItemTemplate : String
     }
 
@@ -38,16 +39,16 @@ decoder =
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "props" (D.list D.string)
-        |> D.required "logo" D.string
-        |> D.required "itemUrl" D.string
+        |> D.required "logo" (D.maybe D.string)
+        |> D.required "itemUrl" (D.maybe D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
         |> D.required "requestMethod" D.string
         |> D.required "requestUrl" D.string
         |> D.required "requestHeaders" (D.list RequestHeader.decoder)
         |> D.required "requestBody" D.string
         |> D.required "requestEmptySearch" D.bool
-        |> D.required "responseListField" D.string
-        |> D.required "responseItemId" D.string
+        |> D.required "responseListField" (D.maybe D.string)
+        |> D.required "responseItemId" (D.maybe D.string)
         |> D.required "responseItemTemplate" D.string
 
 
@@ -57,16 +58,16 @@ encode data =
     , ( "id", E.string data.id )
     , ( "name", E.string data.name )
     , ( "props", E.list E.string data.props )
-    , ( "logo", E.string data.logo )
-    , ( "itemUrl", E.string data.itemUrl )
+    , ( "logo", E.maybe E.string data.logo )
+    , ( "itemUrl", E.maybe E.string data.itemUrl )
     , ( "annotations", E.list Annotation.encode data.annotations )
     , ( "requestMethod", E.string data.requestMethod )
     , ( "requestUrl", E.string data.requestUrl )
     , ( "requestHeaders", E.list RequestHeader.encode data.requestHeaders )
     , ( "requestBody", E.string data.requestBody )
     , ( "requestEmptySearch", E.bool data.requestEmptySearch )
-    , ( "responseListField", E.string data.responseListField )
-    , ( "responseItemId", E.string data.responseItemId )
+    , ( "responseListField", E.maybe E.string data.responseListField )
+    , ( "responseItemId", E.maybe E.string data.responseItemId )
     , ( "responseItemTemplate", E.string data.responseItemTemplate )
     ]
 
@@ -76,16 +77,16 @@ init =
     { id = ""
     , name = ""
     , props = []
-    , logo = ""
-    , itemUrl = ""
+    , logo = Nothing
+    , itemUrl = Nothing
     , annotations = []
     , requestMethod = ""
     , requestUrl = ""
     , requestHeaders = []
     , requestBody = ""
     , requestEmptySearch = True
-    , responseListField = ""
-    , responseItemId = ""
+    , responseListField = Nothing
+    , responseItemId = Nothing
     , responseItemTemplate = ""
     }
 
