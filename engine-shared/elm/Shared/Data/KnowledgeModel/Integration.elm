@@ -105,12 +105,12 @@ getProps =
     .props << getCommonIntegrationData
 
 
-getLogo : Integration -> String
+getLogo : Integration -> Maybe String
 getLogo =
     .logo << getCommonIntegrationData
 
 
-getItemUrl : Integration -> String
+getItemUrl : Integration -> Maybe String
 getItemUrl =
     .itemUrl << getCommonIntegrationData
 
@@ -122,27 +122,27 @@ getAnnotations =
 
 getRequestMethod : Integration -> Maybe String
 getRequestMethod =
-    getApiIntegrationData .requestMethod
+    getApiIntegrationData (Just << .requestMethod)
 
 
 getRequestUrl : Integration -> Maybe String
 getRequestUrl =
-    getApiIntegrationData .requestUrl
+    getApiIntegrationData (Just << .requestUrl)
 
 
 getRequestHeaders : Integration -> Maybe (List RequestHeader)
 getRequestHeaders =
-    getApiIntegrationData .requestHeaders
+    getApiIntegrationData (Just << .requestHeaders)
 
 
 getRequestBody : Integration -> Maybe String
 getRequestBody =
-    getApiIntegrationData .requestBody
+    getApiIntegrationData (Just << .requestBody)
 
 
 getRequestEmptySearch : Integration -> Maybe Bool
 getRequestEmptySearch =
-    getApiIntegrationData .requestEmptySearch
+    getApiIntegrationData (Just << .requestEmptySearch)
 
 
 getResponseListField : Integration -> Maybe String
@@ -157,12 +157,12 @@ getResponseItemId =
 
 getResponseItemTemplate : Integration -> Maybe String
 getResponseItemTemplate =
-    getApiIntegrationData .responseItemTemplate
+    getApiIntegrationData (Just << .responseItemTemplate)
 
 
 getWidgetUrl : Integration -> Maybe String
 getWidgetUrl =
-    getWidgetIntegrationData .widgetUrl
+    getWidgetIntegrationData (Just << .widgetUrl)
 
 
 getCommonIntegrationData : Integration -> CommonIntegrationData
@@ -175,21 +175,21 @@ getCommonIntegrationData integration =
             data
 
 
-getApiIntegrationData : (ApiIntegrationData -> a) -> Integration -> Maybe a
+getApiIntegrationData : (ApiIntegrationData -> Maybe a) -> Integration -> Maybe a
 getApiIntegrationData map integration =
     case integration of
         ApiIntegration _ data ->
-            Just <| map data
+            map data
 
         _ ->
             Nothing
 
 
-getWidgetIntegrationData : (WidgetIntegrationData -> a) -> Integration -> Maybe a
+getWidgetIntegrationData : (WidgetIntegrationData -> Maybe a) -> Integration -> Maybe a
 getWidgetIntegrationData map integration =
     case integration of
         WidgetIntegration _ data ->
-            Just <| map data
+            map data
 
         _ ->
             Nothing

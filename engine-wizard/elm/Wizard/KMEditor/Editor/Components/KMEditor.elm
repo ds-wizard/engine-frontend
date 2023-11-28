@@ -1404,8 +1404,8 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             Input.string
                 { name = "logo"
                 , label = gettext "Logo URL" appState.locale
-                , value = Integration.getLogo integration
-                , onInput = createEditEvent setLogo setLogo
+                , value = String.fromMaybe (Integration.getLogo integration)
+                , onInput = createEditEvent setLogo setLogo << String.toMaybe
                 }
 
         propsInput =
@@ -1419,8 +1419,8 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             Input.string
                 { name = "itemUrl"
                 , label = gettext "Item URL" appState.locale
-                , value = Integration.getItemUrl integration
-                , onInput = createEditEvent setItemUrl setItemUrl
+                , value = String.fromMaybe (Integration.getItemUrl integration)
+                , onInput = createEditEvent setItemUrl setItemUrl << String.toMaybe
                 }
 
         annotationsInput =
@@ -1483,16 +1483,16 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             Input.string
                                 { name = "responseItemId"
                                 , label = gettext "Response Item ID" appState.locale
-                                , value = data.responseItemId
-                                , onInput = createTypeEditEvent setResponseItemId
+                                , value = String.fromMaybe data.responseItemId
+                                , onInput = createTypeEditEvent setResponseItemId << String.toMaybe
                                 }
 
                         responseListFieldInput =
                             Input.string
                                 { name = "responseListField"
                                 , label = gettext "Response List Field" appState.locale
-                                , value = data.responseListField
-                                , onInput = createTypeEditEvent setResponseListField
+                                , value = String.fromMaybe data.responseListField
+                                , onInput = createTypeEditEvent setResponseListField << String.toMaybe
                                 }
 
                         responseItemTemplate =
@@ -1593,15 +1593,12 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             if (not << List.isEmpty) integrationPrefabs && EditorBranch.isEmptyIntegrationEditorUuid integrationUuid editorBranch then
                 let
                     viewLogo i =
-                        let
-                            logo =
-                                Integration.getLogo i
-                        in
-                        if String.isEmpty logo then
-                            faSet "km.integration" appState
+                        case Integration.getLogo i of
+                            Just logo ->
+                                img [ src logo ] []
 
-                        else
-                            img [ src logo ] []
+                            Nothing ->
+                                faSet "km.integration" appState
 
                     viewIntegrationButton i =
                         li []

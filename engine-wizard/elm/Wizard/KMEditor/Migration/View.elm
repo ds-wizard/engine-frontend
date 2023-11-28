@@ -646,7 +646,7 @@ viewAddIntegrationDiff appState event =
                 , AddIntegrationEventData.map .id .id event
                 , AddIntegrationEventData.map .name .name event
                 , String.join ", " <| AddIntegrationEventData.map .props .props event
-                , AddIntegrationEventData.map .itemUrl .itemUrl event
+                , Maybe.withDefault "" <| AddIntegrationEventData.map .itemUrl .itemUrl event
                 ]
 
         extraFields =
@@ -665,8 +665,8 @@ viewAddIntegrationDiff appState event =
                         , data.requestUrl
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
                         , data.requestBody
-                        , data.responseListField
-                        , data.responseItemId
+                        , Maybe.withDefault "" data.responseListField
+                        , Maybe.withDefault "" data.responseItemId
                         , data.responseItemTemplate
                         ]
 
@@ -701,13 +701,13 @@ viewEditIntegrationDiff appState event integration =
                 , Integration.getId integration
                 , Integration.getName integration
                 , String.join ", " <| Integration.getProps integration
-                , Integration.getItemUrl integration
+                , Maybe.withDefault "" <| Integration.getItemUrl integration
                 ]
                 [ EditIntegrationEventData.getTypeString event
                 , EventField.getValueWithDefault (EditIntegrationEventData.map .id .id event) (Integration.getId integration)
                 , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name event) (Integration.getName integration)
                 , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map .props .props event) (Integration.getProps integration)
-                , EventField.getValueWithDefault (EditIntegrationEventData.map .itemUrl .itemUrl event) (Integration.getItemUrl integration)
+                , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map .itemUrl .itemUrl event) (Integration.getItemUrl integration)
                 ]
 
         extraFields =
@@ -734,8 +734,8 @@ viewEditIntegrationDiff appState event integration =
                         , EventField.getValueWithDefault data.requestUrl (Maybe.withDefault "" <| Integration.getRequestUrl integration)
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault data.requestHeaders (Maybe.withDefault [] <| Integration.getRequestHeaders integration)
                         , EventField.getValueWithDefault data.requestBody (Maybe.withDefault "" <| Integration.getRequestBody integration)
-                        , EventField.getValueWithDefault data.responseListField (Maybe.withDefault "" <| Integration.getResponseListField integration)
-                        , EventField.getValueWithDefault data.responseItemId (Maybe.withDefault "" <| Integration.getResponseItemId integration)
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseListField (Integration.getResponseListField integration)
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseItemId (Integration.getResponseItemId integration)
                         , EventField.getValueWithDefault data.responseItemTemplate (Maybe.withDefault "" <| Integration.getResponseItemTemplate integration)
                         ]
 
@@ -774,7 +774,7 @@ viewDeleteIntegrationDiff appState integration =
                 , Integration.getId integration
                 , Integration.getName integration
                 , String.join ", " <| Integration.getProps integration
-                , Integration.getItemUrl integration
+                , Maybe.withDefault "" <| Integration.getItemUrl integration
                 ]
 
         extraFields =
@@ -793,8 +793,8 @@ viewDeleteIntegrationDiff appState integration =
                         , data.requestUrl
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
                         , data.requestBody
-                        , data.responseListField
-                        , data.responseItemId
+                        , Maybe.withDefault "" <| data.responseListField
+                        , Maybe.withDefault "" <| data.responseItemId
                         , data.responseItemTemplate
                         ]
 

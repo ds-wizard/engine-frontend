@@ -386,7 +386,7 @@ knowledgeModelEntitiesDecoderTest =
                                     "requestHeaders": [{"key": "X_USER", "value": "user"}],
                                     "requestBody": "{}",
                                     "requestEmptySearch": true,
-                                    "responseListField": "",
+                                    "responseListField": null,
                                     "responseItemId": "{{id}}",
                                     "responseItemTemplate": "{{title}}",
                                     "annotations": []
@@ -413,8 +413,8 @@ knowledgeModelEntitiesDecoderTest =
                                         , id = "service"
                                         , name = "Service"
                                         , props = [ "kind", "category" ]
-                                        , logo = "data:image/png;base64,..."
-                                        , itemUrl = "http://example.com/${id}"
+                                        , logo = Just "data:image/png;base64,..."
+                                        , itemUrl = Just "http://example.com/${id}"
                                         , annotations = []
                                         }
                                         { requestMethod = "GET"
@@ -422,8 +422,8 @@ knowledgeModelEntitiesDecoderTest =
                                         , requestHeaders = [ { key = "X_USER", value = "user" } ]
                                         , requestBody = "{}"
                                         , requestEmptySearch = True
-                                        , responseListField = ""
-                                        , responseItemId = "{{id}}"
+                                        , responseListField = Nothing
+                                        , responseItemId = Just "{{id}}"
                                         , responseItemTemplate = "{{title}}"
                                         }
                                   )

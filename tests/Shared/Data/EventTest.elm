@@ -628,15 +628,15 @@ addApiIntegrationEvent =
             { id = "service"
             , name = "Service"
             , props = [ "kind", "category" ]
-            , logo = "data:image/png;base64,..."
-            , itemUrl = "http://example.com/${id}"
+            , logo = Just "data:image/png;base64,..."
+            , itemUrl = Just "http://example.com/${id}"
             , requestMethod = "GET"
             , requestUrl = "/api/search"
             , requestHeaders = [ { key = "X_USER", value = "user" } ]
             , requestBody = "{}"
             , requestEmptySearch = True
-            , responseListField = "items"
-            , responseItemId = "uuid"
+            , responseListField = Just "items"
+            , responseItemId = Just "uuid"
             , responseItemTemplate = "title"
             , annotations = []
             }
@@ -655,8 +655,8 @@ addWidgetIntegrationEvent =
             { id = "service"
             , name = "Service"
             , props = [ "kind", "category" ]
-            , logo = "data:image/png;base64,..."
-            , itemUrl = "http://example.com/${id}"
+            , logo = Just "data:image/png;base64,..."
+            , itemUrl = Just "http://example.com/${id}"
             , widgetUrl = "http://example.com"
             , annotations = []
             }
@@ -699,7 +699,7 @@ editApiIntegrationEvent =
             , name = { changed = True, value = Just "Service" }
             , props = { changed = True, value = Just [ "kind", "category" ] }
             , logo = { changed = False, value = Nothing }
-            , itemUrl = { changed = True, value = Just "http://example.com/${id}" }
+            , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
             , requestMethod = { changed = True, value = Just "GET" }
             , requestUrl = { changed = False, value = Nothing }
             , requestHeaders = { changed = True, value = Just <| [ { key = "X_SEARCH", value = "full" }, { key = "X_USER", value = "user" } ] }
@@ -726,7 +726,7 @@ editWidgetIntegrationEvent =
             , name = { changed = True, value = Just "Service" }
             , props = { changed = True, value = Just [ "kind", "category" ] }
             , logo = { changed = False, value = Nothing }
-            , itemUrl = { changed = True, value = Just "http://example.com/${id}" }
+            , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
             , widgetUrl = { changed = False, value = Nothing }
             , annotations = { changed = False, value = Nothing }
             }

@@ -270,8 +270,8 @@ knowledgeModelDecoderTest =
                                             , id = "service"
                                             , name = "Service"
                                             , props = [ "kind", "category" ]
-                                            , logo = "data:image/png;base64,..."
-                                            , itemUrl = "http://example.com/${id}"
+                                            , logo = Just "data:image/png;base64,..."
+                                            , itemUrl = Just "http://example.com/${id}"
                                             , annotations = []
                                             }
                                             { requestMethod = "GET"
@@ -279,8 +279,8 @@ knowledgeModelDecoderTest =
                                             , requestHeaders = [ { key = "X_USER", value = "user" } ]
                                             , requestBody = "{}"
                                             , requestEmptySearch = True
-                                            , responseListField = "items"
-                                            , responseItemId = "{{id}}"
+                                            , responseListField = Just "items"
+                                            , responseItemId = Just "{{id}}"
                                             , responseItemTemplate = "{{title}}"
                                             }
                                       )

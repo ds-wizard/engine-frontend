@@ -72,8 +72,8 @@ apply event integration =
                 , requestHeaders = EventField.getValueWithDefault eventData.requestHeaders (Maybe.withDefault [] (Integration.getRequestHeaders integration))
                 , requestBody = EventField.getValueWithDefault eventData.requestBody (Maybe.withDefault "" (Integration.getRequestBody integration))
                 , requestEmptySearch = EventField.getValueWithDefault eventData.requestEmptySearch (Maybe.withDefault True (Integration.getRequestEmptySearch integration))
-                , responseListField = EventField.getValueWithDefault eventData.responseListField (Maybe.withDefault "" (Integration.getResponseListField integration))
-                , responseItemId = EventField.getValueWithDefault eventData.responseItemId (Maybe.withDefault "" (Integration.getResponseItemId integration))
+                , responseListField = EventField.getValueWithDefault eventData.responseListField (Integration.getResponseListField integration)
+                , responseItemId = EventField.getValueWithDefault eventData.responseItemId (Integration.getResponseItemId integration)
                 , responseItemTemplate = EventField.getValueWithDefault eventData.responseItemTemplate (Maybe.withDefault "" (Integration.getResponseItemTemplate integration))
                 }
 

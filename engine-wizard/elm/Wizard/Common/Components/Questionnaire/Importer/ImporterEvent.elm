@@ -72,7 +72,7 @@ decodeReplyListData =
 type alias ReplyIntegrationData =
     { path : String
     , value : String
-    , id : String
+    , id : Maybe String
     }
 
 
@@ -81,7 +81,7 @@ decodeReplyIntegrationData =
     D.succeed ReplyIntegrationData
         |> D.required "path" D.string
         |> D.required "value" D.string
-        |> D.required "id" D.string
+        |> D.required "id" (D.maybe D.string)
 
 
 type alias AddItemData =

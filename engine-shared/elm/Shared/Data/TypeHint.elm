@@ -8,7 +8,7 @@ import Json.Decode.Pipeline as D
 
 
 type alias TypeHint =
-    { id : String
+    { id : Maybe String
     , name : String
     }
 
@@ -16,5 +16,5 @@ type alias TypeHint =
 decoder : Decoder TypeHint
 decoder =
     D.succeed TypeHint
-        |> D.required "id" D.string
+        |> D.required "id" (D.maybe D.string)
         |> D.required "name" D.string
