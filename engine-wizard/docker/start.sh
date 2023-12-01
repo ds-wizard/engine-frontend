@@ -13,7 +13,7 @@ sed -i "s/{defaultIllustrationsColor}/$DEFAULT_ILLUSTRATIONS_COLOR/g" $file
 
 # create config
 config=/usr/share/nginx/html/wizard/config.js
-echo -n "window.wizard={apiUrl:'"$API_URL"'" >${config}
+echo -n "window.app={apiUrl:'"$API_URL"'" >${config}
 if [[ ! -z "$PROVISIONING_URL" ]]; then
   echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >>${config}
 fi

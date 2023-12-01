@@ -1,0 +1,41 @@
+name: Zip
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  zip:
+    name: Build Zip
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        component: ['registry', 'wizard']
+
+    env:
+      NODE_VERSION: 20
+
+    steps:
+      - name: '[setup] Checkout Project'
+        uses: actions/checkout@v4
+
+      - name: '[setup] Node.js ${{ matrix.node-version }}'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: '[app] Install'
+        run: npm ci
+
+      - name: '[app] Review'
+        run: npm run review
+
+      - name: '[app] Build'
+        run: npm run build:${{ matrix.component }}
+
+      - name: '[release] Create artifact'
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.component }}
+          path: dist/engine-${{ matrix.component }}
