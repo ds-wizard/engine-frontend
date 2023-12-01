@@ -54,28 +54,27 @@ function getPdfSupport() {
 
 
 function defaultApiUrl() {
-    if (window.wizard && window.wizard['apiUrl']) return window.wizard['apiUrl']
-    return 'http://localhost:3000'
+    if (window.app && window.app['apiUrl']) return window.app['apiUrl']
+    return window.location.origin + '/wizard-api'
 }
 
 function configUrl(apiUrl) {
-    const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
+    const clientUrl = (window.app && window.app['clientUrl']) || (window.location.origin + '/wizard')
     return (apiUrl || defaultApiUrl()) + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
 }
 
 function localeUrl(apiUrl) {
     const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
-    const clientUrl = (window.wizard && window.wizard['clientUrl']) || (window.location.origin + '/wizard')
-    return (apiUrl || defaultApiUrl()) + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl)
+    return (apiUrl || defaultApiUrl()) + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl())
 }
 
 function provisioningUrl() {
-    if (window.wizard && window.wizard['provisioningUrl']) return window.wizard['provisioningUrl']
+    if (window.app && window.app['provisioningUrl']) return window.app['provisioningUrl']
     return false
 }
 
 function localProvisioning() {
-    if (window.wizard && window.wizard['provisioning']) return window.wizard['provisioning']
+    if (window.app && window.app['provisioning']) return window.app['provisioning']
     return null
 }
 
@@ -86,7 +85,7 @@ function bootstrapErrorHTML(errorCode) {
 }
 
 function clientUrl() {
-    return window.location.protocol + '//' + window.location.host
+    return (window.app && window.app['clientUrl']) || (window.location.origin + '/wizard')
 }
 
 function getApiUrl(config) {

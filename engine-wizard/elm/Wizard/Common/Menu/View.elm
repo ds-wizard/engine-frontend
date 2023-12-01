@@ -240,7 +240,7 @@ viewLogo model =
     let
         logoText =
             span [ class "logo-full", dataCy "nav_app-title-short" ]
-                [ span [] [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel ]
+                [ text <| LookAndFeelConfig.getAppTitleShort model.appState.config.lookAndFeel
                 ]
     in
     if List.isEmpty model.appState.config.modules then
@@ -330,6 +330,11 @@ viewLogo model =
         div [ id itemId, class "logo logo-app-switcher", mouseenter, mouseleave ]
             [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
             , logoText
+            , span [ class "switcher-icon ms-1 me-2 d-flex text-secondary" ]
+                [ fa "fas fa-ellipsis-v"
+                , fa "fas fa-ellipsis-v"
+                , fa "fas fa-ellipsis-v"
+                ]
             , div ([ class "app-switcher-menu", class submenuClass ] ++ submenuStyle)
                 [ ul []
                     (switchToHeading
