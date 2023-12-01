@@ -2,7 +2,7 @@
 
 # create config
 config=/usr/share/nginx/html/config.js
-echo -n "window.registry={apiUrl:'"$API_URL"'" > ${config}
+echo -n "window.app={apiUrl:'"$API_URL"'" > ${config}
 
 if [[ ! -z "$APP_TITLE" ]]; then
   echo -n ",appTitle:'"$APP_TITLE"'" >>${config}

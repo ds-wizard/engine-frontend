@@ -17,12 +17,12 @@ axiosRetry(axios, {
 })
 
 function apiUrl() {
-    if (window.registry && window.registry['apiUrl']) return window.registry['apiUrl']
+    if (window.app && window.app['apiUrl']) return window.app['apiUrl']
     return 'http://localhost:3000'
 }
 
 function appTitle() {
-    if (window.registry && window.registry['appTitle']) return window.registry['appTitle']
+    if (window.app && window.app['appTitle']) return window.app['appTitle']
     return null
 }
 
