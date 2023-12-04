@@ -17,6 +17,7 @@ import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, sp
 import Html.Attributes exposing (attribute, class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
 import Html.Keyed
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
@@ -1614,7 +1615,30 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                     ]
 
             else
-                emptyNode
+                case List.find ((==) (Integration.getId integration) << Integration.getId) integrationPrefabs of
+                    Just usedPrefab ->
+                        let
+                            differFromPrefab =
+                                Integration.getName integration
+                                    /= Integration.getName usedPrefab
+                                    || Integration.getResponseItemTemplate integration
+                                    /= Integration.getResponseItemTemplate usedPrefab
+                        in
+                        if differFromPrefab then
+                            div [ class "alert alert-info" ]
+                                [ text (gettext "This integration was created from a template and now differs." appState.locale)
+                                , button
+                                    [ class "btn btn-primary ms-2"
+                                    , onClick (createEditEventFromPrefab usedPrefab)
+                                    ]
+                                    [ text (gettext "Update" appState.locale) ]
+                                ]
+
+                        else
+                            emptyNode
+
+                    Nothing ->
+                        emptyNode
     in
     editor ("integration-" ++ integrationUuid)
         ([ integrationEditorTitle
