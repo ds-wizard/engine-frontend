@@ -1,7 +1,7 @@
 'use strict'
 
 const axios = require('axios').default
-const axiosRetry = require('axios-retry')
+const axiosRetry = require('axios-retry').default
 
 const program = require('./elm/Wizard.elm')
 
