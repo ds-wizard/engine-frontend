@@ -3054,7 +3054,7 @@ viewQuestionIntegrationLink integration mbId =
                     String.replace "${id}" id itemUrl
 
                 logo =
-                    case integration.logo of
+                    case Maybe.andThen String.toMaybe integration.logo of
                         Just logoUrl ->
                             img [ src logoUrl ] []
 
