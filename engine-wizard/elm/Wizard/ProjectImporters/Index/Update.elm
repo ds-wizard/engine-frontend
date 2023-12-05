@@ -52,10 +52,10 @@ update msg wrapMsg appState model =
 handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireImporter -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
-        ( templates, cmd ) =
+        ( questionnaireImporters, cmd ) =
             Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.questionnaireImporters
     in
-    ( { model | questionnaireImporters = templates }
+    ( { model | questionnaireImporters = questionnaireImporters }
     , cmd
     )
 

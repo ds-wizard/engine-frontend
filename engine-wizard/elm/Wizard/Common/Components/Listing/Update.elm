@@ -149,10 +149,13 @@ update cfg appState msg model =
                                 isLastPage =
                                     pagination.page.number == (pagination.page.totalPages - 1)
 
+                                isFirstPage =
+                                    pagination.page.number == 0
+
                                 isLastElement =
                                     modBy pagination.page.size pagination.page.totalElements == 1
                             in
-                            if isLastPage && isLastElement then
+                            if (isLastPage && not isFirstPage) && isLastElement then
                                 PaginationQueryString.setPage model.paginationQueryString pagination.page.number
 
                             else

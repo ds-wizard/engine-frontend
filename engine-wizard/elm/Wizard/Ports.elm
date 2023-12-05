@@ -11,15 +11,11 @@ port module Wizard.Ports exposing
     , fileContentRead
     , fileSelected
     , focus
-    , gotImporterData
-    , gotIntegrationWidgetValue
     , gotScrollTop
     , localStorageData
     , localStorageGet
     , localStorageSet
     , localeFileSelected
-    , openImporter
-    , openIntegrationWidget
     , refresh
     , scrollIntoView
     , scrollToTop
@@ -124,26 +120,6 @@ port refresh : () -> Cmd msg
 
 
 port acceptCookies : () -> Cmd msg
-
-
-
--- Integration Widget
-
-
-port openIntegrationWidget : E.Value -> Cmd msg
-
-
-port gotIntegrationWidgetValue : (E.Value -> msg) -> Sub msg
-
-
-
--- Importer
-
-
-port openImporter : E.Value -> Cmd msg
-
-
-port gotImporterData : (E.Value -> msg) -> Sub msg
 
 
 

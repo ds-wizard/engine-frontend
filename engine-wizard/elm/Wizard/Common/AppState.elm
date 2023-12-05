@@ -19,7 +19,9 @@ import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Common.Navigator exposing (Navigator)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Provisioning as Provisioning exposing (Provisioning)
+import Shared.Utils.Theme as Theme exposing (Theme)
 import Time
 import Wizard.Common.Flags as Flags
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
@@ -51,6 +53,7 @@ type alias AppState =
     , locale : Gettext.Locale
     , selectedLocale : Maybe String
     , sessionExpiresSoonModalHidden : Bool
+    , theme : Theme
     }
 
 
@@ -90,6 +93,11 @@ init flagsValue key =
                 , flags.localProvisioning
                 , flags.provisioning
                 ]
+
+        theme =
+            Theme.Theme
+                (LookAndFeelConfig.getPrimaryColor flags.config.lookAndFeel)
+                (LookAndFeelConfig.getIllustrationsColor flags.config.lookAndFeel)
     in
     ( { route = Routes.NotFoundRoute
       , seed = Random.initialSeed flags.seed
@@ -109,6 +117,7 @@ init flagsValue key =
       , locale = flags.locale
       , selectedLocale = flags.selectedLocale
       , sessionExpiresSoonModalHidden = False
+      , theme = theme
       }
     , flagsCmd
     )

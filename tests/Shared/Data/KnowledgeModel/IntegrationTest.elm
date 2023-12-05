@@ -26,7 +26,7 @@ integrationDecoderTest =
                             "requestHeaders": [{"key": "X_USER", "value": "user"}],
                             "requestBody": "{}",
                             "requestEmptySearch": false,
-                            "responseListField": "",
+                            "responseListField": null,
                             "responseItemId": "{{id}}",
                             "responseItemTemplate": "{{title}}",
                             "annotations": []
@@ -39,8 +39,8 @@ integrationDecoderTest =
                             , id = "service"
                             , name = "Service"
                             , props = [ "kind", "category" ]
-                            , logo = "data:image/png;base64,..."
-                            , itemUrl = "http://example.com/${id}"
+                            , logo = Just "data:image/png;base64,..."
+                            , itemUrl = Just "http://example.com/${id}"
                             , annotations = []
                             }
                             { requestMethod = "GET"
@@ -48,8 +48,8 @@ integrationDecoderTest =
                             , requestHeaders = [ { key = "X_USER", value = "user" } ]
                             , requestBody = "{}"
                             , requestEmptySearch = False
-                            , responseListField = ""
-                            , responseItemId = "{{id}}"
+                            , responseListField = Nothing
+                            , responseItemId = Just "{{id}}"
                             , responseItemTemplate = "{{title}}"
                             }
                 in
@@ -78,8 +78,8 @@ integrationDecoderTest =
                             , id = "service"
                             , name = "Service"
                             , props = [ "kind", "category" ]
-                            , logo = "data:image/png;base64,..."
-                            , itemUrl = "http://example.com/${id}"
+                            , logo = Just "data:image/png;base64,..."
+                            , itemUrl = Just "http://example.com/${id}"
                             , annotations = []
                             }
                             { widgetUrl = "http://example.com"

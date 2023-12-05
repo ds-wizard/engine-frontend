@@ -11,6 +11,7 @@ import Wizard.KnowledgeModels.Subscriptions
 import Wizard.Locales.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.ProjectActions.Subscriptions
 import Wizard.ProjectImporters.Subscriptions
 import Wizard.Projects.Subscriptions
 import Wizard.Routes as Routes
@@ -46,6 +47,9 @@ subscriptions model =
 
                 Routes.LocalesRoute route ->
                     Sub.map LocaleMsg <| Wizard.Locales.Subscriptions.subscriptions route model.localeModel
+
+                Routes.ProjectActionsRoute _ ->
+                    Sub.map ProjectActionsMsg <| Wizard.ProjectActions.Subscriptions.subscriptions model.projectActionsModel
 
                 Routes.ProjectImportersRoute _ ->
                     Sub.map ProjectImportersMsg <| Wizard.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel

@@ -28,6 +28,10 @@ a {
     &:not([class]):hover {
         text-decoration: underline;
     }
+
+    &:focus-visible {
+        outline: var(--bs-primary) auto 1px;
+    }
 }
 
 body {
@@ -42,6 +46,12 @@ code {
 .alert {
     p:last-child {
         margin-bottom: 0;
+    }
+}
+
+.btn-link {
+    &:focus-visible {
+        box-shadow: 0 0 $focus-ring-blur $focus-ring-width #{rgba(var(--bs-focus-ring-color), $focus-ring-opacity)};
     }
 }
 
@@ -60,6 +70,22 @@ code {
 
     --bs-btn-disabled-color: var(--bs-btn-primary-disabled-color);
     --bs-btn-disabled-bg: var(--bs-primary);
+    --bs-btn-disabled-border-color: var(--bs-primary);
+
+    --bs-btn-focus-shadow-rgb: var(--bs-focus-ring-color);
+}
+
+.btn-outline-primary {
+    --bs-btn-color: var(--bs-primary);
+    --bs-btn-border-color: var(--bs-primary);
+
+    --bs-btn-hover-bg: var(--bs-btn-primary-hover-bg);
+    --bs-btn-hover-border-color: var(--bs-btn-primary-hover-bg);
+
+    --bs-btn-active-bg: var(--bs-btn-primary-active-bg);
+    --bs-btn-active-border-color: var(--bs-btn-primary-active-bg);
+
+    --bs-btn-disabled-color: var(--bs-primary);
     --bs-btn-disabled-border-color: var(--bs-primary);
 
     --bs-btn-focus-shadow-rgb: var(--bs-focus-ring-color);
@@ -96,7 +122,12 @@ code {
     font-size: $font-size-base * 1.5;
 }
 
-.form-control {
+.form-check-input:checked {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+}
+
+.form-check-input, .form-control, .form-select {
     &:focus {
         border-color: var(--bs-input-focus-border-color);
         box-shadow: 0 0 $focus-ring-blur $focus-ring-width #{rgba(var(--bs-focus-ring-color), $focus-ring-opacity)};
@@ -106,6 +137,10 @@ code {
 .nav-pills {
     --bs-nav-pills-link-active-bg: var(--bs-primary);
     --bs-nav-pills-link-active-color: var(--bs-btn-primary-color);
+}
+
+.nav-link:focus-visible {
+    box-shadow: 0 0 $focus-ring-blur $focus-ring-width #{rgba(var(--bs-focus-ring-color), $focus-ring-opacity)};
 }
 
 .pagination {

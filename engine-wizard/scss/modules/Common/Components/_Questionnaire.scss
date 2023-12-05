@@ -58,7 +58,6 @@ $toolbar-height: 40px;
             color: $gray-900 !important;
             text-decoration: none !important;
 
-
             &:hover, &:focus {
                 background: $gray-200;
                 box-shadow: none;
@@ -67,6 +66,19 @@ $toolbar-height: 40px;
             &.selected {
                 background: var(--bs-primary-bg);
                 color: var(--bs-primary) !important;
+            }
+
+            &-actions {
+                display: flex;
+                align-items: center;
+
+                .icon {
+                    display: inline-block;
+                    background: url(../img/icons/sparkles.svg) center center no-repeat;
+                    width: 1.2em;
+                    height: 1.2em;
+                    margin-right: $spacer-1;
+                }
             }
         }
 

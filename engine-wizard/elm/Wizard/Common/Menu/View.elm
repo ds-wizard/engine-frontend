@@ -149,6 +149,11 @@ menuItems appState =
               , route = Routes.projectsIndex appState
               , isActive = Routes.isProjectsIndex
               }
+            , { title = gettext "Actions" appState.locale
+              , id = "projects-actions"
+              , route = Routes.projectActionsIndex
+              , isActive = Routes.isProjectActionsIndex
+              }
             , { title = gettext "Importers" appState.locale
               , id = "projects-importers"
               , route = Routes.projectImportersIndex

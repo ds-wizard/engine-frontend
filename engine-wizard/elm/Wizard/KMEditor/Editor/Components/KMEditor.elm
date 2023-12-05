@@ -17,6 +17,7 @@ import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, sp
 import Html.Attributes exposing (attribute, class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
 import Html.Keyed
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
@@ -1404,8 +1405,8 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             Input.string
                 { name = "logo"
                 , label = gettext "Logo URL" appState.locale
-                , value = Integration.getLogo integration
-                , onInput = createEditEvent setLogo setLogo
+                , value = String.fromMaybe (Integration.getLogo integration)
+                , onInput = createEditEvent setLogo setLogo << String.toMaybe
                 }
 
         propsInput =
@@ -1419,8 +1420,8 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             Input.string
                 { name = "itemUrl"
                 , label = gettext "Item URL" appState.locale
-                , value = Integration.getItemUrl integration
-                , onInput = createEditEvent setItemUrl setItemUrl
+                , value = String.fromMaybe (Integration.getItemUrl integration)
+                , onInput = createEditEvent setItemUrl setItemUrl << String.toMaybe
                 }
 
         annotationsInput =
@@ -1483,16 +1484,16 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             Input.string
                                 { name = "responseItemId"
                                 , label = gettext "Response Item ID" appState.locale
-                                , value = data.responseItemId
-                                , onInput = createTypeEditEvent setResponseItemId
+                                , value = String.fromMaybe data.responseItemId
+                                , onInput = createTypeEditEvent setResponseItemId << String.toMaybe
                                 }
 
                         responseListFieldInput =
                             Input.string
                                 { name = "responseListField"
                                 , label = gettext "Response List Field" appState.locale
-                                , value = data.responseListField
-                                , onInput = createTypeEditEvent setResponseListField
+                                , value = String.fromMaybe data.responseListField
+                                , onInput = createTypeEditEvent setResponseListField << String.toMaybe
                                 }
 
                         responseItemTemplate =
@@ -1593,15 +1594,12 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             if (not << List.isEmpty) integrationPrefabs && EditorBranch.isEmptyIntegrationEditorUuid integrationUuid editorBranch then
                 let
                     viewLogo i =
-                        let
-                            logo =
-                                Integration.getLogo i
-                        in
-                        if String.isEmpty logo then
-                            faSet "km.integration" appState
+                        case Integration.getLogo i of
+                            Just logo ->
+                                img [ src logo ] []
 
-                        else
-                            img [ src logo ] []
+                            Nothing ->
+                                faSet "km.integration" appState
 
                     viewIntegrationButton i =
                         li []
@@ -1617,7 +1615,30 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                     ]
 
             else
-                emptyNode
+                case List.find ((==) (Integration.getId integration) << Integration.getId) integrationPrefabs of
+                    Just usedPrefab ->
+                        let
+                            differFromPrefab =
+                                Integration.getName integration
+                                    /= Integration.getName usedPrefab
+                                    || Integration.getResponseItemTemplate integration
+                                    /= Integration.getResponseItemTemplate usedPrefab
+                        in
+                        if differFromPrefab then
+                            div [ class "alert alert-info" ]
+                                [ text (gettext "This integration was created from a template and now differs." appState.locale)
+                                , button
+                                    [ class "btn btn-primary ms-2"
+                                    , onClick (createEditEventFromPrefab usedPrefab)
+                                    ]
+                                    [ text (gettext "Update" appState.locale) ]
+                                ]
+
+                        else
+                            emptyNode
+
+                    Nothing ->
+                        emptyNode
     in
     editor ("integration-" ++ integrationUuid)
         ([ integrationEditorTitle

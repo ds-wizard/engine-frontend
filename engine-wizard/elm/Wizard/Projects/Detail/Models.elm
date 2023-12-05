@@ -13,6 +13,7 @@ import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
@@ -44,6 +45,7 @@ type alias Model =
     , previewModel : Preview.Model
     , questionnaireModel : ActionResult Questionnaire.Model
     , questionnaireImporters : ActionResult (List QuestionnaireImporter)
+    , questionnaireActions : ActionResult (List QuestionnaireAction)
     , summaryReportModel : SummaryReport.Model
     , documentsModel : Documents.Model
     , settingsModel : Settings.Model
@@ -68,6 +70,7 @@ init appState uuid mbSelectedPath =
     , previewModel = Preview.init uuid Preview.TemplateNotSet
     , questionnaireModel = Loading
     , questionnaireImporters = Loading
+    , questionnaireActions = Loading
     , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty

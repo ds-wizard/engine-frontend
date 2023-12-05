@@ -1,7 +1,7 @@
 'use strict'
 
 const axios = require('axios').default
-const axiosRetry = require('axios-retry')
+const axiosRetry = require('axios-retry').default
 
 const program = require('./elm/Wizard.elm')
 
@@ -15,9 +15,8 @@ const registerCopyPorts = require('../engine-shared/ports/copy')
 const registerDomPorts = require('./js/ports/dom')
 const registerDownloadPorts = require('./js/ports/download')
 const registerImportPorts = require('./js/ports/import')
-const registerImporterPorts = require('./js/ports/importer')
-const registerIntegrationWidgetPorts = require('./js/ports/integrationWidget')
-const registerLocalStoragePorts = require('./js/ports/localStorage')
+const registerIntegrationPorts = require('./js/ports/integrations')
+const registerLocalStoragePorts = require('./js/ports/local-storage')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
 const registerSessionPorts = require('./js/ports/session')
@@ -127,8 +126,7 @@ function loadApp(config, locale, provisioning) {
     registerDomPorts(app)
     registerDownloadPorts(app)
     registerImportPorts(app)
-    registerImporterPorts(app)
-    registerIntegrationWidgetPorts(app)
+    registerIntegrationPorts(app)
     registerLocalStoragePorts(app)
     registerPageUnloadPorts(app)
     registerRefreshPorts(app)

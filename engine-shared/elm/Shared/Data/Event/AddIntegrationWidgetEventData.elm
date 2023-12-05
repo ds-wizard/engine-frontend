@@ -8,6 +8,7 @@ module Shared.Data.Event.AddIntegrationWidgetEventData exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
 
@@ -16,8 +17,8 @@ type alias AddIntegrationWidgetEventData =
     { id : String
     , name : String
     , props : List String
-    , logo : String
-    , itemUrl : String
+    , logo : Maybe String
+    , itemUrl : Maybe String
     , annotations : List Annotation
     , widgetUrl : String
     }
@@ -29,8 +30,8 @@ decoder =
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "props" (D.list D.string)
-        |> D.required "logo" D.string
-        |> D.required "itemUrl" D.string
+        |> D.required "logo" (D.maybe D.string)
+        |> D.required "itemUrl" (D.maybe D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
         |> D.required "widgetUrl" D.string
 
@@ -41,8 +42,8 @@ encode data =
     , ( "id", E.string data.id )
     , ( "name", E.string data.name )
     , ( "props", E.list E.string data.props )
-    , ( "logo", E.string data.logo )
-    , ( "itemUrl", E.string data.itemUrl )
+    , ( "logo", E.maybe E.string data.logo )
+    , ( "itemUrl", E.maybe E.string data.itemUrl )
     , ( "annotations", E.list Annotation.encode data.annotations )
     , ( "widgetUrl", E.string data.widgetUrl )
     ]

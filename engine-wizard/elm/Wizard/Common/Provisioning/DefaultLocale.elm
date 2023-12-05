@@ -28,6 +28,7 @@ locale =
         , ( "__routing.locales.create", "create" )
         , ( "__routing.locales.import", "import" )
         , ( "__routing.locales.import.localeId", "localeId" )
+        , ( "__routing.projectActions", "project-actions" )
         , ( "__routing.projectImporters", "project-importers" )
         , ( "__routing.projects", "projects" )
         , ( "__routing.projects.create", "create" )

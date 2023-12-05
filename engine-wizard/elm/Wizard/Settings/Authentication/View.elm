@@ -129,12 +129,12 @@ serviceFormView appState openIDPrefabs form i =
 
         callbackUrl =
             (Form.getFieldAsString idField form).value
-                |> Maybe.map (\id -> appState.clientUrl ++ "/wizard/auth/" ++ id ++ "/callback")
+                |> Maybe.map (\id -> appState.clientUrl ++ "/auth/" ++ id ++ "/callback")
                 |> Maybe.withDefault "-"
 
         logoutUrl =
             (Form.getFieldAsString idField form).value
-                |> Maybe.map (\id -> appState.apiUrl ++ "/wizard-api/auth/" ++ id ++ "/logout")
+                |> Maybe.map (\id -> appState.apiUrl ++ "/auth/" ++ id ++ "/logout")
                 |> Maybe.withDefault "-"
 
         buttonName =
