@@ -1,6 +1,7 @@
 module Wizard.Common.AppState exposing
     ( AppState
     , acceptCookies
+    , getClientUrlRoot
     , getUserRole
     , init
     , isFullscreen
@@ -126,6 +127,11 @@ init flagsValue key =
 getUserRole : AppState -> String
 getUserRole =
     Maybe.unwrap "" .role << .user << .config
+
+
+getClientUrlRoot : AppState -> String
+getClientUrlRoot appState =
+    String.replace "/wizard" "" appState.clientUrl
 
 
 setCurrentTime : AppState -> Time.Posix -> AppState

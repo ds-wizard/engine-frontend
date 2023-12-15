@@ -965,7 +965,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     Routing.toUrl appState <|
                         Routes.projectsDetailQuestionnaire model.uuid (Just (String.join "." path))
             in
-            ( appState.seed, { model | recentlyCopied = True }, Copy.copyToClipboard (appState.clientUrl ++ route) )
+            ( appState.seed, { model | recentlyCopied = True }, Copy.copyToClipboard (AppState.getClientUrlRoot appState ++ route) )
 
         ClearRecentlyCopied ->
             wrap { model | recentlyCopied = False }
