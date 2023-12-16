@@ -35,7 +35,7 @@ jobs:
         run: npm run build:${{ matrix.component }}
 
       - name: '[release] Create artifact'
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.component }}
           path: dist/engine-${{ matrix.component }}
