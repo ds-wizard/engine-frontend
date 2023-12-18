@@ -3,6 +3,7 @@ module Wizard.Settings.Organization.View exposing (view)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
@@ -30,12 +31,22 @@ viewProps =
 
 formView : AppState -> Form FormError OrganizationConfigForm -> Html Form.Msg
 formView appState form =
+    let
+        affiliations =
+            if Admin.isEnabled appState.config.admin then
+                []
+
+            else
+                [ FormGroup.resizableTextarea appState form "affiliations" (gettext "Affiliations" appState.locale)
+                , FormExtra.mdAfter (gettext "Affiliation options will be used to help users choose their affiliation while signing up or editing their profile. Write one affiliation option per line." appState.locale)
+                ]
+    in
     div []
-        [ FormGroup.input appState form "name" (gettext "Name" appState.locale)
-        , FormExtra.textAfter (gettext "Name of the organization running this instance." appState.locale)
-        , FormGroup.textarea appState form "description" (gettext "Description" appState.locale)
-        , FormGroup.input appState form "organizationId" (gettext "Organization ID" appState.locale)
-        , FormExtra.textAfter (gettext "Organization ID is used to identify Knowledge Models created in this instance. It can contain alphanumeric characters and dots but cannot start or end with a dot." appState.locale)
-        , FormGroup.resizableTextarea appState form "affiliations" (gettext "Affiliations" appState.locale)
-        , FormExtra.mdAfter (gettext "Affiliation options will be used to help users choose their affiliation while signing up or editing their profile. Write one affiliation option per line." appState.locale)
-        ]
+        ([ FormGroup.input appState form "name" (gettext "Name" appState.locale)
+         , FormExtra.textAfter (gettext "Name of the organization running this instance." appState.locale)
+         , FormGroup.textarea appState form "description" (gettext "Description" appState.locale)
+         , FormGroup.input appState form "organizationId" (gettext "Organization ID" appState.locale)
+         , FormExtra.textAfter (gettext "Organization ID is used to identify Knowledge Models created in this instance. It can contain alphanumeric characters and dots but cannot start or end with a dot." appState.locale)
+         ]
+            ++ affiliations
+        )
