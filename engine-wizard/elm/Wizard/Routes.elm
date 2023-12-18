@@ -683,6 +683,9 @@ isProjectSubroute route =
         ProjectsRoute _ ->
             True
 
+        ProjectActionsRoute _ ->
+            True
+
         ProjectImportersRoute _ ->
             True
 
