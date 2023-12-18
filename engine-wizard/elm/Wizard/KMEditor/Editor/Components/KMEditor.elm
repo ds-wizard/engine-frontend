@@ -1974,7 +1974,7 @@ viewEmptyEditor appState =
 
 editor : String -> List (Html msg) -> Html msg
 editor editorId =
-    div [ id editorId, class "editor-content col-xl-10 col-lg-12" ]
+    div [ id editorId, class "editor-content col-xl-10 col-12" ]
 
 
 editorRoute : EditorBranch -> String -> Routes.Route
