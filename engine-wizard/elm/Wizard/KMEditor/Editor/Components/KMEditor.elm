@@ -1550,7 +1550,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 }
                     in
                     [ widgetUrlInput
-                    , FormExtra.mdAfter (gettext "The URL of the widget implemented using [DSW Integration Widget SDK](https://github.com/ds-wizard/dsw-integration-widget-sdk)." appState.locale)
+                    , FormExtra.mdAfter (gettext "The URL of the widget implemented using [DSW Integration SDK](https://github.com/ds-wizard/dsw-integration-sdk)." appState.locale)
                     , itemUrl
                     , FormExtra.mdAfter (gettext "Defines the URL to the selected item. Use `${id}` value returned from the widget, for example `https://example.com/${id}`." appState.locale)
                     ]
