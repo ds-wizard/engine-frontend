@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "4.1.1",
+  "version": "4.2.0",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -32,7 +32,7 @@
     "elm-review": "^2.10.3",
     "elm-test": "^0.19.1-revision12",
     "elm-webpack-loader": "^8.0.0",
-    "html-webpack-plugin": "^5.5.3",
+    "html-webpack-plugin": "^5.5.4",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.7.6",
     "sass": "^1.69.5",
@@ -46,11 +46,11 @@
   "dependencies": {
     "@codemirror/commands": "^6.3.2",
     "@codemirror/lang-css": "^6.2.1",
-    "@codemirror/lang-html": "^6.4.6",
+    "@codemirror/lang-html": "^6.4.7",
     "@codemirror/lang-xml": "^6.0.2",
     "@codemirror/language": "^6.9.3",
     "@codemirror/legacy-modes": "^6.3.3",
-    "@codemirror/state": "^6.3.2",
+    "@codemirror/state": "^6.3.3",
     "@codemirror/view": "^6.22.1",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "axios": "1.6.2",

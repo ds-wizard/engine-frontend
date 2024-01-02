@@ -123,11 +123,25 @@ $breadcrumbs-height: 40px;
         justify-content: space-between;
         align-items: center;
 
+        @include media-breakpoint-down(lg) {
+            display: block;
+
+            &-buttons {
+                display: flex;
+                justify-content: flex-end;
+            }
+        }
+
+
         h3 {
             margin: 0;
         }
 
         &-buttons {
+            .btn {
+                white-space: nowrap;
+            }
+
             .btn-link {
                 color: $secondary;
                 text-decoration: none;
