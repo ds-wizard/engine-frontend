@@ -22,7 +22,7 @@ view appState model =
         content =
             case model.submitting of
                 Success _ ->
-                    Page.success appState <| gettext "We've sent you a recover link. Follow the instructions in your email." appState.locale
+                    Page.success appState <| gettext "Check your email. If you have an account, you should receive an email with instructions on how to reset your password." appState.locale
 
                 _ ->
                     forgottenPasswordForm appState model
