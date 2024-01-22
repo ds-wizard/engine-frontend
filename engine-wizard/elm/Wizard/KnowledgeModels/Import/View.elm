@@ -22,7 +22,7 @@ view appState model =
     let
         registryNavItem =
             viewNavbarItem
-                (text (gettext "From DSW Registry" appState.locale))
+                (text (gettext "From registry" appState.locale))
                 (faSet "kmImport.fromRegistry" appState)
                 (isRegistryImportModel model)
                 ShowRegistryImport

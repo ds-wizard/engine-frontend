@@ -5,6 +5,8 @@ module Shared.Data.BootstrapConfig.LookAndFeelConfig exposing
     , defaultAppTitle
     , defaultAppTitleShort
     , defaultLogoUrl
+    , defaultRegistryName
+    , defaultRegistryUrl
     , getAppTitle
     , getAppTitleShort
     , getIllustrationsColor
@@ -104,6 +106,16 @@ getIllustrationsColor config =
 getLogoUrl : LookAndFeelConfig -> String
 getLogoUrl config =
     Maybe.withDefault defaultLogoUrl config.logoUrl
+
+
+defaultRegistryName : String
+defaultRegistryName =
+    "{defaultRegistryName}"
+
+
+defaultRegistryUrl : String
+defaultRegistryUrl =
+    "{defaultRegistryUrl}"
 
 
 

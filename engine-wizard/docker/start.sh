@@ -8,6 +8,8 @@ sed -i "s#{defaultAppTitleShort}#$DEFAULT_APP_TITLE_SHORT#g" $file
 sed -i "s#{defaultSupportEmail}#$DEFAULT_SUPPORT_EMAIL#g" $file
 sed -i "s#{defaultSupportRepositoryName}#$DEFAULT_SUPPORT_REPOSITORY_NAME#g" $file
 sed -i "s#{defaultSupportRepositoryUrl}#$DEFAULT_SUPPORT_REPOSITORY_URL#g" $file
+sed -i "s#{defaultRegistryName}#$DEFAULT_REGISTRY_NAME#g" $file
+sed -i "s#{defaultRegistryUrl}#$DEFAULT_REGISTRY_URL#g" $file
 sed -i "s/{defaultPrimaryColor}/$DEFAULT_PRIMARY_COLOR/g" $file
 sed -i "s/{defaultIllustrationsColor}/$DEFAULT_ILLUSTRATIONS_COLOR/g" $file
 
