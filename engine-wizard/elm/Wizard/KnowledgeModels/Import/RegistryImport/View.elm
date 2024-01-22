@@ -5,6 +5,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput, onSubmit)
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
@@ -66,7 +67,7 @@ viewRegistryText appState =
                 (String.formatHtml
                     (gettext "You can find Knowledge Models in %s." appState.locale)
                     [ a [ href url, target "_blank" ]
-                        [ text (gettext "DSW Registry" appState.locale) ]
+                        [ text LookAndFeelConfig.defaultRegistryName ]
                     ]
                 )
 
