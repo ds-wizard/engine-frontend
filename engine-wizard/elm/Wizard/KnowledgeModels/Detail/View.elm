@@ -7,8 +7,8 @@ import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
+import Shared.Data.Package as Package
 import Shared.Data.Package.PackagePhase as PackagePhase
-import Shared.Data.Package.PackageState as PackageState
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
@@ -108,7 +108,7 @@ readme appState package =
 
 newVersionInRegistryWarning : AppState -> PackageDetail -> Html msg
 newVersionInRegistryWarning appState package =
-    case ( package.remoteLatestVersion, PackageState.isOutdated package.state, appState.config.registry ) of
+    case ( package.remoteLatestVersion, Package.isOutdated package, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 importLink =

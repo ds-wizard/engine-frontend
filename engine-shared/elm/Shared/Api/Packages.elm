@@ -51,7 +51,7 @@ getOutdatedPackages =
         queryString =
             PaginationQueryString.empty
                 |> PaginationQueryString.withSize (Just 5)
-                |> PaginationQueryString.toApiUrlWith [ ( "state", "OutdatedPackageState" ) ]
+                |> PaginationQueryString.toApiUrlWith [ ( "outdated", "true" ) ]
 
         url =
             "/packages" ++ queryString

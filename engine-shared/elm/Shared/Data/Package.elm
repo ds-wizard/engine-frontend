@@ -2,6 +2,7 @@ module Shared.Data.Package exposing
     ( Package
     , decoder
     , dummy
+    , isOutdated
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -9,7 +10,6 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
-import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
 import Time
 import Version exposing (Version)
 
@@ -22,8 +22,7 @@ type alias Package =
     , version : Version
     , description : String
     , organization : Maybe OrganizationInfo
-    , remoteLatestVersion : Maybe String
-    , state : PackageState
+    , remoteLatestVersion : Maybe Version
     , phase : PackagePhase
     , createdAt : Time.Posix
     , nonEditable : Bool
@@ -40,8 +39,7 @@ decoder =
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
-        |> D.required "remoteLatestVersion" (D.maybe D.string)
-        |> D.required "state" PackageState.decoder
+        |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "phase" PackagePhase.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "nonEditable" D.bool
@@ -57,8 +55,17 @@ dummy =
     , description = ""
     , organization = Nothing
     , remoteLatestVersion = Nothing
-    , state = PackageState.unknown
     , phase = PackagePhase.Released
     , createdAt = Time.millisToPosix 0
     , nonEditable = True
     }
+
+
+isOutdated : { a | remoteLatestVersion : Maybe Version, version : Version } -> Bool
+isOutdated template =
+    case template.remoteLatestVersion of
+        Just remoteLatestVersion ->
+            Version.greaterThan template.version remoteLatestVersion
+
+        Nothing ->
+            False

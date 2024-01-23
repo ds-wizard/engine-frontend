@@ -51,7 +51,7 @@ getOutdatedTemplates =
         queryString =
             PaginationQueryString.empty
                 |> PaginationQueryString.withSize (Just 5)
-                |> PaginationQueryString.toApiUrlWith [ ( "state", "OutdatedTemplateState" ) ]
+                |> PaginationQueryString.toApiUrlWith [ ( "outdated", "true" ) ]
 
         url =
             "/document-templates" ++ queryString

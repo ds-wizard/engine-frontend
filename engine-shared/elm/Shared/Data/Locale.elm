@@ -1,12 +1,12 @@
 module Shared.Data.Locale exposing
     ( Locale
     , decoder
+    , isOutdated
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
-import Shared.Data.Locale.LocaleState as LocaleState exposing (LocaleState)
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Time
 import Version exposing (Version)
@@ -23,7 +23,6 @@ type alias Locale =
     , defaultLocale : Bool
     , enabled : Bool
     , createdAt : Time.Posix
-    , state : LocaleState
     , remoteLatestVersion : Maybe Version
     , organization : Maybe OrganizationInfo
     }
@@ -42,6 +41,15 @@ decoder =
         |> D.required "defaultLocale" D.bool
         |> D.required "enabled" D.bool
         |> D.required "createdAt" D.datetime
-        |> D.required "state" LocaleState.decoder
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
+
+
+isOutdated : { a | remoteLatestVersion : Maybe Version, version : Version } -> Bool
+isOutdated template =
+    case template.remoteLatestVersion of
+        Just remoteLatestVersion ->
+            Version.greaterThan template.version remoteLatestVersion
+
+        Nothing ->
+            False
