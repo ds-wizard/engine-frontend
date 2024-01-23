@@ -4,8 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
-import Shared.Data.Locale exposing (Locale)
-import Shared.Data.Locale.LocaleState as LocaleState
+import Shared.Data.Locale as Locale exposing (Locale)
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Version
@@ -86,7 +85,7 @@ listingTitle appState locale =
                     [ text (gettext "disabled" appState.locale) ]
 
         outdatedBadge =
-            if locale.state == LocaleState.Outdated then
+            if Locale.isOutdated locale then
                 let
                     localeId =
                         Maybe.map ((++) (locale.organizationId ++ ":" ++ locale.localeId ++ ":") << Version.toString) locale.remoteLatestVersion

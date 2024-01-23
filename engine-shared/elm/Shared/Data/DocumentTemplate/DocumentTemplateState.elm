@@ -7,10 +7,7 @@ import Json.Decode as D exposing (Decoder)
 
 
 type DocumentTemplateState
-    = Unknown
-    | Outdated
-    | UpToDate
-    | Unpublished
+    = Default
     | UnsupportedMetamodelVersion
 
 
@@ -20,17 +17,8 @@ decoder =
         |> D.andThen
             (\str ->
                 case str of
-                    "UnknownDocumentTemplateState" ->
-                        D.succeed Unknown
-
-                    "OutdatedDocumentTemplateState" ->
-                        D.succeed Outdated
-
-                    "UpToDateDocumentTemplateState" ->
-                        D.succeed UpToDate
-
-                    "UnpublishedDocumentTemplateState" ->
-                        D.succeed Unpublished
+                    "DefaultDocumentTemplateState" ->
+                        D.succeed Default
 
                     "UnsupportedMetamodelVersionDocumentTemplateState" ->
                         D.succeed UnsupportedMetamodelVersion

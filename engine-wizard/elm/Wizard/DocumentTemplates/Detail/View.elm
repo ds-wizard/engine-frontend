@@ -6,6 +6,7 @@ import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Shared.Data.DocumentTemplate as DocumentTemplate
 import Shared.Data.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
@@ -113,34 +114,38 @@ readme appState template =
 
 newVersionInRegistryWarning : AppState -> DocumentTemplateDetail -> Html msg
 newVersionInRegistryWarning appState template =
-    case ( template.remoteLatestVersion, template.state == DocumentTemplateState.Outdated, appState.config.registry ) of
-        ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
-            let
-                importLink =
-                    if Feature.documentTemplatesImport appState && Version.greaterThan template.version remoteLatestVersion then
-                        let
-                            latestPackageId =
-                                template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
-                        in
-                        [ linkTo appState
-                            (Routes.documentTemplatesImport (Just latestPackageId))
-                            [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                            [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
-                        ]
+    if template.state /= DocumentTemplateState.UnsupportedMetamodelVersion then
+        case ( template.remoteLatestVersion, DocumentTemplate.isOutdated template, appState.config.registry ) of
+            ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
+                let
+                    importLink =
+                        if Feature.documentTemplatesImport appState && Version.greaterThan template.version remoteLatestVersion then
+                            let
+                                latestPackageId =
+                                    template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
+                            in
+                            [ linkTo appState
+                                (Routes.documentTemplatesImport (Just latestPackageId))
+                                [ class "btn btn-primary btn-sm with-icon ms-2" ]
+                                [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
+                            ]
 
-                    else
-                        []
-            in
-            div [ class "alert alert-warning" ]
-                (faSet "_global.warning" appState
-                    :: String.formatHtml
-                        (gettext "There is a newer version (%s) available." appState.locale)
-                        [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
-                    ++ importLink
-                )
+                        else
+                            []
+                in
+                div [ class "alert alert-warning" ]
+                    (faSet "_global.warning" appState
+                        :: String.formatHtml
+                            (gettext "There is a newer version (%s) available." appState.locale)
+                            [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
+                        ++ importLink
+                    )
 
-        _ ->
-            emptyNode
+            _ ->
+                emptyNode
+
+    else
+        emptyNode
 
 
 unsupportedMetamodelVersionWarning : AppState -> DocumentTemplateDetail -> Html msg

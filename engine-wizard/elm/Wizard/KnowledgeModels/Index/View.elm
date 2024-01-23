@@ -4,9 +4,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
-import Shared.Data.Package exposing (Package)
+import Shared.Data.Package as Package exposing (Package)
 import Shared.Data.Package.PackagePhase as PackagePhase
-import Shared.Data.Package.PackageState as PackageState
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Version
@@ -94,10 +93,10 @@ listingTitle appState package =
 
 listingTitleOutdatedBadge : AppState -> Package -> Html Msg
 listingTitleOutdatedBadge appState package =
-    if PackageState.isOutdated package.state then
+    if Package.isOutdated package then
         let
             packageId =
-                Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":")) package.remoteLatestVersion
+                Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":") << Version.toString) package.remoteLatestVersion
         in
         linkTo appState
             (Routes.knowledgeModelsImport packageId)
