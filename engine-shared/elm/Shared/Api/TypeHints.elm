@@ -4,7 +4,7 @@ import Json.Decode as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtFetch)
+import Shared.Api exposing (ToMsg, jwtOrHttpFetch)
 import Shared.Data.Event as Event exposing (Event)
 import Shared.Data.TypeHint as TypeHint exposing (TypeHint)
 
@@ -27,4 +27,4 @@ fetchTypeHints mbPackageId events questionUuid q =
                 , ( "q", E.string q )
                 ]
     in
-    jwtFetch "/typehints" (D.list TypeHint.decoder) data
+    jwtOrHttpFetch "/typehints" (D.list TypeHint.decoder) data
