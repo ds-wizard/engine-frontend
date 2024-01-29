@@ -3,7 +3,7 @@ module Shared.Api.Feedbacks exposing (getFeedbacks, postFeedback)
 import Json.Decode as D
 import Json.Encode exposing (Value)
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, httpFetch, httpGet)
+import Shared.Api exposing (ToMsg, httpGet, jwtOrHttpFetch)
 import Shared.Data.Feedback as Feedback exposing (Feedback)
 
 
@@ -14,4 +14,4 @@ getFeedbacks packageId questionUuid =
 
 postFeedback : Value -> AbstractAppState a -> ToMsg Feedback msg -> Cmd msg
 postFeedback =
-    httpFetch "/feedbacks" Feedback.decoder
+    jwtOrHttpFetch "/feedbacks" Feedback.decoder
