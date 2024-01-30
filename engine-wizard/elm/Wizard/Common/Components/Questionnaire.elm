@@ -1532,7 +1532,7 @@ viewActionResultModal appState model =
             , div [ class "modal-body" ] modalBody
             , div [ class "modal-footer" ]
                 [ button [ class "btn btn-primary", onClick CloseActionResult ]
-                    [ text (gettext "Ok" appState.locale) ]
+                    [ text (gettext "OK" appState.locale) ]
                 ]
             ]
     in
@@ -1650,7 +1650,7 @@ viewPhaseModal appState model =
     Modal.simpleWithAttrs [ class "PhaseSelectionModal modal-wide" ]
         { modalContent =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text "Select phase" ]
+                [ h5 [ class "modal-title" ] [ text (gettext "Select phase" appState.locale) ]
                 , button
                     [ class "close"
                     , onClick (PhaseModalUpdate False Nothing)

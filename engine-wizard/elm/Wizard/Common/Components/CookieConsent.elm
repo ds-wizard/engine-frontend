@@ -1,5 +1,6 @@
 module Wizard.Common.Components.CookieConsent exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, a, br, button, div, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
@@ -23,12 +24,12 @@ view appState =
         div [ class "CookieConsent" ]
             [ div [ class "container" ]
                 [ div []
-                    [ text "Privacy & Cookies: This site uses cookies. By continuing to use this website, you agree to their use. "
+                    [ text (gettext "Privacy & Cookies: This site uses cookies. By continuing to use this website, you agree to their use. " appState.locale)
                     , br [] []
-                    , text "To find out more, including how to control cookies, see here: "
-                    , a [ href cookiePolicyUrl, target "_blank" ] [ text "Cookie Policy" ]
+                    , text (gettext "To find out more, including how to control cookies, see here: " appState.locale)
+                    , a [ href cookiePolicyUrl, target "_blank" ] [ text (gettext "Cookie Policy" appState.locale) ]
                     ]
-                , button [ class "btn btn-primary", onClick AcceptCookies ] [ text "Close and Accept" ]
+                , button [ class "btn btn-primary", onClick AcceptCookies ] [ text (gettext "Close and Accept" appState.locale) ]
                 ]
             ]
 
