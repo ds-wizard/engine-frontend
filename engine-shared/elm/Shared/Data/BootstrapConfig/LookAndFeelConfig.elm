@@ -5,6 +5,7 @@ module Shared.Data.BootstrapConfig.LookAndFeelConfig exposing
     , defaultAppTitle
     , defaultAppTitleShort
     , defaultLogoUrl
+    , defaultMenuTitle
     , defaultRegistryName
     , defaultRegistryUrl
     , getAppTitle
@@ -116,6 +117,11 @@ defaultRegistryName =
 defaultRegistryUrl : String
 defaultRegistryUrl =
     "{defaultRegistryUrl}"
+
+
+defaultMenuTitle : String
+defaultMenuTitle =
+    "{defaultMenuTitle}"
 
 
 

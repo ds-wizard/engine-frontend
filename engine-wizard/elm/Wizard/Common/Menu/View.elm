@@ -351,7 +351,7 @@ viewMenu model =
     let
         menuHeading =
             if Admin.isEnabled model.appState.config.admin then
-                li [ class "heading" ] [ text (gettext "Wizard" model.appState.locale) ]
+                li [ class "heading" ] [ text LookAndFeelConfig.defaultMenuTitle ]
 
             else
                 emptyNode
