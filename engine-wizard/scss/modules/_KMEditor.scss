@@ -4,7 +4,6 @@
 @import 'KMEditor/Migration';
 
 
-
 .diff-tree-input-actions {
     padding: 0.5rem 0;
     text-align: right;
@@ -148,6 +147,27 @@
                     color: $gray-500 !important;
                 }
             }
+
+            &.current > a:not(.caret) {
+                color: $gray-600 !important;
+
+                span {
+                    position: relative;
+
+                    &:after {
+                        content: ' ';
+                        position: absolute;
+                        left: -1.5rem;
+                        right: -0.5rem;
+                        top: -0.25rem;
+                        bottom: -0.25rem;
+                        background: var(--bs-primary-bg);
+                        border-radius: $border-radius;
+                        z-index: -1;
+                    }
+                }
+            }
+
 
             &.add-entity {
                 a {

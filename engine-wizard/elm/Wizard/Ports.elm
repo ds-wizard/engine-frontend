@@ -18,6 +18,7 @@ port module Wizard.Ports exposing
     , localeFileSelected
     , refresh
     , scrollIntoView
+    , scrollIntoViewCenter
     , scrollToTop
     , setScrollTop
     , setUnloadMessage
@@ -76,6 +77,9 @@ port focus : String -> Cmd msg
 
 
 port scrollIntoView : String -> Cmd msg
+
+
+port scrollIntoViewCenter : String -> Cmd msg
 
 
 port scrollToTop : String -> Cmd msg
