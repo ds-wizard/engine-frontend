@@ -10,13 +10,15 @@ module Wizard.KMEditor.Editor.Components.KMEditor.TreeInput exposing
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, text, ul)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (attribute, class, classList)
 import Html.Events exposing (onClick)
 import Set exposing (Set)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Expert exposing (Expert)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
+import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Html exposing (emptyNode, faKeyClass, faSet)
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
@@ -134,6 +136,7 @@ treeNodeKM appState props model =
             , allowed = False
             , open = isTreeOpen uuid model
             , selected = isSelected uuid model
+            , current = False
             }
     in
     treeNode appState config
@@ -162,6 +165,7 @@ treeNodeChapter appState props model chapter =
             , allowed = allowed
             , open = isTreeOpen chapter.uuid model
             , selected = isSelected chapter.uuid model
+            , current = chapter.uuid == props.movingUuid
             }
     in
     treeNode appState config
@@ -200,15 +204,26 @@ treeNodeQuestion appState props model isChild question =
                 |> EditorBranch.filterDeletedWith Question.getUuid props.editorBranch
                 |> List.map (treeNodeQuestion appState props model (isSelf || isChild))
 
+        experts =
+            KnowledgeModel.getQuestionExperts uuid props.editorBranch.branch.knowledgeModel
+                |> List.filter (\e -> e.uuid == props.movingUuid)
+                |> List.map (treeNodeExpert appState props)
+
+        references =
+            KnowledgeModel.getQuestionReferences uuid props.editorBranch.branch.knowledgeModel
+                |> List.filter (\r -> Reference.getUuid r == props.movingUuid)
+                |> List.map (treeNodeReference appState props)
+
         config =
             { uuid = uuid
             , icon = faSet "km.question" appState
             , label = Question.getTitle question
-            , children = answers ++ itemTemplateQuestions
+            , children = answers ++ itemTemplateQuestions ++ experts ++ references
             , untitledLabel = gettext "Untitled question" appState.locale
             , allowed = allowed
             , open = isTreeOpen uuid model
             , selected = isSelected uuid model
+            , current = isSelf
             }
     in
     treeNode appState config
@@ -240,6 +255,49 @@ treeNodeAnswer appState props model isChild answer =
             , allowed = allowed
             , open = isTreeOpen answer.uuid model
             , selected = isSelected answer.uuid model
+            , current = isSelf
+            }
+    in
+    treeNode appState config
+
+
+treeNodeExpert : AppState -> ViewProps -> Expert -> Html Msg
+treeNodeExpert appState props expert =
+    let
+        isSelf =
+            props.movingUuid == expert.uuid
+
+        config =
+            { uuid = expert.uuid
+            , icon = faSet "km.expert" appState
+            , label = expert.name
+            , children = []
+            , untitledLabel = gettext "Untitled expert" appState.locale
+            , allowed = False
+            , open = False
+            , selected = False
+            , current = isSelf
+            }
+    in
+    treeNode appState config
+
+
+treeNodeReference : AppState -> ViewProps -> Reference -> Html Msg
+treeNodeReference appState props reference =
+    let
+        isSelf =
+            props.movingUuid == Reference.getUuid reference
+
+        config =
+            { uuid = Reference.getUuid reference
+            , icon = faSet "km.reference" appState
+            , label = Reference.getVisibleName reference
+            , children = []
+            , untitledLabel = gettext "Untitled reference" appState.locale
+            , allowed = False
+            , open = False
+            , selected = False
+            , current = isSelf
             }
     in
     treeNode appState config
@@ -254,6 +312,7 @@ type alias TreeNodeConfig msg =
     , allowed : Bool
     , open : Bool
     , selected : Bool
+    , current : Bool
     }
 
 
@@ -287,14 +346,24 @@ treeNode appState config =
 
             else
                 ( False, config.label )
+
+        currentDataAttribute =
+            if config.current then
+                [ attribute "data-km-editor_move-modal_item_current" "" ]
+
+            else
+                []
     in
     li
-        [ classList
+        ([ classList
             [ ( "disabled", not config.allowed )
             , ( "active", config.selected )
+            , ( "current", config.current )
             ]
-        , dataCy "km-editor_move-modal_item"
-        ]
+         , dataCy "km-editor_move-modal_item"
+         ]
+            ++ currentDataAttribute
+        )
         [ caret
         , link
             [ config.icon
