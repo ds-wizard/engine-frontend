@@ -53,7 +53,7 @@
     "@codemirror/state": "^6.3.3",
     "@codemirror/view": "^6.23.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
-    "axios": "1.6.2",
+    "axios": "1.6.7",
     "axios-retry": "^4.0.0",
     "bootstrap": "^5.3.2",
     "chart.js": "^3.9.1",
