@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
-import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
+import Shared.Data.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Shared.Html exposing (emptyNode, faSet)
@@ -95,10 +95,12 @@ listingTitle appState documentTemplate =
 
 listingTitleOutdatedBadge : AppState -> DocumentTemplate -> Html Msg
 listingTitleOutdatedBadge appState documentTemplate =
-    if documentTemplate.state == DocumentTemplateState.Outdated then
+    if DocumentTemplate.isOutdated documentTemplate then
         let
             documentTemplateId =
-                Maybe.map ((++) (documentTemplate.organizationId ++ ":" ++ documentTemplate.templateId ++ ":")) documentTemplate.remoteLatestVersion
+                Maybe.map
+                    ((++) (documentTemplate.organizationId ++ ":" ++ documentTemplate.templateId ++ ":") << Version.toString)
+                    documentTemplate.remoteLatestVersion
         in
         linkTo appState
             (Routes.documentTemplatesImport documentTemplateId)

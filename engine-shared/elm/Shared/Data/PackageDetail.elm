@@ -15,7 +15,6 @@ import List.Extra as List
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
-import Shared.Data.Package.PackageState as PackageState exposing (PackageState)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Time
 import Version exposing (Version)
@@ -37,7 +36,6 @@ type alias PackageDetail =
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
     , remoteLatestVersion : Maybe Version
-    , state : PackageState
     , phase : PackagePhase
     , nonEditable : Bool
     }
@@ -61,7 +59,6 @@ decoder =
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
-        |> D.required "state" PackageState.decoder
         |> D.required "phase" PackagePhase.decoder
         |> D.required "nonEditable" D.bool
 
@@ -89,8 +86,7 @@ toPackage package =
     , version = package.version
     , description = package.description
     , organization = package.organization
-    , remoteLatestVersion = Maybe.map Version.toString package.remoteLatestVersion
-    , state = package.state
+    , remoteLatestVersion = package.remoteLatestVersion
     , phase = package.phase
     , createdAt = Time.millisToPosix 0
     , nonEditable = True

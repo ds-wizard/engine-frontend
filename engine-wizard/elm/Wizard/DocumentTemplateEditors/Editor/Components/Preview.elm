@@ -253,10 +253,12 @@ view cfg appState model =
     in
     div [ class "DocumentTemplateEditor__PreviewEditor w-100 h-100 d-flex flex-column " ]
         [ div [ class "DocumentTemplateEditor__PreviewEditor__Toolbar bg-light d-flex align-items-center" ]
-            [ text "Project:"
+            [ text (gettext "Project" appState.locale)
+            , text ":"
             , TypeHintInput.view appState typeHintInputCfg model.typeHintInputModel False
             , projectLink
-            , text "Format:"
+            , text (gettext "Format" appState.locale)
+            , text ":"
             , select [ class "form-select", onInput FormatSelected, id "format", name "format" ]
                 (option [ value "" ] [ text "--" ] :: List.map formatOption cfg.documentTemplate.formats)
             ]

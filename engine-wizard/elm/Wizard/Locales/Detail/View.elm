@@ -5,7 +5,7 @@ import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Data.Locale.LocaleState as LocaleState
+import Shared.Data.Locale as Locale
 import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Html exposing (emptyNode, faSet)
@@ -97,7 +97,7 @@ readme appState locale =
 
 newVersionInRegistryWarning : AppState -> LocaleDetail -> Html msg
 newVersionInRegistryWarning appState locale =
-    case ( locale.remoteLatestVersion, locale.state == LocaleState.Outdated, appState.config.registry ) of
+    case ( locale.remoteLatestVersion, Locale.isOutdated locale, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 importLink =

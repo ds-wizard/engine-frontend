@@ -9,7 +9,6 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Data.Locale.LocaleState as LocaleState exposing (LocaleState)
 import Shared.Data.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Time
 import Version exposing (Version)
@@ -26,7 +25,6 @@ type alias LocaleDetail =
     , defaultLocale : Bool
     , enabled : Bool
     , createdAt : Time.Posix
-    , state : LocaleState
     , remoteLatestVersion : Maybe Version
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
@@ -50,7 +48,6 @@ decoder =
         |> D.required "defaultLocale" D.bool
         |> D.required "enabled" D.bool
         |> D.required "createdAt" D.datetime
-        |> D.required "state" LocaleState.decoder
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.optional "organization" (D.maybe OrganizationInfo.decoder) Nothing
         |> D.required "registryLink" (D.maybe D.string)

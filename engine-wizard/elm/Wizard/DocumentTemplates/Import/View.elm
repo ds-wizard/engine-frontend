@@ -58,7 +58,7 @@ viewNavbar appState registryActive =
                 , dataCy "template_import_nav_registry"
                 ]
                 [ faSet "kmImport.fromRegistry" appState
-                , text (gettext "From DSW Registry" appState.locale)
+                , text (gettext "From registry" appState.locale)
                 ]
             ]
         , li [ class "nav-item" ]
