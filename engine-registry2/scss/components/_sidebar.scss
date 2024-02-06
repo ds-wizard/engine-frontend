@@ -1,0 +1,33 @@
+.sidebar {
+    margin-top: 3rem;
+
+    @media (min-width: map-get($grid-breakpoints, 'lg')) {
+        margin-top: 0;
+    }
+
+    &-row {
+        @media (min-width: map-get($grid-breakpoints, 'lg')) {
+            margin-left: 1.5rem;
+        }
+
+        &:first-child {
+            margin-bottom: 2rem;
+        }
+
+        &:not(:first-child) {
+            margin-top: 1rem;
+
+            &:not(:last-child) {
+                padding-bottom: 1rem;
+                border-bottom: 1px solid var(--bs-border-color);
+            }
+        }
+
+        .organization {
+            .organization-icon {
+                width: 2.5rem;
+                height: 2.5rem;
+            }
+        }
+    }
+}
