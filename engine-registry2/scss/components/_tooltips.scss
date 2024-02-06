@@ -1,0 +1,77 @@
+@import "~bootstrap/scss/variables";
+
+.with-tooltip {
+    position: relative;
+
+    &:after, &:before {
+        position: absolute;
+        transition: opacity .15s linear;
+        transition-delay: .5s;
+        opacity: 0;
+        z-index: 10;
+
+    }
+
+    &:after {
+        content: attr(data-tooltip);
+        background: $tooltip-bg;
+        padding: $tooltip-padding-y $tooltip-padding-x;
+        border-radius: $tooltip-border-radius;
+        display: inline-block;
+        transform: translate(-50%, 100%);
+        margin: 0 auto;
+        color: $tooltip-color;
+        width: max-content;
+        max-width: $tooltip-max-width;
+        bottom: -5px;
+        left: -5000px;
+        text-align: center;
+        font-size: 0.825rem;
+        white-space: normal;
+        font-weight: normal;
+        font-style: normal;
+        line-height: 1.3;
+    }
+
+    &-left:after {
+        transform: translate(-85%, 100%);
+    }
+
+    &-right:after {
+        transform: translate(-15%, 100%);
+    }
+
+    &:before {
+        bottom: -5px;
+        left: -5000px;
+        content: " ";
+        height: 0;
+        width: 0;
+        pointer-events: none;
+        border: solid transparent;
+        border-color: rgba(0, 0, 0, 0);
+        border-bottom-color: $tooltip-bg;
+        border-width: 5px;
+        margin-left: -5px;
+        transform: translate(0, 0px);
+    }
+
+    &:hover {
+        &:after,  &:before {
+            opacity: $tooltip-opacity;
+            left: 50%;
+        }
+    }
+
+    &-align-left:hover {
+        &:after,  &:before {
+            left: 0.5rem;
+        }
+    }
+
+    &-wide {
+        &:after {
+            max-width: 400px;
+        }
+    }
+}

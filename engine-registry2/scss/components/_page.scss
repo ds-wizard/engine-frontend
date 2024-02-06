@@ -1,0 +1,15 @@
+.page-loader {
+    @include fade-in;
+    color: $gray-500;
+    text-align: center;
+
+    i {
+        font-size: 3rem;
+    }
+}
+
+.page-error {
+    .undraw {
+        max-width: 25rem;
+    }
+}

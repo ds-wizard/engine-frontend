@@ -1,0 +1,37 @@
+.publish-info {
+    font-size: $font-size-sm;
+    color: var(--bs-secondary-color);
+    display: flex;
+    justify-content: flex-start;
+
+    &-bt {
+        display: inline-flex;
+        border-top: 1px solid var(--bs-border-color);
+        padding-top: 0.5rem;
+    }
+
+    .fragment {
+
+        &:not(:first-child) {
+            margin-left: 0.5rem;
+
+            &::before {
+                content: '•';
+                margin-right: 0.5rem;
+            }
+        }
+
+        .organization {
+            font-weight: bold;
+
+            .organization-icon {
+                width: 1.5rem;
+                height: 1.5rem;
+                margin-left: 0.25rem;
+                margin-right: 0.25rem;
+                vertical-align: middle;
+            }
+        }
+    }
+
+}

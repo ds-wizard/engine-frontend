@@ -10,6 +10,7 @@
     "clean": "rm -rf dist",
     "start": "npm run start:wizard",
     "start:registry": "COMPONENT=registry webpack serve",
+    "start:registry2": "COMPONENT=registry2 webpack serve",
     "start:wizard": "COMPONENT=wizard webpack serve",
     "test": "npm run test:elm && npm run test:registry:icon-set && npm run test:registry:locale && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:elm": "elm-test && elm-review",

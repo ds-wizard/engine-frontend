@@ -1,5 +1,5 @@
 module.exports = function (app) {
-    app.ports.copyToClipboard.subscribe(copyToClipboard)
+    app.ports?.copyToClipboard?.subscribe(copyToClipboard)
 
     function copyToClipboard(string) {
         var input = document.createElement('textarea')

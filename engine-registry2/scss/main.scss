@@ -1,0 +1,135 @@
+@import "~bootstrap/scss/bootstrap";
+
+
+$fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
+@import "mixins";
+@import "animations";
+
+@import 'components/item-id-box';
+@import 'components/list-item';
+@import 'components/page';
+@import 'components/publish-info';
+@import 'components/sidebar';
+@import 'components/tooltips';
+
+body {
+    background: var(--bs-light);
+    padding-top: 4rem;
+}
+
+a:not([class]) {
+    text-decoration: none;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
+
+.fs-sm {
+    font-size: $font-size-sm;
+}
+
+.navbar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 10;
+}
+
+.navbar {
+    .navbar-nav {
+        .nav-item:first-child {
+            .nav-link {
+                padding-left: 0;
+            }
+        }
+
+        .nav-item {
+            margin-right: 1rem;
+
+            .nav-link {
+                .fas {
+                    margin-right: 0.5rem;
+                    color: $gray-600;
+                    transition: color 0.15s ease-in-out;
+                }
+
+                &.active {
+                    .fas {
+                        color: var(--bs-navbar-active-color);
+                    }
+                }
+
+                &:hover {
+                    .fas {
+                        color: var(--bs-primary);
+                    }
+
+                    color: var(--bs-primary);
+                }
+            }
+        }
+    }
+
+    .navbar-tool {
+        cursor: pointer;
+        text-decoration: none;
+        color: var(--bs-navbar-color);
+        transition: color 0.15s ease-in-out;
+
+        &:hover {
+            color: var(--bs-nav-link-hover-color);
+        }
+
+        .navbar-tool-icon-box {
+            width: 2.875rem;
+            height: 2.875rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+    }
+
+    &:not(:first-child) {
+        margin-top: -0.5rem;
+    }
+}
+
+
+.full-page-illustrated-message {
+    display: flex;
+    max-width: 80rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 5rem auto auto;
+
+    img, svg {
+        width: 30%;
+    }
+
+    div {
+        max-width: 50%;
+        margin-left: 2rem;
+    }
+
+    p {
+        font-size: 1.25rem;
+    }
+}
+
+.undraw {
+    color: var(--bs-primary);
+    height: auto;
+    max-width: 100%;
+}
+
+.text-grey {
+    color: $gray-500;
+}

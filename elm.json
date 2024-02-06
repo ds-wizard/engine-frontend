@@ -2,6 +2,7 @@
     "type": "application",
     "source-directories": [
         "engine-registry/elm",
+        "engine-registry2/elm",
         "engine-shared/elm",
         "engine-wizard/elm",
         "vendor"
