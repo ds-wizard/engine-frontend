@@ -98,6 +98,7 @@ module Wizard.Routes exposing
     , usersEdit
     , usersEditActiveSessions
     , usersEditApiKeys
+    , usersEditAppKeys
     , usersEditCurrent
     , usersEditPassword
     , usersEditSubmissionSettings
@@ -831,6 +832,11 @@ usersEditPassword =
 usersEditApiKeys : UuidOrCurrent -> Route
 usersEditApiKeys =
     UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ApiKeys
+
+
+usersEditAppKeys : UuidOrCurrent -> Route
+usersEditAppKeys =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.AppKeys
 
 
 usersEditActiveSessions : UuidOrCurrent -> Route

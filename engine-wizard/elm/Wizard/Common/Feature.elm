@@ -66,6 +66,7 @@ module Wizard.Common.Feature exposing
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
+    , userEditAppKeys
     , userEditSubmissionSettings
     , usersCreate
     , usersView
@@ -430,6 +431,12 @@ userEdit appState uuidOrCurrent =
 userEditApiKeys : AppState -> UuidOrCurrent -> Bool
 userEditApiKeys appState uuidOrCurrent =
     UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
+
+
+userEditAppKeys : AppState -> UuidOrCurrent -> Bool
+userEditAppKeys appState uuidOrCurrent =
+    Admin.isEnabled appState.config.admin
+        && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
 
 
 userEditActiveSessions : AppState -> UuidOrCurrent -> Bool
