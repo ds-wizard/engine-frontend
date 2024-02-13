@@ -651,9 +651,7 @@ $toolbar-height: 40px;
                     background: transparentize($secondary, 0.5);
                 }
 
-                label .badge + span,
-                .tag-list,
-                .description {
+                label .badge + span {
                     opacity: 0.5;
                 }
             }
