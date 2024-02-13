@@ -4,16 +4,15 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Extra as Html
-import Maybe.Extra as Maybe
-import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Data.BootstrapConfig.Admin as Admin
-import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Routes as Routes
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
+import Wizard.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
@@ -39,6 +38,10 @@ view appState subroute model =
                     Html.map ApiKeysMsg <|
                         ApiKeys.view appState model.apiKeysModel
 
+                UserEditRoutes.AppKeys ->
+                    Html.map AppKeysMsg <|
+                        AppKeys.view appState model.appKeysModel
+
                 UserEditRoutes.ActiveSessions ->
                     Html.map ActiveSessionsMsg <|
                         ActiveSessions.view appState model.activeSessionsModel
@@ -56,10 +59,6 @@ view appState subroute model =
 
 navigation : AppState -> UserEditRoute -> Model -> Html Msg
 navigation appState subroute model =
-    let
-        isCurrent =
-            UuidOrCurrent.isCurrent model.uuidOrCurrent || UuidOrCurrent.matchUuid model.uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
-    in
     div [ class "nav nav-pills flex-column" ]
         [ strong [] [ text (gettext "User Settings" appState.locale) ]
         , linkTo appState
@@ -80,7 +79,7 @@ navigation appState subroute model =
                 [ text (gettext "Password" appState.locale)
                 ]
             )
-        , Html.viewIf isCurrent
+        , Html.viewIf (Feature.userEditApiKeys appState model.uuidOrCurrent)
             (linkTo appState
                 (Routes.usersEditApiKeys model.uuidOrCurrent)
                 [ class "nav-link"
@@ -90,7 +89,17 @@ navigation appState subroute model =
                 [ text (gettext "API Keys" appState.locale)
                 ]
             )
-        , Html.viewIf isCurrent
+        , Html.viewIf (Feature.userEditAppKeys appState model.uuidOrCurrent)
+            (linkTo appState
+                (Routes.usersEditAppKeys model.uuidOrCurrent)
+                [ class "nav-link"
+                , classList [ ( "active", subroute == UserEditRoutes.AppKeys ) ]
+                , dataCy "user_nav_app-keys"
+                ]
+                [ text (gettext "App Keys" appState.locale)
+                ]
+            )
+        , Html.viewIf (Feature.userEditActiveSessions appState model.uuidOrCurrent)
             (linkTo appState
                 (Routes.usersEditActiveSessions model.uuidOrCurrent)
                 [ class "nav-link"
@@ -100,7 +109,7 @@ navigation appState subroute model =
                 [ text (gettext "Active Sessions" appState.locale)
                 ]
             )
-        , Html.viewIf isCurrent
+        , Html.viewIf (Feature.userEditSubmissionSettings appState model.uuidOrCurrent)
             (linkTo appState
                 (Routes.usersEditSubmissionSettings model.uuidOrCurrent)
                 [ class "nav-link"
