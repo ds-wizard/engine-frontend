@@ -25,7 +25,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { createModel = Wizard.Projects.Create.Models.empty
+    { createModel = Wizard.Projects.Create.Models.initialModel appState Nothing Nothing
     , createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel Uuid.nil
     , detailModel = Detail.init appState Uuid.nil Nothing
     , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
@@ -37,8 +37,8 @@ initialModel appState =
 initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
-        CreateRoute subroute ->
-            { model | createModel = Wizard.Projects.Create.Models.initialModel appState subroute }
+        CreateRoute selectedProjectTemplate selectedKnowledgeModel ->
+            { model | createModel = Wizard.Projects.Create.Models.initialModel appState selectedProjectTemplate selectedKnowledgeModel }
 
         CreateMigrationRoute uuid ->
             { model | createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel uuid }

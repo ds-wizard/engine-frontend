@@ -107,7 +107,7 @@ actions appState cfg package =
                 { extraClass = Nothing
                 , icon = faSet "kmDetail.createQuestionnaire" appState
                 , label = gettext "Create project" appState.locale
-                , msg = ListingActionLink (Routes.projectsCreateCustom (Just package.id))
+                , msg = ListingActionLink (Routes.projectsCreateFromKnowledgeModel package.id)
                 , dataCy = "create-project"
                 }
 

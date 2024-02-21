@@ -49,6 +49,12 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
 
+    &-full {
+        .nav-item {
+            flex: 1 1 0;
+        }
+    }
+
     .nav-item {
         .nav-link {
             color: $body-color;

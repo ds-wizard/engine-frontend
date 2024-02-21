@@ -77,7 +77,7 @@ view appState model =
 createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
-        (Routes.projectsCreate appState)
+        Routes.projectsCreate
         [ class "btn btn-primary", dataCy "projects_create-button" ]
         [ text (gettext "Create" appState.locale) ]
 
@@ -620,6 +620,18 @@ listingActions appState questionnaire =
         openProjectVisible =
             Features.projectOpen appState questionnaire
 
+        createProjectFromTemplate =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faSet "questionnaireList.createProjectFromTemplate" appState
+                , label = gettext "Create project from this template" appState.locale
+                , msg = ListingActionLink (Routes.projectsCreateFromProjectTemplate questionnaire.uuid)
+                , dataCy = "create-project-from-template"
+                }
+
+        createProjectFromTemplateVisible =
+            Features.projectCreateFromTemplate appState questionnaire
+
         clone =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
@@ -692,6 +704,7 @@ listingActions appState questionnaire =
 
         groups =
             [ [ ( openProject, openProjectVisible ) ]
+            , [ ( createProjectFromTemplate, createProjectFromTemplateVisible ) ]
             , [ ( clone, cloneVisible )
               , ( continueMigration, continueMigrationVisible )
               , ( cancelMigration, cancelMigrationVisible )

@@ -45,6 +45,7 @@ module Wizard.Common.Feature exposing
     , projectCommentThreadReopen
     , projectCommentThreadResolve
     , projectContinueMigration
+    , projectCreateFromTemplate
     , projectCreateMigration
     , projectDelete
     , projectDocumentsView
@@ -249,6 +250,11 @@ projectTemplatesCreate =
 projectOpen : AppState -> Questionnaire -> Bool
 projectOpen _ questionnaire =
     questionnaire.state /= QuestionnaireState.Migrating
+
+
+projectCreateFromTemplate : AppState -> Questionnaire -> Bool
+projectCreateFromTemplate appState questionnaire =
+    projectsCreateFromTemplate appState && questionnaire.isTemplate && questionnaire.state /= QuestionnaireState.Migrating
 
 
 projectClone : AppState -> Questionnaire -> Bool
