@@ -2,6 +2,7 @@ module Registry2.Data.AppState exposing
     ( AppState
     , default
     , init
+    , setSession
     , setTimeZone
     )
 
@@ -9,6 +10,7 @@ import Browser.Navigation as Navigation
 import Gettext
 import Json.Decode as D
 import Registry2.Data.Flags as Flags
+import Registry2.Data.Session exposing (Session)
 import Registry2.Routes as Routes
 import Time
 
@@ -19,6 +21,7 @@ type alias AppState =
     , apiUrl : String
     , locale : Gettext.Locale
     , timeZone : Time.Zone
+    , session : Maybe Session
     }
 
 
@@ -29,6 +32,7 @@ default key =
     , apiUrl = ""
     , locale = Gettext.defaultLocale
     , timeZone = Time.utc
+    , session = Nothing
     }
 
 
@@ -42,6 +46,7 @@ init flagsValue key =
                 , apiUrl = flags.apiUrl
                 , locale = Gettext.defaultLocale
                 , timeZone = Time.utc
+                , session = flags.session
                 }
 
         Err _ ->
@@ -51,3 +56,8 @@ init flagsValue key =
 setTimeZone : Time.Zone -> AppState -> AppState
 setTimeZone timeZone appState =
     { appState | timeZone = timeZone }
+
+
+setSession : Maybe Session -> AppState -> AppState
+setSession mbSession appState =
+    { appState | session = mbSession }

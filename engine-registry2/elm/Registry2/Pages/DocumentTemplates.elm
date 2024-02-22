@@ -72,7 +72,7 @@ viewDocumentTemplates appState documentTemplates =
                 |> List.map (ListItem.view appState { toRoute = Routes.documentTemplateDetail << .id })
                 |> div []
     in
-    div []
+    div [ class "my-5" ]
         [ h1 [ class "text-center mb-5" ] [ text (gettext "Document Templates" appState.locale) ]
         , documentTemplateView
         ]

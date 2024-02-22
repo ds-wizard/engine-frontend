@@ -4,6 +4,7 @@ const axiosRetry = require('axios-retry').default
 const program = require('./elm/Registry2.elm')
 
 const registerCopyPorts = require('../engine-shared/ports/copy')
+const registerSessionPorts = require('./js/ports/session')
 
 axiosRetry(axios, {
     retries: 3,
@@ -40,7 +41,7 @@ function loadApp(config) {
             apiUrl: apiUrl(),
             appTitle: appTitle(),
             config: config,
-            credentials: JSON.parse(localStorage.getItem('credentials')),
+            session: JSON.parse(localStorage.getItem('session')),
         }
     })
 
@@ -49,6 +50,7 @@ function loadApp(config) {
     })
 
     registerCopyPorts(app)
+    registerSessionPorts(app)
 }
 
 
