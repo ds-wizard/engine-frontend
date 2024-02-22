@@ -2,16 +2,22 @@ module Registry2.Routes exposing
     ( Route(..)
     , documentTemplateDetail
     , documentTemplates
+    , forgottenToken
     , home
     , isAllowed
     , knowledgeModelDetail
     , knowledgeModels
     , localeDetail
     , locales
+    , login
+    , navigate
+    , organizationDetail
     , parse
+    , signup
     , toUrl
     )
 
+import Browser.Navigation as Navigation
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
 
@@ -24,6 +30,10 @@ type Route
     | DocumentTemplatesDetail String
     | Locales
     | LocalesDetail String
+    | Login
+    | Signup
+    | ForgottenToken
+    | OrganizationDetail
     | NotFound
     | NotAllowed
 
@@ -43,6 +53,10 @@ parsers =
         , Parser.map DocumentTemplatesDetail (Parser.s "document-templates" </> Parser.string)
         , Parser.map Locales (Parser.s "locales")
         , Parser.map LocalesDetail (Parser.s "locales" </> Parser.string)
+        , Parser.map Login (Parser.s "login")
+        , Parser.map Signup (Parser.s "signup")
+        , Parser.map ForgottenToken (Parser.s "forgotten-token")
+        , Parser.map OrganizationDetail (Parser.s "organization")
         ]
 
 
@@ -67,6 +81,18 @@ toUrl route =
         LocalesDetail lId ->
             "/locales/" ++ lId
 
+        Login ->
+            "/login"
+
+        Signup ->
+            "/signup"
+
+        ForgottenToken ->
+            "/forgotten-token"
+
+        OrganizationDetail ->
+            "/organization"
+
         _ ->
             "/"
 
@@ -74,6 +100,11 @@ toUrl route =
 isAllowed : Route -> Bool
 isAllowed _ =
     True
+
+
+navigate : Navigation.Key -> Route -> Cmd msg
+navigate key =
+    Navigation.pushUrl key << toUrl
 
 
 
@@ -113,3 +144,23 @@ locales =
 localeDetail : String -> Route
 localeDetail lId =
     LocalesDetail lId
+
+
+login : Route
+login =
+    Login
+
+
+signup : Route
+signup =
+    Signup
+
+
+forgottenToken : Route
+forgottenToken =
+    ForgottenToken
+
+
+organizationDetail : Route
+organizationDetail =
+    OrganizationDetail

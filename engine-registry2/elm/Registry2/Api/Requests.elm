@@ -21,9 +21,9 @@ createRequest : String -> AppState -> { url : String, body : Http.Body, expect :
 createRequest method appState { url, body, expect } =
     let
         headers =
-            case Nothing of
-                Just tokenString ->
-                    [ Http.header "Authorization" ("Bearer " ++ tokenString) ]
+            case appState.session of
+                Just session ->
+                    [ Http.header "Authorization" ("Bearer " ++ session.token) ]
 
                 Nothing ->
                     []

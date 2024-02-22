@@ -2,17 +2,24 @@ module Registry2 exposing (Model, Msg, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Navigation exposing (Key)
-import Html exposing (Html, a, div, header, i, img, li, main_, p, section, text, ul)
+import Gettext exposing (gettext)
+import Html exposing (Html, a, div, header, i, img, li, main_, p, section, small, strong, text, ul)
 import Html.Attributes exposing (class, classList, height, href, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
+import Maybe.Extra as Maybe
+import Registry2.Components.FontAwesome exposing (fas)
 import Registry2.Data.AppState as AppState exposing (AppState)
+import Registry2.Data.Session as Session exposing (Session)
 import Registry2.Pages.DocumentTemplates as DocumentTemplates
 import Registry2.Pages.DocumentTemplatesDetail as DocumentTemplatesDetail
 import Registry2.Pages.KnowledgeModels as KnowledgeModels
 import Registry2.Pages.KnowledgeModelsDetail as KnowledgeModelsDetail
 import Registry2.Pages.Locales as Locales
 import Registry2.Pages.LocalesDetail as LocalesDetail
+import Registry2.Pages.Login as Login
+import Registry2.Pages.Signup as Signup
+import Registry2.Ports as Ports
 import Registry2.Routes as Routes
 import Shared.Utils exposing (dispatch)
 import Task
@@ -42,6 +49,8 @@ type alias Model =
         , documentTemplatesDetail : DocumentTemplatesDetail.Model
         , locales : Locales.Model
         , localesDetail : LocalesDetail.Model
+        , login : Login.Model
+        , signup : Signup.Model
         }
     }
 
@@ -82,6 +91,8 @@ init flags url key =
                 , documentTemplatesDetail = DocumentTemplatesDetail.initialModel
                 , locales = Locales.initialModel
                 , localesDetail = LocalesDetail.initialModel
+                , login = Login.initialModel
+                , signup = Signup.initialModel
                 }
             }
     in
@@ -102,12 +113,15 @@ type Msg
     | OnUrlRequest UrlRequest
     | OnTimeZone Time.Zone
     | SetMenuVisible Bool
+    | SetSession (Maybe Session)
     | PagesKnowledgeModelsMsg KnowledgeModels.Msg
     | PagesKnowledgeModelsDetailMsg KnowledgeModelsDetail.Msg
     | PagesDocumentTemplatesMsg DocumentTemplates.Msg
     | PagesDocumentTemplatesDetailMsg DocumentTemplatesDetail.Msg
     | PagesLocalesMsg Locales.Msg
     | PagesLocalesDetailMsg LocalesDetail.Msg
+    | PagesLoginMsg Login.Msg
+    | PagesSignupMsg Signup.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -139,6 +153,23 @@ update msg model =
 
         SetMenuVisible visible ->
             ( { model | menuVisible = visible }, Cmd.none )
+
+        SetSession session ->
+            let
+                sessionCmd =
+                    case Debug.log "set session" session of
+                        Just s ->
+                            Ports.saveSession (Session.encode s)
+
+                        Nothing ->
+                            Ports.clearSession ()
+            in
+            ( { model | appState = AppState.setSession session model.appState }
+            , Cmd.batch
+                [ Routes.navigate model.appState.key Routes.home
+                , sessionCmd
+                ]
+            )
 
         PagesKnowledgeModelsMsg pageMsg ->
             let
@@ -210,6 +241,35 @@ update msg model =
             in
             ( { model | pages = { pages | localesDetail = localesDetail } }
             , Cmd.map PagesLocalesDetailMsg cmd
+            )
+
+        PagesLoginMsg pageMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = PagesLoginMsg
+                    , setSessionMsg = SetSession
+                    }
+
+                ( login, cmd ) =
+                    Login.update updateConfig model.appState pageMsg model.pages.login
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | login = login } }
+            , cmd
+            )
+
+        PagesSignupMsg pageMsg ->
+            let
+                ( signup, cmd ) =
+                    Signup.update model.appState pageMsg model.pages.signup
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | signup = signup } }
+            , Cmd.map PagesSignupMsg cmd
             )
 
 
@@ -288,6 +348,24 @@ initPage model =
             , Cmd.map PagesLocalesDetailMsg cmd
             )
 
+        Routes.Login ->
+            let
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | login = Login.initialModel } }
+            , Cmd.none
+            )
+
+        Routes.Signup ->
+            let
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | signup = Signup.initialModel } }
+            , Cmd.none
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -329,13 +407,27 @@ view model =
                     Html.map PagesLocalesDetailMsg <|
                         LocalesDetail.view model.appState model.pages.localesDetail
 
+                Routes.Login ->
+                    Html.map PagesLoginMsg <|
+                        Login.view model.appState model.pages.login
+
+                Routes.Signup ->
+                    Html.map PagesSignupMsg <|
+                        Signup.view model.appState model.pages.signup
+
+                Routes.ForgottenToken ->
+                    text "Forgotten Token"
+
+                Routes.OrganizationDetail ->
+                    text "Organization Detail"
+
                 Routes.NotFound ->
                     text "Not Found"
 
                 Routes.NotAllowed ->
                     text "Not Allowed"
     in
-    { title = "Registry"
+    { title = "DSW Registry"
     , body =
         -- https://themes.getbootstrap.com/preview/?theme_id=35287
         [ main_ []
@@ -353,22 +445,18 @@ view model =
                                     ]
                                 ]
                             , div [ class "navbar-toolbar d-flex flex-shrink-0 align-items-center" ]
-                                [ a [ class "navbar-tool" ]
+                                ([ a [ class "navbar-tool" ]
                                     [ div [ class "navbar-tool-icon-box" ]
-                                        [ i [ class "fas fa-lg fa-info-circle" ] []
-                                        ]
+                                        [ fas "fa-lg fa-info-circle" ]
                                     ]
-                                , a [ class "navbar-tool" ]
-                                    [ div [ class "navbar-tool-icon-box" ]
-                                        [ i [ class "fas fa-lg fa-user" ] []
-                                        ]
-                                    ]
-                                , a [ class "navbar-tool d-lg-none d-sm-flex", onClick (SetMenuVisible (not model.menuVisible)) ]
-                                    [ div [ class "navbar-tool-icon-box" ]
-                                        [ i [ class "fas fa-lg fa-bars" ] []
-                                        ]
-                                    ]
-                                ]
+                                 ]
+                                    ++ profileNavigation model.appState
+                                    ++ [ a [ class "navbar-tool d-lg-none d-sm-flex", onClick (SetMenuVisible (not model.menuVisible)) ]
+                                            [ div [ class "navbar-tool-icon-box" ]
+                                                [ fas "fa-lg fa-bars" ]
+                                            ]
+                                       ]
+                                )
                             ]
                         ]
                     , div [ class "navbar navbar-expand-lg navbar-light" ]
@@ -381,8 +469,8 @@ view model =
                                             , classList [ ( "active", model.appState.route == Routes.Home ) ]
                                             , href (Routes.toUrl Routes.home)
                                             ]
-                                            [ i [ class "fas fa-home" ] []
-                                            , text "Home"
+                                            [ fas "fa-home"
+                                            , text (gettext "Home" model.appState.locale)
                                             ]
                                         ]
                                     , li [ class "nav-item" ]
@@ -391,8 +479,8 @@ view model =
                                             , classList [ ( "active", model.appState.route == Routes.KnowledgeModels ) ]
                                             , href (Routes.toUrl Routes.knowledgeModels)
                                             ]
-                                            [ i [ class "fas fa-sitemap" ] []
-                                            , text "Knowledge Models"
+                                            [ fas "fa-sitemap"
+                                            , text (gettext "Knowledge Models" model.appState.locale)
                                             ]
                                         ]
                                     , li [ class "nav-item" ]
@@ -401,8 +489,8 @@ view model =
                                             , classList [ ( "active", model.appState.route == Routes.DocumentTemplates ) ]
                                             , href (Routes.toUrl Routes.documentTemplates)
                                             ]
-                                            [ i [ class "fas fa-file-code" ] []
-                                            , text "Document Templates"
+                                            [ fas "fa-file-code"
+                                            , text (gettext "Document Templates" model.appState.locale)
                                             ]
                                         ]
                                     , li [ class "nav-item" ]
@@ -411,8 +499,8 @@ view model =
                                             , classList [ ( "active", model.appState.route == Routes.Locales ) ]
                                             , href (Routes.toUrl Routes.locales)
                                             ]
-                                            [ i [ class "fas fa-language" ] []
-                                            , text "Locales"
+                                            [ fas "fa-language"
+                                            , text (gettext "Locales" model.appState.locale)
                                             ]
                                         ]
                                     ]
@@ -422,8 +510,50 @@ view model =
                     ]
                 ]
             , section [ class "container pt-5" ]
-                [ p [ class "my-5" ] [ content ]
-                ]
+                [ content ]
             ]
         ]
     }
+
+
+profileNavigation : AppState -> List (Html Msg)
+profileNavigation appState =
+    case appState.session of
+        Just session ->
+            [ a
+                [ class "navbar-tool d-sm-flex d-lg-none"
+                , href (Routes.toUrl Routes.organizationDetail)
+                ]
+                [ div [ class "navbar-tool-icon-box" ]
+                    [ fas "fa-lg fa-user" ]
+                ]
+            , a
+                [ class "navbar-tool d-sm-flex d-lg-none"
+                , onClick (SetSession Nothing)
+                ]
+                [ div [ class "navbar-tool-icon-box" ]
+                    [ fas "fa-lg fa-sign-out-alt" ]
+                ]
+            , div [ class "navbar-profile d-lg-flex d-sm-none" ]
+                [ div [ class "navbar-tool-icon-box" ]
+                    [ fas "fa-lg fa-user" ]
+                , div [ class "d-flex flex-column justify-content-center" ]
+                    [ small [ class "organization-name" ] [ text session.organizationName ]
+                    , div [ class "text-muted" ]
+                        [ a [ href (Routes.toUrl Routes.organizationDetail) ] [ text "Edit" ]
+                        , text " • "
+                        , a [ onClick (SetSession Nothing) ] [ text "Logout" ]
+                        ]
+                    ]
+                ]
+            ]
+
+        Nothing ->
+            [ a
+                [ class "navbar-tool"
+                , href (Routes.toUrl Routes.login)
+                ]
+                [ div [ class "navbar-tool-icon-box" ]
+                    [ fas "fa-lg fa-user" ]
+                ]
+            ]

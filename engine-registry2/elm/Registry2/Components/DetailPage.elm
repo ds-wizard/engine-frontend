@@ -26,7 +26,7 @@ type alias ViewProps msg =
 
 view : AppState -> ViewProps msg -> Html msg
 view appState props =
-    div []
+    div [ class "my-4" ]
         [ div [ class "row" ]
             [ div [ class "col-12 pb-3" ]
                 [ div []

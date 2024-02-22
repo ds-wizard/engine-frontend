@@ -72,7 +72,7 @@ viewKnowledgeModels appState knowledgeModels =
                 |> List.map (ListItem.view appState { toRoute = Routes.knowledgeModelDetail << .id })
                 |> div []
     in
-    div []
+    div [ class "my-5" ]
         [ h1 [ class "text-center mb-5" ] [ text (gettext "Knowledge Models" appState.locale) ]
         , knowledgeModelsView
         ]
