@@ -13,7 +13,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'components/item-id-box';
 @import 'components/list-item';
 @import 'components/page';
-@import 'components/public-form';
 @import 'components/publish-info';
 @import 'components/sidebar';
 @import 'components/tooltips';
@@ -127,28 +126,6 @@ a:not([class]) {
 }
 
 
-.full-page-illustrated-message {
-    display: flex;
-    max-width: 80rem;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    margin: 5rem auto auto;
-
-    img, svg {
-        width: 30%;
-    }
-
-    div {
-        max-width: 50%;
-        margin-left: 2rem;
-    }
-
-    p {
-        font-size: 1.25rem;
-    }
-}
-
 .undraw {
     color: var(--bs-primary);
     height: auto;
@@ -157,4 +134,12 @@ a:not([class]) {
 
 .text-grey {
     color: $gray-500;
+}
+
+.box {
+    max-width: 25rem;
+
+    &-wide {
+        max-width: 30rem;
+    }
 }

@@ -1,4 +1,4 @@
-module Registry2.Components.Page exposing (view)
+module Registry2.Components.Page exposing (illustratedMessage, view)
 
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
@@ -16,7 +16,7 @@ view appState viewPage actionResult =
             Html.nothing
 
         ActionResult.Loading ->
-            Html.div [ class "page-loader" ]
+            Html.div [ class "page-loader my-5" ]
                 [ i [ class "fas fa-spinner fa-spin" ] []
                 , div [ class "mt-2" ] [ text (gettext "Loading..." appState.locale) ]
                 ]
@@ -25,10 +25,26 @@ view appState viewPage actionResult =
             viewPage a
 
         ActionResult.Error e ->
-            div [ class "page-error d-flex flex-lg-row flex-column-reverse justify-content-center align-items-center" ]
+            div [ class "page-error d-flex flex-lg-row flex-column-reverse justify-content-center align-items-center my-5" ]
                 [ Undraw.cancel
                 , div [ class "ms-5 mb-5" ]
                     [ h1 [] [ text (gettext "Error" appState.locale) ]
                     , p [ class "fs-4" ] [ text e ]
                     ]
                 ]
+
+
+illustratedMessage :
+    { image : Html msg
+    , heading : String
+    , msg : String
+    }
+    -> Html msg
+illustratedMessage { image, heading, msg } =
+    div [ class "page-illustrated-message" ]
+        [ image
+        , div []
+            [ h1 [] [ text heading ]
+            , p [] [ text msg ]
+            ]
+        ]
