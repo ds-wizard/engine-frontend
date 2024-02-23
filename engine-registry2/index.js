@@ -31,7 +31,7 @@ function configUrl() {
 function bootstrapErrorHTML(errorCode) {
     const title = 'Bootstrap Error'
     const message = errorCode ? 'Server responded with an error code ' + errorCode + '.' : 'Configuration cannot be loaded due to server unavailable.'
-    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+    return '<div class="page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
 }
 
 

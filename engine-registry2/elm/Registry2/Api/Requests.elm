@@ -1,19 +1,40 @@
-module Registry2.Api.Requests exposing (get)
+module Registry2.Api.Requests exposing (get, postWhatever, put)
 
 import Http
 import Json.Decode as D exposing (Decoder)
+import Json.Encode as E
 import Registry2.Data.AppState exposing (AppState)
 import Shared.Api exposing (ToMsg)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 
 
 get : AppState -> String -> Decoder a -> ToMsg a msg -> Cmd msg
-get serverInfo url decoder toMsg =
+get appState url decoder toMsg =
     createRequest "GET"
-        serverInfo
+        appState
         { url = url
         , expect = expectJson toMsg decoder
         , body = Http.emptyBody
+        }
+
+
+postWhatever : AppState -> String -> E.Value -> ToMsg () msg -> Cmd msg
+postWhatever appState url body toMsg =
+    createRequest "POST"
+        appState
+        { url = url
+        , body = Http.jsonBody body
+        , expect = expectWhatever toMsg
+        }
+
+
+put : AppState -> String -> Decoder a -> E.Value -> ToMsg a msg -> Cmd msg
+put appState url decoder body toMsg =
+    createRequest "PUT"
+        appState
+        { url = url
+        , body = Http.jsonBody body
+        , expect = expectJson toMsg decoder
         }
 
 
@@ -47,6 +68,13 @@ expectJson toMsg decoder =
         resolve <|
             \string ->
                 Result.mapError D.errorToString (D.decodeString decoder string)
+
+
+expectWhatever : ToMsg () msg -> Http.Expect msg
+expectWhatever toMsg =
+    Http.expectStringResponse toMsg <|
+        resolve <|
+            \_ -> Ok ()
 
 
 resolve : (String -> Result String a) -> Http.Response String -> Result ApiError a

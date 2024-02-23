@@ -10,14 +10,14 @@ module Registry2.Pages.Login exposing
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, form, h5, hr, span, text)
+import Html exposing (Html, a, div, hr, span, text)
 import Html.Attributes exposing (class, href)
-import Html.Events exposing (onSubmit)
 import Registry2.Api.Models.Organization exposing (Organization)
 import Registry2.Api.Organizations as OrganizationsApi
 import Registry2.Components.ActionButton as ActionButton
 import Registry2.Components.FormGroup as FormGroup
 import Registry2.Components.FormResult as FormResult
+import Registry2.Components.FormWrapper as FormWrapper
 import Registry2.Data.AppState exposing (AppState)
 import Registry2.Data.Forms.LoginForm as LoginForm exposing (LoginForm)
 import Registry2.Data.Session as Session exposing (Session)
@@ -86,13 +86,11 @@ update cfg appState msg model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ class "d-flex justify-content-center align-items-center my-5" ]
-        [ form
-            [ class "bg-white rounded shadow-sm p-4 w-100 public-form"
-            , onSubmit (FormMsg Form.Submit)
-            ]
-            [ h5 [] [ text "Login" ]
-            , FormResult.errorOnlyView model.loggingIn
+    FormWrapper.view
+        { title = gettext "Login" appState.locale
+        , submitMsg = FormMsg Form.Submit
+        , content =
+            [ FormResult.errorOnlyView model.loggingIn
             , Html.map FormMsg (FormGroup.input appState model.form "organizationId" (gettext "Organization ID" appState.locale))
             , Html.map FormMsg (FormGroup.password appState model.form "token" (gettext "Token" appState.locale))
             , ActionButton.view
@@ -100,12 +98,12 @@ view appState model =
                 , actionResult = model.loggingIn
                 }
             , div [ class "text-end mt-2" ]
-                [ a [ href (Routes.toUrl Routes.forgottenToken) ] [ text "Forgot your token?" ]
+                [ a [ href (Routes.toUrl Routes.forgottenToken) ] [ text (gettext "Forgot your token?" appState.locale) ]
                 ]
             , hr [] []
             , div [ class "text-center" ]
-                [ span [ class "me-1" ] [ text "Need an account?" ]
+                [ span [ class "me-1" ] [ text (gettext "Need an account?" appState.locale) ]
                 , a [ href (Routes.toUrl Routes.signup) ] [ text "Sign up" ]
                 ]
             ]
-        ]
+        }

@@ -19,6 +19,7 @@ import Registry2.Pages.Locales as Locales
 import Registry2.Pages.LocalesDetail as LocalesDetail
 import Registry2.Pages.Login as Login
 import Registry2.Pages.Signup as Signup
+import Registry2.Pages.SignupConfirmation as SignupConfirmation
 import Registry2.Ports as Ports
 import Registry2.Routes as Routes
 import Shared.Utils exposing (dispatch)
@@ -51,6 +52,7 @@ type alias Model =
         , localesDetail : LocalesDetail.Model
         , login : Login.Model
         , signup : Signup.Model
+        , signupConfirmation : SignupConfirmation.Model
         }
     }
 
@@ -93,6 +95,7 @@ init flags url key =
                 , localesDetail = LocalesDetail.initialModel
                 , login = Login.initialModel
                 , signup = Signup.initialModel
+                , signupConfirmation = SignupConfirmation.initialModel
                 }
             }
     in
@@ -122,6 +125,7 @@ type Msg
     | PagesLocalesDetailMsg LocalesDetail.Msg
     | PagesLoginMsg Login.Msg
     | PagesSignupMsg Signup.Msg
+    | PagesSignupConfirmationMsg SignupConfirmation.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -272,6 +276,18 @@ update msg model =
             , Cmd.map PagesSignupMsg cmd
             )
 
+        PagesSignupConfirmationMsg pageMsg ->
+            let
+                signupConfirmation =
+                    SignupConfirmation.update pageMsg model.appState model.pages.signupConfirmation
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | signupConfirmation = signupConfirmation } }
+            , Cmd.none
+            )
+
 
 initPage : Model -> ( Model, Cmd Msg )
 initPage model =
@@ -366,6 +382,18 @@ initPage model =
             , Cmd.none
             )
 
+        Routes.SignupConfirmation organizationId hash ->
+            let
+                ( signupConfirmation, cmd ) =
+                    SignupConfirmation.init model.appState organizationId hash
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | signupConfirmation = signupConfirmation } }
+            , Cmd.map PagesSignupConfirmationMsg cmd
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -414,6 +442,10 @@ view model =
                 Routes.Signup ->
                     Html.map PagesSignupMsg <|
                         Signup.view model.appState model.pages.signup
+
+                Routes.SignupConfirmation _ _ ->
+                    Html.map PagesSignupConfirmationMsg <|
+                        SignupConfirmation.view model.appState model.pages.signupConfirmation
 
                 Routes.ForgottenToken ->
                     text "Forgotten Token"
