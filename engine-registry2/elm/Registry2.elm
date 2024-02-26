@@ -9,6 +9,7 @@ import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
 import Registry2.Components.FontAwesome exposing (fas)
+import Registry2.Components.Page as Page
 import Registry2.Data.AppState as AppState exposing (AppState)
 import Registry2.Data.Session as Session exposing (Session)
 import Registry2.Pages.DocumentTemplates as DocumentTemplates
@@ -18,10 +19,12 @@ import Registry2.Pages.KnowledgeModelsDetail as KnowledgeModelsDetail
 import Registry2.Pages.Locales as Locales
 import Registry2.Pages.LocalesDetail as LocalesDetail
 import Registry2.Pages.Login as Login
+import Registry2.Pages.OrganizationDetail as OragnizationDetail
 import Registry2.Pages.Signup as Signup
 import Registry2.Pages.SignupConfirmation as SignupConfirmation
 import Registry2.Ports as Ports
 import Registry2.Routes as Routes
+import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch)
 import Task
 import Time
@@ -53,6 +56,7 @@ type alias Model =
         , login : Login.Model
         , signup : Signup.Model
         , signupConfirmation : SignupConfirmation.Model
+        , organizationDetail : OragnizationDetail.Model
         }
     }
 
@@ -76,7 +80,7 @@ init flags url key =
                         originalRoute =
                             Routes.parse url
                     in
-                    ( { appStateWithoutRoute | route = routeIfAllowed originalRoute }
+                    ( { appStateWithoutRoute | route = routeIfAllowed appStateWithoutRoute originalRoute }
                     , dispatch (OnUrlChange url)
                     )
 
@@ -96,15 +100,16 @@ init flags url key =
                 , login = Login.initialModel
                 , signup = Signup.initialModel
                 , signupConfirmation = SignupConfirmation.initialModel
+                , organizationDetail = OragnizationDetail.initialModel
                 }
             }
     in
     ( model, Cmd.batch [ cmd, Task.perform OnTimeZone Time.here ] )
 
 
-routeIfAllowed : Routes.Route -> Routes.Route
-routeIfAllowed route =
-    if Routes.isAllowed route then
+routeIfAllowed : AppState -> Routes.Route -> Routes.Route
+routeIfAllowed appState route =
+    if Routes.isAllowed appState route then
         route
 
     else
@@ -126,6 +131,7 @@ type Msg
     | PagesLoginMsg Login.Msg
     | PagesSignupMsg Signup.Msg
     | PagesSignupConfirmationMsg SignupConfirmation.Msg
+    | PagesOrganizationDetailMsg OragnizationDetail.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -134,7 +140,7 @@ update msg model =
         OnUrlChange url ->
             let
                 nextRoute =
-                    routeIfAllowed (Routes.parse url)
+                    routeIfAllowed model.appState (Routes.parse url)
             in
             initPage (setRoute nextRoute model)
 
@@ -288,6 +294,18 @@ update msg model =
             , Cmd.none
             )
 
+        PagesOrganizationDetailMsg pageMsg ->
+            let
+                ( organizationDetail, cmd ) =
+                    OragnizationDetail.update pageMsg model.appState model.pages.organizationDetail
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | organizationDetail = organizationDetail } }
+            , Cmd.map PagesOrganizationDetailMsg cmd
+            )
+
 
 initPage : Model -> ( Model, Cmd Msg )
 initPage model =
@@ -394,6 +412,18 @@ initPage model =
             , Cmd.map PagesSignupConfirmationMsg cmd
             )
 
+        Routes.OrganizationDetail ->
+            let
+                ( organizationDetail, cmd ) =
+                    OragnizationDetail.init model.appState
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | organizationDetail = organizationDetail } }
+            , Cmd.map PagesOrganizationDetailMsg cmd
+            )
+
         _ ->
             ( model, Cmd.none )
 
@@ -451,13 +481,22 @@ view model =
                     text "Forgotten Token"
 
                 Routes.OrganizationDetail ->
-                    text "Organization Detail"
+                    Html.map PagesOrganizationDetailMsg <|
+                        OragnizationDetail.view model.appState model.pages.organizationDetail
 
                 Routes.NotFound ->
-                    text "Not Found"
+                    Page.illustratedMessage
+                        { image = Undraw.pageNotFound
+                        , heading = gettext "Not Found" model.appState.locale
+                        , msg = gettext "The page you are looking for does not exist." model.appState.locale
+                        }
 
                 Routes.NotAllowed ->
-                    text "Not Allowed"
+                    Page.illustratedMessage
+                        { image = Undraw.security
+                        , heading = gettext "Not Allowed" model.appState.locale
+                        , msg = gettext "You are not allowed to view this page." model.appState.locale
+                        }
     in
     { title = "DSW Registry"
     , body =
@@ -541,7 +580,7 @@ view model =
                         ]
                     ]
                 ]
-            , section [ class "container pt-5" ]
+            , section [ class "container pt-lg-5" ]
                 [ content ]
             ]
         ]
@@ -566,7 +605,7 @@ profileNavigation appState =
                 [ div [ class "navbar-tool-icon-box" ]
                     [ fas "fa-lg fa-sign-out-alt" ]
                 ]
-            , div [ class "navbar-profile d-lg-flex d-sm-none" ]
+            , div [ class "navbar-profile d-lg-flex d-none" ]
                 [ div [ class "navbar-tool-icon-box" ]
                     [ fas "fa-lg fa-user" ]
                 , div [ class "d-flex flex-column justify-content-center" ]
