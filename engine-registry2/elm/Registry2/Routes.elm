@@ -18,6 +18,8 @@ module Registry2.Routes exposing
     )
 
 import Browser.Navigation as Navigation
+import Maybe.Extra as Maybe
+import Registry2.Data.Session exposing (Session)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
 
@@ -102,9 +104,14 @@ toUrl route =
             "/"
 
 
-isAllowed : Route -> Bool
-isAllowed _ =
-    True
+isAllowed : { a | session : Maybe Session } -> Route -> Bool
+isAllowed appState route =
+    case route of
+        OrganizationDetail ->
+            Maybe.isJust appState.session
+
+        _ ->
+            True
 
 
 navigate : Navigation.Key -> Route -> Cmd msg

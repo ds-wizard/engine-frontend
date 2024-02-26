@@ -1,6 +1,7 @@
 module Registry2.Data.AppState exposing
     ( AppState
     , default
+    , getOrganizationId
     , init
     , setSession
     , setTimeZone
@@ -61,3 +62,8 @@ setTimeZone timeZone appState =
 setSession : Maybe Session -> AppState -> AppState
 setSession mbSession appState =
     { appState | session = mbSession }
+
+
+getOrganizationId : AppState -> Maybe String
+getOrganizationId appState =
+    Maybe.map .organizationId appState.session
