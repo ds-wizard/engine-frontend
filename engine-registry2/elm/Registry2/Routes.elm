@@ -36,6 +36,7 @@ type Route
     | Signup
     | SignupConfirmation String String
     | ForgottenToken
+    | ForgottenTokenConfirmation String String
     | OrganizationDetail
     | NotFound
     | NotAllowed
@@ -60,6 +61,7 @@ parsers =
         , Parser.map Signup (Parser.s "signup")
         , Parser.map SignupConfirmation (Parser.s "signup" </> Parser.string </> Parser.string)
         , Parser.map ForgottenToken (Parser.s "forgotten-token")
+        , Parser.map ForgottenTokenConfirmation (Parser.s "forgotten-token" </> Parser.string </> Parser.string)
         , Parser.map OrganizationDetail (Parser.s "organization")
         ]
 
@@ -96,6 +98,9 @@ toUrl route =
 
         ForgottenToken ->
             "/forgotten-token"
+
+        ForgottenTokenConfirmation orgId hash ->
+            "/forgotten-token/" ++ orgId ++ "/" ++ hash
 
         OrganizationDetail ->
             "/organization"
