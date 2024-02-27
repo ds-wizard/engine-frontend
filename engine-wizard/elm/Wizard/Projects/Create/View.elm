@@ -12,7 +12,7 @@ import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
-import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.FormActions as FormActions
@@ -41,7 +41,7 @@ view appState model =
 
 viewPageContent : AppState -> Model -> List a -> Html Msg
 viewPageContent appState model _ =
-    div [ detailClass "" ]
+    div [ detailClass "Projects__Create" ]
         [ Page.header (gettext "Create Project" appState.locale) []
         , formView appState model
         ]
@@ -126,6 +126,7 @@ defaultContentTabs appState model =
                 [ class "nav-link"
                 , classList [ ( "active", model.activeTab == ProjectTemplateTab ) ]
                 , onClick (SetActiveTab ProjectTemplateTab)
+                , dataCy "project_create_nav_template"
                 ]
                 [ faSet "_global.questionnaire" appState
                 , text (gettext "From project template" appState.locale)
@@ -136,6 +137,7 @@ defaultContentTabs appState model =
                 [ class "nav-link"
                 , classList [ ( "active", model.activeTab == KnowledgeModelTab ) ]
                 , onClick (SetActiveTab KnowledgeModelTab)
+                , dataCy "project_create_nav_custom"
                 ]
                 [ faSet "_global.knowledgeModel" appState
                 , text (gettext "From knowledge model" appState.locale)
