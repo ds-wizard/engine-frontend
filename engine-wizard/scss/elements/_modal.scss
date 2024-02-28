@@ -28,6 +28,8 @@
         @include transition(margin-top 0.2s ease-in);
 
         .modal-header {
+            justify-content: space-between;
+
             .close {
                 outline: none;
                 border: none;
