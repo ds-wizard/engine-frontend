@@ -4,7 +4,7 @@ import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
-import Html.Attributes exposing (class, classList, href, placeholder, style, title, type_, value)
+import Html.Attributes exposing (class, classList, href, placeholder, title, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
 import List.Extra as List
@@ -586,23 +586,9 @@ listingDescription appState questionnaire =
                 [ text questionnaire.package.name
                 , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.package.version ]
                 ]
-
-        projectProgressView =
-            if questionnaire.answeredQuestions == 0 && questionnaire.unansweredQuestions == 0 then
-                emptyNode
-
-            else
-                let
-                    pctg =
-                        (toFloat questionnaire.answeredQuestions / toFloat (questionnaire.answeredQuestions + questionnaire.unansweredQuestions)) * 100
-                in
-                span [ class "fragment flex-grow-1" ]
-                    [ span [ class "progress", style "height" "7px" ]
-                        [ span [ class "progress-bar bg-info", style "width" (String.fromFloat pctg ++ "%") ] [] ]
-                    ]
     in
     span []
-        [ collaborators, kmLink, projectProgressView ]
+        [ collaborators, kmLink ]
 
 
 listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)

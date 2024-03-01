@@ -32,8 +32,6 @@ type alias Questionnaire =
     , permissions : List Permission
     , state : QuestionnaireState
     , updatedAt : Time.Posix
-    , answeredQuestions : Int
-    , unansweredQuestions : Int
     }
 
 
@@ -72,8 +70,6 @@ decoder =
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "state" QuestionnaireState.decoder
         |> D.required "updatedAt" D.datetime
-        |> D.required "answeredQuestions" D.int
-        |> D.required "unansweredQuestions" D.int
 
 
 matchMember : Questionnaire -> Maybe UserInfo -> Bool
