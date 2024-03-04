@@ -1,4 +1,4 @@
-module Registry2.Api.Requests exposing (get, postWhatever, put)
+module Registry2.Api.Requests exposing (get, postWhatever, put, putEmpty)
 
 import Http
 import Json.Decode as D exposing (Decoder)
@@ -34,6 +34,16 @@ put appState url decoder body toMsg =
         appState
         { url = url
         , body = Http.jsonBody body
+        , expect = expectJson toMsg decoder
+        }
+
+
+putEmpty : AppState -> String -> Decoder a -> ToMsg a msg -> Cmd msg
+putEmpty appState url decoder toMsg =
+    createRequest "PUT"
+        appState
+        { url = url
+        , body = Http.emptyBody
         , expect = expectJson toMsg decoder
         }
 
