@@ -8,6 +8,7 @@ import Html.Attributes exposing (class, classList, height, href, src)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
+import Registry2.Components.AboutModal as AboutModal
 import Registry2.Components.FontAwesome exposing (fas)
 import Registry2.Components.Page as Page
 import Registry2.Data.AppState as AppState exposing (AppState)
@@ -62,6 +63,7 @@ type alias Model =
         , forgottenTokenConfirmation : ForgottenTokenConfirmation.Model
         , organizationDetail : OragnizationDetail.Model
         }
+    , aboutModalModel : AboutModal.Model
     }
 
 
@@ -108,6 +110,7 @@ init flags url key =
                 , forgottenTokenConfirmation = ForgottenTokenConfirmation.initialModel
                 , organizationDetail = OragnizationDetail.initialModel
                 }
+            , aboutModalModel = AboutModal.initialModel
             }
     in
     ( model, Cmd.batch [ cmd, Task.perform OnTimeZone Time.here ] )
@@ -140,6 +143,7 @@ type Msg
     | PagesForgottenTokenMsg ForgottenToken.Msg
     | PagesForgottenTokenConfirmationMsg ForgottenTokenConfirmation.Msg
     | PagesOrganizationDetailMsg OragnizationDetail.Msg
+    | AboutModalMsg AboutModal.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -336,6 +340,15 @@ update msg model =
             in
             ( { model | pages = { pages | organizationDetail = organizationDetail } }
             , Cmd.map PagesOrganizationDetailMsg cmd
+            )
+
+        AboutModalMsg aboutModalMsg ->
+            let
+                ( aboutModalModel, cmd ) =
+                    AboutModal.update model.appState aboutModalMsg model.aboutModalModel
+            in
+            ( { model | aboutModalModel = aboutModalModel }
+            , Cmd.map AboutModalMsg cmd
             )
 
 
@@ -574,7 +587,7 @@ view model =
                                     ]
                                 ]
                             , div [ class "navbar-toolbar d-flex flex-shrink-0 align-items-center" ]
-                                ([ a [ class "navbar-tool" ]
+                                ([ a [ class "navbar-tool", onClick (AboutModalMsg AboutModal.openMsg) ]
                                     [ div [ class "navbar-tool-icon-box" ]
                                         [ fas "fa-lg fa-info-circle" ]
                                     ]
@@ -641,6 +654,7 @@ view model =
             , section [ class "container pt-lg-5" ]
                 [ content ]
             ]
+        , Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
         ]
     }
 
