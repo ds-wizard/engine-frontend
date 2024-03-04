@@ -1,4 +1,4 @@
-module Registry2.Pages.SignupConfirmation exposing
+module Registry2.Pages.ForgottenTokenConfirmation exposing
     ( Model
     , Msg
     , init
@@ -21,10 +21,6 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 
 
-
--- MODEL
-
-
 type alias Model =
     { organization : ActionResult Organization }
 
@@ -37,12 +33,11 @@ initialModel =
 init : AppState -> String -> String -> ( Model, Cmd Msg )
 init appState organizationId hash =
     ( initialModel
-    , OrganizationsApi.putOrganizationState appState
+    , OrganizationsApi.putOrganizationToken appState
         { organizationId = organizationId
         , hash = hash
-        , active = True
         }
-        PutOrganizationStateCompleted
+        PutOrganizationTokenCompleted
     )
 
 
@@ -51,23 +46,15 @@ setOrganization organization model =
     { model | organization = organization }
 
 
-
--- UPDATE
-
-
 type Msg
-    = PutOrganizationStateCompleted (Result ApiError Organization)
+    = PutOrganizationTokenCompleted (Result ApiError Organization)
 
 
 update : Msg -> AppState -> Model -> Model
 update msg appState =
     case msg of
-        PutOrganizationStateCompleted result ->
-            ActionResult.apply setOrganization (ApiError.toActionResult appState (gettext "Unable to activate your organization account." appState.locale)) result
-
-
-
--- VIEW
+        PutOrganizationTokenCompleted result ->
+            ActionResult.apply setOrganization (ApiError.toActionResult appState (gettext "Unable to recover your organization token." appState.locale)) result
 
 
 view : AppState -> Model -> Html Msg
@@ -81,11 +68,11 @@ viewOrganization appState organization =
         [ div [ class "bg-white rounded shadow-sm p-4 w-100 box box-wide" ]
             [ h5 [ class "text-success" ]
                 [ fas "fa-check me-2"
-                , text (gettext "Activated" appState.locale)
+                , text (gettext "Recovered" appState.locale)
                 ]
             , p []
                 (String.formatHtml
-                    (gettext "The account for your organization %s has been successfully activated!" appState.locale)
+                    (gettext "A new token for your organization %s has been generated!" appState.locale)
                     [ strong [] [ text organization.name ] ]
                 )
             , div [ class "alert alert-info" ]

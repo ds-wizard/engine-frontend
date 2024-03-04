@@ -15,6 +15,7 @@ import Registry2.Data.Session as Session exposing (Session)
 import Registry2.Pages.DocumentTemplates as DocumentTemplates
 import Registry2.Pages.DocumentTemplatesDetail as DocumentTemplatesDetail
 import Registry2.Pages.ForgottenToken as ForgottenToken
+import Registry2.Pages.ForgottenTokenConfirmation as ForgottenTokenConfirmation
 import Registry2.Pages.KnowledgeModels as KnowledgeModels
 import Registry2.Pages.KnowledgeModelsDetail as KnowledgeModelsDetail
 import Registry2.Pages.Locales as Locales
@@ -58,6 +59,7 @@ type alias Model =
         , signup : Signup.Model
         , signupConfirmation : SignupConfirmation.Model
         , forgottenToken : ForgottenToken.Model
+        , forgottenTokenConfirmation : ForgottenTokenConfirmation.Model
         , organizationDetail : OragnizationDetail.Model
         }
     }
@@ -103,6 +105,7 @@ init flags url key =
                 , signup = Signup.initialModel
                 , signupConfirmation = SignupConfirmation.initialModel
                 , forgottenToken = ForgottenToken.initialModel
+                , forgottenTokenConfirmation = ForgottenTokenConfirmation.initialModel
                 , organizationDetail = OragnizationDetail.initialModel
                 }
             }
@@ -135,6 +138,7 @@ type Msg
     | PagesSignupMsg Signup.Msg
     | PagesSignupConfirmationMsg SignupConfirmation.Msg
     | PagesForgottenTokenMsg ForgottenToken.Msg
+    | PagesForgottenTokenConfirmationMsg ForgottenTokenConfirmation.Msg
     | PagesOrganizationDetailMsg OragnizationDetail.Msg
 
 
@@ -310,6 +314,18 @@ update msg model =
             , Cmd.map PagesForgottenTokenMsg cmd
             )
 
+        PagesForgottenTokenConfirmationMsg pageMsg ->
+            let
+                forgottenTokenConfirmation =
+                    ForgottenTokenConfirmation.update pageMsg model.appState model.pages.forgottenTokenConfirmation
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | forgottenTokenConfirmation = forgottenTokenConfirmation } }
+            , Cmd.none
+            )
+
         PagesOrganizationDetailMsg pageMsg ->
             let
                 ( organizationDetail, cmd ) =
@@ -437,6 +453,18 @@ initPage model =
             , Cmd.none
             )
 
+        Routes.ForgottenTokenConfirmation orgId hash ->
+            let
+                ( forgottenTokenConfirmation, cmd ) =
+                    ForgottenTokenConfirmation.init model.appState orgId hash
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | forgottenTokenConfirmation = forgottenTokenConfirmation } }
+            , Cmd.map PagesForgottenTokenConfirmationMsg cmd
+            )
+
         Routes.OrganizationDetail ->
             let
                 ( organizationDetail, cmd ) =
@@ -506,8 +534,9 @@ view model =
                     Html.map PagesForgottenTokenMsg <|
                         ForgottenToken.view model.appState model.pages.forgottenToken
 
-                Routes.ForgottenTokenConfirmation orgId hash ->
-                    text "Forgotten Token Confirmation"
+                Routes.ForgottenTokenConfirmation _ _ ->
+                    Html.map PagesForgottenTokenConfirmationMsg <|
+                        ForgottenTokenConfirmation.view model.appState model.pages.forgottenTokenConfirmation
 
                 Routes.OrganizationDetail ->
                     Html.map PagesOrganizationDetailMsg <|

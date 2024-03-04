@@ -3,6 +3,7 @@ module Registry2.Api.Organizations exposing
     , postOrganization
     , putOrganization
     , putOrganizationState
+    , putOrganizationToken
     )
 
 import Json.Encode as E
@@ -40,3 +41,8 @@ putOrganizationState appState { organizationId, hash, active } =
             E.object [ ( "active", E.bool active ) ]
     in
     Requests.put appState ("/organizations/" ++ organizationId ++ "/state?hash=" ++ hash) Organization.decoder body
+
+
+putOrganizationToken : AppState -> { organizationId : String, hash : String } -> ToMsg Organization msg -> Cmd msg
+putOrganizationToken appState { organizationId, hash } =
+    Requests.putEmpty appState ("/organizations/" ++ organizationId ++ "/token?hash=" ++ hash) Organization.decoder
