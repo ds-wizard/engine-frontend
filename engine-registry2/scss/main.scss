@@ -12,9 +12,11 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 
 @import 'components/item-id-box';
 @import 'components/list-item';
+@import 'components/modal';
 @import 'components/page';
 @import 'components/publish-info';
 @import 'components/sidebar';
+@import 'components/table-build-info';
 @import 'components/tooltips';
 
 body {
