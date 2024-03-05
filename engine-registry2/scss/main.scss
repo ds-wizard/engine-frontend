@@ -19,6 +19,9 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'components/table-build-info';
 @import 'components/tooltips';
 
+@import 'pages/homepage';
+
+
 body {
     background: var(--bs-light);
     padding-top: 4rem;

@@ -1,0 +1,45 @@
+.homepage {
+    h1, p {
+        color: $body-color;
+    }
+
+    p {
+        font-size: 1.25rem;
+    }
+}
+
+.homepage-link {
+    color: $body-color;
+    text-decoration: none;
+    transition: transform ease-in-out 0.15s, box-shadow ease-in-out 0.15s;
+
+
+    &:hover {
+        --bs-box-shadow: 0 0.75rem 2rem rgba(0, 0, 0, 0.15);
+        transform: translateY(-0.25rem);
+    }
+
+    .fas {
+        color: $gray-700;
+        font-size: 3rem;
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+
+        &.fa-sitemap {
+            background-image: linear-gradient(45deg, #2ecc71, #1abc9c, #3498db);
+        }
+
+        &.fa-file-code {
+            background-image: linear-gradient(45deg, #e74c3c, #f39c12, #d35400);
+        }
+
+        &.fa-language {
+            background-image: linear-gradient(45deg, #9b59b6, #e74c3c, #3498db);
+        }
+    }
+
+    .text-muted {
+        text-align: justify;
+        font-size: $font-size-sm;
+    }
+}

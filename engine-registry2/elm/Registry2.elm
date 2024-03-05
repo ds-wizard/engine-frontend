@@ -17,6 +17,7 @@ import Registry2.Pages.DocumentTemplates as DocumentTemplates
 import Registry2.Pages.DocumentTemplatesDetail as DocumentTemplatesDetail
 import Registry2.Pages.ForgottenToken as ForgottenToken
 import Registry2.Pages.ForgottenTokenConfirmation as ForgottenTokenConfirmation
+import Registry2.Pages.Homepage as Homepage
 import Registry2.Pages.KnowledgeModels as KnowledgeModels
 import Registry2.Pages.KnowledgeModelsDetail as KnowledgeModelsDetail
 import Registry2.Pages.Locales as Locales
@@ -505,7 +506,7 @@ view model =
         content =
             case model.appState.route of
                 Routes.Home ->
-                    text "Homepage"
+                    Homepage.view model.appState
 
                 Routes.KnowledgeModels ->
                     Html.map PagesKnowledgeModelsMsg <|
