@@ -1,6 +1,7 @@
 module.exports = function (app) {
     app.ports.focus.subscribe(focus)
     app.ports.scrollIntoView.subscribe(scrollIntoView)
+    app.ports.scrollIntoViewCenter.subscribe(scrollIntoViewCenter)
     app.ports.scrollToTop.subscribe(scrollToTop)
     app.ports.setScrollTopPort.subscribe(setScrollTopPort)
     app.ports.subscribeScrollTop.subscribe(subscribeScrollTop)
@@ -16,6 +17,15 @@ module.exports = function (app) {
             $element.scrollIntoView({
                 behavior: 'smooth',
                 block: 'start'
+            })
+        })
+    }
+
+    function scrollIntoViewCenter(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
+            $element.scrollIntoView({
+                behavior: 'smooth',
+                block: 'center'
             })
         })
     }

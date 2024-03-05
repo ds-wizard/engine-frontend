@@ -5,5 +5,6 @@ type UserEditRoute
     = Profile
     | Password
     | ApiKeys
+    | AppKeys
     | ActiveSessions
     | SubmissionSettings

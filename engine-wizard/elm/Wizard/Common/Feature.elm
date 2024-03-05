@@ -45,6 +45,7 @@ module Wizard.Common.Feature exposing
     , projectCommentThreadReopen
     , projectCommentThreadResolve
     , projectContinueMigration
+    , projectCreateFromTemplate
     , projectCreateMigration
     , projectDelete
     , projectDocumentsView
@@ -66,6 +67,7 @@ module Wizard.Common.Feature exposing
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
+    , userEditAppKeys
     , userEditSubmissionSettings
     , usersCreate
     , usersView
@@ -250,6 +252,11 @@ projectOpen _ questionnaire =
     questionnaire.state /= QuestionnaireState.Migrating
 
 
+projectCreateFromTemplate : AppState -> Questionnaire -> Bool
+projectCreateFromTemplate appState questionnaire =
+    projectsCreateFromTemplate appState && questionnaire.isTemplate && questionnaire.state /= QuestionnaireState.Migrating
+
+
 projectClone : AppState -> Questionnaire -> Bool
 projectClone _ questionnaire =
     questionnaire.state /= QuestionnaireState.Migrating
@@ -430,6 +437,12 @@ userEdit appState uuidOrCurrent =
 userEditApiKeys : AppState -> UuidOrCurrent -> Bool
 userEditApiKeys appState uuidOrCurrent =
     UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
+
+
+userEditAppKeys : AppState -> UuidOrCurrent -> Bool
+userEditAppKeys appState uuidOrCurrent =
+    Admin.isEnabled appState.config.admin
+        && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
 
 
 userEditActiveSessions : AppState -> UuidOrCurrent -> Bool

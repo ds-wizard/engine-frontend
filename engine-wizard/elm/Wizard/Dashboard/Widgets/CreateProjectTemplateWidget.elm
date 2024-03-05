@@ -13,7 +13,7 @@ view appState =
         { title = gettext "Create Project Template" appState.locale
         , text = gettext "Project template is a special type of project that can be used as a starting point for new projects. You can select a knowledge model, set up a document template and format, or prefill some answers to make it easier to start for researchers." appState.locale
         , action =
-            { route = Routes.projectsCreateCustom Nothing
+            { route = Routes.projectsCreate
             , label = gettext "Create" appState.locale
             }
         }

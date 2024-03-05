@@ -3,7 +3,7 @@ module Wizard.Dashboard.Widgets.RecentProjectsWidget exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, br, div, h2, p, strong, text)
-import Html.Attributes exposing (class, style)
+import Html.Attributes exposing (class)
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Html exposing (faSet)
 import String.Format as String
@@ -51,14 +51,6 @@ viewRecentProjects appState questionnaires =
 viewProject : AppState -> Questionnaire -> Html msg
 viewProject appState questionnaire =
     let
-        projectProgressView =
-            let
-                pctg =
-                    (toFloat questionnaire.answeredQuestions / toFloat (questionnaire.answeredQuestions + questionnaire.unansweredQuestions)) * 100
-            in
-            div [ class "progress mt-1 flex-grow-1", style "height" "7px" ]
-                [ div [ class "progress-bar bg-info", style "width" (String.fromFloat pctg ++ "%") ] [] ]
-
         updatedText =
             inWordsWithConfig { withAffix = True } (locale appState) questionnaire.updatedAt appState.currentTime
     in
@@ -69,8 +61,7 @@ viewProject appState questionnaire =
         , div [ class "ms-2 flex-grow-1 content" ]
             [ strong [] [ text questionnaire.name ]
             , div [ class "d-flex align-items-center" ]
-                [ projectProgressView
-                , div [ class "flex-grow-1 ps-4 text-lighter fst-italic" ] [ text (String.format (gettext "Updated %s" appState.locale) [ updatedText ]) ]
+                [ div [ class "flex-grow-1 ps-4 text-lighter fst-italic" ] [ text (String.format (gettext "Updated %s" appState.locale) [ updatedText ]) ]
                 ]
             ]
         ]

@@ -157,7 +157,7 @@ update cfg appState msg model =
                         , apiKeys = ActionResult.Loading
                         , deletingApiKey = ActionResult.Unset
                       }
-                    , Cmd.map cfg.wrapMsg <| ApiKeysApi.getApiKeys appState GetApiKeysComplete
+                    , Cmd.map cfg.wrapMsg (fetchData appState)
                     )
 
                 Err error ->

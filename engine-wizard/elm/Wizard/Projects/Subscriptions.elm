@@ -14,7 +14,7 @@ import Wizard.Projects.Routes exposing (Route(..))
 subscriptions : Route -> Model -> Sub Msg
 subscriptions route model =
     case route of
-        CreateRoute _ ->
+        CreateRoute _ _ ->
             Sub.map CreateMsg <|
                 Wizard.Projects.Create.Subscriptions.subscriptions model.createModel
 

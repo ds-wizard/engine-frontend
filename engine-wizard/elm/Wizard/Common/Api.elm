@@ -1,6 +1,5 @@
 module Wizard.Common.Api exposing
     ( applyResult
-    , applyResultCmd
     , applyResultTransform
     , applyResultTransformCmd
     , getResultCmd
@@ -68,29 +67,6 @@ applyResultTransform appState { setResult, defaultError, model, result, logoutMs
         , logoutMsg = logoutMsg
         , transform = transform
         , cmd = Cmd.none
-        }
-
-
-applyResultCmd :
-    { a | locale : Gettext.Locale }
-    ->
-        { setResult : ActionResult data -> model -> model
-        , defaultError : String
-        , model : model
-        , result : Result ApiError data
-        , logoutMsg : msg
-        , cmd : Cmd msg
-        }
-    -> ( model, Cmd msg )
-applyResultCmd appState { setResult, defaultError, model, result, logoutMsg, cmd } =
-    applyResultTransformCmd appState
-        { setResult = setResult
-        , defaultError = defaultError
-        , model = model
-        , result = result
-        , logoutMsg = logoutMsg
-        , transform = identity
-        , cmd = cmd
         }
 
 

@@ -5,6 +5,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
+import Wizard.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
@@ -24,6 +25,9 @@ fetchData appState uuidOrCurrent subroute =
 
         UserEditRoute.ApiKeys ->
             Cmd.map ApiKeysMsg (ApiKeys.fetchData appState)
+
+        UserEditRoute.AppKeys ->
+            Cmd.map AppKeysMsg (AppKeys.fetchData appState)
 
         UserEditRoute.ActiveSessions ->
             Cmd.map ActiveSessionsMsg (ActiveSessions.fetchData appState)
@@ -70,6 +74,18 @@ update msg wrapMsg appState model =
                     ApiKeys.update updateConfig appState apiKeysMsg model.apiKeysModel
             in
             ( { model | apiKeysModel = apiKeysModel }, apiKeysCmd )
+
+        AppKeysMsg appKeysMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << AppKeysMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( appKeysModel, appKeysCmd ) =
+                    AppKeys.update updateConfig appState appKeysMsg model.appKeysModel
+            in
+            ( { model | appKeysModel = appKeysModel }, appKeysCmd )
 
         ActiveSessionsMsg activeSessionsMsg ->
             let

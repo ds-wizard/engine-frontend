@@ -5,15 +5,18 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, hr, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.TenantDetail exposing (TenantDetail)
 import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (flip, listFilterJust)
 import String.Format as String
+import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Components.PlansList as PlansList
@@ -47,7 +50,7 @@ viewApp appState model app =
 
 
 header : AppState -> TenantDetail -> Html Msg
-header appState app =
+header appState tenantDetail =
     let
         editAction =
             a [ onClick EditModalOpen, dataCy "tenant-detail_edit" ]
@@ -57,28 +60,36 @@ header appState app =
 
         title =
             span [ class "top-header-title-with-icon" ]
-                [ TenantIcon.view app
-                , text app.name
+                [ TenantIcon.view tenantDetail
+                , text tenantDetail.name
                 ]
     in
     DetailPage.header title [ editAction ]
 
 
 content : AppState -> TenantDetail -> Html Msg
-content appState appDetail =
+content appState tenantDetail =
     let
+        editWarning =
+            Html.viewIf (Admin.isEnabled appState.config.admin) <|
+                div [ class "alert alert-danger d-flex align-items-center" ]
+                    [ faSet "_global.warning" appState
+                    , Markdown.toHtml [] (String.format "Do not edit the tenant here. Go to [Admin Center](%s)." [ "/admin/tenants/" ++ Uuid.toString tenantDetail.uuid ])
+                    ]
+
         planActions plan =
             [ a [ onClick (EditPlanModalOpen plan), dataCy "tenant-detail_plan_edit" ] [ faSet "_global.edit" appState ]
             , a [ onClick (DeletePlanModalOpen plan), class "text-danger ms-3", dataCy "tenant-detail_plan_delete" ] [ faSet "_global.delete" appState ]
             ]
     in
     DetailPage.content
-        [ div [ DetailPage.contentInnerClass ]
+        [ editWarning
+        , div [ DetailPage.contentInnerClass ]
             [ h3 [] [ text (gettext "Usage" appState.locale) ]
-            , UsageTable.view appState appDetail.usage
+            , UsageTable.view appState tenantDetail.usage
             , hr [ class "my-5" ] []
             , h3 [] [ text (gettext "Plans" appState.locale) ]
-            , PlansList.view appState { actions = Just planActions } appDetail.plans
+            , PlansList.view appState { actions = Just planActions } tenantDetail.plans
             , a [ class "with-icon", onClick AddPlanModalOpen, dataCy "tenant-detail_add-plan" ]
                 [ faSet "_global.add" appState, text (gettext "Add plan" appState.locale) ]
             ]
@@ -86,12 +97,12 @@ content appState appDetail =
 
 
 sidePanel : AppState -> TenantDetail -> Html Msg
-sidePanel appState appDetail =
+sidePanel appState tenantDetail =
     let
         sections =
-            [ sidePanelInfo appState appDetail
-            , sidePanelUrls appState appDetail
-            , sidePanelAdmins appState appDetail
+            [ sidePanelInfo appState tenantDetail
+            , sidePanelUrls appState tenantDetail
+            , sidePanelAdmins appState tenantDetail
             ]
     in
     DetailPage.sidePanel
@@ -99,41 +110,41 @@ sidePanel appState appDetail =
 
 
 sidePanelInfo : AppState -> TenantDetail -> Maybe ( String, String, Html msg )
-sidePanelInfo appState appDetail =
+sidePanelInfo appState tenantDetail =
     let
         enabledBadge =
-            if appDetail.enabled then
+            if tenantDetail.enabled then
                 Badge.success [] [ text (gettext "Enabled" appState.locale) ]
 
             else
                 Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
 
         infoList =
-            [ ( gettext "Tenant ID" appState.locale, "tenant-id", text appDetail.tenantId )
+            [ ( gettext "Tenant ID" appState.locale, "tenant-id", text tenantDetail.tenantId )
             , ( gettext "Enabled" appState.locale, "enabled", enabledBadge )
-            , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone appDetail.createdAt )
-            , ( gettext "Updated at" appState.locale, "updated-at", text <| TimeUtils.toReadableDateTime appState.timeZone appDetail.updatedAt )
+            , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone tenantDetail.createdAt )
+            , ( gettext "Updated at" appState.locale, "updated-at", text <| TimeUtils.toReadableDateTime appState.timeZone tenantDetail.updatedAt )
             ]
     in
     Just ( gettext "Info" appState.locale, "info", DetailPage.sidePanelList 4 8 infoList )
 
 
 sidePanelUrls : AppState -> TenantDetail -> Maybe ( String, String, Html msg )
-sidePanelUrls appState appDetail =
+sidePanelUrls appState tenantDetail =
     let
         urlsList =
-            [ ( gettext "Client URL" appState.locale, "client-url", a [ href appDetail.clientUrl, target "_blank" ] [ text appDetail.clientUrl ] )
-            , ( gettext "Server URL" appState.locale, "server-url", a [ href appDetail.serverUrl, target "_blank" ] [ text appDetail.serverUrl ] )
+            [ ( gettext "Client URL" appState.locale, "client-url", a [ href tenantDetail.clientUrl, target "_blank" ] [ text tenantDetail.clientUrl ] )
+            , ( gettext "Server URL" appState.locale, "server-url", a [ href tenantDetail.serverUrl, target "_blank" ] [ text tenantDetail.serverUrl ] )
             ]
     in
     Just ( gettext "URLs" appState.locale, "urls", DetailPage.sidePanelList 4 8 urlsList )
 
 
 sidePanelAdmins : AppState -> TenantDetail -> Maybe ( String, String, Html msg )
-sidePanelAdmins appState appDetail =
+sidePanelAdmins appState tenantDetail =
     let
         users =
-            appDetail.users
+            tenantDetail.users
                 |> List.filter .active
                 |> List.sortWith User.compare
                 |> List.map viewUser

@@ -69,9 +69,9 @@ module Wizard.Routes exposing
     , projectImportersIndex
     , projectImportersIndexWithFilters
     , projectsCreate
-    , projectsCreateCustom
+    , projectsCreateFromKnowledgeModel
+    , projectsCreateFromProjectTemplate
     , projectsCreateMigration
-    , projectsCreateTemplate
     , projectsDetailDocuments
     , projectsDetailDocumentsNew
     , projectsDetailDocumentsWithFilters
@@ -98,6 +98,7 @@ module Wizard.Routes exposing
     , usersEdit
     , usersEditActiveSessions
     , usersEditApiKeys
+    , usersEditAppKeys
     , usersEditCurrent
     , usersEditPassword
     , usersEditSubmissionSettings
@@ -111,7 +112,6 @@ import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Dev.Routes
@@ -125,7 +125,6 @@ import Wizard.KnowledgeModels.Routes
 import Wizard.Locales.Routes
 import Wizard.ProjectActions.Routes
 import Wizard.ProjectImporters.Routes
-import Wizard.Projects.Create.ProjectCreateRoute
 import Wizard.Projects.Detail.ProjectDetailRoute
 import Wizard.Projects.Routes
 import Wizard.Public.Routes
@@ -566,23 +565,19 @@ isProjectImportersIndex route =
 -- Projects
 
 
-projectsCreate : { a | config : BootstrapConfig } -> Route
-projectsCreate appState =
-    if QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation then
-        projectsCreateTemplate Nothing
-
-    else
-        projectsCreateCustom Nothing
+projectsCreate : Route
+projectsCreate =
+    ProjectsRoute <| Wizard.Projects.Routes.CreateRoute Nothing Nothing
 
 
-projectsCreateCustom : Maybe String -> Route
-projectsCreateCustom =
-    ProjectsRoute << Wizard.Projects.Routes.CreateRoute << Wizard.Projects.Create.ProjectCreateRoute.CustomCreateRoute
+projectsCreateFromKnowledgeModel : String -> Route
+projectsCreateFromKnowledgeModel selectedKnowledgeModel =
+    ProjectsRoute <| Wizard.Projects.Routes.CreateRoute Nothing (Just selectedKnowledgeModel)
 
 
-projectsCreateTemplate : Maybe String -> Route
-projectsCreateTemplate =
-    ProjectsRoute << Wizard.Projects.Routes.CreateRoute << Wizard.Projects.Create.ProjectCreateRoute.TemplateCreateRoute
+projectsCreateFromProjectTemplate : Uuid -> Route
+projectsCreateFromProjectTemplate selectedProjectTemplate =
+    ProjectsRoute <| Wizard.Projects.Routes.CreateRoute (Just selectedProjectTemplate) Nothing
 
 
 projectsCreateMigration : Uuid -> Route
@@ -831,6 +826,11 @@ usersEditPassword =
 usersEditApiKeys : UuidOrCurrent -> Route
 usersEditApiKeys =
     UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ApiKeys
+
+
+usersEditAppKeys : UuidOrCurrent -> Route
+usersEditAppKeys =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.AppKeys
 
 
 usersEditActiveSessions : UuidOrCurrent -> Route

@@ -87,6 +87,7 @@ import Wizard.KMEditor.Editor.Components.KMEditor.Breadcrumbs as Breadcrumbs
 import Wizard.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.KMEditor.Editor.Components.KMEditor.Tree as Tree
 import Wizard.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 
 
@@ -205,6 +206,10 @@ update setFullscreenMsg msg model editorBranch =
             ( editorBranch, { model | deleteModalState = deleteModalState }, Cmd.none )
 
         OpenMoveModal movingEntity movingUuid ->
+            let
+                scrollCmd =
+                    Ports.scrollIntoViewCenter "[data-km-editor_move-modal_item_current]"
+            in
             ( editorBranch
             , { model
                 | moveModalState =
@@ -214,7 +219,7 @@ update setFullscreenMsg msg model editorBranch =
                         , treeInputModel = TreeInput.initialModel (Set.fromList editorBranch.openNodeUuids)
                         }
               }
-            , Cmd.none
+            , scrollCmd
             )
 
         MoveModalMsg moveModalMsg ->

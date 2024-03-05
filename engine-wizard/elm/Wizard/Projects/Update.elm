@@ -23,7 +23,7 @@ import Wizard.Routes
 fetchData : Route -> AppState -> Model -> Cmd Msg
 fetchData route appState model =
     case route of
-        CreateRoute _ ->
+        CreateRoute _ _ ->
             Cmd.map CreateMsg <|
                 Wizard.Projects.Create.Update.fetchData appState model.createModel
 

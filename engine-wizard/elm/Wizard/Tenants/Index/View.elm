@@ -3,9 +3,13 @@ module Wizard.Tenants.Index.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Tenant exposing (Tenant)
-import Shared.Html exposing (emptyNode)
+import Shared.Html exposing (emptyNode, faSet)
+import Shared.Markdown as Markdown
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
@@ -20,8 +24,17 @@ import Wizard.Tenants.Routes exposing (indexRouteEnabledFilterId)
 
 view : AppState -> Model -> Html Msg
 view appState model =
+    let
+        editWarning =
+            Html.viewIf (Admin.isEnabled appState.config.admin) <|
+                div [ class "alert alert-danger mt-n3 mb-4 d-flex align-items-center" ]
+                    [ faSet "_global.warning" appState
+                    , Markdown.toHtml [] (String.format "Do not edit tenants here. Go to [Admin Center](%s)." [ "/admin/tenants" ])
+                    ]
+    in
     div [ listClass "Tenants__Index" ]
         [ Page.header (gettext "Tenants" appState.locale) []
+        , editWarning
         , Listing.view appState (listingConfig appState) model.tenants
         ]
 
