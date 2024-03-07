@@ -2878,7 +2878,7 @@ viewQuestionValue appState cfg model path question =
                     ]
 
                 Just UrlQuestionValueType ->
-                    [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
+                    [ input (type_ "text" :: defaultAttrs ++ extraAttrs) []
                     , warningView RegexPatterns.url (gettext "This is not a valid URL." appState.locale)
                     ]
 
