@@ -3,16 +3,13 @@ module Registry2 exposing (Model, Msg, main)
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Navigation exposing (Key)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, header, i, img, li, main_, p, section, small, strong, text, ul)
-import Html.Attributes exposing (class, classList, height, href, src)
-import Html.Events exposing (onClick)
+import Html
 import Json.Decode as D
-import Maybe.Extra as Maybe
 import Registry2.Components.AboutModal as AboutModal
-import Registry2.Components.FontAwesome exposing (fas)
 import Registry2.Components.Page as Page
 import Registry2.Data.AppState as AppState exposing (AppState)
 import Registry2.Data.Session as Session exposing (Session)
+import Registry2.Layouts.AppLayout as Layout
 import Registry2.Pages.DocumentTemplates as DocumentTemplates
 import Registry2.Pages.DocumentTemplatesDetail as DocumentTemplatesDetail
 import Registry2.Pages.ForgottenToken as ForgottenToken
@@ -180,7 +177,7 @@ update msg model =
         SetSession session ->
             let
                 sessionCmd =
-                    case Debug.log "set session" session of
+                    case session of
                         Just s ->
                             Ports.saveSession (Session.encode s)
 
@@ -496,7 +493,7 @@ initPage model =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions model =
+subscriptions _ =
     Sub.none
 
 
@@ -570,134 +567,12 @@ view model =
                         , msg = gettext "You are not allowed to view this page." model.appState.locale
                         }
     in
-    { title = "DSW Registry"
-    , body =
-        -- https://themes.getbootstrap.com/preview/?theme_id=35287
-        [ main_ []
-            [ header [ class "shadow-sm navbar-fixed" ]
-                [ div [ class "navbar-sticky bg-white" ]
-                    [ div [ class "navbar navbar-expand-lg navbar-light" ]
-                        [ div [ class "container" ]
-                            [ a
-                                [ class "navbar-brand"
-                                , href (Routes.toUrl Routes.home)
-                                ]
-                                [ div [ class "d-flex" ]
-                                    [ img [ src "/img/logo.svg", height 30, class "me-1" ] []
-                                    , text "DSW Registry"
-                                    ]
-                                ]
-                            , div [ class "navbar-toolbar d-flex flex-shrink-0 align-items-center" ]
-                                ([ a [ class "navbar-tool", onClick (AboutModalMsg AboutModal.openMsg) ]
-                                    [ div [ class "navbar-tool-icon-box" ]
-                                        [ fas "fa-lg fa-info-circle" ]
-                                    ]
-                                 ]
-                                    ++ profileNavigation model.appState
-                                    ++ [ a [ class "navbar-tool d-lg-none d-sm-flex", onClick (SetMenuVisible (not model.menuVisible)) ]
-                                            [ div [ class "navbar-tool-icon-box" ]
-                                                [ fas "fa-lg fa-bars" ]
-                                            ]
-                                       ]
-                                )
-                            ]
-                        ]
-                    , div [ class "navbar navbar-expand-lg navbar-light" ]
-                        [ div [ class "container" ]
-                            [ div [ class "navbar-collapse collapse", classList [ ( "show", model.menuVisible ) ] ]
-                                [ ul [ class "navbar-nav" ]
-                                    [ li [ class "nav-item" ]
-                                        [ a
-                                            [ class "nav-link"
-                                            , classList [ ( "active", model.appState.route == Routes.Home ) ]
-                                            , href (Routes.toUrl Routes.home)
-                                            ]
-                                            [ fas "fa-home"
-                                            , text (gettext "Home" model.appState.locale)
-                                            ]
-                                        ]
-                                    , li [ class "nav-item" ]
-                                        [ a
-                                            [ class "nav-link"
-                                            , classList [ ( "active", model.appState.route == Routes.KnowledgeModels ) ]
-                                            , href (Routes.toUrl Routes.knowledgeModels)
-                                            ]
-                                            [ fas "fa-sitemap"
-                                            , text (gettext "Knowledge Models" model.appState.locale)
-                                            ]
-                                        ]
-                                    , li [ class "nav-item" ]
-                                        [ a
-                                            [ class "nav-link"
-                                            , classList [ ( "active", model.appState.route == Routes.DocumentTemplates ) ]
-                                            , href (Routes.toUrl Routes.documentTemplates)
-                                            ]
-                                            [ fas "fa-file-code"
-                                            , text (gettext "Document Templates" model.appState.locale)
-                                            ]
-                                        ]
-                                    , li [ class "nav-item" ]
-                                        [ a
-                                            [ class "nav-link"
-                                            , classList [ ( "active", model.appState.route == Routes.Locales ) ]
-                                            , href (Routes.toUrl Routes.locales)
-                                            ]
-                                            [ fas "fa-language"
-                                            , text (gettext "Locales" model.appState.locale)
-                                            ]
-                                        ]
-                                    ]
-                                ]
-                            ]
-                        ]
-                    ]
-                ]
-            , section [ class "container pt-lg-5" ]
-                [ content ]
-            ]
-        , Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
-        ]
-    }
-
-
-profileNavigation : AppState -> List (Html Msg)
-profileNavigation appState =
-    case appState.session of
-        Just session ->
-            [ a
-                [ class "navbar-tool d-sm-flex d-lg-none"
-                , href (Routes.toUrl Routes.organizationDetail)
-                ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-user" ]
-                ]
-            , a
-                [ class "navbar-tool d-sm-flex d-lg-none"
-                , onClick (SetSession Nothing)
-                ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-sign-out-alt" ]
-                ]
-            , div [ class "navbar-profile d-lg-flex d-none" ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-user" ]
-                , div [ class "d-flex flex-column justify-content-center" ]
-                    [ small [ class "organization-name" ] [ text session.organizationName ]
-                    , div [ class "text-muted" ]
-                        [ a [ href (Routes.toUrl Routes.organizationDetail) ] [ text "Edit" ]
-                        , text " • "
-                        , a [ onClick (SetSession Nothing) ] [ text "Logout" ]
-                        ]
-                    ]
-                ]
-            ]
-
-        Nothing ->
-            [ a
-                [ class "navbar-tool"
-                , href (Routes.toUrl Routes.login)
-                ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-user" ]
-                ]
-            ]
+    Layout.app model.appState
+        { appTitle = "DSW Registry"
+        , openAboutModalMsg = AboutModalMsg AboutModal.openMsg
+        , logoutMsg = SetSession Nothing
+        , openCloseMenuMsg = SetMenuVisible
+        , content = content
+        , aboutModal = Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
+        , menuVisible = model.menuVisible
+        }

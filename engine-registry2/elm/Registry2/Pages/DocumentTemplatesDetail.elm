@@ -9,8 +9,7 @@ module Registry2.Pages.DocumentTemplatesDetail exposing
 
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, i)
-import Html.Attributes exposing (class)
+import Html exposing (Html)
 import Registry2.Api.DocumentTemplates as DocumentTemplatesApi
 import Registry2.Api.Models.DocumentTemplateDetail as DocumentTemplate exposing (DocumentTemplateDetail)
 import Registry2.Components.DetailPage as DetailPage
