@@ -1,39 +1,30 @@
 module Registry.Pages.Login exposing
-    ( LoginForm
-    , Model
+    ( Model
     , Msg
-    , init
+    , UpdateConfig
+    , initialModel
     , update
     , view
     )
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
 import Form exposing (Form)
-import Form.Validate as Validate exposing (Validation)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, form, text)
+import Html exposing (Html, a, div, hr, span, text)
 import Html.Attributes exposing (class, href)
-import Html.Events exposing (onSubmit)
-import Registry.Common.AppState exposing (AppState)
-import Registry.Common.Credentials exposing (Credentials)
-import Registry.Common.Requests as Requests
-import Registry.Common.View.ActionButton as ActionButton
-import Registry.Common.View.FormGroup as FormGroup
-import Registry.Common.View.FormResult as FormResult
-import Registry.Routing as Routing
+import Registry.Api.Models.Organization exposing (Organization)
+import Registry.Api.Organizations as OrganizationsApi
+import Registry.Components.ActionButton as ActionButton
+import Registry.Components.FormGroup as FormGroup
+import Registry.Components.FormResult as FormResult
+import Registry.Components.FormWrapper as FormWrapper
+import Registry.Data.AppState exposing (AppState)
+import Registry.Data.Forms.LoginForm as LoginForm exposing (LoginForm)
+import Registry.Data.Session as Session exposing (Session)
+import Registry.Routes as Routes
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-
-
-init : Model
-init =
-    { form = initLoginForm
-    , loggingIn = Unset
-    }
-
-
-
--- MODEL
+import Shared.Utils as Task
 
 
 type alias Model =
@@ -42,89 +33,77 @@ type alias Model =
     }
 
 
-type alias LoginForm =
-    { organizationId : String
-    , token : String
+initialModel : Model
+initialModel =
+    { form = LoginForm.init
+    , loggingIn = ActionResult.Unset
     }
-
-
-loginFormValidation : Validation e LoginForm
-loginFormValidation =
-    Validate.map2 LoginForm
-        (Validate.field "organizationId" Validate.string)
-        (Validate.field "token" Validate.string)
-
-
-initLoginForm : Form e LoginForm
-initLoginForm =
-    Form.initial [] loginFormValidation
-
-
-
--- UPDATE
 
 
 type Msg
     = FormMsg Form.Msg
-    | GetTokenCompleted (Result ApiError String)
+    | GetOrganizationCompleted (Result ApiError Organization)
 
 
-update :
-    { tagger : Msg -> msg
-    , loginCmd : Credentials -> Cmd msg
+type alias UpdateConfig msg =
+    { wrapMsg : Msg -> msg
+    , setSessionMsg : Maybe Session -> msg
     }
-    -> Msg
-    -> AppState
-    -> Model
-    -> ( Model, Cmd msg )
-update { tagger, loginCmd } msg appState model =
+
+
+update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
+update cfg appState msg model =
     case msg of
         FormMsg formMsg ->
-            handleFormMsg tagger formMsg appState model
-
-        GetTokenCompleted result ->
-            case ( result, Form.getOutput model.form ) of
-                ( Ok _, Just loginForm ) ->
-                    ( model, loginCmd loginForm )
+            case ( formMsg, Form.getOutput model.form ) of
+                ( Form.Submit, Just loginForm ) ->
+                    let
+                        appStateWithSession =
+                            { appState | session = Just <| Session.setToken loginForm.token <| Session.init }
+                    in
+                    ( { model | loggingIn = ActionResult.Loading }
+                    , Cmd.map cfg.wrapMsg <|
+                        OrganizationsApi.getOrganization appStateWithSession loginForm.organizationId GetOrganizationCompleted
+                    )
 
                 _ ->
-                    ( { model | loggingIn = Error <| gettext "Login failed." appState.locale }
+                    ( { model | form = Form.update LoginForm.validation formMsg model.form }
+                    , Cmd.none
+                    )
+
+        GetOrganizationCompleted result ->
+            case result of
+                Ok organization ->
+                    ( model
+                    , Task.dispatch (cfg.setSessionMsg <| Just <| Session.fromOrganization organization)
+                    )
+
+                Err _ ->
+                    ( { model | loggingIn = ActionResult.Error (gettext "Login failed." appState.locale) }
                     , Cmd.none
                     )
 
 
-handleFormMsg : (Msg -> msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )
-handleFormMsg tagger formMsg appState model =
-    case ( formMsg, Form.getOutput model.form ) of
-        ( Form.Submit, Just loginForm ) ->
-            ( { model | loggingIn = Loading }
-            , Requests.getToken loginForm appState GetTokenCompleted
-                |> Cmd.map tagger
-            )
-
-        _ ->
-            ( { model | form = Form.update loginFormValidation formMsg model.form }
-            , Cmd.none
-            )
-
-
-
--- VIEW
-
-
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ class "card card-form bg-light" ]
-        [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
-        , div [ class "card-body" ]
-            [ form [ onSubmit <| FormMsg Form.Submit ]
-                [ FormResult.errorOnlyView model.loggingIn
-                , Html.map FormMsg <| FormGroup.input appState model.form "organizationId" <| gettext "Organization ID" appState.locale
-                , Html.map FormMsg <| FormGroup.password appState model.form "token" <| gettext "Token" appState.locale
-                , div [ class "d-flex justify-content-between align-items-center" ]
-                    [ ActionButton.submit ( gettext "Log In" appState.locale, model.loggingIn )
-                    , a [ href <| Routing.toString Routing.ForgottenToken ] [ text (gettext "Forgot your token?" appState.locale) ]
-                    ]
+    FormWrapper.view
+        { title = gettext "Login" appState.locale
+        , submitMsg = FormMsg Form.Submit
+        , content =
+            [ FormResult.errorOnlyView model.loggingIn
+            , Html.map FormMsg (FormGroup.input appState model.form "organizationId" (gettext "Organization ID" appState.locale))
+            , Html.map FormMsg (FormGroup.password appState model.form "token" (gettext "Token" appState.locale))
+            , ActionButton.view
+                { label = gettext "Login" appState.locale
+                , actionResult = model.loggingIn
+                }
+            , div [ class "text-end mt-2" ]
+                [ a [ href (Routes.toUrl Routes.forgottenToken) ] [ text (gettext "Forgot your token?" appState.locale) ]
+                ]
+            , hr [] []
+            , div [ class "text-center" ]
+                [ span [ class "me-1" ] [ text (gettext "Need an account?" appState.locale) ]
+                , a [ href (Routes.toUrl Routes.signup) ] [ text "Sign up" ]
                 ]
             ]
-        ]
+        }

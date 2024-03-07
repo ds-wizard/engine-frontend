@@ -2,86 +2,77 @@ module Registry.Pages.DocumentTemplates exposing
     ( Model
     , Msg
     , init
+    , initialModel
     , update
     , view
     )
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, h5, p, small, text)
-import Html.Attributes exposing (class, href)
-import Registry.Common.AppState exposing (AppState)
-import Registry.Common.Entities.DocumentTemplate exposing (DocumentTemplate)
-import Registry.Common.Requests as Requests
-import Registry.Common.View.Page as Page
-import Registry.Routing as Routing
+import Html exposing (Html, div, h1, text)
+import Html.Attributes exposing (class)
+import Registry.Api.DocumentTemplates as DocumentTemplatesApi
+import Registry.Api.Models.DocumentTemplate exposing (DocumentTemplate)
+import Registry.Components.ListItem as ListItem
+import Registry.Components.Page as Page
+import Registry.Data.AppState exposing (AppState)
+import Registry.Routes as Routes
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-
-
-init : AppState -> ( Model, Cmd Msg )
-init appState =
-    ( { documentTemplates = Loading }
-    , Requests.getDocumentTemplates appState GetDocumentTemplatesCompleted
-    )
-
-
-
--- MODEL
+import Time
 
 
 type alias Model =
     { documentTemplates : ActionResult (List DocumentTemplate) }
 
 
-setPackages : ActionResult (List DocumentTemplate) -> Model -> Model
-setPackages documentTemplates model =
-    { model | documentTemplates = documentTemplates }
+initialModel : Model
+initialModel =
+    { documentTemplates = ActionResult.Loading }
 
 
+setDocumentTemplates : ActionResult (List DocumentTemplate) -> Model -> Model
+setDocumentTemplates result model =
+    { model | documentTemplates = result }
 
--- UPDATE
+
+init : AppState -> ( Model, Cmd Msg )
+init appState =
+    ( initialModel
+    , DocumentTemplatesApi.getDocumentTemplates appState GetDocumentTemplatesCompleted
+    )
 
 
 type Msg
     = GetDocumentTemplatesCompleted (Result ApiError (List DocumentTemplate))
 
 
-update : Msg -> AppState -> Model -> Model
-update msg appState =
+update : AppState -> Msg -> Model -> ( Model, Cmd Msg )
+update appState msg model =
     case msg of
         GetDocumentTemplatesCompleted result ->
-            ActionResult.apply setPackages (ApiError.toActionResult appState (gettext "Unable to get templates." appState.locale)) result
+            ( ActionResult.apply setDocumentTemplates
+                (ApiError.toActionResult appState (gettext "Unable to get document templates." appState.locale))
+                result
+                model
+            , Cmd.none
+            )
 
 
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
-    Page.actionResultView viewList model.documentTemplates
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.view appState (viewDocumentTemplates appState) model.documentTemplates
 
 
-viewList : List DocumentTemplate -> Html Msg
-viewList documentTemplates =
-    div []
-        [ div [ class "list-group list-group-flush" ]
-            (List.map viewItem <| List.sortBy .name documentTemplates)
-        ]
-
-
-viewItem : DocumentTemplate -> Html Msg
-viewItem documentTemplate =
+viewDocumentTemplates : AppState -> List DocumentTemplate -> Html Msg
+viewDocumentTemplates appState documentTemplates =
     let
-        packageLink =
-            Routing.toString <| Routing.DocumentTemplateDetail documentTemplate.id
+        documentTemplateView =
+            documentTemplates
+                |> List.sortBy (Time.toMillis appState.timeZone << .createdAt)
+                |> List.map (ListItem.view appState { toRoute = Routes.documentTemplateDetail << .id })
+                |> div []
     in
-    div [ class "list-group-item flex-column align-items-start" ]
-        [ div [ class "d-flex justify-content-between" ]
-            [ h5 [ class "mb-1" ]
-                [ a [ href packageLink ] [ text documentTemplate.name ]
-                ]
-            , small [] [ text documentTemplate.organization.name ]
-            ]
-        , p [] [ text documentTemplate.description ]
+    div [ class "my-5" ]
+        [ h1 [ class "text-center mb-5" ] [ text (gettext "Document Templates" appState.locale) ]
+        , documentTemplateView
         ]

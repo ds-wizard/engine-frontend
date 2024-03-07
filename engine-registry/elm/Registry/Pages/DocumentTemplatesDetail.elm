@@ -1,4 +1,4 @@
-module Registry.Pages.LocalesDetail exposing
+module Registry.Pages.DocumentTemplatesDetail exposing
     ( Model
     , Msg
     , init
@@ -10,8 +10,8 @@ module Registry.Pages.LocalesDetail exposing
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Registry.Api.Locales as LocalesApi
-import Registry.Api.Models.LocaleDetail as Locale exposing (LocaleDetail)
+import Registry.Api.DocumentTemplates as DocumentTemplatesApi
+import Registry.Api.Models.DocumentTemplateDetail as DocumentTemplate exposing (DocumentTemplateDetail)
 import Registry.Components.DetailPage as DetailPage
 import Registry.Components.ItemIdBox as ItemIdBox
 import Registry.Components.Page as Page
@@ -23,7 +23,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 
 
 type alias Model =
-    { locale : ActionResult LocaleDetail
+    { documentTemplate : ActionResult DocumentTemplateDetail
     , itemIdBoxState : ItemIdBox.State
     , versionListState : VersionList.State
     }
@@ -31,26 +31,26 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { locale = ActionResult.Loading
+    { documentTemplate = ActionResult.Loading
     , itemIdBoxState = ItemIdBox.initialState
     , versionListState = VersionList.initialState
     }
 
 
-setLocale : ActionResult LocaleDetail -> Model -> Model
-setLocale result model =
-    { model | locale = result }
+setDocumentTemplate : ActionResult DocumentTemplateDetail -> Model -> Model
+setDocumentTemplate result model =
+    { model | documentTemplate = result }
 
 
 init : AppState -> String -> ( Model, Cmd Msg )
 init appState knowledgeModelId =
     ( initialModel
-    , LocalesApi.getLocale appState knowledgeModelId GetLocaleCompleted
+    , DocumentTemplatesApi.getDocumentTemplate appState knowledgeModelId GetDocumentTemplateCompleted
     )
 
 
 type Msg
-    = GetLocaleCompleted (Result ApiError LocaleDetail)
+    = GetDocumentTemplateCompleted (Result ApiError DocumentTemplateDetail)
     | ItemIdBoxMsg ItemIdBox.Msg
     | VersionListMsg VersionList.Msg
 
@@ -58,9 +58,9 @@ type Msg
 update : AppState -> Msg -> Model -> ( Model, Cmd Msg )
 update appState msg model =
     case msg of
-        GetLocaleCompleted result ->
-            ( ActionResult.apply setLocale
-                (ApiError.toActionResult appState (gettext "Unable to get locale." appState.locale))
+        GetDocumentTemplateCompleted result ->
+            ( ActionResult.apply setDocumentTemplate
+                (ApiError.toActionResult appState (gettext "Unable to get document template." appState.locale))
                 result
                 model
             , Cmd.none
@@ -83,34 +83,35 @@ update appState msg model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.view appState (viewKnowledgeModel appState model) model.locale
+    Page.view appState (viewKnowledgeModel appState model) model.documentTemplate
 
 
-viewKnowledgeModel : AppState -> Model -> LocaleDetail -> Html Msg
-viewKnowledgeModel appState model locale =
+viewKnowledgeModel : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+viewKnowledgeModel appState model documentTemplate =
     DetailPage.view appState
-        { icon = "fas fa-language"
-        , title = locale.name
-        , version = locale.version
-        , published = locale.createdAt
-        , readme = locale.readme
+        { icon = "fas fa-file-code"
+        , title = documentTemplate.name
+        , version = documentTemplate.version
+        , published = documentTemplate.createdAt
+        , readme = documentTemplate.readme
         , sidebar =
             [ SidebarRow.viewId appState
-                { title = gettext "Locale ID" appState.locale
-                , id = locale.id
+                { title = gettext "Document Template ID" appState.locale
+                , id = documentTemplate.id
                 , wrapMsg = ItemIdBoxMsg
                 , itemIdBoxState = model.itemIdBoxState
                 }
-            , SidebarRow.viewLicense appState locale.license
-            , SidebarRow.viewVersion appState locale.version
+            , SidebarRow.viewLicense appState documentTemplate.license
+            , SidebarRow.viewVersion appState documentTemplate.version
             , SidebarRow.viewOtherVersions appState
-                { versions = locale.versions
-                , currentVersion = locale.version
-                , toUrl = Routes.toUrl << Routes.localeDetail << Locale.otherVersionId locale
+                { versions = documentTemplate.versions
+                , currentVersion = documentTemplate.version
+                , toUrl = Routes.toUrl << Routes.documentTemplateDetail << DocumentTemplate.otherVersionId documentTemplate
                 , wrapMsg = VersionListMsg
                 , versionListState = model.versionListState
                 }
-            , SidebarRow.viewPublishedOn appState locale.createdAt
-            , SidebarRow.viewOrganization appState locale.organization
+            , SidebarRow.viewMetamodelVersion appState documentTemplate.metamodelVersion
+            , SidebarRow.viewPublishedOn appState documentTemplate.createdAt
+            , SidebarRow.viewOrganization appState documentTemplate.organization
             ]
         }

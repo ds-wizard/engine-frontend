@@ -1,126 +1,150 @@
 @import "~bootstrap/scss/bootstrap";
+
+
+$fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
+@import '~@fortawesome/fontawesome-free/scss/fontawesome';
+@import '~@fortawesome/fontawesome-free/scss/solid';
+@import '~@fortawesome/fontawesome-free/scss/regular';
+@import '~@fortawesome/fontawesome-free/scss/brands';
+
 @import "mixins";
 @import "animations";
 
-@import "Common";
-@import "Pages";
+@import 'components/item-id-box';
+@import 'components/list-item';
+@import 'components/modal';
+@import 'components/page';
+@import 'components/publish-info';
+@import 'components/sidebar';
+@import 'components/table-build-info';
+@import 'components/tooltips';
+
+@import 'pages/homepage';
 
 
 body {
-    margin-top: 100px;
-    margin-bottom: 100px;
+    background: var(--bs-light);
+    padding-top: 4rem;
 }
 
-
-.navbar-nav {
-    flex-direction: row;
-
-    .nav-link {
-        padding-right: .5rem;
-        padding-left: .5rem;
-        cursor: pointer;
-
-    }
-}
-
-
-.navbar-brand {
-    .logo {
-        height: 30px;
-        margin-right: 10px;
-    }
-}
-
-
-h1 + form {
-    margin-top: 2rem;
-}
-
-a {
-    cursor: pointer;
+a:not([class]) {
     text-decoration: none;
 
-    &:not(.btn):not(.dropdown-item):hover {
+    &:hover {
         text-decoration: underline;
     }
-
-    &:not([href]):not([tabindex]) {
-        color: $link-color;
-
-        &:hover, &:active, &:focus {
-            text-decoration: underline;
-            color: $link-hover-color;
-        }
-    }
-
-    &.disabled {
-        text-decoration: none;
-        color: $gray-500;
-    }
 }
 
-
-.btn-with-loader {
-    min-width: 100px;
+.fs-sm {
+    font-size: $font-size-sm;
 }
 
-
-.animation-fade-in {
-    opacity: 0;
-    @include animation(fadeIn, ease-in, 1);
-    @include animation-duration(1s);
-    @include animation-delay(.4s);
-    @include animation-fill-mode(forwards);
-}
-
-
-.full-page-illustrated-message {
-    display: flex;
-    max-width: 80rem;
+.navbar-fixed {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    align-items: center;
-    justify-content: center;
-    margin: 5rem auto auto;
-
-    img, svg {
-        width: 30%;
-    }
-
-    div {
-        max-width: 50%;
-        margin-left: 2rem;
-    }
-
-    p {
-        font-size: 1.25rem;
-    }
+    z-index: 10;
 }
 
+.navbar {
+    .navbar-nav {
+        .nav-item:first-child {
+            .nav-link {
+                padding-left: 0;
+            }
+        }
 
-.card-form {
-    max-width: 30rem;
-    margin: auto;
+        .nav-item {
+            margin-right: 1rem;
 
-    .card-header {
-        font-weight: bold;
-    }
+            .nav-link {
+                .fas {
+                    margin-right: 0.5rem;
+                    color: $gray-600;
+                    transition: color 0.15s ease-in-out;
+                }
 
-    .form-group {
-        margin-bottom: 2rem;
+                &.active {
+                    .fas {
+                        color: var(--bs-navbar-active-color);
+                    }
+                }
 
-        label {
-            font-weight: bold
+                &:hover {
+                    .fas {
+                        color: var(--bs-primary);
+                    }
+
+                    color: var(--bs-primary);
+                }
+            }
         }
     }
 
-    .form-group + .text-muted {
-        margin-top: -1.5rem;
-        margin-bottom: 2rem;
+    .navbar-tool {
+        cursor: pointer;
+        text-decoration: none;
+        transition: color 0.15s ease-in-out;
+
+        &:hover {
+            color: var(--bs-nav-link-hover-color);
+        }
+    }
+
+    .navbar-tool-icon-box {
+        color: var(--bs-navbar-color);
+        width: 2.875rem;
+        height: 2.875rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &:not(:first-child) {
+        margin-top: -0.5rem;
+    }
+
+    .navbar-profile {
+        justify-content: center;
+        font-size: $font-size-sm;
+
+        .organization-name {
+            font-weight: bold;
+            display: inline-block;
+            max-width: 10rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        a {
+            color: var(--bs-primary);
+            cursor: pointer;
+
+            &:hover {
+                color: var(--bs-link-hover-color);
+                text-decoration: underline;
+            }
+        }
     }
 }
 
-svg.undraw {
-    color: $illustrations-color;
+
+.undraw {
+    color: var(--bs-primary);
     height: auto;
     max-width: 100%;
+}
+
+.text-grey {
+    color: $gray-500;
+}
+
+.box {
+    max-width: 25rem;
+
+    &-wide {
+        max-width: 30rem;
+    }
 }

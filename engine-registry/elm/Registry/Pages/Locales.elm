@@ -2,86 +2,77 @@ module Registry.Pages.Locales exposing
     ( Model
     , Msg
     , init
+    , initialModel
     , update
     , view
     )
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, h5, p, small, text)
-import Html.Attributes exposing (class, href)
-import Registry.Common.AppState exposing (AppState)
-import Registry.Common.Entities.Locale exposing (Locale)
-import Registry.Common.Requests as Requests
-import Registry.Common.View.Page as Page
-import Registry.Routing as Routing
+import Html exposing (Html, div, h1, text)
+import Html.Attributes exposing (class)
+import Registry.Api.Locales as LocalesApi
+import Registry.Api.Models.Locale exposing (Locale)
+import Registry.Components.ListItem as ListItem
+import Registry.Components.Page as Page
+import Registry.Data.AppState exposing (AppState)
+import Registry.Routes as Routes
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-
-
-init : AppState -> ( Model, Cmd Msg )
-init appState =
-    ( { locales = Loading }
-    , Requests.getLocales appState GetLocalesComplete
-    )
-
-
-
--- MODEL
+import Time
 
 
 type alias Model =
     { locales : ActionResult (List Locale) }
 
 
-setPackages : ActionResult (List Locale) -> Model -> Model
-setPackages locales model =
-    { model | locales = locales }
+initialModel : Model
+initialModel =
+    { locales = ActionResult.Loading }
 
 
+setLocales : ActionResult (List Locale) -> Model -> Model
+setLocales result model =
+    { model | locales = result }
 
--- UPDATE
+
+init : AppState -> ( Model, Cmd Msg )
+init appState =
+    ( initialModel
+    , LocalesApi.getLocales appState GetLocalesCompleted
+    )
 
 
 type Msg
-    = GetLocalesComplete (Result ApiError (List Locale))
+    = GetLocalesCompleted (Result ApiError (List Locale))
 
 
-update : Msg -> AppState -> Model -> Model
-update msg appState =
+update : AppState -> Msg -> Model -> ( Model, Cmd Msg )
+update appState msg model =
     case msg of
-        GetLocalesComplete result ->
-            ActionResult.apply setPackages (ApiError.toActionResult appState (gettext "Unable to get locales." appState.locale)) result
+        GetLocalesCompleted result ->
+            ( ActionResult.apply setLocales
+                (ApiError.toActionResult appState (gettext "Unable to get locales." appState.locale))
+                result
+                model
+            , Cmd.none
+            )
 
 
-
--- VIEW
-
-
-view : Model -> Html Msg
-view model =
-    Page.actionResultView viewList model.locales
+view : AppState -> Model -> Html Msg
+view appState model =
+    Page.view appState (viewLocales appState) model.locales
 
 
-viewList : List Locale -> Html Msg
-viewList locale =
-    div []
-        [ div [ class "list-group list-group-flush" ]
-            (List.map viewItem <| List.sortBy .name locale)
-        ]
-
-
-viewItem : Locale -> Html Msg
-viewItem locale =
+viewLocales : AppState -> List Locale -> Html Msg
+viewLocales appState documentTemplates =
     let
-        packageLink =
-            Routing.toString <| Routing.LocaleDetail locale.id
+        localeView =
+            documentTemplates
+                |> List.sortBy (Time.toMillis appState.timeZone << .createdAt)
+                |> List.map (ListItem.view appState { toRoute = Routes.localeDetail << .id })
+                |> div []
     in
-    div [ class "list-group-item flex-column align-items-start" ]
-        [ div [ class "d-flex justify-content-between" ]
-            [ h5 [ class "mb-1" ]
-                [ a [ href packageLink ] [ text locale.name ]
-                ]
-            , small [] [ text locale.organization.name ]
-            ]
-        , p [] [ text locale.description ]
+    div [ class "my-5" ]
+        [ h1 [ class "text-center mb-5" ] [ text (gettext "Locales" appState.locale) ]
+        , localeView
         ]
