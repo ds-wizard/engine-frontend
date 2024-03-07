@@ -1,6 +1,13 @@
-module Registry2.Pages.OrganizationDetail exposing (Model, Msg, init, initialModel, update, view)
+module Registry2.Pages.OrganizationDetail exposing
+    ( Model
+    , Msg
+    , init
+    , initialModel
+    , update
+    , view
+    )
 
-import ActionResult as ActionResult exposing (ActionResult)
+import ActionResult exposing (ActionResult)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html)

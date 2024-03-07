@@ -9,8 +9,8 @@ module Registry2.Pages.KnowledgeModelsDetail exposing
 
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, i, text)
-import Html.Attributes exposing (class, href)
+import Html exposing (Html, a, text)
+import Html.Attributes exposing (href)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Registry2.Api.KnowledgeModels as KnowledgeModelsApi

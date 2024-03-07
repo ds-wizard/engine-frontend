@@ -1,4 +1,4 @@
-module Registry2.Components.ListItem exposing (view)
+module Registry2.Components.ListItem exposing (Item, ViewConfig, view)
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, text)

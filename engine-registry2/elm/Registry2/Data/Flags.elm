@@ -1,7 +1,6 @@
 module Registry2.Data.Flags exposing
     ( Flags
     , decoder
-    , default
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -20,10 +19,3 @@ decoder =
     D.succeed Flags
         |> D.required "apiUrl" D.string
         |> D.required "session" (D.maybe Session.decoder)
-
-
-default : Flags
-default =
-    { apiUrl = ""
-    , session = Nothing
-    }

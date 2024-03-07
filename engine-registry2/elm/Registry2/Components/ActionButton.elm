@@ -1,7 +1,7 @@
-module Registry2.Components.ActionButton exposing (view)
+module Registry2.Components.ActionButton exposing (ButtonConfig, view)
 
 import ActionResult exposing (ActionResult)
-import Html exposing (Html, button, i, text)
+import Html exposing (Html, button, text)
 import Html.Attributes exposing (class, classList)
 import Registry2.Components.FontAwesome exposing (fas)
 

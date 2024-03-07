@@ -1,4 +1,4 @@
-module Registry2.Components.VersionList exposing (Msg, State, initialState, update, view)
+module Registry2.Components.VersionList exposing (Msg, State, ViewProps, initialState, update, view)
 
 import Html exposing (Html, a, div, i, li, text, ul)
 import Html.Attributes exposing (class, href)
