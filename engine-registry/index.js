@@ -1,13 +1,10 @@
-'use strict'
-
-
 const axios = require('axios').default
 const axiosRetry = require('axios-retry').default
 
 const program = require('./elm/Registry.elm')
 
 const registerCopyPorts = require('../engine-shared/ports/copy')
-
+const registerSessionPorts = require('./js/ports/session')
 
 axiosRetry(axios, {
     retries: 3,
@@ -15,6 +12,7 @@ axiosRetry(axios, {
         return retryCount * 1000
     }
 })
+
 
 function apiUrl() {
     if (window.app && window.app['apiUrl']) return window.app['apiUrl']
@@ -33,7 +31,7 @@ function configUrl() {
 function bootstrapErrorHTML(errorCode) {
     const title = 'Bootstrap Error'
     const message = errorCode ? 'Server responded with an error code ' + errorCode + '.' : 'Configuration cannot be loaded due to server unavailable.'
-    return '<div class="full-page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+    return '<div class="page-illustrated-message"><img src="/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
 }
 
 
@@ -43,15 +41,16 @@ function loadApp(config) {
             apiUrl: apiUrl(),
             appTitle: appTitle(),
             config: config,
-            credentials: JSON.parse(localStorage.getItem('credentials')),
+            session: JSON.parse(localStorage.getItem('session')),
         }
     })
 
-    app.ports.saveCredentials.subscribe(function (credentials) {
+    app.ports?.saveCredentials?.subscribe(function (credentials) {
         localStorage.setItem('credentials', JSON.stringify(credentials))
     })
 
     registerCopyPorts(app)
+    registerSessionPorts(app)
 }
 
 
@@ -61,6 +60,7 @@ window.onload = function () {
             loadApp(config.data)
         })
         .catch(function (err) {
+            console.error(err)
             const errorCode = err.response ? err.response.status : null
             document.body.innerHTML = bootstrapErrorHTML(errorCode)
         })

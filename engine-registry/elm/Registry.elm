@@ -1,35 +1,35 @@
-module Registry exposing (Model, Msg, PageModel, main)
+module Registry exposing (Model, Msg, main)
 
 import Browser exposing (Document, UrlRequest)
-import Browser.Navigation as Nav exposing (load)
+import Browser.Navigation as Navigation exposing (Key)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, img, li, text, ul)
-import Html.Attributes exposing (class, classList, href, src)
-import Html.Events exposing (onClick)
-import Html.Extra as Html
+import Html
 import Json.Decode as D
-import Json.Encode as E
-import Registry.Common.AboutModal as AboutModal
-import Registry.Common.AppState as AppState exposing (AppState)
-import Registry.Common.Credentials as Credentials exposing (Credentials)
-import Registry.Common.View.Page as Page
-import Registry.Pages.DocumentTemplateDetail as TemplateDetail
-import Registry.Pages.DocumentTemplates as Templates
+import Registry.Components.AboutModal as AboutModal
+import Registry.Components.Page as Page
+import Registry.Data.AppState as AppState exposing (AppState)
+import Registry.Data.Session as Session exposing (Session)
+import Registry.Layouts.AppLayout as Layout
+import Registry.Pages.DocumentTemplates as DocumentTemplates
+import Registry.Pages.DocumentTemplatesDetail as DocumentTemplatesDetail
 import Registry.Pages.ForgottenToken as ForgottenToken
 import Registry.Pages.ForgottenTokenConfirmation as ForgottenTokenConfirmation
-import Registry.Pages.Index as Index
-import Registry.Pages.KMDetail as KMDetail
+import Registry.Pages.Homepage as Homepage
+import Registry.Pages.KnowledgeModels as KnowledgeModels
+import Registry.Pages.KnowledgeModelsDetail as KnowledgeModelsDetail
 import Registry.Pages.Locales as Locales
-import Registry.Pages.LocalesDetail as LocaleDetail
+import Registry.Pages.LocalesDetail as LocalesDetail
 import Registry.Pages.Login as Login
-import Registry.Pages.Organization as Organization
+import Registry.Pages.OrganizationDetail as OragnizationDetail
 import Registry.Pages.Signup as Signup
 import Registry.Pages.SignupConfirmation as SignupConfirmation
 import Registry.Ports as Ports
-import Registry.Routing as Routing
-import Registry.Utils exposing (dispatch)
+import Registry.Routes as Routes
 import Shared.Undraw as Undraw
-import Url
+import Shared.Utils exposing (dispatch)
+import Task
+import Time
+import Url exposing (Url)
 
 
 main : Program D.Value Model Msg
@@ -39,513 +39,539 @@ main =
         , update = update
         , view = view
         , subscriptions = subscriptions
-        , onUrlChange = UrlChanged
-        , onUrlRequest = LinkedClicked
+        , onUrlChange = OnUrlChange
+        , onUrlRequest = OnUrlRequest
         }
 
 
 type alias Model =
-    { route : Routing.Route
-    , key : Nav.Key
-    , appState : AppState
-    , pageModel : PageModel
+    { appState : AppState
+    , menuVisible : Bool
+    , pages :
+        { knowledgeModels : KnowledgeModels.Model
+        , knowledgeModelsDetail : KnowledgeModelsDetail.Model
+        , documentTemplates : DocumentTemplates.Model
+        , documentTemplatesDetail : DocumentTemplatesDetail.Model
+        , locales : Locales.Model
+        , localesDetail : LocalesDetail.Model
+        , login : Login.Model
+        , signup : Signup.Model
+        , signupConfirmation : SignupConfirmation.Model
+        , forgottenToken : ForgottenToken.Model
+        , forgottenTokenConfirmation : ForgottenTokenConfirmation.Model
+        , organizationDetail : OragnizationDetail.Model
+        }
     , aboutModalModel : AboutModal.Model
     }
 
 
-type PageModel
-    = ForgottenTokenModel ForgottenToken.Model
-    | ForgottenTokenConfirmationModel ForgottenTokenConfirmation.Model
-    | IndexModel Index.Model
-    | KMDetailModel KMDetail.Model
-    | LoginModel Login.Model
-    | OrganizationModel Organization.Model
-    | SignupModel Signup.Model
-    | SignupConfirmationModel SignupConfirmation.Model
-    | TemplatesModel Templates.Model
-    | TemplateDetailModel TemplateDetail.Model
-    | LocalesModel Locales.Model
-    | LocaleDetailModel LocaleDetail.Model
-    | EmptyModel
-    | NotFoundModel
+setRoute : Routes.Route -> Model -> Model
+setRoute route model =
+    let
+        appState =
+            model.appState
+    in
+    { model | appState = { appState | route = route } }
+
+
+init : D.Value -> Url -> Key -> ( Model, Cmd Msg )
+init flags url key =
+    let
+        ( appState, cmd ) =
+            case AppState.init flags key of
+                Just appStateWithoutRoute ->
+                    let
+                        originalRoute =
+                            Routes.parse appStateWithoutRoute.config url
+                    in
+                    ( { appStateWithoutRoute | route = routeIfAllowed appStateWithoutRoute originalRoute }
+                    , dispatch (OnUrlChange url)
+                    )
+
+                Nothing ->
+                    ( AppState.default key, Cmd.none )
+
+        model =
+            { appState = appState
+            , menuVisible = False
+            , pages =
+                { knowledgeModels = KnowledgeModels.initialModel
+                , knowledgeModelsDetail = KnowledgeModelsDetail.initialModel
+                , documentTemplates = DocumentTemplates.initialModel
+                , documentTemplatesDetail = DocumentTemplatesDetail.initialModel
+                , locales = Locales.initialModel
+                , localesDetail = LocalesDetail.initialModel
+                , login = Login.initialModel
+                , signup = Signup.initialModel
+                , signupConfirmation = SignupConfirmation.initialModel
+                , forgottenToken = ForgottenToken.initialModel
+                , forgottenTokenConfirmation = ForgottenTokenConfirmation.initialModel
+                , organizationDetail = OragnizationDetail.initialModel
+                }
+            , aboutModalModel = AboutModal.initialModel
+            }
+    in
+    ( model, Cmd.batch [ cmd, Task.perform OnTimeZone Time.here ] )
+
+
+routeIfAllowed : AppState -> Routes.Route -> Routes.Route
+routeIfAllowed appState route =
+    if Routes.isAllowed appState route then
+        route
+
+    else
+        Routes.NotAllowed
 
 
 type Msg
-    = UrlChanged Url.Url
-    | LinkedClicked UrlRequest
-    | SetCredentials (Maybe Credentials)
-    | ForgottenTokenMsg ForgottenToken.Msg
-    | ForgottenTokenConfirmationMsg ForgottenTokenConfirmation.Msg
-    | IndexMsg Index.Msg
-    | KMDetailMsg KMDetail.Msg
-    | LoginMsg Login.Msg
-    | OrganizationMsg Organization.Msg
-    | SignupMsg Signup.Msg
-    | SignupConfirmationMsg SignupConfirmation.Msg
-    | TemplatesMsg Templates.Msg
-    | TemplateDetailMsg TemplateDetail.Msg
-    | LocalesMsg Locales.Msg
-    | LocaleDetailMsg LocaleDetail.Msg
+    = OnUrlChange Url
+    | OnUrlRequest UrlRequest
+    | OnTimeZone Time.Zone
+    | SetMenuVisible Bool
+    | SetSession (Maybe Session)
+    | PagesKnowledgeModelsMsg KnowledgeModels.Msg
+    | PagesKnowledgeModelsDetailMsg KnowledgeModelsDetail.Msg
+    | PagesDocumentTemplatesMsg DocumentTemplates.Msg
+    | PagesDocumentTemplatesDetailMsg DocumentTemplatesDetail.Msg
+    | PagesLocalesMsg Locales.Msg
+    | PagesLocalesDetailMsg LocalesDetail.Msg
+    | PagesLoginMsg Login.Msg
+    | PagesSignupMsg Signup.Msg
+    | PagesSignupConfirmationMsg SignupConfirmation.Msg
+    | PagesForgottenTokenMsg ForgottenToken.Msg
+    | PagesForgottenTokenConfirmationMsg ForgottenTokenConfirmation.Msg
+    | PagesOrganizationDetailMsg OragnizationDetail.Msg
     | AboutModalMsg AboutModal.Msg
-
-
-init : D.Value -> Url.Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    let
-        appState =
-            AppState.init flags
-    in
-    initChildModel
-        { route = Routing.toRoute appState.config url
-        , key = key
-        , appState = appState
-        , pageModel = NotFoundModel
-        , aboutModalModel = AboutModal.initialModel
-        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case ( msg, model.pageModel ) of
-        ( LinkedClicked urlRequest, _ ) ->
+    case msg of
+        OnUrlChange url ->
+            let
+                nextRoute =
+                    routeIfAllowed model.appState (Routes.parse model.appState.config url)
+            in
+            initPage (setRoute nextRoute model)
+
+        OnUrlRequest urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
+                    ( { model | menuVisible = False }
+                    , Navigation.pushUrl model.appState.key (Url.toString url)
+                    )
 
-                Browser.External href ->
-                    ( model, Nav.load href )
+                Browser.External url ->
+                    if url == "" then
+                        ( model, Cmd.none )
 
-        ( UrlChanged url, _ ) ->
-            initChildModel { model | route = Routing.toRoute model.appState.config url }
+                    else
+                        ( model, Navigation.load url )
 
-        ( SetCredentials mbCredentials, _ ) ->
+        OnTimeZone timeZone ->
+            ( { model | appState = AppState.setTimeZone timeZone model.appState }, Cmd.none )
+
+        SetMenuVisible visible ->
+            ( { model | menuVisible = visible }, Cmd.none )
+
+        SetSession session ->
             let
-                ( route, encodedCredentials ) =
-                    case mbCredentials of
-                        Just credentials ->
-                            ( Routing.Organization
-                            , Credentials.encode credentials
-                            )
+                sessionCmd =
+                    case session of
+                        Just s ->
+                            Ports.saveSession (Session.encode s)
 
                         Nothing ->
-                            ( Routing.Index
-                            , E.null
-                            )
+                            Ports.clearSession ()
             in
-            ( { model | appState = AppState.setCredentials mbCredentials model.appState }
+            ( { model | appState = AppState.setSession session model.appState }
             , Cmd.batch
-                [ Nav.pushUrl model.key <| Routing.toString route
-                , Ports.saveCredentials encodedCredentials
+                [ Routes.navigate model.appState.key Routes.home
+                , sessionCmd
                 ]
             )
 
-        ( ForgottenTokenMsg forgottenTokenMsg, ForgottenTokenModel forgottenTokenModel ) ->
+        PagesKnowledgeModelsMsg pageMsg ->
             let
-                ( newForgottenTokenModel, forgottenTokenCmd ) =
-                    ForgottenToken.update forgottenTokenMsg model.appState forgottenTokenModel
+                ( knowledgeModels, cmd ) =
+                    KnowledgeModels.update model.appState pageMsg model.pages.knowledgeModels
+
+                pages =
+                    model.pages
             in
-            ( { model | pageModel = ForgottenTokenModel newForgottenTokenModel }
-            , Cmd.map ForgottenTokenMsg forgottenTokenCmd
+            ( { model | pages = { pages | knowledgeModels = knowledgeModels } }
+            , Cmd.map PagesKnowledgeModelsMsg cmd
             )
 
-        ( ForgottenTokenConfirmationMsg forgottenTokenConfirmationMsg, ForgottenTokenConfirmationModel forgottenTokenConfirmationModel ) ->
-            ( { model | pageModel = ForgottenTokenConfirmationModel <| ForgottenTokenConfirmation.update forgottenTokenConfirmationMsg model.appState forgottenTokenConfirmationModel }
-            , Cmd.none
-            )
-
-        ( IndexMsg indexMsg, IndexModel indexModel ) ->
-            ( { model | pageModel = IndexModel <| Index.update indexMsg model.appState indexModel }
-            , Cmd.none
-            )
-
-        ( KMDetailMsg kmDetailMsg, KMDetailModel kmDetailModel ) ->
+        PagesKnowledgeModelsDetailMsg pageMsg ->
             let
-                ( newKmModel, cmd ) =
-                    KMDetail.update kmDetailMsg model.appState kmDetailModel
+                ( knowledgeModelsDetail, cmd ) =
+                    KnowledgeModelsDetail.update model.appState pageMsg model.pages.knowledgeModelsDetail
+
+                pages =
+                    model.pages
             in
-            ( { model | pageModel = KMDetailModel newKmModel }
+            ( { model | pages = { pages | knowledgeModelsDetail = knowledgeModelsDetail } }
+            , Cmd.map PagesKnowledgeModelsDetailMsg cmd
+            )
+
+        PagesDocumentTemplatesMsg pageMsg ->
+            let
+                ( documentTemplates, cmd ) =
+                    DocumentTemplates.update model.appState pageMsg model.pages.documentTemplates
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | documentTemplates = documentTemplates } }
+            , Cmd.map PagesDocumentTemplatesMsg cmd
+            )
+
+        PagesDocumentTemplatesDetailMsg pageMsg ->
+            let
+                ( documentTemplatesDetail, cmd ) =
+                    DocumentTemplatesDetail.update model.appState pageMsg model.pages.documentTemplatesDetail
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | documentTemplatesDetail = documentTemplatesDetail } }
+            , Cmd.map PagesDocumentTemplatesDetailMsg cmd
+            )
+
+        PagesLocalesMsg pageMsg ->
+            let
+                ( locales, cmd ) =
+                    Locales.update model.appState pageMsg model.pages.locales
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | locales = locales } }
+            , Cmd.map PagesLocalesMsg cmd
+            )
+
+        PagesLocalesDetailMsg pageMsg ->
+            let
+                ( localesDetail, cmd ) =
+                    LocalesDetail.update model.appState pageMsg model.pages.localesDetail
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | localesDetail = localesDetail } }
+            , Cmd.map PagesLocalesDetailMsg cmd
+            )
+
+        PagesLoginMsg pageMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = PagesLoginMsg
+                    , setSessionMsg = SetSession
+                    }
+
+                ( login, cmd ) =
+                    Login.update updateConfig model.appState pageMsg model.pages.login
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | login = login } }
             , cmd
             )
 
-        ( LoginMsg loginMsg, LoginModel loginModel ) ->
+        PagesSignupMsg pageMsg ->
             let
-                ( newLoginModel, cmd ) =
-                    Login.update
-                        { tagger = LoginMsg
-                        , loginCmd = \c -> dispatch <| SetCredentials <| Just c
-                        }
-                        loginMsg
-                        model.appState
-                        loginModel
+                ( signup, cmd ) =
+                    Signup.update model.appState pageMsg model.pages.signup
+
+                pages =
+                    model.pages
             in
-            ( { model | pageModel = LoginModel <| newLoginModel }
-            , cmd
+            ( { model | pages = { pages | signup = signup } }
+            , Cmd.map PagesSignupMsg cmd
             )
 
-        ( OrganizationMsg organizationMsg, OrganizationModel organizationModel ) ->
+        PagesSignupConfirmationMsg pageMsg ->
             let
-                ( newOrganizationModel, cmd ) =
-                    Organization.update organizationMsg model.appState organizationModel
-            in
-            ( { model | pageModel = OrganizationModel newOrganizationModel }
-            , Cmd.map OrganizationMsg cmd
-            )
+                signupConfirmation =
+                    SignupConfirmation.update pageMsg model.appState model.pages.signupConfirmation
 
-        ( SignupMsg signupMsg, SignupModel signupModel ) ->
-            let
-                ( newSignupModel, cmd ) =
-                    Signup.update signupMsg model.appState signupModel
+                pages =
+                    model.pages
             in
-            ( { model | pageModel = SignupModel newSignupModel }
-            , Cmd.map SignupMsg cmd
-            )
-
-        ( SignupConfirmationMsg confirmSignupMsg, SignupConfirmationModel signupConfirmationModel ) ->
-            ( { model | pageModel = SignupConfirmationModel <| SignupConfirmation.update confirmSignupMsg model.appState signupConfirmationModel }
+            ( { model | pages = { pages | signupConfirmation = signupConfirmation } }
             , Cmd.none
             )
 
-        ( TemplatesMsg templatesMsg, TemplatesModel templatesModel ) ->
-            ( { model | pageModel = TemplatesModel <| Templates.update templatesMsg model.appState templatesModel }
+        PagesForgottenTokenMsg pageMsg ->
+            let
+                ( forgottenToken, cmd ) =
+                    ForgottenToken.update model.appState pageMsg model.pages.forgottenToken
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | forgottenToken = forgottenToken } }
+            , Cmd.map PagesForgottenTokenMsg cmd
+            )
+
+        PagesForgottenTokenConfirmationMsg pageMsg ->
+            let
+                forgottenTokenConfirmation =
+                    ForgottenTokenConfirmation.update pageMsg model.appState model.pages.forgottenTokenConfirmation
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | forgottenTokenConfirmation = forgottenTokenConfirmation } }
             , Cmd.none
             )
 
-        ( TemplateDetailMsg templateDetailMsg, TemplateDetailModel templateDetailModel ) ->
+        PagesOrganizationDetailMsg pageMsg ->
             let
-                ( newTemplateModel, cmd ) =
-                    TemplateDetail.update templateDetailMsg model.appState templateDetailModel
+                ( organizationDetail, cmd ) =
+                    OragnizationDetail.update pageMsg model.appState model.pages.organizationDetail
+
+                pages =
+                    model.pages
             in
-            ( { model | pageModel = TemplateDetailModel newTemplateModel }
-            , cmd
+            ( { model | pages = { pages | organizationDetail = organizationDetail } }
+            , Cmd.map PagesOrganizationDetailMsg cmd
             )
 
-        ( LocalesMsg localesMsg, LocalesModel localesModel ) ->
-            ( { model | pageModel = LocalesModel <| Locales.update localesMsg model.appState localesModel }
-            , Cmd.none
-            )
-
-        ( LocaleDetailMsg localeDetailMsg, LocaleDetailModel localeDetailModel ) ->
+        AboutModalMsg aboutModalMsg ->
             let
-                ( newLocaleModel, cmd ) =
-                    LocaleDetail.update localeDetailMsg model.appState localeDetailModel
-            in
-            ( { model | pageModel = LocaleDetailModel newLocaleModel }
-            , cmd
-            )
-
-        ( AboutModalMsg aboutModalMsg, _ ) ->
-            let
-                ( newAboutModalModel, cmd ) =
+                ( aboutModalModel, cmd ) =
                     AboutModal.update model.appState aboutModalMsg model.aboutModalModel
             in
-            ( { model | aboutModalModel = newAboutModalModel }
+            ( { model | aboutModalModel = aboutModalModel }
             , Cmd.map AboutModalMsg cmd
+            )
+
+
+initPage : Model -> ( Model, Cmd Msg )
+initPage model =
+    case model.appState.route of
+        Routes.KnowledgeModels ->
+            let
+                ( knowledgeModels, cmd ) =
+                    KnowledgeModels.init model.appState
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | knowledgeModels = knowledgeModels } }
+            , Cmd.map PagesKnowledgeModelsMsg cmd
+            )
+
+        Routes.KnowledgeModelsDetail knowledgeModelId ->
+            let
+                ( knowledgeModelsDetail, cmd ) =
+                    KnowledgeModelsDetail.init model.appState knowledgeModelId
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | knowledgeModelsDetail = knowledgeModelsDetail } }
+            , Cmd.map PagesKnowledgeModelsDetailMsg cmd
+            )
+
+        Routes.DocumentTemplates ->
+            let
+                ( documentTemplates, cmd ) =
+                    DocumentTemplates.init model.appState
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | documentTemplates = documentTemplates } }
+            , Cmd.map PagesDocumentTemplatesMsg cmd
+            )
+
+        Routes.DocumentTemplatesDetail documentTemplateId ->
+            let
+                ( documentTemplatesDetail, cmd ) =
+                    DocumentTemplatesDetail.init model.appState documentTemplateId
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | documentTemplatesDetail = documentTemplatesDetail } }
+            , Cmd.map PagesDocumentTemplatesDetailMsg cmd
+            )
+
+        Routes.Locales ->
+            let
+                ( locales, cmd ) =
+                    Locales.init model.appState
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | locales = locales } }
+            , Cmd.map PagesLocalesMsg cmd
+            )
+
+        Routes.LocalesDetail localeId ->
+            let
+                ( localesDetail, cmd ) =
+                    LocalesDetail.init model.appState localeId
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | localesDetail = localesDetail } }
+            , Cmd.map PagesLocalesDetailMsg cmd
+            )
+
+        Routes.Login ->
+            let
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | login = Login.initialModel } }
+            , Cmd.none
+            )
+
+        Routes.Signup ->
+            let
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | signup = Signup.initialModel } }
+            , Cmd.none
+            )
+
+        Routes.SignupConfirmation organizationId hash ->
+            let
+                ( signupConfirmation, cmd ) =
+                    SignupConfirmation.init model.appState organizationId hash
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | signupConfirmation = signupConfirmation } }
+            , Cmd.map PagesSignupConfirmationMsg cmd
+            )
+
+        Routes.ForgottenToken ->
+            let
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | forgottenToken = ForgottenToken.initialModel } }
+            , Cmd.none
+            )
+
+        Routes.ForgottenTokenConfirmation orgId hash ->
+            let
+                ( forgottenTokenConfirmation, cmd ) =
+                    ForgottenTokenConfirmation.init model.appState orgId hash
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | forgottenTokenConfirmation = forgottenTokenConfirmation } }
+            , Cmd.map PagesForgottenTokenConfirmationMsg cmd
+            )
+
+        Routes.OrganizationDetail ->
+            let
+                ( organizationDetail, cmd ) =
+                    OragnizationDetail.init model.appState
+
+                pages =
+                    model.pages
+            in
+            ( { model | pages = { pages | organizationDetail = organizationDetail } }
+            , Cmd.map PagesOrganizationDetailMsg cmd
             )
 
         _ ->
             ( model, Cmd.none )
 
 
-initChildModel : Model -> ( Model, Cmd Msg )
-initChildModel model =
-    case model.route of
-        Routing.ForgottenToken ->
-            withOrganizationRedirect
-                ( { model | pageModel = ForgottenTokenModel ForgottenToken.init }
-                , Cmd.none
-                )
-
-        Routing.ForgottenTokenConfirmation organizationId hash ->
-            let
-                ( forgottenTokenConfirmationModel, forgottenTokenConfirmationCmd ) =
-                    ForgottenTokenConfirmation.init model.appState organizationId hash
-            in
-            withOrganizationRedirect
-                ( { model | pageModel = ForgottenTokenConfirmationModel forgottenTokenConfirmationModel }
-                , Cmd.map ForgottenTokenConfirmationMsg forgottenTokenConfirmationCmd
-                )
-
-        Routing.Index ->
-            let
-                ( indexModel, indexCmd ) =
-                    Index.init model.appState
-            in
-            ( { model | pageModel = IndexModel indexModel }
-            , Cmd.map IndexMsg indexCmd
-            )
-
-        Routing.KMDetail pkgId ->
-            let
-                ( kmDetailModel, kmDetailCmd ) =
-                    KMDetail.init model.appState pkgId
-            in
-            ( { model | pageModel = KMDetailModel kmDetailModel }
-            , Cmd.map KMDetailMsg kmDetailCmd
-            )
-
-        Routing.Login ->
-            withOrganizationRedirect
-                ( { model | pageModel = LoginModel Login.init }
-                , Cmd.none
-                )
-
-        Routing.Organization ->
-            case model.appState.credentials of
-                Just credentials ->
-                    let
-                        ( organizationModel, organizationCmd ) =
-                            Organization.init model.appState credentials
-                    in
-                    ( { model | pageModel = OrganizationModel organizationModel }
-                    , Cmd.map OrganizationMsg organizationCmd
-                    )
-
-                Nothing ->
-                    ( model
-                    , Nav.pushUrl model.key <| Routing.toString Routing.Login
-                    )
-
-        Routing.Signup ->
-            withOrganizationRedirect
-                ( { model | pageModel = SignupModel Signup.init }
-                , Cmd.none
-                )
-
-        Routing.SignupConfirmation organizationId hash ->
-            let
-                ( signupConfirmationModel, signupConfirmationCmd ) =
-                    SignupConfirmation.init model.appState organizationId hash
-            in
-            withOrganizationRedirect
-                ( { model | pageModel = SignupConfirmationModel signupConfirmationModel }
-                , Cmd.map SignupConfirmationMsg signupConfirmationCmd
-                )
-
-        Routing.DocumentTemplates ->
-            let
-                ( templatesModel, templatesCmd ) =
-                    Templates.init model.appState
-            in
-            ( { model | pageModel = TemplatesModel templatesModel }
-            , Cmd.map TemplatesMsg templatesCmd
-            )
-
-        Routing.DocumentTemplateDetail templateId ->
-            let
-                ( templateDetailModel, templateDetailCmd ) =
-                    TemplateDetail.init model.appState templateId
-            in
-            ( { model | pageModel = TemplateDetailModel templateDetailModel }
-            , Cmd.map TemplateDetailMsg templateDetailCmd
-            )
-
-        Routing.Locales ->
-            let
-                ( localesModel, localesCmd ) =
-                    Locales.init model.appState
-            in
-            ( { model | pageModel = LocalesModel localesModel }
-            , Cmd.map LocalesMsg localesCmd
-            )
-
-        Routing.LocaleDetail localeId ->
-            let
-                ( localeDetailModel, localeDetailCmd ) =
-                    LocaleDetail.init model.appState localeId
-            in
-            ( { model | pageModel = LocaleDetailModel localeDetailModel }
-            , Cmd.map LocaleDetailMsg localeDetailCmd
-            )
-
-        Routing.DeprecatedTemplates ->
-            ( { model | pageModel = EmptyModel }, load (Routing.toString Routing.DocumentTemplates) )
-
-        Routing.DeprecatedTemplateDetail templateId ->
-            ( { model | pageModel = EmptyModel }, load (Routing.toString (Routing.DocumentTemplateDetail templateId)) )
-
-        Routing.NotFound ->
-            ( { model | pageModel = NotFoundModel }
-            , Cmd.none
-            )
-
-
-withOrganizationRedirect : ( Model, Cmd Msg ) -> ( Model, Cmd Msg )
-withOrganizationRedirect ( model, cmd ) =
-    case model.appState.credentials of
-        Just _ ->
-            ( model, Nav.pushUrl model.key <| Routing.toString Routing.Organization )
-
-        Nothing ->
-            ( model, cmd )
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Sub.none
 
 
 view : Model -> Document Msg
 view model =
     let
         content =
-            if not model.appState.valid then
-                Page.illustratedMessage
-                    { image = Undraw.bugFixing
-                    , heading = gettext "Configuration Error" model.appState.locale
-                    , msg = gettext "The application is not configured correctly and cannot run." model.appState.locale
-                    }
+            case model.appState.route of
+                Routes.Home ->
+                    Homepage.view model.appState
 
-            else
-                case model.pageModel of
-                    ForgottenTokenModel forgottenTokenModel ->
-                        Html.map ForgottenTokenMsg <| ForgottenToken.view model.appState forgottenTokenModel
+                Routes.KnowledgeModels ->
+                    Html.map PagesKnowledgeModelsMsg <|
+                        KnowledgeModels.view model.appState model.pages.knowledgeModels
 
-                    ForgottenTokenConfirmationModel forgottenTokenConfirmationModel ->
-                        Html.map ForgottenTokenConfirmationMsg <| ForgottenTokenConfirmation.view model.appState forgottenTokenConfirmationModel
+                Routes.KnowledgeModelsDetail _ ->
+                    Html.map PagesKnowledgeModelsDetailMsg <|
+                        KnowledgeModelsDetail.view model.appState model.pages.knowledgeModelsDetail
 
-                    IndexModel indexModel ->
-                        Html.map IndexMsg <| Index.view indexModel
+                Routes.DocumentTemplates ->
+                    Html.map PagesDocumentTemplatesMsg <|
+                        DocumentTemplates.view model.appState model.pages.documentTemplates
 
-                    KMDetailModel kmDetailModel ->
-                        Html.map KMDetailMsg <| KMDetail.view model.appState kmDetailModel
+                Routes.DocumentTemplatesDetail _ ->
+                    Html.map PagesDocumentTemplatesDetailMsg <|
+                        DocumentTemplatesDetail.view model.appState model.pages.documentTemplatesDetail
 
-                    LoginModel loginModel ->
-                        Html.map LoginMsg <| Login.view model.appState loginModel
+                Routes.Locales ->
+                    Html.map PagesLocalesMsg <|
+                        Locales.view model.appState model.pages.locales
 
-                    OrganizationModel organizationDetailModel ->
-                        Html.map OrganizationMsg <| Organization.view model.appState organizationDetailModel
+                Routes.LocalesDetail _ ->
+                    Html.map PagesLocalesDetailMsg <|
+                        LocalesDetail.view model.appState model.pages.localesDetail
 
-                    SignupModel signupModel ->
-                        Html.map SignupMsg <| Signup.view model.appState signupModel
+                Routes.Login ->
+                    Html.map PagesLoginMsg <|
+                        Login.view model.appState model.pages.login
 
-                    SignupConfirmationModel signupConfirmationModel ->
-                        Html.map SignupConfirmationMsg <| SignupConfirmation.view model.appState signupConfirmationModel
+                Routes.Signup ->
+                    Html.map PagesSignupMsg <|
+                        Signup.view model.appState model.pages.signup
 
-                    TemplatesModel templatesModel ->
-                        Html.map TemplatesMsg <| Templates.view templatesModel
+                Routes.SignupConfirmation _ _ ->
+                    Html.map PagesSignupConfirmationMsg <|
+                        SignupConfirmation.view model.appState model.pages.signupConfirmation
 
-                    TemplateDetailModel templateDetailModel ->
-                        Html.map TemplateDetailMsg <| TemplateDetail.view model.appState templateDetailModel
+                Routes.ForgottenToken ->
+                    Html.map PagesForgottenTokenMsg <|
+                        ForgottenToken.view model.appState model.pages.forgottenToken
 
-                    LocalesModel localesModel ->
-                        Html.map LocalesMsg <| Locales.view localesModel
+                Routes.ForgottenTokenConfirmation _ _ ->
+                    Html.map PagesForgottenTokenConfirmationMsg <|
+                        ForgottenTokenConfirmation.view model.appState model.pages.forgottenTokenConfirmation
 
-                    LocaleDetailModel localeDetailModel ->
-                        Html.map LocaleDetailMsg <| LocaleDetail.view model.appState localeDetailModel
+                Routes.OrganizationDetail ->
+                    Html.map PagesOrganizationDetailMsg <|
+                        OragnizationDetail.view model.appState model.pages.organizationDetail
 
-                    EmptyModel ->
-                        div [] []
+                Routes.NotFound ->
+                    Page.illustratedMessage
+                        { image = Undraw.pageNotFound
+                        , heading = gettext "Not Found" model.appState.locale
+                        , msg = gettext "The page you are looking for does not exist." model.appState.locale
+                        }
 
-                    NotFoundModel ->
-                        Page.illustratedMessage
-                            { image = Undraw.pageNotFound
-                            , heading = gettext "Not Found" model.appState.locale
-                            , msg = gettext "The page you are looking for does not exist." model.appState.locale
-                            }
-
-        html =
-            [ header model
-            , div [ class "container" ]
-                [ content ]
-            , Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
-            ]
+                Routes.NotAllowed ->
+                    Page.illustratedMessage
+                        { image = Undraw.security
+                        , heading = gettext "Not Allowed" model.appState.locale
+                        , msg = gettext "You are not allowed to view this page." model.appState.locale
+                        }
     in
-    { title = model.appState.appTitle
-    , body = html
-    }
-
-
-header : Model -> Html Msg
-header model =
-    let
-        appState =
-            model.appState
-
-        navigation =
-            appState.credentials
-                |> Maybe.map (always (loggedInHeaderNavigation appState))
-                |> Maybe.withDefault (publicHeaderNavigation appState)
-    in
-    div [ class "navbar navbar-expand-lg fixed-top navbar-light bg-light" ]
-        [ div [ class "container" ]
-            [ a [ class "navbar-brand", href <| Routing.toString Routing.Index ]
-                [ img [ class "logo", src "/img/logo.svg" ] []
-                , text model.appState.appTitle
-                ]
-            , ul [ class "nav navbar-nav" ]
-                [ li
-                    [ class "nav-item"
-                    , classList [ ( "active", model.route == Routing.Index ) ]
-                    ]
-                    [ a [ href <| Routing.toString Routing.Index, class "nav-link" ]
-                        [ text (gettext "Knowledge Models" appState.locale) ]
-                    ]
-                , li
-                    [ class "nav-item"
-                    , classList [ ( "active", model.route == Routing.DocumentTemplates ) ]
-                    ]
-                    [ a [ href <| Routing.toString Routing.DocumentTemplates, class "nav-link" ]
-                        [ text (gettext "Document Templates" appState.locale) ]
-                    ]
-                , li
-                    [ class "nav-item"
-                    , classList [ ( "active", model.route == Routing.Locales ) ]
-                    ]
-                    [ a [ href <| Routing.toString Routing.Locales, class "nav-link" ]
-                        [ text (gettext "Locales" appState.locale) ]
-                    ]
-                ]
-            , navigation
-            ]
-        ]
-
-
-loggedInHeaderNavigation : AppState -> Html Msg
-loggedInHeaderNavigation appState =
-    ul [ class "nav navbar-nav ms-auto" ]
-        [ li [ class "nav-item" ]
-            [ a
-                [ href <| Routing.toString Routing.Organization
-                , class "nav-link btn btn-link"
-                ]
-                [ text (gettext "Profile" appState.locale) ]
-            ]
-        , li [ class "nav-item" ]
-            [ a
-                [ onClick <| SetCredentials Nothing
-                , href "#"
-                , class "nav-link btn btn-link"
-                ]
-                [ text (gettext "Log Out" appState.locale) ]
-            ]
-        , li [ class "nav-item" ]
-            [ button
-                [ onClick <| AboutModalMsg (AboutModal.SetOpen True)
-                , class "nav-link btn btn-link"
-                ]
-                [ text (gettext "About" appState.locale) ]
-            ]
-        ]
-
-
-publicHeaderNavigation : AppState -> Html Msg
-publicHeaderNavigation appState =
-    ul [ class "nav navbar-nav ms-auto" ]
-        [ Html.viewIf appState.config.authentication.publicRegistrationEnabled <|
-            li [ class "nav-item" ]
-                [ a [ href <| Routing.toString Routing.Login, class "nav-link btn btn-link" ]
-                    [ text (gettext "Log In" appState.locale) ]
-                ]
-        , Html.viewIf appState.config.authentication.publicRegistrationEnabled <|
-            li [ class "nav-item" ]
-                [ a [ href <| Routing.toString Routing.Signup, class "nav-link btn btn-link" ]
-                    [ text (gettext "Sign Up" appState.locale) ]
-                ]
-        , li [ class "nav-item" ]
-            [ button
-                [ onClick <| AboutModalMsg (AboutModal.SetOpen True)
-                , class "nav-link btn btn-link"
-                ]
-                [ text (gettext "About" appState.locale) ]
-            ]
-        ]
-
-
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+    Layout.app model.appState
+        { openAboutModalMsg = AboutModalMsg AboutModal.openMsg
+        , logoutMsg = SetSession Nothing
+        , openCloseMenuMsg = SetMenuVisible
+        , content = content
+        , aboutModal = Html.map AboutModalMsg <| AboutModal.view model.appState model.aboutModalModel
+        , menuVisible = model.menuVisible
+        }
