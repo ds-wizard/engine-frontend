@@ -82,7 +82,7 @@ init flags url key =
                 Just appStateWithoutRoute ->
                     let
                         originalRoute =
-                            Routes.parse url
+                            Routes.parse appStateWithoutRoute.config url
                     in
                     ( { appStateWithoutRoute | route = routeIfAllowed appStateWithoutRoute originalRoute }
                     , dispatch (OnUrlChange url)
@@ -150,7 +150,7 @@ update msg model =
         OnUrlChange url ->
             let
                 nextRoute =
-                    routeIfAllowed model.appState (Routes.parse url)
+                    routeIfAllowed model.appState (Routes.parse model.appState.config url)
             in
             initPage (setRoute nextRoute model)
 
@@ -568,8 +568,7 @@ view model =
                         }
     in
     Layout.app model.appState
-        { appTitle = "DSW Registry"
-        , openAboutModalMsg = AboutModalMsg AboutModal.openMsg
+        { openAboutModalMsg = AboutModalMsg AboutModal.openMsg
         , logoutMsg = SetSession Nothing
         , openCloseMenuMsg = SetMenuVisible
         , content = content

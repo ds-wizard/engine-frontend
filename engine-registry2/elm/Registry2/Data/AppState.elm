@@ -10,6 +10,7 @@ module Registry2.Data.AppState exposing
 import Browser.Navigation as Navigation
 import Gettext
 import Json.Decode as D
+import Registry2.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Registry2.Data.Flags as Flags
 import Registry2.Data.Session exposing (Session)
 import Registry2.Routes as Routes
@@ -18,7 +19,9 @@ import Time
 
 type alias AppState =
     { route : Routes.Route
+    , config : BootstrapConfig
     , key : Navigation.Key
+    , appTitle : Maybe String
     , apiUrl : String
     , locale : Gettext.Locale
     , timeZone : Time.Zone
@@ -29,7 +32,9 @@ type alias AppState =
 default : Navigation.Key -> AppState
 default key =
     { route = Routes.NotFound
+    , config = BootstrapConfig.default
     , key = key
+    , appTitle = Nothing
     , apiUrl = ""
     , locale = Gettext.defaultLocale
     , timeZone = Time.utc
@@ -43,7 +48,9 @@ init flagsValue key =
         Ok flags ->
             Just
                 { route = Routes.NotFound
+                , config = flags.config
                 , key = key
+                , appTitle = flags.appTitle
                 , apiUrl = flags.apiUrl
                 , locale = Gettext.defaultLocale
                 , timeZone = Time.utc
