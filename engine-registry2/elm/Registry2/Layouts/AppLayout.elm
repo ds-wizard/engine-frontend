@@ -11,8 +11,7 @@ import Registry2.Routes as Routes
 
 
 type alias AppLayoutConfig msg =
-    { appTitle : String
-    , openAboutModalMsg : msg
+    { openAboutModalMsg : msg
     , logoutMsg : msg
     , openCloseMenuMsg : Bool -> msg
     , content : Html msg
@@ -23,10 +22,14 @@ type alias AppLayoutConfig msg =
 
 app : AppState -> AppLayoutConfig msg -> Document msg
 app appState cfg =
-    { title = cfg.appTitle
+    let
+        appTitle =
+            Maybe.withDefault "DSW Registry" appState.appTitle
+    in
+    { title = appTitle
     , body =
         [ main_ []
-            [ viewHeader appState cfg
+            [ viewHeader appState cfg appTitle
             , section [ class "container pt-lg-5" ]
                 [ cfg.content ]
             ]
@@ -35,8 +38,8 @@ app appState cfg =
     }
 
 
-viewHeader : AppState -> AppLayoutConfig msg -> Html msg
-viewHeader appState cfg =
+viewHeader : AppState -> AppLayoutConfig msg -> String -> Html msg
+viewHeader appState cfg appTitle =
     header [ class "shadow-sm navbar-fixed" ]
         [ div [ class "navbar-sticky bg-white" ]
             [ div [ class "navbar navbar-expand-lg navbar-light" ]
@@ -47,7 +50,7 @@ viewHeader appState cfg =
                         ]
                         [ div [ class "d-flex" ]
                             [ img [ src "/img/logo.svg", height 30, class "me-1" ] []
-                            , text cfg.appTitle
+                            , text appTitle
                             ]
                         ]
                     , div [ class "navbar-toolbar d-flex flex-shrink-0 align-items-center" ]
@@ -118,42 +121,46 @@ viewHeader appState cfg =
 
 profileNavigation : AppState -> AppLayoutConfig msg -> List (Html msg)
 profileNavigation appState cfg =
-    case appState.session of
-        Just session ->
-            [ a
-                [ class "navbar-tool d-sm-flex d-lg-none"
-                , href (Routes.toUrl Routes.organizationDetail)
-                ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-user" ]
-                ]
-            , a
-                [ class "navbar-tool d-sm-flex d-lg-none"
-                , onClick cfg.logoutMsg
-                ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-sign-out-alt" ]
-                ]
-            , div [ class "navbar-profile d-lg-flex d-none" ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-user" ]
-                , div [ class "d-flex flex-column justify-content-center" ]
-                    [ small [ class "organization-name" ] [ text session.organizationName ]
-                    , div [ class "text-muted" ]
-                        [ a [ href (Routes.toUrl Routes.organizationDetail) ] [ text (gettext "Edit" appState.locale) ]
-                        , text " • "
-                        , a [ onClick cfg.logoutMsg ] [ text (gettext "Logout" appState.locale) ]
+    if appState.config.authentication.publicRegistrationEnabled then
+        case appState.session of
+            Just session ->
+                [ a
+                    [ class "navbar-tool d-sm-flex d-lg-none"
+                    , href (Routes.toUrl Routes.organizationDetail)
+                    ]
+                    [ div [ class "navbar-tool-icon-box" ]
+                        [ fas "fa-lg fa-user" ]
+                    ]
+                , a
+                    [ class "navbar-tool d-sm-flex d-lg-none"
+                    , onClick cfg.logoutMsg
+                    ]
+                    [ div [ class "navbar-tool-icon-box" ]
+                        [ fas "fa-lg fa-sign-out-alt" ]
+                    ]
+                , div [ class "navbar-profile d-lg-flex d-none" ]
+                    [ div [ class "navbar-tool-icon-box" ]
+                        [ fas "fa-lg fa-user" ]
+                    , div [ class "d-flex flex-column justify-content-center" ]
+                        [ small [ class "organization-name" ] [ text session.organizationName ]
+                        , div [ class "text-muted" ]
+                            [ a [ href (Routes.toUrl Routes.organizationDetail) ] [ text (gettext "Edit" appState.locale) ]
+                            , text " • "
+                            , a [ onClick cfg.logoutMsg ] [ text (gettext "Logout" appState.locale) ]
+                            ]
                         ]
                     ]
                 ]
-            ]
 
-        Nothing ->
-            [ a
-                [ class "navbar-tool"
-                , href (Routes.toUrl Routes.login)
+            Nothing ->
+                [ a
+                    [ class "navbar-tool"
+                    , href (Routes.toUrl Routes.login)
+                    ]
+                    [ div [ class "navbar-tool-icon-box" ]
+                        [ fas "fa-lg fa-user" ]
+                    ]
                 ]
-                [ div [ class "navbar-tool-icon-box" ]
-                    [ fas "fa-lg fa-user" ]
-                ]
-            ]
+
+    else
+        []

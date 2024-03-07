@@ -19,6 +19,7 @@ module Registry2.Routes exposing
 
 import Browser.Navigation as Navigation
 import Maybe.Extra as Maybe
+import Registry2.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Registry2.Data.Session exposing (Session)
 import Url exposing (Url)
 import Url.Parser as Parser exposing ((</>), Parser)
@@ -42,28 +43,38 @@ type Route
     | NotAllowed
 
 
-parse : Url -> Route
-parse =
-    Maybe.withDefault NotFound << Parser.parse parsers
+parse : BootstrapConfig -> Url -> Route
+parse config =
+    Maybe.withDefault NotFound << Parser.parse (parsers config)
 
 
-parsers : Parser (Route -> a) a
-parsers =
-    Parser.oneOf
-        [ Parser.map Home Parser.top
-        , Parser.map KnowledgeModels (Parser.s "knowledge-models")
-        , Parser.map KnowledgeModelsDetail (Parser.s "knowledge-models" </> Parser.string)
-        , Parser.map DocumentTemplates (Parser.s "document-templates")
-        , Parser.map DocumentTemplatesDetail (Parser.s "document-templates" </> Parser.string)
-        , Parser.map Locales (Parser.s "locales")
-        , Parser.map LocalesDetail (Parser.s "locales" </> Parser.string)
-        , Parser.map Login (Parser.s "login")
-        , Parser.map Signup (Parser.s "signup")
-        , Parser.map SignupConfirmation (Parser.s "signup" </> Parser.string </> Parser.string)
-        , Parser.map ForgottenToken (Parser.s "forgotten-token")
-        , Parser.map ForgottenTokenConfirmation (Parser.s "forgotten-token" </> Parser.string </> Parser.string)
-        , Parser.map OrganizationDetail (Parser.s "organization")
-        ]
+parsers : BootstrapConfig -> Parser (Route -> a) a
+parsers config =
+    let
+        authRoutes =
+            if config.authentication.publicRegistrationEnabled then
+                [ Parser.map Login (Parser.s "login")
+                , Parser.map Signup (Parser.s "signup")
+                , Parser.map SignupConfirmation (Parser.s "signup" </> Parser.string </> Parser.string)
+                , Parser.map ForgottenToken (Parser.s "forgotten-token")
+                , Parser.map ForgottenTokenConfirmation (Parser.s "forgotten-token" </> Parser.string </> Parser.string)
+                , Parser.map OrganizationDetail (Parser.s "organization")
+                ]
+
+            else
+                []
+
+        publicRoutes =
+            [ Parser.map Home Parser.top
+            , Parser.map KnowledgeModels (Parser.s "knowledge-models")
+            , Parser.map KnowledgeModelsDetail (Parser.s "knowledge-models" </> Parser.string)
+            , Parser.map DocumentTemplates (Parser.s "document-templates")
+            , Parser.map DocumentTemplatesDetail (Parser.s "document-templates" </> Parser.string)
+            , Parser.map Locales (Parser.s "locales")
+            , Parser.map LocalesDetail (Parser.s "locales" </> Parser.string)
+            ]
+    in
+    Parser.oneOf (publicRoutes ++ authRoutes)
 
 
 toUrl : Route -> String
