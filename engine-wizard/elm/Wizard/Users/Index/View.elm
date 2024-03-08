@@ -63,7 +63,7 @@ listingConfig appState =
         ]
     , filters =
         [ Listing.SimpleFilter indexRouteRoleFilterId
-            { name = "Role"
+            { name = gettext "Role" appState.locale
             , options = Role.options appState
             }
         ]
