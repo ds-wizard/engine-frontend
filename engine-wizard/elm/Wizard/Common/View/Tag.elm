@@ -1,6 +1,7 @@
 module Wizard.Common.View.Tag exposing
     ( SelectionConfig
     , TagListConfig
+    , ViewListConfig
     , list
     , readOnlyList
     , selection
@@ -196,18 +197,32 @@ readOnlyTagView selected tag =
         ]
 
 
-viewList : List Tag -> Html msg
-viewList tags =
+type alias ViewListConfig =
+    { showDescription : Bool
+    }
+
+
+viewList : ViewListConfig -> List Tag -> Html msg
+viewList cfg tags =
     if List.isEmpty tags then
         emptyNode
 
     else
-        div [ class "tag-list tag-list-view" ] (List.map viewListTagView tags)
+        div [ class "tag-list tag-list-view" ] (List.map (viewListTagView cfg) tags)
 
 
-viewListTagView : Tag -> Html msg
-viewListTagView tag =
-    div [ class "tag" ]
+viewListTagView : ViewListConfig -> Tag -> Html msg
+viewListTagView cfg tag =
+    let
+        tooltipAttrs =
+            case ( tag.description, cfg.showDescription ) of
+                ( Just description, True ) ->
+                    tooltipCustom "with-tooltip-wide" description
+
+                _ ->
+                    []
+    in
+    div (class "tag" :: tooltipAttrs)
         [ label
             [ class "tag-label"
             , style "background" tag.color
