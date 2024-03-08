@@ -15,7 +15,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, br, button, div, form, h2, hr, label, li, p, strong, text, ul)
+import Html exposing (Html, a, br, button, div, form, h2, hr, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, disabled, id, name, style, type_)
 import Html.Events exposing (onClick, onMouseDown, onSubmit)
 import List.Extra as List
@@ -26,7 +26,7 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Package.PackagePhase as PackagePhase
 import Shared.Data.PackageSuggestion as PackageSuggestion
@@ -313,7 +313,6 @@ type alias ViewConfig =
     , package : Package
     , templateState : Maybe DocumentTemplateState
     , templatePhase : Maybe DocumentTemplatePhase
-    , tags : List Tag
     }
 
 
@@ -514,11 +513,20 @@ knowledgeModel : AppState -> ViewConfig -> Html Msg
 knowledgeModel appState cfg =
     let
         tagList =
-            if List.isEmpty cfg.tags then
-                emptyNode
+            if List.isEmpty cfg.questionnaire.selectedQuestionTagUuids then
+                div [ class "rounded bg-light px-3 py-2 fw-bold" ]
+                    [ faSet "questionnaire.settings.kmAllQuestions" appState
+                    , span [ class "ms-2" ] [ text (gettext "All questions are used" appState.locale) ]
+                    ]
 
             else
-                Tag.viewList cfg.tags
+                div []
+                    [ div [ class "rounded bg-light px-3 py-2 fw-bold mb-2" ]
+                        [ faSet "questionnaire.settings.kmFiltered" appState
+                        , span [ class "ms-2" ] [ text (gettext "Filtered by question tags" appState.locale) ]
+                        ]
+                    , Tag.viewList { showDescription = True } (KnowledgeModel.getTags cfg.questionnaire.knowledgeModel)
+                    ]
 
         deprecatedWarning =
             if cfg.package.phase == PackagePhase.Deprecated then
@@ -535,7 +543,7 @@ knowledgeModel appState cfg =
             [ class "package-link mb-2" ]
             [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage cfg.package) ]
         , tagList
-        , div [ class "text-end" ]
+        , div [ class "mt-3" ]
             [ linkTo appState
                 (Routes.projectsCreateMigration cfg.questionnaire.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]

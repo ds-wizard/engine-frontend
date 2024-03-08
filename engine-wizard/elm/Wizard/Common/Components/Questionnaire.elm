@@ -2465,7 +2465,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             |> listFilterJust
                             |> List.sortBy .name
                 in
-                Tag.viewList tags
+                Tag.viewList { showDescription = False } tags
 
             else
                 emptyNode

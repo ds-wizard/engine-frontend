@@ -147,6 +147,8 @@ iconSet =
         , ( "questionnaire.resourcePageReferences", "fas fa-book" )
         , ( "questionnaire.saving.saving", "fas fa-sync-alt fa-spin" )
         , ( "questionnaire.saving.saved", "far fa-check-circle" )
+        , ( "questionnaire.settings.kmAllQuestions", "far fa-check-square" )
+        , ( "questionnaire.settings.kmFiltered", "fas fa-filter" )
         , ( "questionnaire.shrink", "fas fa-compress" )
         , ( "questionnaire.urlReferences", "fas fa-external-link-alt" )
         , ( "questionnaireList.clone", "far fa-copy" )
