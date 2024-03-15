@@ -112,14 +112,16 @@ navigationSystemLinks appState =
     let
         items =
             [ ( OrganizationRoute, gettext "Organization" appState.locale )
-            , ( AuthenticationRoute, gettext "Authentication" appState.locale )
             ]
     in
     if Admin.isEnabled appState.config.admin then
         items
 
     else
-        items ++ [ ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale ) ]
+        items
+            ++ [ ( AuthenticationRoute, gettext "Authentication" appState.locale )
+               , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
+               ]
 
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
