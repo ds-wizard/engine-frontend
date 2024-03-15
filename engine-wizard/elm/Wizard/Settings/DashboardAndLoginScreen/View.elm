@@ -22,13 +22,21 @@ import Wizard.Settings.Generic.View as GenericView
 
 
 view : AppState -> Model -> Html Msg
-view =
-    GenericView.view viewProps
+view appState =
+    GenericView.view (viewProps appState) appState
 
 
-viewProps : GenericView.ViewProps DashboardAndLoginScreenConfigForm Msg
-viewProps =
-    { locTitle = gettext "Dashboard & Login Screen"
+viewProps : AppState -> GenericView.ViewProps DashboardAndLoginScreenConfigForm Msg
+viewProps appState =
+    let
+        locTitle =
+            if Admin.isEnabled appState.config.admin then
+                gettext "Dashboard"
+
+            else
+                gettext "Dashboard & Login Screen"
+    in
+    { locTitle = locTitle
     , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
     , wrapMsg = FormMsg
