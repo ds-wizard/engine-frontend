@@ -58,10 +58,11 @@ formView appState form =
     in
     div []
         [ FormGroup.toggle form "publicEnabled" (gettext "Public Knowledge Models" appState.locale)
-        , FormExtra.mdAfter (gettext "If enabled you can define knowledge models that are publicly available for reading." appState.locale)
+        , FormExtra.mdAfter (gettext "If enabled, you can define knowledge models that are publicly available for reading." appState.locale)
         , allowedInput
         , hr [] []
         , FormGroup.resizableTextarea appState form "integrationConfig" (gettext "Integration Config" appState.locale)
+        , FormExtra.mdAfter (gettext "Integration config is used to configure [secrets and other properties](https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties) for integrations in knowledge models." appState.locale)
         ]
 
 
