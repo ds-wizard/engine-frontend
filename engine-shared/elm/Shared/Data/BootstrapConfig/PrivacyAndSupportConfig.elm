@@ -85,7 +85,7 @@ defaultSupportSiteUrl =
 
 defaultSupportSiteIcon : String
 defaultSupportSiteIcon =
-    "fab fa-github"
+    "{defaultSupportSiteIcon}"
 
 
 
