@@ -8,7 +8,7 @@ import Shared.Data.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, settingsClass)
 import Wizard.Routes as Routes
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
@@ -50,7 +50,7 @@ view appState subroute model =
                     Html.map SubmissionSettingsMsg <|
                         SubmissionSettings.view appState model.submissionSettingsModel
     in
-    div [ class "Users__Edit col-full" ]
+    div [ settingsClass "Users__Edit" ]
         [ div [ class "Users__Edit__navigation" ] [ navigation appState subroute model ]
         , div [ class "Users__Edit__content" ]
             [ content ]

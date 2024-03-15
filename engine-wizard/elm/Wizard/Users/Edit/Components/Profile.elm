@@ -27,7 +27,6 @@ import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormExtra as FormExtra
@@ -175,7 +174,7 @@ userView appState model user =
                 Html.map EditFormMsg <|
                     userFormView appState model user (UuidOrCurrent.isCurrent model.uuidOrCurrent)
     in
-    div [ wideDetailClass "" ]
+    div []
         [ Page.header (gettext "Profile" appState.locale) []
         , div [ class "row" ]
             [ content

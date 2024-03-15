@@ -15,7 +15,6 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -48,7 +47,7 @@ viewForm appState model _ =
             else
                 gettext "Look & Feel" appState.locale
     in
-    div [ wideDetailClass "LookAndFeel" ]
+    div [ class "LookAndFeel" ]
         [ Page.header headerTitle []
         , form [ onSubmit (GenericMsgs.FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingConfig

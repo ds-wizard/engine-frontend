@@ -14,7 +14,7 @@ import Shared.Data.DevOperationSection exposing (DevOperationSection)
 import Shared.Html exposing (emptyNode)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (settingsClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Page as Page
@@ -35,7 +35,7 @@ viewContent appState model adminOperationSections =
                 |> List.find (.name >> Just >> (==) model.openedSection)
                 |> Maybe.unwrap emptyNode (viewSection appState model)
     in
-    div [ class "Settings col-full" ]
+    div [ settingsClass "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation model adminOperationSections ]
         , div [ class "Settings__content" ] [ section ]
         ]
@@ -73,7 +73,7 @@ viewSection appState model section =
         description =
             Maybe.unwrap emptyNode (Markdown.toHtml []) section.description
     in
-    div [ wideDetailClass "" ]
+    div []
         [ h2 [] [ text section.name ]
         , description
         , div [] operations
