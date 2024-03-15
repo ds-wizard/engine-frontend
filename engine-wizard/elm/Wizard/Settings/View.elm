@@ -3,6 +3,7 @@ module Wizard.Settings.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
@@ -107,10 +108,17 @@ navigation appState currentRoute =
 
 navigationSystemLinks : AppState -> List ( Route, String )
 navigationSystemLinks appState =
-    [ ( OrganizationRoute, gettext "Organization" appState.locale )
-    , ( AuthenticationRoute, gettext "Authentication" appState.locale )
-    , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
-    ]
+    let
+        items =
+            [ ( OrganizationRoute, gettext "Organization" appState.locale )
+            , ( AuthenticationRoute, gettext "Authentication" appState.locale )
+            ]
+    in
+    if Admin.isEnabled appState.config.admin then
+        items
+
+    else
+        items ++ [ ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale ) ]
 
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
