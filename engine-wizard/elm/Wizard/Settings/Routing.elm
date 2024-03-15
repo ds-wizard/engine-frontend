@@ -4,7 +4,9 @@ module Wizard.Settings.Routing exposing
     , toUrl
     )
 
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Locale exposing (lr)
+import Shared.Utils exposing (listInsertIf)
 import Url.Parser exposing ((</>), Parser, map, s)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
@@ -16,19 +18,22 @@ parsers appState wrapRoute =
     let
         moduleRoot =
             lr "settings" appState
+
+        adminDisabled =
+            not (Admin.isEnabled appState.config.admin)
     in
-    [ map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))
-    , map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s (lr "settings.authentication" appState))
-    , map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s (lr "settings.privacyAndSupport" appState))
-    , map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))
-    , map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s (lr "settings.lookAndFeel" appState))
-    , map (wrapRoute <| RegistryRoute) (s moduleRoot </> s (lr "settings.registry" appState))
-    , map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s (lr "settings.projects" appState))
-    , map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))
-    , map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))
-    , map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))
-    , map (wrapRoute <| PlansRoute) (s moduleRoot </> s (lr "settings.plans" appState))
-    ]
+    []
+        |> listInsertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))) True
+        |> listInsertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s (lr "settings.authentication" appState))) adminDisabled
+        |> listInsertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s (lr "settings.privacyAndSupport" appState))) adminDisabled
+        |> listInsertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))) True
+        |> listInsertIf (map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s (lr "settings.lookAndFeel" appState))) True
+        |> listInsertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s (lr "settings.registry" appState))) (Feature.registry appState)
+        |> listInsertIf (map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s (lr "settings.projects" appState))) True
+        |> listInsertIf (map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))) True
+        |> listInsertIf (map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))) True
+        |> listInsertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))) (Feature.plans appState)
+        |> listInsertIf (map (wrapRoute <| PlansRoute) (s moduleRoot </> s (lr "settings.plans" appState))) (Feature.plans appState)
 
 
 toUrl : AppState -> Route -> List String
