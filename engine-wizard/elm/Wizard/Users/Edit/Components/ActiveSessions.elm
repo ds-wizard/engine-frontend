@@ -29,7 +29,7 @@ import Time
 import UserAgent
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (tooltip, wideDetailClass)
+import Wizard.Common.Html.Attribute exposing (tooltip)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 
@@ -172,7 +172,7 @@ viewActiveSessions appState model tokens =
             else
                 emptyNode
     in
-    div [ wideDetailClass "" ]
+    div []
         [ div [ class "row" ]
             [ div [ class "col" ]
                 [ Page.header (gettext "Active Sessions" appState.locale) [] ]

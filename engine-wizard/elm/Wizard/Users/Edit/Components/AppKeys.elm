@@ -24,7 +24,6 @@ import Shared.Setters exposing (setAppKeys)
 import String.Format as String
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
@@ -112,7 +111,7 @@ update cfg appState msg model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ wideDetailClass "" ]
+    div []
         [ Page.header (gettext "App Keys" appState.locale) []
         , div [ class "row" ]
             [ div [ class "col-8" ] [ viewAppKeys appState model ]

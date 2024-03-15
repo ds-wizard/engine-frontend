@@ -32,6 +32,12 @@
             cursor: default;
         }
     }
+
+    &.flex-column {
+        .nav-link {
+            margin-bottom: 1px;
+        }
+    }
 }
 
 .nav-underline-tabs {

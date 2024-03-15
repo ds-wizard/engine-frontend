@@ -7,6 +7,7 @@ import Shared.Data.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (settingsClass)
 import Wizard.Routes as Routes
 import Wizard.Settings.Authentication.View
 import Wizard.Settings.DashboardAndLoginScreen.View
@@ -73,7 +74,7 @@ view route appState model =
                     Html.map PlansMsg <|
                         Wizard.Settings.Plans.View.view appState model.plansModel
     in
-    div [ class "Settings col-full" ]
+    div [ settingsClass "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
         , div [ class "Settings__content" ] [ content ]
         ]
