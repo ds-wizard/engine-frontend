@@ -85,7 +85,7 @@ formView appState form =
          , FormExtra.mdAfter (gettext "If *Project Visibility* is enabled, this value is pre-selected when creating a new project. If *Project Visibility* is disabled, this value is used implicitly for new projects." appState.locale)
          , hr [] []
          , FormGroup.toggle form "questionnaireSharingEnabled" (gettext "Project Sharing" appState.locale)
-         , FormExtra.mdAfter (gettext "If enabled, users can choose if project can be shared with people outside of DSW or not. Otherwise, all projects use the *Default Project Sharing*." appState.locale)
+         , FormExtra.mdAfter (gettext "If enabled, users can choose if project can be shared with people outside of the wizard or not. Otherwise, all projects use the *Default Project Sharing*." appState.locale)
          , FormGroup.richRadioGroup appState (QuestionnaireSharing.richFormOptions appState) form "questionnaireSharingDefaultValue" (gettext "Default Project Sharing" appState.locale)
          , FormExtra.mdAfter (gettext "If *Project Sharing* is enabled, this value is pre-selected when creating a new project. If *Project Sharing* is disabled, this value is used implicitly for new projects." appState.locale)
          ]
