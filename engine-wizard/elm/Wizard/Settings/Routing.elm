@@ -32,7 +32,7 @@ parsers appState wrapRoute =
         |> listInsertIf (map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s (lr "settings.projects" appState))) True
         |> listInsertIf (map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))) True
         |> listInsertIf (map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))) True
-        |> listInsertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))) (Feature.plans appState)
+        |> listInsertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))) True
         |> listInsertIf (map (wrapRoute <| PlansRoute) (s moduleRoot </> s (lr "settings.plans" appState))) (Feature.plans appState)
 
 
