@@ -123,7 +123,15 @@ navigationSystemLinks appState =
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
 navigationUserInterfaceLinks appState =
-    [ ( DashboardAndLoginScreenRoute, gettext "Dashboard & Login Screen" appState.locale )
+    let
+        dashboardAndLoginScreenTitle =
+            if Admin.isEnabled appState.config.admin then
+                gettext "Dashboard" appState.locale
+
+            else
+                gettext "Dashboard & Login Screen" appState.locale
+    in
+    [ ( DashboardAndLoginScreenRoute, dashboardAndLoginScreenTitle )
     , ( LookAndFeelRoute, gettext "Look & Feel" appState.locale )
     ]
 
