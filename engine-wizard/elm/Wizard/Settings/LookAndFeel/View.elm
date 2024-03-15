@@ -40,9 +40,16 @@ viewForm appState model _ =
             , formChanged = model.formRemoved || Form.containsChanges model.form
             , wide = True
             }
+
+        headerTitle =
+            if Admin.isEnabled appState.config.admin then
+                gettext "Menu" appState.locale
+
+            else
+                gettext "Look & Feel" appState.locale
     in
     div [ wideDetailClass "LookAndFeel" ]
-        [ Page.header (gettext "Look & Feel" appState.locale) []
+        [ Page.header headerTitle []
         , form [ onSubmit (GenericMsgs.FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingConfig
             , formView appState model.form

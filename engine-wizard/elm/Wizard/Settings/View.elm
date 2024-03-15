@@ -130,9 +130,16 @@ navigationUserInterfaceLinks appState =
 
             else
                 gettext "Dashboard & Login Screen" appState.locale
+
+        lookAndFeelTitle =
+            if Admin.isEnabled appState.config.admin then
+                gettext "Menu" appState.locale
+
+            else
+                gettext "Look & Feel" appState.locale
     in
     [ ( DashboardAndLoginScreenRoute, dashboardAndLoginScreenTitle )
-    , ( LookAndFeelRoute, gettext "Look & Feel" appState.locale )
+    , ( LookAndFeelRoute, lookAndFeelTitle )
     ]
 
 
