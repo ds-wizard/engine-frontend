@@ -22,11 +22,11 @@ import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Random exposing (Seed)
-import Set
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Utils exposing (dispatch, getUuid)
@@ -74,11 +74,7 @@ setDocumentTemplate detail model =
 
 formChanged : Model -> Bool
 formChanged model =
-    let
-        hasChangedFields =
-            not <| Set.isEmpty <| Set.remove "readme-preview-active" <| Form.getChangedFields <| model.form
-    in
-    model.formListsChanged || hasChangedFields
+    Form.containsChanges model.form || model.formListsChanged
 
 
 getFormOutput : Model -> Maybe DocumentTemplateForm

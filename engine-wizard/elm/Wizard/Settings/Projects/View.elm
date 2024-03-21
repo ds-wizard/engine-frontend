@@ -58,7 +58,7 @@ formView appState form =
                     , FormExtra.mdAfter (gettext "ht&#8203;tps://github.com/**exampleOwner**/exampleRepository" appState.locale)
                     , FormGroup.input appState form "feedbackRepo" (gettext "GitHub Repository Name" appState.locale)
                     , FormExtra.mdAfter (gettext "ht&#8203;tps://github.com/exampleOwner/**exampleRepository**" appState.locale)
-                    , FormGroup.textarea appState form "feedbackToken" (gettext "Access Token" appState.locale)
+                    , FormGroup.secret appState form "feedbackToken" (gettext "Access Token" appState.locale)
                     , FormExtra.mdAfter (gettext "[Personal Access Token](https://help.github.com/en/github/authenticating-to-github/creating-a-personal-access-token-for-the-command-line) for GitHub account creating the issues. Make sure to select **public_repo** scope if the repository is public or **repo** if it is private. We recommend creating a bot account with the access to the feedback repository instead of using your own GitHub account." appState.locale)
                     ]
 

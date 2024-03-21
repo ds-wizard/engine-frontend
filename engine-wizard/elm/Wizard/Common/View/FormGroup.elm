@@ -22,6 +22,7 @@ module Wizard.Common.View.FormGroup exposing
     , readOnlyInput
     , resizableTextarea
     , richRadioGroup
+    , secret
     , select
     , simpleDate
     , textView
@@ -126,8 +127,6 @@ inputWithTypehints options appState form fieldName labelText =
         ]
 
 
-{-| Helper for creating form group with password input field.
--}
 password : AppState -> Form FormError o -> String -> String -> Html Form.Msg
 password =
     formGroup Input.passwordInput []
@@ -150,8 +149,47 @@ passwordWithStrength appState form fieldName labelText =
         ]
 
 
-{-| Helper for creating form group with select field.
--}
+secret : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+secret appState form fieldName labelText =
+    let
+        visibleFieldName =
+            fieldName ++ "-visible__"
+
+        visibleStateField =
+            Form.getFieldAsBool visibleFieldName form
+
+        visible =
+            Maybe.withDefault False visibleStateField.value
+
+        visibleActiveMsg =
+            Form.Input visibleFieldName Form.Checkbox << Field.Bool
+
+        inputFn field attributes =
+            let
+                inputField =
+                    if visible then
+                        Input.textInput field (attributes ++ [ class "form-control" ])
+
+                    else
+                        Input.passwordInput field (attributes ++ [ class "form-control" ])
+
+                showHideIcon =
+                    if visible then
+                        a [ onClick (visibleActiveMsg False) ]
+                            [ faSet "_global.secretHide" appState ]
+
+                    else
+                        a [ onClick (visibleActiveMsg True) ]
+                            [ faSet "_global.secretShow" appState ]
+            in
+            div [ class "input-secret" ]
+                [ inputField
+                , showHideIcon
+                ]
+    in
+    formGroup inputFn [] appState form fieldName labelText
+
+
 select : AppState -> List ( String, String ) -> Form FormError o -> String -> String -> Html Form.Msg
 select appState options =
     formGroup (Input.selectInput options) [ class "form-select" ] appState
@@ -464,7 +502,7 @@ markupEditor cfg appState form fieldName labelText =
             Form.getFieldAsString fieldName form
 
         previewActiveFieldName =
-            fieldName ++ "-preview-active"
+            fieldName ++ "-preview-active__"
 
         ( error, errorClass ) =
             getErrors appState field labelText

@@ -27,6 +27,8 @@ iconSet =
         , ( "_global.preview", "fas fa-eye" )
         , ( "_global.questionnaire", "far fa-list-alt" )
         , ( "_global.remove", "fas fa-times" )
+        , ( "_global.secretShow", "fas fa-fw fa-eye" )
+        , ( "_global.secretHide", "fas fa-fw fa-eye-slash" )
         , ( "_global.settings", "fas fa-cogs" )
         , ( "_global.sortAsc", "fas fa-long-arrow-alt-down" )
         , ( "_global.sortDesc", "fas fa-long-arrow-alt-up" )

@@ -184,7 +184,7 @@ serviceFormView appState openIDPrefabs form i =
             , FormGroup.textView "logout-url" logoutUrl (gettext "Logout URL" appState.locale)
             , div [ class "row" ]
                 [ div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientIdField (gettext "Client ID" appState.locale) ]
-                , div [ class "col" ] [ mapFormMsg <| FormGroup.input appState form clientSecretField (gettext "Client Secret" appState.locale) ]
+                , div [ class "col" ] [ mapFormMsg <| FormGroup.secret appState form clientSecretField (gettext "Client Secret" appState.locale) ]
                 ]
             , mapFormMsg <| FormGroup.input appState form urlField (gettext "URL" appState.locale)
             , div [ class "input-table", dataCy "settings_authentication_service_parameters" ]
