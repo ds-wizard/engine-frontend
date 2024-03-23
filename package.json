@@ -39,7 +39,7 @@
     "uglify-js": "^3.17.4",
     "webpack": "^5.90.3",
     "webpack-cli": "^5.1.4",
-    "webpack-dev-server": "^5.0.3"
+    "webpack-dev-server": "^5.0.4"
   },
   "dependencies": {
     "@codemirror/commands": "^6.3.3",
