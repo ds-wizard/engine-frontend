@@ -20,7 +20,7 @@ const components = {
         port: 8081,
         extraEntries: [],
         publicPath: '/'
-    }
+    },
 }
 
 
@@ -146,7 +146,7 @@ module.exports = {
         },
         port: components[component].port,
         static: {
-            directory: component === 'engine-registry' ? __dirname : path.join(__dirname, component, 'static')
+            directory: (component === 'engine-registry') ? __dirname : path.join(__dirname, component, 'static')
         }
     }
 }

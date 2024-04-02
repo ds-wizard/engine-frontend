@@ -5,6 +5,7 @@ module Wizard.Common.Html.Attribute exposing
     , grammarlyAttributes
     , linkToAttributes
     , listClass
+    , settingsClass
     , tooltip
     , tooltipCustom
     , tooltipLeft
@@ -33,6 +34,11 @@ detailClass otherClass =
 wideDetailClass : String -> Html.Attribute msg
 wideDetailClass otherClass =
     class <| "col col-wide-detail " ++ otherClass
+
+
+settingsClass : String -> Html.Attribute msg
+settingsClass otherClass =
+    class <| "d-flex container container-max-xxl mx-auto " ++ otherClass
 
 
 listClass : String -> Html.Attribute msg

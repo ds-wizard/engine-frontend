@@ -1,0 +1,17 @@
+.list-item {
+    background: var(--bs-white);
+
+    &:not(:last-child) {
+        margin-bottom: 1rem;
+    }
+
+    .list-item-link {
+        font-weight: bold;
+        color: var(--bs-body);
+        text-decoration: none;
+
+        &:hover {
+            color: var(--bs-primary);
+        }
+    }
+}

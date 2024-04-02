@@ -347,6 +347,32 @@ select {
             margin-left: 0.5rem;
         }
     }
+
+    .input-secret {
+        position: relative;
+
+        input {
+            padding-right: 2rem;
+        }
+
+        a {
+            color: $gray-700 !important;
+            position: absolute;
+            right: 0.25rem;
+            width: 1.5rem;
+            top: 0;
+            bottom: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none !important;
+            @include transition(opacity 0.15s ease-in-out);
+
+            &:hover {
+                opacity: 0.8;
+            }
+        }
+    }
 }
 
 .form-control:disabled {

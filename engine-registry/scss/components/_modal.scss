@@ -1,0 +1,105 @@
+.modal-cover {
+    position: fixed;
+    padding: 0;
+    margin: 0;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba($modal-backdrop-bg, $modal-backdrop-opacity);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    @include transition(opacity 0.2s ease-in);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+
+
+    .modal-dialog {
+        opacity: 1;
+        margin-top: -$modal-dialog-margin-y-sm-up;
+        min-width: 500px;
+        @include transition(margin-top 0.2s ease-in);
+
+        .modal-header {
+            justify-content: space-between;
+
+            .close {
+                outline: none;
+                border: none;
+                background: transparent;
+
+                &:hover {
+                    color: var(--bs-primary);
+                }
+            }
+        }
+
+        .modal-content {
+            max-height: calc(100vh - 2 * $modal-dialog-margin);
+        }
+    }
+
+    &.modal-wide {
+        .modal-dialog {
+            width: 100%;
+            max-width: $modal-lg;
+        }
+    }
+
+    &.modal-error {
+        .modal-dialog {
+            min-width: 700px;
+        }
+    }
+
+    &.visible {
+        opacity: 1;
+        max-height: 999999px;
+
+        .modal-dialog {
+            margin-top: $modal-dialog-margin-y-sm-up;
+        }
+    }
+
+    .modal-header {
+        .btn-link {
+            color: $gray-600;
+            text-decoration: none;
+
+            &:hover {
+                color: $gray-700;
+            }
+        }
+    }
+
+    .modal-footer {
+        display: flex;
+        justify-content: space-between;
+        flex-direction: row-reverse;
+
+        &::before, &::after {
+            display: none;
+        }
+
+        .btn {
+            min-width: 100px;
+        }
+    }
+
+    .modal-body {
+        overflow: auto;
+
+        .btn:not(.btn-link) {
+            min-width: 100px;
+        }
+
+        .full-page-message {
+            background: none;
+            margin: 0;
+            padding: 0 2rem;
+        }
+    }
+}

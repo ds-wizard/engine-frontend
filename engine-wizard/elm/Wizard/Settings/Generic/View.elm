@@ -11,7 +11,6 @@ import Html.Events exposing (onSubmit)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
@@ -41,7 +40,7 @@ viewForm props appState model _ =
             , wide = True
             }
     in
-    div [ wideDetailClass "" ]
+    div []
         [ Page.header (props.locTitle appState.locale) []
         , form [ onSubmit (props.wrapMsg Form.Submit), class "pb-6" ]
             [ FormResult.errorOnlyView appState model.savingConfig

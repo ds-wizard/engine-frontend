@@ -23,7 +23,6 @@ import Shared.Form.FormError exposing (FormError)
 import String.Format as String
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
@@ -159,7 +158,7 @@ submissionPropsView appState model props =
                 Html.map FormMsg <|
                     formView appState model
     in
-    div [ detailClass "" ]
+    div []
         [ Page.header (gettext "Submission Settings" appState.locale) []
         , FormResult.view appState model.savingProps
         , content

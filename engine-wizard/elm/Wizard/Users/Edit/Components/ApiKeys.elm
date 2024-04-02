@@ -20,7 +20,6 @@ import String.Format as String
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.CopyableCodeBlock as CopyableCodeBlock
-import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
@@ -170,7 +169,7 @@ update cfg appState msg model =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    div [ wideDetailClass "" ]
+    div []
         [ Page.header (gettext "API Keys" appState.locale) []
         , div [ class "row" ]
             [ div [ class "col-8" ]

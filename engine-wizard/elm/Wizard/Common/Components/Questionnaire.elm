@@ -2465,7 +2465,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             |> listFilterJust
                             |> List.sortBy .name
                 in
-                Tag.viewList tags
+                Tag.viewList { showDescription = False } tags
 
             else
                 emptyNode
@@ -2878,7 +2878,7 @@ viewQuestionValue appState cfg model path question =
                     ]
 
                 Just UrlQuestionValueType ->
-                    [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
+                    [ input (type_ "text" :: defaultAttrs ++ extraAttrs) []
                     , warningView RegexPatterns.url (gettext "This is not a valid URL." appState.locale)
                     ]
 

@@ -7,7 +7,6 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
 import Shared.Components.Badge as Badge
-import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Html exposing (emptyNode, fa, faSet)
@@ -351,7 +350,6 @@ viewProjectContent appState route model qm =
                         , package = qm.questionnaire.package
                         , templateState = qm.questionnaire.documentTemplateState
                         , templatePhase = qm.questionnaire.documentTemplatePhase
-                        , tags = KnowledgeModel.getTags qm.questionnaire.knowledgeModel
                         }
                         model.settingsModel
 

@@ -88,7 +88,7 @@ createFieldValidation appState fieldName fieldError =
 containsChanges : Form e a -> Bool
 containsChanges =
     let
-        isNotPreviewActiveField =
-            not << String.contains "-preview-active"
+        isNotHelperField =
+            not << String.endsWith "__"
     in
-    not << Set.isEmpty << Set.filter isNotPreviewActiveField << Form.getChangedFields
+    not << Set.isEmpty << Set.filter isNotHelperField << Form.getChangedFields

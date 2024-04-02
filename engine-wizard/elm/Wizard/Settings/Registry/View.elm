@@ -78,7 +78,7 @@ formView appState form =
                                 [ text (gettext "Sign Up" appState.locale) ]
                 in
                 div [ class "nested-group" ]
-                    [ formWrap <| FormGroup.textarea appState form "token" (gettext "Token" appState.locale)
+                    [ formWrap <| FormGroup.secret appState form "token" (gettext "Token" appState.locale)
                     , FormExtra.mdAfter (gettext "Fill in your DSW Registry token. If you don't have one, you need sign up first." appState.locale)
                     , signupButton
                     ]

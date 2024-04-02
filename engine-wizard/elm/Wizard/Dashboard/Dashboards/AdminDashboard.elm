@@ -15,6 +15,7 @@ import Maybe.Extra as Maybe
 import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Usage as UsageApi
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig
 import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.Package exposing (Package)
@@ -111,7 +112,8 @@ view appState model =
             appState.config.organization.name == "My Organization" || appState.config.organization.organizationId == "myorg"
 
         lookAndFeelWidgetVisible =
-            Maybe.isNothing appState.config.lookAndFeel.appTitle || Maybe.isNothing appState.config.lookAndFeel.appTitleShort
+            not (Admin.isEnabled appState.config.admin)
+                && (Maybe.isNothing appState.config.lookAndFeel.appTitle || Maybe.isNothing appState.config.lookAndFeel.appTitleShort)
 
         registryWidgetVisible =
             not <| RegistryConfig.isEnabled appState.config.registry

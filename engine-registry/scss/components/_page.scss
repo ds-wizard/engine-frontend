@@ -1,0 +1,38 @@
+.page-loader {
+    @include fade-in;
+    color: $gray-500;
+    text-align: center;
+
+    i {
+        font-size: 3rem;
+    }
+}
+
+.page-error {
+    .undraw {
+        max-width: 25rem;
+    }
+}
+
+
+.page-illustrated-message {
+    display: flex;
+    max-width: 80rem;
+    width: 100%;
+    align-items: center;
+    justify-content: center;
+    margin: 5rem auto auto;
+
+    img, svg {
+        width: 30%;
+    }
+
+    div {
+        max-width: 50%;
+        margin-left: 2rem;
+    }
+
+    p {
+        font-size: 1.25rem;
+    }
+}

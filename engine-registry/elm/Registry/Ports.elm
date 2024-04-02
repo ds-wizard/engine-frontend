@@ -1,6 +1,12 @@
-port module Registry.Ports exposing (saveCredentials)
+port module Registry.Ports exposing
+    ( clearSession
+    , saveSession
+    )
 
 import Json.Encode as E
 
 
-port saveCredentials : E.Value -> Cmd msg
+port saveSession : E.Value -> Cmd msg
+
+
+port clearSession : () -> Cmd msg

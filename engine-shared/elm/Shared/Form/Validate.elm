@@ -100,11 +100,11 @@ optionalInt =
     V.oneOf [ V.emptyString |> V.map (\_ -> 0), V.int ]
 
 
-regex : Regex -> Validation e String
-regex r =
+regex : Regex -> String -> Validation FormError String
+regex r error =
     V.string
         |> V.andThen
-            (\s -> V.format r s |> V.mapError (\_ -> Error.value InvalidFormat))
+            (\s -> V.format r s |> V.mapError (\_ -> Error.value (CustomError (FormError.Error error))))
 
 
 maybeRegex : Regex -> String -> Validation FormError (Maybe String)
@@ -121,14 +121,14 @@ uuid =
         |> V.map Uuid.fromUuidString
 
 
-organizationId : Validation e String
+organizationId : Validation FormError String
 organizationId =
-    regex RegexPatterns.organizationId
+    regex RegexPatterns.organizationId "Organization ID can only contain alphanumeric characters, hyphens, and dots. It must start and end with an alphanumeric character."
 
 
-kmId : Validation e String
+kmId : Validation FormError String
 kmId =
-    regex RegexPatterns.kmId
+    regex RegexPatterns.kmId "Knowledge Model ID can only contain alphanumeric characters and hyphens. It must start and end with an alphanumeric character."
 
 
 projectTag : { a | locale : Gettext.Locale } -> Validation FormError String

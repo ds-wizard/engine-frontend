@@ -3,9 +3,11 @@ module Wizard.Settings.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.Html.Attribute exposing (settingsClass)
 import Wizard.Routes as Routes
 import Wizard.Settings.Authentication.View
 import Wizard.Settings.DashboardAndLoginScreen.View
@@ -72,7 +74,7 @@ view route appState model =
                     Html.map PlansMsg <|
                         Wizard.Settings.Plans.View.view appState model.plansModel
     in
-    div [ class "Settings col-full" ]
+    div [ settingsClass "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
         , div [ class "Settings__content" ] [ content ]
         ]
@@ -107,16 +109,40 @@ navigation appState currentRoute =
 
 navigationSystemLinks : AppState -> List ( Route, String )
 navigationSystemLinks appState =
-    [ ( OrganizationRoute, gettext "Organization" appState.locale )
-    , ( AuthenticationRoute, gettext "Authentication" appState.locale )
-    , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
-    ]
+    let
+        items =
+            [ ( OrganizationRoute, gettext "Organization" appState.locale )
+            ]
+    in
+    if Admin.isEnabled appState.config.admin then
+        items
+
+    else
+        items
+            ++ [ ( AuthenticationRoute, gettext "Authentication" appState.locale )
+               , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
+               ]
 
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
 navigationUserInterfaceLinks appState =
-    [ ( DashboardAndLoginScreenRoute, gettext "Dashboard & Login Screen" appState.locale )
-    , ( LookAndFeelRoute, gettext "Look & Feel" appState.locale )
+    let
+        dashboardAndLoginScreenTitle =
+            if Admin.isEnabled appState.config.admin then
+                gettext "Dashboard" appState.locale
+
+            else
+                gettext "Dashboard & Login Screen" appState.locale
+
+        lookAndFeelTitle =
+            if Admin.isEnabled appState.config.admin then
+                gettext "Menu" appState.locale
+
+            else
+                gettext "Look & Feel" appState.locale
+    in
+    [ ( DashboardAndLoginScreenRoute, dashboardAndLoginScreenTitle )
+    , ( LookAndFeelRoute, lookAndFeelTitle )
     ]
 
 
