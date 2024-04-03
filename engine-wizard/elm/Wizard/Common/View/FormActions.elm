@@ -10,40 +10,33 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class, classList, disabled, type_)
+import Html.Events exposing (onClick)
 import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
-import Wizard.Routes as Routes
 
 
-{-| Helper to show action buttons below the form.
-
-  - Cancel button simply redirects to another route
-  - Action button invokes specified message when clicked
-
--}
-view : AppState -> Routes.Route -> ActionButton.ButtonConfig a msg -> Html msg
-view appState cancelRoute actionButtonConfig =
+view : AppState -> msg -> ActionButton.ButtonConfig a msg -> Html msg
+view appState cancelMsg actionButtonConfig =
     div [ class "form-actions" ]
-        [ linkTo appState cancelRoute [ class "btn btn-secondary" ] [ text (gettext "Cancel" appState.locale) ]
+        [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
         , ActionButton.button appState actionButtonConfig
         ]
 
 
-viewCustomButton : AppState -> Routes.Route -> Html msg -> Html msg
-viewCustomButton appState cancelRoute actionButton =
+viewCustomButton : AppState -> msg -> Html msg -> Html msg
+viewCustomButton appState cancelMsg actionButton =
     div [ class "form-actions" ]
-        [ linkTo appState cancelRoute [ class "btn btn-secondary" ] [ text (gettext "Cancel" appState.locale) ]
+        [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
         , actionButton
         ]
 
 
-viewSubmit : AppState -> Routes.Route -> ActionButton.SubmitConfig a -> Html msg
-viewSubmit appState cancelRoute submitConfig =
+viewSubmit : AppState -> msg -> ActionButton.SubmitConfig a -> Html msg
+viewSubmit appState cancelMsg submitConfig =
     div [ class "form-actions" ]
-        [ linkTo appState cancelRoute [ class "btn btn-secondary" ] [ text (gettext "Cancel" appState.locale) ]
+        [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
         , ActionButton.submit appState submitConfig
         ]
 

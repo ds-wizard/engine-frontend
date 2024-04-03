@@ -21,7 +21,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.Create.Models exposing (ActiveTab(..), DefaultMode(..), Mode(..), Model, mapMode)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -53,7 +52,7 @@ formView appState model =
         [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
         , formContent appState model
         , FormActions.view appState
-            (Routes.projectsIndex appState)
+            Cancel
             (ActionButton.ButtonConfig (gettext "Create" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 

@@ -16,7 +16,7 @@ import Wizard.Locales.Create.Msgs exposing (Msg(..))
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 update : AppState -> Msg -> (Msg -> Wizard.Msgs.Msg) -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -44,6 +44,9 @@ update appState msg wrapMsg model =
 
         CreateCompleted result ->
             handleCreateCompleted appState model result
+
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState Routes.localesIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model

@@ -10,6 +10,7 @@ const codeEditor = require('./js/components/code-editor')
 const datetimePickers = require('./js/components/datetime-pickers')
 
 const cookies = require('./js/ports/cookies')
+const registerBrowserPorts = require('./js/ports/browser')
 const registerConsolePorts = require('./js/ports/console')
 const registerCopyPorts = require('../engine-shared/ports/copy')
 const registerDomPorts = require('./js/ports/dom')
@@ -121,6 +122,7 @@ function loadApp(config, locale, provisioning) {
         flags: flags,
     })
 
+    registerBrowserPorts(app)
     registerConsolePorts(app)
     registerCopyPorts(app)
     registerDomPorts(app)

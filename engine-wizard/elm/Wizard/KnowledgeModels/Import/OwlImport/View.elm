@@ -17,7 +17,6 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.KnowledgeModels.Import.OwlImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.OwlImport.Msgs exposing (Msg(..))
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -50,7 +49,7 @@ view appState model =
 
         formActions =
             FormActions.view appState
-                Routes.knowledgeModelsIndex
+                Cancel
                 (ActionButton.ButtonConfig (gettext "Import" appState.locale) model.importing (FormMsg <| Form.Submit) False)
     in
     div [ id dropzoneId, dataCy "import_file" ]

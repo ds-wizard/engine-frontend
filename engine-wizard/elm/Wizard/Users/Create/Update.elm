@@ -14,7 +14,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 import Wizard.Users.Common.UserCreateForm as UserCreateForm
 import Wizard.Users.Create.Models exposing (Model)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
@@ -23,6 +23,9 @@ import Wizard.Users.Create.Msgs exposing (Msg(..))
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        Cancel ->
+            ( appState.seed, model, Ports.historyBack (Routing.toUrl appState Routes.usersIndex) )
+
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState.seed appState model
 

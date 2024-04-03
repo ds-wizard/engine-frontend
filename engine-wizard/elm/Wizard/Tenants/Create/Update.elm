@@ -9,8 +9,9 @@ import Shared.Form exposing (setFormErrors)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 import Wizard.Tenants.Common.TenantCreateForm as AppCreateForm
 import Wizard.Tenants.Create.Models exposing (Model)
 import Wizard.Tenants.Create.Msgs exposing (Msg(..))
@@ -19,6 +20,9 @@ import Wizard.Tenants.Create.Msgs exposing (Msg(..))
 update : AppState -> Msg -> (Msg -> Wizard.Msgs.Msg) -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update appState msg wrapMsg model =
     case msg of
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState Routes.tenantsIndex) )
+
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
 
