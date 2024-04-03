@@ -11,6 +11,7 @@ import Wizard.KnowledgeModels.Subscriptions
 import Wizard.Locales.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.Ports as Ports
 import Wizard.ProjectActions.Subscriptions
 import Wizard.ProjectImporters.Subscriptions
 import Wizard.Projects.Subscriptions
@@ -68,9 +69,13 @@ subscriptions model =
 
         menuSubscriptions =
             Wizard.Common.Menu.Subscriptions.subscriptions model.menuModel
+
+        historySubscriptions =
+            Ports.historyBackCallback HistoryBackCallback
     in
     Sub.batch
         [ currentViewSubscriptions
         , authSubscriptions
         , menuSubscriptions
+        , historySubscriptions
         ]

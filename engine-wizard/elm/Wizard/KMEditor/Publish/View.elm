@@ -19,11 +19,8 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Common.BranchPublishForm exposing (BranchPublishForm)
 import Wizard.KMEditor.Common.BranchUtils as BranchUtils
-import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.KMEditor.Publish.Models exposing (Model)
 import Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
-import Wizard.KMEditor.Routes as KMEditorRoutes
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -39,7 +36,7 @@ contentView appState model branch =
             [ FormResult.view appState model.publishingBranch
             , formView appState model.form branch
             , FormActions.viewCustomButton appState
-                (Routes.KMEditorRoute (KMEditorRoutes.EditorRoute branch.uuid (KMEditorRoute.Edit Nothing)))
+                Cancel
                 (ActionButton.buttonWithAttrs appState
                     (ActionButton.ButtonWithAttrsConfig (gettext "Publish" appState.locale)
                         model.publishingBranch

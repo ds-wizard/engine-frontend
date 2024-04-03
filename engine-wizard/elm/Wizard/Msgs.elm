@@ -31,6 +31,7 @@ import Wizard.Users.Msgs
 type Msg
     = OnUrlChange Url
     | OnUrlRequest UrlRequest
+    | HistoryBackCallback String
     | OnTime Time.Posix
     | OnTimeZone Time.Zone
     | AcceptCookies

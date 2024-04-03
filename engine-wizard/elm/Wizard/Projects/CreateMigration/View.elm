@@ -23,7 +23,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -105,7 +104,7 @@ createMigrationView appState model questionnaire =
                 ]
             ]
         , FormActions.view appState
-            (Routes.projectsIndex appState)
+            Cancel
             (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingMigration (FormMsg Form.Submit) False)
         ]
 

@@ -23,7 +23,6 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document exposing (Document)
 import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.SummaryReport exposing (SummaryReport)
@@ -45,9 +44,9 @@ import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
-import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Projects.Routes exposing (Route(..))
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 
 
 
@@ -88,6 +87,7 @@ initEmpty =
 type Msg
     = GetSummaryReportComplete (Result ApiError SummaryReport)
     | GetQuestionnaireEventComplete (Result ApiError QuestionnaireEvent)
+    | Cancel
     | FormMsg Form.Msg
     | SetTemplateTypeHintInputReply String
     | TemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)
@@ -127,6 +127,9 @@ update cfg msg appState model =
 
         GetQuestionnaireEventComplete result ->
             handleGetQuestionnaireEventCompleted appState model result
+
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsDetailDocuments cfg.questionnaireUuid)) )
 
         FormMsg formMsg ->
             handleForm cfg formMsg appState model
@@ -282,7 +285,7 @@ viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
                 [ FormResult.view appState model.savingDocument
                 , formView appState questionnaire mbEvent model summaryReport
                 , FormActions.view appState
-                    (Routes.ProjectsRoute <| DetailRoute questionnaire.uuid <| ProjectDetailRoute.Documents PaginationQueryString.empty)
+                    Cancel
                     (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingDocument (FormMsg Form.Submit) False)
                 ]
             ]

@@ -25,8 +25,9 @@ import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (Bra
 import Wizard.KMEditor.Create.Models exposing (Model)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -42,6 +43,9 @@ fetchData appState model =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState Routes.kmEditorIndex) )
+
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model
 

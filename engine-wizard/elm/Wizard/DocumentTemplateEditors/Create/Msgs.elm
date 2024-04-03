@@ -10,7 +10,8 @@ import Wizard.Common.Components.TypeHintInput as TypeHintInput
 
 
 type Msg
-    = FormMsg Form.Msg
+    = Cancel
+    | FormMsg Form.Msg
     | FormSetVersion Version
     | PostDocumentTemplateDraftCompleted (Result ApiError DocumentTemplateDraftDetail)
     | DocumentTemplateTypeHintInputMsg (TypeHintInput.Msg DocumentTemplateSuggestion)

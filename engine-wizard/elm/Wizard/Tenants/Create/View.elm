@@ -12,7 +12,6 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.Routes as Routes
 import Wizard.Tenants.Common.TenantCreateForm exposing (TenantCreateForm)
 import Wizard.Tenants.Create.Models exposing (Model)
 import Wizard.Tenants.Create.Msgs exposing (Msg(..))
@@ -25,7 +24,7 @@ view appState model =
         , FormResult.view appState model.savingTenant
         , Html.map FormMsg <| formView appState model.form
         , FormActions.viewSubmit appState
-            Routes.tenantsIndex
+            Cancel
             (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingTenant)
         ]
 

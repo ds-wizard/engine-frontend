@@ -21,11 +21,12 @@ import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Wizard.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Uuid -> Cmd Msg
@@ -47,6 +48,9 @@ update wrapMsg msg appState model =
 
         GetQuestionnaireCompleted result ->
             handleGetQuestionnaireCompleted appState wrapMsg model result
+
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model

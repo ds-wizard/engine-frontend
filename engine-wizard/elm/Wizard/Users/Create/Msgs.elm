@@ -6,5 +6,6 @@ import Shared.Error.ApiError exposing (ApiError)
 
 
 type Msg
-    = FormMsg Form.Msg
+    = Cancel
+    | FormMsg Form.Msg
     | PostUserCompleted (Result ApiError ())

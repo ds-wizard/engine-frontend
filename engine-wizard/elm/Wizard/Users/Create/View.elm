@@ -13,7 +13,6 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
-import Wizard.Routes as Routes
 import Wizard.Users.Common.UserCreateForm exposing (UserCreateForm)
 import Wizard.Users.Create.Models exposing (Model)
 import Wizard.Users.Create.Msgs exposing (Msg(..))
@@ -26,7 +25,7 @@ view appState model =
         , FormResult.view appState model.savingUser
         , formView appState model.form |> Html.map FormMsg
         , FormActions.viewSubmit appState
-            Routes.usersIndex
+            Cancel
             (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser)
         ]
 

@@ -12,6 +12,7 @@ import Wizard.Common.Components.TypeHintInput as TypeHintInput
 
 type Msg
     = GetQuestionnaireCompleted (Result ApiError QuestionnaireDetail)
+    | Cancel
     | FormMsg Form.Msg
     | SelectPackage PackageSuggestion
     | PostMigrationCompleted (Result ApiError QuestionnaireMigration)

@@ -13,9 +13,9 @@ import Wizard.KnowledgeModels.Common.OwlImportForm as OwlImportForm
 import Wizard.KnowledgeModels.Import.OwlImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.KnowledgeModels.Import.OwlImport.Msgs exposing (Msg(..))
 import Wizard.Msgs
-import Wizard.Ports exposing (createDropzone, fileSelected)
+import Wizard.Ports as Ports exposing (createDropzone, fileSelected)
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -43,6 +43,9 @@ update msg wrapMsg appState model =
 
         ImportOwlCompleted result ->
             importOwlCompleted appState model result
+
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState Routes.knowledgeModelsIndex) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form, model.file ) of

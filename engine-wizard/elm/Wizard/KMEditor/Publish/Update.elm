@@ -21,8 +21,9 @@ import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm
 import Wizard.KMEditor.Publish.Models exposing (Model)
 import Wizard.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 fetchData : Uuid -> AppState -> Cmd Msg
@@ -38,6 +39,9 @@ update msg wrapMsg appState model =
 
         GetPreviousPackageCompleted result ->
             handleGetPreviousPackageCompleted model result
+
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState Routes.knowledgeModelsIndex) )
 
         FormMsg formMsg ->
             handleFormMsg formMsg wrapMsg appState model
