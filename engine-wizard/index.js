@@ -96,6 +96,10 @@ function getApiUrl(config) {
     return defaultApiUrl()
 }
 
+function guideLinks() {
+    return (window.app && window.app['guideLinks']) || {}
+}
+
 function loadApp(config, locale, provisioning) {
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
@@ -111,6 +115,7 @@ function loadApp(config, locale, provisioning) {
         },
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),
+        guideLinks: guideLinks(),
     }
 
     if (Object.keys(locale).length > 0) {

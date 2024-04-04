@@ -25,6 +25,7 @@ import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Shared.Utils.Theme as Theme exposing (Theme)
 import Time
 import Wizard.Common.Flags as Flags
+import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
 import Wizard.KMEditor.Editor.KMEditorRoute
@@ -55,6 +56,7 @@ type alias AppState =
     , selectedLocale : Maybe String
     , sessionExpiresSoonModalHidden : Bool
     , theme : Theme
+    , guideLinks : GuideLinks
     }
 
 
@@ -119,6 +121,7 @@ init flagsValue key =
       , selectedLocale = flags.selectedLocale
       , sessionExpiresSoonModalHidden = False
       , theme = theme
+      , guideLinks = GuideLinks.merge flags.guideLinks GuideLinks.default
       }
     , flagsCmd
     )

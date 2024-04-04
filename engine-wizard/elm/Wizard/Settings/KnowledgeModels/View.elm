@@ -9,7 +9,9 @@ import Html.Events exposing (onClick)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (compose2)
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableKnowledgeModelConfigFrom exposing (EditableKnowledgeModelConfigForm)
@@ -62,7 +64,11 @@ formView appState form =
         , allowedInput
         , hr [] []
         , FormGroup.resizableTextarea appState form "integrationConfig" (gettext "Integration Config" appState.locale)
-        , FormExtra.mdAfter (gettext "Integration config is used to configure [secrets and other properties](https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties) for integrations in knowledge models." appState.locale)
+        , FormExtra.mdAfter
+            (String.format
+                (gettext "Integration config is used to configure [secrets and other properties](%s) for integrations in knowledge models." appState.locale)
+                [ GuideLinks.integrationQuestionSecrets appState.guideLinks ]
+            )
         ]
 
 
