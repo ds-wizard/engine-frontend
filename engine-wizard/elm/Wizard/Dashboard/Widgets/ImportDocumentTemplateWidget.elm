@@ -5,6 +5,7 @@ import Html exposing (Html)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
 
@@ -15,8 +16,11 @@ view appState =
         { title = gettext "Import Document Template" appState.locale
         , text =
             String.format
-                (gettext "Document templates transform answers from a questionnaire into a document. This document can be anything, from PDF to machine-actionable JSON. You can import existing document templates from [%s](%s/templates) or [develop new ones](https://guide.ds-wizard.org/en/latest/more/development/document-templates/index.html)." appState.locale)
-                [ LookAndFeelConfig.defaultRegistryName, LookAndFeelConfig.defaultRegistryUrl ]
+                (gettext "Document templates transform answers from a questionnaire into a document. This document can be anything, from PDF to machine-actionable JSON. You can import existing document templates from [%s](%s/templates) or [develop new ones](%s)." appState.locale)
+                [ LookAndFeelConfig.defaultRegistryName
+                , LookAndFeelConfig.defaultRegistryUrl
+                , GuideLinks.documentTemplates appState.guideLinks
+                ]
         , action =
             { route = Routes.documentTemplatesImport Nothing
             , label = gettext "Import" appState.locale
