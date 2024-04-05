@@ -54,6 +54,7 @@ import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeel
 import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -692,7 +693,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( model
                 , Integrations.openIntegrationWidget
                     { url = requestUrl
-                    , theme = appState.theme
+                    , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
                     , data = { path = path }
                     }
                 )
@@ -906,7 +907,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( model
                 , Integrations.openAction
                     { url = questionnaireAction.url
-                    , theme = appState.theme
+                    , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
                     , data =
                         { projectUuid = model.uuid
                         , userToken = String.toMaybe appState.session.token.token

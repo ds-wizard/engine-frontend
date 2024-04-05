@@ -10,9 +10,9 @@ module Shared.Data.BootstrapConfig.LookAndFeelConfig exposing
     , defaultRegistryUrl
     , getAppTitle
     , getAppTitleShort
-    , getIllustrationsColor
     , getLogoUrl
-    , getPrimaryColor
+    , getTheme
+    , isCustomTheme
     )
 
 import Color exposing (Color)
@@ -22,6 +22,7 @@ import Json.Decode.Color as D
 import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
 import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink as CustomMenuLink exposing (CustomMenuLink)
+import Shared.Utils.Theme exposing (Theme)
 
 
 type alias LookAndFeelConfig =
@@ -102,6 +103,18 @@ getIllustrationsColor config =
     config.illustrationsColor
         |> Maybe.orElse (Result.toMaybe (Convert.hexToColor defaultIllustrationsColorString))
         |> Maybe.withDefault defaultIllustrationsColor
+
+
+isCustomTheme : LookAndFeelConfig -> Bool
+isCustomTheme config =
+    config.primaryColor /= Nothing || config.illustrationsColor /= Nothing
+
+
+getTheme : LookAndFeelConfig -> Theme
+getTheme config =
+    Theme
+        (getPrimaryColor config)
+        (getIllustrationsColor config)
 
 
 getLogoUrl : LookAndFeelConfig -> String

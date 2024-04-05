@@ -35,7 +35,8 @@ echo -n "};" >>${config}
 headExtraFile=/src/head-extra.html
 if [ -f "$headExtraFile" ]; then
   headExtraBlock=$(cat $headExtraFile)
-  sed -i "s~</head>~$headExtraBlock</head>~g" /usr/share/nginx/html/wizard/index.html
+  index=/usr/share/nginx/html/wizard/index.html
+  awk -v r="$headExtraBlock" '{gsub(/<\/head>/, r"</head>")}1' /usr/share/nginx/html/wizard/index.html > $index.tmp && mv $index.tmp $index
 fi
 
 # start nginx
