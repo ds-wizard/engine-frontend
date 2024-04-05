@@ -6,6 +6,7 @@ import Random exposing (Seed)
 import Shared.Api.KnowledgeModels as KnowledgeModelsApi
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeel
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Error.ApiError as ApiError
@@ -43,7 +44,7 @@ update wrapMsg msg appState model =
                 ( Success knowledgeModelString, Success importer ) ->
                     Integrations.openImporter
                         { url = importer.url
-                        , theme = appState.theme
+                        , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
                         , data =
                             { knowledgeModel = knowledgeModelString
                             }
