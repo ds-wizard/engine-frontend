@@ -41,10 +41,18 @@ init flags location key =
 
                     route =
                         routeIfAllowed appState originalRoute
+
+                    setThemeCmd =
+                        case appState.theme of
+                            Just theme ->
+                                Theme.setTheme theme
+
+                            Nothing ->
+                                Cmd.none
                 in
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute
-                    , Theme.setTheme appState.theme
+                    , setThemeCmd
                     , Time.getTime
                     , Time.getTimeZone
                     ]

@@ -22,7 +22,7 @@ import Shared.Common.Navigator exposing (Navigator)
 import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Provisioning as Provisioning exposing (Provisioning)
-import Shared.Utils.Theme as Theme exposing (Theme)
+import Shared.Utils.Theme exposing (Theme)
 import Time
 import Wizard.Common.Flags as Flags
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
@@ -55,7 +55,7 @@ type alias AppState =
     , locale : Gettext.Locale
     , selectedLocale : Maybe String
     , sessionExpiresSoonModalHidden : Bool
-    , theme : Theme
+    , theme : Maybe Theme
     , guideLinks : GuideLinks
     }
 
@@ -98,9 +98,11 @@ init flagsValue key =
                 ]
 
         theme =
-            Theme.Theme
-                (LookAndFeelConfig.getPrimaryColor flags.config.lookAndFeel)
-                (LookAndFeelConfig.getIllustrationsColor flags.config.lookAndFeel)
+            if LookAndFeelConfig.isCustomTheme flags.config.lookAndFeel then
+                Just <| LookAndFeelConfig.getTheme flags.config.lookAndFeel
+
+            else
+                Nothing
     in
     ( { route = Routes.NotFoundRoute
       , seed = Random.initialSeed flags.seed
