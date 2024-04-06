@@ -50,7 +50,7 @@
     "@codemirror/legacy-modes": "^6.3.3",
     "@codemirror/state": "^6.4.1",
     "@codemirror/view": "^6.26.1",
-    "@fortawesome/fontawesome-free": "^5.15.4",
+    "@fortawesome/fontawesome-free": "^6.5.2",
     "axios": "1.6.8",
     "axios-retry": "^4.1.0",
     "bootstrap": "^5.3.3",
