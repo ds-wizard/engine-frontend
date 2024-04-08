@@ -107,7 +107,14 @@ getIllustrationsColor config =
 
 isCustomTheme : LookAndFeelConfig -> Bool
 isCustomTheme config =
-    config.primaryColor /= Nothing || config.illustrationsColor /= Nothing
+    let
+        isDefaultPrimaryColor =
+            getPrimaryColor config == defaultPrimaryColor
+
+        isDefaultIllustrationsColor =
+            getIllustrationsColor config == defaultIllustrationsColor
+    in
+    not (isDefaultPrimaryColor && isDefaultIllustrationsColor)
 
 
 getTheme : LookAndFeelConfig -> Theme
