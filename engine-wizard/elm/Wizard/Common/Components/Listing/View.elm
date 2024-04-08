@@ -468,7 +468,7 @@ viewEmpty : AppState -> ViewConfig a msg -> Model a -> Html msg
 viewEmpty appState config model =
     let
         filtersActive =
-            not (String.isEmpty model.qInput && List.isEmpty (Dict.toList model.filters.values))
+            not (String.isEmpty model.qInput && Dict.isEmpty model.filters.values)
 
         emptyText =
             if filtersActive then
