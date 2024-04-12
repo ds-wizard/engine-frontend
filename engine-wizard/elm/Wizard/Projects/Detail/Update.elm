@@ -10,12 +10,10 @@ import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.Member as Member
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
-import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
@@ -203,12 +201,6 @@ update wrapMsg msg appState model =
                 createdBy =
                     Maybe.map UserInfo.toUserSuggestion appState.config.user
 
-                indications =
-                    ActionResult.unwrap
-                        AnsweredIndicationData.empty
-                        (QuestionnaireDetail.calculatePhasesAnsweredIndications << .questionnaire)
-                        newQuestionnaireModel
-
                 ( newSeed, newModel, newCmd ) =
                     case questionnaireMsg of
                         Questionnaire.PhaseModalUpdate _ mbPhaseUuid ->
@@ -220,7 +212,6 @@ update wrapMsg msg appState model =
                                             , phaseUuid = mbPhaseUuid
                                             , createdAt = createdAt
                                             , createdBy = createdBy
-                                            , phasesAnsweredIndication = indications
                                             }
 
                             else
@@ -235,7 +226,6 @@ update wrapMsg msg appState model =
                                         , value = reply.value
                                         , createdAt = createdAt
                                         , createdBy = createdBy
-                                        , phasesAnsweredIndication = indications
                                         }
 
                         Questionnaire.ClearReply path ->
@@ -246,7 +236,6 @@ update wrapMsg msg appState model =
                                         , path = path
                                         , createdAt = createdAt
                                         , createdBy = createdBy
-                                        , phasesAnsweredIndication = indications
                                         }
 
                         Questionnaire.SetLabels path value ->
