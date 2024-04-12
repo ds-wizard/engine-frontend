@@ -14,7 +14,6 @@ import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..), getItemUuids)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Utils exposing (flip, getUuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing (ImporterEvent(..))
@@ -80,7 +79,6 @@ createEvent appState questionnaire importerEvent ( seed, items, importerResult )
                 , value = value
                 , createdAt = appState.currentTime
                 , createdBy = Nothing
-                , phasesAnsweredIndication = AnsweredIndicationData.empty
                 }
 
         questionNotFound path =

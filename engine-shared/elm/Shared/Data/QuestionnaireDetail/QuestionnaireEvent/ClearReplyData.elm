@@ -8,7 +8,6 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
 import Uuid exposing (Uuid)
@@ -19,7 +18,6 @@ type alias ClearReplyData =
     , path : String
     , createdAt : Time.Posix
     , createdBy : Maybe UserSuggestion
-    , phasesAnsweredIndication : AnsweredIndicationData
     }
 
 
@@ -29,7 +27,6 @@ encode data =
         [ ( "type", E.string "ClearReplyEvent" )
         , ( "uuid", Uuid.encode data.uuid )
         , ( "path", E.string data.path )
-        , ( "phasesAnsweredIndication", AnsweredIndicationData.encode data.phasesAnsweredIndication )
         ]
 
 
@@ -40,4 +37,3 @@ decoder =
         |> D.required "path" D.string
         |> D.required "createdAt" D.datetime
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
-        |> D.hardcoded AnsweredIndicationData.empty
