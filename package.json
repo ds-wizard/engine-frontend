@@ -34,7 +34,7 @@
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.8.1",
     "sass": "^1.74.1",
-    "sass-loader": "^14.1.1",
+    "sass-loader": "^14.2.0",
     "terser-webpack-plugin": "^5.3.10",
     "uglify-js": "^3.17.4",
     "webpack": "^5.91.0",
