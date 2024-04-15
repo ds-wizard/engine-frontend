@@ -19,6 +19,7 @@ type alias Flags =
     , seed : Int
     , apiUrl : String
     , clientUrl : String
+    , webSocketUrl : Maybe String
     , config : BootstrapConfig
     , provisioning : Provisioning
     , localProvisioning : Provisioning
@@ -39,6 +40,7 @@ decoder =
         |> D.required "seed" D.int
         |> D.required "apiUrl" D.string
         |> D.required "clientUrl" D.string
+        |> D.optional "webSocketUrl" (D.maybe D.string) Nothing
         |> D.required "config" BootstrapConfig.decoder
         |> D.optional "provisioning" Provisioning.decoder Provisioning.default
         |> D.optional "localProvisioning" Provisioning.decoder Provisioning.default
@@ -57,6 +59,7 @@ default =
     , seed = 0
     , apiUrl = ""
     , clientUrl = ""
+    , webSocketUrl = Nothing
     , config = BootstrapConfig.default
     , provisioning = Provisioning.default
     , localProvisioning = Provisioning.default

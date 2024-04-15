@@ -46,6 +46,7 @@ import Shared.Data.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport as SummaryReport exposing (SummaryReport)
 import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
+import String.Extra as String
 import Uuid exposing (Uuid)
 
 
@@ -174,8 +175,27 @@ getSummaryReport questionnaireUuid =
 
 
 websocket : Uuid -> AbstractAppState a -> String
-websocket questionnaireUuid =
-    wsUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/websocket")
+websocket questionnaireUuid appState =
+    case appState.webSocketUrl of
+        Just webSocketUrl ->
+            let
+                token =
+                    Maybe.map ((++) "Authorization=Bearer%20") (String.toMaybe appState.session.token.token)
+
+                queryParams =
+                    List.filterMap identity
+                        [ token
+                        , Just "type=Questionnaire"
+                        , Just ("identifier=" ++ Uuid.toString questionnaireUuid)
+                        ]
+
+                queryString =
+                    String.join "&" queryParams
+            in
+            webSocketUrl ++ "?" ++ queryString
+
+        Nothing ->
+            wsUrl ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/websocket") appState
 
 
 getDocumentPreview : Uuid -> AbstractAppState a -> ToMsg ( Http.Metadata, Maybe UrlResponse ) msg -> Cmd msg
