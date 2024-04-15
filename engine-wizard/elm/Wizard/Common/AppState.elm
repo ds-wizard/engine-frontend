@@ -44,6 +44,7 @@ type alias AppState =
     , key : Key
     , apiUrl : String
     , clientUrl : String
+    , webSocketUrl : Maybe String
     , config : BootstrapConfig
     , provisioning : Provisioning
     , valid : Bool
@@ -111,6 +112,7 @@ init flagsValue key =
       , key = key
       , apiUrl = flags.apiUrl
       , clientUrl = flags.clientUrl
+      , webSocketUrl = flags.webSocketUrl
       , config = flags.config
       , provisioning = provisioning
       , valid = flags.success

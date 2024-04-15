@@ -79,6 +79,10 @@ function localProvisioning() {
     return null
 }
 
+function getWebSocketUrl() {
+    return window.app && window.app['websocketUrl']
+}
+
 function bootstrapErrorHTML(errorCode) {
     const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
     const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
@@ -107,6 +111,7 @@ function loadApp(config, locale, provisioning) {
         selectedLocale: JSON.parse(localStorage.locale || null),
         apiUrl: getApiUrl(config),
         clientUrl: clientUrl(),
+        webSocketUrl : getWebSocketUrl(),
         config: config,
         provisioning: provisioning,
         localProvisioning: localProvisioning(),
