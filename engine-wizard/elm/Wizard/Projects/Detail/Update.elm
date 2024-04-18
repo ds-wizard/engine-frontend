@@ -55,10 +55,20 @@ fetchData appState uuid model =
             ]
 
     else
+        let
+            importersAndActionsCmd =
+                if Session.exists appState.session then
+                    Cmd.batch
+                        [ QuestionnaireImportersApi.getQuestionnaireImportersFor uuid appState GetQuestionnaireImportersComplete
+                        , QuestionnaireActionsApi.getQuestionnaireActionsFor uuid appState GetQuestionnaireActionsComplete
+                        ]
+
+                else
+                    Cmd.none
+        in
         Cmd.batch
             [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
-            , QuestionnaireImportersApi.getQuestionnaireImportersFor uuid appState GetQuestionnaireImportersComplete
-            , QuestionnaireActionsApi.getQuestionnaireActionsFor uuid appState GetQuestionnaireActionsComplete
+            , importersAndActionsCmd
             ]
 
 

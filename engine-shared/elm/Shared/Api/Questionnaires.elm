@@ -105,7 +105,7 @@ getQuestionnaireMigration uuid =
 
 getQuestionnaireEvents : Uuid -> AbstractAppState a -> ToMsg (List QuestionnaireEvent) msg -> Cmd msg
 getQuestionnaireEvents uuid =
-    jwtGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/events") (D.list QuestionnaireEvent.decoder)
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/events") (D.list QuestionnaireEvent.decoder)
 
 
 getQuestionnaireEvent : Uuid -> Uuid -> AbstractAppState a -> ToMsg QuestionnaireEvent msg -> Cmd msg
