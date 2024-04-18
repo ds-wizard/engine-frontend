@@ -16,6 +16,7 @@ port module Wizard.Ports exposing
     , historyBackCallback
     , localStorageData
     , localStorageGet
+    , localStorageGetAndRemove
     , localStorageSet
     , localeFileSelected
     , refresh
@@ -150,6 +151,9 @@ port downloadFile : String -> Cmd msg
 
 
 port localStorageGet : String -> Cmd msg
+
+
+port localStorageGetAndRemove : String -> Cmd msg
 
 
 port localStorageSet : E.Value -> Cmd msg

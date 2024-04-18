@@ -4,6 +4,7 @@ module Wizard.Public.Auth.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Shared.Data.Token exposing (Token)
 
 
 type alias Model =
@@ -13,6 +14,8 @@ type alias Model =
     , authenticating : ActionResult String
     , hash : Maybe String
     , submittingConsent : ActionResult String
+    , originalUrl : ActionResult (Maybe String)
+    , token : ActionResult Token
     }
 
 
@@ -24,4 +27,6 @@ initialModel id sessionState =
     , authenticating = ActionResult.Loading
     , hash = Nothing
     , submittingConsent = ActionResult.Unset
+    , originalUrl = ActionResult.Loading
+    , token = ActionResult.Loading
     }
