@@ -6,6 +6,7 @@ import Json.Decode.Pipeline as D
 import Shared.Data.Submission.SubmissionState as SubmissionState exposing (SubmissionState)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
+import Time.Extra as Time
 import Uuid exposing (Uuid)
 
 
@@ -45,7 +46,7 @@ visibleName submission =
 
 compare : Submission -> Submission -> Order
 compare a b =
-    Basics.compare (Time.posixToMillis b.updatedAt) (Time.posixToMillis a.updatedAt)
+    Time.compare b.updatedAt a.updatedAt
 
 
 getReturnedData : Submission -> String

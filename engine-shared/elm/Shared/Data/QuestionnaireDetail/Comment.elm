@@ -1,5 +1,6 @@
 module Shared.Data.QuestionnaireDetail.Comment exposing
     ( Comment
+    , compare
     , decoder
     , isAuthor
     )
@@ -10,6 +11,7 @@ import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
+import Time.Extra as Time
 import Uuid exposing (Uuid)
 
 
@@ -39,3 +41,8 @@ isAuthor user comment =
             Maybe.map .uuid
     in
     Maybe.isJust user && toUserUuid comment.createdBy == toUserUuid user
+
+
+compare : Comment -> Comment -> Order
+compare a b =
+    Time.compare a.createdAt b.createdAt

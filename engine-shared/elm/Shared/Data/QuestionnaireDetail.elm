@@ -346,6 +346,7 @@ addCommentThread path threadUuid private comment questionnaire =
             , resolved = False
             , comments = []
             , private = private
+            , createdAt = comment.createdAt
             , createdBy = comment.createdBy
             }
 
