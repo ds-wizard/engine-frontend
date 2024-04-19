@@ -1,5 +1,6 @@
 module Wizard.Projects.Detail.Msgs exposing (Msg(..))
 
+import Debounce
 import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
@@ -23,6 +24,8 @@ type Msg
     = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
     | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
     | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
+    | QuestionnaireDebounceMsg String Debounce.Msg
+    | QuestionnaireAddSavingEvent QuestionnaireEvent
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing
     | ProjectSavingMsg ProjectSaving.Msg

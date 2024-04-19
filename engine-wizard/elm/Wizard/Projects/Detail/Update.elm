@@ -1,6 +1,8 @@
 module Wizard.Projects.Detail.Update exposing (fetchData, isGuarded, onUnload, update)
 
 import ActionResult exposing (ActionResult(..))
+import Debounce
+import Dict
 import Form
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
@@ -10,7 +12,7 @@ import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.Member as Member
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
@@ -185,8 +187,9 @@ update wrapMsg msg appState model =
                             buildEvent uuid
 
                         applyActionModel =
-                            addQuestionnaireEvent event <|
-                                addSavingActionUuid uuid newModel1
+                            newModel1
+                                |> addSavingActionUuid uuid
+                                |> addQuestionnaireEvent event
 
                         updatedQuestionnaireModel =
                             ActionResult.map updateQuestionnaire applyActionModel.questionnaireModel
@@ -204,6 +207,30 @@ update wrapMsg msg appState model =
                             Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
                     in
                     ( applyActionSeed, updatedModel, Cmd.batch [ wsCmd, setUnloadMessageCmd ] )
+
+                applyActionDebounce seed buildEvent =
+                    let
+                        ( uuid, applyActionSeed ) =
+                            Random.step Uuid.uuidGenerator seed
+
+                        event =
+                            buildEvent uuid
+
+                        path =
+                            Maybe.withDefault "" (QuestionnaireEvent.getPath event)
+
+                        ( debounce, debounceCmd ) =
+                            Debounce.push (debounceConfig path)
+                                event
+                                (getDebounceModel path newModel1)
+
+                        updatedModel =
+                            { newModel1 | questionnaireWebSocketDebounce = Dict.insert path debounce model.questionnaireWebSocketDebounce }
+
+                        setUnloadMessageCmd =
+                            Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+                    in
+                    ( applyActionSeed, updatedModel, Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd ] )
 
                 createdAt =
                     appState.currentTime
@@ -228,7 +255,7 @@ update wrapMsg msg appState model =
                                 ( appState.seed, newModel1, Cmd.none )
 
                         Questionnaire.SetReply path reply ->
-                            applyAction questionnaireSeed identity <|
+                            applyActionDebounce questionnaireSeed <|
                                 \uuid ->
                                     QuestionnaireEvent.SetReply
                                         { uuid = uuid
@@ -388,6 +415,42 @@ update wrapMsg msg appState model =
             , newModel
             , Cmd.batch [ questionnaireCmd, newCmd ]
             )
+
+        QuestionnaireDebounceMsg path debounceMsg ->
+            let
+                send event =
+                    let
+                        wsCmd =
+                            event
+                                |> ClientQuestionnaireAction.SetContent
+                                |> ClientQuestionnaireAction.encode
+                                |> WebSocket.send model.websocket
+                    in
+                    Cmd.batch
+                        [ wsCmd
+                        , dispatch (QuestionnaireAddSavingEvent event)
+                        ]
+
+                ( debounce, cmd ) =
+                    Debounce.update
+                        (debounceConfig path)
+                        (Debounce.takeLast send)
+                        debounceMsg
+                        (getDebounceModel path model)
+            in
+            withSeed <|
+                ( { model | questionnaireWebSocketDebounce = Dict.insert path debounce model.questionnaireWebSocketDebounce }
+                , Cmd.map wrapMsg cmd
+                )
+
+        QuestionnaireAddSavingEvent questionnaireEvent ->
+            let
+                newModel =
+                    model
+                        |> addSavingActionUuid (QuestionnaireEvent.getUuid questionnaireEvent)
+                        |> addQuestionnaireEvent questionnaireEvent
+            in
+            withSeed ( newModel, Cmd.none )
 
         PreviewMsg previewMsg ->
             let
@@ -768,3 +831,15 @@ handleWebsocketMsg websocketMsg appState model =
 
         _ ->
             ( appState.seed, model, Cmd.none )
+
+
+debounceConfig : String -> Debounce.Config Msg
+debounceConfig path =
+    { strategy = Debounce.soon 1000
+    , transform = QuestionnaireDebounceMsg path
+    }
+
+
+getDebounceModel : String -> Model -> Debounce.Debounce QuestionnaireEvent
+getDebounceModel path model =
+    Maybe.withDefault Debounce.init (Dict.get path model.questionnaireWebSocketDebounce)
