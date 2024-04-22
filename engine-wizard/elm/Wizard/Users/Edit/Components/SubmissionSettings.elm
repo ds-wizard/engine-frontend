@@ -20,6 +20,7 @@ import Shared.Data.SubmissionProps exposing (SubmissionProps)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
+import Shared.Html exposing (emptyNode)
 import String.Format as String
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -171,6 +172,11 @@ formView appState model =
         submissionPropsIndexes =
             Form.getListIndexes "submissionProps" model.form
 
+        noSubmissionFields =
+            submissionPropsIndexes
+                |> List.map (\i -> Form.getListIndexes ("submissionProps." ++ String.fromInt i ++ ".values") model.form)
+                |> List.all List.isEmpty
+
         submissionSettingsSection i =
             let
                 field name =
@@ -212,8 +218,12 @@ formView appState model =
                 ]
 
         saveButtonRow =
-            div [ class "mt-5" ]
-                [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingProps) ]
+            if noSubmissionFields then
+                emptyNode
+
+            else
+                div [ class "mt-5" ]
+                    [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingProps) ]
     in
     Html.form [ onSubmit Form.Submit ]
         (List.map submissionSettingsSection submissionPropsIndexes ++ [ saveButtonRow ])
