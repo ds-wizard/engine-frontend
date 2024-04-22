@@ -80,7 +80,11 @@ function localProvisioning() {
 }
 
 function getWebSocketUrl() {
-    return window.app && window.app['websocketUrl']
+    return window.app && window.app['webSocketUrl']
+}
+
+function getWebSocketThrottleDelay() {
+    return window.app && window.app['webSocketThrottleDelay']
 }
 
 function bootstrapErrorHTML(errorCode) {
@@ -112,6 +116,7 @@ function loadApp(config, locale, provisioning) {
         apiUrl: getApiUrl(config),
         clientUrl: clientUrl(),
         webSocketUrl : getWebSocketUrl(),
+        webSocketThrottleDelay: getWebSocketThrottleDelay(),
         config: config,
         provisioning: provisioning,
         localProvisioning: localProvisioning(),
