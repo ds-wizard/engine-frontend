@@ -220,7 +220,7 @@ update wrapMsg msg appState model =
                             Maybe.withDefault "" (QuestionnaireEvent.getPath event)
 
                         ( debounce, debounceCmd ) =
-                            Debounce.push (debounceConfig path)
+                            Debounce.push (debounceConfig appState path)
                                 event
                                 (getDebounceModel path newModel1)
 
@@ -433,7 +433,7 @@ update wrapMsg msg appState model =
 
                 ( debounce, cmd ) =
                     Debounce.update
-                        (debounceConfig path)
+                        (debounceConfig appState path)
                         (Debounce.takeLast send)
                         debounceMsg
                         (getDebounceModel path model)
@@ -833,9 +833,9 @@ handleWebsocketMsg websocketMsg appState model =
             ( appState.seed, model, Cmd.none )
 
 
-debounceConfig : String -> Debounce.Config Msg
-debounceConfig path =
-    { strategy = Debounce.soon 1000
+debounceConfig : AppState -> String -> Debounce.Config Msg
+debounceConfig appState path =
+    { strategy = Debounce.soon appState.websocketThrottleDelay
     , transform = QuestionnaireDebounceMsg path
     }
 
