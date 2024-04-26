@@ -44,7 +44,6 @@ type alias AppState =
     , key : Key
     , apiUrl : String
     , clientUrl : String
-    , webSocketUrl : Maybe String
     , websocketThrottleDelay : Float
     , config : BootstrapConfig
     , provisioning : Provisioning
@@ -113,7 +112,6 @@ init flagsValue key =
       , key = key
       , apiUrl = flags.apiUrl
       , clientUrl = flags.clientUrl
-      , webSocketUrl = flags.webSocketUrl
       , websocketThrottleDelay = Maybe.withDefault 1000 flags.webSocketThrottleDelay
       , config = flags.config
       , provisioning = provisioning
