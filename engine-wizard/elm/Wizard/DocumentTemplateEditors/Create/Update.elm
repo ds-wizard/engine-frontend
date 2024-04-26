@@ -61,13 +61,16 @@ update msg wrapMsg appState model =
             case result of
                 Ok documentTemplate ->
                     let
+                        nextVersion =
+                            Version.nextMinor documentTemplate.version
+
                         form =
                             model.form
                                 |> setDocumentTemplateEditorCreateFormValue "name" documentTemplate.name
                                 |> setDocumentTemplateEditorCreateFormValue "templateId" documentTemplate.templateId
-                                |> setDocumentTemplateEditorCreateFormValue "versionMajor" (String.fromInt (Version.getMajor documentTemplate.version))
-                                |> setDocumentTemplateEditorCreateFormValue "versionMinor" (String.fromInt (Version.getMinor documentTemplate.version + 1))
-                                |> setDocumentTemplateEditorCreateFormValue "versionPatch" (String.fromInt (Version.getPatch documentTemplate.version))
+                                |> setDocumentTemplateEditorCreateFormValue "versionMajor" (String.fromInt (Version.getMajor nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue "versionMinor" (String.fromInt (Version.getMinor nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue "versionPatch" (String.fromInt (Version.getPatch nextVersion))
                     in
                     ( { model | documentTemplate = ActionResult.Success documentTemplate, form = form }, Cmd.none )
 
