@@ -773,9 +773,16 @@ viewAboutModal appState isOpen recentlyCopied serverBuildInfoActionResult =
             else
                 emptyNode
 
+        modalTitle =
+            if Admin.isEnabled appState.config.admin then
+                String.format (gettext "About %s" appState.locale) [ LookAndFeelConfig.defaultMenuTitle ]
+
+            else
+                gettext "About" appState.locale
+
         modalContent =
             [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text (gettext "About" appState.locale) ]
+                [ h5 [ class "modal-title" ] [ text modalTitle ]
                 , copyButton
                 ]
             , div [ class "modal-body" ]
