@@ -79,10 +79,6 @@ function localProvisioning() {
     return null
 }
 
-function getWebSocketUrl() {
-    return window.app && window.app['webSocketUrl']
-}
-
 function getWebSocketThrottleDelay() {
     return window.app && window.app['webSocketThrottleDelay']
 }
@@ -115,7 +111,6 @@ function loadApp(config, locale, provisioning) {
         selectedLocale: JSON.parse(localStorage.locale || null),
         apiUrl: getApiUrl(config),
         clientUrl: clientUrl(),
-        webSocketUrl : getWebSocketUrl(),
         webSocketThrottleDelay: getWebSocketThrottleDelay(),
         config: config,
         provisioning: provisioning,

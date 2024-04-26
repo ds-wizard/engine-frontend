@@ -19,7 +19,6 @@ type alias Flags =
     , seed : Int
     , apiUrl : String
     , clientUrl : String
-    , webSocketUrl : Maybe String
     , webSocketThrottleDelay : Maybe Float
     , config : BootstrapConfig
     , provisioning : Provisioning
@@ -41,7 +40,6 @@ decoder =
         |> D.required "seed" D.int
         |> D.required "apiUrl" D.string
         |> D.required "clientUrl" D.string
-        |> D.optional "webSocketUrl" (D.maybe D.string) Nothing
         |> D.optional "webSocketThrottleDelay" (D.maybe D.float) Nothing
         |> D.required "config" BootstrapConfig.decoder
         |> D.optional "provisioning" Provisioning.decoder Provisioning.default
@@ -61,7 +59,6 @@ default =
     , seed = 0
     , apiUrl = ""
     , clientUrl = ""
-    , webSocketUrl = Nothing
     , webSocketThrottleDelay = Nothing
     , config = BootstrapConfig.default
     , provisioning = Provisioning.default

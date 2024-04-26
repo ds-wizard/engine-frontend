@@ -176,7 +176,7 @@ getSummaryReport questionnaireUuid =
 
 websocket : Uuid -> AbstractAppState a -> String
 websocket questionnaireUuid appState =
-    case appState.webSocketUrl of
+    case appState.config.signalBridge.webSocketUrl of
         Just webSocketUrl ->
             let
                 token =
@@ -185,7 +185,7 @@ websocket questionnaireUuid appState =
                 queryParams =
                     List.filterMap identity
                         [ token
-                        , Just "type=Questionnaire"
+                        , Just "subscription=Questionnaire"
                         , Just ("identifier=" ++ Uuid.toString questionnaireUuid)
                         ]
 
