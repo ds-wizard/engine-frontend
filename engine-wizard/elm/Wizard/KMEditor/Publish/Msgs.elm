@@ -11,6 +11,7 @@ import Version exposing (Version)
 type Msg
     = GetBranchCompleted (Result ApiError BranchDetail)
     | GetPreviousPackageCompleted (Result ApiError PackageDetail)
+    | Cancel
     | FormMsg Form.Msg
     | FormSetVersion Version
     | PutBranchCompleted (Result ApiError Package)

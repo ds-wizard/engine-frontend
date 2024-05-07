@@ -10,7 +10,8 @@ import Wizard.Common.Components.TypeHintInput as TypeHintInput
 
 
 type Msg
-    = FormMsg Form.Msg
+    = Cancel
+    | FormMsg Form.Msg
     | FormSetVersion Version
     | PostBranchCompleted (Result ApiError Branch)
     | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)

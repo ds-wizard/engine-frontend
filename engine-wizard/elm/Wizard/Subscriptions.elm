@@ -11,9 +11,11 @@ import Wizard.KnowledgeModels.Subscriptions
 import Wizard.Locales.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.Ports as Ports
 import Wizard.ProjectActions.Subscriptions
 import Wizard.ProjectImporters.Subscriptions
 import Wizard.Projects.Subscriptions
+import Wizard.Public.Subscriptions
 import Wizard.Routes as Routes
 import Wizard.Tenants.Subscriptions
 import Wizard.Users.Subscriptions
@@ -57,6 +59,9 @@ subscriptions model =
                 Routes.ProjectsRoute route ->
                     Sub.map ProjectsMsg <| Wizard.Projects.Subscriptions.subscriptions route model.projectsModel
 
+                Routes.PublicRoute route ->
+                    Sub.map PublicMsg <| Wizard.Public.Subscriptions.subscriptions route
+
                 Routes.UsersRoute route ->
                     Sub.map UsersMsg <| Wizard.Users.Subscriptions.subscriptions route model.users
 
@@ -68,9 +73,13 @@ subscriptions model =
 
         menuSubscriptions =
             Wizard.Common.Menu.Subscriptions.subscriptions model.menuModel
+
+        historySubscriptions =
+            Ports.historyBackCallback HistoryBackCallback
     in
     Sub.batch
         [ currentViewSubscriptions
         , authSubscriptions
         , menuSubscriptions
+        , historySubscriptions
         ]

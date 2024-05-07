@@ -13,4 +13,5 @@ type Msg
     | FileRead E.Value
     | CancelFile
     | ImportOwlCompleted (Result ApiError ())
+    | Cancel
     | FormMsg Form.Msg

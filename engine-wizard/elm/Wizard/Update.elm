@@ -1,7 +1,7 @@
 module Wizard.Update exposing (update)
 
 import Browser
-import Browser.Navigation exposing (load, pushUrl)
+import Browser.Navigation as Navigation exposing (load, pushUrl)
 import Json.Encode as E
 import Shared.Auth.Session as Session
 import Url
@@ -198,6 +198,13 @@ update msg model =
 
                         else
                             ( model, load url )
+
+            Wizard.Msgs.HistoryBackCallback url ->
+                if String.isEmpty url then
+                    ( model, Navigation.back model.appState.key 1 )
+
+                else
+                    ( model, Navigation.pushUrl model.appState.key url )
 
             Wizard.Msgs.OnTime time ->
                 ( { model | appState = AppState.setCurrentTime model.appState time }, Cmd.none )

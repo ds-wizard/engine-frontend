@@ -16,22 +16,27 @@ import Shared.Utils exposing (dispatch)
 import String.Extra as String
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.LocalStorageData as LocalStorageData
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Public.Login.Models exposing (Model)
 import Wizard.Public.Login.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> Cmd msg
-fetchData appState =
+fetchData : AppState -> Maybe String -> Cmd msg
+fetchData appState mbOriginalUrl =
     if Session.exists appState.session && not (Session.expired appState.currentTime appState.session) then
         cmdNavigate appState Routes.appHome
 
     else if Admin.isEnabled appState.config.admin then
         case List.head appState.config.authentication.external.services of
             Just service ->
-                Navigation.load (AuthApi.authRedirectUrl service appState)
+                Cmd.batch
+                    [ Navigation.load (AuthApi.authRedirectUrl service appState)
+                    , saveOriginalUrlCmd mbOriginalUrl
+                    ]
 
             Nothing ->
                 Cmd.none
@@ -69,11 +74,12 @@ update msg wrapMsg appState model =
             loginCompleted appState model result
 
         ExternalLoginOpenId openIdServiceConfig ->
-            let
-                redirectCmd =
-                    Navigation.load (AuthApi.authRedirectUrl openIdServiceConfig appState)
-            in
-            ( model, redirectCmd )
+            ( model
+            , Cmd.batch
+                [ Navigation.load (AuthApi.authRedirectUrl openIdServiceConfig appState)
+                , saveOriginalUrlCmd model.originalUrl
+                ]
+            )
 
 
 loginCompleted : AppState -> Model -> Result ApiError TokenResponse -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -92,3 +98,13 @@ loginCompleted appState model result =
 
         Err error ->
             ( { model | loggingIn = ApiError.toActionResult appState (gettext "Login failed." appState.locale) error }, Cmd.none )
+
+
+saveOriginalUrlCmd : Maybe String -> Cmd msg
+saveOriginalUrlCmd originalUrl =
+    case originalUrl of
+        Just url ->
+            Ports.localStorageSet (LocalStorageData.encode E.string { key = "wizard/originalUrl", value = url })
+
+        Nothing ->
+            Cmd.none

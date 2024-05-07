@@ -17,6 +17,7 @@ type Msg
     | GetSelectedKnowledgeModelCompleted (Result ApiError PackageDetail)
     | GetProjectTemplatesCountCompleted (Result ApiError (Pagination Questionnaire))
     | GetKnowledgeModelsCountCompleted (Result ApiError (Pagination PackageSuggestion))
+    | Cancel
     | FormMsg Form.Msg
     | PostQuestionnaireCompleted (Result ApiError Questionnaire)
     | GetKnowledgeModelPreviewCompleted (Result ApiError KnowledgeModel)

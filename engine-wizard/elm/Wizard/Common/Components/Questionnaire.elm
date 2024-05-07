@@ -69,8 +69,8 @@ import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
-import Shared.Data.QuestionnaireDetail.Comment exposing (Comment)
-import Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread)
+import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
+import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
@@ -1898,6 +1898,7 @@ viewQuestionnaireRightPanelComments appState model path =
             commentThreads
                 |> List.filter (\thread -> thread.private == model.commentsViewPrivate)
                 |> List.filter condition
+                |> List.sortWith CommentThread.compare
                 |> List.map (viewCommentThread appState model path)
 
         resolvedSelect =
@@ -2015,6 +2016,11 @@ viewCommentThread appState model path commentThread =
                     , mbThreadUuid = Just commentThread.uuid
                     , private = commentThread.private
                     }
+
+        comments =
+            commentThread.comments
+                |> List.sortWith Comment.compare
+                |> List.indexedMap (viewComment appState model path commentThread)
     in
     div
         [ class "CommentThread"
@@ -2023,9 +2029,7 @@ viewCommentThread appState model path commentThread =
             , ( "CommentThread--Private", commentThread.private )
             ]
         ]
-        (List.indexedMap (viewComment appState model path commentThread) commentThread.comments
-            ++ [ replyForm, deleteOverlay ]
-        )
+        (comments ++ [ replyForm, deleteOverlay ])
 
 
 viewComment : AppState -> Model -> String -> CommentThread -> Int -> Comment -> Html Msg

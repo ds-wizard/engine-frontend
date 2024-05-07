@@ -17,7 +17,6 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Create.Models exposing (Model)
 import Wizard.KMEditor.Create.Msgs exposing (Msg(..))
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -42,7 +41,7 @@ viewCreate appState model _ =
             [ FormResult.errorOnlyView appState model.savingBranch
             , formView appState model
             , FormActions.viewSubmit appState
-                Routes.kmEditorIndex
+                Cancel
                 (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingBranch)
             ]
         ]

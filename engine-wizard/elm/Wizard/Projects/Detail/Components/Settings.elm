@@ -371,7 +371,7 @@ formView appState cfg model =
             if Feature.projectTemplatesCreate appState then
                 [ hr [] []
                 , Html.map FormMsg <| FormGroup.toggle model.form "isTemplate" <| gettext "Project Template" appState.locale
-                , FormExtra.mdAfter (gettext "Project templates can be used by other users so they don't have to start their new projects from scratch." appState.locale)
+                , FormExtra.mdAfter (gettext "Other users can use project templates so they don't have to start their new projects from scratch. Project templates follow the same sharing policy as projects, so make sure to share them with users who should use them." appState.locale)
                 ]
 
             else

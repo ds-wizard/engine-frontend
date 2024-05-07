@@ -25,6 +25,7 @@ import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Shared.Utils.Theme exposing (Theme)
 import Time
 import Wizard.Common.Flags as Flags
+import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
 import Wizard.Common.Provisioning.DefaultLocale as DefaultLocale
 import Wizard.KMEditor.Editor.KMEditorRoute
@@ -43,6 +44,7 @@ type alias AppState =
     , key : Key
     , apiUrl : String
     , clientUrl : String
+    , websocketThrottleDelay : Float
     , config : BootstrapConfig
     , provisioning : Provisioning
     , valid : Bool
@@ -55,6 +57,7 @@ type alias AppState =
     , selectedLocale : Maybe String
     , sessionExpiresSoonModalHidden : Bool
     , theme : Maybe Theme
+    , guideLinks : GuideLinks
     }
 
 
@@ -109,6 +112,7 @@ init flagsValue key =
       , key = key
       , apiUrl = flags.apiUrl
       , clientUrl = flags.clientUrl
+      , websocketThrottleDelay = Maybe.withDefault 1000 flags.webSocketThrottleDelay
       , config = flags.config
       , provisioning = provisioning
       , valid = flags.success
@@ -121,6 +125,7 @@ init flagsValue key =
       , selectedLocale = flags.selectedLocale
       , sessionExpiresSoonModalHidden = False
       , theme = theme
+      , guideLinks = GuideLinks.merge flags.guideLinks GuideLinks.default
       }
     , flagsCmd
     )

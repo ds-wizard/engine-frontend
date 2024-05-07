@@ -23,6 +23,7 @@ import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 
 
 misconfigured : AppState -> Document Msg
@@ -113,7 +114,7 @@ publicHeader fluidFull model =
                 in
                 [ li [ class "nav-item" ]
                     [ linkTo model.appState
-                        (Routes.publicLogin Nothing)
+                        (Routes.publicLogin (Just (Routing.toUrl model.appState model.appState.route)))
                         [ class "nav-link", dataCy "public_nav_login" ]
                         [ text (gettext "Log In" model.appState.locale) ]
                     ]

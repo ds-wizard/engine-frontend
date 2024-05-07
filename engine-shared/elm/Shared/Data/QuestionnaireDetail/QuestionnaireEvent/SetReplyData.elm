@@ -11,7 +11,6 @@ import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
-import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
 import Uuid exposing (Uuid)
@@ -23,7 +22,6 @@ type alias SetReplyData =
     , value : ReplyValue
     , createdAt : Time.Posix
     , createdBy : Maybe UserSuggestion
-    , phasesAnsweredIndication : AnsweredIndicationData
     }
 
 
@@ -34,7 +32,6 @@ encode data =
         , ( "uuid", Uuid.encode data.uuid )
         , ( "path", E.string data.path )
         , ( "value", ReplyValue.encode data.value )
-        , ( "phasesAnsweredIndication", AnsweredIndicationData.encode data.phasesAnsweredIndication )
         ]
 
 
@@ -46,7 +43,6 @@ decoder =
         |> D.required "value" ReplyValue.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
-        |> D.hardcoded AnsweredIndicationData.empty
 
 
 toReply : SetReplyData -> Reply

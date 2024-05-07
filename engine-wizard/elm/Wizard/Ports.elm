@@ -12,8 +12,11 @@ port module Wizard.Ports exposing
     , fileSelected
     , focus
     , gotScrollTop
+    , historyBack
+    , historyBackCallback
     , localStorageData
     , localStorageGet
+    , localStorageGetAndRemove
     , localStorageSet
     , localeFileSelected
     , refresh
@@ -28,6 +31,16 @@ port module Wizard.Ports exposing
 
 import Json.Encode as E
 import Wizard.Common.ElementScrollTop as ElementScrollTop exposing (ElementScrollTop)
+
+
+
+-- Browser
+
+
+port historyBack : String -> Cmd msg
+
+
+port historyBackCallback : (String -> msg) -> Sub msg
 
 
 
@@ -138,6 +151,9 @@ port downloadFile : String -> Cmd msg
 
 
 port localStorageGet : String -> Cmd msg
+
+
+port localStorageGetAndRemove : String -> Cmd msg
 
 
 port localStorageSet : E.Value -> Cmd msg

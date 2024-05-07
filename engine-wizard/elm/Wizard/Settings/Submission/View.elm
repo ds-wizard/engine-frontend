@@ -4,7 +4,7 @@ import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, label, p, strong, text)
-import Html.Attributes exposing (class, placeholder)
+import Html.Attributes exposing (class, placeholder, type_)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
@@ -167,7 +167,7 @@ supportedFormatFormView appState templates prefix form index =
         [ Input.selectInput templateOptions templateField [ class "form-select", class templateIdErrorClass ]
         , Input.selectInput templateVersionOptions templateIdField [ class "form-select", class templateIdErrorClass ]
         , Input.selectInput formatOptions formatUuidField [ class "form-select", class formatUuidErrorClass ]
-        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
+        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
             [ faSet "_global.delete" appState ]
         , templateIdError
         , formatUuidError
@@ -182,7 +182,7 @@ propFormView appState prefix form index =
     in
     div [ class "input-group mb-2" ]
         [ Input.textInput field [ class "form-control" ]
-        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
+        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
             [ faSet "_global.delete" appState ]
         ]
 
@@ -255,7 +255,7 @@ headerFormView appState prefix form index =
     div [ class "input-group mb-2" ]
         [ Input.textInput headerField [ placeholder (gettext "Header" appState.locale), class "form-control", class headerErrorClass ]
         , Input.textInput valueField [ placeholder (gettext "Value" appState.locale), class "form-control", class valueErrorClass ]
-        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index) ]
+        , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
             [ faSet "_global.delete" appState ]
         , headerError
         , valueError

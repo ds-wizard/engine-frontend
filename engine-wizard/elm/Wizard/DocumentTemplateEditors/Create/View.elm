@@ -17,7 +17,6 @@ import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.DocumentTemplateEditors.Create.Models exposing (Model)
 import Wizard.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -42,7 +41,7 @@ viewCreate appState model _ =
             [ FormResult.errorOnlyView appState model.savingDocumentTemplate
             , formView appState model
             , FormActions.viewSubmit appState
-                Routes.documentTemplateEditorsIndex
+                Cancel
                 (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingDocumentTemplate)
             ]
         ]

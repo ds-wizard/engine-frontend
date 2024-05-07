@@ -19,6 +19,7 @@ import Shared.Data.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
 import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Data.BootstrapConfig.QuestionnaireConfig as QuestionnaireConfig exposing (QuestionnaireConfig)
 import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig)
+import Shared.Data.BootstrapConfig.SignalBridgeConfig as SignalBridgeConfig exposing (SignalBridgeConfig)
 import Shared.Data.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 
@@ -38,6 +39,7 @@ type alias BootstrapConfig =
     , owl : OwlConfig
     , locales : List LocaleConfig
     , modules : List AppSwitcherItem
+    , signalBridge : SignalBridgeConfig
     , user : Maybe UserInfo
     }
 
@@ -58,6 +60,7 @@ default =
     , owl = OwlConfig.default
     , locales = []
     , modules = []
+    , signalBridge = SignalBridgeConfig.default
     , user = Nothing
     }
 
@@ -79,4 +82,5 @@ decoder =
         |> D.required "owl" OwlConfig.decoder
         |> D.required "locales" (D.list LocaleConfig.decoder)
         |> D.required "modules" (D.list AppSwitcherItem.decoder)
+        |> D.required "signalBridge" SignalBridgeConfig.decoder
         |> D.required "user" (D.maybe UserInfo.decoder)

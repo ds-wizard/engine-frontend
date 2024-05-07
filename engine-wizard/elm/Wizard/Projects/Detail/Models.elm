@@ -9,6 +9,8 @@ module Wizard.Projects.Detail.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Debounce exposing (Debounce)
+import Dict exposing (Dict)
 import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
@@ -46,6 +48,7 @@ type alias Model =
     , questionnaireModel : ActionResult Questionnaire.Model
     , questionnaireImporters : ActionResult (List QuestionnaireImporter)
     , questionnaireActions : ActionResult (List QuestionnaireAction)
+    , questionnaireWebSocketDebounce : Dict String (Debounce QuestionnaireEvent)
     , summaryReportModel : SummaryReport.Model
     , documentsModel : Documents.Model
     , settingsModel : Settings.Model
@@ -71,6 +74,7 @@ init appState uuid mbSelectedPath =
     , questionnaireModel = Loading
     , questionnaireImporters = Loading
     , questionnaireActions = Loading
+    , questionnaireWebSocketDebounce = Dict.empty
     , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty

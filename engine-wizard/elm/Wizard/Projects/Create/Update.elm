@@ -22,11 +22,12 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Feature as Feature
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
 import Wizard.Projects.Create.Models exposing (Model, mapMode, updateDefaultMode)
 import Wizard.Projects.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -141,6 +142,9 @@ update wrapMsg msg appState model =
                 , transform = \pagination -> pagination.page.totalElements > 0
                 }
                 |> updateModelDefaultMode
+
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form ) of

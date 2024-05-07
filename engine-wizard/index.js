@@ -10,6 +10,7 @@ const codeEditor = require('./js/components/code-editor')
 const datetimePickers = require('./js/components/datetime-pickers')
 
 const cookies = require('./js/ports/cookies')
+const registerBrowserPorts = require('./js/ports/browser')
 const registerConsolePorts = require('./js/ports/console')
 const registerCopyPorts = require('../engine-shared/ports/copy')
 const registerDomPorts = require('./js/ports/dom')
@@ -78,6 +79,10 @@ function localProvisioning() {
     return null
 }
 
+function getWebSocketThrottleDelay() {
+    return window.app && window.app['webSocketThrottleDelay']
+}
+
 function bootstrapErrorHTML(errorCode) {
     const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
     const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
@@ -95,6 +100,10 @@ function getApiUrl(config) {
     return defaultApiUrl()
 }
 
+function guideLinks() {
+    return (window.app && window.app['guideLinks']) || {}
+}
+
 function loadApp(config, locale, provisioning) {
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
@@ -102,6 +111,7 @@ function loadApp(config, locale, provisioning) {
         selectedLocale: JSON.parse(localStorage.locale || null),
         apiUrl: getApiUrl(config),
         clientUrl: clientUrl(),
+        webSocketThrottleDelay: getWebSocketThrottleDelay(),
         config: config,
         provisioning: provisioning,
         localProvisioning: localProvisioning(),
@@ -110,6 +120,7 @@ function loadApp(config, locale, provisioning) {
         },
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),
+        guideLinks: guideLinks(),
     }
 
     if (Object.keys(locale).length > 0) {
@@ -121,6 +132,7 @@ function loadApp(config, locale, provisioning) {
         flags: flags,
     })
 
+    registerBrowserPorts(app)
     registerConsolePorts(app)
     registerCopyPorts(app)
     registerDomPorts(app)

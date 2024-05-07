@@ -21,7 +21,6 @@ import Wizard.Common.View.Page as Page
 import Wizard.Locales.Common.LocaleCreateForm exposing (LocaleCreateFrom)
 import Wizard.Locales.Create.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.Locales.Create.Msgs exposing (Msg(..))
-import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -56,7 +55,7 @@ view appState model =
 
         formActions =
             FormActions.view appState
-                Routes.localesIndex
+                Cancel
                 (ActionButton.ButtonConfig (gettext "Create" appState.locale) model.creatingLocale (FormMsg <| Form.Submit) False)
     in
     div [ detailClass "" ]

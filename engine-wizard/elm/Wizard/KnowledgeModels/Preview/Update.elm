@@ -17,7 +17,6 @@ import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
-import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData
 import Shared.Error.ApiError as ApiError
 import Shared.Setters exposing (setKnowledgeModel, setPackage)
 import Shared.Utils exposing (getUuid)
@@ -107,7 +106,6 @@ update msg wrapMsg appState model =
                                                 , value = reply.value
                                                 , createdAt = reply.createdAt
                                                 , createdBy = reply.createdBy
-                                                , phasesAnsweredIndication = AnsweredIndicationData.empty
                                                 }
                                     in
                                     ( nextSeed, event :: list )

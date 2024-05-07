@@ -13,4 +13,5 @@ type Msg
     | FileRead E.Value
     | CancelFile
     | CreateCompleted (Result ApiError ())
+    | Cancel
     | FormMsg Form.Msg

@@ -3,7 +3,6 @@ module Shared.Data.QuestionnaireDetail exposing
     , QuestionnaireDetail
     , QuestionnaireWarning
     , addComment
-    , calculatePhasesAnsweredIndications
     , calculateUnansweredQuestionsForChapter
     , canComment
     , clearReplyValue
@@ -71,7 +70,6 @@ import Shared.Data.QuestionnaireDetail.Reply as Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Markdown as Markdown
@@ -348,6 +346,7 @@ addCommentThread path threadUuid private comment questionnaire =
             , resolved = False
             , comments = []
             , private = private
+            , createdAt = comment.createdAt
             , createdBy = comment.createdBy
             }
 
@@ -673,19 +672,6 @@ getItemTitle questionnaire itemPath itemTemplateQuestions =
 
 
 -- Evaluations
-
-
-calculatePhasesAnsweredIndications : QuestionnaireDetail -> AnsweredIndicationData
-calculatePhasesAnsweredIndications questionnaire =
-    let
-        ( unaswered, total ) =
-            KnowledgeModel.getChapters questionnaire.knowledgeModel
-                |> List.map (evaluateChapter questionnaire)
-                |> List.foldl Tuple.sum ( 0, 0 )
-    in
-    { answeredQuestions = total - unaswered
-    , unansweredQuestions = unaswered
-    }
 
 
 calculateUnansweredQuestionsForChapter : QuestionnaireDetail -> Chapter -> Int

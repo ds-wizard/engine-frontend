@@ -24,8 +24,9 @@ import Wizard.DocumentTemplateEditors.Common.DocumentTemplateEditorCreateForm as
 import Wizard.DocumentTemplateEditors.Create.Models exposing (Model)
 import Wizard.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
 import Wizard.Msgs
+import Wizard.Ports as Ports
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Model -> Cmd Msg
@@ -41,6 +42,9 @@ fetchData appState model =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        Cancel ->
+            ( model, Ports.historyBack (Routing.toUrl appState Routes.documentTemplateEditorsIndex) )
+
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model
 
@@ -57,13 +61,16 @@ update msg wrapMsg appState model =
             case result of
                 Ok documentTemplate ->
                     let
+                        nextVersion =
+                            Version.nextMinor documentTemplate.version
+
                         form =
                             model.form
                                 |> setDocumentTemplateEditorCreateFormValue "name" documentTemplate.name
                                 |> setDocumentTemplateEditorCreateFormValue "templateId" documentTemplate.templateId
-                                |> setDocumentTemplateEditorCreateFormValue "versionMajor" (String.fromInt (Version.getMajor documentTemplate.version))
-                                |> setDocumentTemplateEditorCreateFormValue "versionMinor" (String.fromInt (Version.getMinor documentTemplate.version + 1))
-                                |> setDocumentTemplateEditorCreateFormValue "versionPatch" (String.fromInt (Version.getPatch documentTemplate.version))
+                                |> setDocumentTemplateEditorCreateFormValue "versionMajor" (String.fromInt (Version.getMajor nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue "versionMinor" (String.fromInt (Version.getMinor nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue "versionPatch" (String.fromInt (Version.getPatch nextVersion))
                     in
                     ( { model | documentTemplate = ActionResult.Success documentTemplate, form = form }, Cmd.none )
 
