@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "4.5.2",
+  "version": "4.5.3",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
