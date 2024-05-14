@@ -16,7 +16,7 @@ view appState =
         { title = gettext "Import Document Template" appState.locale
         , text =
             String.format
-                (gettext "Document templates transform answers from a questionnaire into a document. This document can be anything, from PDF to machine-actionable JSON. You can import existing document templates from [%s](%s/templates) or [develop new ones](%s)." appState.locale)
+                (gettext "Document templates transform answers from a questionnaire into a document. This document can be anything, from PDF to machine-actionable JSON. You can import existing document templates from [%s](%s/document-templates) or [develop new ones](%s)." appState.locale)
                 [ LookAndFeelConfig.defaultRegistryName
                 , LookAndFeelConfig.defaultRegistryUrl
                 , GuideLinks.documentTemplates appState.guideLinks
