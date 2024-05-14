@@ -66,7 +66,7 @@ viewRegistryText appState =
             p []
                 (String.formatHtml
                     (gettext "You can find document templates in %s." appState.locale)
-                    [ a [ href (url ++ "/templates"), target "_blank" ] [ text LookAndFeelConfig.defaultRegistryName ]
+                    [ a [ href (url ++ "/document-templates"), target "_blank" ] [ text LookAndFeelConfig.defaultRegistryName ]
                     ]
                 )
 
