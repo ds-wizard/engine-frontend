@@ -95,11 +95,11 @@ update wrapMsg msg appState model =
 
         ListingFilterAddSelectedUser user listingMsg ->
             let
-                updatePackages users =
+                updateUsers users =
                     { users | items = List.uniqueBy .uuid (user :: users.items) }
 
                 newModel =
-                    { model | userFilterSelectedUsers = ActionResult.map updatePackages model.userFilterSelectedUsers }
+                    { model | userFilterSelectedUsers = ActionResult.map updateUsers model.userFilterSelectedUsers }
             in
             handleListingMsg wrapMsg appState listingMsg newModel
 
@@ -274,9 +274,6 @@ update wrapMsg msg appState model =
                     update wrapMsg updateMsg appState updateModel
             in
             Debouncer.update update_ updateConfig debounceMsg model
-
-        NoOp ->
-            ( model, Cmd.none )
 
 
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )

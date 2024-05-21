@@ -4,7 +4,7 @@ import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
-import Html.Attributes exposing (class, classList, href, placeholder, title, type_, value)
+import Html.Attributes exposing (class, classList, placeholder, title, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
 import List.Extra as List
@@ -15,7 +15,6 @@ import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Shared.Data.User as User
@@ -46,7 +45,6 @@ import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
-import Wizard.Routing as Routing
 
 
 view : AppState -> Model -> Html Msg
@@ -387,11 +385,8 @@ listingUsersFilter appState model =
             else
                 filterMsg (PaginationQueryFilter.insertValue indexRouteUsersFilterId (String.join "," (List.unique userUuids)) model.questionnaires.filters)
 
-        linkWithOp op =
-            Routing.toUrl appState <|
-                Routes.projectsIndexWithFilters
-                    (PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters)
-                    (PaginationQueryString.resetPage model.questionnaires.paginationQueryString)
+        filtersWithOp op =
+            PaginationQueryFilter.insertOp indexRouteUsersFilterId op model.questionnaires.filters
 
         removeUserMsg user =
             List.filter ((/=) (Uuid.toString user.uuid)) selectedUserUuids
@@ -461,17 +456,15 @@ listingUsersFilter appState model =
             , Dropdown.customItem <|
                 div [ class "dropdown-item-operator" ]
                     [ a
-                        [ href (linkWithOp FilterOperator.OR)
-                        , classList [ ( "active", filterOperator == FilterOperator.OR ) ]
+                        [ classList [ ( "active", filterOperator == FilterOperator.OR ) ]
                         , dataCy "filter_users_operator_OR"
-                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                        , alwaysStopPropagationOn "click" (D.succeed (ListingMsg (filterMsg (filtersWithOp FilterOperator.OR))))
                         ]
                         [ text (gettext "OR" appState.locale) ]
                     , a
-                        [ href (linkWithOp FilterOperator.AND)
-                        , classList [ ( "active", filterOperator == FilterOperator.AND ) ]
+                        [ classList [ ( "active", filterOperator == FilterOperator.AND ) ]
                         , dataCy "filter_users_operator_AND"
-                        , alwaysStopPropagationOn "click" (D.succeed NoOp)
+                        , alwaysStopPropagationOn "click" (D.succeed (ListingMsg (filterMsg (filtersWithOp FilterOperator.AND))))
                         ]
                         [ text (gettext "AND" appState.locale) ]
                     ]

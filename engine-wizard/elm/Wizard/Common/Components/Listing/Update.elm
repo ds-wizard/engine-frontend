@@ -113,7 +113,7 @@ update cfg appState msg model =
             updatePagination Nothing model.filters pqs
 
         UpdatePaginationQueryFilters mbFilterId pqf ->
-            updatePagination mbFilterId pqf model.paginationQueryString
+            updatePagination mbFilterId pqf (PaginationQueryString.resetPage model.paginationQueryString)
 
         QueryInput string ->
             ( { model | qInput = string }
