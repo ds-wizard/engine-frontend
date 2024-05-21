@@ -1816,12 +1816,13 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
         viewChapterComments group =
             div []
                 [ strong [] [ text group.chapter.title ]
-                , ul [] (List.map viewQuestionComments group.todos)
+                , ul [ class "fa-ul" ] (List.map viewQuestionComments group.todos)
                 ]
 
         viewQuestionComments comment =
             li []
-                [ a [ onClick (OpenComments comment.path) ]
+                [ span [ class "fa-li" ] [ fa "far fa-comment" ]
+                , a [ onClick (OpenComments comment.path) ]
                     [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
                     , Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.comments) ]
                     ]
