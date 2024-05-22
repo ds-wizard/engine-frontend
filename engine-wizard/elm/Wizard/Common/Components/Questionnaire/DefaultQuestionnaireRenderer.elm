@@ -226,7 +226,7 @@ viewResourcePageReferences appState =
 
 viewResourcePageReference : ResourcePageReferenceData -> Html msg
 viewResourcePageReference data =
-    a [ href <| "/book-references/" ++ data.shortUuid, target "_blank" ]
+    a [ href <| "/wizard/book-references/" ++ data.shortUuid, target "_blank" ]
         [ text data.shortUuid ]
 
 
