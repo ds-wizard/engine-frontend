@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h1, p, span, text)
 import Html.Attributes exposing (class, href)
 import Registry.Components.FontAwesome exposing (fas)
-import Registry.Data.AppState exposing (AppState)
+import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Routes as Routes
 
 
@@ -14,10 +14,10 @@ view appState =
         [ div [ class "row" ]
             [ div [ class "col-12 mb-5" ]
                 [ h1 [ class "text-center" ]
-                    [ text "DSW Registry"
+                    [ text (AppState.getAppTitle appState)
                     ]
                 , p [ class "text-center" ]
-                    [ text "Customize your experience with prepared content and translations."
+                    [ text (gettext "Customize your experience with prepared content and translations." appState.locale)
                     ]
                 ]
             , div [ class "row" ]

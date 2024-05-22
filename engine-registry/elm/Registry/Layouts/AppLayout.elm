@@ -6,7 +6,7 @@ import Html exposing (Html, a, div, header, img, li, main_, section, small, text
 import Html.Attributes exposing (class, classList, height, href, src)
 import Html.Events exposing (onClick)
 import Registry.Components.FontAwesome exposing (fas)
-import Registry.Data.AppState exposing (AppState)
+import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Routes as Routes
 
 
@@ -24,7 +24,7 @@ app : AppState -> AppLayoutConfig msg -> Document msg
 app appState cfg =
     let
         appTitle =
-            Maybe.withDefault "DSW Registry" appState.appTitle
+            AppState.getAppTitle appState
     in
     { title = appTitle
     , body =

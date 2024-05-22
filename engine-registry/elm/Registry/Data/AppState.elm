@@ -1,6 +1,7 @@
 module Registry.Data.AppState exposing
     ( AppState
     , default
+    , getAppTitle
     , getOrganizationId
     , init
     , setSession
@@ -74,3 +75,8 @@ setSession mbSession appState =
 getOrganizationId : AppState -> Maybe String
 getOrganizationId appState =
     Maybe.map .organizationId appState.session
+
+
+getAppTitle : AppState -> String
+getAppTitle appState =
+    Maybe.withDefault "DSW Registry" appState.appTitle
