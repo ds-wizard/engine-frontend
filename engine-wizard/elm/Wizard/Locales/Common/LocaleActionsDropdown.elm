@@ -112,7 +112,7 @@ actions appState cfg locale =
                 }
 
         deleteActionVisible =
-            Feature.localeDelete appState locale && not locale.defaultLocale
+            Feature.localeDelete appState locale
 
         groups =
             [ [ ( viewAction, viewActionVisible )
