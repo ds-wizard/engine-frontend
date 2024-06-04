@@ -16,7 +16,7 @@ view appState =
         , text =
             String.format
                 (gettext "Knowledge models are published in [%s](%s). You can easily import them into your instance to make them available for researchers. You can also import other knowledge models exported from different instances." appState.locale)
-                [ LookAndFeelConfig.defaultRegistryName, LookAndFeelConfig.defaultRegistryUrl ]
+                [ LookAndFeelConfig.defaultRegistryName, LookAndFeelConfig.defaultRegistryUrl ++ "/knowledge-models" ]
         , action =
             { route = Routes.knowledgeModelsImport Nothing
             , label = gettext "Import" appState.locale

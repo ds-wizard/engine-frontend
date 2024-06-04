@@ -482,6 +482,8 @@ type Msg
     | OpenAction QuestionnaireAction
     | CollapseItem String
     | ExpandItem String
+    | CollapseItems (List String)
+    | ExpandItems (List String)
     | GotLocalStorageData E.Value
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
@@ -495,6 +497,12 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         wrap newModel =
             ( appState.seed, newModel, Cmd.none )
+
+        updateCollapsedItems newCollapsedItems =
+            withSeed
+                ( { model | collapsedItems = newCollapsedItems }
+                , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
+                )
     in
     case msg of
         SetActivePage activePage ->
@@ -916,24 +924,20 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 )
 
         CollapseItem path ->
-            let
-                newCollapsedItems =
-                    Set.insert path model.collapsedItems
-            in
-            withSeed
-                ( { model | collapsedItems = newCollapsedItems }
-                , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
-                )
+            updateCollapsedItems <|
+                Set.insert path model.collapsedItems
 
         ExpandItem path ->
-            let
-                newCollapsedItems =
-                    Set.remove path model.collapsedItems
-            in
-            withSeed
-                ( { model | collapsedItems = newCollapsedItems }
-                , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
-                )
+            updateCollapsedItems <|
+                Set.remove path model.collapsedItems
+
+        CollapseItems paths ->
+            updateCollapsedItems <|
+                List.foldl Set.insert model.collapsedItems paths
+
+        ExpandItems paths ->
+            updateCollapsedItems <|
+                List.foldl Set.remove model.collapsedItems paths
 
         GotLocalStorageData value ->
             case decodeValue (D.field "key" D.string) value of
@@ -1816,12 +1820,13 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
         viewChapterComments group =
             div []
                 [ strong [] [ text group.chapter.title ]
-                , ul [] (List.map viewQuestionComments group.todos)
+                , ul [ class "fa-ul" ] (List.map viewQuestionComments group.todos)
                 ]
 
         viewQuestionComments comment =
             li []
-                [ a [ onClick (OpenComments comment.path) ]
+                [ span [ class "fa-li" ] [ fa "far fa-comment" ]
+                , a [ onClick (OpenComments comment.path) ]
                     [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
                     , Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.comments) ]
                     ]
@@ -2665,6 +2670,29 @@ viewQuestionMultiChoice appState cfg model path question =
 viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> Html Msg
 viewQuestionList appState cfg ctx model path humanIdentifiers question =
     let
+        expandAndCollapseButtons =
+            if List.length itemUuids > 1 then
+                let
+                    allItemsPaths =
+                        List.map (\uuid -> pathToString (path ++ [ uuid ])) itemUuids
+                in
+                div [ class "mb-3" ]
+                    [ a [ onClick (ExpandItems allItemsPaths) ]
+                        [ faSet "questionnaire.item.expandAll" appState
+                        , span [ class "ms-1" ] [ text (gettext "Expand all" appState.locale) ]
+                        ]
+                    , a
+                        [ onClick (CollapseItems allItemsPaths)
+                        , class "ms-3"
+                        ]
+                        [ faSet "questionnaire.item.collapseAll" appState
+                        , span [ class "ms-1" ] [ text (gettext "Collapse all" appState.locale) ]
+                        ]
+                    ]
+
+            else
+                emptyNode
+
         viewItem =
             viewQuestionListItem appState cfg ctx model question path humanIdentifiers (List.length itemUuids)
 
@@ -2680,7 +2708,8 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
                 emptyNode
     in
     div []
-        [ div [] (List.indexedMap viewItem itemUuids)
+        [ expandAndCollapseButtons
+        , div [] (List.indexedMap viewItem itemUuids)
         , viewQuestionListAdd appState cfg itemUuids path
         , noAnswersInfo
         ]

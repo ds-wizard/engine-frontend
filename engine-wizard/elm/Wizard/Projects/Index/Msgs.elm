@@ -32,4 +32,3 @@ type Msg
     | PackagesFilterSearch String
     | PackagesFilterSearchComplete (Result ApiError (Pagination PackageSuggestion))
     | DebouncerMsg (Debouncer.Msg Msg)
-    | NoOp

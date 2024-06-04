@@ -66,7 +66,7 @@ viewRegistryText appState =
             p []
                 (String.formatHtml
                     (gettext "You can find Knowledge Models in %s." appState.locale)
-                    [ a [ href url, target "_blank" ]
+                    [ a [ href (url ++ "/knowledge-models"), target "_blank" ]
                         [ text LookAndFeelConfig.defaultRegistryName ]
                     ]
                 )
