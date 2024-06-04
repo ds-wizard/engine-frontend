@@ -38,7 +38,7 @@ import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, disabled, for, id, name, readonly, rows, type_, value)
+import Html.Attributes exposing (autocomplete, checked, class, classList, for, id, name, readonly, rows, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
@@ -53,7 +53,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
-import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
 
 
@@ -232,15 +231,10 @@ formatRadioGroup appState options form fieldName labelText =
 
                 buildOption : DocumentTemplateFormatSimple -> Html Form.Msg
                 buildOption format =
-                    let
-                        isDisabled =
-                            appState.config.feature.pdfOnlyEnabled && not format.isPdf
-                    in
                     label
                         [ class "export-link"
                         , classList
                             [ ( "export-link-selected", state.value == Just (Uuid.toString format.uuid) )
-                            , ( "disabled", isDisabled )
                             ]
                         ]
                         [ Html.input
@@ -249,23 +243,14 @@ formatRadioGroup appState options form fieldName labelText =
                             , type_ "radio"
                             , name "format"
                             , onCheck (\_ -> Input state.path Form.Text <| Field.String <| Uuid.toString format.uuid)
-                            , disabled isDisabled
                             ]
                             []
                         , fa format.icon
                         , text format.name
                         ]
-
-                pdfOnlyInfo =
-                    if appState.config.feature.pdfOnlyEnabled then
-                        Flash.info appState (gettext "Only PDF documents are enabled in this instance." appState.locale)
-
-                    else
-                        emptyNode
             in
             div [ class errorClass ]
-                [ pdfOnlyInfo
-                , div [ class "export-formats" ] (List.map buildOption options)
+                [ div [ class "export-formats" ] (List.map buildOption options)
                 ]
     in
     formGroup radioInput [] appState form fieldName labelText

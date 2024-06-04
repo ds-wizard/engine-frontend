@@ -15,7 +15,7 @@ import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -27,7 +27,7 @@ import Wizard.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
 type alias Model =
     { selectedProjectTemplateUuid : Maybe Uuid
     , selectedKnowledgeModelId : Maybe String
-    , selectedProjectTemplate : ActionResult QuestionnaireDetail
+    , selectedProjectTemplate : ActionResult QuestionnaireSettings
     , selectedKnowledgeModel : ActionResult PackageDetail
     , projectTemplateTypeHintInputModel : TypeHintInput.Model Questionnaire
     , knowledgeModelTypeHintInputModel : TypeHintInput.Model PackageSuggestion

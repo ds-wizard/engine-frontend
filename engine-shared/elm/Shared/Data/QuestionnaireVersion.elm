@@ -1,11 +1,13 @@
 module Shared.Data.QuestionnaireVersion exposing
     ( QuestionnaireVersion
     , decoder
+    , getVersionByEventUuid
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import List.Extra as List
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Time
 import Uuid exposing (Uuid)
@@ -30,3 +32,8 @@ decoder =
         |> D.required "eventUuid" Uuid.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
+
+
+getVersionByEventUuid : List QuestionnaireVersion -> Uuid -> Maybe QuestionnaireVersion
+getVersionByEventUuid versions eventUuid =
+    List.find (.eventUuid >> (==) eventUuid) versions

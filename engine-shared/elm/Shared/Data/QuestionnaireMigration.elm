@@ -12,12 +12,13 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetailWrapper as QuestionnaireDetailWrapper
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireDetail exposing (QuestionnaireQuestionnaire)
 
 
 type alias QuestionnaireMigration =
-    { oldQuestionnaire : QuestionnaireDetail
-    , newQuestionnaire : QuestionnaireDetail
+    { oldQuestionnaire : QuestionnaireQuestionnaire
+    , newQuestionnaire : QuestionnaireQuestionnaire
     , resolvedQuestionUuids : List String
     }
 
@@ -25,8 +26,8 @@ type alias QuestionnaireMigration =
 decoder : Decoder QuestionnaireMigration
 decoder =
     D.succeed QuestionnaireMigration
-        |> D.required "oldQuestionnaire" QuestionnaireDetail.decoder
-        |> D.required "newQuestionnaire" QuestionnaireDetail.decoder
+        |> D.required "oldQuestionnaire" (D.map .data (QuestionnaireDetailWrapper.decoder QuestionnaireDetail.decoder))
+        |> D.required "newQuestionnaire" (D.map .data (QuestionnaireDetailWrapper.decoder QuestionnaireDetail.decoder))
         |> D.required "resolvedQuestionUuids" (D.list D.string)
 
 

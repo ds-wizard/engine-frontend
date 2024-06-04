@@ -5,10 +5,10 @@
         @include border-radius($border-radius);
         padding: .375rem .75rem;
         border: 1px solid #ced4da;
-        max-width: 25%;
         white-space: nowrap;
         display: flex;
         justify-content: center;
+        margin-right: 0 !important;
 
         .questionnaire-name {
             flex: 1 1;

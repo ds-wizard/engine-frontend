@@ -1,36 +1,27 @@
-module Shared.Data.QuestionnaireDetail exposing
+module Shared.Data.QuestionnaireQuestionnaire exposing
     ( QuestionCommentInfo
-    , QuestionnaireDetail
+    , QuestionnaireQuestionnaire
     , QuestionnaireWarning
-    , addComment
+    , addCommentCount
+    , addCommentThreadToCount
     , calculateUnansweredQuestionsForChapter
-    , canComment
     , clearReplyValue
     , commentsLength
     , createQuestionnaireDetail
     , decoder
-    , deleteComment
-    , deleteCommentThread
-    , editComment
     , generateReplies
     , getCommentCount
     , getComments
     , getItemTitle
     , getTodos
-    , getVersionByEventUuid
     , getWarnings
     , hasReply
-    , isAnonymousProject
     , isCurrentVersion
-    , isEditor
-    , isMigrating
-    , isOwner
-    , isVersion
-    , reopenCommentThread
-    , resolveCommentThread
+    , removeCommentThreadFromCount
     , setLabels
     , setPhaseUuid
     , setReply
+    , subCommentCount
     , todoUuid
     , todosLength
     , updateContent
@@ -46,381 +37,192 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
-import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Auth.Session as Session
-import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
-import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
-import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Shared.Data.Member as Member
-import Shared.Data.Package as Package exposing (Package)
+import Shared.Data.Package exposing (Package)
 import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
-import Shared.Data.QuestionnaireDetail.Comment exposing (Comment)
-import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.Reply as Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
-import Shared.Data.QuestionnairePerm as QuestionnairePerm
-import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils exposing (boolToInt, flip, getUuidString)
+import Shared.Utils exposing (boolToInt, getUuidString)
 import String.Extra as String
 import Time
 import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
 
 
-type alias QuestionnaireDetail =
+type alias QuestionnaireQuestionnaire =
     { uuid : Uuid
     , name : String
-    , description : Maybe String
-    , projectTags : List String
     , isTemplate : Bool
-    , package : Package
+    , packageId : String
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
-    , commentThreadsMap : Dict String (List CommentThread)
     , phaseUuid : Maybe Uuid
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
     , permissions : List Permission
-    , selectedQuestionTagUuids : List String
-    , documentTemplateId : Maybe String
-    , documentTemplate : Maybe DocumentTemplateSuggestion
-    , documentTemplatePhase : Maybe DocumentTemplatePhase
-    , documentTemplateState : Maybe DocumentTemplateState
-    , formatUuid : Maybe Uuid
-    , format : Maybe DocumentTemplateFormat
     , labels : Dict String (List String)
-    , versions : List QuestionnaireVersion
     , migrationUuid : Maybe Uuid
+    , commentCounts : Dict String (Dict String Int)
+    , questionnaireActionsAvailable : Int
+    , questionnaireImportersAvailable : Int
+    , selectedQuestionTagUuids : List String
     }
 
 
-decoder : Decoder QuestionnaireDetail
+decoder : Decoder QuestionnaireQuestionnaire
 decoder =
-    D.succeed QuestionnaireDetail
+    D.succeed QuestionnaireQuestionnaire
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
-        |> D.required "description" (D.maybe D.string)
-        |> D.required "projectTags" (D.list D.string)
         |> D.required "isTemplate" D.bool
-        |> D.required "package" Package.decoder
+        |> D.required "packageId" D.string
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
-        |> D.required "commentThreadsMap" (D.dict (D.list CommentThread.decoder))
         |> D.required "phaseUuid" (D.maybe Uuid.decoder)
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
-        |> D.required "selectedQuestionTagUuids" (D.list D.string)
-        |> D.required "documentTemplateId" (D.maybe D.string)
-        |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)
-        |> D.required "documentTemplatePhase" (D.maybe DocumentTemplatePhase.decoder)
-        |> D.required "documentTemplateState" (D.maybe DocumentTemplateState.decoder)
-        |> D.required "formatUuid" (D.maybe Uuid.decoder)
-        |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
-        |> D.required "versions" (D.list QuestionnaireVersion.decoder)
         |> D.required "migrationUuid" (D.maybe Uuid.decoder)
+        |> D.required "commentCounts" (D.dict (D.dict D.int))
+        |> D.required "questionnaireActionsAvailable" D.int
+        |> D.required "questionnaireImportersAvailable" D.int
+        |> D.required "selectedQuestionTagUuids" (D.list D.string)
 
 
-isEditor : AbstractAppState a -> QuestionnaireDetail -> Bool
-isEditor appState questionnaire =
-    hasPerm appState questionnaire QuestionnairePerm.edit
-
-
-isOwner : AbstractAppState a -> QuestionnaireDetail -> Bool
-isOwner appState questionnaire =
-    hasPerm appState questionnaire QuestionnairePerm.admin
-
-
-isAnonymousProject : QuestionnaireDetail -> Bool
-isAnonymousProject questionnaire =
-    List.isEmpty questionnaire.permissions
-
-
-isMigrating : QuestionnaireDetail -> Bool
-isMigrating =
-    Maybe.isJust << .migrationUuid
-
-
-canComment : AbstractAppState a -> QuestionnaireDetail -> Bool
-canComment appState questionnaire =
-    hasPerm appState questionnaire QuestionnairePerm.comment && not (isMigrating questionnaire)
-
-
-createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireDetail
-createQuestionnaireDetail package km =
-    { uuid = Uuid.nil
-    , name = ""
-    , description = Nothing
-    , projectTags = []
-    , isTemplate = False
-    , visibility = PrivateQuestionnaire
-    , sharing = RestrictedQuestionnaire
-    , permissions = []
-    , package = package
-    , knowledgeModel = km
-    , replies = Dict.empty
-    , commentThreadsMap = Dict.empty
-    , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
-    , selectedQuestionTagUuids = []
-    , documentTemplateId = Nothing
-    , documentTemplate = Nothing
-    , documentTemplatePhase = Nothing
-    , documentTemplateState = Nothing
-    , formatUuid = Nothing
-    , format = Nothing
-    , labels = Dict.empty
-    , versions = []
-    , migrationUuid = Nothing
-    }
-
-
-hasPerm : AbstractAppState a -> QuestionnaireDetail -> String -> Bool
-hasPerm appState questionnaire role =
+addCommentCount : String -> Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+addCommentCount path threadUuid questionnaire =
     let
-        mbUser =
-            appState.config.user
+        threadUuidString =
+            Uuid.toString threadUuid
 
-        isAuthenticated =
-            Session.exists appState.session
+        questionDict =
+            Dict.get path questionnaire.commentCounts
+                |> Maybe.withDefault Dict.empty
 
-        globalPerms =
-            if UserInfo.isAdmin mbUser then
-                QuestionnairePerm.all
-
-            else
-                []
-
-        visibilityPerms =
-            if isAuthenticated then
-                case questionnaire.visibility of
-                    VisibleEditQuestionnaire ->
-                        [ QuestionnairePerm.view, QuestionnairePerm.comment, QuestionnairePerm.edit ]
-
-                    VisibleCommentQuestionnaire ->
-                        [ QuestionnairePerm.view, QuestionnairePerm.comment ]
-
-                    VisibleViewQuestionnaire ->
-                        [ QuestionnairePerm.view ]
-
-                    PrivateQuestionnaire ->
-                        []
-
-            else
-                []
-
-        sharingPerms =
-            case questionnaire.sharing of
-                AnyoneWithLinkEditQuestionnaire ->
-                    [ QuestionnairePerm.view, QuestionnairePerm.comment, QuestionnairePerm.edit ]
-
-                AnyoneWithLinkCommentQuestionnaire ->
-                    [ QuestionnairePerm.view, QuestionnairePerm.comment ]
-
-                AnyoneWithLinkViewQuestionnaire ->
-                    [ QuestionnairePerm.view ]
-
-                RestrictedQuestionnaire ->
-                    []
-
-        memberPerms =
-            case mbUser of
-                Just user ->
-                    let
-                        userUuids =
-                            user.uuid :: user.userGroupUuids
-                    in
-                    questionnaire.permissions
-                        |> List.filter (flip List.member userUuids << Member.getUuid << .member)
-                        |> List.concatMap .perms
-
-                Nothing ->
-                    []
-
-        appliedPerms =
-            List.unique <| globalPerms ++ visibilityPerms ++ sharingPerms ++ memberPerms
+        count =
+            Dict.get threadUuidString questionDict
+                |> Maybe.withDefault 0
     in
-    List.member role appliedPerms
+    { questionnaire | commentCounts = Dict.insert path (Dict.insert threadUuidString (count + 1) questionDict) questionnaire.commentCounts }
 
 
-updateWithQuestionnaireData : SetQuestionnaireData -> QuestionnaireDetail -> QuestionnaireDetail
-updateWithQuestionnaireData data detail =
-    { detail
-        | name = data.name
-        , description = data.description
-        , projectTags = data.projectTags
-        , isTemplate = data.isTemplate
-        , visibility = data.visibility
-        , sharing = data.sharing
-        , documentTemplateId = data.documentTemplateId
-        , documentTemplate = data.documentTemplate
-        , formatUuid = data.formatUuid
-        , format = data.format
-        , permissions = data.permissions
-    }
-
-
-setPhaseUuid : Maybe Uuid -> QuestionnaireDetail -> QuestionnaireDetail
-setPhaseUuid phaseUuid questionnaire =
-    { questionnaire | phaseUuid = phaseUuid }
-
-
-setReply : String -> Reply -> QuestionnaireDetail -> QuestionnaireDetail
-setReply path reply questionnaire =
-    { questionnaire | replies = Dict.insert path reply questionnaire.replies }
-
-
-clearReplyValue : String -> QuestionnaireDetail -> QuestionnaireDetail
-clearReplyValue path questionnaire =
-    { questionnaire | replies = Dict.remove path questionnaire.replies }
-
-
-setLabels : String -> List String -> QuestionnaireDetail -> QuestionnaireDetail
-setLabels path labels questionnaire =
-    { questionnaire | labels = Dict.insert path labels questionnaire.labels }
-
-
-resolveCommentThread : String -> Uuid -> QuestionnaireDetail -> QuestionnaireDetail
-resolveCommentThread path threadUuid =
+subCommentCount : String -> Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+subCommentCount path threadUuid questionnaire =
     let
-        mapCommentThread commentThread =
-            { commentThread | resolved = True }
+        threadUuidString =
+            Uuid.toString threadUuid
+
+        questionDict =
+            Dict.get path questionnaire.commentCounts
+                |> Maybe.withDefault Dict.empty
+
+        count =
+            Dict.get threadUuidString questionDict
+                |> Maybe.withDefault 0
     in
-    mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
+    { questionnaire | commentCounts = Dict.insert path (Dict.insert threadUuidString (max 0 (count - 1)) questionDict) questionnaire.commentCounts }
 
 
-reopenCommentThread : String -> Uuid -> QuestionnaireDetail -> QuestionnaireDetail
-reopenCommentThread path threadUuid =
+addCommentThreadToCount : String -> Uuid -> Int -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+addCommentThreadToCount path threadUuid count questionnaire =
     let
-        mapCommentThread commentThread =
-            { commentThread | resolved = False }
+        threadUuidString =
+            Uuid.toString threadUuid
+
+        questionDict =
+            Dict.get path questionnaire.commentCounts
+                |> Maybe.withDefault Dict.empty
     in
-    mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
+    { questionnaire | commentCounts = Dict.insert path (Dict.insert threadUuidString count questionDict) questionnaire.commentCounts }
 
 
-deleteCommentThread : String -> Uuid -> QuestionnaireDetail -> QuestionnaireDetail
-deleteCommentThread path threadUuid =
-    mapCommentThreads path (List.filter (\t -> t.uuid /= threadUuid))
-
-
-addComment : String -> Uuid -> Bool -> Comment -> QuestionnaireDetail -> QuestionnaireDetail
-addComment path threadUuid private comment questionnaire =
-    let
-        threadExists =
-            Dict.get path questionnaire.commentThreadsMap
-                |> Maybe.withDefault []
-                |> List.any (.uuid >> (==) threadUuid)
-
-        mapCommentThread commentThread =
-            { commentThread | comments = commentThread.comments ++ [ comment ] }
-
-        questionnaireWithThread =
-            if threadExists then
-                questionnaire
-
-            else
-                addCommentThread path threadUuid private comment questionnaire
-    in
-    mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread)) questionnaireWithThread
-
-
-addCommentThread : String -> Uuid -> Bool -> Comment -> QuestionnaireDetail -> QuestionnaireDetail
-addCommentThread path threadUuid private comment questionnaire =
-    let
-        commentThread =
-            { uuid = threadUuid
-            , resolved = False
-            , comments = []
-            , private = private
-            , createdAt = comment.createdAt
-            , createdBy = comment.createdBy
-            }
-
-        commentThreads =
-            Dict.get path questionnaire.commentThreadsMap
-                |> Maybe.withDefault []
-    in
-    { questionnaire | commentThreadsMap = Dict.insert path (commentThreads ++ [ commentThread ]) questionnaire.commentThreadsMap }
-
-
-editComment : String -> Uuid -> Uuid -> Time.Posix -> String -> QuestionnaireDetail -> QuestionnaireDetail
-editComment path threadUuid commentUuid updatedAt newText =
-    let
-        mapComment comment =
-            if comment.uuid == commentUuid then
-                { comment | text = newText, updatedAt = updatedAt }
-
-            else
-                comment
-
-        mapCommentThread commentThread =
-            { commentThread | comments = List.map mapComment commentThread.comments }
-    in
-    mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-
-
-deleteComment : String -> Uuid -> Uuid -> QuestionnaireDetail -> QuestionnaireDetail
-deleteComment path threadUuid commentUuid =
-    let
-        mapCommentThread commentThread =
-            { commentThread | comments = List.filter (\c -> c.uuid /= commentUuid) commentThread.comments }
-    in
-    mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-
-
-getCommentCount : String -> QuestionnaireDetail -> Int
-getCommentCount path questionnaire =
-    Dict.get path questionnaire.commentThreadsMap
-        |> Maybe.withDefault []
-        |> List.filter (\thread -> not thread.resolved)
-        |> List.map (.comments >> List.length)
-        |> List.sum
-
-
-mapCommentThreads : String -> (List CommentThread -> List CommentThread) -> QuestionnaireDetail -> QuestionnaireDetail
-mapCommentThreads path map questionnaire =
-    let
-        mbCommentThreads =
-            Dict.get path questionnaire.commentThreadsMap
-                |> Maybe.map map
-    in
-    case mbCommentThreads of
-        Just commentThreads ->
-            { questionnaire | commentThreadsMap = Dict.insert path commentThreads questionnaire.commentThreadsMap }
+removeCommentThreadFromCount : String -> Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+removeCommentThreadFromCount path threadUuid questionnaire =
+    case Dict.get path questionnaire.commentCounts of
+        Just questionDict ->
+            { questionnaire | commentCounts = Dict.insert path (Dict.remove (Uuid.toString threadUuid) questionDict) questionnaire.commentCounts }
 
         Nothing ->
             questionnaire
 
 
-wrapMapCommentThread : Uuid -> (CommentThread -> CommentThread) -> CommentThread -> CommentThread
-wrapMapCommentThread threadUuid mapCommentThread commentThread =
-    if commentThread.uuid == threadUuid then
-        mapCommentThread commentThread
+createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireQuestionnaire
+createQuestionnaireDetail package km =
+    { uuid = Uuid.nil
+    , name = ""
+    , isTemplate = False
+    , visibility = PrivateQuestionnaire
+    , sharing = RestrictedQuestionnaire
+    , permissions = []
+    , packageId = package.id
+    , knowledgeModel = km
+    , replies = Dict.empty
+    , commentCounts = Dict.empty
+    , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
+    , labels = Dict.empty
+    , migrationUuid = Nothing
+    , questionnaireActionsAvailable = 0
+    , questionnaireImportersAvailable = 0
+    , selectedQuestionTagUuids = []
+    }
 
-    else
-        commentThread
+
+updateWithQuestionnaireData : SetQuestionnaireData -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+updateWithQuestionnaireData data detail =
+    { detail
+        | name = data.name
+        , isTemplate = data.isTemplate
+        , visibility = data.visibility
+        , sharing = data.sharing
+        , permissions = data.permissions
+    }
 
 
-todosLength : QuestionnaireDetail -> Int
+setPhaseUuid : Maybe Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+setPhaseUuid phaseUuid questionnaire =
+    { questionnaire | phaseUuid = phaseUuid }
+
+
+setReply : String -> Reply -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+setReply path reply questionnaire =
+    { questionnaire | replies = Dict.insert path reply questionnaire.replies }
+
+
+clearReplyValue : String -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+clearReplyValue path questionnaire =
+    { questionnaire | replies = Dict.remove path questionnaire.replies }
+
+
+setLabels : String -> List String -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+setLabels path labels questionnaire =
+    { questionnaire | labels = Dict.insert path labels questionnaire.labels }
+
+
+getCommentCount : String -> QuestionnaireQuestionnaire -> Int
+getCommentCount path questionnaire =
+    Dict.get path questionnaire.commentCounts
+        |> Maybe.unwrap [] Dict.values
+        |> List.sum
+
+
+todosLength : QuestionnaireQuestionnaire -> Int
 todosLength =
     List.length << getTodos
 
 
-getTodos : QuestionnaireDetail -> List QuestionnaireTodo
+getTodos : QuestionnaireQuestionnaire -> List QuestionnaireTodo
 getTodos questionnaire =
     let
         fn chapter currentPath question =
@@ -437,7 +239,7 @@ getTodos questionnaire =
     concatMapVisibleQuestions fn questionnaire
 
 
-commentsLength : QuestionnaireDetail -> Int
+commentsLength : QuestionnaireQuestionnaire -> Int
 commentsLength =
     List.sum << List.map .comments << getComments
 
@@ -450,17 +252,13 @@ type alias QuestionCommentInfo =
     }
 
 
-getComments : QuestionnaireDetail -> List QuestionCommentInfo
+getComments : QuestionnaireQuestionnaire -> List QuestionCommentInfo
 getComments questionnaire =
     let
         fn chapter currentPath question =
             let
                 questionCommentCount =
-                    Dict.get (pathToString currentPath) questionnaire.commentThreadsMap
-                        |> Maybe.withDefault []
-                        |> List.filter (not << .resolved)
-                        |> List.map (.comments >> List.length)
-                        |> List.sum
+                    getCommentCount (pathToString currentPath) questionnaire
             in
             if questionCommentCount > 0 then
                 [ { chapter = chapter
@@ -483,12 +281,12 @@ type alias QuestionnaireWarning =
     }
 
 
-warningsLength : QuestionnaireDetail -> Int
+warningsLength : QuestionnaireQuestionnaire -> Int
 warningsLength =
     List.length << getWarnings
 
 
-getWarnings : QuestionnaireDetail -> List QuestionnaireWarning
+getWarnings : QuestionnaireQuestionnaire -> List QuestionnaireWarning
 getWarnings questionnaire =
     let
         fn chapter currentPath question =
@@ -547,21 +345,21 @@ getWarnings questionnaire =
     concatMapVisibleQuestions fn questionnaire
 
 
-concatMapVisibleQuestions : (Chapter -> List String -> Question -> List a) -> QuestionnaireDetail -> List a
+concatMapVisibleQuestions : (Chapter -> List String -> Question -> List a) -> QuestionnaireQuestionnaire -> List a
 concatMapVisibleQuestions fn questionnaire =
     List.concatMap
         (concatMapVisibleQuestionsChapters fn questionnaire)
         (KnowledgeModel.getChapters questionnaire.knowledgeModel)
 
 
-concatMapVisibleQuestionsChapters : (Chapter -> List String -> Question -> List a) -> QuestionnaireDetail -> Chapter -> List a
+concatMapVisibleQuestionsChapters : (Chapter -> List String -> Question -> List a) -> QuestionnaireQuestionnaire -> Chapter -> List a
 concatMapVisibleQuestionsChapters fn questionnaire chapter =
     List.concatMap
         (mapVisibleQuestion fn questionnaire chapter [ chapter.uuid ])
         (KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel)
 
 
-mapVisibleQuestion : (Chapter -> List String -> Question -> List a) -> QuestionnaireDetail -> Chapter -> List String -> Question -> List a
+mapVisibleQuestion : (Chapter -> List String -> Question -> List a) -> QuestionnaireQuestionnaire -> Chapter -> List String -> Question -> List a
 mapVisibleQuestion fn questionnaire chapter path question =
     let
         currentPath =
@@ -606,13 +404,13 @@ mapVisibleQuestion fn questionnaire chapter path question =
     results ++ childResults
 
 
-getReplyValue : QuestionnaireDetail -> String -> Maybe ReplyValue
+getReplyValue : QuestionnaireQuestionnaire -> String -> Maybe ReplyValue
 getReplyValue questionnaire path =
     Maybe.map .value <|
         Dict.get path questionnaire.replies
 
 
-hasTodo : QuestionnaireDetail -> String -> Bool
+hasTodo : QuestionnaireQuestionnaire -> String -> Bool
 hasTodo questionnaire path =
     Maybe.unwrap False (List.member todoUuid) (Dict.get path questionnaire.labels)
 
@@ -627,19 +425,9 @@ todoUuid =
     "615b9028-5e3f-414f-b245-12d2ae2eeb20"
 
 
-hasReply : String -> QuestionnaireDetail -> Bool
+hasReply : String -> QuestionnaireQuestionnaire -> Bool
 hasReply path questionnaire =
     Maybe.unwrap False (not << ReplyValue.isEmpty) (getReplyValue questionnaire path)
-
-
-getVersionByEventUuid : { q | versions : List QuestionnaireVersion } -> Uuid -> Maybe QuestionnaireVersion
-getVersionByEventUuid questionnaire eventUuid =
-    List.find (.eventUuid >> (==) eventUuid) questionnaire.versions
-
-
-isVersion : QuestionnaireDetail -> QuestionnaireEvent -> Bool
-isVersion questionnaire event =
-    List.any (.eventUuid >> (==) (QuestionnaireEvent.getUuid event)) questionnaire.versions
 
 
 lastVisibleEvent : List QuestionnaireEvent -> Maybe QuestionnaireEvent
@@ -654,7 +442,7 @@ isCurrentVersion questionnaire eventUuid =
     Maybe.map QuestionnaireEvent.getUuid (lastVisibleEvent questionnaire) == Just eventUuid
 
 
-getItemTitle : QuestionnaireDetail -> List String -> List Question -> Maybe String
+getItemTitle : QuestionnaireQuestionnaire -> List String -> List Question -> Maybe String
 getItemTitle questionnaire itemPath itemTemplateQuestions =
     let
         firstQuestionUuid =
@@ -674,19 +462,19 @@ getItemTitle questionnaire itemPath itemTemplateQuestions =
 -- Evaluations
 
 
-calculateUnansweredQuestionsForChapter : QuestionnaireDetail -> Chapter -> Int
+calculateUnansweredQuestionsForChapter : QuestionnaireQuestionnaire -> Chapter -> Int
 calculateUnansweredQuestionsForChapter questionnaire =
     Tuple.first << evaluateChapter questionnaire
 
 
-evaluateChapter : QuestionnaireDetail -> Chapter -> ( Int, Int )
+evaluateChapter : QuestionnaireQuestionnaire -> Chapter -> ( Int, Int )
 evaluateChapter questionnaire chapter =
     KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel
         |> List.map (evaluateQuestion questionnaire [ chapter.uuid ])
         |> List.foldl Tuple.sum ( 0, 0 )
 
 
-evaluateQuestion : QuestionnaireDetail -> List String -> Question -> ( Int, Int )
+evaluateQuestion : QuestionnaireQuestionnaire -> List String -> Question -> ( Int, Int )
 evaluateQuestion questionnaire path question =
     let
         currentPath =
@@ -747,7 +535,7 @@ evaluateQuestion questionnaire path question =
             ( boolToInt requiredNow, boolToInt requiredNow )
 
 
-evaluateFollowups : QuestionnaireDetail -> List String -> String -> ( Int, Int )
+evaluateFollowups : QuestionnaireQuestionnaire -> List String -> String -> ( Int, Int )
 evaluateFollowups questionnaire path answerUuid =
     let
         currentPath =
@@ -758,7 +546,7 @@ evaluateFollowups questionnaire path answerUuid =
         |> List.foldl Tuple.sum ( 0, 0 )
 
 
-evaluateAnswerItem : QuestionnaireDetail -> List String -> List Question -> String -> ( Int, Int )
+evaluateAnswerItem : QuestionnaireQuestionnaire -> List String -> List Question -> String -> ( Int, Int )
 evaluateAnswerItem questionnaire path questions uuid =
     let
         currentPath =
@@ -773,7 +561,7 @@ evaluateAnswerItem questionnaire path questions uuid =
 -- Generating Replies
 
 
-generateReplies : Time.Posix -> Seed -> String -> KnowledgeModel -> QuestionnaireDetail -> ( Seed, Maybe String, QuestionnaireDetail )
+generateReplies : Time.Posix -> Seed -> String -> KnowledgeModel -> QuestionnaireQuestionnaire -> ( Seed, Maybe String, QuestionnaireQuestionnaire )
 generateReplies currentTime seed questionUuid km questionnaireDetail =
     let
         parentMap =
@@ -864,7 +652,7 @@ foldReplies currentTime km parentMap seed questionUuid replies =
 -- Utils
 
 
-updateContent : QuestionnaireDetail -> QuestionnaireContent -> QuestionnaireDetail
+updateContent : QuestionnaireQuestionnaire -> QuestionnaireContent -> QuestionnaireQuestionnaire
 updateContent detail content =
     { detail
         | replies = content.replies

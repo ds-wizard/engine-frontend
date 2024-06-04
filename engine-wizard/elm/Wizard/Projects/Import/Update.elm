@@ -28,7 +28,7 @@ import Wizard.Routing exposing (cmdNavigate)
 fetchData : AppState -> Uuid -> String -> Cmd Msg
 fetchData appState uuid importerId =
     Cmd.batch
-        [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
+        [ QuestionnairesApi.getQuestionnaireQuestionnaire uuid appState GetQuestionnaireComplete
         , QuestionnaireImportersApi.getQuestionnaireImporter importerId appState GetQuestionnaireImporterComplete
         ]
 
@@ -58,8 +58,8 @@ update wrapMsg msg appState model =
             let
                 setResult r m =
                     { m
-                        | questionnaire = r
-                        , questionnaireModel = ActionResult.map (Tuple.first << flip (Questionnaire.init appState) Nothing) r
+                        | questionnaire = ActionResult.map .data r
+                        , questionnaireModel = ActionResult.map (Tuple.first << flip (Questionnaire.init appState) Nothing << .data) r
                     }
 
                 ( newModel, cmd ) =
@@ -74,7 +74,7 @@ update wrapMsg msg appState model =
                 fetchCmd =
                     case newModel.questionnaire of
                         Success questionnaire ->
-                            KnowledgeModelsApi.fetchAsString questionnaire.package.id questionnaire.selectedQuestionTagUuids appState (wrapMsg << FetchKnowledgeModelStringComplete)
+                            KnowledgeModelsApi.fetchAsString questionnaire.packageId questionnaire.selectedQuestionTagUuids appState (wrapMsg << FetchKnowledgeModelStringComplete)
 
                         _ ->
                             Cmd.none

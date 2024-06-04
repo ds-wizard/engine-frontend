@@ -45,7 +45,7 @@ fetchData appState model =
         fetchSelectedProjectTemplate =
             case ( createFromTemplate, model.selectedProjectTemplateUuid ) of
                 ( True, Just templateUuid ) ->
-                    QuestionnaireApi.getQuestionnaire templateUuid appState GetSelectedProjectTemplateCompleted
+                    QuestionnaireApi.getQuestionnaireSettings templateUuid appState GetSelectedProjectTemplateCompleted
 
                 _ ->
                     Cmd.none
@@ -105,7 +105,7 @@ update wrapMsg msg appState model =
     case msg of
         GetSelectedProjectTemplateCompleted result ->
             applyResult appState
-                { setResult = \value record -> { record | selectedProjectTemplate = value }
+                { setResult = \value record -> { record | selectedProjectTemplate = ActionResult.map .data value }
                 , defaultError = gettext "Unable to get selected project template." appState.locale
                 , model = model
                 , result = result

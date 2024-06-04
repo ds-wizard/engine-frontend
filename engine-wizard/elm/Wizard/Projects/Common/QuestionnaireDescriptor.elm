@@ -1,11 +1,11 @@
 module Wizard.Projects.Common.QuestionnaireDescriptor exposing
     ( QuestionnaireDescriptor
     , fromQuestionnaire
-    , fromQuestionnaireDetail
+    , fromQuestionnaireSettings
     )
 
 import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Uuid exposing (Uuid)
 
 
@@ -22,8 +22,8 @@ fromQuestionnaire questionnaire =
     }
 
 
-fromQuestionnaireDetail : QuestionnaireDetail -> QuestionnaireDescriptor
-fromQuestionnaireDetail questionnaire =
-    { name = questionnaire.name
-    , uuid = questionnaire.uuid
+fromQuestionnaireSettings : QuestionnaireSettings -> QuestionnaireDescriptor
+fromQuestionnaireSettings settings =
+    { name = settings.name
+    , uuid = settings.uuid
     }

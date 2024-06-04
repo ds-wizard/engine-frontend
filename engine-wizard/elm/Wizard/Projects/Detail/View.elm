@@ -8,7 +8,7 @@ import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
 import Shared.Components.Badge as Badge
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
@@ -19,6 +19,7 @@ import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as De
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Feature as Features
 import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.View exposing (visibilityIcons)
@@ -26,7 +27,7 @@ import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.Preview as Preview
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
-import Wizard.Projects.Detail.Components.RevertModal as ReverModal
+import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.View as Documents
@@ -46,7 +47,7 @@ view route appState model =
         viewOffline appState
 
     else
-        Page.actionResultView appState (viewProject route appState model) model.questionnaireModel
+        Page.actionResultView appState (viewProject route appState model) model.questionnaireCommon
 
 
 
@@ -83,27 +84,33 @@ viewError appState =
 -- PROJECT
 
 
-viewProject : ProjectDetailRoute -> AppState -> Model -> Questionnaire.Model -> Html Msg
-viewProject route appState model qm =
+viewProject : ProjectDetailRoute -> AppState -> Model -> QuestionnaireCommon -> Html Msg
+viewProject route appState model questionnaire =
     let
         navigation =
             if AppState.isFullscreen appState then
                 emptyNode
 
             else
-                viewProjectNavigation appState route model qm
+                viewProjectNavigation appState route model questionnaire
 
         modalConfig =
-            { events = ActionResult.withDefault [] qm.questionnaireEvents
-            , versions = qm.questionnaire.versions
+            { events =
+                model.questionnaireModel
+                    |> ActionResult.andThen .questionnaireEvents
+                    |> ActionResult.withDefault []
+            , versions =
+                model.questionnaireModel
+                    |> ActionResult.andThen .questionnaireVersions
+                    |> ActionResult.withDefault []
             }
     in
     div [ class "Projects__Detail col-full flex-column" ]
         [ navigation
-        , viewProjectContent appState route model qm
+        , viewProjectContent appState route model questionnaire
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
         , Html.map QuestionnaireVersionViewModalMsg <| QuestionnaireVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
-        , Html.map RevertModalMsg <| ReverModal.view appState model.revertModalModel
+        , Html.map RevertModalMsg <| RevertModal.view appState model.revertModalModel
         ]
 
 
@@ -111,11 +118,11 @@ viewProject route appState model qm =
 -- PROJECT - NAVIGATION
 
 
-viewProjectNavigation : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
-viewProjectNavigation appState route model qm =
+viewProjectNavigation : AppState -> ProjectDetailRoute -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigation appState route model questionnaire =
     DetailNavigation.container
-        [ viewProjectNavigationTitleRow appState model qm.questionnaire
-        , viewProjectNavigationNav appState route model qm
+        [ viewProjectNavigationTitleRow appState model questionnaire
+        , viewProjectNavigationNav appState route model questionnaire
         ]
 
 
@@ -123,7 +130,7 @@ viewProjectNavigation appState route model qm =
 -- PROJECT - NAVIGATION - TITLE ROW
 
 
-viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireDetail -> Html Msg
+viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireCommon -> Html Msg
 viewProjectNavigationTitleRow appState model questionnaire =
     DetailNavigation.row
         [ DetailNavigation.section
@@ -139,7 +146,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
         ]
 
 
-templateBadge : AppState -> QuestionnaireDetail -> Html msg
+templateBadge : AppState -> QuestionnaireCommon -> Html msg
 templateBadge appState questionnaire =
     if questionnaire.isTemplate then
         Badge.info [] [ text (gettext "Template" appState.locale) ]
@@ -154,9 +161,9 @@ viewProjectNavigationProjectSaving appState model =
         ProjectSaving.view appState model.projectSavingModel
 
 
-viewProjectNavigationActions : AppState -> Model -> QuestionnaireDetail -> Html Msg
+viewProjectNavigationActions : AppState -> Model -> QuestionnaireCommon -> Html Msg
 viewProjectNavigationActions appState model questionnaire =
-    if QuestionnaireDetail.isAnonymousProject questionnaire && Session.exists appState.session then
+    if QuestionnaireUtils.isAnonymousProject questionnaire && Session.exists appState.session then
         DetailNavigation.sectionActions
             [ ActionResultView.error model.addingToMyProjects
             , ActionButton.buttonCustom appState
@@ -170,7 +177,7 @@ viewProjectNavigationActions appState model questionnaire =
                 }
             ]
 
-    else if QuestionnaireDetail.isOwner appState questionnaire then
+    else if QuestionnaireUtils.isOwner appState questionnaire then
         DetailNavigation.sectionActions
             [ button
                 [ class "btn btn-info text-light with-icon"
@@ -190,14 +197,11 @@ viewProjectNavigationActions appState model questionnaire =
 -- PROJECT - NAVIGATION - NAV ROW
 
 
-viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
-viewProjectNavigationNav appState route model qm =
+viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigationNav appState route model questionnaire =
     let
         projectRoute subroute =
             Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid subroute)
-
-        questionnaire =
-            qm.questionnaire
 
         isQuestionnaireRoute =
             case route of
@@ -232,7 +236,7 @@ viewProjectNavigationNav appState route model qm =
             , label = gettext "Metrics" appState.locale
             , icon = faSet "project.metrics" appState
             , isActive = route == ProjectDetailRoute.Metrics
-            , isVisible = Features.projectMetrics appState questionnaire
+            , isVisible = Features.projectMetrics appState
             , dataCy = "project_nav_metrics"
             }
 
@@ -241,7 +245,7 @@ viewProjectNavigationNav appState route model qm =
             , label = gettext "Preview" appState.locale
             , icon = faSet "_global.preview" appState
             , isActive = route == ProjectDetailRoute.Preview
-            , isVisible = Features.projectPreview appState questionnaire
+            , isVisible = Features.projectPreview appState
             , dataCy = "project_nav_preview"
             }
 
@@ -250,7 +254,7 @@ viewProjectNavigationNav appState route model qm =
             , label = gettext "Documents" appState.locale
             , icon = faSet "project.documents" appState
             , isActive = isDocumentRoute
-            , isVisible = Features.projectDocumentsView appState questionnaire
+            , isVisible = Features.projectDocumentsView appState
             , dataCy = "project_nav_documents"
             }
 
@@ -278,11 +282,11 @@ viewProjectNavigationNav appState route model qm =
 -- PROJECT - CONTENT
 
 
-viewProjectContent : AppState -> ProjectDetailRoute -> Model -> Questionnaire.Model -> Html Msg
-viewProjectContent appState route model qm =
+viewProjectContent : AppState -> ProjectDetailRoute -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectContent appState route model questionnaire =
     let
         isEditable =
-            QuestionnaireDetail.isEditor appState qm.questionnaire
+            QuestionnaireUtils.isEditor appState questionnaire
 
         isAuthenticated =
             Session.exists appState.session
@@ -293,47 +297,59 @@ viewProjectContent appState route model qm =
     case route of
         ProjectDetailRoute.Questionnaire _ ->
             let
-                isMigrating =
-                    QuestionnaireDetail.isMigrating qm.questionnaire
+                viewContent qm =
+                    let
+                        isMigrating =
+                            QuestionnaireUtils.isMigrating qm.questionnaire
+                    in
+                    Questionnaire.view appState
+                        { features =
+                            { feedbackEnabled = True
+                            , todosEnabled = isEditable
+                            , commentsEnabled = True
+                            , readonly = not isEditable || isMigrating
+                            , toolbarEnabled = True
+                            , questionLinksEnabled = True
+                            }
+                        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
+                        , wrapMsg = QuestionnaireMsg
+                        , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
+                        , revertQuestionnaireMsg = Just OpenRevertModal
+                        }
+                        { events = [] }
+                        qm
             in
-            Questionnaire.view appState
-                { features =
-                    { feedbackEnabled = True
-                    , todosEnabled = isEditable
-                    , commentsEnabled = True
-                    , readonly = not isEditable || isMigrating
-                    , toolbarEnabled = True
-                    , questionLinksEnabled = True
-                    }
-                , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
-                , wrapMsg = QuestionnaireMsg
-                , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
-                , revertQuestionnaireMsg = Just OpenRevertModal
-                }
-                { events = [] }
-                qm
+            Page.actionResultView appState viewContent model.questionnaireModel
 
         ProjectDetailRoute.Preview ->
-            Html.map PreviewMsg <|
-                Preview.view appState qm.questionnaire model.previewModel
+            let
+                viewContent questionnairePreview =
+                    Html.map PreviewMsg <|
+                        Preview.view appState questionnairePreview model.previewModel
+            in
+            Page.actionResultView appState viewContent model.questionnairePreview
 
         ProjectDetailRoute.Metrics ->
-            Html.map SummaryReportMsg <|
-                SummaryReport.view appState { questionnaire = qm.questionnaire } model.summaryReportModel
+            let
+                viewContent summaryReport =
+                    Html.map SummaryReportMsg <|
+                        SummaryReport.view appState summaryReport
+            in
+            Page.actionResultView appState viewContent model.questionnaireSummaryReport
 
         ProjectDetailRoute.Documents _ ->
             Documents.view appState
-                { questionnaire = qm.questionnaire
+                { questionnaire = questionnaire
                 , questionnaireEditable = isEditable
                 , wrapMsg = DocumentsMsg
-                , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
+                , previewQuestionnaireEventMsg = Just (OpenVersionPreview questionnaire.uuid)
                 }
                 model.documentsModel
 
         ProjectDetailRoute.NewDocument _ ->
             if isEditable && isAuthenticated then
                 Html.map NewDocumentMsg <|
-                    NewDocument.view appState qm.questionnaire model.newDocumentModel
+                    NewDocument.view appState questionnaire model.newDocumentModel
 
             else
                 forbiddenPage
@@ -341,17 +357,14 @@ viewProjectContent appState route model qm =
         ProjectDetailRoute.Settings ->
             let
                 isOwner =
-                    QuestionnaireDetail.isOwner appState qm.questionnaire
+                    QuestionnaireUtils.isOwner appState questionnaire
+
+                viewContent questionnaireSettings =
+                    Html.map SettingsMsg <|
+                        Settings.view appState questionnaireSettings model.settingsModel
             in
             if isOwner && isAuthenticated then
-                Html.map SettingsMsg <|
-                    Settings.view appState
-                        { questionnaire = qm.questionnaire
-                        , package = qm.questionnaire.package
-                        , templateState = qm.questionnaire.documentTemplateState
-                        , templatePhase = qm.questionnaire.documentTemplatePhase
-                        }
-                        model.settingsModel
+                Page.actionResultView appState viewContent model.questionnaireSettings
 
             else
                 forbiddenPage

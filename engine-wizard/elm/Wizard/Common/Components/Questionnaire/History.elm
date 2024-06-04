@@ -21,14 +21,14 @@ import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
-import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.User as User
 import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, fa, faSet)
@@ -40,6 +40,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
+import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 
@@ -124,7 +125,7 @@ subscriptions model =
 
 
 type alias ViewConfig msg =
-    { questionnaire : QuestionnaireDetail
+    { questionnaire : QuestionnaireQuestionnaire
     , wrapMsg : Msg -> msg
     , scrollMsg : String -> msg
     , createVersionMsg : Uuid -> msg
@@ -135,17 +136,17 @@ type alias ViewConfig msg =
     }
 
 
-view : AppState -> ViewConfig msg -> Model -> ActionResult (List QuestionnaireEvent) -> Html msg
-view appState cfg model questionnaireEvents =
-    Page.actionResultView appState (viewHistory appState cfg model) questionnaireEvents
+view : AppState -> ViewConfig msg -> Model -> ActionResult ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+view appState cfg model versionsAndEvents =
+    Page.actionResultView appState (viewHistory appState cfg model) versionsAndEvents
 
 
-viewHistory : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> Html msg
-viewHistory appState cfg model questionnaireEvents =
+viewHistory : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+viewHistory appState cfg model ( versions, events ) =
     let
         filterVersions =
             if model.namedOnly then
-                List.filter (QuestionnaireDetail.isVersion cfg.questionnaire)
+                List.filter (isVersion versions)
 
             else
                 identity
@@ -154,12 +155,12 @@ viewHistory appState cfg model questionnaireEvents =
             not (QuestionnaireEvent.isInvisible event)
 
         eventGroups =
-            questionnaireEvents
+            events
                 |> List.filter filterEvents
                 |> filterVersions
                 |> List.foldl (groupEvents appState) []
                 |> List.reverse
-                |> List.map (viewEventsMonthGroup appState cfg model questionnaireEvents)
+                |> List.map (viewEventsMonthGroup appState cfg model versions events)
 
         namedOnlySelect =
             div [ class "form-check" ]
@@ -172,8 +173,8 @@ viewHistory appState cfg model questionnaireEvents =
     div [ class "history" ] (namedOnlySelect :: eventGroups)
 
 
-viewEventsMonthGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> EventsMonthGroup -> Html msg
-viewEventsMonthGroup appState cfg model questionnaireEvents group =
+viewEventsMonthGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> EventsMonthGroup -> Html msg
+viewEventsMonthGroup appState cfg model versions events group =
     let
         yearString =
             String.fromInt group.year
@@ -182,7 +183,7 @@ viewEventsMonthGroup appState cfg model questionnaireEvents group =
             TimeUtils.monthToString appState group.month
 
         dayGroups =
-            List.map (viewEventsDayGroup appState cfg model questionnaireEvents group.month (createEventsDayGroupIdentifier group.year group.month)) (List.reverse group.days)
+            List.map (viewEventsDayGroup appState cfg model versions events group.month (createEventsDayGroupIdentifier group.year group.month)) (List.reverse group.days)
     in
     div [ class "history-month" ]
         [ h5 [] [ text <| monthString ++ " " ++ yearString ]
@@ -190,8 +191,8 @@ viewEventsMonthGroup appState cfg model questionnaireEvents group =
         ]
 
 
-viewEventsDayGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> Time.Month -> (EventsDayGroup -> String) -> EventsDayGroup -> Html msg
-viewEventsDayGroup appState cfg model questionnaireEvents month getIdentifier group =
+viewEventsDayGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> Time.Month -> (EventsDayGroup -> String) -> EventsDayGroup -> Html msg
+viewEventsDayGroup appState cfg model versions events month getIdentifier group =
     let
         monthString =
             String.fromInt (TimeUtils.monthToInt month)
@@ -202,15 +203,15 @@ viewEventsDayGroup appState cfg model questionnaireEvents month getIdentifier gr
         dateString =
             dayString ++ ". " ++ monthString ++ "."
 
-        events =
-            List.map (viewEvent appState cfg model questionnaireEvents) (List.reverse (filterDayEvents cfg.questionnaire group.events))
+        eventElements =
+            List.map (viewEvent appState cfg model versions events) (List.reverse (filterDayEvents versions group.events))
 
         content =
             if model.namedOnly then
                 [ a [ class "date named-only-open" ]
                     [ strong [] [ text dateString ]
                     ]
-                , div [] events
+                , div [] eventElements
                 ]
 
             else if List.member (getIdentifier group) model.expandedDays then
@@ -218,7 +219,7 @@ viewEventsDayGroup appState cfg model questionnaireEvents month getIdentifier gr
                     [ fa "fas fa-caret-down"
                     , strong [] [ text dateString ]
                     ]
-                , div [] events
+                , div [] eventElements
                 ]
 
             else
@@ -240,21 +241,21 @@ viewEventsDayGroup appState cfg model questionnaireEvents month getIdentifier gr
     div [ class "history-day" ] content
 
 
-viewEvent : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
-viewEvent appState cfg model questionnaireEvents event =
+viewEvent : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEvent appState cfg model versions events event =
     div [ class "history-event" ]
-        [ viewEventHeader appState cfg model questionnaireEvents event
-        , viewEventBadges appState cfg questionnaireEvents event
+        [ viewEventHeader appState cfg model versions events event
+        , viewEventBadges appState versions events event
         , viewEventDetail appState cfg event
         , viewEventUser appState (QuestionnaireEvent.getCreatedBy event)
         ]
 
 
-viewEventHeader : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
-viewEventHeader appState cfg model questionnaireEvents event =
+viewEventHeader : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEventHeader appState cfg model versions events event =
     let
         dropdown =
-            viewEventHeaderDropdown appState cfg model questionnaireEvents event
+            viewEventHeaderDropdown appState cfg model versions events event
 
         readableTime =
             TimeUtils.toReadableTime appState.timeZone (QuestionnaireEvent.getCreatedAt event)
@@ -265,17 +266,17 @@ viewEventHeader appState cfg model questionnaireEvents event =
         ]
 
 
-viewEventHeaderDropdown : AppState -> ViewConfig msg -> Model -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
-viewEventHeaderDropdown appState cfg model questionnaireEvents event =
+viewEventHeaderDropdown : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEventHeaderDropdown appState cfg model versions events event =
     let
         eventUuid =
             QuestionnaireEvent.getUuid event
 
         isOwner =
-            QuestionnaireDetail.isOwner appState cfg.questionnaire
+            QuestionnaireUtils.isOwner appState cfg.questionnaire
 
         mbVersion =
-            QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid
+            QuestionnaireVersion.getVersionByEventUuid versions eventUuid
 
         versionGroup =
             case mbVersion of
@@ -313,7 +314,7 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
                     ]
 
         previewGroup =
-            case ( cfg.previewQuestionnaireEventMsg, QuestionnaireDetail.isCurrentVersion questionnaireEvents eventUuid ) of
+            case ( cfg.previewQuestionnaireEventMsg, QuestionnaireQuestionnaire.isCurrentVersion events eventUuid ) of
                 ( Just viewMsg, False ) ->
                     let
                         viewQuestionnaireAction =
@@ -351,7 +352,7 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
                             , msg = ListingActionMsg (revertMsg event)
                             , dataCy = "revert"
                             }
-                      , not (QuestionnaireDetail.isCurrentVersion questionnaireEvents eventUuid) && isOwner
+                      , not (QuestionnaireQuestionnaire.isCurrentVersion events eventUuid) && isOwner
                       )
                     ]
 
@@ -386,21 +387,21 @@ viewEventHeaderDropdown appState cfg model questionnaireEvents event =
         emptyNode
 
 
-viewEventBadges : AppState -> ViewConfig msg -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
-viewEventBadges appState cfg questionnaireEvents event =
+viewEventBadges : AppState -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEventBadges appState versions events event =
     let
         eventUuid =
             QuestionnaireEvent.getUuid event
 
         currentVersionBadge =
-            if QuestionnaireDetail.isCurrentVersion questionnaireEvents eventUuid then
+            if QuestionnaireQuestionnaire.isCurrentVersion events eventUuid then
                 QuestionnaireVersionTag.current appState
 
             else
                 emptyNode
 
         versionNameBadge =
-            case QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire eventUuid of
+            case QuestionnaireVersion.getVersionByEventUuid versions eventUuid of
                 Just version ->
                     QuestionnaireVersionTag.version version
 
@@ -614,8 +615,8 @@ groupEvents appState event groups =
     monthGroups ++ [ currentMonthGroupWithEvent ]
 
 
-filterDayEvents : QuestionnaireDetail -> List QuestionnaireEvent -> List QuestionnaireEvent
-filterDayEvents questionnaire events =
+filterDayEvents : List QuestionnaireVersion -> List QuestionnaireEvent -> List QuestionnaireEvent
+filterDayEvents versions events =
     let
         defaultAcc =
             { questions = Dict.empty
@@ -633,7 +634,7 @@ filterDayEvents questionnaire events =
                             createdBy =
                                 QuestionnaireEvent.getCreatedBy event
                         in
-                        if not (QuestionnaireDetail.isVersion questionnaire event) && Maybe.unwrap False ((==) createdBy) (Dict.get eventPath acc.questions) then
+                        if not (isVersion versions event) && Maybe.unwrap False ((==) createdBy) (Dict.get eventPath acc.questions) then
                             acc
 
                         else
@@ -650,3 +651,8 @@ filterDayEvents questionnaire events =
 linkToQuestion : ViewConfig msg -> Question -> String -> Html msg
 linkToQuestion cfg question path =
     a [ onClick <| cfg.scrollMsg path ] [ text (Question.getTitle question) ]
+
+
+isVersion : List QuestionnaireVersion -> QuestionnaireEvent -> Bool
+isVersion questionnaireVersions event =
+    List.any (.eventUuid >> (==) (QuestionnaireEvent.getUuid event)) questionnaireVersions

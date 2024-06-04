@@ -1,104 +1,52 @@
 module Wizard.Common.Components.SummaryReport exposing
-    ( Context
-    , Model
-    , Msg
-    , fetchData
-    , init
+    ( Msg
     , update
     , view
     , viewIndications
     )
 
-import ActionResult exposing (ActionResult(..))
 import ChartJS
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, colspan, id, style)
 import Html.Events exposing (onClick)
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Round
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.SummaryReport exposing (ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
 import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Markdown as Markdown
 import String exposing (fromFloat, fromInt)
 import String.Format as String
-import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.View.Page as Page
 import Wizard.Ports as Ports
 
 
-
--- Model
-
-
-type alias Model =
-    { summaryReport : ActionResult SummaryReport
-    }
-
-
-init : Model
-init =
-    { summaryReport = Loading }
-
-
-type alias Context =
-    { questionnaire : QuestionnaireDetail
-    }
-
-
-
--- Update
-
-
 type Msg
-    = GetSummaryReportComplete (Result ApiError SummaryReport)
-    | ScrollToMetric String
+    = ScrollToMetric String
 
 
-fetchData : AppState -> Uuid -> Cmd Msg
-fetchData appState questionnaireUuid =
-    QuestionnairesApi.getSummaryReport questionnaireUuid appState GetSummaryReportComplete
-
-
-update : Msg -> AppState -> Model -> ( Model, Cmd msg )
-update msg appState model =
+update : Msg -> Cmd msg
+update msg =
     case msg of
-        GetSummaryReportComplete result ->
-            case result of
-                Ok summaryReport ->
-                    ( { model | summaryReport = Success summaryReport }
-                    , Cmd.none
-                    )
-
-                Err error ->
-                    ( { model | summaryReport = ApiError.toActionResult appState (gettext "Unable to get the summary report." appState.locale) error }
-                    , Cmd.none
-                    )
-
         ScrollToMetric metric ->
-            ( model, Ports.scrollIntoView ("#" ++ metricId metric) )
+            Ports.scrollIntoView ("#" ++ metricId metric)
 
 
 
 -- View
 
 
-view : AppState -> Context -> Model -> Html Msg
-view appState context model =
+view : AppState -> SummaryReport -> Html Msg
+view appState summaryReport =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Metrics" ]
-        [ Page.actionResultView appState (viewContent appState context) model.summaryReport
+        [ viewContent appState summaryReport
         ]
 
 
-viewContent : AppState -> Context -> SummaryReport -> Html Msg
-viewContent appState ctx summaryReport =
+viewContent : AppState -> SummaryReport -> Html Msg
+viewContent appState summaryReport =
     let
         title =
             [ h2 [] [ text (gettext "Summary Report" appState.locale) ] ]
@@ -108,15 +56,15 @@ viewContent appState ctx summaryReport =
 
         totalReport =
             [ viewIndications appState summaryReport.totalReport.indications
-            , viewMetrics appState ctx summaryReport.totalReport.metrics chartData
+            , viewMetrics appState summaryReport.metrics summaryReport.totalReport.metrics chartData
             , hr [] []
             ]
 
         metrics =
-            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+            summaryReport.metrics
 
         chapters =
-            viewChapters appState ctx summaryReport
+            viewChapters appState summaryReport
 
         metricDescriptions =
             if List.length metrics > 0 then
@@ -129,50 +77,46 @@ viewContent appState ctx summaryReport =
         (List.concat [ title, totalReport, chapters, metricDescriptions ])
 
 
-viewChapters : AppState -> Context -> SummaryReport -> List (Html Msg)
-viewChapters appState ctx summaryReport =
-    List.map (viewChapterReport appState ctx) summaryReport.chapterReports
+viewChapters : AppState -> SummaryReport -> List (Html Msg)
+viewChapters appState summaryReport =
+    List.map (viewChapterReport appState summaryReport) summaryReport.chapterReports
 
 
-viewChapterReport : AppState -> Context -> ChapterReport -> Html Msg
-viewChapterReport appState ctx chapterReport =
+viewChapterReport : AppState -> SummaryReport -> ChapterReport -> Html Msg
+viewChapterReport appState summaryReport chapterReport =
     let
         chapterTitle =
-            ctx.questionnaire.knowledgeModel
-                |> KnowledgeModel.getChapter chapterReport.chapterUuid
-                |> Maybe.map .title
-                |> Maybe.withDefault ""
+            summaryReport.chapters
+                |> List.find ((==) chapterReport.chapterUuid << .uuid)
+                |> Maybe.unwrap "" .title
 
         metrics =
-            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
-
-        chapters =
-            KnowledgeModel.getChapters ctx.questionnaire.knowledgeModel
+            summaryReport.metrics
 
         chartData =
-            createChapterChartData metrics chapters chapterReport
+            createChapterChartData metrics chapterTitle chapterReport
     in
     div []
         [ h3 [] [ text chapterTitle ]
         , viewIndications appState chapterReport.indications
-        , viewMetrics appState ctx chapterReport.metrics chartData
+        , viewMetrics appState metrics chapterReport.metrics chartData
         ]
 
 
-viewMetrics : AppState -> Context -> List MetricReport -> ChartJS.Data -> Html Msg
-viewMetrics appState ctx metricReports chartData =
+viewMetrics : AppState -> List Metric -> List MetricReport -> ChartJS.Data -> Html Msg
+viewMetrics appState metrics metricReports chartData =
     let
         content =
             if List.length metricReports == 0 then
                 []
 
             else if List.length metricReports > 2 then
-                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState ctx metricReports ]
+                [ div [ class "col-xs-12 col-xl-6" ] [ viewMetricsTable appState metrics metricReports ]
                 , div [ class "col-xs-12 col-xl-6" ] [ viewMetricsChart chartData ]
                 ]
 
             else
-                [ div [ class "col-12" ] [ viewMetricsTable appState ctx metricReports ] ]
+                [ div [ class "col-12" ] [ viewMetricsTable appState metrics metricReports ] ]
     in
     div [ class "row" ] content
 
@@ -210,12 +154,8 @@ viewAnsweredIndication title data =
         ]
 
 
-viewMetricsTable : AppState -> Context -> List MetricReport -> Html Msg
-viewMetricsTable appState ctx metricReports =
-    let
-        metrics =
-            KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
-    in
+viewMetricsTable : AppState -> List Metric -> List MetricReport -> Html Msg
+viewMetricsTable appState metrics metricReports =
     table [ class "table table-metrics-report" ]
         [ thead []
             [ tr []
@@ -306,16 +246,11 @@ createTotalChartData metrics totalReport =
     createChartData data ""
 
 
-createChapterChartData : List Metric -> List Chapter -> ChapterReport -> ChartJS.Data
-createChapterChartData metrics chapters chapterReport =
+createChapterChartData : List Metric -> String -> ChapterReport -> ChartJS.Data
+createChapterChartData metrics label chapterReport =
     let
         data =
             List.map (createDataValue metrics) chapterReport.metrics
-
-        label =
-            List.find (.uuid >> (==) chapterReport.chapterUuid) chapters
-                |> Maybe.map .title
-                |> Maybe.withDefault ""
     in
     createChartData data label
 

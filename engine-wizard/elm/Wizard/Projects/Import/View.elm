@@ -9,12 +9,12 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
@@ -40,7 +40,7 @@ view appState model =
         ActionResult.combine3 model.questionnaire model.questionnaireModel model.questionnaireImporter
 
 
-viewContent : AppState -> Model -> ( QuestionnaireDetail, Questionnaire.Model, QuestionnaireImporter ) -> Html Msg
+viewContent : AppState -> Model -> ( QuestionnaireQuestionnaire, Questionnaire.Model, QuestionnaireImporter ) -> Html Msg
 viewContent appState model ( questionnaire, questionnaireModel, _ ) =
     Maybe.unwrap
         (viewContentBeforeImport appState)
@@ -58,7 +58,7 @@ viewContentBeforeImport appState =
         }
 
 
-viewContentImportResult : AppState -> Model -> QuestionnaireDetail -> Questionnaire.Model -> ImporterResult -> Html Msg
+viewContentImportResult : AppState -> Model -> QuestionnaireQuestionnaire -> Questionnaire.Model -> ImporterResult -> Html Msg
 viewContentImportResult appState model questionnaire questionnaireModel importResult =
     div [ class "Projects__Import col-full flex-column" ]
         [ viewNavigation appState model questionnaire importResult
@@ -67,7 +67,7 @@ viewContentImportResult appState model questionnaire questionnaireModel importRe
         ]
 
 
-viewNavigation : AppState -> Model -> QuestionnaireDetail -> ImporterResult -> Html Msg
+viewNavigation : AppState -> Model -> QuestionnaireQuestionnaire -> ImporterResult -> Html Msg
 viewNavigation appState model questionnaire importResult =
     let
         importTitle =
@@ -143,7 +143,7 @@ viewNavigation appState model questionnaire importResult =
         ]
 
 
-viewQuestionnairePreview : AppState -> Model -> QuestionnaireDetail -> Questionnaire.Model -> ImporterResult -> Html Msg
+viewQuestionnairePreview : AppState -> Model -> QuestionnaireQuestionnaire -> Questionnaire.Model -> ImporterResult -> Html Msg
 viewQuestionnairePreview appState model questionnaire questionnaireModel importResult =
     div [ class "Projects__Import__Content__Questionnaire" ]
         [ viewImportResults appState model questionnaire importResult
@@ -166,7 +166,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
         ]
 
 
-viewImportResults : AppState -> Model -> QuestionnaireDetail -> ImporterResult -> Html Msg
+viewImportResults : AppState -> Model -> QuestionnaireQuestionnaire -> ImporterResult -> Html Msg
 viewImportResults appState model questionnaire importResult =
     let
         heading =
@@ -199,7 +199,7 @@ viewImportResults appState model questionnaire importResult =
         ]
 
 
-viewEvent : AppState -> QuestionnaireDetail -> QuestionnaireEvent -> Html Msg
+viewEvent : AppState -> QuestionnaireQuestionnaire -> QuestionnaireEvent -> Html Msg
 viewEvent appState questionnaire event =
     let
         mbQuestion =
@@ -215,7 +215,7 @@ viewEvent appState questionnaire event =
             emptyNode
 
 
-viewReply : AppState -> QuestionnaireDetail -> Question -> SetReplyData -> Html Msg
+viewReply : AppState -> QuestionnaireQuestionnaire -> Question -> SetReplyData -> Html Msg
 viewReply appState questionnaire question data =
     let
         eventView replies =

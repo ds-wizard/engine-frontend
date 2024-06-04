@@ -8,7 +8,7 @@ import Gettext exposing (gettext)
 import Shared.Api.Documents as DocumentsApi
 import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.Document exposing (Document)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -89,7 +89,7 @@ update wrapMsg msg appState model =
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
-handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireCommon -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState model result =
     applyResult appState
         { setResult = setQuestionnaire << Just

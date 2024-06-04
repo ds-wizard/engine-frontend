@@ -10,10 +10,10 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Question exposing (Question(..))
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..), getItemUuids)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
+import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Utils exposing (flip, getUuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing (ImporterEvent(..))
@@ -32,7 +32,7 @@ initialResult =
     }
 
 
-convertToQuestionnaireEvents : AppState -> QuestionnaireDetail -> Result D.Error (List ImporterEvent) -> ( Seed, ImporterResult )
+convertToQuestionnaireEvents : AppState -> QuestionnaireQuestionnaire -> Result D.Error (List ImporterEvent) -> ( Seed, ImporterResult )
 convertToQuestionnaireEvents appState questionnaire importerEventsResult =
     case importerEventsResult of
         Ok importerEvents ->
@@ -48,7 +48,7 @@ convertToQuestionnaireEvents appState questionnaire importerEventsResult =
 
 foldCreateEvent :
     AppState
-    -> QuestionnaireDetail
+    -> QuestionnaireQuestionnaire
     -> ImporterEvent
     -> ( Seed, Dict String (List String), ImporterResult )
     -> ( Seed, Dict String (List String), ImporterResult )
@@ -58,7 +58,7 @@ foldCreateEvent appState questionnaire importerEvent result =
 
 createEvent :
     AppState
-    -> QuestionnaireDetail
+    -> QuestionnaireQuestionnaire
     -> ImporterEvent
     -> ( Seed, Dict String (List String), ImporterResult )
     -> ( Seed, Dict String (List String), ImporterResult )

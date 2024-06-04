@@ -11,7 +11,6 @@ import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
-import Shared.Data.BootstrapConfig.FeatureConfig as FeatureConfig exposing (FeatureConfig)
 import Shared.Data.BootstrapConfig.LocaleConfig as LocaleConfig exposing (LocaleConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
@@ -34,7 +33,6 @@ type alias BootstrapConfig =
     , privacyAndSupport : PrivacyAndSupportConfig
     , questionnaire : QuestionnaireConfig
     , submission : SubmissionConfig
-    , feature : FeatureConfig
     , cloud : CloudConfig
     , owl : OwlConfig
     , locales : List LocaleConfig
@@ -55,7 +53,6 @@ default =
     , privacyAndSupport = PrivacyAndSupportConfig.default
     , questionnaire = QuestionnaireConfig.default
     , submission = SubmissionConfig.default
-    , feature = FeatureConfig.default
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
     , locales = []
@@ -77,7 +74,6 @@ decoder =
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
         |> D.required "questionnaire" QuestionnaireConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
-        |> D.required "feature" FeatureConfig.decoder
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder
         |> D.required "locales" (D.list LocaleConfig.decoder)

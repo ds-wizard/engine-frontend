@@ -15,8 +15,8 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.PackageDetail as PackageDetail
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire
 import Shared.Error.ApiError as ApiError
 import Shared.Setters exposing (setKnowledgeModel, setPackage)
 import Shared.Utils exposing (getUuid)
@@ -66,13 +66,13 @@ update msg wrapMsg appState model =
             handleQuestionnaireMsg qtnMsg wrapMsg appState model
 
         CreateProjectMsg ->
-            case model.questionnaireModel of
-                Success questionnaireModel ->
+            case model.package of
+                Success package ->
                     let
                         body =
                             E.object
-                                [ ( "name", E.string questionnaireModel.questionnaire.package.name )
-                                , ( "packageId", E.string questionnaireModel.questionnaire.package.id )
+                                [ ( "name", E.string package.name )
+                                , ( "packageId", E.string package.id )
                                 , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
                                 , ( "sharing", QuestionnaireSharing.encode QuestionnaireSharing.AnyoneWithLinkEditQuestionnaire )
                                 , ( "questionTagUuids", E.list E.string [] )
@@ -148,12 +148,12 @@ initQuestionnaireModel appState ( model, cmd ) =
         Success ( knowledgeModel, package ) ->
             let
                 questionnaire =
-                    QuestionnaireDetail.createQuestionnaireDetail (PackageDetail.toPackage package) knowledgeModel
+                    QuestionnaireQuestionnaire.createQuestionnaireDetail (PackageDetail.toPackage package) knowledgeModel
 
                 ( ( newSeed, mbChapterUuid, questionnaireWithReplies ), scrollCmd ) =
                     case model.mbQuestionUuid of
                         Just questionUuid ->
-                            ( QuestionnaireDetail.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaire
+                            ( QuestionnaireQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaire
                             , Ports.scrollIntoView ("#question-" ++ questionUuid)
                             )
 
