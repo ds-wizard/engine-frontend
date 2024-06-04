@@ -23,8 +23,9 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.Document exposing (Document)
 import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
@@ -85,7 +86,7 @@ initEmpty =
 
 
 type Msg
-    = GetSummaryReportComplete (Result ApiError SummaryReport)
+    = GetSummaryReportComplete (Result ApiError (QuestionnaireDetailWrapper SummaryReport))
     | GetQuestionnaireEventComplete (Result ApiError QuestionnaireEvent)
     | Cancel
     | FormMsg Form.Msg
@@ -144,13 +145,13 @@ update cfg msg appState model =
             handlePostDocumentCompleted cfg appState model result
 
 
-handleGetSummaryReportCompleted : AppState -> Model -> Result ApiError SummaryReport -> ( Model, Cmd msg )
+handleGetSummaryReportCompleted : AppState -> Model -> Result ApiError (QuestionnaireDetailWrapper SummaryReport) -> ( Model, Cmd msg )
 handleGetSummaryReportCompleted appState model result =
     let
         newSummaryReport =
             case result of
                 Ok summaryReport ->
-                    Success summaryReport
+                    Success summaryReport.data
 
                 Err error ->
                     ApiError.toActionResult appState (gettext "Unable to get the summary report." appState.locale) error
@@ -260,7 +261,7 @@ subscriptions model =
 -- VIEW
 
 
-view : AppState -> QuestionnaireDetail -> Model -> Html Msg
+view : AppState -> QuestionnaireCommon -> Model -> Html Msg
 view appState questionnaire model =
     let
         eventActionResult =
@@ -276,7 +277,7 @@ view appState questionnaire model =
     Page.actionResultView appState (viewFormState appState questionnaire model) actionResult
 
 
-viewFormState : AppState -> QuestionnaireDetail -> Model -> ( SummaryReport, Maybe QuestionnaireEvent ) -> Html Msg
+viewFormState : AppState -> QuestionnaireCommon -> Model -> ( SummaryReport, Maybe QuestionnaireEvent ) -> Html Msg
 viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
     div [ class "Projects__Detail__Content Projects__Detail__Content--NewDocument" ]
         [ div [ detailClass "container" ]
@@ -292,7 +293,7 @@ viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
         ]
 
 
-formView : AppState -> QuestionnaireDetail -> Maybe QuestionnaireEvent -> Model -> SummaryReport -> Html Msg
+formView : AppState -> QuestionnaireCommon -> Maybe QuestionnaireEvent -> Model -> SummaryReport -> Html Msg
 formView appState questionnaire mbEvent model summaryReport =
     let
         cfg =

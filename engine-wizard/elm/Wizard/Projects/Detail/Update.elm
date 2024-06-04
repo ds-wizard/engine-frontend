@@ -7,15 +7,15 @@ import Form
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
-import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
 import Shared.Data.Member as Member
+import Shared.Data.QuestionnaireCommon as QuestionnaireCommon
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Shared.Data.QuestionnairePerm as QuestionnairePerm
+import Shared.Data.QuestionnairePreview as QuestionnairePreview
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
 import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
@@ -31,16 +31,16 @@ import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Msgs
 import Wizard.Ports as Ports
-import Wizard.Projects.Common.QuestionnaireEditForm as QuestionnaireEditForm
+import Wizard.Projects.Common.QuestionnaireShareForm as QuestionnaireShareForm
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
-import Wizard.Projects.Detail.Components.Preview as Preview
+import Wizard.Projects.Detail.Components.Preview as Preview exposing (PreviewState(..))
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
 import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Update as Documents
-import Wizard.Projects.Detail.Models exposing (Model, addQuestionnaireEvent, addSavingActionUuid, hasTemplate, initPageModel, removeSavingActionUuid)
+import Wizard.Projects.Detail.Models exposing (Model, addQuestionnaireEvent, addSavingActionUuid, removeSavingActionUuid)
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..))
@@ -50,28 +50,14 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
 fetchData appState uuid model =
-    if ActionResult.unwrap False (.uuid >> (==) uuid) model.questionnaireModel then
+    if ActionResult.unwrap False (.uuid >> (==) uuid) model.questionnaireCommon then
         Cmd.batch
             [ fetchSubrouteData appState model
             , WebSocket.open model.websocket
             ]
 
     else
-        let
-            importersAndActionsCmd =
-                if Session.exists appState.session then
-                    Cmd.batch
-                        [ QuestionnaireImportersApi.getQuestionnaireImportersFor uuid appState GetQuestionnaireImportersComplete
-                        , QuestionnaireActionsApi.getQuestionnaireActionsFor uuid appState GetQuestionnaireActionsComplete
-                        ]
-
-                else
-                    Cmd.none
-        in
-        Cmd.batch
-            [ QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireComplete
-            , importersAndActionsCmd
-            ]
+        fetchSubrouteData appState model
 
 
 fetchSubrouteData : AppState -> Model -> Cmd Msg
@@ -80,39 +66,39 @@ fetchSubrouteData appState model =
         ProjectsRoute (DetailRoute uuid route) ->
             case route of
                 ProjectDetailRoute.Questionnaire _ ->
-                    dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
+                    Cmd.batch
+                        [ dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
+                        , QuestionnairesApi.getQuestionnaireQuestionnaire uuid appState GetQuestionnaireDetailCompleted
+                        ]
 
                 ProjectDetailRoute.Preview ->
-                    Cmd.map PreviewMsg <|
-                        Preview.fetchData appState uuid (hasTemplate model)
+                    QuestionnairesApi.getQuestionnairePreview uuid appState GetQuestionnairePreviewCompleted
 
                 ProjectDetailRoute.Metrics ->
-                    Cmd.map SummaryReportMsg <|
-                        SummaryReport.fetchData appState uuid
+                    QuestionnairesApi.getSummaryReport uuid appState GetQuestionnaireSummaryReportCompleted
 
                 ProjectDetailRoute.Documents _ ->
-                    Cmd.map DocumentsMsg <|
-                        Documents.fetchData
+                    let
+                        commonCmd =
+                            if ActionResult.isSuccess model.questionnaireCommon then
+                                Cmd.map DocumentsMsg Documents.fetchData
 
-                ProjectDetailRoute.NewDocument mbEventUuid ->
-                    Cmd.map NewDocumentMsg <|
-                        NewDocument.fetchData appState uuid mbEventUuid
+                            else
+                                QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCommonCompleted
+                    in
+                    Cmd.batch
+                        [ commonCmd
+                        , Cmd.map DocumentsMsg Documents.fetchData
+                        ]
 
-                _ ->
-                    Cmd.none
+                ProjectDetailRoute.NewDocument _ ->
+                    QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireSettingsCompleted
+
+                ProjectDetailRoute.Settings ->
+                    QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireSettingsCompleted
 
         _ ->
             Cmd.none
-
-
-fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-fetchSubrouteDataFromAfter wrapMsg appState model =
-    case ( model.questionnaireModel, appState.route ) of
-        ( Success _, ProjectsRoute (DetailRoute _ route) ) ->
-            ( initPageModel appState route model, Cmd.map wrapMsg <| fetchSubrouteData appState model )
-
-        _ ->
-            ( model, Cmd.none )
 
 
 isGuarded : AppState -> Routes.Route -> Model -> Maybe String
@@ -153,6 +139,37 @@ update wrapMsg msg appState model =
     let
         withSeed ( m, c ) =
             ( appState.seed, m, c )
+
+        openWebSocket =
+            if ActionResult.isLoading model.questionnaireCommon then
+                WebSocket.open model.websocket
+
+            else
+                Cmd.none
+
+        setError result error =
+            let
+                questionnaireRoute =
+                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+
+                loginRoute =
+                    Routes.publicLogin (Just questionnaireRoute)
+            in
+            case ( error, Session.exists appState.session ) of
+                ( BadStatus 403 _, False ) ->
+                    withSeed ( model, cmdNavigate appState loginRoute )
+
+                ( BadStatus 401 _, False ) ->
+                    withSeed ( model, cmdNavigate appState loginRoute )
+
+                ( BadStatus 401 _, True ) ->
+                    withSeed ( model, dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
+
+                _ ->
+                    withSeed <|
+                        ( { model | questionnaireCommon = ApiError.toActionResult appState (gettext "Unable to get the project." appState.locale) error }
+                        , getResultCmd Wizard.Msgs.logoutMsg result
+                        )
     in
     case msg of
         ResetModel ->
@@ -392,20 +409,21 @@ update wrapMsg msg appState model =
                                         , createdBy = createdBy
                                         }
 
-                        Questionnaire.CommentThreadReopen path threadUuid private ->
+                        Questionnaire.CommentThreadReopen path commentThread ->
                             let
                                 reopenCommentThread questionnaire =
-                                    Questionnaire.reopenCommentThread path threadUuid questionnaire
+                                    Questionnaire.reopenCommentThread path commentThread.uuid (List.length commentThread.comments) questionnaire
                             in
                             applyAction questionnaireSeed reopenCommentThread <|
                                 \uuid ->
                                     QuestionnaireEvent.ReopenCommentThread
                                         { uuid = uuid
                                         , path = path
-                                        , threadUuid = threadUuid
-                                        , private = private
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
                                         , createdAt = createdAt
                                         , createdBy = createdBy
+                                        , commentCount = List.length commentThread.comments
                                         }
 
                         _ ->
@@ -463,40 +481,31 @@ update wrapMsg msg appState model =
                 )
 
         SummaryReportMsg summaryReportMsg ->
-            let
-                ( summaryReportModel, summaryReportCmd ) =
-                    SummaryReport.update summaryReportMsg appState model.summaryReportModel
-            in
             withSeed <|
-                ( { model | summaryReportModel = summaryReportModel }
-                , Cmd.map (wrapMsg << SummaryReportMsg) summaryReportCmd
+                ( model
+                , SummaryReport.update summaryReportMsg
                 )
 
         DocumentsMsg documentsMsg ->
-            case model.questionnaireModel of
-                Success qm ->
-                    let
-                        ( documentsModel, documentsCmd ) =
-                            Documents.update (wrapMsg << DocumentsMsg) documentsMsg appState qm.questionnaire.uuid model.documentsModel
-                    in
-                    withSeed <|
-                        ( { model | documentsModel = documentsModel }
-                        , documentsCmd
-                        )
-
-                _ ->
-                    withSeed ( model, Cmd.none )
+            let
+                ( documentsModel, documentsCmd ) =
+                    Documents.update (wrapMsg << DocumentsMsg) documentsMsg appState model.uuid model.documentsModel
+            in
+            withSeed <|
+                ( { model | documentsModel = documentsModel }
+                , documentsCmd
+                )
 
         NewDocumentMsg newDocumentMsg ->
-            case model.questionnaireModel of
-                Success qm ->
+            case model.questionnaireCommon of
+                Success questionnaire ->
                     let
                         ( newDocumentModel, newDocumentCmd ) =
                             NewDocument.update
                                 { wrapMsg = wrapMsg << NewDocumentMsg
-                                , questionnaireUuid = qm.questionnaire.uuid
-                                , packageId = qm.questionnaire.package.id
-                                , documentsNavigateCmd = cmdNavigate appState <| Routes.projectsDetailDocuments qm.questionnaire.uuid
+                                , questionnaireUuid = questionnaire.uuid
+                                , packageId = questionnaire.packageId
+                                , documentsNavigateCmd = cmdNavigate appState <| Routes.projectsDetailDocuments questionnaire.uuid
                                 }
                                 newDocumentMsg
                                 appState
@@ -510,98 +519,115 @@ update wrapMsg msg appState model =
                 _ ->
                     withSeed ( model, Cmd.none )
 
-        GetQuestionnaireComplete result ->
+        GetQuestionnaireCommonCompleted result ->
             case result of
-                Ok questionnaire ->
+                Ok data ->
+                    let
+                        newModel =
+                            { model | questionnaireCommon = Success data }
+                    in
+                    withSeed ( newModel, openWebSocket )
+
+                Err error ->
+                    setError result error
+
+        GetQuestionnaireDetailCompleted result ->
+            case result of
+                Ok data ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Questionnaire.init appState questionnaire model.mbSelectedPath
+                            Questionnaire.init appState data.data model.mbSelectedPath
 
-                        setImporters =
-                            ActionResult.unwrap identity Questionnaire.setQuestionnaireImporters model.questionnaireImporters
-
-                        setActions =
-                            ActionResult.unwrap identity Questionnaire.setQuestionnaireActions model.questionnaireActions
-
-                        newQuestionnaireModel =
-                            questionnaireModel
-                                |> setImporters
-                                |> setActions
-                                |> Success
-
-                        ( newModel, fetchCmd ) =
-                            fetchSubrouteDataFromAfter wrapMsg
-                                appState
-                                { model | questionnaireModel = newQuestionnaireModel }
+                        newModel =
+                            { model
+                                | questionnaireModel = Success questionnaireModel
+                                , questionnaireCommon = Success data.common
+                            }
                     in
                     withSeed <|
                         ( newModel
                         , Cmd.batch
-                            [ WebSocket.open model.websocket
-                            , fetchCmd
+                            [ openWebSocket
                             , Cmd.map (wrapMsg << QuestionnaireMsg) questionnaireCmd
                             ]
                         )
 
                 Err error ->
-                    let
-                        questionnaireRoute =
-                            Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+                    setError result error
 
-                        loginRoute =
-                            Routes.publicLogin (Just questionnaireRoute)
-                    in
-                    case ( error, Session.exists appState.session ) of
-                        ( BadStatus 403 _, False ) ->
-                            withSeed ( model, cmdNavigate appState loginRoute )
-
-                        ( BadStatus 401 _, False ) ->
-                            withSeed ( model, cmdNavigate appState loginRoute )
-
-                        ( BadStatus 401 _, True ) ->
-                            withSeed ( model, dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
-
-                        _ ->
-                            withSeed <|
-                                ( { model | questionnaireModel = ApiError.toActionResult appState (gettext "Unable to get the project." appState.locale) error }
-                                , getResultCmd Wizard.Msgs.logoutMsg result
-                                )
-
-        GetQuestionnaireImportersComplete result ->
+        GetQuestionnaireSummaryReportCompleted result ->
             case result of
-                Ok questionnaireImporters ->
+                Ok data ->
                     let
-                        questionnaireModel =
-                            ActionResult.map (Questionnaire.setQuestionnaireImporters questionnaireImporters) model.questionnaireModel
+                        newModel =
+                            { model
+                                | questionnaireSummaryReport = Success data.data
+                                , questionnaireCommon = Success data.common
+                            }
+                    in
+                    withSeed ( newModel, openWebSocket )
+
+                Err error ->
+                    setError result error
+
+        GetQuestionnairePreviewCompleted result ->
+            case result of
+                Ok data ->
+                    let
+                        hasTemplate =
+                            QuestionnairePreview.hasTemplateSet data.data
+
+                        templateState =
+                            if hasTemplate then
+                                Preview Loading
+
+                            else
+                                TemplateNotSet
 
                         newModel =
                             { model
-                                | questionnaireImporters = Success questionnaireImporters
-                                , questionnaireModel = questionnaireModel
+                                | questionnairePreview = Success data.data
+                                , questionnaireCommon = Success data.common
+                                , previewModel = Preview.init model.uuid templateState
                             }
                     in
-                    withSeed ( newModel, Cmd.none )
+                    withSeed
+                        ( newModel
+                        , Cmd.batch
+                            [ openWebSocket
+                            , Cmd.map (wrapMsg << PreviewMsg) (Preview.fetchData appState model.uuid hasTemplate)
+                            ]
+                        )
 
-                Err _ ->
-                    withSeed ( model, Cmd.none )
+                Err error ->
+                    setError result error
 
-        GetQuestionnaireActionsComplete result ->
+        GetQuestionnaireSettingsCompleted result ->
             case result of
-                Ok questionnaireActions ->
+                Ok data ->
                     let
-                        questionnaireModel =
-                            ActionResult.map (Questionnaire.setQuestionnaireActions questionnaireActions) model.questionnaireModel
-
                         newModel =
                             { model
-                                | questionnaireActions = Success questionnaireActions
-                                , questionnaireModel = questionnaireModel
+                                | questionnaireSettings = Success data.data
+                                , settingsModel = Settings.init appState (Just data.data)
+                                , questionnaireCommon = Success data.common
                             }
-                    in
-                    withSeed ( newModel, Cmd.none )
 
-                Err _ ->
-                    withSeed ( model, Cmd.none )
+                        ( newModelWithDocument, newDocumentCmd ) =
+                            case appState.route of
+                                ProjectsRoute (DetailRoute uuid (ProjectDetailRoute.NewDocument mbEventUuid)) ->
+                                    ( { newModel | newDocumentModel = NewDocument.initialModel data.data mbEventUuid }
+                                    , Cmd.map (wrapMsg << NewDocumentMsg) <|
+                                        NewDocument.fetchData appState uuid mbEventUuid
+                                    )
+
+                                _ ->
+                                    ( newModel, Cmd.none )
+                    in
+                    withSeed ( newModelWithDocument, Cmd.batch [ openWebSocket, newDocumentCmd ] )
+
+                Err error ->
+                    setError result error
 
         WebSocketMsg wsMsg ->
             handleWebsocketMsg wsMsg appState model
@@ -630,7 +656,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
                     , redirectCmd = cmdNavigate appState (Routes.projectsIndex appState)
-                    , packageId = ActionResult.unwrap "" (.questionnaire >> .package >> .id) model.questionnaireModel
+                    , packageId = ActionResult.unwrap "" (.questionnaire >> .packageId) model.questionnaireModel
                     , questionnaireUuid = model.uuid
                     , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
                     }
@@ -694,12 +720,9 @@ update wrapMsg msg appState model =
             withSeed ( { model | revertModalModel = newRevertModalModel }, Cmd.none )
 
         AddToMyProjects ->
-            case model.questionnaireModel of
-                Success questionnaireModel ->
+            case model.questionnaireCommon of
+                Success questionnaire ->
                     let
-                        questionnaireDetail =
-                            questionnaireModel.questionnaire
-
                         member =
                             Member.userMember
                                 { uuid = Maybe.unwrap Uuid.nil .uuid appState.config.user
@@ -714,18 +737,18 @@ update wrapMsg msg appState model =
                             , perms = QuestionnairePerm.all
                             }
 
-                        detail =
-                            { questionnaireDetail | permissions = [ permission ] }
+                        questionnaireCommon =
+                            { questionnaire | permissions = [ permission ] }
 
                         questionnaireEditForm =
-                            QuestionnaireEditForm.init appState detail
+                            QuestionnaireShareForm.init questionnaireCommon
 
                         cmd =
                             case Form.getOutput questionnaireEditForm of
                                 Just form ->
                                     Cmd.map wrapMsg <|
-                                        QuestionnairesApi.putQuestionnaire questionnaireDetail.uuid
-                                            (QuestionnaireEditForm.encode form)
+                                        QuestionnairesApi.putQuestionnaireShare model.uuid
+                                            (QuestionnaireShareForm.encode form)
                                             appState
                                             PutQuestionnaireComplete
 
@@ -776,7 +799,10 @@ handleWebsocketMsg websocketMsg appState model =
 
         updateQuestionnaireData data =
             ( appState.seed
-            , { model | questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData data) model.questionnaireModel }
+            , { model
+                | questionnaireCommon = ActionResult.map (QuestionnaireCommon.updateWithQuestionnaireData data) model.questionnaireCommon
+                , questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData data) model.questionnaireModel
+              }
             , Cmd.none
             )
     in
@@ -806,7 +832,7 @@ handleWebsocketMsg websocketMsg appState model =
                                     updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid)
 
                                 QuestionnaireEvent.ReopenCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.reopenCommentThread data.path data.threadUuid)
+                                    updateQuestionnaire event data.uuid (Questionnaire.reopenCommentThread data.path data.threadUuid data.commentCount)
 
                                 QuestionnaireEvent.DeleteCommentThread data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.deleteCommentThread data.path data.threadUuid)

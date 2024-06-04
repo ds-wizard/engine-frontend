@@ -2,7 +2,6 @@ module Wizard.Projects.Detail.Models exposing
     ( Model
     , addQuestionnaireEvent
     , addSavingActionUuid
-    , hasTemplate
     , init
     , initPageModel
     , removeSavingActionUuid
@@ -11,20 +10,20 @@ module Wizard.Projects.Detail.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
-import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnaireApi
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Shared.Data.QuestionnairePreview exposing (QuestionnairePreview)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
-import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
-import Wizard.Projects.Detail.Components.Preview as Preview exposing (PreviewState(..))
+import Wizard.Projects.Detail.Components.Preview as Preview
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
 import Wizard.Projects.Detail.Components.RevertModal as RevertModal
@@ -46,16 +45,17 @@ type alias Model =
     , shareModalModel : ShareModal.Model
     , previewModel : Preview.Model
     , questionnaireModel : ActionResult Questionnaire.Model
-    , questionnaireImporters : ActionResult (List QuestionnaireImporter)
-    , questionnaireActions : ActionResult (List QuestionnaireAction)
+    , questionnaireSummaryReport : ActionResult SummaryReport
+    , questionnairePreview : ActionResult QuestionnairePreview
+    , questionnaireSettings : ActionResult QuestionnaireSettings
     , questionnaireWebSocketDebounce : Dict String (Debounce QuestionnaireEvent)
-    , summaryReportModel : SummaryReport.Model
     , documentsModel : Documents.Model
     , settingsModel : Settings.Model
     , newDocumentModel : NewDocument.Model
     , questionnaireVersionViewModalModel : QuestionnaireVersionViewModal.Model
     , revertModalModel : RevertModal.Model
     , addingToMyProjects : ActionResult ()
+    , questionnaireCommon : ActionResult QuestionnaireCommon
     }
 
 
@@ -69,64 +69,37 @@ init appState uuid mbSelectedPath =
     , onlineUsers = []
     , savingActionUuids = []
     , projectSavingModel = ProjectSaving.init
-    , shareModalModel = ShareModal.init appState
+    , shareModalModel = ShareModal.init
     , previewModel = Preview.init uuid Preview.TemplateNotSet
     , questionnaireModel = Loading
-    , questionnaireImporters = Loading
-    , questionnaireActions = Loading
+    , questionnaireSummaryReport = Loading
+    , questionnairePreview = Loading
+    , questionnaireSettings = Loading
     , questionnaireWebSocketDebounce = Dict.empty
-    , summaryReportModel = SummaryReport.init
     , documentsModel = Documents.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty
     , settingsModel = Settings.init appState Nothing
     , questionnaireVersionViewModalModel = QuestionnaireVersionViewModal.initEmpty
     , revertModalModel = RevertModal.init
     , addingToMyProjects = Unset
+    , questionnaireCommon = Loading
     }
 
 
 initPageModel : AppState -> ProjectDetailRoute -> Model -> Model
 initPageModel appState route model =
     case route of
-        PlanDetailRoute.Preview ->
-            let
-                state =
-                    if hasTemplate model then
-                        Preview Loading
-
-                    else
-                        TemplateNotSet
-            in
-            { model | previewModel = Preview.init model.uuid state }
-
-        PlanDetailRoute.Metrics ->
-            { model | summaryReportModel = SummaryReport.init }
-
         PlanDetailRoute.Documents paginationQueryString ->
             { model | documentsModel = Documents.initialModel paginationQueryString }
 
-        PlanDetailRoute.NewDocument mbEventUuid ->
-            { model
-                | newDocumentModel =
-                    case model.questionnaireModel of
-                        Success qm ->
-                            NewDocument.initialModel qm.questionnaire mbEventUuid
-
-                        _ ->
-                            NewDocument.initEmpty
-            }
+        PlanDetailRoute.NewDocument _ ->
+            { model | newDocumentModel = NewDocument.initEmpty }
 
         PlanDetailRoute.Settings ->
-            { model | settingsModel = Settings.init appState (ActionResult.unwrap Nothing (.questionnaire >> Just) model.questionnaireModel) }
+            { model | settingsModel = Settings.init appState (ActionResult.toMaybe model.questionnaireSettings) }
 
         _ ->
             model
-
-
-hasTemplate : Model -> Bool
-hasTemplate model =
-    ActionResult.unwrap False (.questionnaire >> .documentTemplateId >> Maybe.isJust) model.questionnaireModel
-        && ActionResult.unwrap False (.questionnaire >> .format >> Maybe.isJust) model.questionnaireModel
 
 
 addSavingActionUuid : Uuid -> Model -> Model

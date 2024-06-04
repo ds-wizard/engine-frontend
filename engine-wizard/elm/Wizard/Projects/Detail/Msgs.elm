@@ -1,10 +1,13 @@
 module Wizard.Projects.Detail.Msgs exposing (Msg(..))
 
 import Debounce
-import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Shared.Data.QuestionnairePreview exposing (QuestionnairePreview)
+import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Shared.Data.SummaryReport exposing (SummaryReport)
 import Shared.Error.ApiError exposing (ApiError)
 import Shared.WebSocket as WebSocket
 import Uuid exposing (Uuid)
@@ -21,9 +24,11 @@ import Wizard.Projects.Detail.Documents.Msgs as Documents
 
 
 type Msg
-    = GetQuestionnaireComplete (Result ApiError QuestionnaireDetail)
-    | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
-    | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
+    = GetQuestionnaireCommonCompleted (Result ApiError QuestionnaireCommon)
+    | GetQuestionnaireDetailCompleted (Result ApiError (QuestionnaireDetailWrapper QuestionnaireQuestionnaire))
+    | GetQuestionnaireSummaryReportCompleted (Result ApiError (QuestionnaireDetailWrapper SummaryReport))
+    | GetQuestionnairePreviewCompleted (Result ApiError (QuestionnaireDetailWrapper QuestionnairePreview))
+    | GetQuestionnaireSettingsCompleted (Result ApiError (QuestionnaireDetailWrapper QuestionnaireSettings))
     | QuestionnaireDebounceMsg String Debounce.Msg
     | QuestionnaireAddSavingEvent QuestionnaireEvent
     | WebSocketMsg WebSocket.RawMsg

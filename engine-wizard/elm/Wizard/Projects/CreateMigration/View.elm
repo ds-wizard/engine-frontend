@@ -5,9 +5,8 @@ import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
-import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.PackageSuggestion as PackageSuggestion
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Html exposing (faSet)
 import Version
 import Wizard.Common.AppState exposing (AppState)
@@ -30,7 +29,7 @@ view appState model =
     Page.actionResultView appState (createMigrationView appState model) model.questionnaire
 
 
-createMigrationView : AppState -> Model -> QuestionnaireDetail -> Html Msg
+createMigrationView : AppState -> Model -> QuestionnaireSettings -> Html Msg
 createMigrationView appState model questionnaire =
     let
         createVersionOption package version =
@@ -48,13 +47,10 @@ createMigrationView appState model questionnaire =
         createOptions package =
             ( "", "--" ) :: List.map (createVersionOption package) (List.reverse (List.sortWith Version.compare package.versions))
 
-        tags =
-            KnowledgeModel.getTags questionnaire.knowledgeModel
-
         originalTagList =
             div [ class "form-group form-group-tags" ]
                 [ label [] [ text (gettext "Original question tags" appState.locale) ]
-                , div [] [ Tag.readOnlyList appState questionnaire.selectedQuestionTagUuids tags ]
+                , div [] [ Tag.readOnlyList appState questionnaire.selectedQuestionTagUuids questionnaire.knowledgeModelTags ]
                 ]
 
         cfg =
@@ -90,7 +86,7 @@ createMigrationView appState model questionnaire =
                 [ FormGroup.plainGroup
                     (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
                     (gettext "Original Knowledge Model" appState.locale)
-                , FormGroup.codeView (Version.toString questionnaire.package.version) <| gettext "Original version" appState.locale
+                , FormGroup.codeView (Version.toString questionnaire.package.version) (gettext "Original Version" appState.locale)
                 , originalTagList
                 ]
             , faSet "_global.arrowRight" appState

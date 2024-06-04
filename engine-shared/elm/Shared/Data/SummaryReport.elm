@@ -10,12 +10,16 @@ module Shared.Data.SummaryReport exposing
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
+import Shared.Data.KnowledgeModel.Chapter as Chapter exposing (Chapter)
+import Shared.Data.KnowledgeModel.Metric as Metric exposing (Metric)
 import Shared.Data.SummaryReport.AnsweredIndicationData as AnsweredIndicationData exposing (AnsweredIndicationData)
 
 
 type alias SummaryReport =
     { totalReport : TotalReport
     , chapterReports : List ChapterReport
+    , chapters : List Chapter
+    , metrics : List Metric
     }
 
 
@@ -48,6 +52,8 @@ decoder =
     Decode.succeed SummaryReport
         |> required "totalReport" totalReportDecoder
         |> required "chapterReports" (Decode.list chapterReportDecoder)
+        |> required "chapters" (Decode.list Chapter.decoder)
+        |> required "metrics" (Decode.list Metric.decoder)
 
 
 totalReportDecoder : Decoder TotalReport

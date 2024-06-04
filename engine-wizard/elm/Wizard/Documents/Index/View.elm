@@ -11,7 +11,7 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
@@ -53,7 +53,7 @@ view appState model =
     Page.actionResultView appState (viewDocuments appState model) questionnaireActionResult
 
 
-viewDocuments : AppState -> Model -> Maybe QuestionnaireDetail -> Html Msg
+viewDocuments : AppState -> Model -> Maybe QuestionnaireCommon -> Html Msg
 viewDocuments appState model mbQuestionnaire =
     let
         questionnaireFilterView questionnaire =

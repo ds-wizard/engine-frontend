@@ -107,6 +107,11 @@ code {
 
     .dropdown-item {
         cursor: pointer;
+
+        &-no-hover {
+            background: transparent !important;
+            cursor: default !important;
+        }
     }
 }
 

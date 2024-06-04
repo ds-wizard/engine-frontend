@@ -16,7 +16,7 @@ import Http
 import Process
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnairePreview exposing (QuestionnairePreview)
 import Shared.Data.UrlResponse exposing (UrlResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
@@ -29,6 +29,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.ContentType as ContentType
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
 
@@ -125,7 +126,7 @@ handleHeadDocumentPreviewComplete appState model result =
 -- VIEW
 
 
-view : AppState -> QuestionnaireDetail -> Model -> Html Msg
+view : AppState -> QuestionnairePreview -> Model -> Html Msg
 view appState questionnaire model =
     case model.previewState of
         Preview preview ->
@@ -173,7 +174,7 @@ viewNotSupported appState documentUrl =
         }
 
 
-viewTemplateNotSet : AppState -> QuestionnaireDetail -> Html msg
+viewTemplateNotSet : AppState -> QuestionnairePreview -> Html msg
 viewTemplateNotSet appState questionnaire =
     let
         content =
@@ -181,7 +182,7 @@ viewTemplateNotSet appState questionnaire =
                 [ p [] [ text (gettext "Log in to set a default document template and format." appState.locale) ]
                 ]
 
-            else if QuestionnaireDetail.isOwner appState questionnaire then
+            else if QuestionnaireUtils.isOwner appState questionnaire then
                 [ p [] [ text (gettext "Before you can use preview you need to set a default document template and format." appState.locale) ]
                 , p []
                     [ linkTo appState
@@ -205,7 +206,7 @@ viewTemplateNotSet appState questionnaire =
         }
 
 
-viewTemplateUnsupported : AppState -> QuestionnaireDetail -> Html msg
+viewTemplateUnsupported : AppState -> QuestionnairePreview -> Html msg
 viewTemplateUnsupported appState questionnaire =
     let
         content =
@@ -213,7 +214,7 @@ viewTemplateUnsupported appState questionnaire =
                 [ p [] [ text (gettext "Log in to update the default document template." appState.locale) ]
                 ]
 
-            else if QuestionnaireDetail.isOwner appState questionnaire then
+            else if QuestionnaireUtils.isOwner appState questionnaire then
                 [ p [] [ text (gettext "Before you can use preview you need to update the default document template." appState.locale) ]
                 , p []
                     [ linkTo appState

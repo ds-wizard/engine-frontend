@@ -20,8 +20,6 @@ module Wizard.Common.Components.Questionnaire exposing
     , setActiveChapterUuid
     , setLabels
     , setPhaseUuid
-    , setQuestionnaireActions
-    , setQuestionnaireImporters
     , setReply
     , subscriptions
     , update
@@ -49,8 +47,11 @@ import Random exposing (Seed)
 import Regex
 import Roman
 import Set exposing (Set)
+import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
+import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.TypeHints as TypeHintsApi
+import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
@@ -68,7 +69,6 @@ import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
 import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
@@ -76,12 +76,13 @@ import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.TypeHint exposing (TypeHint)
 import Shared.Data.User as User
 import Shared.Data.UserInfo as UserInfo
 import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
@@ -110,6 +111,7 @@ import Wizard.Common.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Common.Integrations as Integrations
 import Wizard.Common.LocalStorageData as LocalStorageData exposing (LocalStorageData)
 import Wizard.Common.TimeDistance as TimeDistance
+import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Tag as Tag
@@ -128,8 +130,9 @@ type alias Model =
     { uuid : Uuid
     , activePage : ActivePage
     , rightPanel : RightPanel
-    , questionnaire : QuestionnaireDetail
+    , questionnaire : QuestionnaireQuestionnaire
     , questionnaireEvents : ActionResult (List QuestionnaireEvent)
+    , questionnaireVersions : ActionResult (List QuestionnaireVersion)
     , phaseModalOpen : Bool
     , removeItem : Maybe ( String, String )
     , typeHints : Maybe TypeHints
@@ -150,13 +153,14 @@ type alias Model =
     , splitPane : SplitPane.State
     , navigationTreeModel : NavigationTree.Model
     , questionnaireImportersDropdown : Dropdown.State
-    , questionnaireImporters : List QuestionnaireImporter
+    , questionnaireImporters : ActionResult (List QuestionnaireImporter)
     , questionnaireActionsDropdown : Dropdown.State
-    , questionnaireActions : List QuestionnaireAction
+    , questionnaireActions : ActionResult (List QuestionnaireAction)
     , questionnaireActionResult : Maybe Integrations.ActionResult
     , collapsedItems : Set String
     , recentlyCopied : Bool
     , contentScrollTop : Maybe Int
+    , commentThreadsMap : Dict String (ActionResult (List CommentThread))
     }
 
 
@@ -180,7 +184,7 @@ type RightPanel
     | RightPanelWarnings
 
 
-init : AppState -> QuestionnaireDetail -> Maybe String -> ( Model, Cmd Msg )
+init : AppState -> QuestionnaireQuestionnaire -> Maybe String -> ( Model, Cmd Msg )
 init appState questionnaire mbPath =
     let
         mbChapterUuid =
@@ -200,6 +204,7 @@ init appState questionnaire mbPath =
             , rightPanel = RightPanelNone
             , questionnaire = questionnaire
             , questionnaireEvents = ActionResult.Unset
+            , questionnaireVersions = ActionResult.Unset
             , phaseModalOpen = False
             , removeItem = Nothing
             , typeHints = Nothing
@@ -220,13 +225,14 @@ init appState questionnaire mbPath =
             , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.1, 0.7 )))
             , navigationTreeModel = navigationTreeModel
             , questionnaireImportersDropdown = Dropdown.initialState
-            , questionnaireImporters = []
+            , questionnaireImporters = ActionResult.Unset
             , questionnaireActionsDropdown = Dropdown.initialState
-            , questionnaireActions = []
+            , questionnaireActions = ActionResult.Unset
             , questionnaireActionResult = Nothing
             , collapsedItems = Set.empty
             , recentlyCopied = False
             , contentScrollTop = Nothing
+            , commentThreadsMap = Dict.empty
             }
 
         ( model, scrollCmd ) =
@@ -246,14 +252,13 @@ init appState questionnaire mbPath =
     )
 
 
-setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
-setQuestionnaireImporters importers model =
-    { model | questionnaireImporters = importers }
 
-
-setQuestionnaireActions : List QuestionnaireAction -> Model -> Model
-setQuestionnaireActions actions model =
-    { model | questionnaireActions = actions }
+--setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
+--setQuestionnaireImporters importers model =
+--    { model | questionnaireImporters = importers }
+--setQuestionnaireActions : List QuestionnaireAction -> Model -> Model
+--setQuestionnaireActions actions model =
+--    { model | questionnaireActions = actions }
 
 
 addEvent : QuestionnaireEvent -> Model -> Model
@@ -272,62 +277,158 @@ setActiveChapterUuid uuid model =
 updateWithQuestionnaireData : SetQuestionnaireData -> Model -> Model
 updateWithQuestionnaireData data model =
     { model
-        | questionnaire = QuestionnaireDetail.updateWithQuestionnaireData data model.questionnaire
+        | questionnaire = QuestionnaireQuestionnaire.updateWithQuestionnaireData data model.questionnaire
         , rightPanel = RightPanelNone
     }
 
 
 setPhaseUuid : Maybe Uuid -> Model -> Model
 setPhaseUuid phaseUuid =
-    updateQuestionnaire <| QuestionnaireDetail.setPhaseUuid phaseUuid
+    updateQuestionnaire <| QuestionnaireQuestionnaire.setPhaseUuid phaseUuid
 
 
 setReply : String -> Reply -> Model -> Model
 setReply path reply =
-    updateQuestionnaire <| QuestionnaireDetail.setReply path reply
+    updateQuestionnaire <| QuestionnaireQuestionnaire.setReply path reply
 
 
 clearReply : String -> Model -> Model
 clearReply path =
-    updateQuestionnaire <| QuestionnaireDetail.clearReplyValue path
+    updateQuestionnaire <| QuestionnaireQuestionnaire.clearReplyValue path
 
 
 setLabels : String -> List String -> Model -> Model
 setLabels path value =
-    updateQuestionnaire <| QuestionnaireDetail.setLabels path value
+    updateQuestionnaire <| QuestionnaireQuestionnaire.setLabels path value
 
 
 resolveCommentThread : String -> Uuid -> Model -> Model
-resolveCommentThread path threadUuid =
-    updateQuestionnaire <| QuestionnaireDetail.resolveCommentThread path threadUuid
+resolveCommentThread path threadUuid model =
+    let
+        mapCommentThread commentThread =
+            { commentThread | resolved = True }
+    in
+    model
+        |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.removeCommentThreadFromCount path threadUuid)
 
 
-reopenCommentThread : String -> Uuid -> Model -> Model
-reopenCommentThread path threadUuid =
-    updateQuestionnaire <| QuestionnaireDetail.reopenCommentThread path threadUuid
+reopenCommentThread : String -> Uuid -> Int -> Model -> Model
+reopenCommentThread path threadUuid commentCount model =
+    let
+        mapCommentThread commentThread =
+            { commentThread | resolved = False }
+    in
+    model
+        |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.addCommentThreadToCount path threadUuid commentCount)
 
 
 deleteCommentThread : String -> Uuid -> Model -> Model
-deleteCommentThread path threadUuid =
-    updateQuestionnaire <| QuestionnaireDetail.deleteCommentThread path threadUuid
+deleteCommentThread path threadUuid model =
+    model
+        |> mapCommentThreads path (List.filter (\t -> t.uuid /= threadUuid))
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.removeCommentThreadFromCount path threadUuid)
 
 
 addComment : String -> Uuid -> Bool -> Comment -> Model -> Model
-addComment path threadUuid private comment =
-    updateQuestionnaire <| QuestionnaireDetail.addComment path threadUuid private comment
+addComment path threadUuid private comment model =
+    let
+        threadExists =
+            Dict.get path model.commentThreadsMap
+                |> Maybe.andThen ActionResult.toMaybe
+                |> Maybe.withDefault []
+                |> List.any (.uuid >> (==) threadUuid)
+
+        mapCommentThread commentThread =
+            { commentThread | comments = commentThread.comments ++ [ comment ] }
+
+        questionnaireWithThread =
+            if threadExists then
+                model
+
+            else
+                addCommentThread path threadUuid private comment model
+    in
+    questionnaireWithThread
+        |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.addCommentCount path threadUuid)
+
+
+addCommentThread : String -> Uuid -> Bool -> Comment -> Model -> Model
+addCommentThread path threadUuid private comment model =
+    let
+        commentThread =
+            { uuid = threadUuid
+            , resolved = False
+            , comments = []
+            , private = private
+            , createdAt = comment.createdAt
+            , createdBy = comment.createdBy
+            }
+
+        commentThreads =
+            Dict.get path model.commentThreadsMap
+                |> Maybe.withDefault (Success [])
+
+        mapAddCommentThread originalCommentThreads =
+            originalCommentThreads ++ [ commentThread ]
+    in
+    { model | commentThreadsMap = Dict.insert path (ActionResult.map mapAddCommentThread commentThreads) model.commentThreadsMap }
 
 
 editComment : String -> Uuid -> Uuid -> Time.Posix -> String -> Model -> Model
 editComment path threadUuid commentUuid updatedAt newText =
-    updateQuestionnaire <| QuestionnaireDetail.editComment path threadUuid commentUuid updatedAt newText
+    let
+        mapComment comment =
+            if comment.uuid == commentUuid then
+                { comment | text = newText, updatedAt = updatedAt }
+
+            else
+                comment
+
+        mapCommentThread commentThread =
+            { commentThread | comments = List.map mapComment commentThread.comments }
+    in
+    mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
 
 
 deleteComment : String -> Uuid -> Uuid -> Model -> Model
-deleteComment path threadUuid commentUuid =
-    updateQuestionnaire <| QuestionnaireDetail.deleteComment path threadUuid commentUuid
+deleteComment path threadUuid commentUuid model =
+    let
+        mapCommentThread commentThread =
+            { commentThread | comments = List.filter (\c -> c.uuid /= commentUuid) commentThread.comments }
+    in
+    model
+        |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.subCommentCount path threadUuid)
 
 
-updateQuestionnaire : (QuestionnaireDetail -> QuestionnaireDetail) -> Model -> Model
+mapCommentThreads : String -> (List CommentThread -> List CommentThread) -> Model -> Model
+mapCommentThreads path map model =
+    let
+        mbCommentThreads =
+            Dict.get path model.commentThreadsMap
+                |> Maybe.map (ActionResult.map map)
+    in
+    case mbCommentThreads of
+        Just commentThreads ->
+            { model | commentThreadsMap = Dict.insert path commentThreads model.commentThreadsMap }
+
+        Nothing ->
+            model
+
+
+wrapMapCommentThread : Uuid -> (CommentThread -> CommentThread) -> CommentThread -> CommentThread
+wrapMapCommentThread threadUuid mapCommentThread commentThread =
+    if commentThread.uuid == threadUuid then
+        mapCommentThread commentThread
+
+    else
+        commentThread
+
+
+updateQuestionnaire : (QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire) -> Model -> Model
 updateQuestionnaire fn model =
     { model | questionnaire = fn model.questionnaire }
 
@@ -448,7 +549,8 @@ type Msg
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
-    | GetQuestionnaireEventsComplete (Result ApiError (List QuestionnaireEvent))
+    | GetQuestionnaireEventsCompleted (Result ApiError (List QuestionnaireEvent))
+    | GetQuestionnaireVersionsCompleted (Result ApiError (List QuestionnaireVersion))
     | HistoryMsg History.Msg
     | VersionModalMsg VersionModal.Msg
     | DeleteVersionModalMsg DeleteVersionModal.Msg
@@ -469,7 +571,7 @@ type Msg
     | CommentEditSubmit String Uuid Uuid String Bool
     | CommentThreadDelete String Uuid Bool
     | CommentThreadResolve String Uuid Bool
-    | CommentThreadReopen String Uuid Bool
+    | CommentThreadReopen String CommentThread
     | CommentsViewResolved Bool
     | CommentsViewPrivate Bool
     | CommentDropdownMsg String Dropdown.State
@@ -487,6 +589,9 @@ type Msg
     | GotLocalStorageData E.Value
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
+    | GetCommentThreadsCompleted String (Result ApiError (Dict String (List CommentThread)))
+    | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
+    | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -503,6 +608,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( { model | collapsedItems = newCollapsedItems }
                 , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
                 )
+
+        loadComments path =
+            QuestionnairesApi.getQuestionnaireComments model.uuid path appState (GetCommentThreadsCompleted path)
     in
     case msg of
         SetActivePage activePage ->
@@ -527,11 +635,18 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         SetRightPanel rightPanel ->
             let
                 cmd =
-                    if rightPanel == RightPanelHistory then
-                        QuestionnairesApi.getQuestionnaireEvents model.uuid appState GetQuestionnaireEventsComplete
+                    case rightPanel of
+                        RightPanelHistory ->
+                            Cmd.batch
+                                [ QuestionnairesApi.getQuestionnaireEvents model.uuid appState GetQuestionnaireEventsCompleted
+                                , QuestionnairesApi.getQuestionnaireVersions model.uuid appState GetQuestionnaireVersionsCompleted
+                                ]
 
-                    else
-                        Cmd.none
+                        RightPanelComments path ->
+                            loadComments path
+
+                        _ ->
+                            Cmd.none
             in
             withSeed ( { model | rightPanel = rightPanel, questionnaireEvents = ActionResult.Loading }, cmd )
 
@@ -733,14 +848,23 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 , Ports.localStorageSet (localStorageViewSettingsEncode viewSettings)
                 )
 
-        GetQuestionnaireEventsComplete result ->
+        GetQuestionnaireEventsCompleted result ->
             wrap <|
                 case result of
-                    Ok questionnaireHistory ->
-                        { model | questionnaireEvents = Success questionnaireHistory }
+                    Ok questionnaireEvents ->
+                        { model | questionnaireEvents = Success questionnaireEvents }
 
                     Err _ ->
                         { model | questionnaireEvents = Error (gettext "Unable to get version history." appState.locale) }
+
+        GetQuestionnaireVersionsCompleted result ->
+            wrap <|
+                case result of
+                    Ok questionnaireVersions ->
+                        { model | questionnaireVersions = Success questionnaireVersions }
+
+                    Err _ ->
+                        { model | questionnaireVersions = Error (gettext "Unable to get version history." appState.locale) }
 
         HistoryMsg historyMsg ->
             wrap { model | historyModel = History.update historyMsg model.historyModel }
@@ -789,40 +913,39 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         AddQuestionnaireVersion questionnaireVersion ->
             let
-                questionnaire =
-                    model.questionnaire
+                questionnaireVersions =
+                    ActionResult.map ((::) questionnaireVersion) model.questionnaireVersions
             in
-            wrap { model | questionnaire = { questionnaire | versions = questionnaireVersion :: questionnaire.versions } }
+            wrap { model | questionnaireVersions = questionnaireVersions }
 
         UpdateQuestionnaireVersion questionnaireVersion ->
             let
-                questionnaire =
-                    model.questionnaire
-
                 updateVersion version =
                     if version.uuid == questionnaireVersion.uuid then
                         { version | name = questionnaireVersion.name, description = questionnaireVersion.description }
 
                     else
                         version
+
+                questionnaireVersions =
+                    ActionResult.map (List.map updateVersion) model.questionnaireVersions
             in
-            wrap { model | questionnaire = { questionnaire | versions = List.map updateVersion questionnaire.versions } }
+            wrap { model | questionnaireVersions = questionnaireVersions }
 
         DeleteQuestionnaireVersion questionnaireVersion ->
             let
-                questionnaire =
-                    model.questionnaire
+                questionnaireVersions =
+                    ActionResult.map (List.filter (not << (==) questionnaireVersion.uuid << .uuid)) model.questionnaireVersions
             in
             wrap
-                { model
-                    | questionnaire =
-                        { questionnaire
-                            | versions = List.filter (not << (==) questionnaireVersion.uuid << .uuid) questionnaire.versions
-                        }
-                }
+                { model | questionnaireVersions = questionnaireVersions }
 
         OpenComments path ->
-            withSeed <| handleScrollToPath { model | rightPanel = RightPanelComments path } path
+            let
+                ( newModel, cmd ) =
+                    handleScrollToPath { model | rightPanel = RightPanelComments path } path
+            in
+            withSeed ( newModel, Cmd.batch [ cmd, loadComments path ] )
 
         CommentInput path mbThreadUuid value ->
             let
@@ -887,10 +1010,42 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | navigationTreeModel = NavigationTree.update navigationTreeMsg model.navigationTreeModel }
 
         ImportersDropdownMsg state ->
-            wrap { model | questionnaireImportersDropdown = state }
+            let
+                ( questionnaireImporters, cmd ) =
+                    if ActionResult.isUnset model.questionnaireImporters then
+                        ( Loading
+                        , QuestionnaireImportersApi.getQuestionnaireImportersFor model.uuid appState GetQuestionnaireImportersComplete
+                        )
+
+                    else
+                        ( model.questionnaireImporters, Cmd.none )
+            in
+            withSeed
+                ( { model
+                    | questionnaireImportersDropdown = state
+                    , questionnaireImporters = questionnaireImporters
+                  }
+                , cmd
+                )
 
         ActionsDropdownMsg state ->
-            wrap { model | questionnaireActionsDropdown = state }
+            let
+                ( questionnaireActions, cmd ) =
+                    if ActionResult.isUnset model.questionnaireActions then
+                        ( Loading
+                        , QuestionnaireActionsApi.getQuestionnaireActionsFor model.uuid appState GetQuestionnaireActionsComplete
+                        )
+
+                    else
+                        ( model.questionnaireActions, Cmd.none )
+            in
+            withSeed
+                ( { model
+                    | questionnaireActionsDropdown = state
+                    , questionnaireActions = questionnaireActions
+                  }
+                , cmd
+                )
 
         GotActionResult result ->
             case result of
@@ -974,6 +1129,43 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         ClearRecentlyCopied ->
             wrap { model | recentlyCopied = False }
+
+        GetCommentThreadsCompleted path result ->
+            case result of
+                Ok threads ->
+                    case Dict.get path threads of
+                        Just commentThreads ->
+                            wrap { model | commentThreadsMap = Dict.insert path (Success commentThreads) model.commentThreadsMap }
+
+                        Nothing ->
+                            wrap { model | commentThreadsMap = Dict.insert path (Success []) model.commentThreadsMap }
+
+                Err _ ->
+                    wrap { model | commentThreadsMap = Dict.insert path (Error (gettext "Unable to get comments." appState.locale)) model.commentThreadsMap }
+
+        GetQuestionnaireActionsComplete result ->
+            wrap
+                { model
+                    | questionnaireActions =
+                        case result of
+                            Ok actions ->
+                                Success actions
+
+                            Err error ->
+                                ApiError.toActionResult appState (gettext "Unable to get project actions." appState.locale) error
+                }
+
+        GetQuestionnaireImportersComplete result ->
+            wrap
+                { model
+                    | questionnaireImporters =
+                        case result of
+                            Ok importers ->
+                                Success importers
+
+                            Err error ->
+                                ApiError.toActionResult appState (gettext "Unable to get project importers." appState.locale) error
+                }
 
         _ ->
             wrap model
@@ -1164,7 +1356,7 @@ debounceConfig =
 loadTypeHints : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
 loadTypeHints appState ctx model path questionUuid value =
     TypeHintsApi.fetchTypeHints
-        (Just model.questionnaire.package.id)
+        (Just model.questionnaire.packageId)
         ctx.events
         questionUuid
         value
@@ -1338,10 +1530,7 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
 
         importersDropdown =
-            if cfg.features.readonly || List.isEmpty model.questionnaireImporters then
-                emptyNode
-
-            else
+            if importersAvailable appState cfg model then
                 div [ class "item-group" ]
                     [ Dropdown.dropdown model.questionnaireImportersDropdown
                         { options = []
@@ -1349,9 +1538,13 @@ viewQuestionnaireToolbar appState cfg model =
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
                                 [ text (gettext "Import replies" appState.locale) ]
-                        , items = List.map importerDropdownItem model.questionnaireImporters
+                        , items =
+                            ActionResultBlock.dropdownView appState importerDropdownItem model.questionnaireImporters
                         }
                     ]
+
+            else
+                emptyNode
 
         importerDropdownItem importer =
             Dropdown.anchorItem
@@ -1359,10 +1552,7 @@ viewQuestionnaireToolbar appState cfg model =
                 [ text importer.name ]
 
         actionsDropdown =
-            if cfg.features.readonly || List.isEmpty model.questionnaireActions then
-                emptyNode
-
-            else
+            if actionsAvailable appState cfg model then
                 div [ class "item-group" ]
                     [ Dropdown.dropdown model.questionnaireActionsDropdown
                         { options = []
@@ -1372,9 +1562,13 @@ viewQuestionnaireToolbar appState cfg model =
                                 [ span [ class "icon" ] []
                                 , text (gettext "Actions" appState.locale)
                                 ]
-                        , items = List.map actionDropdownItem model.questionnaireActions
+                        , items =
+                            ActionResultBlock.dropdownView appState actionDropdownItem model.questionnaireActions
                         }
                     ]
+
+            else
+                emptyNode
 
         actionDropdownItem action =
             Dropdown.anchorItem
@@ -1424,7 +1618,7 @@ viewQuestionnaireToolbar appState cfg model =
                     ( RightPanelWarnings, False )
 
         todosLength =
-            QuestionnaireDetail.todosLength model.questionnaire
+            QuestionnaireQuestionnaire.todosLength model.questionnaire
 
         todosBadge =
             if todosLength > 0 then
@@ -1445,7 +1639,7 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
 
         commentsLength =
-            QuestionnaireDetail.commentsLength model.questionnaire
+            QuestionnaireQuestionnaire.commentsLength model.questionnaire
 
         commentsBadge =
             if commentsLength > 0 then
@@ -1466,7 +1660,7 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
 
         warningsLength =
-            QuestionnaireDetail.warningsLength model.questionnaire
+            QuestionnaireQuestionnaire.warningsLength model.questionnaire
 
         warningsButton =
             div [ class "item-group" ]
@@ -1480,7 +1674,7 @@ viewQuestionnaireToolbar appState cfg model =
             warningsLength > 0
 
         versionHistoryButtonVisible =
-            Feature.projectVersionHitory appState model.questionnaire
+            Feature.projectVersionHistory appState model.questionnaire
 
         versionHistoryButton =
             div [ class "item-group" ]
@@ -1737,15 +1931,18 @@ viewQuestionnaireRightPanel appState cfg model =
                     , previewQuestionnaireEventMsg = cfg.previewQuestionnaireEventMsg
                     , revertQuestionnaireMsg = cfg.revertQuestionnaireMsg
                     }
+
+                versionsAndEvents =
+                    ActionResult.combine model.questionnaireVersions model.questionnaireEvents
             in
             wrapPanel <|
-                [ History.view appState historyCfg model.historyModel model.questionnaireEvents
+                [ History.view appState historyCfg model.historyModel versionsAndEvents
                 , Html.map (cfg.wrapMsg << VersionModalMsg) <| VersionModal.view appState model.versionModalModel
                 , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
                 ]
 
         RightPanelWarnings ->
-            if QuestionnaireDetail.warningsLength model.questionnaire > 0 then
+            if QuestionnaireQuestionnaire.warningsLength model.questionnaire > 0 then
                 wrapPanel <|
                     [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings model ]
 
@@ -1761,7 +1958,7 @@ viewQuestionnaireRightPanelTodos : AppState -> Model -> Html Msg
 viewQuestionnaireRightPanelTodos appState model =
     let
         todos =
-            QuestionnaireDetail.getTodos model.questionnaire
+            QuestionnaireQuestionnaire.getTodos model.questionnaire
 
         viewTodoGroup group =
             div []
@@ -1792,7 +1989,7 @@ viewQuestionnaireRightPanelWarnings : Model -> Html Msg
 viewQuestionnaireRightPanelWarnings model =
     let
         warnings =
-            QuestionnaireDetail.getWarnings model.questionnaire
+            QuestionnaireQuestionnaire.getWarnings model.questionnaire
 
         viewWarningGroup group =
             div []
@@ -1833,7 +2030,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                 ]
 
         questionnaireComments =
-            QuestionnaireDetail.getComments model.questionnaire
+            QuestionnaireQuestionnaire.getComments model.questionnaire
                 |> groupComments
                 |> List.map viewChapterComments
 
@@ -1877,11 +2074,14 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
 
 viewQuestionnaireRightPanelComments : AppState -> Model -> String -> Html Msg
 viewQuestionnaireRightPanelComments appState model path =
-    let
-        commentThreads =
-            Dict.get path model.questionnaire.commentThreadsMap
-                |> Maybe.withDefault []
+    Dict.get path model.commentThreadsMap
+        |> Maybe.withDefault ActionResult.Loading
+        |> ActionResultBlock.view appState (viewQuestionnaireRightPanelCommentsLoaded appState model path)
 
+
+viewQuestionnaireRightPanelCommentsLoaded : AppState -> Model -> String -> List CommentThread -> Html Msg
+viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
+    let
         navigationView =
             if Feature.projectCommentPrivate appState model.questionnaire then
                 viewCommentsNavigation appState model commentThreads
@@ -2109,7 +2309,7 @@ viewCommentHeader appState model path commentThread index comment =
 
         reopenAction =
             Dropdown.anchorItem
-                [ onClick (CommentThreadReopen path commentThread.uuid commentThread.private) ]
+                [ onClick (CommentThreadReopen path commentThread) ]
                 [ text (gettext "Reopen" appState.locale) ]
 
         reopenActionVisible =
@@ -2446,7 +2646,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 
         ( questionClass, questionState ) =
             case
-                ( QuestionnaireDetail.hasReply (pathToString newPath) model.questionnaire
+                ( QuestionnaireQuestionnaire.hasReply (pathToString newPath) model.questionnaire
                 , isQuestionDesirable model question
                 )
             of
@@ -2815,7 +3015,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 Maybe.unwrap
                     (i [ class "ms-2" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
                     (strong [ class "ms-2" ] << List.singleton << text)
-                    (QuestionnaireDetail.getItemTitle model.questionnaire itemPath questions)
+                    (QuestionnaireQuestionnaire.getItemTitle model.questionnaire itemPath questions)
 
             else
                 emptyNode
@@ -3196,7 +3396,7 @@ viewCommentAction appState cfg model path =
                 pathToString path
 
             commentCount =
-                QuestionnaireDetail.getCommentCount pathString model.questionnaire
+                QuestionnaireQuestionnaire.getCommentCount pathString model.questionnaire
 
             isOpen =
                 case model.rightPanel of
@@ -3248,7 +3448,7 @@ viewTodoAction appState cfg model path =
             hasTodo =
                 model.questionnaire.labels
                     |> Dict.get currentPath
-                    |> Maybe.unwrap False (List.member QuestionnaireDetail.todoUuid)
+                    |> Maybe.unwrap False (List.member QuestionnaireQuestionnaire.todoUuid)
         in
         if hasTodo then
             a
@@ -3263,7 +3463,7 @@ viewTodoAction appState cfg model path =
         else
             a
                 [ class "action action-add-todo"
-                , onClick <| SetLabels currentPath [ QuestionnaireDetail.todoUuid ]
+                , onClick <| SetLabels currentPath [ QuestionnaireQuestionnaire.todoUuid ]
                 ]
                 [ faSet "_global.add" appState
                 , span [] [ span [] [ text (gettext "Add TODO" appState.locale) ] ]
@@ -3282,7 +3482,7 @@ viewFeedbackAction appState cfg model question =
     if feedbackEnabled then
         let
             openFeedbackModal =
-                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.package.id (Question.getUuid question))
+                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.packageId (Question.getUuid question))
         in
         a
             (class "action"
@@ -3347,3 +3547,19 @@ createReply appState value =
     , createdAt = appState.currentTime
     , createdBy = Maybe.map UserInfo.toUserSuggestion appState.config.user
     }
+
+
+actionsAvailable : AppState -> Config a -> Model -> Bool
+actionsAvailable appState cfg model =
+    Session.exists appState.session
+        && not cfg.features.readonly
+        && model.questionnaire.questionnaireActionsAvailable
+        > 0
+
+
+importersAvailable : AppState -> Config a -> Model -> Bool
+importersAvailable appState cfg model =
+    Session.exists appState.session
+        && not cfg.features.readonly
+        && model.questionnaire.questionnaireImportersAvailable
+        > 0

@@ -17,9 +17,9 @@ import Maybe.Extra as Maybe
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (flip)
@@ -51,9 +51,9 @@ initEmpty =
 
 
 init : AppState -> Uuid -> Uuid -> ( Model, Cmd Msg )
-init appState quetionnaireUuid eventUuid =
+init appState questionnaireUuid eventUuid =
     ( { questionnaireModel = Loading, eventUuid = Just eventUuid }
-    , QuestionnairesApi.fetchPreview quetionnaireUuid eventUuid appState FetchPreviewComplete
+    , QuestionnairesApi.fetchPreview questionnaireUuid eventUuid appState FetchPreviewComplete
     )
 
 
@@ -67,7 +67,7 @@ type Msg
     | Close
 
 
-update : Msg -> QuestionnaireDetail -> AppState -> Model -> ( Model, Cmd Msg )
+update : Msg -> QuestionnaireQuestionnaire -> AppState -> Model -> ( Model, Cmd Msg )
 update msg questionnaire appState model =
     case msg of
         FetchPreviewComplete result ->
@@ -75,7 +75,7 @@ update msg questionnaire appState model =
                 ( Ok content, Loading ) ->
                     let
                         questionnaireModel =
-                            QuestionnaireDetail.updateContent questionnaire content
+                            QuestionnaireQuestionnaire.updateContent questionnaire content
                                 |> flip (Questionnaire.init appState) Nothing
                                 |> Tuple.first
                                 |> Success
@@ -132,7 +132,7 @@ view cfg appState model =
 
         versionBadge =
             model.eventUuid
-                |> Maybe.andThen (QuestionnaireDetail.getVersionByEventUuid { versions = cfg.versions })
+                |> Maybe.andThen (QuestionnaireVersion.getVersionByEventUuid cfg.versions)
                 |> Maybe.unwrap emptyNode QuestionnaireVersionTag.version
     in
     div [ class "QuestionnaireVersionViewModal modal modal-cover", classList [ ( "visible", visible ) ] ]

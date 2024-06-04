@@ -14,9 +14,9 @@ import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Utils exposing (flip, listFilterJust)
 import Uuid exposing (Uuid)
 import Wizard.Common.Components.Questionnaire as Questionnaire
@@ -92,8 +92,8 @@ type alias ChangeListContext =
     , newKM : KnowledgeModel
     , oldKmParentMap : ParentMap
     , newKmParentMap : ParentMap
-    , oldQuestionnaire : QuestionnaireDetail
-    , newQuestionnaire : QuestionnaireDetail
+    , oldQuestionnaire : QuestionnaireQuestionnaire
+    , newQuestionnaire : QuestionnaireQuestionnaire
     }
 
 
@@ -170,14 +170,14 @@ getQuestionChanges context chapter question =
     QuestionnaireChanges.merge questionChange childChanges
 
 
-getReply : QuestionnaireDetail -> Question -> Maybe ReplyValue
+getReply : QuestionnaireQuestionnaire -> Question -> Maybe ReplyValue
 getReply questionnaire question =
     Dict.toList questionnaire.replies
         |> List.find (Tuple.first >> getUuidFromPath >> (==) (Question.getUuid question))
         |> Maybe.map (Tuple.second >> .value)
 
 
-isNew : QuestionnaireDetail -> Question -> Bool
+isNew : QuestionnaireQuestionnaire -> Question -> Bool
 isNew questionnaire question =
     Maybe.isNothing <| KnowledgeModel.getQuestion (Question.getUuid question) questionnaire.knowledgeModel
 

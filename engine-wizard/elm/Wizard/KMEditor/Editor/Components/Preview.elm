@@ -20,7 +20,7 @@ import Random exposing (Seed)
 import Set exposing (Set)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.Package as Package
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -89,7 +89,7 @@ generateReplies appState questionUuid knowledgeModel model =
 
         ( newSeed, mbChapterUuid, questionnaireDetail ) =
             questionnaireModel.questionnaire
-                |> QuestionnaireDetail.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel
+                |> QuestionnaireQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel
 
         activePage =
             Maybe.unwrap questionnaireModel.activePage PageChapter mbChapterUuid
@@ -105,13 +105,13 @@ generateReplies appState questionUuid knowledgeModel model =
     )
 
 
-createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireDetail
+createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireQuestionnaire
 createQuestionnaireDetail packageId km =
     let
         package =
             Package.dummy
     in
-    QuestionnaireDetail.createQuestionnaireDetail { package | id = packageId } km
+    QuestionnaireQuestionnaire.createQuestionnaireDetail { package | id = packageId } km
 
 
 type Msg

@@ -1,5 +1,5 @@
-module Wizard.Projects.Common.QuestionnaireEditFormQuestionnairePermType exposing
-    ( QuestionnaireEditFormMemberPerms(..)
+module Wizard.Projects.Common.QuestionnaireShareFormMemberPermType exposing
+    ( QuestionnaireShareFormMemberPermType(..)
     , encode
     , formOptions
     , initFromPerms
@@ -17,7 +17,7 @@ import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 
 
-type QuestionnaireEditFormMemberPerms
+type QuestionnaireShareFormMemberPermType
     = Viewer
     | Commenter
     | Editor
@@ -40,7 +40,7 @@ initFromPerms perms =
             toString Viewer
 
 
-toString : QuestionnaireEditFormMemberPerms -> String
+toString : QuestionnaireShareFormMemberPermType -> String
 toString perms =
     case perms of
         Viewer ->
@@ -65,7 +65,7 @@ formOptions appState =
     ]
 
 
-validation : Validation FormError QuestionnaireEditFormMemberPerms
+validation : Validation FormError QuestionnaireShareFormMemberPermType
 validation =
     V.string
         |> V.andThen
@@ -88,7 +88,7 @@ validation =
             )
 
 
-encode : QuestionnaireEditFormMemberPerms -> E.Value
+encode : QuestionnaireShareFormMemberPermType -> E.Value
 encode perms =
     E.list E.string <|
         case perms of

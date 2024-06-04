@@ -12,7 +12,7 @@ import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.Submission.SubmissionState as SubmissionState
 import Shared.Data.User as User
@@ -43,7 +43,7 @@ import Wizard.Routes as Routes exposing (Route(..))
 
 
 type alias ViewConfig msg =
-    { questionnaire : QuestionnaireDetail
+    { questionnaire : QuestionnaireCommon
     , questionnaireEditable : Bool
     , wrapMsg : Msg -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
@@ -81,7 +81,7 @@ listingConfig cfg appState =
                     ]
     in
     { title = listingTitle cfg appState
-    , description = listingDescription cfg appState
+    , description = listingDescription
     , itemAdditionalData = itemAdditionalData
     , dropdownItems = listingActions appState cfg
     , textTitle = .name
@@ -138,12 +138,12 @@ listingTitle cfg appState document =
         ]
 
 
-listingDescription : ViewConfig msg -> AppState -> Document -> Html msg
-listingDescription cfg _ document =
+listingDescription : Document -> Html msg
+listingDescription document =
     let
-        viewVersion version =
+        viewVersion versionName =
             span [ class "fragment" ]
-                [ QuestionnaireVersionTag.version version
+                [ QuestionnaireVersionTag.version { name = versionName }
                 ]
 
         formatFragment =
@@ -163,9 +163,7 @@ listingDescription cfg _ document =
                     emptyNode
 
         versionFragment =
-            document.questionnaireEventUuid
-                |> Maybe.andThen (QuestionnaireDetail.getVersionByEventUuid cfg.questionnaire)
-                |> Maybe.unwrap emptyNode viewVersion
+            Maybe.unwrap emptyNode viewVersion document.questionnaireVersion
     in
     span []
         [ formatFragment
