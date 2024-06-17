@@ -104,6 +104,10 @@ body {
         }
 
         .switcher-icon {
+            i {
+                margin: 0 0.04rem;
+            }
+
             .side-navigation-collapsed & {
                 display: none !important;
             }
