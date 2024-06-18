@@ -1336,6 +1336,12 @@ handleAddItem appState wrapMsg model path originalItems =
         ( uuid, newSeed ) =
             getUuidString appState.seed
 
+        itemPath =
+            path ++ "." ++ uuid
+
+        scrollCmd =
+            Ports.scrollIntoView ("[data-path=\"" ++ itemPath ++ "\"]")
+
         dispatchCmd =
             ItemListReply (originalItems ++ [ uuid ])
                 |> createReply appState
@@ -1343,7 +1349,7 @@ handleAddItem appState wrapMsg model path originalItems =
                 |> wrapMsg
                 |> dispatch
     in
-    ( newSeed, model, dispatchCmd )
+    ( newSeed, model, Cmd.batch [ dispatchCmd, scrollCmd ] )
 
 
 debounceConfig : Debounce.Config Msg
