@@ -2854,7 +2854,38 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
                 ]
 
         else
-            div [ class "followups-group" ] followUpQuestions
+            let
+                pathString =
+                    pathToString newPath
+            in
+            if Set.member pathString model.collapsedItems then
+                let
+                    followUpCount =
+                        List.length followUpQuestions
+
+                    expandButton =
+                        a [ onClick (ExpandItem pathString) ]
+                            [ faSet "questionnaire.item.expand" appState
+                            , span [ class "ms-1" ] [ text (gettext "Expand" appState.locale) ]
+                            ]
+                in
+                div [ class "followups-group followups-group-collapsed" ] <|
+                    String.formatHtml
+                        (ngettext ( "%s %s follow up question", "%s %s follow up questions" ) followUpCount appState.locale)
+                        [ expandButton
+                        , strong [] [ text (String.fromInt followUpCount) ]
+                        ]
+
+            else
+                let
+                    collapseButton =
+                        a [ onClick (CollapseItem pathString) ]
+                            [ faSet "questionnaire.item.collapse" appState
+                            , span [ class "ms-1" ] [ text (gettext "Collapse" appState.locale) ]
+                            ]
+                in
+                div [ class "followups-group" ]
+                    (div [ class "mb-4" ] [ collapseButton ] :: followUpQuestions)
 
 
 viewQuestionMultiChoice : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
