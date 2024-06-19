@@ -4,6 +4,7 @@ module Shared.Data.Member exposing
     , decoder
     , getUuid
     , imageUrl
+    , isUserMember
     , toQuestionnaireEditFormMemberType
     , toUserGroupSuggestion
     , toUserSuggestion
@@ -27,6 +28,16 @@ type Member
 userMember : UserSuggestion -> Member
 userMember =
     UserMember
+
+
+isUserMember : Member -> Bool
+isUserMember member =
+    case member of
+        UserMember _ ->
+            True
+
+        UserGroupMember _ ->
+            False
 
 
 getUuid : Member -> Uuid

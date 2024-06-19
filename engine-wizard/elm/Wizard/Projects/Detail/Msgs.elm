@@ -1,5 +1,6 @@
 module Wizard.Projects.Detail.Msgs exposing (Msg(..))
 
+import Bootstrap.Dropdown as Dropdown
 import Debounce
 import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
@@ -40,6 +41,8 @@ type Msg
     | DocumentsMsg Documents.Msg
     | NewDocumentMsg NewDocument.Msg
     | ShareModalMsg ShareModal.Msg
+    | ShareDropdownMsg Dropdown.State
+    | ShareDropdownCopyLink
     | SettingsMsg Settings.Msg
     | Refresh
     | QuestionnaireVersionViewModalMsg QuestionnaireVersionViewModal.Msg

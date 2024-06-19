@@ -16,6 +16,7 @@ module Shared.Utils exposing
     , packageIdToComponents
     , tuplePrepend
     , withNoCmd
+    , withSeed
     )
 
 import Color
@@ -171,6 +172,11 @@ getOrganizationAndItemId fullId =
 
         _ ->
             ""
+
+
+withSeed : Seed -> ( m, Cmd msg ) -> ( Seed, m, Cmd msg )
+withSeed seed ( model, cmd ) =
+    ( seed, model, cmd )
 
 
 withNoCmd : model -> ( model, Cmd msg )

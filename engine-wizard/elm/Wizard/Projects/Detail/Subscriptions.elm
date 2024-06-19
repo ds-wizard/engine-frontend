@@ -1,6 +1,7 @@
 module Wizard.Projects.Detail.Subscriptions exposing (subscriptions)
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Dropdown as Dropdown
 import Shared.WebSocket as WebSocket
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
@@ -47,5 +48,6 @@ subscriptions route model =
         , WebSocket.schedulePing WebSocketPing
         , Sub.map ProjectSavingMsg <| ProjectSaving.subscriptions model.projectSavingModel
         , Sub.map ShareModalMsg <| ShareModal.subscriptions model.shareModalModel
+        , Dropdown.subscriptions model.shareDropdownState ShareDropdownMsg
         , pageSubscriptions
         ]

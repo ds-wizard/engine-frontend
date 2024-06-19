@@ -1,6 +1,8 @@
 module Wizard.Projects.Detail.View exposing (view)
 
 import ActionResult
+import Bootstrap.Button as Button
+import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
@@ -22,7 +24,7 @@ import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Page as Page
-import Wizard.Projects.Common.View exposing (visibilityIcons)
+import Wizard.Projects.Common.View exposing (shareIcon, shareTooltipHtml)
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.Preview as Preview
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
@@ -134,11 +136,10 @@ viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireCommon -> Html
 viewProjectNavigationTitleRow appState model questionnaire =
     DetailNavigation.row
         [ DetailNavigation.section
-            (div [ class "title" ] [ text questionnaire.name ]
-                :: templateBadge appState questionnaire
-                :: visibilityIcons appState questionnaire
-                ++ [ viewProjectNavigationProjectSaving appState model ]
-            )
+            [ div [ class "title" ] [ text questionnaire.name ]
+            , templateBadge appState questionnaire
+            , viewProjectNavigationProjectSaving appState model
+            ]
         , DetailNavigation.section
             [ DetailNavigation.onlineUsers appState model.onlineUsers
             , viewProjectNavigationActions appState model questionnaire
@@ -179,18 +180,41 @@ viewProjectNavigationActions appState model questionnaire =
 
     else if QuestionnaireUtils.isOwner appState questionnaire then
         DetailNavigation.sectionActions
-            [ button
-                [ class "btn btn-info text-light with-icon"
-                , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
-                , dataCy "project_detail_share-button"
-                ]
-                [ fa "fas fa-user-friends"
-                , text (gettext "Share" appState.locale)
-                ]
-            ]
+            [ viewProjectNavigationShareButton appState model questionnaire ]
 
     else
         emptyNode
+
+
+viewProjectNavigationShareButton : AppState -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigationShareButton appState model questionnaire =
+    div [ class "btn-group" ]
+        [ button
+            [ class "btn btn-info text-light with-icon"
+            , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
+            , dataCy "project_detail_share-button"
+            ]
+            [ shareIcon appState questionnaire
+            , text (gettext "Share" appState.locale)
+            ]
+        , Dropdown.dropdown model.shareDropdownState
+            { options =
+                [ Dropdown.attrs [ class "ShareDropdown" ]
+                , Dropdown.alignMenuRight
+                ]
+            , toggleMsg = ShareDropdownMsg
+            , toggleButton = Dropdown.toggle [ Button.info ] []
+            , items =
+                [ Dropdown.anchorItem [ onClick ShareDropdownCopyLink ]
+                    [ faSet "questionnaire.copyLink" appState
+                    , text (gettext "Copy link" appState.locale)
+                    ]
+                , Dropdown.divider
+                , Dropdown.customItem <|
+                    div [ class "px-3 py-2 text-muted" ] (shareTooltipHtml appState questionnaire)
+                ]
+            }
+        ]
 
 
 
