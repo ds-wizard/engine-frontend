@@ -40,7 +40,7 @@ import Wizard.Projects.Common.CloneProjectModal.View as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModalMsg
 import Wizard.Projects.Common.DeleteProjectModal.View as DeleteProjectModal
 import Wizard.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
-import Wizard.Projects.Common.View exposing (visibilityIcons)
+import Wizard.Projects.Common.View exposing (visibilityIcon)
 import Wizard.Projects.Index.Models exposing (Model)
 import Wizard.Projects.Index.Msgs exposing (Msg(..))
 import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
@@ -529,11 +529,11 @@ listingTitle appState questionnaire =
                 flip Routes.projectsDetailQuestionnaire Nothing
     in
     span []
-        (linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
-            :: templateBadge appState questionnaire
-            :: visibilityIcons appState questionnaire
-            ++ [ stateBadge appState questionnaire ]
-        )
+        [ linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
+        , templateBadge appState questionnaire
+        , visibilityIcon appState questionnaire
+        , stateBadge appState questionnaire
+        ]
 
 
 listingDescription : AppState -> Questionnaire -> Html Msg

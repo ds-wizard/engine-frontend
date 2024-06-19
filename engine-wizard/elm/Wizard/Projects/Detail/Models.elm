@@ -8,6 +8,7 @@ module Wizard.Projects.Detail.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Bootstrap.Dropdown as Dropdown
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Shared.Api.Questionnaires as QuestionnaireApi
@@ -43,6 +44,7 @@ type alias Model =
     , savingActionUuids : List Uuid
     , projectSavingModel : ProjectSaving.Model
     , shareModalModel : ShareModal.Model
+    , shareDropdownState : Dropdown.State
     , previewModel : Preview.Model
     , questionnaireModel : ActionResult Questionnaire.Model
     , questionnaireSummaryReport : ActionResult SummaryReport
@@ -70,6 +72,7 @@ init appState uuid mbSelectedPath =
     , savingActionUuids = []
     , projectSavingModel = ProjectSaving.init
     , shareModalModel = ShareModal.init
+    , shareDropdownState = Dropdown.initialState
     , previewModel = Preview.init uuid Preview.TemplateNotSet
     , questionnaireModel = Loading
     , questionnaireSummaryReport = Loading

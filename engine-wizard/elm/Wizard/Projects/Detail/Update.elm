@@ -9,6 +9,7 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
+import Shared.Copy as Ports
 import Shared.Data.Member as Member
 import Shared.Data.QuestionnaireCommon as QuestionnaireCommon
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
@@ -650,6 +651,16 @@ update wrapMsg msg appState model =
                     ShareModal.update updateConfig shareModalMsg appState model.shareModalModel
             in
             ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
+
+        ShareDropdownMsg dropdownState ->
+            withSeed ( { model | shareDropdownState = dropdownState }, Cmd.none )
+
+        ShareDropdownCopyLink ->
+            let
+                link =
+                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (DetailRoute model.uuid (ProjectDetailRoute.Questionnaire Nothing))))
+            in
+            withSeed ( model, Ports.copyToClipboard link )
 
         SettingsMsg settingsMsg ->
             let

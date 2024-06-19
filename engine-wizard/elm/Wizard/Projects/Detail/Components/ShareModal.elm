@@ -13,9 +13,9 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, hr, input, span, strong, text)
-import Html.Attributes exposing (class, classList, id, readonly, title, value)
-import Html.Events exposing (onClick)
+import Html exposing (Html, a, button, div, h5, hr, span, strong, text)
+import Html.Attributes exposing (class, classList, title)
+import Html.Events exposing (onClick, onMouseOut)
 import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
@@ -35,22 +35,24 @@ import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (getUuid)
+import Shared.Utils exposing (getUuid, withNoCmd, withSeed)
 import String.Format as String
+import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintInput
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
+import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.MemberIcon as MemberIcon
-import Wizard.Common.View.Modal as Modal
-import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireShareForm as QuestionnaireShareForm exposing (QuestionnaireShareForm)
 import Wizard.Projects.Common.QuestionnaireShareFormMemberPermType as QuestionnaireEditFormMemberPerms
 import Wizard.Projects.Common.QuestionnaireShareFormMemberType as QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Projects.Routes as Routes
+import Wizard.Projects.Routes as ProjectsRoutes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
@@ -62,12 +64,14 @@ import Wizard.Routing as Routing
 type alias Model =
     { visible : Bool
     , savingSharing : ActionResult String
+    , lastSavingSharing : Time.Posix
     , questionnaireEditForm : Form FormError QuestionnaireShareForm
     , questionnaireUuid : Uuid
     , userTypeHintInputModel : TypeHintInput.Model UserSuggestion
     , userGroupTypeHintInputModel : TypeHintInput.Model UserGroupSuggestion
     , users : List UserSuggestion
     , userGroups : List UserGroupSuggestion
+    , copiedLink : Bool
     }
 
 
@@ -75,12 +79,14 @@ init : Model
 init =
     { visible = False
     , savingSharing = Unset
+    , lastSavingSharing = Time.millisToPosix 0
     , questionnaireEditForm = QuestionnaireShareForm.initEmpty
     , questionnaireUuid = Uuid.nil
     , userTypeHintInputModel = TypeHintInput.init "memberId"
     , userGroupTypeHintInputModel = TypeHintInput.init "userGroupUuid"
     , users = []
     , userGroups = []
+    , copiedLink = False
     }
 
 
@@ -106,8 +112,9 @@ type Msg
     | AddUser UserSuggestion
     | AddUserGroup UserGroupSuggestion
     | FormMsg Form.Msg
-    | PutQuestionnaireComplete (Result ApiError ())
-    | CopyPublicLink String
+    | PutQuestionnaireShareComplete Time.Posix (Result ApiError ())
+    | CopyLink String
+    | ClearCopiedLink
 
 
 openMsg : QuestionnaireCommon -> Msg
@@ -124,37 +131,48 @@ type alias UpdateConfig msg =
 
 update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Seed, Model, Cmd msg )
 update cfg msg appState model =
-    let
-        withSeed ( m, c ) =
-            ( appState.seed, m, c )
-    in
     case msg of
         Open questionnaire ->
-            withSeed ( setQuestionnaire questionnaire { model | visible = True }, Cmd.none )
+            setQuestionnaire questionnaire { model | visible = True }
+                |> withNoCmd
+                |> withSeed appState.seed
 
         Close ->
-            withSeed ( { model | visible = False }, Cmd.none )
+            { model | visible = False }
+                |> withNoCmd
+                |> withSeed appState.seed
 
         UserTypeHintInputMsg typeHintInputMsg ->
-            withSeed <| handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
+            handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
+                |> withSeed appState.seed
 
         UserGroupTypeHintInputMsg typeHintInputMsg ->
-            withSeed <| handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model
+            handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model
+                |> withSeed appState.seed
 
         AddUser user ->
-            handleAddUser appState model user
+            handleAddUser appState cfg model user
 
         AddUserGroup userGroup ->
-            handleAddUserGroup appState model userGroup
+            handleAddUserGroup appState cfg model userGroup
 
         FormMsg formMsg ->
-            withSeed <| handleFormMsg cfg formMsg appState model
+            handleFormMsg cfg formMsg appState model
+                |> withSeed appState.seed
 
-        PutQuestionnaireComplete result ->
-            withSeed <| handlePutQuestionnaireComplete appState model result
+        PutQuestionnaireShareComplete time result ->
+            handlePutQuestionnaireComplete appState model time result
+                |> withNoCmd
+                |> withSeed appState.seed
 
-        CopyPublicLink publicLink ->
-            withSeed ( model, Copy.copyToClipboard publicLink )
+        CopyLink link ->
+            ( { model | copiedLink = True }, Copy.copyToClipboard link )
+                |> withSeed appState.seed
+
+        ClearCopiedLink ->
+            { model | copiedLink = False }
+                |> withNoCmd
+                |> withSeed appState.seed
 
 
 handleUserTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserSuggestion -> AppState -> Model -> ( Model, Cmd msg )
@@ -205,8 +223,8 @@ handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model =
     ( { model | userGroupTypeHintInputModel = userGroupTypeHintInputModel }, cmd )
 
 
-handleAddUser : AppState -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
-handleAddUser appState model user =
+handleAddUser : AppState -> UpdateConfig msg -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUser appState cfg model user =
     let
         userTypeHintInputModel =
             TypeHintInput.clear model.userTypeHintInputModel
@@ -233,19 +251,21 @@ handleAddUser appState model user =
 
         newForm =
             List.foldl formUpdate model.questionnaireEditForm msgs
+
+        newModel =
+            { model
+                | userTypeHintInputModel = userTypeHintInputModel
+                , questionnaireEditForm = newForm
+                , users = List.uniqueBy (Uuid.toString << .uuid) (user :: model.users)
+            }
     in
-    ( newSeed
-    , { model
-        | userTypeHintInputModel = userTypeHintInputModel
-        , questionnaireEditForm = newForm
-        , users = List.uniqueBy (Uuid.toString << .uuid) (user :: model.users)
-      }
-    , Cmd.none
-    )
+    newModel
+        |> saveSharing appState cfg
+        |> withSeed newSeed
 
 
-handleAddUserGroup : AppState -> Model -> UserGroupSuggestion -> ( Seed, Model, Cmd msg )
-handleAddUserGroup appState model userGroup =
+handleAddUserGroup : AppState -> UpdateConfig msg -> Model -> UserGroupSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUserGroup appState cfg model userGroup =
     let
         userGroupTypeHintInputModel =
             TypeHintInput.clear model.userGroupTypeHintInputModel
@@ -272,49 +292,74 @@ handleAddUserGroup appState model userGroup =
 
         newForm =
             List.foldl formUpdate model.questionnaireEditForm msgs
+
+        newModel =
+            { model
+                | userGroupTypeHintInputModel = userGroupTypeHintInputModel
+                , questionnaireEditForm = newForm
+                , userGroups = List.uniqueBy (Uuid.toString << .uuid) (userGroup :: model.userGroups)
+            }
     in
-    ( newSeed
-    , { model
-        | userGroupTypeHintInputModel = userGroupTypeHintInputModel
-        , questionnaireEditForm = newForm
-        , userGroups = List.uniqueBy (Uuid.toString << .uuid) (userGroup :: model.userGroups)
-      }
-    , Cmd.none
-    )
+    newModel
+        |> saveSharing appState cfg
+        |> withSeed newSeed
 
 
 handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )
 handleFormMsg cfg formMsg appState model =
-    case ( formMsg, Form.getOutput model.questionnaireEditForm ) of
-        ( Form.Submit, Just form ) ->
+    let
+        newModel =
+            { model | questionnaireEditForm = Form.update QuestionnaireShareForm.validation formMsg model.questionnaireEditForm }
+
+        shouldSave =
+            case formMsg of
+                Form.Input _ _ _ ->
+                    True
+
+                Form.RemoveItem _ _ ->
+                    True
+
+                _ ->
+                    False
+    in
+    if shouldSave then
+        saveSharing appState cfg newModel
+
+    else
+        ( newModel, Cmd.none )
+
+
+handlePutQuestionnaireComplete : AppState -> Model -> Time.Posix -> Result ApiError () -> Model
+handlePutQuestionnaireComplete appState model time result =
+    case result of
+        Ok _ ->
+            if model.lastSavingSharing == time then
+                { model | savingSharing = Unset }
+
+            else
+                model
+
+        Err error ->
+            { model | savingSharing = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
+
+
+saveSharing : AppState -> UpdateConfig msg -> Model -> ( Model, Cmd msg )
+saveSharing appState cfg model =
+    case Form.getOutput model.questionnaireEditForm of
+        Just form ->
             let
                 body =
                     QuestionnaireShareForm.encode form
-
-                cmd =
-                    Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.putQuestionnaireShare cfg.questionnaireUuid body appState PutQuestionnaireComplete
             in
-            ( { model | savingSharing = Loading }
-            , cmd
+            ( { model
+                | savingSharing = Loading
+                , lastSavingSharing = appState.currentTime
+              }
+            , QuestionnairesApi.putQuestionnaireShare cfg.questionnaireUuid body appState (cfg.wrapMsg << PutQuestionnaireShareComplete appState.currentTime)
             )
 
-        _ ->
-            ( { model | questionnaireEditForm = Form.update QuestionnaireShareForm.validation formMsg model.questionnaireEditForm }
-            , Cmd.none
-            )
-
-
-handlePutQuestionnaireComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd msg )
-handlePutQuestionnaireComplete appState model result =
-    case result of
-        Ok _ ->
-            ( { model | visible = False, savingSharing = Unset }, Ports.refresh () )
-
-        Err error ->
-            ( { model | savingSharing = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
-            , Cmd.none
-            )
+        Nothing ->
+            ( model, Cmd.none )
 
 
 
@@ -343,24 +388,63 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         modalContent =
-            [ Html.viewIf (Admin.isEnabled appState.config.admin) <| userGroupsView appState model
+            [ FormResult.view appState model.savingSharing
+            , Html.viewIf (Admin.isEnabled appState.config.admin) <| userGroupsView appState model
             , usersView appState model
-            , formView appState model.questionnaireUuid model.questionnaireEditForm
+            , formView appState model.questionnaireEditForm
             ]
-
-        modalConfig =
-            { modalTitle = gettext "Share Project" appState.locale
-            , modalContent = modalContent
-            , visible = model.visible
-            , actionResult = model.savingSharing
-            , actionName = gettext "Save" appState.locale
-            , actionMsg = FormMsg Form.Submit
-            , cancelMsg = Just Close
-            , dangerous = False
-            , dataCy = "project-share"
-            }
     in
-    Modal.confirm appState modalConfig
+    div [ class "modal modal-cover", classList [ ( "visible", model.visible ) ] ]
+        [ div [ class "modal-dialog" ]
+            [ div [ class "modal-content", dataCy "modal_project-share" ]
+                [ div [ class "modal-header" ]
+                    [ h5 [ class "modal-title" ] [ text (gettext "Share Project" appState.locale) ]
+                    ]
+                , div [ class "modal-body" ] modalContent
+                , div [ class "modal-footer" ]
+                    [ ActionButton.buttonWithAttrs appState
+                        { label = gettext "Done" appState.locale
+                        , result = model.savingSharing
+                        , msg = Close
+                        , dangerous = False
+                        , attrs = [ dataCy "modal_action-button" ]
+                        }
+                    , copyLinkButton appState model
+                    ]
+                ]
+            ]
+        ]
+
+
+copyLinkButton : AppState -> Model -> Html Msg
+copyLinkButton appState model =
+    let
+        copyLinkTooltip =
+            if model.copiedLink then
+                tooltip (gettext "Copied!" appState.locale)
+
+            else
+                []
+
+        publicLink =
+            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing))))
+
+        copyLinkIcon =
+            if model.copiedLink then
+                faSet "questionnaire.copyLinkCopied" appState
+
+            else
+                faSet "questionnaire.copyLink" appState
+    in
+    button
+        (class "btn btn-outline-primary with-icon"
+            :: onClick (CopyLink publicLink)
+            :: onMouseOut ClearCopiedLink
+            :: copyLinkTooltip
+        )
+        [ copyLinkIcon
+        , text (gettext "Copy link" appState.locale)
+        ]
 
 
 userGroupsView : AppState -> Model -> Html Msg
@@ -500,8 +584,8 @@ userView appState users form i =
             emptyNode
 
 
-formView : AppState -> Uuid -> Form FormError QuestionnaireShareForm -> Html Msg
-formView appState questionnaireUuid form =
+formView : AppState -> Form FormError QuestionnaireShareForm -> Html Msg
+formView appState form =
     let
         visibilityInputs =
             if appState.config.questionnaire.questionnaireVisibility.enabled then
@@ -539,22 +623,8 @@ formView appState questionnaireUuid form =
         sharingInputs =
             if appState.config.questionnaire.questionnaireSharing.enabled then
                 let
-                    publicLink =
-                        appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (Routes.DetailRoute questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing))))
-
                     sharingEnabled =
                         Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
-
-                    publicLinkView =
-                        div
-                            [ class "form-group form-group-toggle-extra"
-                            , classList [ ( "visible", sharingEnabled ) ]
-                            ]
-                            [ div [ class "d-flex" ]
-                                [ input [ readonly True, class "form-control", id "public-link", value publicLink ] []
-                                , button [ class "btn btn-link text-nowrap", onClick (CopyPublicLink publicLink) ] [ text (gettext "Copy link" appState.locale) ]
-                                ]
-                            ]
 
                     sharingSelect =
                         FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "sharingPermission"
@@ -574,7 +644,6 @@ formView appState questionnaireUuid form =
                 in
                 [ Html.map FormMsg sharingEnabledInput
                 , Html.map FormMsg sharingPermissionInput
-                , publicLinkView
                 ]
 
             else
