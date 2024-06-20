@@ -279,7 +279,7 @@ projectCancelMigration appState questionnaire =
 
 projectDelete : AppState -> Questionnaire -> Bool
 projectDelete appState questionnaire =
-    Questionnaire.isEditable appState questionnaire
+    Questionnaire.isOwner appState questionnaire
 
 
 projectTagging : AppState -> Bool
