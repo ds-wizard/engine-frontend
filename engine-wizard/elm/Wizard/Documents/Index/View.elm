@@ -147,10 +147,12 @@ listingDescription appState document =
         questionnaireLink =
             case document.questionnaire of
                 Just questionnaire ->
-                    linkTo appState
-                        (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
-                        [ class "fragment" ]
-                        [ text questionnaire.name ]
+                    span [ class "fragment" ]
+                        [ linkTo appState
+                            (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
+                            []
+                            [ text questionnaire.name ]
+                        ]
 
                 Nothing ->
                     emptyNode
@@ -170,11 +172,20 @@ listingDescription appState document =
 
                 Nothing ->
                     emptyNode
+
+        documentTemplateLink =
+            span [ class "fragment" ]
+                [ linkTo appState
+                    (Routes.documentTemplatesDetail document.documentTemplateId)
+                    []
+                    [ text document.documentTemplateName ]
+                ]
     in
     span []
         [ formatFragment
         , fileSizeFragment
         , questionnaireLink
+        , documentTemplateLink
         ]
 
 
