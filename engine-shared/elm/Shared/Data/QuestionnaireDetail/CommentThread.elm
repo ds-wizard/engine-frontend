@@ -1,4 +1,4 @@
-module Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread, compare, decoder, isAuthor)
+module Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread, commentCount, compare, decoder, isAuthor)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -44,3 +44,8 @@ isAuthor user commentThread =
 compare : CommentThread -> CommentThread -> Order
 compare a b =
     Time.compare a.createdAt b.createdAt
+
+
+commentCount : CommentThread -> Int
+commentCount =
+    List.length << .comments

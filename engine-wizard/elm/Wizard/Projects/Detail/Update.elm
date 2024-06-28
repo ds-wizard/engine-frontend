@@ -12,6 +12,7 @@ import Shared.Auth.Session as Session
 import Shared.Copy as Ports
 import Shared.Data.Member as Member
 import Shared.Data.QuestionnaireCommon as QuestionnaireCommon
+import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
@@ -378,42 +379,43 @@ update wrapMsg msg appState model =
                                         , createdBy = createdBy
                                         }
 
-                        Questionnaire.CommentThreadDelete path threadUuid private ->
+                        Questionnaire.CommentThreadDelete path commentThread ->
                             let
                                 deleteCommentThread questionnaire =
-                                    Questionnaire.deleteCommentThread path threadUuid questionnaire
+                                    Questionnaire.deleteCommentThread path commentThread.uuid questionnaire
                             in
                             applyAction questionnaireSeed deleteCommentThread <|
                                 \uuid ->
                                     QuestionnaireEvent.DeleteCommentThread
                                         { uuid = uuid
                                         , path = path
-                                        , threadUuid = threadUuid
-                                        , private = private
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
                                         , createdAt = createdAt
                                         , createdBy = createdBy
                                         }
 
-                        Questionnaire.CommentThreadResolve path threadUuid private ->
+                        Questionnaire.CommentThreadResolve path commentThread ->
                             let
                                 resolveCommentThread questionnaire =
-                                    Questionnaire.resolveCommentThread path threadUuid questionnaire
+                                    Questionnaire.resolveCommentThread path commentThread.uuid (CommentThread.commentCount commentThread) questionnaire
                             in
                             applyAction questionnaireSeed resolveCommentThread <|
                                 \uuid ->
                                     QuestionnaireEvent.ResolveCommentThread
                                         { uuid = uuid
                                         , path = path
-                                        , threadUuid = threadUuid
-                                        , private = private
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
                                         , createdAt = createdAt
                                         , createdBy = createdBy
+                                        , commentCount = List.length commentThread.comments
                                         }
 
                         Questionnaire.CommentThreadReopen path commentThread ->
                             let
                                 reopenCommentThread questionnaire =
-                                    Questionnaire.reopenCommentThread path commentThread.uuid (List.length commentThread.comments) questionnaire
+                                    Questionnaire.reopenCommentThread path commentThread.uuid (CommentThread.commentCount commentThread) questionnaire
                             in
                             applyAction questionnaireSeed reopenCommentThread <|
                                 \uuid ->
@@ -840,7 +842,7 @@ handleWebsocketMsg websocketMsg appState model =
                                     updateQuestionnaire event data.uuid (Questionnaire.setLabels data.path data.value)
 
                                 QuestionnaireEvent.ResolveCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid)
+                                    updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid data.commentCount)
 
                                 QuestionnaireEvent.ReopenCommentThread data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.reopenCommentThread data.path data.threadUuid data.commentCount)

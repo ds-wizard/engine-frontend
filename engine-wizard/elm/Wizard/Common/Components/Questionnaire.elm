@@ -252,15 +252,6 @@ init appState questionnaire mbPath =
     )
 
 
-
---setQuestionnaireImporters : List QuestionnaireImporter -> Model -> Model
---setQuestionnaireImporters importers model =
---    { model | questionnaireImporters = importers }
---setQuestionnaireActions : List QuestionnaireAction -> Model -> Model
---setQuestionnaireActions actions model =
---    { model | questionnaireActions = actions }
-
-
 addEvent : QuestionnaireEvent -> Model -> Model
 addEvent event model =
     { model | questionnaireEvents = ActionResult.map (\events -> events ++ [ event ]) model.questionnaireEvents }
@@ -302,15 +293,15 @@ setLabels path value =
     updateQuestionnaire <| QuestionnaireQuestionnaire.setLabels path value
 
 
-resolveCommentThread : String -> Uuid -> Model -> Model
-resolveCommentThread path threadUuid model =
+resolveCommentThread : String -> Uuid -> Int -> Model -> Model
+resolveCommentThread path threadUuid commentCount model =
     let
         mapCommentThread commentThread =
             { commentThread | resolved = True }
     in
     model
         |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.removeCommentThreadFromCount path threadUuid)
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.addResolvedCommentThreadToCount path threadUuid commentCount)
 
 
 reopenCommentThread : String -> Uuid -> Int -> Model -> Model
@@ -321,7 +312,7 @@ reopenCommentThread path threadUuid commentCount model =
     in
     model
         |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.addCommentThreadToCount path threadUuid commentCount)
+        |> updateQuestionnaire (QuestionnaireQuestionnaire.addReopenedCommentThreadToCount path threadUuid commentCount)
 
 
 deleteCommentThread : String -> Uuid -> Model -> Model
@@ -569,8 +560,8 @@ type Msg
     | CommentEditInput Uuid String
     | CommentEditCancel Uuid
     | CommentEditSubmit String Uuid Uuid String Bool
-    | CommentThreadDelete String Uuid Bool
-    | CommentThreadResolve String Uuid Bool
+    | CommentThreadDelete String CommentThread
+    | CommentThreadResolve String CommentThread
     | CommentThreadReopen String CommentThread
     | CommentsViewResolved Bool
     | CommentsViewPrivate Bool
@@ -2023,15 +2014,29 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
         viewChapterComments group =
             div []
                 [ strong [] [ text group.chapter.title ]
-                , ul [ class "fa-ul" ] (List.map viewQuestionComments group.todos)
+                , ul [ class "fa-ul" ] (List.map viewQuestionComments group.comments)
                 ]
 
         viewQuestionComments comment =
+            let
+                resolvedCommentCount =
+                    if model.commentsViewResolved && comment.resolvedComments > 0 then
+                        Badge.success [ class "rounded-pill ms-1" ]
+                            [ fa "fas fa-check"
+                            , text (String.fromInt comment.resolvedComments)
+                            ]
+
+                    else
+                        emptyNode
+            in
             li []
                 [ span [ class "fa-li" ] [ fa "far fa-comment" ]
                 , a [ onClick (OpenComments comment.path) ]
                     [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
-                    , Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.comments) ]
+                    , span [ class "text-nowrap" ]
+                        [ Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.unresolvedComments) ]
+                        , resolvedCommentCount
+                        ]
                     ]
                 ]
 
@@ -2047,7 +2052,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                         List.map
                             (\group ->
                                 if group.chapter.uuid == comment.chapter.uuid then
-                                    { group | todos = group.todos ++ [ comment ] }
+                                    { group | comments = group.comments ++ [ comment ] }
 
                                 else
                                     group
@@ -2055,7 +2060,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                             acc
 
                     else
-                        acc ++ [ { chapter = comment.chapter, todos = [ comment ] } ]
+                        acc ++ [ { chapter = comment.chapter, comments = [ comment ] } ]
             in
             List.foldl fold [] comments
 
@@ -2069,9 +2074,20 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                 ]
 
             else
-                questionnaireComments
+                viewCommentsResolvedSelect appState model
+                    :: questionnaireComments
     in
-    div [ class "comments-overview" ] content
+    div [ class "comments-overview Comments" ] content
+
+
+viewCommentsResolvedSelect : AppState -> Model -> Html Msg
+viewCommentsResolvedSelect appState model =
+    div [ class "form-check" ]
+        [ label [ class "form-check-label form-check-toggle" ]
+            [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
+            , span [] [ text (gettext "View resolved comments" appState.locale) ]
+            ]
+        ]
 
 
 
@@ -2112,14 +2128,6 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 |> List.sortWith CommentThread.compare
                 |> List.map (viewCommentThread appState model path)
 
-        resolvedSelect =
-            div [ class "form-check" ]
-                [ label [ class "form-check-label form-check-toggle" ]
-                    [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved ] []
-                    , span [] [ text (gettext "View resolved comments" appState.locale) ]
-                    ]
-                ]
-
         resolvedThreadsView =
             if model.commentsViewResolved then
                 div [] (viewFilteredCommentThreads (\thread -> thread.resolved))
@@ -2141,7 +2149,7 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 }
     in
     div [ class "Comments" ]
-        [ resolvedSelect
+        [ viewCommentsResolvedSelect appState model
         , navigationView
         , resolvedThreadsView
         , commentThreadsView
@@ -2206,7 +2214,7 @@ viewCommentThread appState model path commentThread =
         deleteOverlay =
             if model.commentDeleting == Maybe.map .uuid (List.head commentThread.comments) then
                 viewCommentDeleteOverlay appState
-                    { deleteMsg = CommentThreadDelete path commentThread.uuid commentThread.private
+                    { deleteMsg = CommentThreadDelete path commentThread
                     , deleteText = gettext "Delete this comment thread?" appState.locale
                     , extraClass = "CommentDeleteOverlay--Thread"
                     }
@@ -2303,7 +2311,7 @@ viewCommentHeader appState model path commentThread index comment =
             if index == 0 && Feature.projectCommentThreadResolve appState model.questionnaire commentThread then
                 a
                     ([ class "ms-1"
-                     , onClick (CommentThreadResolve path commentThread.uuid commentThread.private)
+                     , onClick (CommentThreadResolve path commentThread)
                      , dataCy "comments_comment_resolve"
                      ]
                         ++ tooltipLeft (gettext "Resolve comment thread" appState.locale)
@@ -3433,7 +3441,7 @@ viewCommentAction appState cfg model path =
                 pathToString path
 
             commentCount =
-                QuestionnaireQuestionnaire.getCommentCount pathString model.questionnaire
+                QuestionnaireQuestionnaire.getUnresolvedCommentCount pathString model.questionnaire
 
             isOpen =
                 case model.rightPanel of

@@ -20,6 +20,7 @@ type alias ResolveCommentThreadData =
     , private : Bool
     , createdAt : Time.Posix
     , createdBy : Maybe UserSuggestion
+    , commentCount : Int
     }
 
 
@@ -31,6 +32,7 @@ encode data =
         , ( "path", E.string data.path )
         , ( "threadUuid", Uuid.encode data.threadUuid )
         , ( "private", E.bool data.private )
+        , ( "commentCount", E.int data.commentCount )
         ]
 
 
@@ -43,3 +45,4 @@ decoder =
         |> D.hardcoded False
         |> D.required "createdAt" D.datetime
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
+        |> D.required "commentCount" D.int
