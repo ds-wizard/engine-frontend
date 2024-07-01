@@ -4,6 +4,7 @@ module Shared.Setters exposing
     , setAppKeys
     , setAssets
     , setBookReference
+    , setDebouncer
     , setDropdownState
     , setFiles
     , setFormatUuid
@@ -51,6 +52,11 @@ setAssets value record =
 setBookReference : a -> { b | bookReference : a } -> { b | bookReference : a }
 setBookReference value record =
     { record | bookReference = value }
+
+
+setDebouncer : a -> { b | debouncer : a } -> { b | debouncer : a }
+setDebouncer value record =
+    { record | debouncer = value }
 
 
 setDropdownState : a -> { b | dropdownState : a } -> { b | dropdownState : a }

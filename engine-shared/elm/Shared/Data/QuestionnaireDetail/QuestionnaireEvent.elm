@@ -14,6 +14,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import List.Extra as List
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData exposing (AddCommentData)
+import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AssignCommentThreadData as AssignCommentThreadData exposing (AssignCommentThreadData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData as ClearReplyData exposing (ClearReplyData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.DeleteCommentData as DeleteCommentData exposing (DeleteCommentData)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.DeleteCommentThreadData as DeleteCommentThreadData exposing (DeleteCommentThreadData)
@@ -37,6 +38,7 @@ type QuestionnaireEvent
     | ResolveCommentThread ResolveCommentThreadData
     | ReopenCommentThread ReopenCommentThreadData
     | DeleteCommentThread DeleteCommentThreadData
+    | AssignCommentThread AssignCommentThreadData
     | AddComment AddCommentData
     | EditComment EditCommentData
     | DeleteComment DeleteCommentData
@@ -72,6 +74,9 @@ decoderByType actionType =
         "DeleteCommentThreadEvent" ->
             D.map DeleteCommentThread DeleteCommentThreadData.decoder
 
+        "AssignCommentThreadEvent" ->
+            D.map AssignCommentThread AssignCommentThreadData.decoder
+
         "AddCommentEvent" ->
             D.map AddComment AddCommentData.decoder
 
@@ -95,6 +100,7 @@ encode =
         ResolveCommentThreadData.encode
         ReopenCommentThreadData.encode
         DeleteCommentThreadData.encode
+        AssignCommentThreadData.encode
         AddCommentData.encode
         EditCommentData.encode
         DeleteCommentData.encode
@@ -123,22 +129,22 @@ isInvisible event =
 
 getUuid : QuestionnaireEvent -> Uuid
 getUuid =
-    map .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid
+    map .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid .uuid
 
 
 getPath : QuestionnaireEvent -> Maybe String
 getPath =
-    map (.path >> Just) (.path >> Just) (always Nothing) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just)
+    map (.path >> Just) (.path >> Just) (always Nothing) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just) (.path >> Just)
 
 
 getCreatedAt : QuestionnaireEvent -> Time.Posix
 getCreatedAt =
-    map .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt
+    map .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt .createdAt
 
 
 getCreatedBy : QuestionnaireEvent -> Maybe UserSuggestion
 getCreatedBy =
-    map .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy
+    map .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy .createdBy
 
 
 getQuestionUuid : QuestionnaireEvent -> Maybe String
@@ -154,12 +160,13 @@ map :
     -> (ResolveCommentThreadData -> a)
     -> (ReopenCommentThreadData -> a)
     -> (DeleteCommentThreadData -> a)
+    -> (AssignCommentThreadData -> a)
     -> (AddCommentData -> a)
     -> (EditCommentData -> a)
     -> (DeleteCommentData -> a)
     -> QuestionnaireEvent
     -> a
-map mapSetReply mapClearReply mapSetLevel mapSetLabels mapResolveCommentThread mapReopenCommentThread mapDeleteCommentThread mapAddComment mapEditComment mapDeleteComment event =
+map mapSetReply mapClearReply mapSetLevel mapSetLabels mapResolveCommentThread mapReopenCommentThread mapDeleteCommentThread mapAssignCommentThread mapAddComment mapEditComment mapDeleteComment event =
     case event of
         SetReply data ->
             mapSetReply data
@@ -181,6 +188,9 @@ map mapSetReply mapClearReply mapSetLevel mapSetLabels mapResolveCommentThread m
 
         DeleteCommentThread data ->
             mapDeleteCommentThread data
+
+        AssignCommentThread data ->
+            mapAssignCommentThread data
 
         AddComment data ->
             mapAddComment data

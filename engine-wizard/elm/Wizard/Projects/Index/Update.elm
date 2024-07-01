@@ -16,6 +16,7 @@ import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Setters exposing (setDebouncer)
 import Shared.Utils exposing (dispatch, flip)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
@@ -267,7 +268,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { mapMsg = wrapMsg << DebouncerMsg
                     , getDebouncer = .debouncer
-                    , setDebouncer = \d m -> { m | debouncer = d }
+                    , setDebouncer = setDebouncer
                     }
 
                 update_ updateMsg updateModel =

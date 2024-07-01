@@ -112,6 +112,15 @@ code {
             background: transparent !important;
             cursor: default !important;
         }
+
+        &-search {
+            input {
+                width: 100%;
+                border: none;
+                outline: none;
+                box-shadow: none;
+            }
+        }
     }
 }
 

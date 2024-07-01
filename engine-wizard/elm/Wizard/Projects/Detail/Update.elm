@@ -429,6 +429,23 @@ update wrapMsg msg appState model =
                                         , commentCount = List.length commentThread.comments
                                         }
 
+                        Questionnaire.CommentThreadAssign path commentThread mbUser ->
+                            let
+                                assignCommentThread questionnaire =
+                                    Questionnaire.assignCommentThread path commentThread.uuid mbUser questionnaire
+                            in
+                            applyAction questionnaireSeed assignCommentThread <|
+                                \uuid ->
+                                    QuestionnaireEvent.AssignCommentThread
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
+                                        , assignedTo = mbUser
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
+                                        }
+
                         _ ->
                             ( appState.seed, newModel1, Cmd.none )
             in
@@ -849,6 +866,9 @@ handleWebsocketMsg websocketMsg appState model =
 
                                 QuestionnaireEvent.DeleteCommentThread data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.deleteCommentThread data.path data.threadUuid)
+
+                                QuestionnaireEvent.AssignCommentThread data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.assignCommentThread data.path data.threadUuid data.assignedTo)
 
                                 QuestionnaireEvent.AddComment data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.addComment data.path data.threadUuid data.private (AddCommentData.toComment data))

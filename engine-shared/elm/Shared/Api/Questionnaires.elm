@@ -18,6 +18,7 @@ module Shared.Api.Questionnaires exposing
     , getQuestionnaireQuestionnaire
     , getQuestionnaireSettings
     , getQuestionnaireSuggestions
+    , getQuestionnaireUserSuggestions
     , getQuestionnaireVersions
     , getQuestionnaires
     , getSummaryReport
@@ -58,6 +59,8 @@ import Shared.Data.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport as SummaryReport exposing (SummaryReport)
 import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
+import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
+import Shared.Utils exposing (boolToString)
 import String.Extra as String
 import Uuid exposing (Uuid)
 
@@ -139,6 +142,17 @@ putQuestionnaireSettings uuid =
 putQuestionnaireShare : Uuid -> Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putQuestionnaireShare uuid =
     jwtPut ("/questionnaires/" ++ Uuid.toString uuid ++ "/share")
+
+
+getQuestionnaireUserSuggestions : Uuid -> Bool -> String -> AbstractAppState a -> ToMsg (Pagination UserSuggestion) msg -> Cmd msg
+getQuestionnaireUserSuggestions questionnaireUuid editor query =
+    let
+        queryString =
+            PaginationQueryString.fromQ query
+                |> PaginationQueryString.withSize (Just 10)
+                |> PaginationQueryString.toApiUrlWith [ ( "editor", boolToString editor ) ]
+    in
+    jwtGet ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/users/suggestions" ++ queryString) (Pagination.decoder "users" UserSuggestion.decoder)
 
 
 getQuestionnaireMigration : Uuid -> AbstractAppState a -> ToMsg QuestionnaireMigration msg -> Cmd msg

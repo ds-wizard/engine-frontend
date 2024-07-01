@@ -310,10 +310,13 @@ getComments questionnaire =
     let
         fn chapter currentPath question =
             let
-                questionCommentCount =
+                unresolvedCommentCount =
                     getUnresolvedCommentCount (pathToString currentPath) questionnaire
+
+                resolvedCommentCount =
+                    getResolvedCommentCount (pathToString currentPath) questionnaire
             in
-            if questionCommentCount > 0 then
+            if unresolvedCommentCount > 0 || resolvedCommentCount > 0 then
                 [ { chapter = chapter
                   , question = question
                   , path = pathToString currentPath
