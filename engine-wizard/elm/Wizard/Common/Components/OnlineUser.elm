@@ -8,11 +8,11 @@ import Shared.Data.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, Online
 import Shared.Data.User as User
 import Shared.Html exposing (fa, faKeyClass)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Html.Attribute exposing (tooltip)
+import Wizard.Common.Html.Attribute exposing (tooltip, tooltipLeft)
 
 
-view : AppState -> OnlineUserInfo -> Html msg
-view appState userInfo =
+view : AppState -> Bool -> OnlineUserInfo -> Html msg
+view appState isTooltipLeft userInfo =
     let
         ( username, colorClass, content ) =
             case userInfo of
@@ -21,8 +21,15 @@ view appState userInfo =
 
                 OnlineUserInfo.Anonymous { avatarNumber, colorNumber } ->
                     viewAnonymous appState avatarNumber colorNumber
+
+        tooltipAttributes =
+            if isTooltipLeft then
+                tooltipLeft
+
+            else
+                tooltip
     in
-    div (class "OnlineUser" :: class colorClass :: tooltip username) [ content ]
+    div (class "OnlineUser" :: class colorClass :: tooltipAttributes username) [ content ]
 
 
 viewLogged : LoggedData -> ( String, String, Html msg )

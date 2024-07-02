@@ -39,8 +39,8 @@ sectionActions =
     div [ class "DetailNavigation__Row__Section__Actions" ]
 
 
-onlineUsers : AppState -> List OnlineUserInfo -> Html msg
-onlineUsers appState users =
+onlineUsers : AppState -> Bool -> List OnlineUserInfo -> Html msg
+onlineUsers appState isTooltipLeft users =
     if List.isEmpty users then
         emptyNode
 
@@ -58,7 +58,7 @@ onlineUsers appState users =
             [ class "DetailNavigation__Row__Section__Online-Users"
             , classList [ ( "DetailNavigation__Row__Section__Online-Users--Stacked", List.length users > 5 ) ]
             ]
-            (List.map (OnlineUser.view appState) (List.take 10 users)
+            (List.map (OnlineUser.view appState isTooltipLeft) (List.take 10 users)
                 ++ [ extraUsers ]
             )
 

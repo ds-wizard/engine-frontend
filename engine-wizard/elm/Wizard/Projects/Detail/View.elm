@@ -134,6 +134,10 @@ viewProjectNavigation appState route model questionnaire =
 
 viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireCommon -> Html Msg
 viewProjectNavigationTitleRow appState model questionnaire =
+    let
+        isTooltipLeft =
+            not (QuestionnaireUtils.isAnonymousProject questionnaire && Session.exists appState.session) && not (QuestionnaireUtils.isOwner appState questionnaire)
+    in
     DetailNavigation.row
         [ DetailNavigation.section
             [ div [ class "title" ] [ text questionnaire.name ]
@@ -141,7 +145,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
             , viewProjectNavigationProjectSaving appState model
             ]
         , DetailNavigation.section
-            [ DetailNavigation.onlineUsers appState model.onlineUsers
+            [ DetailNavigation.onlineUsers appState isTooltipLeft model.onlineUsers
             , viewProjectNavigationActions appState model questionnaire
             ]
         ]
