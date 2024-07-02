@@ -1,10 +1,15 @@
-module Wizard.Documents.Index.Models exposing (Model, addDocumentSubmission, anyDocumentInProgress, initialModel)
+module Wizard.Documents.Index.Models exposing
+    ( Model
+    , addDocumentSubmission
+    , anyDocumentInProgress
+    , initialModel
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
 import Uuid exposing (Uuid)
@@ -16,7 +21,7 @@ type alias Model =
     , documentToBeDeleted : Maybe Document
     , deletingDocument : ActionResult String
     , questionnaireUuid : Maybe Uuid
-    , questionnaire : Maybe (ActionResult QuestionnaireDetail)
+    , questionnaire : Maybe (ActionResult QuestionnaireCommon)
     , documentToBeSubmitted : Maybe Document
     , submittingDocument : ActionResult Submission
     , submissionServices : ActionResult (List SubmissionService)

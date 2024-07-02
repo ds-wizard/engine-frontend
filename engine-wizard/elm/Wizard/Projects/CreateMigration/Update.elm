@@ -11,8 +11,9 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setSelected)
 import Shared.Utils exposing (withNoCmd)
@@ -31,7 +32,7 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCompleted
+    QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -90,20 +91,21 @@ handleRemoveTag model tagUuid =
         { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
 
 
-handleGetQuestionnaireCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError QuestionnaireDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError (QuestionnaireDetailWrapper QuestionnaireSettings) -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState wrapMsg model result =
     let
+        setResult : ActionResult (QuestionnaireDetailWrapper QuestionnaireSettings) -> Model -> Model
         setResult q m =
             case q of
                 Success questionnaire ->
                     { m
-                        | questionnaire = Success questionnaire
-                        , selectedTags = questionnaire.selectedQuestionTagUuids
-                        , useAllQuestions = List.isEmpty questionnaire.selectedQuestionTagUuids
+                        | questionnaire = Success questionnaire.data
+                        , selectedTags = questionnaire.data.selectedQuestionTagUuids
+                        , useAllQuestions = List.isEmpty questionnaire.data.selectedQuestionTagUuids
                     }
 
                 _ ->
-                    { m | questionnaire = q }
+                    { m | questionnaire = ActionResult.map .data q }
     in
     loadCurrentPackage appState wrapMsg <|
         applyResult appState

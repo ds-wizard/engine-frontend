@@ -224,4 +224,45 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
             margin-right: -1rem;
         }
     }
+
+
+
+    .ShareDropdown {
+
+        .dropdown-menu {
+            width: 300px;
+            white-space: normal;
+
+            .dropdown-item {
+                padding: $spacer-1 $spacer-3;
+
+                color: $gray-900;
+                text-decoration: none !important;
+
+                &:not([href]) {
+                    color: $gray-900;
+
+                    &:hover {
+                        color: $gray-900;
+                    }
+                }
+
+                &:active, &:not([href]):active {
+                    color: $light;
+
+                    &.text-danger {
+                        background-color: $danger;
+                        color: $light !important;
+                    }
+                }
+
+                .fa {
+                    width: 1.5rem;
+                    text-align: center;
+                    margin-right: $spacer-1;
+
+                }
+            }
+        }
+    }
 }

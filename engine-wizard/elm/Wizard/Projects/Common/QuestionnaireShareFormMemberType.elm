@@ -1,5 +1,5 @@
-module Wizard.Projects.Common.QuestionnaireEditFormMemberType exposing
-    ( QuestionnaireEditFormMemberType(..)
+module Wizard.Projects.Common.QuestionnaireShareFormMemberType exposing
+    ( QuestionnaireShareFormMemberType(..)
     , encode
     , toString
     , validation
@@ -11,12 +11,12 @@ import Json.Encode as E
 import Shared.Form.FormError exposing (FormError)
 
 
-type QuestionnaireEditFormMemberType
+type QuestionnaireShareFormMemberType
     = UserQuestionnairePermType
     | UserGroupQuestionnairePermType
 
 
-toString : QuestionnaireEditFormMemberType -> String
+toString : QuestionnaireShareFormMemberType -> String
 toString memberType =
     case memberType of
         UserQuestionnairePermType ->
@@ -26,12 +26,12 @@ toString memberType =
             "UserGroupQuestionnairePermType"
 
 
-encode : QuestionnaireEditFormMemberType -> E.Value
+encode : QuestionnaireShareFormMemberType -> E.Value
 encode =
     E.string << toString
 
 
-validation : Validation FormError QuestionnaireEditFormMemberType
+validation : Validation FormError QuestionnaireShareFormMemberType
 validation =
     V.string
         |> V.andThen

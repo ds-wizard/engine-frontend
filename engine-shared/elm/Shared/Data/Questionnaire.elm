@@ -2,11 +2,13 @@ module Shared.Data.Questionnaire exposing
     ( Questionnaire
     , decoder
     , isEditable
+    , isOwner
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import List.Extra as List
 import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Auth.Session as Session
 import Shared.Data.Member as Member
@@ -15,6 +17,7 @@ import Shared.Data.Permission as Permission exposing (Permission)
 import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Shared.Data.QuestionnairePerm as QuestionnairePerm
 import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 import Shared.Utils exposing (flip)
 import Time
@@ -55,6 +58,21 @@ isEditable appState questionnaire =
             matchMember questionnaire appState.config.user
     in
     isAdmin || not isReadonly || isMember
+
+
+isOwner : AbstractAppState a -> Questionnaire -> Bool
+isOwner appState questionnaire =
+    let
+        isAdmin =
+            UserInfo.isAdmin appState.config.user
+
+        isQuestionnaireOwner =
+            appState.config.user
+                |> Maybe.andThen (\user -> List.find (\p -> Member.getUuid p.member == user.uuid) questionnaire.permissions)
+                |> Maybe.map (List.member QuestionnairePerm.admin << .perms)
+                |> Maybe.withDefault False
+    in
+    isAdmin || isQuestionnaireOwner
 
 
 decoder : Decoder Questionnaire

@@ -1,6 +1,7 @@
 module ActionResult exposing
     ( ActionResult(..)
     , all
+    , andThen
     , apply
     , combine
     , combine3
@@ -67,6 +68,22 @@ map fn actionResult =
     case actionResult of
         Success value ->
             Success <| fn value
+
+        Unset ->
+            Unset
+
+        Loading ->
+            Loading
+
+        Error err ->
+            Error err
+
+
+andThen : (a -> ActionResult b) -> ActionResult a -> ActionResult b
+andThen fn actionResult =
+    case actionResult of
+        Success value ->
+            fn value
 
         Unset ->
             Unset

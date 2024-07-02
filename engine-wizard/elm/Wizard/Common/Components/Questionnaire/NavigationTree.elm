@@ -20,8 +20,8 @@ import Shared.Components.Badge as Badge
 import Shared.Data.KnowledgeModel as KnowledgeModel
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Uuid
@@ -66,7 +66,7 @@ update msg model =
 type alias ViewConfig msg =
     { activeChapterUuid : Maybe String
     , nonDesirableQuestions : Bool
-    , questionnaire : QuestionnaireDetail
+    , questionnaire : QuestionnaireQuestionnaire
     , openChapter : String -> msg
     , scrollToPath : String -> msg
     , wrapMsg : Msg -> msg
@@ -119,11 +119,11 @@ viewChapter appState cfg model order chapter =
         ]
 
 
-viewChapterIndication : AppState -> QuestionnaireDetail -> Chapter -> Html msg
+viewChapterIndication : AppState -> QuestionnaireQuestionnaire -> Chapter -> Html msg
 viewChapterIndication appState questionnaire chapter =
     let
         unanswered =
-            QuestionnaireDetail.calculateUnansweredQuestionsForChapter questionnaire chapter
+            QuestionnaireQuestionnaire.calculateUnansweredQuestionsForChapter questionnaire chapter
     in
     if unanswered > 0 then
         Badge.light [ class "rounded-pill" ] [ text <| String.fromInt unanswered ]
@@ -245,7 +245,7 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
                 ul [] (List.map (viewQuestion appState cfg model (currentPath ++ [ itemUuid ])) itemTemplateQuestions)
 
         mbItemTitle =
-            QuestionnaireDetail.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
+            QuestionnaireQuestionnaire.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
 
         defaultItemTitle =
             i [] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ]

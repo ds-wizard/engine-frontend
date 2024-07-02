@@ -5,7 +5,6 @@ import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, 
 import Html.Attributes exposing (class, classList, style, target)
 import Html.Events exposing (onClick)
 import Shared.Data.KnowledgeModel.Question as Question
-import Shared.Data.Package exposing (Package)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Undraw as Undraw
@@ -85,23 +84,23 @@ migrationInfo appState migration =
         , table []
             [ tr []
                 [ th [] [ text (gettext "Source KM" appState.locale) ]
-                , td [] [ packageInfo appState migration.oldQuestionnaire.package ]
+                , td [] [ packageInfo appState migration.oldQuestionnaire.packageId ]
                 ]
             , tr []
                 [ th [] [ text (gettext "Target KM" appState.locale) ]
-                , td [] [ packageInfo appState migration.newQuestionnaire.package ]
+                , td [] [ packageInfo appState migration.newQuestionnaire.packageId ]
                 ]
             ]
         ]
 
 
-packageInfo : AppState -> Package -> Html Msg
-packageInfo appState package =
+packageInfo : AppState -> String -> Html Msg
+packageInfo appState packageId =
     code []
         [ linkTo appState
-            (Routes.knowledgeModelsDetail package.id)
+            (Routes.knowledgeModelsDetail packageId)
             [ target "_blank" ]
-            [ text package.id ]
+            [ text packageId ]
         ]
 
 

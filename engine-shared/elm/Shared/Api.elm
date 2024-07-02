@@ -309,6 +309,7 @@ resolve toResult response =
             Err (BadStatus metadata.statusCode body)
 
         Http.GoodStatus_ _ body ->
+            --Result.mapError (always OtherError) (Debug.log "result" (toResult body))
             Result.mapError (always OtherError) (toResult body)
 
 

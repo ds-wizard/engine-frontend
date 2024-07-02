@@ -4,6 +4,7 @@ module Shared.Data.Member exposing
     , decoder
     , getUuid
     , imageUrl
+    , isUserMember
     , toQuestionnaireEditFormMemberType
     , toUserGroupSuggestion
     , toUserSuggestion
@@ -16,7 +17,7 @@ import Shared.Data.User as User
 import Shared.Data.UserGroupSuggestion as UserGroupSuggestion exposing (UserGroupSuggestion)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Uuid exposing (Uuid)
-import Wizard.Projects.Common.QuestionnaireEditFormMemberType exposing (QuestionnaireEditFormMemberType(..))
+import Wizard.Projects.Common.QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
 
 
 type Member
@@ -27,6 +28,16 @@ type Member
 userMember : UserSuggestion -> Member
 userMember =
     UserMember
+
+
+isUserMember : Member -> Bool
+isUserMember member =
+    case member of
+        UserMember _ ->
+            True
+
+        UserGroupMember _ ->
+            False
 
 
 getUuid : Member -> Uuid
@@ -112,7 +123,7 @@ toUserGroupSuggestion member =
             Nothing
 
 
-toQuestionnaireEditFormMemberType : Member -> QuestionnaireEditFormMemberType
+toQuestionnaireEditFormMemberType : Member -> QuestionnaireShareFormMemberType
 toQuestionnaireEditFormMemberType member =
     case member of
         UserMember _ ->

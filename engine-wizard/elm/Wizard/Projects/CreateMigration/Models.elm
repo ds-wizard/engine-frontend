@@ -8,7 +8,7 @@ import Form exposing (Form)
 import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -17,7 +17,7 @@ import Wizard.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireM
 
 type alias Model =
     { questionnaireUuid : Uuid
-    , questionnaire : ActionResult QuestionnaireDetail
+    , questionnaire : ActionResult QuestionnaireSettings
     , currentPackage : ActionResult PackageDetail
     , selectedPackage : Maybe PackageSuggestion
     , selectedPackageDetail : ActionResult PackageDetail

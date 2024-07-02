@@ -44,8 +44,16 @@ type alias SystemLogErrorData =
 
 decoder : Decoder ServerError
 decoder =
-    D.field "type" D.string
-        |> D.andThen decoderByType
+    D.oneOf
+        [ D.field "type" D.string |> D.andThen decoderByType
+        , defaultErrorDecoder
+        ]
+
+
+defaultErrorDecoder : Decoder ServerError
+defaultErrorDecoder =
+    D.succeed UserSimpleError
+        |> D.required "message" messageDecoder
 
 
 decoderByType : String -> Decoder ServerError
@@ -138,6 +146,9 @@ messageToReadable appState message =
             Just <| String.format (gettext "Asset \"%s\" was not found in archive." appState.locale) message.params
 
         -- Registry
+        "error.api.common.unable_to_get_organization" ->
+            Just <| gettext "Invalid credentials." appState.locale
+
         "error.validation.email_uniqueness" ->
             Just <| gettext "Email is already used." appState.locale
 

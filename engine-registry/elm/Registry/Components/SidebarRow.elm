@@ -94,7 +94,7 @@ viewOtherVersions appState props =
 viewMetamodelVersion : AppState -> Int -> Html msg
 viewMetamodelVersion appState metamodelVersion =
     view
-        { title = gettext "Version" appState.locale
+        { title = gettext "Metamodel Version" appState.locale
         , content =
             [ text (String.fromInt metamodelVersion) ]
         }

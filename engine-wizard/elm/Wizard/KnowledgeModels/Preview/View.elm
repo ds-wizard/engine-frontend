@@ -1,9 +1,10 @@
 module Wizard.KnowledgeModels.Preview.View exposing (view)
 
+import ActionResult
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Shared.Data.Package exposing (Package)
+import Shared.Data.PackageDetail exposing (PackageDetail)
 import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
@@ -19,11 +20,15 @@ import Wizard.KnowledgeModels.Preview.Msgs exposing (Msg(..))
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewProject appState model) model.questionnaireModel
+    let
+        actionResult =
+            ActionResult.combine model.package model.questionnaireModel
+    in
+    Page.actionResultView appState (viewProject appState model) actionResult
 
 
-viewProject : AppState -> Model -> Questionnaire.Model -> Html Msg
-viewProject appState model questionnaireModel =
+viewProject : AppState -> Model -> ( PackageDetail, Questionnaire.Model ) -> Html Msg
+viewProject appState model ( package, questionnaireModel ) =
     let
         questionnaire =
             Questionnaire.view appState
@@ -44,12 +49,12 @@ viewProject appState model questionnaireModel =
                 questionnaireModel
     in
     div [ class "KnowledgeModels__Preview" ]
-        [ viewHeader appState model questionnaireModel.questionnaire.package
+        [ viewHeader appState model package
         , questionnaire
         ]
 
 
-viewHeader : AppState -> Model -> Package -> Html Msg
+viewHeader : AppState -> Model -> PackageDetail -> Html Msg
 viewHeader appState model package =
     let
         actions =

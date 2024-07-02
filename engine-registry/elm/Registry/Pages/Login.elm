@@ -22,7 +22,7 @@ import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.LoginForm as LoginForm exposing (LoginForm)
 import Registry.Data.Session as Session exposing (Session)
 import Registry.Routes as Routes
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils as Task
 
@@ -78,8 +78,8 @@ update cfg appState msg model =
                     , Task.dispatch (cfg.setSessionMsg <| Just <| Session.fromOrganization organization)
                     )
 
-                Err _ ->
-                    ( { model | loggingIn = ActionResult.Error (gettext "Login failed." appState.locale) }
+                Err err ->
+                    ( { model | loggingIn = ApiError.toActionResult appState (gettext "Login failed." appState.locale) err }
                     , Cmd.none
                     )
 

@@ -1,7 +1,7 @@
 module Wizard.Documents.Index.Msgs exposing (Msg(..))
 
 import Shared.Data.Document exposing (Document)
-import Shared.Data.QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.Submission exposing (Submission)
 import Shared.Data.SubmissionService exposing (SubmissionService)
 import Shared.Error.ApiError exposing (ApiError)
@@ -10,7 +10,7 @@ import Wizard.Common.FileDownloader as FileDownloader
 
 
 type Msg
-    = GetQuestionnaireCompleted (Result ApiError QuestionnaireDetail)
+    = GetQuestionnaireCompleted (Result ApiError QuestionnaireCommon)
     | ShowHideDeleteDocument (Maybe Document)
     | DeleteDocument
     | DeleteDocumentCompleted (Result ApiError ())

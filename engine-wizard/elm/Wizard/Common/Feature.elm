@@ -57,7 +57,7 @@ module Wizard.Common.Feature exposing
     , projectTagging
     , projectTemplatesCreate
     , projectTodos
-    , projectVersionHitory
+    , projectVersionHistory
     , projectsCreateCustom
     , projectsCreateFromTemplate
     , projectsView
@@ -84,12 +84,12 @@ import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
 import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
 import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.UserInfo as UserInfo
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils exposing (QuestionnaireLike)
 
 
 
@@ -279,7 +279,7 @@ projectCancelMigration appState questionnaire =
 
 projectDelete : AppState -> Questionnaire -> Bool
 projectDelete appState questionnaire =
-    Questionnaire.isEditable appState questionnaire
+    Questionnaire.isOwner appState questionnaire
 
 
 projectTagging : AppState -> Bool
@@ -287,69 +287,69 @@ projectTagging appState =
     appState.config.questionnaire.projectTagging.enabled
 
 
-projectMetrics : AppState -> QuestionnaireDetail -> Bool
-projectMetrics appState _ =
+projectMetrics : AppState -> Bool
+projectMetrics appState =
     appState.config.questionnaire.summaryReport.enabled
 
 
-projectPreview : AppState -> QuestionnaireDetail -> Bool
-projectPreview _ _ =
+projectPreview : AppState -> Bool
+projectPreview _ =
     True
 
 
-projectDocumentsView : AppState -> QuestionnaireDetail -> Bool
-projectDocumentsView _ _ =
+projectDocumentsView : AppState -> Bool
+projectDocumentsView _ =
     True
 
 
-projectTodos : AppState -> QuestionnaireDetail -> Bool
+projectTodos : AppState -> QuestionnaireLike q -> Bool
 projectTodos appState questionnaire =
-    QuestionnaireDetail.isEditor appState questionnaire && not (QuestionnaireDetail.isMigrating questionnaire)
+    QuestionnaireUtils.isEditor appState questionnaire && not (QuestionnaireUtils.isMigrating questionnaire)
 
 
-projectVersionHitory : AppState -> QuestionnaireDetail -> Bool
-projectVersionHitory appState questionnaire =
-    QuestionnaireDetail.isEditor appState questionnaire && not (QuestionnaireDetail.isMigrating questionnaire)
+projectVersionHistory : AppState -> QuestionnaireLike q -> Bool
+projectVersionHistory appState questionnaire =
+    QuestionnaireUtils.isEditor appState questionnaire && not (QuestionnaireUtils.isMigrating questionnaire)
 
 
-projectSettings : AppState -> QuestionnaireDetail -> Bool
+projectSettings : AppState -> QuestionnaireLike q -> Bool
 projectSettings appState questionnaire =
-    QuestionnaireDetail.isOwner appState questionnaire
+    QuestionnaireUtils.isOwner appState questionnaire
 
 
-projectCommentAdd : AppState -> QuestionnaireDetail -> Bool
+projectCommentAdd : AppState -> QuestionnaireLike q -> Bool
 projectCommentAdd appState questionnaire =
-    QuestionnaireDetail.canComment appState questionnaire
+    QuestionnaireUtils.canComment appState questionnaire
 
 
-projectCommentEdit : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
+projectCommentEdit : AppState -> QuestionnaireLike q -> CommentThread -> Comment -> Bool
 projectCommentEdit appState questionnaire commentThread comment =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
+    QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
-projectCommentDelete : AppState -> QuestionnaireDetail -> CommentThread -> Comment -> Bool
+projectCommentDelete : AppState -> QuestionnaireLike q -> CommentThread -> Comment -> Bool
 projectCommentDelete appState questionnaire commentThread comment =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
+    QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
-projectCommentThreadResolve : AppState -> QuestionnaireDetail -> CommentThread -> Bool
+projectCommentThreadResolve : AppState -> QuestionnaireLike q -> CommentThread -> Bool
 projectCommentThreadResolve appState questionnaire commentThread =
-    QuestionnaireDetail.canComment appState questionnaire && not commentThread.resolved
+    QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved
 
 
-projectCommentThreadReopen : AppState -> QuestionnaireDetail -> CommentThread -> Bool
+projectCommentThreadReopen : AppState -> QuestionnaireLike q -> CommentThread -> Bool
 projectCommentThreadReopen appState questionnaire commentThread =
-    QuestionnaireDetail.canComment appState questionnaire && commentThread.resolved
+    QuestionnaireUtils.canComment appState questionnaire && commentThread.resolved
 
 
-projectCommentThreadDelete : AppState -> QuestionnaireDetail -> CommentThread -> Bool
+projectCommentThreadDelete : AppState -> QuestionnaireLike q -> CommentThread -> Bool
 projectCommentThreadDelete appState questionnaire commentThread =
-    QuestionnaireDetail.canComment appState questionnaire && CommentThread.isAuthor appState.config.user commentThread
+    QuestionnaireUtils.canComment appState questionnaire && CommentThread.isAuthor appState.config.user commentThread
 
 
-projectCommentPrivate : AppState -> QuestionnaireDetail -> Bool
+projectCommentPrivate : AppState -> QuestionnaireLike q -> Bool
 projectCommentPrivate appState questionnaire =
-    QuestionnaireDetail.isEditor appState questionnaire
+    QuestionnaireUtils.isEditor appState questionnaire
 
 
 

@@ -10,23 +10,30 @@ module Shared.Api.Questionnaires exposing
     , getDocuments
     , getProjectTagsSuggestions
     , getQuestionnaire
+    , getQuestionnaireComments
     , getQuestionnaireEvent
     , getQuestionnaireEvents
     , getQuestionnaireMigration
+    , getQuestionnairePreview
+    , getQuestionnaireQuestionnaire
+    , getQuestionnaireSettings
     , getQuestionnaireSuggestions
+    , getQuestionnaireVersions
     , getQuestionnaires
     , getSummaryReport
     , postQuestionnaire
     , postQuestionnaireFromTemplate
     , postRevert
     , postVersion
-    , putQuestionnaire
     , putQuestionnaireContent
     , putQuestionnaireMigration
+    , putQuestionnaireSettings
+    , putQuestionnaireShare
     , putVersion
     , websocket
     )
 
+import Dict exposing (Dict)
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (Value)
@@ -38,10 +45,15 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (Pa
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
+import Shared.Data.QuestionnaireCommon as QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.QuestionnaireContent as QuestionnaireContent exposing (QuestionnaireContent)
-import Shared.Data.QuestionnaireDetail as QuestionnaireDetail exposing (QuestionnaireDetail)
+import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetailWrapper as QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Shared.Data.QuestionnairePreview as QuestionnairePreview exposing (QuestionnairePreview)
+import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireDetail exposing (QuestionnaireQuestionnaire)
+import Shared.Data.QuestionnaireSettings as QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Data.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Data.SummaryReport as SummaryReport exposing (SummaryReport)
@@ -94,14 +106,49 @@ createListExtraParams filters =
         ]
 
 
-getQuestionnaire : Uuid -> AbstractAppState a -> ToMsg QuestionnaireDetail msg -> Cmd msg
+getQuestionnaire : Uuid -> AbstractAppState a -> ToMsg QuestionnaireCommon msg -> Cmd msg
 getQuestionnaire uuid =
-    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid) QuestionnaireDetail.decoder
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid) QuestionnaireCommon.decoder
+
+
+getQuestionnaireQuestionnaire : Uuid -> AbstractAppState a -> ToMsg (QuestionnaireDetailWrapper QuestionnaireQuestionnaire) msg -> Cmd msg
+getQuestionnaireQuestionnaire uuid =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/questionnaire") (QuestionnaireDetailWrapper.decoder QuestionnaireDetail.decoder)
+
+
+getQuestionnaireComments : Uuid -> String -> AbstractAppState a -> ToMsg (Dict String (List CommentThread)) msg -> Cmd msg
+getQuestionnaireComments questionnaireUuid path =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/comments?path=" ++ path) (D.dict (D.list CommentThread.decoder))
+
+
+getQuestionnairePreview : Uuid -> AbstractAppState a -> ToMsg (QuestionnaireDetailWrapper QuestionnairePreview) msg -> Cmd msg
+getQuestionnairePreview uuid =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/preview") (QuestionnaireDetailWrapper.decoder QuestionnairePreview.decoder)
+
+
+getQuestionnaireSettings : Uuid -> AbstractAppState a -> ToMsg (QuestionnaireDetailWrapper QuestionnaireSettings) msg -> Cmd msg
+getQuestionnaireSettings uuid =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/settings") (QuestionnaireDetailWrapper.decoder QuestionnaireSettings.decoder)
+
+
+putQuestionnaireSettings : Uuid -> Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putQuestionnaireSettings uuid =
+    jwtPut ("/questionnaires/" ++ Uuid.toString uuid ++ "/settings")
+
+
+putQuestionnaireShare : Uuid -> Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putQuestionnaireShare uuid =
+    jwtPut ("/questionnaires/" ++ Uuid.toString uuid ++ "/share")
 
 
 getQuestionnaireMigration : Uuid -> AbstractAppState a -> ToMsg QuestionnaireMigration msg -> Cmd msg
 getQuestionnaireMigration uuid =
     jwtGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/migrations/current") QuestionnaireMigration.decoder
+
+
+getQuestionnaireVersions : Uuid -> AbstractAppState a -> ToMsg (List QuestionnaireVersion) msg -> Cmd msg
+getQuestionnaireVersions uuid =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString uuid ++ "/versions") (D.list QuestionnaireVersion.decoder)
 
 
 getQuestionnaireEvents : Uuid -> AbstractAppState a -> ToMsg (List QuestionnaireEvent) msg -> Cmd msg
@@ -134,11 +181,6 @@ fetchQuestionnaireMigration uuid =
     jwtFetch ("/questionnaires/" ++ Uuid.toString uuid ++ "/migrations") QuestionnaireMigration.decoder
 
 
-putQuestionnaire : Uuid -> Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putQuestionnaire uuid =
-    jwtPut ("/questionnaires/" ++ Uuid.toString uuid)
-
-
 putQuestionnaireContent : Uuid -> List QuestionnaireEvent -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putQuestionnaireContent uuid events =
     let
@@ -169,9 +211,9 @@ deleteQuestionnaire uuid =
     jwtDelete ("/questionnaires/" ++ Uuid.toString uuid)
 
 
-getSummaryReport : Uuid -> AbstractAppState a -> ToMsg SummaryReport msg -> Cmd msg
+getSummaryReport : Uuid -> AbstractAppState a -> ToMsg (QuestionnaireDetailWrapper SummaryReport) msg -> Cmd msg
 getSummaryReport questionnaireUuid =
-    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/report") SummaryReport.decoder
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/report") (QuestionnaireDetailWrapper.decoder SummaryReport.decoder)
 
 
 websocket : Uuid -> AbstractAppState a -> String
