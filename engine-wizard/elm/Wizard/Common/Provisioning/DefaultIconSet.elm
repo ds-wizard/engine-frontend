@@ -112,6 +112,7 @@ iconSet =
         , ( "login.externalService", "fab fa-openid" )
         , ( "menu.about", "fas fa-info" )
         , ( "menu.administration", "fas fa-cog" )
+        , ( "menu.assignedComments", "fas fa-check-to-slot" )
         , ( "menu.collapse", "fas fa-angle-double-left" )
         , ( "menu.dashboard", "fas fa-home" )
         , ( "menu.dev", "fas fa-laptop-code" )

@@ -6,9 +6,11 @@ module Wizard.Routing exposing
     )
 
 import Browser.Navigation exposing (pushUrl)
+import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, s)
+import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.Routing
 import Wizard.DocumentTemplateEditors.Routing
@@ -22,7 +24,7 @@ import Wizard.ProjectImporters.Routing
 import Wizard.Projects.Routing
 import Wizard.Public.Routing
 import Wizard.Registry.Routing
-import Wizard.Routes as Routes
+import Wizard.Routes as Routes exposing (commentsRouteResolvedFilterId)
 import Wizard.Settings.Routing
 import Wizard.Tenants.Routing
 import Wizard.Users.Routing
@@ -31,6 +33,9 @@ import Wizard.Users.Routing
 matchers : AppState -> Parser (Routes.Route -> b) b
 matchers appState =
     let
+        commentsIndexRoute pqs mbResolved =
+            Routes.CommentsRoute pqs mbResolved
+
         parsers =
             Wizard.Dev.Routing.parsers appState Routes.DevRoute
                 ++ Wizard.Tenants.Routing.parsers Routes.TenantsRoute
@@ -48,6 +53,7 @@ matchers appState =
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
                 ++ Wizard.Users.Routing.parsers appState Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s (lr "dashboard" appState))
+                   , map (PaginationQueryString.wrapRoute1 commentsIndexRoute (Just "updatedAt,desc")) (PaginationQueryString.parser1 (s "comments") (Query.string commentsRouteResolvedFilterId))
                    ]
 
         parsersWithPrefix =
@@ -68,6 +74,9 @@ routeIfAllowed appState route =
 isAllowed : Routes.Route -> AppState -> Bool
 isAllowed route appState =
     case route of
+        Routes.CommentsRoute _ _ ->
+            True
+
         Routes.DevRoute adminRoute ->
             Wizard.Dev.Routing.isAllowed adminRoute appState
 
@@ -128,6 +137,14 @@ toUrl appState route =
     let
         parts =
             case route of
+                Routes.CommentsRoute pqs mbResolved ->
+                    let
+                        params =
+                            PaginationQueryString.filterParams
+                                [ ( commentsRouteResolvedFilterId, mbResolved ) ]
+                    in
+                    [ "comments", PaginationQueryString.toUrlWith params pqs ]
+
                 Routes.DevRoute adminRoute ->
                     Wizard.Dev.Routing.toUrl appState adminRoute
 

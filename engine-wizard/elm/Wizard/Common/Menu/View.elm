@@ -662,6 +662,14 @@ viewProfileMenu model =
                         , text (gettext "Edit profile" model.appState.locale)
                         ]
                     ]
+                , li []
+                    [ linkTo model.appState
+                        Routes.commentsIndex
+                        [ dataCy "menu_assigned-comments" ]
+                        [ faSetFw "menu.assignedComments" model.appState
+                        , text (gettext "Assigned comments" model.appState.locale)
+                        ]
+                    ]
                 , langaugeButton
                 , li []
                     [ a

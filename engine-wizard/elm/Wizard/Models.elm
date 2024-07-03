@@ -10,6 +10,8 @@ module Wizard.Models exposing
 
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Wizard.Comments.Models
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Menu.Models
 import Wizard.Dashboard.Models
@@ -35,6 +37,7 @@ type alias Model =
     { appState : AppState
     , menuModel : Wizard.Common.Menu.Models.Model
     , adminModel : Wizard.Dev.Models.Model
+    , commentsModel : Wizard.Comments.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
     , documentsModel : Wizard.Documents.Models.Model
     , documentTemplateEditorsModel : Wizard.DocumentTemplateEditors.Models.Model
@@ -58,6 +61,7 @@ initialModel appState =
     { appState = appState
     , menuModel = Wizard.Common.Menu.Models.initialModel
     , adminModel = Wizard.Dev.Models.initialModel
+    , commentsModel = Wizard.Comments.Models.initialModel PaginationQueryString.empty Nothing
     , tenantsModel = Wizard.Tenants.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel appState
     , documentsModel = Wizard.Documents.Models.initialModel
@@ -115,6 +119,9 @@ setSeed seed model =
 initLocalModel : Model -> Model
 initLocalModel model =
     case model.appState.route of
+        Routes.CommentsRoute paginationQueryString mbResolved ->
+            { model | commentsModel = Wizard.Comments.Models.initialModel paginationQueryString mbResolved }
+
         Routes.DashboardRoute ->
             { model | dashboardModel = Wizard.Dashboard.Models.initialModel model.appState }
 

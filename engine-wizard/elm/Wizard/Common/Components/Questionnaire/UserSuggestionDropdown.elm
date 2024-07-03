@@ -8,13 +8,13 @@ module Wizard.Common.Components.Questionnaire.UserSuggestionDropdown exposing
     , view
     )
 
-import ActionResult exposing (ActionResult)
+import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, input, span, text)
-import Html.Attributes exposing (class, placeholder, type_, value)
+import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
 import Shared.Api.Questionnaires as QuestionnairesApi
@@ -30,10 +30,12 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltipLeft)
 import Wizard.Common.Html.Events exposing (alwaysStopPropagationOn)
 import Wizard.Common.View.UserIcon as UserIcon
+import Wizard.Ports as Ports
 
 
 type alias Model =
     { uuid : Uuid
+    , threadUuid : Uuid
     , editorNote : Bool
     , dropdownState : Dropdown.State
     , searchValue : String
@@ -42,9 +44,10 @@ type alias Model =
     }
 
 
-init : Uuid -> Bool -> Model
-init uuid editorNote =
+init : Uuid -> Uuid -> Bool -> Model
+init uuid threadUuid editorNote =
     { uuid = uuid
+    , threadUuid = threadUuid
     , editorNote = editorNote
     , dropdownState = Dropdown.initialState
     , searchValue = ""
@@ -69,7 +72,10 @@ update appState msg model =
                 ( users, cmd ) =
                     if model.users == ActionResult.Unset then
                         ( ActionResult.Loading
-                        , dispatch (Search "")
+                        , Cmd.batch
+                            [ dispatch (Search "")
+                            , Ports.focus ("#user-search-" ++ Uuid.toString model.threadUuid)
+                            ]
                         )
 
                     else
@@ -136,7 +142,22 @@ view cfg appState model =
                 ]
 
         foundUsers =
-            ActionResult.unwrap [] (List.sortWith User.compare << .items) model.users
+            case model.users of
+                Success users ->
+                    if List.isEmpty users.items then
+                        [ Dropdown.customItem <|
+                            div [ class "dropdown-item-empty" ]
+                                [ text (gettext "No users found." appState.locale)
+                                ]
+                        ]
+
+                    else
+                        users.items
+                            |> List.sortWith User.compare
+                            |> List.map viewUserItem
+
+                _ ->
+                    []
     in
     Dropdown.dropdown model.dropdownState
         { options = [ Dropdown.alignMenuRight, Dropdown.attrs [ class "UserSuggestionDropdown" ] ]
@@ -144,6 +165,7 @@ view cfg appState model =
         , toggleButton =
             Dropdown.toggle
                 [ Button.roleLink
+                , Button.attrs [ dataCy "comments_comment_assign" ]
                 ]
                 [ span (tooltipLeft (gettext "Assign comment thread" appState.locale))
                     [ faSet "questionnaire.commentsAssign" appState ]
@@ -158,10 +180,11 @@ view cfg appState model =
                         , alwaysStopPropagationOn "click" (D.succeed (cfg.wrapMsg <| SearchInput model.searchValue))
                         , onInput (cfg.wrapMsg << SearchInput)
                         , value model.searchValue
+                        , id ("user-search-" ++ Uuid.toString model.threadUuid)
                         ]
                         []
                     ]
             , Dropdown.divider
             ]
-                ++ List.map viewUserItem foundUsers
+                ++ foundUsers
         }

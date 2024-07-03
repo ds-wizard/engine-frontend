@@ -44,7 +44,7 @@ initialModel appState packageId =
             createQuestionnaireDetail packageId KnowledgeModel.empty
 
         ( questionnaireModel, _ ) =
-            Questionnaire.init appState questionnaire Nothing
+            Questionnaire.initSimple appState questionnaire
     in
     { questionnaireModel = questionnaireModel
     , tags = Set.empty
@@ -76,7 +76,7 @@ setPackageId appState packageId model =
             createQuestionnaireDetail packageId KnowledgeModel.empty
 
         ( questionnaireModel, _ ) =
-            Questionnaire.init appState questionnaire Nothing
+            Questionnaire.initSimple appState questionnaire
     in
     { model | questionnaireModel = questionnaireModel }
 

@@ -16,6 +16,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , deleteCommentThread
     , editComment
     , init
+    , initSimple
     , reopenCommentThread
     , resolveCommentThread
     , setActiveChapterUuid
@@ -131,6 +132,7 @@ import Wizard.Routing as Routing
 
 type alias Model =
     { uuid : Uuid
+    , mbCommentThreadUuid : Maybe Uuid
     , activePage : ActivePage
     , rightPanel : RightPanel
     , questionnaire : QuestionnaireQuestionnaire
@@ -188,8 +190,13 @@ type RightPanel
     | RightPanelWarnings
 
 
-init : AppState -> QuestionnaireQuestionnaire -> Maybe String -> ( Model, Cmd Msg )
-init appState questionnaire mbPath =
+initSimple : AppState -> QuestionnaireQuestionnaire -> ( Model, Cmd Msg )
+initSimple appState questionnaire =
+    init appState questionnaire Nothing Nothing
+
+
+init : AppState -> QuestionnaireQuestionnaire -> Maybe String -> Maybe Uuid -> ( Model, Cmd Msg )
+init appState questionnaire mbPath mbCommentThreadUuid =
     let
         mbChapterUuid =
             List.head questionnaire.knowledgeModel.chapterUuids
@@ -204,6 +211,7 @@ init appState questionnaire mbPath =
 
         defaultModel =
             { uuid = questionnaire.uuid
+            , mbCommentThreadUuid = mbCommentThreadUuid
             , activePage = activePage
             , rightPanel = RightPanelNone
             , questionnaire = questionnaire
@@ -241,11 +249,14 @@ init appState questionnaire mbPath =
             }
 
         ( model, scrollCmd ) =
-            case mbPath of
-                Just path ->
-                    handleScrollToPath defaultModel path
+            case ( mbPath, mbCommentThreadUuid ) of
+                ( Just path, Just _ ) ->
+                    ( defaultModel, dispatch (OpenComments True path) )
 
-                Nothing ->
+                ( Just path, Nothing ) ->
+                    handleScrollToPath defaultModel False path
+
+                _ ->
                     ( defaultModel, Cmd.none )
     in
     ( model
@@ -567,7 +578,7 @@ type Msg
     | AddQuestionnaireVersion QuestionnaireVersion
     | UpdateQuestionnaireVersion QuestionnaireVersion
     | DeleteQuestionnaireVersion QuestionnaireVersion
-    | OpenComments String
+    | OpenComments Bool String
     | CommentInput String (Maybe Uuid) String
     | CommentSubmit String (Maybe Uuid) String Bool
     | CommentDelete (Maybe Uuid)
@@ -600,7 +611,7 @@ type Msg
     | GetCommentThreadsCompleted String (Result ApiError (Dict String (List CommentThread)))
     | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
     | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
-    | UserSuggestionDropdownMsg String Bool UserSuggestionDropdown.Msg
+    | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -668,7 +679,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     ( appState.seed, model, Cmd.none )
 
         ScrollToPath path ->
-            withSeed <| handleScrollToPath model path
+            withSeed <| handleScrollToPath model False path
 
         UpdateContentScroll ->
             let
@@ -949,10 +960,10 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap
                 { model | questionnaireVersions = questionnaireVersions }
 
-        OpenComments path ->
+        OpenComments immediate path ->
             let
                 ( newModel, cmd ) =
-                    handleScrollToPath { model | rightPanel = RightPanelComments path } path
+                    handleScrollToPath { model | rightPanel = RightPanelComments path } immediate path
             in
             withSeed ( newModel, Cmd.batch [ cmd, loadComments path ] )
 
@@ -1132,7 +1143,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             let
                 route =
                     Routing.toUrl appState <|
-                        Routes.projectsDetailQuestionnaire model.uuid (Just (String.join "." path))
+                        Routes.projectsDetailQuestionnaire model.uuid (Just (String.join "." path)) Nothing
             in
             ( appState.seed, { model | recentlyCopied = True }, Copy.copyToClipboard (AppState.getClientUrlRoot appState ++ route) )
 
@@ -1142,12 +1153,38 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         GetCommentThreadsCompleted path result ->
             case result of
                 Ok threads ->
-                    case Dict.get path threads of
-                        Just commentThreads ->
-                            wrap { model | commentThreadsMap = Dict.insert path (Success commentThreads) model.commentThreadsMap }
+                    let
+                        newModel =
+                            case Dict.get path threads of
+                                Just commentThreads ->
+                                    { model | commentThreadsMap = Dict.insert path (Success commentThreads) model.commentThreadsMap }
+
+                                Nothing ->
+                                    { model | commentThreadsMap = Dict.insert path (Success []) model.commentThreadsMap }
+                    in
+                    case model.mbCommentThreadUuid of
+                        Just threadUuid ->
+                            let
+                                selector =
+                                    "[data-comment-thread-uuid=\"" ++ Uuid.toString threadUuid ++ "\"]"
+
+                                ( isPrivate, isResolved ) =
+                                    Dict.get path newModel.commentThreadsMap
+                                        |> Maybe.andThen ActionResult.toMaybe
+                                        |> Maybe.andThen (List.find (\t -> t.uuid == threadUuid))
+                                        |> Maybe.unwrap ( False, False ) (\t -> ( t.private, t.resolved ))
+                            in
+                            withSeed
+                                ( { newModel
+                                    | mbCommentThreadUuid = Nothing
+                                    , commentsViewPrivate = isPrivate
+                                    , commentsViewResolved = isResolved
+                                  }
+                                , Ports.scrollIntoView selector
+                                )
 
                         Nothing ->
-                            wrap { model | commentThreadsMap = Dict.insert path (Success []) model.commentThreadsMap }
+                            wrap newModel
 
                 Err _ ->
                     wrap { model | commentThreadsMap = Dict.insert path (Error (gettext "Unable to get comments." appState.locale)) model.commentThreadsMap }
@@ -1176,16 +1213,16 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                                 ApiError.toActionResult appState (gettext "Unable to get project importers." appState.locale) error
                 }
 
-        UserSuggestionDropdownMsg uuid editorNote userSuggestionDropdownMsg ->
+        UserSuggestionDropdownMsg uuid threadUuid editorNote userSuggestionDropdownMsg ->
             let
                 ( userSuggestionModalModel, userSuggestionCmd ) =
                     Dict.get uuid model.userSuggestionDropdownModels
-                        |> Maybe.withDefault (UserSuggestionDropdown.init model.uuid editorNote)
+                        |> Maybe.withDefault (UserSuggestionDropdown.init model.uuid threadUuid editorNote)
                         |> UserSuggestionDropdown.update appState userSuggestionDropdownMsg
             in
             withSeed
                 ( { model | userSuggestionDropdownModels = Dict.insert uuid userSuggestionModalModel model.userSuggestionDropdownModels }
-                , Cmd.map (UserSuggestionDropdownMsg uuid editorNote) userSuggestionCmd
+                , Cmd.map (UserSuggestionDropdownMsg uuid threadUuid editorNote) userSuggestionCmd
                 )
 
         _ ->
@@ -1205,8 +1242,8 @@ localStorageCollapsedItemsCmd uuid items =
         |> Ports.localStorageSet
 
 
-handleScrollToPath : Model -> String -> ( Model, Cmd Msg )
-handleScrollToPath model path =
+handleScrollToPath : Model -> Bool -> String -> ( Model, Cmd Msg )
+handleScrollToPath model immediate path =
     let
         pathParts =
             String.split "." path
@@ -1234,13 +1271,20 @@ handleScrollToPath model path =
 
         selector =
             "[data-path=\"" ++ path ++ "\"]"
+
+        scrollIntoViewCmd =
+            if immediate then
+                Ports.scrollIntoViewInstant selector
+
+            else
+                Ports.scrollIntoView selector
     in
     ( { model
         | activePage = PageChapter chapterUuid
         , collapsedItems = newCollapsedItems
       }
     , Cmd.batch
-        [ Ports.scrollIntoView selector
+        [ scrollIntoViewCmd
         , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
         ]
     )
@@ -1425,7 +1469,7 @@ subscriptions model =
 
         userSuggestionDropdownSubs =
             Dict.toList model.userSuggestionDropdownModels
-                |> List.map (\( uuid, userSuggestionModalModel ) -> Sub.map (UserSuggestionDropdownMsg uuid userSuggestionModalModel.editorNote) (UserSuggestionDropdown.subscriptions userSuggestionModalModel))
+                |> List.map (\( uuid, userSuggestionModalModel ) -> Sub.map (UserSuggestionDropdownMsg uuid userSuggestionModalModel.threadUuid userSuggestionModalModel.editorNote) (UserSuggestionDropdown.subscriptions userSuggestionModalModel))
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
@@ -2066,7 +2110,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
             in
             li []
                 [ span [ class "fa-li" ] [ fa "far fa-comment" ]
-                , a [ onClick (OpenComments comment.path) ]
+                , a [ onClick (OpenComments False comment.path) ]
                     [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
                     , span [ class "text-nowrap" ]
                         [ Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.unresolvedComments) ]
@@ -2318,6 +2362,7 @@ viewCommentThread appState model path commentThread =
             [ ( "CommentThread--Resolved", commentThread.resolved )
             , ( "CommentThread--Private", commentThread.private )
             ]
+        , attribute "data-comment-thread-uuid" (Uuid.toString commentThread.uuid)
         ]
         (assignedHeader
             :: commentViews
@@ -2399,13 +2444,13 @@ viewCommentHeader appState model path commentThread index comment =
             if index == 0 && Feature.projectCommentThreadAssign appState model.questionnaire commentThread then
                 let
                     viewConfig =
-                        { wrapMsg = UserSuggestionDropdownMsg (Uuid.toString comment.uuid) commentThread.private
+                        { wrapMsg = UserSuggestionDropdownMsg (Uuid.toString comment.uuid) commentThread.uuid commentThread.private
                         , selectMsg = CommentThreadAssign path commentThread << Just
                         }
 
                     userSuggestionDropdownModel =
                         Dict.get (Uuid.toString comment.uuid) model.userSuggestionDropdownModels
-                            |> Maybe.withDefault (UserSuggestionDropdown.init model.uuid commentThread.private)
+                            |> Maybe.withDefault (UserSuggestionDropdown.init model.uuid commentThread.uuid commentThread.private)
                 in
                 UserSuggestionDropdown.view viewConfig appState userSuggestionDropdownModel
 

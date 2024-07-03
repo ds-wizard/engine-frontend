@@ -164,7 +164,7 @@ isFullscreen appState =
                 Routes.KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute _ (Wizard.KMEditor.Editor.KMEditorRoute.Edit _)) ->
                     True
 
-                Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute _ (Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire _)) ->
+                Routes.ProjectsRoute (Wizard.Projects.Routes.DetailRoute _ (Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire _ _)) ->
                     True
 
                 _ ->

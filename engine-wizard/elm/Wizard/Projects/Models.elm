@@ -27,7 +27,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Projects.Create.Models.initialModel appState Nothing Nothing
     , createMigrationModel = Wizard.Projects.CreateMigration.Models.initialModel Uuid.nil
-    , detailModel = Detail.init appState Uuid.nil Nothing
+    , detailModel = Detail.init appState Uuid.nil Nothing Nothing
     , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
     , migrationModel = Wizard.Projects.Migration.Models.initialModel Uuid.nil
     , importModel = Wizard.Projects.Import.Models.initialModel Uuid.nil ""
@@ -49,15 +49,15 @@ initLocalModel appState route model =
 
             else
                 let
-                    mbSelectedPath =
+                    ( mbSelectedPath, mbCommentThreadUuid ) =
                         case subroute of
-                            ProjectDetailRoute.Questionnaire path ->
-                                path
+                            ProjectDetailRoute.Questionnaire path commentThreadUuid ->
+                                ( path, commentThreadUuid )
 
                             _ ->
-                                Nothing
+                                ( Nothing, Nothing )
                 in
-                { model | detailModel = Detail.initPageModel appState subroute <| Detail.init appState uuid mbSelectedPath }
+                { model | detailModel = Detail.initPageModel appState subroute <| Detail.init appState uuid mbSelectedPath mbCommentThreadUuid }
 
         IndexRoute paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
             { model | indexModel = Wizard.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp (Just model.indexModel) }

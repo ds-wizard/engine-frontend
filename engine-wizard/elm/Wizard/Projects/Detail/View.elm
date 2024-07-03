@@ -233,7 +233,7 @@ viewProjectNavigationNav appState route model questionnaire =
 
         isQuestionnaireRoute =
             case route of
-                ProjectDetailRoute.Questionnaire _ ->
+                ProjectDetailRoute.Questionnaire _ _ ->
                     True
 
                 _ ->
@@ -251,7 +251,7 @@ viewProjectNavigationNav appState route model questionnaire =
                     False
 
         questionnaireLink =
-            { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing)
+            { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing Nothing)
             , label = gettext "Questionnaire" appState.locale
             , icon = faSet "project.questionnaire" appState
             , isActive = isQuestionnaireRoute
@@ -323,7 +323,7 @@ viewProjectContent appState route model questionnaire =
             Page.error appState (gettext "You are not allowed to view this page." appState.locale)
     in
     case route of
-        ProjectDetailRoute.Questionnaire _ ->
+        ProjectDetailRoute.Questionnaire _ _ ->
             let
                 viewContent qm =
                     let

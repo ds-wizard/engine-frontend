@@ -67,7 +67,7 @@ fetchSubrouteData appState model =
     case appState.route of
         ProjectsRoute (DetailRoute uuid route) ->
             case route of
-                ProjectDetailRoute.Questionnaire _ ->
+                ProjectDetailRoute.Questionnaire _ _ ->
                     Cmd.batch
                         [ dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
                         , QuestionnairesApi.getQuestionnaireQuestionnaire uuid appState GetQuestionnaireDetailCompleted
@@ -152,7 +152,7 @@ update wrapMsg msg appState model =
         setError result error =
             let
                 questionnaireRoute =
-                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+                    Routing.toUrl appState (Routes.projectsDetail model.uuid)
 
                 loginRoute =
                     Routes.publicLogin (Just questionnaireRoute)
@@ -556,7 +556,7 @@ update wrapMsg msg appState model =
                 Ok data ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Questionnaire.init appState data.data model.mbSelectedPath
+                            Questionnaire.init appState data.data model.mbSelectedPath model.mbCommentThreadUuid
 
                         newModel =
                             { model
@@ -677,7 +677,7 @@ update wrapMsg msg appState model =
         ShareDropdownCopyLink ->
             let
                 link =
-                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (DetailRoute model.uuid (ProjectDetailRoute.Questionnaire Nothing))))
+                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.projectsDetail model.uuid))
             in
             withSeed ( model, Ports.copyToClipboard link )
 

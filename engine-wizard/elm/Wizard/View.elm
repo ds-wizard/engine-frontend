@@ -4,6 +4,7 @@ import Browser exposing (Document)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Shared.Undraw as Undraw
+import Wizard.Comments.View
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout
 import Wizard.Common.View.Page as Page
@@ -43,6 +44,11 @@ view model =
             Routes.TenantsRoute route ->
                 Wizard.Tenants.View.view route model.appState model.tenantsModel
                     |> Html.map TenantsMsg
+                    |> Layout.app model
+
+            Routes.CommentsRoute _ _ ->
+                Wizard.Comments.View.view model.appState model.commentsModel
+                    |> Html.map CommentsMsg
                     |> Layout.app model
 
             Routes.DashboardRoute ->

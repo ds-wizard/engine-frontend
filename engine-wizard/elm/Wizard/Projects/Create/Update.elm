@@ -216,7 +216,7 @@ update wrapMsg msg appState model =
             case result of
                 Ok questionnaire ->
                     ( model
-                    , cmdNavigate appState <| Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing
+                    , cmdNavigate appState <| Routes.projectsDetail questionnaire.uuid
                     )
 
                 Err error ->

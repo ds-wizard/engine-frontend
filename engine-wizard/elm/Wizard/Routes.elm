@@ -1,6 +1,9 @@
 module Wizard.Routes exposing
     ( Route(..)
     , appHome
+    , commentsIndex
+    , commentsIndexWithFilters
+    , commentsRouteResolvedFilterId
     , dashboard
     , devOperations
     , documentTemplateEditorCreate
@@ -72,6 +75,7 @@ module Wizard.Routes exposing
     , projectsCreateFromKnowledgeModel
     , projectsCreateFromProjectTemplate
     , projectsCreateMigration
+    , projectsDetail
     , projectsDetailDocuments
     , projectsDetailDocumentsNew
     , projectsDetailDocumentsWithFilters
@@ -138,6 +142,7 @@ import Wizard.Users.Routes
 type Route
     = DashboardRoute
     | DevRoute Wizard.Dev.Routes.Route
+    | CommentsRoute PaginationQueryString (Maybe String)
     | DocumentsRoute Wizard.Documents.Routes.Route
     | DocumentTemplateEditorsRoute Wizard.DocumentTemplateEditors.Routes.Route
     | DocumentTemplatesRoute Wizard.DocumentTemplates.Routes.Route
@@ -154,6 +159,11 @@ type Route
     | UsersRoute Wizard.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute
+
+
+commentsRouteResolvedFilterId : String
+commentsRouteResolvedFilterId =
+    "resolved"
 
 
 publicHome : Route
@@ -203,6 +213,20 @@ listingRouteMatchers =
     , isProjectsIndex
     , isUsersIndex
     ]
+
+
+
+-- Comments
+
+
+commentsIndex : Route
+commentsIndex =
+    CommentsRoute PaginationQueryString.empty (Just "false")
+
+
+commentsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+commentsIndexWithFilters filters pagination =
+    CommentsRoute pagination (PaginationQueryFilters.getValue commentsRouteResolvedFilterId filters)
 
 
 
@@ -585,9 +609,14 @@ projectsCreateMigration =
     ProjectsRoute << Wizard.Projects.Routes.CreateMigrationRoute
 
 
-projectsDetailQuestionnaire : Uuid -> Maybe String -> Route
-projectsDetailQuestionnaire uuid mbQuestionUuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire mbQuestionUuid
+projectsDetail : Uuid -> Route
+projectsDetail uuid =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire Nothing Nothing
+
+
+projectsDetailQuestionnaire : Uuid -> Maybe String -> Maybe Uuid -> Route
+projectsDetailQuestionnaire uuid mbQuestionPath mbCommentThreadUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid
 
 
 projectsDetailDocuments : Uuid -> Route

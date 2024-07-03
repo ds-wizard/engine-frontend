@@ -22,6 +22,7 @@ port module Wizard.Ports exposing
     , refresh
     , scrollIntoView
     , scrollIntoViewCenter
+    , scrollIntoViewInstant
     , scrollToTop
     , setScrollTop
     , setUnloadMessage
@@ -90,6 +91,9 @@ port focus : String -> Cmd msg
 
 
 port scrollIntoView : String -> Cmd msg
+
+
+port scrollIntoViewInstant : String -> Cmd msg
 
 
 port scrollIntoViewCenter : String -> Cmd msg

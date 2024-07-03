@@ -79,12 +79,6 @@
                 }
             }
 
-            .dropdown-item-empty {
-                padding: 0.5rem 1.5rem;
-                font-style: italic;
-                color: $text-muted;
-            }
-
             .dropdown-item-operator {
                 display: flex;
                 margin: -0.5rem 0;
@@ -256,6 +250,10 @@
                         }
 
                         vertical-align: text-top;
+                    }
+
+                    .ItemIcon {
+                        margin-right: .25rem;
                     }
 
                     .progress {

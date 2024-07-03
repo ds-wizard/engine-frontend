@@ -526,7 +526,7 @@ listingTitle appState questionnaire =
                 Routes.projectsMigration
 
             else
-                flip Routes.projectsDetailQuestionnaire Nothing
+                Routes.projectsDetail
     in
     span []
         [ linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
@@ -592,7 +592,7 @@ listingActions appState questionnaire =
                 { extraClass = Nothing
                 , icon = faSet "_global.open" appState
                 , label = gettext "Open project" appState.locale
-                , msg = ListingActionLink (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
+                , msg = ListingActionLink (Routes.projectsDetail questionnaire.uuid)
                 , dataCy = "open"
                 }
 

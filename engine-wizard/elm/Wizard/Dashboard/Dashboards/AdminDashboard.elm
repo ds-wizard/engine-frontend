@@ -12,6 +12,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
+import Shared.Api.CommentThreads as CommentThreadsApi
 import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Packages as PackagesApi
 import Shared.Api.Usage as UsageApi
@@ -20,13 +21,17 @@ import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig
 import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Pagination exposing (Pagination)
+import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
+import Shared.Data.PaginationQueryString as PaginationQueryString
+import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Shared.Data.Usage exposing (Usage)
 import Shared.Error.ApiError exposing (ApiError)
-import Shared.Setters exposing (setPackages, setTemplates, setUsage)
+import Shared.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.Api exposing (applyResult, applyResultTransform)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.AddOpenIDWidget as AddOpenIDWidget
+import Wizard.Dashboard.Widgets.AssignedComments as AssignedComments
 import Wizard.Dashboard.Widgets.ConfigureLookAndFeelWidget as ConfigureLookAndFeel
 import Wizard.Dashboard.Widgets.ConfigureOrganizationWidget as ConfigureOrganizationWidget
 import Wizard.Dashboard.Widgets.ConnectRegistryWidget as ConnectRegistryWidget
@@ -40,6 +45,7 @@ type alias Model =
     { usage : ActionResult Usage
     , packages : ActionResult (List Package)
     , templates : ActionResult (List DocumentTemplate)
+    , commentThreads : ActionResult (List QuestionnaireCommentThreadAssigned)
     }
 
 
@@ -48,6 +54,7 @@ initialModel =
     { usage = ActionResult.Loading
     , packages = ActionResult.Loading
     , templates = ActionResult.Loading
+    , commentThreads = ActionResult.Loading
     }
 
 
@@ -55,6 +62,7 @@ type Msg
     = GetUsageComplete (Result ApiError Usage)
     | GetPackagesComplete (Result ApiError (Pagination Package))
     | GetTemplatesComplete (Result ApiError (Pagination DocumentTemplate))
+    | GetCommentThreadsComplete (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
 
 
 fetchData : AppState -> Cmd Msg
@@ -69,7 +77,27 @@ fetchData appState =
         usageCmd =
             UsageApi.getUsage appState GetUsageComplete
     in
-    Cmd.batch [ packagesCmd, templatesCmd, usageCmd ]
+    Cmd.batch [ packagesCmd, templatesCmd, usageCmd, fetchCommentThreads appState ]
+
+
+fetchCommentThreads : AppState -> Cmd Msg
+fetchCommentThreads appState =
+    let
+        pagination =
+            PaginationQueryString.empty
+                |> PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC
+                |> PaginationQueryString.withSize (Just 3)
+
+        filters =
+            PaginationQueryFilters.create
+                [ ( "resolved", Just "false" ) ]
+                []
+    in
+    CommentThreadsApi.getCommentThreads
+        filters
+        pagination
+        appState
+        GetCommentThreadsComplete
 
 
 update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
@@ -104,6 +132,16 @@ update logoutMsg msg appState model =
                 , transform = .items
                 }
 
+        GetCommentThreadsComplete result ->
+            applyResultTransform appState
+                { setResult = setCommentThreads
+                , defaultError = gettext "Unable to get assigned comments." appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = logoutMsg
+                , transform = .items
+                }
+
 
 view : AppState -> Model -> Html msg
 view appState model =
@@ -131,6 +169,7 @@ view appState model =
     div []
         [ div [ class "row gx-3" ]
             (WelcomeWidget.view appState
+                :: AssignedComments.view appState model.commentThreads
                 :: OutdatedPackagesWidget.view appState model.packages
                 :: OutdatedTemplatesWidget.view appState model.templates
                 :: ctaWidgets
