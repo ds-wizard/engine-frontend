@@ -1,4 +1,7 @@
-FROM nginx:alpine
+FROM nginx:1.27.0-alpine
+
+RUN apk --purge del curl
+RUN apk upgrade --no-cache
 
 COPY engine-registry/docker/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY engine-registry/docker/nginx/start.sh /start.sh
