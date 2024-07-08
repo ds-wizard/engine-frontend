@@ -108,14 +108,21 @@ viewAboutModalContent appState serverBuildInfo =
                     [ text swaggerUrl ]
               )
             ]
+
+        viewComponentVersion component =
+            viewBuildInfo appState component.name component []
+
+        componentVersions =
+            List.map viewComponentVersion (List.sortBy .name serverBuildInfo.components)
     in
     div []
-        [ viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client []
-        , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
-        ]
+        (viewBuildInfo appState (gettext "Client" appState.locale) BuildInfo.client []
+            :: viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
+            :: componentVersions
+        )
 
 
-viewBuildInfo : AppState -> String -> BuildInfo -> List ( String, Html msg ) -> Html msg
+viewBuildInfo : AppState -> String -> { a | version : String, builtAt : String } -> List ( String, Html msg ) -> Html msg
 viewBuildInfo appState name buildInfo extra =
     let
         viewExtraRow ( title, value ) =
