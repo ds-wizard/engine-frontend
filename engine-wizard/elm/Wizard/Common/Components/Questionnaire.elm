@@ -1672,7 +1672,7 @@ viewQuestionnaireToolbar appState cfg model =
                     ( RightPanelNone, True )
 
                 RightPanelComments _ ->
-                    ( RightPanelNone, True )
+                    ( RightPanelCommentsOverview, True )
 
                 _ ->
                     ( RightPanelCommentsOverview, False )
@@ -2097,27 +2097,31 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                 ]
 
         viewQuestionComments comment =
-            let
-                resolvedCommentCount =
-                    if model.commentsViewResolved && comment.resolvedComments > 0 then
-                        Badge.success [ class "rounded-pill ms-1" ]
-                            [ fa "fas fa-check"
-                            , text (String.fromInt comment.resolvedComments)
-                            ]
+            if not model.commentsViewResolved && comment.unresolvedComments == 0 then
+                emptyNode
 
-                    else
-                        emptyNode
-            in
-            li []
-                [ span [ class "fa-li" ] [ fa "far fa-comment" ]
-                , a [ onClick (OpenComments False comment.path) ]
-                    [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
-                    , span [ class "text-nowrap" ]
-                        [ Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.unresolvedComments) ]
-                        , resolvedCommentCount
+            else
+                let
+                    resolvedCommentCount =
+                        if model.commentsViewResolved && comment.resolvedComments > 0 then
+                            Badge.success [ class "rounded-pill ms-1" ]
+                                [ fa "fas fa-check"
+                                , text (String.fromInt comment.resolvedComments)
+                                ]
+
+                        else
+                            emptyNode
+                in
+                li []
+                    [ span [ class "fa-li" ] [ fa "far fa-comment" ]
+                    , a [ onClick (OpenComments False comment.path) ]
+                        [ span [ class "question" ] [ text <| Question.getTitle comment.question ]
+                        , span [ class "text-nowrap" ]
+                            [ Badge.light [ class "rounded-pill" ] [ text (String.fromInt comment.unresolvedComments) ]
+                            , resolvedCommentCount
+                            ]
                         ]
                     ]
-                ]
 
         groupComments comments =
             let
@@ -2162,19 +2166,26 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
 
             else
                 List.map viewChapterComments (groupComments questionnaireComments)
+
+        resolvedCommentsCount =
+            List.sum <| List.map .resolvedComments questionnaireComments
     in
     div [ class "comments-overview Comments" ]
-        (viewCommentsResolvedSelect appState model :: content)
+        (viewCommentsResolvedSelect appState model resolvedCommentsCount :: content)
 
 
-viewCommentsResolvedSelect : AppState -> Model -> Html Msg
-viewCommentsResolvedSelect appState model =
-    div [ class "form-check" ]
-        [ label [ class "form-check-label form-check-toggle" ]
-            [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
-            , span [] [ text (gettext "View resolved comments" appState.locale) ]
+viewCommentsResolvedSelect : AppState -> Model -> Int -> Html Msg
+viewCommentsResolvedSelect appState model resolvedCommentsCount =
+    if resolvedCommentsCount > 0 then
+        div [ class "form-check" ]
+            [ label [ class "form-check-label form-check-toggle" ]
+                [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
+                , span [] [ text (String.format (gettext "View resolved comments (%s)" appState.locale) [ String.fromInt resolvedCommentsCount ]) ]
+                ]
             ]
-        ]
+
+    else
+        emptyNode
 
 
 
@@ -2234,9 +2245,14 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 , mbThreadUuid = Nothing
                 , private = model.commentsViewPrivate
                 }
+
+        resolvedCommentsCount =
+            List.filter .resolved commentThreads
+                |> List.map (List.length << .comments)
+                |> List.sum
     in
     div [ class "Comments" ]
-        [ viewCommentsResolvedSelect appState model
+        [ viewCommentsResolvedSelect appState model resolvedCommentsCount
         , navigationView
         , resolvedThreadsView
         , commentThreadsView
@@ -2248,17 +2264,22 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
 viewCommentsNavigation : AppState -> Model -> List CommentThread -> Html Msg
 viewCommentsNavigation appState model commentThreads =
     let
-        threadCount predicate =
-            List.filter predicate commentThreads
-                |> List.filter (not << .resolved)
-                |> List.map (.comments >> List.length)
+        threadCount privatePredicate resolvedPredicate =
+            List.filter (\c -> privatePredicate c && resolvedPredicate c) commentThreads
+                |> List.map (List.length << .comments)
                 |> List.sum
 
         publicThreadsCount =
-            threadCount (not << .private)
+            threadCount (not << .private) (not << .resolved)
 
         privateThreadsCount =
-            threadCount .private
+            threadCount .private (not << .resolved)
+
+        resolvedPublicThreadsCount =
+            threadCount (not << .private) .resolved
+
+        resolvedPrivateThreadsCount =
+            threadCount .private .resolved
 
         toBadge count =
             if count == 0 then
@@ -2266,6 +2287,16 @@ viewCommentsNavigation appState model commentThreads =
 
             else
                 Badge.light [ class "rounded-pill" ] [ text (String.fromInt count) ]
+
+        toResolvedBadge count =
+            if model.commentsViewResolved && count > 0 then
+                Badge.success [ class "rounded-pill" ]
+                    [ fa "fas fa-check"
+                    , text (String.fromInt count)
+                    ]
+
+            else
+                emptyNode
     in
     ul [ class "nav nav-underline-tabs" ]
         [ li [ class "nav-item" ]
@@ -2278,6 +2309,7 @@ viewCommentsNavigation appState model commentThreads =
                 [ span [ attribute "data-content" (gettext "Comments" appState.locale) ]
                     [ text (gettext "Comments" appState.locale) ]
                 , toBadge publicThreadsCount
+                , toResolvedBadge resolvedPublicThreadsCount
                 ]
             ]
         , li [ class "nav-item" ]
@@ -2290,6 +2322,7 @@ viewCommentsNavigation appState model commentThreads =
                 [ span [ attribute "data-content" (gettext "Editor notes" appState.locale) ]
                     [ text (gettext "Editor notes" appState.locale) ]
                 , toBadge privateThreadsCount
+                , toResolvedBadge resolvedPrivateThreadsCount
                 ]
             ]
         ]
