@@ -6,7 +6,6 @@ module Wizard.Common.Components.Questionnaire exposing
     , Model
     , Msg(..)
     , QuestionnaireRenderer
-    , RightPanel
     , TypeHints
     , addComment
     , addEvent
@@ -105,6 +104,7 @@ import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
+import Wizard.Common.Components.Questionnaire.RightPanel as RightPanel exposing (RightPanel)
 import Wizard.Common.Components.Questionnaire.UserSuggestionDropdown as UserSuggestionDropdown
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.ElementScrollTop as ElementScrollTop
@@ -181,15 +181,6 @@ type ActivePage
     | PageChapter String
 
 
-type RightPanel
-    = RightPanelNone
-    | RightPanelTODOs
-    | RightPanelHistory
-    | RightPanelCommentsOverview
-    | RightPanelComments String
-    | RightPanelWarnings
-
-
 initSimple : AppState -> QuestionnaireQuestionnaire -> ( Model, Cmd Msg )
 initSimple appState questionnaire =
     init appState questionnaire Nothing Nothing
@@ -213,7 +204,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             { uuid = questionnaire.uuid
             , mbCommentThreadUuid = mbCommentThreadUuid
             , activePage = activePage
-            , rightPanel = RightPanelNone
+            , rightPanel = RightPanel.None
             , questionnaire = questionnaire
             , questionnaireEvents = ActionResult.Unset
             , questionnaireVersions = ActionResult.Unset
@@ -258,12 +249,21 @@ init appState questionnaire mbPath mbCommentThreadUuid =
 
                 _ ->
                     ( defaultModel, Cmd.none )
+
+        rightPanelCmd =
+            case mbCommentThreadUuid of
+                Just _ ->
+                    Cmd.none
+
+                _ ->
+                    Ports.localStorageGet (localStorageRightPanelKey questionnaire.uuid)
     in
     ( model
     , Cmd.batch
         [ scrollCmd
         , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
         , Ports.localStorageGet localStorageViewSettingsKey
+        , rightPanelCmd
         ]
     )
 
@@ -285,7 +285,7 @@ updateWithQuestionnaireData : SetQuestionnaireData -> Model -> Model
 updateWithQuestionnaireData data model =
     { model
         | questionnaire = QuestionnaireQuestionnaire.updateWithQuestionnaireData data model.questionnaire
-        , rightPanel = RightPanelNone
+        , rightPanel = RightPanel.None
     }
 
 
@@ -531,6 +531,16 @@ localStorageCollapsedItemsEncode =
     LocalStorageData.encode (E.list E.string << Set.toList)
 
 
+localStorageRightPanelKey : Uuid -> String
+localStorageRightPanelKey uuid =
+    "project-" ++ Uuid.toString uuid ++ "-right-panel"
+
+
+localStorageRightPanelDecoder : Decoder (LocalStorageData RightPanel)
+localStorageRightPanelDecoder =
+    LocalStorageData.decoder RightPanel.decoder
+
+
 contentElementSelector : String
 contentElementSelector =
     ".questionnaire__content"
@@ -654,21 +664,30 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         SetRightPanel rightPanel ->
             let
-                cmd =
+                panelCmd =
                     case rightPanel of
-                        RightPanelHistory ->
+                        RightPanel.VersionHistory ->
                             Cmd.batch
                                 [ QuestionnairesApi.getQuestionnaireEvents model.uuid appState GetQuestionnaireEventsCompleted
                                 , QuestionnairesApi.getQuestionnaireVersions model.uuid appState GetQuestionnaireVersionsCompleted
                                 ]
 
-                        RightPanelComments path ->
+                        RightPanel.Comments path ->
                             loadComments path
 
                         _ ->
                             Cmd.none
+
+                newModel =
+                    { model | rightPanel = rightPanel, questionnaireEvents = ActionResult.Loading }
             in
-            withSeed ( { model | rightPanel = rightPanel, questionnaireEvents = ActionResult.Loading }, cmd )
+            withSeed
+                ( newModel
+                , Cmd.batch
+                    [ panelCmd
+                    , localStorageRightPanelCmd newModel
+                    ]
+                )
 
         SetFullscreen fullscreen ->
             case mbSetFullscreenMsg of
@@ -963,9 +982,16 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         OpenComments immediate path ->
             let
                 ( newModel, cmd ) =
-                    handleScrollToPath { model | rightPanel = RightPanelComments path } immediate path
+                    handleScrollToPath { model | rightPanel = RightPanel.Comments path } immediate path
             in
-            withSeed ( newModel, Cmd.batch [ cmd, loadComments path ] )
+            withSeed
+                ( newModel
+                , Cmd.batch
+                    [ cmd
+                    , loadComments path
+                    , localStorageRightPanelCmd newModel
+                    ]
+                )
 
         CommentInput path mbThreadUuid value ->
             let
@@ -1133,6 +1159,14 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             Err _ ->
                                 wrap model
 
+                    else if key == localStorageRightPanelKey model.uuid then
+                        case decodeValue localStorageRightPanelDecoder value of
+                            Ok data ->
+                                withSeed ( model, dispatch (SetRightPanel data.value) )
+
+                            Err _ ->
+                                wrap model
+
                     else
                         wrap model
 
@@ -1240,6 +1274,23 @@ localStorageCollapsedItemsCmd uuid items =
     data
         |> localStorageCollapsedItemsEncode
         |> Ports.localStorageSet
+
+
+localStorageRightPanelCmd : Model -> Cmd msg
+localStorageRightPanelCmd model =
+    if model.rightPanel == RightPanel.None then
+        Ports.localStorageRemove (localStorageRightPanelKey model.uuid)
+
+    else
+        let
+            data =
+                { key = localStorageRightPanelKey model.uuid
+                , value = model.rightPanel
+                }
+        in
+        data
+            |> LocalStorageData.encode RightPanel.encode
+            |> Ports.localStorageSet
 
 
 handleScrollToPath : Model -> Bool -> String -> ( Model, Cmd Msg )
@@ -1660,38 +1711,38 @@ viewQuestionnaireToolbar appState cfg model =
 
         ( todosPanel, todosOpen ) =
             case model.rightPanel of
-                RightPanelTODOs ->
-                    ( RightPanelNone, True )
+                RightPanel.TODOs ->
+                    ( RightPanel.None, True )
 
                 _ ->
-                    ( RightPanelTODOs, False )
+                    ( RightPanel.TODOs, False )
 
         ( commentsOverviewPanel, commentsOverviewOpen ) =
             case model.rightPanel of
-                RightPanelCommentsOverview ->
-                    ( RightPanelNone, True )
+                RightPanel.CommentsOverview ->
+                    ( RightPanel.None, True )
 
-                RightPanelComments _ ->
-                    ( RightPanelCommentsOverview, True )
+                RightPanel.Comments _ ->
+                    ( RightPanel.CommentsOverview, True )
 
                 _ ->
-                    ( RightPanelCommentsOverview, False )
+                    ( RightPanel.CommentsOverview, False )
 
         ( versionsPanel, versionsOpen ) =
             case model.rightPanel of
-                RightPanelHistory ->
-                    ( RightPanelNone, True )
+                RightPanel.VersionHistory ->
+                    ( RightPanel.None, True )
 
                 _ ->
-                    ( RightPanelHistory, False )
+                    ( RightPanel.VersionHistory, False )
 
         ( warningsPanel, warningsOpen ) =
             case model.rightPanel of
-                RightPanelWarnings ->
-                    ( RightPanelNone, True )
+                RightPanel.Warnings ->
+                    ( RightPanel.None, True )
 
                 _ ->
-                    ( RightPanelWarnings, False )
+                    ( RightPanel.Warnings, False )
 
         todosLength =
             QuestionnaireQuestionnaire.todosLength model.questionnaire
@@ -1980,22 +2031,22 @@ viewQuestionnaireRightPanel appState cfg model =
                 content
     in
     case model.rightPanel of
-        RightPanelNone ->
+        RightPanel.None ->
             emptyNode
 
-        RightPanelTODOs ->
+        RightPanel.TODOs ->
             wrapPanel <|
                 [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelTodos appState model ]
 
-        RightPanelCommentsOverview ->
+        RightPanel.CommentsOverview ->
             wrapPanel <|
                 [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelCommentsOverview appState model ]
 
-        RightPanelComments path ->
+        RightPanel.Comments path ->
             wrapPanel <|
                 [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelComments appState model path ]
 
-        RightPanelHistory ->
+        RightPanel.VersionHistory ->
             let
                 historyCfg =
                     { questionnaire = model.questionnaire
@@ -2017,7 +2068,7 @@ viewQuestionnaireRightPanel appState cfg model =
                 , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
                 ]
 
-        RightPanelWarnings ->
+        RightPanel.Warnings ->
             if QuestionnaireQuestionnaire.warningsLength model.questionnaire > 0 then
                 wrapPanel <|
                     [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings model ]
@@ -3624,7 +3675,7 @@ viewCommentAction appState cfg model path =
 
             isOpen =
                 case model.rightPanel of
-                    RightPanelComments rightPanelPath ->
+                    RightPanel.Comments rightPanelPath ->
                         rightPanelPath == pathString
 
                     _ ->
@@ -3632,10 +3683,10 @@ viewCommentAction appState cfg model path =
 
             msg =
                 if isOpen then
-                    SetRightPanel RightPanelNone
+                    SetRightPanel RightPanel.None
 
                 else
-                    SetRightPanel (RightPanelComments pathString)
+                    SetRightPanel (RightPanel.Comments pathString)
         in
         if commentCount > 0 then
             a

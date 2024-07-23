@@ -2,6 +2,7 @@ module.exports = function (app) {
     app.ports.localStorageGet?.subscribe(localStorageGet)
     app.ports.localStorageGetAndRemove?.subscribe(localStorageGetAndRemove)
     app.ports.localStorageSet?.subscribe(localStorageSet)
+    app.ports.localStorageRemove?.subscribe(localStorageRemove)
 
     function localStorageGet(key) {
         var value = localStorage.getItem(key)
@@ -28,5 +29,9 @@ module.exports = function (app) {
 
     function localStorageSet(data) {
         localStorage.setItem(data.key, JSON.stringify(data.value))
+    }
+
+    function localStorageRemove(key) {
+        localStorage.removeItem(key)
     }
 }

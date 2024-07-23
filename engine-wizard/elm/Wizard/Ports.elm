@@ -17,6 +17,7 @@ port module Wizard.Ports exposing
     , localStorageData
     , localStorageGet
     , localStorageGetAndRemove
+    , localStorageRemove
     , localStorageSet
     , localeFileSelected
     , refresh
@@ -164,3 +165,6 @@ port localStorageSet : E.Value -> Cmd msg
 
 
 port localStorageData : (E.Value -> msg) -> Sub msg
+
+
+port localStorageRemove : String -> Cmd msg
