@@ -162,6 +162,7 @@ type alias Model =
 
 type alias TypeHints =
     { path : List String
+    , searchValue : String
     , hints : ActionResult (List TypeHint)
     }
 
@@ -432,7 +433,7 @@ type Msg
     | HideTypeHints
     | TypeHintInput (List String) Bool Reply
     | TypeHintDebounceMsg Debounce.Msg
-    | TypeHintsLoaded (List String) (Result ApiError (List TypeHint))
+    | TypeHintsLoaded (List String) String (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
     | PhaseModalUpdate Bool (Maybe Uuid)
     | SetReply String Reply
@@ -591,8 +592,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         TypeHintDebounceMsg debounceMsg ->
             withSeed <| handleTypeHintDebounceMsg appState ctx model debounceMsg
 
-        TypeHintsLoaded path result ->
-            wrap <| handleTypeHintsLoaded appState model path result
+        TypeHintsLoaded path value result ->
+            wrap <| handleTypeHintsLoaded appState model path value result
 
         FeedbackModalMsg feedbackModalMsg ->
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
@@ -1043,6 +1044,7 @@ handleShowTypeHints appState ctx model path emptySearch questionUuid value =
             typeHints =
                 Just
                     { path = path
+                    , searchValue = value
                     , hints = Loading
                     }
 
@@ -1066,15 +1068,11 @@ handleTypeHintsInput model path emptySearch reply =
                             Maybe.withDefault "" (List.last path)
 
                         updatedTypeHints =
-                            case model.typeHints of
-                                Just typehints ->
-                                    Just typehints
-
-                                Nothing ->
-                                    Just
-                                        { path = path
-                                        , hints = Loading
-                                        }
+                            Just
+                                { path = path
+                                , searchValue = ReplyValue.getStringReply reply.value
+                                , hints = Loading
+                                }
                     in
                     ( Debounce.push
                         debounceConfig
@@ -1108,11 +1106,11 @@ handleTypeHintDebounceMsg appState ctx model debounceMsg =
     ( { model | typeHintsDebounce = typeHintsDebounce }, cmd )
 
 
-handleTypeHintsLoaded : AppState -> Model -> List String -> Result ApiError (List TypeHint) -> Model
-handleTypeHintsLoaded appState model path result =
+handleTypeHintsLoaded : AppState -> Model -> List String -> String -> Result ApiError (List TypeHint) -> Model
+handleTypeHintsLoaded appState model path value result =
     case model.typeHints of
         Just typeHints ->
-            if typeHints.path == path then
+            if typeHints.path == path && typeHints.searchValue == value then
                 case result of
                     Ok hints ->
                         { model | typeHints = Just { typeHints | hints = Success hints } }
@@ -1169,7 +1167,7 @@ loadTypeHints appState ctx model path questionUuid value =
         questionUuid
         value
         appState
-        (TypeHintsLoaded path)
+        (TypeHintsLoaded path value)
 
 
 
