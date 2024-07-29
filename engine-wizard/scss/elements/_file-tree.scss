@@ -2,11 +2,11 @@
 @import '../variables';
 
 .file-tree {
-    @include indent(0, 20);
-
     width: 100%;
     position: relative;
     overflow: auto;
+
+    @include indent(0, 20);
 
     ul {
         margin: 0;

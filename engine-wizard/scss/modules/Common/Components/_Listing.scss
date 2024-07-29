@@ -244,12 +244,11 @@
 
                     img {
                         margin-right: .25rem;
+                        vertical-align: text-top;
 
                         &.user-icon-only:last-child {
                             margin-right: 0;
                         }
-
-                        vertical-align: text-top;
                     }
 
                     .ItemIcon {

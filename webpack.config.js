@@ -50,7 +50,7 @@ module.exports = {
                         options: {
                             sassOptions: {
                                 quietDeps: true,
-                                outputStyle: 'expanded'
+                                style: 'expanded'
                             }
                         }
                     }
@@ -116,6 +116,10 @@ module.exports = {
             }),
             '...'
         ]
+    },
+
+    performance: {
+        hints: false
     },
 
     plugins: [
