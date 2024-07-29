@@ -88,13 +88,15 @@ formView appState form =
                         ]
                     ]
                 ]
-    in
-    div [ class "Dashboard" ]
-        (FormGroup.htmlRadioGroup appState opts form "dashboardType" (gettext "Dashboard Style" appState.locale)
-            :: loginInfos
-            ++ [ hr [] []
-               , h3 [] [ text (gettext "Announcements" appState.locale) ]
-               , div [ class "row mt-5" ]
+
+        announcements =
+            if Admin.isEnabled appState.config.admin then
+                []
+
+            else
+                [ hr [] []
+                , h3 [] [ text (gettext "Announcements" appState.locale) ]
+                , div [ class "row mt-5" ]
                     [ div [ class "col-8" ]
                         [ FormGroup.list appState
                             (announcementFormView appState)
@@ -107,7 +109,12 @@ formView appState form =
                         [ img [ class "settings-img", src "/wizard/img/settings/announcements.png" ] []
                         ]
                     ]
-               ]
+                ]
+    in
+    div [ class "Dashboard" ]
+        (FormGroup.htmlRadioGroup appState opts form "dashboardType" (gettext "Dashboard Style" appState.locale)
+            :: loginInfos
+            ++ announcements
         )
 
 
