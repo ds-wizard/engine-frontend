@@ -263,6 +263,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
     , Cmd.batch
         [ scrollCmd
         , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
+        , Ports.localStorageGet (localStorageViewResolvedKey questionnaire.uuid)
         , Ports.localStorageGet localStorageViewSettingsKey
         , rightPanelCmd
         ]
@@ -540,6 +541,16 @@ localStorageRightPanelKey uuid =
 localStorageRightPanelDecoder : Decoder (LocalStorageData RightPanel)
 localStorageRightPanelDecoder =
     LocalStorageData.decoder RightPanel.decoder
+
+
+localStorageViewResolvedKey : Uuid -> String
+localStorageViewResolvedKey uuid =
+    "project-" ++ Uuid.toString uuid ++ "-view-resolved"
+
+
+localStorageViewResolvedDecoder : Decoder (LocalStorageData Bool)
+localStorageViewResolvedDecoder =
+    LocalStorageData.decoder D.bool
 
 
 contentElementSelector : String
@@ -1042,7 +1053,11 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | commentDeletingListenClicks = True }
 
         CommentsViewResolved value ->
-            wrap { model | commentsViewResolved = value }
+            let
+                newModel =
+                    { model | commentsViewResolved = value }
+            in
+            withSeed ( newModel, localStorageViewResolvedCmd newModel )
 
         CommentsViewPrivate value ->
             wrap { model | commentsViewPrivate = value }
@@ -1164,6 +1179,14 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         case decodeValue localStorageRightPanelDecoder value of
                             Ok data ->
                                 withSeed ( model, dispatch (SetRightPanel data.value) )
+
+                            Err _ ->
+                                wrap model
+
+                    else if key == localStorageViewResolvedKey model.uuid then
+                        case decodeValue localStorageViewResolvedDecoder value of
+                            Ok data ->
+                                wrap { model | commentsViewResolved = data.value }
 
                             Err _ ->
                                 wrap model
@@ -1292,6 +1315,19 @@ localStorageRightPanelCmd model =
         data
             |> LocalStorageData.encode RightPanel.encode
             |> Ports.localStorageSet
+
+
+localStorageViewResolvedCmd : Model -> Cmd msg
+localStorageViewResolvedCmd model =
+    let
+        data =
+            { key = localStorageViewResolvedKey model.uuid
+            , value = model.commentsViewResolved
+            }
+    in
+    data
+        |> LocalStorageData.encode E.bool
+        |> Ports.localStorageSet
 
 
 handleScrollToPath : Model -> Bool -> String -> ( Model, Cmd Msg )
