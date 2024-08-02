@@ -68,7 +68,7 @@ viewKnowledgeModels appState knowledgeModels =
     let
         knowledgeModelsView =
             knowledgeModels
-                |> List.sortBy (Time.toMillis appState.timeZone << .createdAt)
+                |> List.sortBy ((*) -1 << Time.posixToMillis << .createdAt)
                 |> List.map (ListItem.view appState { toRoute = Routes.knowledgeModelDetail << .id })
                 |> div []
     in
