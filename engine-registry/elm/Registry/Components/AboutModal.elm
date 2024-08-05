@@ -12,9 +12,12 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, classList, colspan, href, target)
 import Html.Events exposing (onClick)
+import Json.Decode as D
+import Json.Decode.Extra as D
 import Registry.Api.BuildInfo as BuildInfoApi
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
+import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 
@@ -130,6 +133,11 @@ viewBuildInfo appState name buildInfo extra =
                 [ td [] [ text title ]
                 , td [] [ value ]
                 ]
+
+        buildAtValue =
+            D.decodeString D.datetime ("\"" ++ buildInfo.builtAt ++ "\"")
+                |> Result.map (TimeUtils.toReadableDateTime appState.timeZone)
+                |> Result.withDefault buildInfo.builtAt
     in
     table [ class "table table-borderless table-build-info" ]
         [ thead []
@@ -143,7 +151,7 @@ viewBuildInfo appState name buildInfo extra =
                 ]
              , tr []
                 [ td [] [ text (gettext "Built at" appState.locale) ]
-                , td [] [ em [] [ text buildInfo.builtAt ] ]
+                , td [] [ em [] [ text buildAtValue ] ]
                 ]
              ]
                 ++ List.map viewExtraRow extra
