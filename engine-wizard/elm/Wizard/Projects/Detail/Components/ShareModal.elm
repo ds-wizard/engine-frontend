@@ -427,7 +427,7 @@ copyLinkButton appState model =
                 []
 
         publicLink =
-            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing))))
+            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing Nothing))))
 
         copyLinkIcon =
             if model.copiedLink then

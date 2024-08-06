@@ -1,6 +1,7 @@
 module Wizard.Subscriptions exposing (subscriptions)
 
 import Wizard.Auth.Subscriptions
+import Wizard.Comments.Subscriptions
 import Wizard.Common.Menu.Subscriptions
 import Wizard.Dev.Subscriptions
 import Wizard.DocumentTemplateEditors.Subscriptions
@@ -31,6 +32,9 @@ subscriptions model =
 
                 Routes.DevRoute route ->
                     Sub.map AdminMsg <| Wizard.Dev.Subscriptions.subscriptions route model.adminModel
+
+                Routes.CommentsRoute _ _ ->
+                    Sub.map CommentsMsg <| Wizard.Comments.Subscriptions.subscriptions model.commentsModel
 
                 Routes.DocumentsRoute _ ->
                     Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions model.documentsModel

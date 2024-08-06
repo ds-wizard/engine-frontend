@@ -22,7 +22,6 @@ import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire expo
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet)
-import Shared.Utils exposing (flip)
 import Triple
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -76,9 +75,11 @@ update msg questionnaire appState model =
                     let
                         questionnaireModel =
                             QuestionnaireQuestionnaire.updateContent questionnaire content
-                                |> flip (Questionnaire.init appState) Nothing
-                                |> Tuple.first
-                                |> Success
+                                |> (\q ->
+                                        Questionnaire.initSimple appState q
+                                            |> Tuple.first
+                                            |> Success
+                                   )
                     in
                     ( { model | questionnaireModel = questionnaireModel }, Cmd.none )
 

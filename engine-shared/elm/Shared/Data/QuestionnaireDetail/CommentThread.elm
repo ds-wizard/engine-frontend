@@ -1,4 +1,4 @@
-module Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread, compare, decoder, isAuthor)
+module Shared.Data.QuestionnaireDetail.CommentThread exposing (CommentThread, commentCount, compare, decoder, isAssigned, isAuthor)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -18,6 +18,7 @@ type alias CommentThread =
     , private : Bool
     , createdAt : Time.Posix
     , createdBy : Maybe UserSuggestion
+    , assignedTo : Maybe UserSuggestion
     }
 
 
@@ -30,6 +31,7 @@ decoder =
         |> D.required "private" D.bool
         |> D.required "createdAt" D.datetime
         |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
+        |> D.required "assignedTo" (D.maybe UserSuggestion.decoder)
 
 
 isAuthor : Maybe { u | uuid : Uuid } -> CommentThread -> Bool
@@ -44,3 +46,13 @@ isAuthor user commentThread =
 compare : CommentThread -> CommentThread -> Order
 compare a b =
     Time.compare a.createdAt b.createdAt
+
+
+commentCount : CommentThread -> Int
+commentCount =
+    List.length << .comments
+
+
+isAssigned : CommentThread -> Bool
+isAssigned =
+    Maybe.isJust << .assignedTo

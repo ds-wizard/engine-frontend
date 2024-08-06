@@ -59,7 +59,7 @@ viewDocuments appState model mbQuestionnaire =
         questionnaireFilterView questionnaire =
             div [ class "listing-toolbar-extra questionnaire-filter" ]
                 [ linkTo appState
-                    (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
+                    (Routes.projectsDetail questionnaire.uuid)
                     [ class "questionnaire-name" ]
                     [ text questionnaire.name ]
                 , linkTo appState
@@ -149,7 +149,7 @@ listingDescription appState document =
                 Just questionnaire ->
                     span [ class "fragment" ]
                         [ linkTo appState
-                            (Routes.projectsDetailQuestionnaire questionnaire.uuid Nothing)
+                            (Routes.projectsDetail questionnaire.uuid)
                             []
                             [ text questionnaire.name ]
                         ]

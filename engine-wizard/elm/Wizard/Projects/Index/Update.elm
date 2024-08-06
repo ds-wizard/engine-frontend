@@ -16,7 +16,8 @@ import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.Questionnaire exposing (Questionnaire)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch, flip)
+import Shared.Setters exposing (setDebouncer)
+import Shared.Utils exposing (dispatch)
 import Uuid exposing (Uuid)
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
@@ -122,7 +123,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << CloneQuestionnaireModalMsg
                     , cloneCompleteCmd =
-                        cmdNavigate appState << flip Routes.projectsDetailQuestionnaire Nothing << .uuid
+                        cmdNavigate appState << Routes.projectsDetail << .uuid
                     }
 
                 ( deleteModalModel, cmd ) =
@@ -267,7 +268,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { mapMsg = wrapMsg << DebouncerMsg
                     , getDebouncer = .debouncer
-                    , setDebouncer = \d m -> { m | debouncer = d }
+                    , setDebouncer = setDebouncer
                     }
 
                 update_ updateMsg updateModel =

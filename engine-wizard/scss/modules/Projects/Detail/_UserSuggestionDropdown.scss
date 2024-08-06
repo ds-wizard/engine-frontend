@@ -1,0 +1,16 @@
+.UserSuggestionDropdown {
+    .dropdown-menu {
+        width: 250px;
+    }
+
+    .dropdown-item {
+        overflow-x: hidden;
+        text-overflow: ellipsis;
+
+        .ItemIcon {
+            display: inline-flex;
+            margin-right: 0.25rem;
+            vertical-align: bottom;
+        }
+    }
+}

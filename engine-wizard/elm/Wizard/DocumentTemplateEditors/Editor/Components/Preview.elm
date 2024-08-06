@@ -237,7 +237,7 @@ view cfg appState model =
             case model.typeHintInputModel.selected of
                 Just questionnaireSuggestion ->
                     linkTo appState
-                        (Routes.projectsDetailQuestionnaire questionnaireSuggestion.uuid Nothing)
+                        (Routes.projectsDetail questionnaireSuggestion.uuid)
                         (class "project-link" :: target "_blank" :: tooltip (gettext "Open project" appState.locale))
                         [ fa "fa-external-link-alt" ]
 

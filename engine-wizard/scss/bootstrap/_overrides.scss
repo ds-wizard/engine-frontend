@@ -112,6 +112,21 @@ code {
             background: transparent !important;
             cursor: default !important;
         }
+
+        &-search {
+            input {
+                width: 100%;
+                border: none;
+                outline: none;
+                box-shadow: none;
+            }
+        }
+
+        &-empty {
+            padding: var(--bs-dropdown-item-padding-y) var(--bs-dropdown-item-padding-x);
+            font-style: italic;
+            color: $text-muted;
+        }
     }
 }
 

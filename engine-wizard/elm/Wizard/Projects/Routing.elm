@@ -4,12 +4,12 @@ module Wizard.Projects.Routing exposing
     , toUrl
     )
 
-import Dict
 import Shared.Auth.Permission as Perm
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
-import Shared.Utils exposing (dictFromMaybeList, flip)
+import Shared.Utils exposing (flip)
+import Shared.Utils.UrlUtils exposing (queryParamsToString)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
@@ -48,8 +48,8 @@ parsers appState wrapRoute =
                 (Query.string indexRoutePackagesFilterId)
                 (FilterOperator.queryParser indexRoutePackagesFilterId)
 
-        projectDetailQuestionnaire projectUuid mbQuestionPath =
-            wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Questionnaire mbQuestionPath)
+        projectDetailQuestionnaire projectUuid mbQuestionPath mbCommentThreadUuid =
+            wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid)
 
         -- Project Import
         projectImportRoute uuid string =
@@ -57,7 +57,7 @@ parsers appState wrapRoute =
     in
     [ map projectCreateRoute (s moduleRoot </> s (lr "projects.create" appState) <?> Query.uuid (lr "projects.create.selectedProjectTemplate" appState) <?> Query.string (lr "projects.create.selectedKnowledgeModel" appState))
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "projects.createMigration" appState) </> uuid)
-    , map projectDetailQuestionnaire (s moduleRoot </> uuid <?> Query.string "questionPath")
+    , map projectDetailQuestionnaire (s moduleRoot </> uuid <?> Query.string "questionPath" <?> Query.uuid "commentThreadUuid")
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
     , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
@@ -83,21 +83,11 @@ toUrl appState route =
     case route of
         CreateRoute selectedProjectTemplate selectedKnowledgeModel ->
             let
-                params =
-                    dictFromMaybeList
+                queryString =
+                    queryParamsToString
                         [ ( lr "projects.create.selectedProjectTemplate" appState, Maybe.map Uuid.toString selectedProjectTemplate )
                         , ( lr "projects.create.selectedKnowledgeModel" appState, selectedKnowledgeModel )
                         ]
-                        |> Dict.toList
-                        |> List.map (\( k, v ) -> k ++ "=" ++ v)
-                        |> String.join "&"
-
-                queryString =
-                    if String.length params > 0 then
-                        "?" ++ params
-
-                    else
-                        ""
             in
             [ moduleRoot, lr "projects.create" appState ++ queryString ]
 
@@ -106,13 +96,15 @@ toUrl appState route =
 
         DetailRoute uuid subroute ->
             case subroute of
-                ProjectDetailRoute.Questionnaire mbQuestionPath ->
-                    case mbQuestionPath of
-                        Just questionPath ->
-                            [ moduleRoot, Uuid.toString uuid, "?questionPath=" ++ questionPath ]
-
-                        Nothing ->
-                            [ moduleRoot, Uuid.toString uuid ]
+                ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid ->
+                    let
+                        queryString =
+                            queryParamsToString
+                                [ ( "questionPath", mbQuestionPath )
+                                , ( "commentThreadUuid", Maybe.map Uuid.toString mbCommentThreadUuid )
+                                ]
+                    in
+                    [ moduleRoot, Uuid.toString uuid ++ queryString ]
 
                 ProjectDetailRoute.Preview ->
                     [ moduleRoot, Uuid.toString uuid, "preview" ]
@@ -137,16 +129,15 @@ toUrl appState route =
         IndexRoute paginationQueryString mbIsTemplate mbUserUuid mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
             let
                 params =
-                    Dict.toList <|
-                        dictFromMaybeList
-                            [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
-                            , ( indexRouteUsersFilterId, mbUserUuid )
-                            , FilterOperator.toUrlParam indexRouteUsersFilterId mbUserOp
-                            , ( indexRouteProjectTagsFilterId, mbProjectTags )
-                            , FilterOperator.toUrlParam indexRouteProjectTagsFilterId mbProjectTagsOp
-                            , ( indexRoutePackagesFilterId, mbPackages )
-                            , FilterOperator.toUrlParam indexRoutePackagesFilterId mbPackagesOp
-                            ]
+                    PaginationQueryString.filterParams
+                        [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
+                        , ( indexRouteUsersFilterId, mbUserUuid )
+                        , FilterOperator.toUrlParam indexRouteUsersFilterId mbUserOp
+                        , ( indexRouteProjectTagsFilterId, mbProjectTags )
+                        , FilterOperator.toUrlParam indexRouteProjectTagsFilterId mbProjectTagsOp
+                        , ( indexRoutePackagesFilterId, mbPackages )
+                        , FilterOperator.toUrlParam indexRoutePackagesFilterId mbPackagesOp
+                        ]
             in
             [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]
 

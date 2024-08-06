@@ -21,11 +21,11 @@
 }
 
 .diff-tree {
-    @include indent(0, 20);
-
     width: 100%;
     height: 100%;
     position: relative;
+
+    @include indent(0, 20);
 
     .inner {
         min-width: 100%;

@@ -6,6 +6,7 @@ import Json.Encode as E
 import Shared.Auth.Session as Session
 import Url
 import Wizard.Auth.Update
+import Wizard.Comments.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.LocalStorageData as LocalStorageData
 import Wizard.Common.Menu.Update
@@ -43,6 +44,10 @@ fetchData model =
         Routes.TenantsRoute route ->
             Cmd.map TenantsMsg <|
                 Wizard.Tenants.Update.fetchData route model.appState
+
+        Routes.CommentsRoute _ _ ->
+            Cmd.map Wizard.Msgs.CommentsMsg <|
+                Wizard.Comments.Update.fetchData
 
         Routes.DashboardRoute ->
             Cmd.map DashboardMsg <|
@@ -275,6 +280,13 @@ update msg model =
                         Wizard.Dev.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
                 in
                 ( { model | adminModel = adminModel }, cmd )
+
+            Wizard.Msgs.CommentsMsg commentsMsg ->
+                let
+                    ( commentsModel, cmd ) =
+                        Wizard.Comments.Update.update Wizard.Msgs.CommentsMsg commentsMsg model.appState model.commentsModel
+                in
+                ( { model | commentsModel = commentsModel }, cmd )
 
             Wizard.Msgs.DashboardMsg dashboardMsg ->
                 let

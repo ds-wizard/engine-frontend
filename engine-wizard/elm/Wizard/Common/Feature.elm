@@ -41,7 +41,9 @@ module Wizard.Common.Feature exposing
     , projectCommentDelete
     , projectCommentEdit
     , projectCommentPrivate
+    , projectCommentThreadAssign
     , projectCommentThreadDelete
+    , projectCommentThreadRemoveAssign
     , projectCommentThreadReopen
     , projectCommentThreadResolve
     , projectContinueMigration
@@ -335,6 +337,16 @@ projectCommentDelete appState questionnaire commentThread comment =
 projectCommentThreadResolve : AppState -> QuestionnaireLike q -> CommentThread -> Bool
 projectCommentThreadResolve appState questionnaire commentThread =
     QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved
+
+
+projectCommentThreadAssign : AppState -> QuestionnaireLike q -> CommentThread -> Bool
+projectCommentThreadAssign appState questionnaire commentThread =
+    QuestionnaireUtils.canComment appState questionnaire && not (CommentThread.isAssigned commentThread)
+
+
+projectCommentThreadRemoveAssign : AppState -> QuestionnaireLike q -> CommentThread -> Bool
+projectCommentThreadRemoveAssign appState questionnaire commentThread =
+    QuestionnaireUtils.canComment appState questionnaire && CommentThread.isAssigned commentThread
 
 
 projectCommentThreadReopen : AppState -> QuestionnaireLike q -> CommentThread -> Bool

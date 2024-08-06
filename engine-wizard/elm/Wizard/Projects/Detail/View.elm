@@ -134,6 +134,10 @@ viewProjectNavigation appState route model questionnaire =
 
 viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireCommon -> Html Msg
 viewProjectNavigationTitleRow appState model questionnaire =
+    let
+        isTooltipLeft =
+            not (QuestionnaireUtils.isAnonymousProject questionnaire && Session.exists appState.session) && not (QuestionnaireUtils.isOwner appState questionnaire)
+    in
     DetailNavigation.row
         [ DetailNavigation.section
             [ div [ class "title" ] [ text questionnaire.name ]
@@ -141,7 +145,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
             , viewProjectNavigationProjectSaving appState model
             ]
         , DetailNavigation.section
-            [ DetailNavigation.onlineUsers appState model.onlineUsers
+            [ DetailNavigation.onlineUsers appState isTooltipLeft model.onlineUsers
             , viewProjectNavigationActions appState model questionnaire
             ]
         ]
@@ -229,7 +233,7 @@ viewProjectNavigationNav appState route model questionnaire =
 
         isQuestionnaireRoute =
             case route of
-                ProjectDetailRoute.Questionnaire _ ->
+                ProjectDetailRoute.Questionnaire _ _ ->
                     True
 
                 _ ->
@@ -247,7 +251,7 @@ viewProjectNavigationNav appState route model questionnaire =
                     False
 
         questionnaireLink =
-            { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing)
+            { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing Nothing)
             , label = gettext "Questionnaire" appState.locale
             , icon = faSet "project.questionnaire" appState
             , isActive = isQuestionnaireRoute
@@ -319,7 +323,7 @@ viewProjectContent appState route model questionnaire =
             Page.error appState (gettext "You are not allowed to view this page." appState.locale)
     in
     case route of
-        ProjectDetailRoute.Questionnaire _ ->
+        ProjectDetailRoute.Questionnaire _ _ ->
             let
                 viewContent qm =
                     let

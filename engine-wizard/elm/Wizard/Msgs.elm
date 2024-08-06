@@ -8,6 +8,7 @@ import Browser exposing (UrlRequest)
 import Time
 import Url exposing (Url)
 import Wizard.Auth.Msgs
+import Wizard.Comments.Msgs
 import Wizard.Common.Menu.Msgs
 import Wizard.Dashboard.Msgs
 import Wizard.Dev.Msgs
@@ -42,6 +43,7 @@ type Msg
     | HideSessionExpiresSoonModal
     | MenuMsg Wizard.Common.Menu.Msgs.Msg
     | AdminMsg Wizard.Dev.Msgs.Msg
+    | CommentsMsg Wizard.Comments.Msgs.Msg
     | DashboardMsg Wizard.Dashboard.Msgs.Msg
     | DocumentsMsg Wizard.Documents.Msgs.Msg
     | DocumentTemplateEditorsMsg Wizard.DocumentTemplateEditors.Msgs.Msg

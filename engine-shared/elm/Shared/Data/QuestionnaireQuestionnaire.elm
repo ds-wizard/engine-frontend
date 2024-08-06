@@ -3,17 +3,18 @@ module Shared.Data.QuestionnaireQuestionnaire exposing
     , QuestionnaireQuestionnaire
     , QuestionnaireWarning
     , addCommentCount
-    , addCommentThreadToCount
+    , addReopenedCommentThreadToCount
+    , addResolvedCommentThreadToCount
     , calculateUnansweredQuestionsForChapter
     , clearReplyValue
     , commentsLength
     , createQuestionnaireDetail
     , decoder
     , generateReplies
-    , getCommentCount
     , getComments
     , getItemTitle
     , getTodos
+    , getUnresolvedCommentCount
     , getWarnings
     , hasReply
     , isCurrentVersion
@@ -73,7 +74,8 @@ type alias QuestionnaireQuestionnaire =
     , permissions : List Permission
     , labels : Dict String (List String)
     , migrationUuid : Maybe Uuid
-    , commentCounts : Dict String (Dict String Int)
+    , unresolvedCommentCounts : Dict String (Dict String Int)
+    , resolvedCommentCounts : Dict String (Dict String Int)
     , questionnaireActionsAvailable : Int
     , questionnaireImportersAvailable : Int
     , selectedQuestionTagUuids : List String
@@ -95,7 +97,8 @@ decoder =
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
         |> D.required "migrationUuid" (D.maybe Uuid.decoder)
-        |> D.required "commentCounts" (D.dict (D.dict D.int))
+        |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))
+        |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "questionnaireActionsAvailable" D.int
         |> D.required "questionnaireImportersAvailable" D.int
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
@@ -108,14 +111,14 @@ addCommentCount path threadUuid questionnaire =
             Uuid.toString threadUuid
 
         questionDict =
-            Dict.get path questionnaire.commentCounts
+            Dict.get path questionnaire.unresolvedCommentCounts
                 |> Maybe.withDefault Dict.empty
 
         count =
             Dict.get threadUuidString questionDict
                 |> Maybe.withDefault 0
     in
-    { questionnaire | commentCounts = Dict.insert path (Dict.insert threadUuidString (count + 1) questionDict) questionnaire.commentCounts }
+    { questionnaire | unresolvedCommentCounts = Dict.insert path (Dict.insert threadUuidString (count + 1) questionDict) questionnaire.unresolvedCommentCounts }
 
 
 subCommentCount : String -> Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
@@ -125,37 +128,78 @@ subCommentCount path threadUuid questionnaire =
             Uuid.toString threadUuid
 
         questionDict =
-            Dict.get path questionnaire.commentCounts
+            Dict.get path questionnaire.unresolvedCommentCounts
                 |> Maybe.withDefault Dict.empty
 
         count =
             Dict.get threadUuidString questionDict
                 |> Maybe.withDefault 0
     in
-    { questionnaire | commentCounts = Dict.insert path (Dict.insert threadUuidString (max 0 (count - 1)) questionDict) questionnaire.commentCounts }
+    { questionnaire | unresolvedCommentCounts = Dict.insert path (Dict.insert threadUuidString (max 0 (count - 1)) questionDict) questionnaire.unresolvedCommentCounts }
 
 
-addCommentThreadToCount : String -> Uuid -> Int -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
-addCommentThreadToCount path threadUuid count questionnaire =
+addReopenedCommentThreadToCount : String -> Uuid -> Int -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+addReopenedCommentThreadToCount path threadUuid count questionnaire =
     let
         threadUuidString =
             Uuid.toString threadUuid
 
-        questionDict =
-            Dict.get path questionnaire.commentCounts
+        unresolvedQuestionDict =
+            Dict.get path questionnaire.unresolvedCommentCounts
+                |> Maybe.withDefault Dict.empty
+
+        resolvedQuestionDict =
+            Dict.get path questionnaire.resolvedCommentCounts
                 |> Maybe.withDefault Dict.empty
     in
-    { questionnaire | commentCounts = Dict.insert path (Dict.insert threadUuidString count questionDict) questionnaire.commentCounts }
+    { questionnaire
+        | unresolvedCommentCounts = Dict.insert path (Dict.insert threadUuidString count unresolvedQuestionDict) questionnaire.unresolvedCommentCounts
+        , resolvedCommentCounts = Dict.insert path (Dict.remove threadUuidString resolvedQuestionDict) questionnaire.resolvedCommentCounts
+    }
+
+
+addResolvedCommentThreadToCount : String -> Uuid -> Int -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+addResolvedCommentThreadToCount path threadUuid count questionnaire =
+    let
+        threadUuidString =
+            Uuid.toString threadUuid
+
+        unresolvedQuestionDict =
+            Dict.get path questionnaire.unresolvedCommentCounts
+                |> Maybe.withDefault Dict.empty
+
+        resolvedQuestionDict =
+            Dict.get path questionnaire.resolvedCommentCounts
+                |> Maybe.withDefault Dict.empty
+    in
+    { questionnaire
+        | unresolvedCommentCounts = Dict.insert path (Dict.remove threadUuidString unresolvedQuestionDict) questionnaire.unresolvedCommentCounts
+        , resolvedCommentCounts = Dict.insert path (Dict.insert threadUuidString count resolvedQuestionDict) questionnaire.resolvedCommentCounts
+    }
 
 
 removeCommentThreadFromCount : String -> Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
 removeCommentThreadFromCount path threadUuid questionnaire =
-    case Dict.get path questionnaire.commentCounts of
-        Just questionDict ->
-            { questionnaire | commentCounts = Dict.insert path (Dict.remove (Uuid.toString threadUuid) questionDict) questionnaire.commentCounts }
+    let
+        removeFromUnresolvedCommentCounts q =
+            case Dict.get path q.unresolvedCommentCounts of
+                Just questionDict ->
+                    { q | unresolvedCommentCounts = Dict.insert path (Dict.remove (Uuid.toString threadUuid) questionDict) questionnaire.unresolvedCommentCounts }
 
-        Nothing ->
-            questionnaire
+                Nothing ->
+                    q
+
+        removeFromResolvedCommentCounts q =
+            case Dict.get path q.resolvedCommentCounts of
+                Just questionDict ->
+                    { q | resolvedCommentCounts = Dict.insert path (Dict.remove (Uuid.toString threadUuid) questionDict) questionnaire.resolvedCommentCounts }
+
+                Nothing ->
+                    q
+    in
+    questionnaire
+        |> removeFromUnresolvedCommentCounts
+        |> removeFromResolvedCommentCounts
 
 
 createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireQuestionnaire
@@ -169,7 +213,8 @@ createQuestionnaireDetail package km =
     , packageId = package.id
     , knowledgeModel = km
     , replies = Dict.empty
-    , commentCounts = Dict.empty
+    , unresolvedCommentCounts = Dict.empty
+    , resolvedCommentCounts = Dict.empty
     , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
     , labels = Dict.empty
     , migrationUuid = Nothing
@@ -210,9 +255,16 @@ setLabels path labels questionnaire =
     { questionnaire | labels = Dict.insert path labels questionnaire.labels }
 
 
-getCommentCount : String -> QuestionnaireQuestionnaire -> Int
-getCommentCount path questionnaire =
-    Dict.get path questionnaire.commentCounts
+getUnresolvedCommentCount : String -> QuestionnaireQuestionnaire -> Int
+getUnresolvedCommentCount path questionnaire =
+    Dict.get path questionnaire.unresolvedCommentCounts
+        |> Maybe.unwrap [] Dict.values
+        |> List.sum
+
+
+getResolvedCommentCount : String -> QuestionnaireQuestionnaire -> Int
+getResolvedCommentCount path questionnaire =
+    Dict.get path questionnaire.resolvedCommentCounts
         |> Maybe.unwrap [] Dict.values
         |> List.sum
 
@@ -241,14 +293,15 @@ getTodos questionnaire =
 
 commentsLength : QuestionnaireQuestionnaire -> Int
 commentsLength =
-    List.sum << List.map .comments << getComments
+    List.sum << List.map .unresolvedComments << getComments
 
 
 type alias QuestionCommentInfo =
     { chapter : Chapter
     , question : Question
     , path : String
-    , comments : Int
+    , unresolvedComments : Int
+    , resolvedComments : Int
     }
 
 
@@ -257,14 +310,18 @@ getComments questionnaire =
     let
         fn chapter currentPath question =
             let
-                questionCommentCount =
-                    getCommentCount (pathToString currentPath) questionnaire
+                unresolvedCommentCount =
+                    getUnresolvedCommentCount (pathToString currentPath) questionnaire
+
+                resolvedCommentCount =
+                    getResolvedCommentCount (pathToString currentPath) questionnaire
             in
-            if questionCommentCount > 0 then
+            if unresolvedCommentCount > 0 || resolvedCommentCount > 0 then
                 [ { chapter = chapter
                   , question = question
                   , path = pathToString currentPath
-                  , comments = questionCommentCount
+                  , unresolvedComments = getUnresolvedCommentCount (pathToString currentPath) questionnaire
+                  , resolvedComments = getResolvedCommentCount (pathToString currentPath) questionnaire
                   }
                 ]
 

@@ -72,11 +72,11 @@ a:not([class]) {
                 }
 
                 &:hover {
+                    color: var(--bs-primary);
+
                     .fas {
                         color: var(--bs-primary);
                     }
-
-                    color: var(--bs-primary);
                 }
             }
         }

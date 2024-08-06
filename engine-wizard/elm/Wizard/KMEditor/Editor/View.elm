@@ -116,7 +116,7 @@ viewKMEditorNavigationTitleRow appState model branch =
             , viewKMEditorNavigationSaving appState model
             ]
         , DetailNavigation.section
-            [ DetailNavigation.onlineUsers appState model.onlineUsers
+            [ DetailNavigation.onlineUsers appState False model.onlineUsers
             , DetailNavigation.sectionActions
                 [ button
                     [ class "btn btn-primary with-icon"

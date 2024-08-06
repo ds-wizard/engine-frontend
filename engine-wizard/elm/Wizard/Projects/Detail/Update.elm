@@ -12,6 +12,7 @@ import Shared.Auth.Session as Session
 import Shared.Copy as Ports
 import Shared.Data.Member as Member
 import Shared.Data.QuestionnaireCommon as QuestionnaireCommon
+import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
@@ -66,7 +67,7 @@ fetchSubrouteData appState model =
     case appState.route of
         ProjectsRoute (DetailRoute uuid route) ->
             case route of
-                ProjectDetailRoute.Questionnaire _ ->
+                ProjectDetailRoute.Questionnaire _ _ ->
                     Cmd.batch
                         [ dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
                         , QuestionnairesApi.getQuestionnaireQuestionnaire uuid appState GetQuestionnaireDetailCompleted
@@ -151,7 +152,7 @@ update wrapMsg msg appState model =
         setError result error =
             let
                 questionnaireRoute =
-                    Routing.toUrl appState (Routes.projectsDetailQuestionnaire model.uuid Nothing)
+                    Routing.toUrl appState (Routes.projectsDetail model.uuid)
 
                 loginRoute =
                     Routes.publicLogin (Just questionnaireRoute)
@@ -378,42 +379,43 @@ update wrapMsg msg appState model =
                                         , createdBy = createdBy
                                         }
 
-                        Questionnaire.CommentThreadDelete path threadUuid private ->
+                        Questionnaire.CommentThreadDelete path commentThread ->
                             let
                                 deleteCommentThread questionnaire =
-                                    Questionnaire.deleteCommentThread path threadUuid questionnaire
+                                    Questionnaire.deleteCommentThread path commentThread.uuid questionnaire
                             in
                             applyAction questionnaireSeed deleteCommentThread <|
                                 \uuid ->
                                     QuestionnaireEvent.DeleteCommentThread
                                         { uuid = uuid
                                         , path = path
-                                        , threadUuid = threadUuid
-                                        , private = private
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
                                         , createdAt = createdAt
                                         , createdBy = createdBy
                                         }
 
-                        Questionnaire.CommentThreadResolve path threadUuid private ->
+                        Questionnaire.CommentThreadResolve path commentThread ->
                             let
                                 resolveCommentThread questionnaire =
-                                    Questionnaire.resolveCommentThread path threadUuid questionnaire
+                                    Questionnaire.resolveCommentThread path commentThread.uuid (CommentThread.commentCount commentThread) questionnaire
                             in
                             applyAction questionnaireSeed resolveCommentThread <|
                                 \uuid ->
                                     QuestionnaireEvent.ResolveCommentThread
                                         { uuid = uuid
                                         , path = path
-                                        , threadUuid = threadUuid
-                                        , private = private
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
                                         , createdAt = createdAt
                                         , createdBy = createdBy
+                                        , commentCount = List.length commentThread.comments
                                         }
 
                         Questionnaire.CommentThreadReopen path commentThread ->
                             let
                                 reopenCommentThread questionnaire =
-                                    Questionnaire.reopenCommentThread path commentThread.uuid (List.length commentThread.comments) questionnaire
+                                    Questionnaire.reopenCommentThread path commentThread.uuid (CommentThread.commentCount commentThread) questionnaire
                             in
                             applyAction questionnaireSeed reopenCommentThread <|
                                 \uuid ->
@@ -425,6 +427,23 @@ update wrapMsg msg appState model =
                                         , createdAt = createdAt
                                         , createdBy = createdBy
                                         , commentCount = List.length commentThread.comments
+                                        }
+
+                        Questionnaire.CommentThreadAssign path commentThread mbUser ->
+                            let
+                                assignCommentThread questionnaire =
+                                    Questionnaire.assignCommentThread path commentThread.uuid mbUser questionnaire
+                            in
+                            applyAction questionnaireSeed assignCommentThread <|
+                                \uuid ->
+                                    QuestionnaireEvent.AssignCommentThread
+                                        { uuid = uuid
+                                        , path = path
+                                        , threadUuid = commentThread.uuid
+                                        , private = commentThread.private
+                                        , assignedTo = mbUser
+                                        , createdAt = createdAt
+                                        , createdBy = createdBy
                                         }
 
                         _ ->
@@ -537,7 +556,7 @@ update wrapMsg msg appState model =
                 Ok data ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Questionnaire.init appState data.data model.mbSelectedPath
+                            Questionnaire.init appState data.data model.mbSelectedPath model.mbCommentThreadUuid
 
                         newModel =
                             { model
@@ -658,7 +677,7 @@ update wrapMsg msg appState model =
         ShareDropdownCopyLink ->
             let
                 link =
-                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (DetailRoute model.uuid (ProjectDetailRoute.Questionnaire Nothing))))
+                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.projectsDetail model.uuid))
             in
             withSeed ( model, Ports.copyToClipboard link )
 
@@ -840,13 +859,16 @@ handleWebsocketMsg websocketMsg appState model =
                                     updateQuestionnaire event data.uuid (Questionnaire.setLabels data.path data.value)
 
                                 QuestionnaireEvent.ResolveCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid)
+                                    updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid data.commentCount)
 
                                 QuestionnaireEvent.ReopenCommentThread data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.reopenCommentThread data.path data.threadUuid data.commentCount)
 
                                 QuestionnaireEvent.DeleteCommentThread data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.deleteCommentThread data.path data.threadUuid)
+
+                                QuestionnaireEvent.AssignCommentThread data ->
+                                    updateQuestionnaire event data.uuid (Questionnaire.assignCommentThread data.path data.threadUuid data.assignedTo)
 
                                 QuestionnaireEvent.AddComment data ->
                                     updateQuestionnaire event data.uuid (Questionnaire.addComment data.path data.threadUuid data.private (AddCommentData.toComment data))

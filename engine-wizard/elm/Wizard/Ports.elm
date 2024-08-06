@@ -17,11 +17,13 @@ port module Wizard.Ports exposing
     , localStorageData
     , localStorageGet
     , localStorageGetAndRemove
+    , localStorageRemove
     , localStorageSet
     , localeFileSelected
     , refresh
     , scrollIntoView
     , scrollIntoViewCenter
+    , scrollIntoViewInstant
     , scrollToTop
     , setScrollTop
     , setUnloadMessage
@@ -92,6 +94,9 @@ port focus : String -> Cmd msg
 port scrollIntoView : String -> Cmd msg
 
 
+port scrollIntoViewInstant : String -> Cmd msg
+
+
 port scrollIntoViewCenter : String -> Cmd msg
 
 
@@ -160,3 +165,6 @@ port localStorageSet : E.Value -> Cmd msg
 
 
 port localStorageData : (E.Value -> msg) -> Sub msg
+
+
+port localStorageRemove : String -> Cmd msg
