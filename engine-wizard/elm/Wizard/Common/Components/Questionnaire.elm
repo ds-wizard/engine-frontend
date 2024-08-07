@@ -2176,10 +2176,18 @@ viewQuestionnaireRightPanelCommentsOverview : AppState -> Model -> Html Msg
 viewQuestionnaireRightPanelCommentsOverview appState model =
     let
         viewChapterComments group =
-            div []
-                [ strong [] [ text group.chapter.title ]
-                , ul [ class "fa-ul" ] (List.map viewQuestionComments group.comments)
-                ]
+            let
+                anyUnresolvedComments =
+                    List.any (\c -> c.unresolvedComments > 0) group.comments
+            in
+            if not model.commentsViewResolved && not anyUnresolvedComments then
+                emptyNode
+
+            else
+                div []
+                    [ strong [] [ text group.chapter.title ]
+                    , ul [ class "fa-ul" ] (List.map viewQuestionComments group.comments)
+                    ]
 
         viewQuestionComments comment =
             if not model.commentsViewResolved && comment.unresolvedComments == 0 then
