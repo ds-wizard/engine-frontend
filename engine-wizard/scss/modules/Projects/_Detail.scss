@@ -4,11 +4,14 @@
 @import 'Detail/QuestionnaireVersionViewModal';
 @import 'Detail/UserSuggestionDropdown';
 
+$warning-height: 40px;
 $nav-row-height: 32px;
 $nav-row-padding: 16px;
 $header-height: 2 * ($nav-row-height + $nav-row-padding) + 1;
 $content-height: calc(100vh - #{$header-height});
+$content-with-warning-height: calc(100vh - #{$header-height + $warning-height});
 $public-content-height: calc(100vh - #{$header-height + $public-header-height});
+$public-content-with-warning-height: calc(100vh - #{$header-height + $warning-height + $public-header-height});
 
 
 .Projects__Detail {
@@ -18,6 +21,16 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
         .questionnaire {
             height: $public-content-height;
         }
+
+        &--Warning {
+            .Projects__Detail__Content {
+                height: $public-content-with-warning-height !important;
+            }
+
+            .questionnaire {
+                height: $public-content-with-warning-height !important;
+            }
+        }
     }
 
     .app-fullscreen & {
@@ -26,6 +39,25 @@ $public-content-height: calc(100vh - #{$header-height + $public-header-height});
         .questionnaire {
             height: 100vh;
         }
+    }
+
+    &--Warning {
+        .Projects__Detail__Content {
+            height: $content-with-warning-height !important;
+        }
+
+        .questionnaire {
+            height: $content-with-warning-height !important;
+        }
+    }
+
+    &__Warning {
+        flex: 0 0 $warning-height;
+        background: $warning;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 
     &__Content {

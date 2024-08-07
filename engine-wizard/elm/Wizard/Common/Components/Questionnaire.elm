@@ -109,7 +109,7 @@ import Wizard.Common.Components.Questionnaire.UserSuggestionDropdown as UserSugg
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.ElementScrollTop as ElementScrollTop
 import Wizard.Common.Feature as Feature
-import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
+import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Common.Integrations as Integrations
@@ -1587,34 +1587,17 @@ view appState cfg ctx model =
             else
                 ( emptyNode, False )
 
-        ( migrationWarning, migrationWarningEnabled ) =
-            case model.questionnaire.migrationUuid of
-                Just migrationUuid ->
-                    let
-                        warningLink =
-                            linkTo appState (Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
-
-                        warning =
-                            gettext "There is an ongoing %s. Finish it before you can continue editing this project." appState.locale
-                                |> flip String.formatHtml [ warningLink ]
-                    in
-                    ( div [ class "questionnaire__warning" ]
-                        [ div [ class "alert alert-warning" ] warning ]
-                    , True
-                    )
-
-                Nothing ->
-                    ( emptyNode, False )
-
         splitPaneConfig =
             SplitPane.createViewConfig
                 { toMsg = cfg.wrapMsg << SplitPaneMsg
                 , customSplitter = Nothing
                 }
     in
-    div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ), ( "warning-enabled", migrationWarningEnabled ) ] ]
+    div
+        [ class "questionnaire"
+        , classList [ ( "toolbar-enabled", toolbarEnabled ) ]
+        ]
         [ toolbar
-        , migrationWarning
         , div [ class "questionnaire__body" ]
             [ SplitPane.view splitPaneConfig
                 (Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model)
