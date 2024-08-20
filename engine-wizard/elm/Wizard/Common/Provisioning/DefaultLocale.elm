@@ -37,7 +37,6 @@ locale =
         , ( "__routing.projects.createMigration", "create-migration" )
         , ( "__routing.projects.migration", "migration" )
         , ( "__routing.projects.migration", "migration" )
-        , ( "__routing.public.bookReferences", "book-references" )
         , ( "__routing.public.forgottenPassword", "forgotten-password" )
         , ( "__routing.public.signup", "signup" )
         , ( "__routing.registry", "registry" )

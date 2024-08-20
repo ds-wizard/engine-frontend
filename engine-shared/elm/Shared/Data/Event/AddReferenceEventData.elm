@@ -75,7 +75,7 @@ toReference referenceUuid data =
 
 getEntityVisibleName : AddReferenceEventData -> Maybe String
 getEntityVisibleName =
-    Just << map .shortUuid .label .targetUuid
+    Just << map .resourcePageUuid .label .targetUuid
 
 
 map :

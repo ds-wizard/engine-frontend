@@ -43,6 +43,8 @@ import Shared.Data.Event.AddMetricEventData as AddMetricEventData
 import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData
+import Shared.Data.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
+import Shared.Data.Event.AddResourcePageEventData as AddResourcePageEventData
 import Shared.Data.Event.AddTagEventData as AddTagEventData
 import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
@@ -55,6 +57,8 @@ import Shared.Data.Event.EditMetricEventData as EditMetricEventData
 import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
 import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData
 import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData
+import Shared.Data.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
+import Shared.Data.Event.EditResourcePageEventData as EditResourcePageEventData
 import Shared.Data.Event.EditTagEventData as EditTagEventData
 import Shared.Data.Event.MoveEventData exposing (MoveEventData)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -67,6 +71,8 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (flip)
@@ -313,7 +319,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (gettext "Untitled choice" appState.locale) << .label) KnowledgeModel.getChoice
 
         getReferenceName =
-            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName) KnowledgeModel.getReference
+            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel)) KnowledgeModel.getReference
 
         getExpertName =
             getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert
@@ -470,6 +476,7 @@ getAllUuids editorBranch =
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.experts
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.references
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.integrations
+        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourceCollections
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.tags
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.metrics
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.phases
@@ -622,6 +629,20 @@ applyEvent appState local event originalEditorBranch =
                 in
                 applyAdd local KnowledgeModel.insertReference reference commonData editorBranch
 
+            AddResourceCollectionEvent eventData commonData ->
+                let
+                    resourceCollection =
+                        AddResourceCollectionEventData.toResourceCollection commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertResourceCollection resourceCollection commonData editorBranch
+
+            AddResourcePageEvent eventData commonData ->
+                let
+                    resourcePage =
+                        AddResourcePageEventData.toResourcePage commonData.entityUuid eventData
+                in
+                applyAdd local KnowledgeModel.insertResourcePage resourcePage commonData editorBranch
+
             AddTagEvent eventData commonData ->
                 let
                     tag =
@@ -712,6 +733,22 @@ applyEvent appState local event originalEditorBranch =
                 in
                 applyEdit KnowledgeModel.updateReference mbReference commonData editorBranch
 
+            EditResourceCollectionEvent eventData commonData ->
+                let
+                    mbResourceCollection =
+                        KnowledgeModel.getResourceCollection commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditResourceCollectionEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateResourceCollection mbResourceCollection commonData editorBranch
+
+            EditResourcePageEvent eventData commonData ->
+                let
+                    mbResourcePage =
+                        KnowledgeModel.getResourcePage commonData.entityUuid knowledgeModel
+                            |> Maybe.map (EditResourcePageEventData.apply eventData)
+                in
+                applyEdit KnowledgeModel.updateResourcePage mbResourcePage commonData editorBranch
+
             EditTagEvent eventData commonData ->
                 let
                     mbTag =
@@ -742,6 +779,12 @@ applyEvent appState local event originalEditorBranch =
                 applyDelete commonData editorBranch
 
             DeleteReferenceEvent commonData ->
+                applyDelete commonData editorBranch
+
+            DeleteResourceCollectionEvent commonData ->
+                applyDelete commonData editorBranch
+
+            DeleteResourcePageEvent commonData ->
                 applyDelete commonData editorBranch
 
             DeleteQuestionEvent commonData ->
@@ -832,6 +875,7 @@ computeWarnings appState editorBranch =
                 |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases filteredKM))
                 |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags filteredKM))
                 |> flip (++) (List.concatMap (computeIntegrationWarnings appState) (KnowledgeModel.getIntegrations filteredKM))
+                |> flip (++) (List.concatMap (computeResourceCollectionWarnings appState filteredKM) (KnowledgeModel.getResourceCollections filteredKM))
     in
     { editorBranch | warnings = warnings }
 
@@ -972,8 +1016,8 @@ computeReferenceWarnings appState reference =
     in
     case reference of
         Reference.ResourcePageReference data ->
-            if String.isEmpty data.shortUuid then
-                createError (gettext "Empty short UUID for page reference" appState.locale)
+            if String.isEmpty data.resourcePageUuid || data.resourcePageUuid == Uuid.toString Uuid.nil then
+                createError (gettext "No resource page selected for resource page reference" appState.locale)
 
             else
                 []
@@ -1098,3 +1142,50 @@ computeIntegrationWarnings appState integration =
                         []
     in
     idWarning ++ typeWarnings
+
+
+computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorBranchWarning
+computeResourceCollectionWarnings appState km resourceCollection =
+    let
+        titleWarning =
+            if String.isEmpty resourceCollection.title then
+                [ { editorUuid = resourceCollection.uuid
+                  , message = gettext "Empty title for resource collection" appState.locale
+                  }
+                ]
+
+            else
+                []
+
+        resourcePagesWarnings =
+            List.concatMap
+                (computeResourcePageWarnings appState)
+                (KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid km)
+    in
+    titleWarning ++ resourcePagesWarnings
+
+
+computeResourcePageWarnings : AppState -> ResourcePage -> List EditorBranchWarning
+computeResourcePageWarnings appState resourcePage =
+    let
+        titleWarning =
+            if String.isEmpty resourcePage.title then
+                [ { editorUuid = resourcePage.uuid
+                  , message = gettext "Empty title for resource page" appState.locale
+                  }
+                ]
+
+            else
+                []
+
+        contentWarning =
+            if String.isEmpty resourcePage.content then
+                [ { editorUuid = resourcePage.uuid
+                  , message = gettext "Empty content for resource page" appState.locale
+                  }
+                ]
+
+            else
+                []
+    in
+    titleWarning ++ contentWarning

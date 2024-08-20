@@ -29,6 +29,7 @@ import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as De
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Tag as Tag
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Routes
 
 
 type alias Model =
@@ -186,7 +187,10 @@ view appState editorBranch model =
                     , toolbarEnabled = False
                     , questionLinksEnabled = False
                     }
-                , renderer = DefaultQuestionnaireRenderer.create appState knowledgeModel
+                , renderer =
+                    DefaultQuestionnaireRenderer.create appState
+                        knowledgeModel
+                        (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid << Just << Uuid.fromUuidString)
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing

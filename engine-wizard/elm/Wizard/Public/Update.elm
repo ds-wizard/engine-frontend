@@ -3,7 +3,6 @@ module Wizard.Public.Update exposing (fetchData, update)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Auth.Update
-import Wizard.Public.BookReference.Update
 import Wizard.Public.ForgottenPassword.Update
 import Wizard.Public.ForgottenPasswordConfirmation.Update
 import Wizard.Public.Login.Update
@@ -21,10 +20,6 @@ fetchData route appState =
         AuthCallback id error code sessionState ->
             Cmd.map AuthMsg <|
                 Wizard.Public.Auth.Update.fetchData id error code sessionState appState
-
-        BookReferenceRoute uuid ->
-            Cmd.map BookReferenceMsg <|
-                Wizard.Public.BookReference.Update.fetchData uuid appState
 
         LoginRoute mbOriginalUrl ->
             Wizard.Public.Login.Update.fetchData appState mbOriginalUrl
@@ -49,13 +44,6 @@ update msg wrapMsg appState model =
                     Wizard.Public.Auth.Update.update authMsg (wrapMsg << AuthMsg) appState model.authModel
             in
             ( { model | authModel = authModel }, cmd )
-
-        BookReferenceMsg brMsg ->
-            let
-                ( bookReferenceModel, cmd ) =
-                    Wizard.Public.BookReference.Update.update brMsg appState model.bookReferenceModel
-            in
-            ( { model | bookReferenceModel = bookReferenceModel }, cmd )
 
         ForgottenPasswordMsg fpMsg ->
             let

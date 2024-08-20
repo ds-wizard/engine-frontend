@@ -60,10 +60,16 @@ viewEvent appState kmName km event =
             Maybe.map .label <| KnowledgeModel.getChoice commonData.entityUuid km
 
         getReferenceName commonData =
-            Maybe.map Reference.getVisibleName <| KnowledgeModel.getReference commonData.entityUuid km
+            Maybe.map (Reference.getVisibleName (KnowledgeModel.getAllResourcePages km)) <| KnowledgeModel.getReference commonData.entityUuid km
 
         getExpertName commonData =
             Maybe.map .name <| KnowledgeModel.getExpert commonData.entityUuid km
+
+        getResourceCollectionName commonData =
+            Maybe.map .title <| KnowledgeModel.getResourceCollection commonData.entityUuid km
+
+        getResourcePageName commonData =
+            Maybe.map .title <| KnowledgeModel.getResourcePage commonData.entityUuid km
 
         viewKnolwedgeModelNode_ =
             viewKnowledgeModelNode appState Nothing
@@ -97,6 +103,12 @@ viewEvent appState kmName km event =
 
         viewExpertNode_ =
             viewExpertNode appState kmName km getParent
+
+        viewResourceCollectionNode_ =
+            viewResourceCollectionNode appState kmName Nothing
+
+        viewResourcePageNode_ =
+            viewResourcePageNode appState kmName km
     in
     case event of
         AddKnowledgeModelEvent _ _ ->
@@ -194,6 +206,24 @@ viewEvent appState kmName km event =
 
         DeleteExpertEvent commonData ->
             viewExpertNode_ stateClass.deleted (getExpertName commonData) commonData.parentUuid
+
+        AddResourceCollectionEvent _ _ ->
+            viewResourceCollectionNode_ stateClass.added eventEntityName
+
+        EditResourceCollectionEvent _ _ ->
+            viewResourceCollectionNode_ stateClass.edited eventEntityName
+
+        DeleteResourceCollectionEvent commonData ->
+            viewResourceCollectionNode_ stateClass.deleted (getResourceCollectionName commonData)
+
+        AddResourcePageEvent _ commonData ->
+            viewResourcePageNode_ stateClass.added eventEntityName commonData.parentUuid
+
+        EditResourcePageEvent _ commonData ->
+            viewResourcePageNode_ stateClass.edited (eventEntityNameOrDefault (getResourcePageName commonData)) commonData.parentUuid
+
+        DeleteResourcePageEvent commonData ->
+            viewResourcePageNode_ stateClass.deleted (getResourcePageName commonData) commonData.parentUuid
 
         MoveQuestionEvent eventData commonData ->
             div []
@@ -426,6 +456,41 @@ viewExpertNode appState kmName km getParent cssClass mbTitle parentUuid =
         |> Maybe.withDefault expertNode
 
 
+viewResourceCollectionNode :
+    AppState
+    -> String
+    -> Maybe (Html msg)
+    -> String
+    -> Maybe String
+    -> Html msg
+viewResourceCollectionNode appState kmName mbChildNode cssClass mbTitle =
+    let
+        resourceCollectionNode =
+            viewNode (faSet "km.resourceCollection" appState) cssClass mbTitle mbChildNode
+    in
+    viewKnowledgeModelNode appState (Just resourceCollectionNode) stateClass.none (Just kmName)
+
+
+viewResourcePageNode :
+    AppState
+    -> String
+    -> KnowledgeModel
+    -> String
+    -> Maybe String
+    -> String
+    -> Html msg
+viewResourcePageNode appState kmName km cssClass mbTitle parentUuid =
+    let
+        resourcePageNode =
+            viewNode (faSet "km.resourcePage" appState) cssClass mbTitle Nothing
+
+        parentQuestion =
+            getParentResourceCollectionNode appState kmName km parentUuid resourcePageNode
+    in
+    parentQuestion
+        |> Maybe.withDefault resourcePageNode
+
+
 viewNode : Html msg -> String -> Maybe String -> Maybe (Html msg) -> Html msg
 viewNode icon cssClass mbTitle mbChildNode =
     let
@@ -521,4 +586,24 @@ getParentAnswerNode appState kmName km getParent answerUuid node =
                     stateClass.none
                     (Just answer.label)
                     (getParent answerUuid)
+            )
+
+
+getParentResourceCollectionNode :
+    AppState
+    -> String
+    -> KnowledgeModel
+    -> String
+    -> Html msg
+    -> Maybe (Html msg)
+getParentResourceCollectionNode appState kmName km resourceCollectionUuid node =
+    KnowledgeModel.getResourceCollection resourceCollectionUuid km
+        |> Maybe.map
+            (\resourceCollection ->
+                viewResourceCollectionNode
+                    appState
+                    kmName
+                    (Just node)
+                    stateClass.none
+                    (Just resourceCollection.title)
             )

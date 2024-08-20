@@ -58,6 +58,7 @@ module Wizard.Routes exposing
     , knowledgeModelsIndex
     , knowledgeModelsIndexWithFilters
     , knowledgeModelsPreview
+    , knowledgeModelsResourcePage
     , localesCreate
     , localesDetail
     , localesImport
@@ -522,6 +523,11 @@ isKnowledgeModelsIndex route =
 knowledgeModelsPreview : String -> Maybe String -> Route
 knowledgeModelsPreview packageId mbQuestionUuid =
     KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.PreviewRoute packageId mbQuestionUuid
+
+
+knowledgeModelsResourcePage : String -> String -> Route
+knowledgeModelsResourcePage kmId resourcePageUuid =
+    KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.ResourcePageRoute kmId resourcePageUuid
 
 
 isKnowledgeModelsSubroute : Route -> Bool

@@ -61,7 +61,7 @@ apply event reference =
         EditReferenceResourcePageEvent eventData ->
             ResourcePageReference
                 { uuid = Reference.getUuid reference
-                , shortUuid = EventField.getValueWithDefault eventData.shortUuid (Maybe.withDefault "" (Reference.getShortUuid reference))
+                , resourcePageUuid = EventField.getValueWithDefault eventData.resourcePageUuid (Maybe.withDefault "" (Reference.getResourcePageUuid reference))
                 , annotations = EventField.getValueWithDefault eventData.annotations (Reference.getAnnotations reference)
                 }
 
@@ -84,7 +84,7 @@ apply event reference =
 
 getEntityVisibleName : EditReferenceEventData -> Maybe String
 getEntityVisibleName =
-    EventField.getValue << map .shortUuid .label .targetUuid
+    EventField.getValue << map .resourcePageUuid .label .targetUuid
 
 
 map :

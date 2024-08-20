@@ -11,6 +11,8 @@ module Shared.Data.KnowledgeModel.KnowledgeModelEntities exposing
     , insertPhase
     , insertQuestion
     , insertReference
+    , insertResourceCollection
+    , insertResourcePage
     , insertTag
     , moveAnswer
     , moveChoice
@@ -23,6 +25,8 @@ module Shared.Data.KnowledgeModel.KnowledgeModelEntities exposing
     , updateQuestion
     , updateQuestions
     , updateReference
+    , updateResourceCollection
+    , updateResourcePage
     , updateTags
     )
 
@@ -38,6 +42,8 @@ import Shared.Data.KnowledgeModel.Metric as Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase as Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.ResourceCollection as ResourceCollection exposing (ResourceCollection)
+import Shared.Data.KnowledgeModel.ResourcePage as ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag as Tag exposing (Tag)
 
 
@@ -48,6 +54,8 @@ type alias KnowledgeModelEntities =
     , choices : Dict String Choice
     , experts : Dict String Expert
     , references : Dict String Reference
+    , resourceCollections : Dict String ResourceCollection
+    , resourcePages : Dict String ResourcePage
     , integrations : Dict String Integration
     , tags : Dict String Tag
     , metrics : Dict String Metric
@@ -64,6 +72,8 @@ decoder =
         |> D.required "choices" (D.dict Choice.decoder)
         |> D.required "experts" (D.dict Expert.decoder)
         |> D.required "references" (D.dict Reference.decoder)
+        |> D.required "resourceCollections" (D.dict ResourceCollection.decoder)
+        |> D.required "resourcePages" (D.dict ResourcePage.decoder)
         |> D.required "integrations" (D.dict Integration.decoder)
         |> D.required "tags" (D.dict Tag.decoder)
         |> D.required "metrics" (D.dict Metric.decoder)
@@ -78,6 +88,8 @@ empty =
     , choices = Dict.empty
     , experts = Dict.empty
     , references = Dict.empty
+    , resourceCollections = Dict.empty
+    , resourcePages = Dict.empty
     , integrations = Dict.empty
     , tags = Dict.empty
     , metrics = Dict.empty
@@ -186,6 +198,24 @@ insertReference reference questionUuid entities =
             { entities
                 | references = Dict.insert (Reference.getUuid reference) reference entities.references
                 , questions = Dict.insert questionUuid (Question.addReferenceUuid (Reference.getUuid reference) question) entities.questions
+            }
+
+        Nothing ->
+            entities
+
+
+insertResourceCollection : ResourceCollection -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertResourceCollection resourceCollection entities =
+    { entities | resourceCollections = Dict.insert resourceCollection.uuid resourceCollection entities.resourceCollections }
+
+
+insertResourcePage : ResourcePage -> String -> KnowledgeModelEntities -> KnowledgeModelEntities
+insertResourcePage resourcePage resourceCollectionUuid entities =
+    case Dict.get resourceCollectionUuid entities.resourceCollections of
+        Just resourceCollection ->
+            { entities
+                | resourcePages = Dict.insert resourcePage.uuid resourcePage entities.resourcePages
+                , resourceCollections = Dict.insert resourceCollectionUuid (ResourceCollection.addResourcePageUuid resourcePage.uuid resourceCollection) entities.resourceCollections
             }
 
         Nothing ->
@@ -341,6 +371,16 @@ updateQuestion question entities =
 updateReference : Reference -> KnowledgeModelEntities -> KnowledgeModelEntities
 updateReference reference entities =
     { entities | references = Dict.insert (Reference.getUuid reference) reference entities.references }
+
+
+updateResourceCollection : ResourceCollection -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateResourceCollection resourceCollection entities =
+    { entities | resourceCollections = Dict.insert resourceCollection.uuid resourceCollection entities.resourceCollections }
+
+
+updateResourcePage : ResourcePage -> KnowledgeModelEntities -> KnowledgeModelEntities
+updateResourcePage resourcePage entities =
+    { entities | resourcePages = Dict.insert resourcePage.uuid resourcePage entities.resourcePages }
 
 
 

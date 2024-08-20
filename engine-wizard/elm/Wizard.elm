@@ -13,7 +13,6 @@ import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
 import Wizard.Projects.Routes as PlansRoutes
-import Wizard.Public.Routes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -69,9 +68,6 @@ decideInitialRoute model location route originalRoute =
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
-                ( True, Wizard.Public.Routes.BookReferenceRoute _ ) ->
-                    dispatchUrlChange
-
                 ( True, _ ) ->
                     cmdNavigate model.appState Routes.DashboardRoute
 
@@ -85,6 +81,9 @@ decideInitialRoute model location route originalRoute =
             dispatchUrlChange
 
         Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.PreviewRoute _ _) ->
+            dispatchUrlChange
+
+        Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.ResourcePageRoute _ _) ->
             dispatchUrlChange
 
         _ ->

@@ -20,6 +20,8 @@ import Shared.Data.Event.AddReferenceCrossEventData exposing (AddReferenceCrossE
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
 import Shared.Data.Event.AddReferenceResourcePageEventData exposing (AddReferenceResourcePageEventData)
 import Shared.Data.Event.AddReferenceURLEventData exposing (AddReferenceURLEventData)
+import Shared.Data.Event.AddResourceCollectionEventData exposing (AddResourceCollectionEventData)
+import Shared.Data.Event.AddResourcePageEventData exposing (AddResourcePageEventData)
 import Shared.Data.Event.AddTagEventData exposing (AddTagEventData)
 import Shared.Data.Event.EditAnswerEventData exposing (EditAnswerEventData)
 import Shared.Data.Event.EditChapterEventData exposing (EditChapterEventData)
@@ -34,6 +36,8 @@ import Shared.Data.Event.EditReferenceCrossEventData exposing (EditReferenceCros
 import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData(..))
 import Shared.Data.Event.EditReferenceResourcePageEventData exposing (EditReferenceResourcePageEventData)
 import Shared.Data.Event.EditReferenceURLEventData exposing (EditReferenceURLEventData)
+import Shared.Data.Event.EditResourceCollectionEventData exposing (EditResourceCollectionEventData)
+import Shared.Data.Event.EditResourcePageEventData exposing (EditResourcePageEventData)
 import Shared.Data.Event.EditTagEventData exposing (EditTagEventData)
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -52,6 +56,8 @@ import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..)
 import Shared.Data.KnowledgeModel.Reference.CrossReferenceData exposing (CrossReferenceData)
 import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
+import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
@@ -308,6 +314,38 @@ getEventView appState model migration event =
             KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteExpertDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete expert" appState.locale))
+                |> Maybe.withDefault errorMessage
+
+        AddResourceCollectionEvent eventData _ ->
+            viewAddResourceCollectionDiff appState eventData
+                |> viewEvent appState model event (gettext "Add resource collection" appState.locale)
+
+        EditResourceCollectionEvent eventData commonData ->
+            KnowledgeModel.getResourceCollection commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditResourceCollectionDiff appState migration.currentKnowledgeModel eventData)
+                |> Maybe.map (viewEvent appState model event (gettext "Edit resource collection" appState.locale))
+                |> Maybe.withDefault errorMessage
+
+        DeleteResourceCollectionEvent commonData ->
+            KnowledgeModel.getResourceCollection commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeleteResourceCollectionDiff appState migration.currentKnowledgeModel)
+                |> Maybe.map (viewEvent appState model event (gettext "Delete resource collection" appState.locale))
+                |> Maybe.withDefault errorMessage
+
+        AddResourcePageEvent eventData _ ->
+            viewAddResourcePageDiff appState eventData
+                |> viewEvent appState model event (gettext "Add resource page" appState.locale)
+
+        EditResourcePageEvent eventData commonData ->
+            KnowledgeModel.getResourcePage commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewEditResourcePageDiff appState eventData)
+                |> Maybe.map (viewEvent appState model event (gettext "Edit resource page" appState.locale))
+                |> Maybe.withDefault errorMessage
+
+        DeleteResourcePageEvent commonData ->
+            KnowledgeModel.getResourcePage commonData.entityUuid migration.currentKnowledgeModel
+                |> Maybe.map (viewDeleteResourcePageDiff appState)
+                |> Maybe.map (viewEvent appState model event (gettext "Delete resource page" appState.locale))
                 |> Maybe.withDefault errorMessage
 
         MoveQuestionEvent _ commonData ->
@@ -1132,7 +1170,7 @@ viewEditQuestionDiff appState km event question =
             List.map Reference.getUuid references
 
         referenceNames =
-            Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName r )) references
+            Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName (KnowledgeModel.getAllResourcePages km) r )) references
 
         referencesDiff =
             viewDiffChildren (gettext "References" appState.locale)
@@ -1252,7 +1290,7 @@ viewDeleteQuestionDiff appState km question =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewDeletedChildren (gettext "References" appState.locale) <| List.map Reference.getVisibleName references
+            viewDeletedChildren (gettext "References" appState.locale) <| List.map (Reference.getVisibleName (KnowledgeModel.getAllResourcePages km)) references
 
         -- Experts
         experts =
@@ -1349,7 +1387,7 @@ viewMoveQuestion appState km question =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewPlainChildren (gettext "References" appState.locale) <| List.map Reference.getVisibleName references
+            viewPlainChildren (gettext "References" appState.locale) <| List.map (Reference.getVisibleName (KnowledgeModel.getAllResourcePages km)) references
 
         -- Experts
         experts =
@@ -1630,10 +1668,10 @@ viewAddResourcePageReferenceDiff appState data =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
                     [ gettext "Reference Type" appState.locale
-                    , gettext "Short UUID" appState.locale
+                    , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , data.shortUuid
+                    , data.resourcePageUuid
                     ]
 
         annotationsDiff =
@@ -1693,13 +1731,13 @@ viewEditReferenceDiff appState event reference =
                     viewDiff <|
                         List.map3 (\a b c -> ( a, b, c ))
                             [ gettext "Reference Type" appState.locale
-                            , gettext "Short UUID" appState.locale
+                            , gettext "Resource Page UUID" appState.locale
                             ]
                             [ gettext "Resource Page" appState.locale
-                            , referenceData.shortUuid
+                            , referenceData.resourcePageUuid
                             ]
                             [ gettext "Resource Page" appState.locale
-                            , EventField.getValueWithDefault eventData.shortUuid referenceData.shortUuid
+                            , EventField.getValueWithDefault eventData.resourcePageUuid referenceData.resourcePageUuid
                             ]
 
                 annotationsDiff =
@@ -1775,10 +1813,10 @@ viewEditResourcePageReferenceDiff appState data =
             viewAdd <|
                 List.map2 (\a b -> ( a, b ))
                     [ gettext "Reference Type" appState.locale
-                    , gettext "Short UUID" appState.locale
+                    , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , EventField.getValueWithDefault data.shortUuid ""
+                    , EventField.getValueWithDefault data.resourcePageUuid ""
                     ]
 
         annotationsDiff =
@@ -1844,10 +1882,10 @@ viewDeleteResourcePageReferenceDiff appState data =
             viewDelete <|
                 List.map2 (\a b -> ( a, b ))
                     [ gettext "Reference Type" appState.locale
-                    , gettext "Short UUID" appState.locale
+                    , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , data.shortUuid
+                    , data.resourcePageUuid
                     ]
 
         annotationsDiff =
@@ -1913,10 +1951,10 @@ viewMoveResourcePageReference appState data =
             viewPlain <|
                 List.map2 (\a b -> ( a, b ))
                     [ gettext "Reference Type" appState.locale
-                    , gettext "Short UUID" appState.locale
+                    , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , data.shortUuid
+                    , data.resourcePageUuid
                     ]
 
         annotationsDiff =
@@ -2042,6 +2080,143 @@ viewMoveExpert appState expert =
 
         annotationsDiff =
             viewAnnotationsDiff appState expert.annotations expert.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
+
+
+viewAddResourceCollectionDiff : AppState -> AddResourceCollectionEventData -> Html Msg
+viewAddResourceCollectionDiff appState event =
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ gettext "Title" appState.locale
+                    ]
+                    [ event.title
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState [] event.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
+
+
+viewEditResourceCollectionDiff : AppState -> KnowledgeModel -> EditResourceCollectionEventData -> ResourceCollection -> Html Msg
+viewEditResourceCollectionDiff appState km event resourceCollection =
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ gettext "Title" appState.locale
+                    ]
+                    [ resourceCollection.title
+                    ]
+                    [ EventField.getValueWithDefault event.title resourceCollection.title
+                    ]
+
+        resourcePages =
+            KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid km
+
+        originalResourcePages =
+            List.map .uuid resourcePages
+
+        resourcePageNames =
+            Dict.fromList <| List.map (\r -> ( r.uuid, r.title )) resourcePages
+
+        resourcePagesDiff =
+            viewDiffChildren (gettext "Resource Pages" appState.locale)
+                originalResourcePages
+                (EventField.getValueWithDefault event.resourcePageUuids originalResourcePages)
+                resourcePageNames
+
+        annotationsDiff =
+            viewAnnotationsDiff appState resourceCollection.annotations (EventField.getValueWithDefault event.annotations resourceCollection.annotations)
+    in
+    div [] (fieldDiff ++ [ resourcePagesDiff, annotationsDiff ])
+
+
+viewDeleteResourceCollectionDiff : AppState -> KnowledgeModel -> ResourceCollection -> Html Msg
+viewDeleteResourceCollectionDiff appState km resourceCollection =
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ gettext "Title" appState.locale
+                    ]
+                    [ resourceCollection.title
+                    ]
+
+        resourcePages =
+            KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid km
+
+        resourcePageNames =
+            List.map .title resourcePages
+
+        resourcePagesDiff =
+            viewDeletedChildren (gettext "Resource Pages" appState.locale) resourcePageNames
+
+        annotationsDiff =
+            viewAnnotationsDiff appState resourceCollection.annotations []
+    in
+    div [] (fieldDiff ++ [ resourcePagesDiff, annotationsDiff ])
+
+
+viewAddResourcePageDiff : AppState -> AddResourcePageEventData -> Html Msg
+viewAddResourcePageDiff appState event =
+    let
+        fieldDiff =
+            viewAdd <|
+                List.map2 (\a b -> ( a, b ))
+                    [ gettext "Title" appState.locale
+                    , gettext "Content" appState.locale
+                    ]
+                    [ event.title
+                    , event.content
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState [] event.annotations
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
+
+
+viewEditResourcePageDiff : AppState -> EditResourcePageEventData -> ResourcePage -> Html Msg
+viewEditResourcePageDiff appState event resourcePage =
+    let
+        fieldDiff =
+            viewDiff <|
+                List.map3 (\a b c -> ( a, b, c ))
+                    [ gettext "Title" appState.locale
+                    , gettext "Content" appState.locale
+                    ]
+                    [ resourcePage.title
+                    , resourcePage.content
+                    ]
+                    [ EventField.getValueWithDefault event.title resourcePage.title
+                    , EventField.getValueWithDefault event.content resourcePage.content
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState resourcePage.annotations (EventField.getValueWithDefault event.annotations resourcePage.annotations)
+    in
+    div [] (fieldDiff ++ [ annotationsDiff ])
+
+
+viewDeleteResourcePageDiff : AppState -> ResourcePage -> Html Msg
+viewDeleteResourcePageDiff appState resourcePage =
+    let
+        fieldDiff =
+            viewDelete <|
+                List.map2 (\a b -> ( a, b ))
+                    [ gettext "Title" appState.locale
+                    , gettext "Content" appState.locale
+                    ]
+                    [ resourcePage.title
+                    , resourcePage.content
+                    ]
+
+        annotationsDiff =
+            viewAnnotationsDiff appState resourcePage.annotations []
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 

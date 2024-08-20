@@ -33,12 +33,14 @@ import Shared.Data.Event.AddMetricEventData as AddMetricEventData
 import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData
+import Shared.Data.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
+import Shared.Data.Event.AddResourcePageEventData as AddResourcePageEventData
 import Shared.Data.Event.AddTagEventData as AddTagEventData
 import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
 import Shared.Data.Event.EditChapterEventData as EditChapterEventData
 import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResponseItemId, setResponseItemTemplate, setResponseListField, setShortUuid, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
+import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData
 import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
@@ -55,6 +57,8 @@ import Shared.Data.Event.EditQuestionValueEventData as EditQuestionValueEventDat
 import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
 import Shared.Data.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
 import Shared.Data.Event.EditReferenceURLEventData as EditReferenceURLEventData
+import Shared.Data.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
+import Shared.Data.Event.EditResourcePageEventData as EditResourcePageEventData
 import Shared.Data.Event.EditTagEventData as EditTagEventData
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -68,6 +72,8 @@ import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
@@ -111,6 +117,8 @@ type DeleteModalState
     | PhaseState String
     | TagState String
     | IntegrationState String
+    | ResourceCollectionState String
+    | ResourcePageState String
     | QuestionState String
     | AnswerState String
     | ChoiceState String
@@ -296,6 +304,8 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                 , createChoice = \questionUuid -> eventMsg questionUuid Nothing (AddChoiceEvent AddChoiceEventData.init)
                 , createExpert = \questionUuid -> eventMsg questionUuid Nothing (AddExpertEvent AddExpertEventData.init)
                 , createReference = \questionUuid -> eventMsg questionUuid Nothing (AddReferenceEvent AddReferenceEventData.init)
+                , createResourceCollection = \questionUuid -> eventMsg questionUuid Nothing (AddResourceCollectionEvent AddResourceCollectionEventData.init)
+                , createResourcePage = \referenceUuid -> eventMsg referenceUuid Nothing (AddResourcePageEvent AddResourcePageEventData.init)
                 , createIntegration = \kmUuid -> eventMsg kmUuid Nothing (AddIntegrationEvent AddIntegrationEventData.init)
                 , createTag = \kmUuid -> eventMsg kmUuid Nothing (AddTagEvent AddTagEventData.init)
                 , createMetric = \kmUuid -> eventMsg kmUuid Nothing (AddMetricEvent AddMetricEventData.init)
@@ -425,6 +435,12 @@ viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch =
         integrationEditor =
             createEditor viewIntegrationEditor KnowledgeModel.getIntegration
 
+        resourceCollectionEditor =
+            createEditor viewResourceCollectionEditor KnowledgeModel.getResourceCollection
+
+        resourcePageEditor =
+            createEditor viewResourcePageEditor KnowledgeModel.getResourcePage
+
         answerEditor =
             createEditor viewAnswerEditor KnowledgeModel.getAnswer
 
@@ -448,6 +464,8 @@ viewEditor appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                 |> Maybe.orElse phaseEditor
                 |> Maybe.orElse tagEditor
                 |> Maybe.orElse integrationEditor
+                |> Maybe.orElse resourceCollectionEditor
+                |> Maybe.orElse resourcePageEditor
                 |> Maybe.orElse answerEditor
                 |> Maybe.orElse choiceEditor
                 |> Maybe.orElse referenceEditor
@@ -500,6 +518,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
 
         addIntegrationEvent =
             AddIntegrationEvent AddIntegrationEventData.init
+                |> eventMsg kmUuid Nothing
+
+        addResourceCollectionEvent =
+            AddResourceCollectionEvent AddResourceCollectionEventData.init
                 |> eventMsg kmUuid Nothing
 
         chaptersInput =
@@ -587,6 +609,23 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , addChildDataCy = "integration"
                 }
 
+        resourceCollectionsInput =
+            Input.reorderable appState
+                { name = "resourceCollections"
+                , label = gettext "Resource Collections" appState.locale
+                , items = EditorBranch.filterDeleted editorBranch km.resourceCollectionUuids
+                , entityUuid = kmUuid
+                , getReorderableState = flip Dict.get model.reorderableStates
+                , toMsg = compose2 wrapMsg ReorderableMsg
+                , updateList = createEditEvent setResourceCollectionUuids
+                , getRoute = editorRoute editorBranch
+                , getName = KnowledgeModel.getResourceCollectionName km
+                , untitledLabel = gettext "Untitled resource collection" appState.locale
+                , addChildLabel = gettext "Add resource collection" appState.locale
+                , addChildMsg = addResourceCollectionEvent
+                , addChildDataCy = "resource-collection"
+                }
+
         annotationsInput =
             Input.annotations appState
                 { annotations = km.annotations
@@ -600,6 +639,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         , phasesInput
         , tagsInput
         , integrationsInput
+        , resourceCollectionsInput
         , annotationsInput
         ]
 
@@ -1856,12 +1896,23 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 |> (EditReferenceEvent << EditReferenceResourcePageEvent)
                                 |> eventMsg parentUuid (Just referenceUuid)
 
-                        shortUuidInput =
-                            Input.string
-                                { name = "shortUuid"
-                                , label = gettext "Short UUID" appState.locale
-                                , value = data.shortUuid
-                                , onInput = createTypeEditEvent setShortUuid
+                        resourcePageOption resourcePageUuid =
+                            KnowledgeModel.getResourcePage resourcePageUuid editorBranch.branch.knowledgeModel
+                                |> Maybe.map (\rp -> ( rp.uuid, rp.title ))
+
+                        resourcePageUuidOptions =
+                            KnowledgeModel.getResourceCollections editorBranch.branch.knowledgeModel
+                                |> EditorBranch.filterDeletedWith .uuid editorBranch
+                                |> List.map (\rc -> ( rc.title, List.filterMap resourcePageOption rc.resourcePageUuids ))
+
+                        resourcePageUuidSelect =
+                            Input.selectWithGroups
+                                { name = "resourcePageUuid"
+                                , label = gettext "Resource Page" appState.locale
+                                , value = data.resourcePageUuid
+                                , defaultOption = ( Uuid.toString Uuid.nil, gettext "- select resource page -" appState.locale )
+                                , options = resourcePageUuidOptions
+                                , onChange = createTypeEditEvent setResourcePageUuid
                                 }
 
                         annotationsInput =
@@ -1870,7 +1921,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 , onEdit = createTypeEditEvent setAnnotations
                                 }
                     in
-                    [ shortUuidInput, annotationsInput ]
+                    [ resourcePageUuidSelect, annotationsInput ]
 
                 URLReference data ->
                     let
@@ -1967,6 +2018,168 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
         , nameInput
         , emailInput
         , annotationsInput
+        ]
+
+
+viewResourceCollectionEditor : EditorConfig msg -> ResourceCollection -> Html msg
+viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch } resourceCollection =
+    let
+        parentUuid =
+            EditorBranch.getParentUuid resourceCollection.uuid editorBranch
+
+        createEditEvent map value =
+            EditResourceCollectionEventData.init
+                |> map value
+                |> EditResourceCollectionEvent
+                |> eventMsg parentUuid (Just resourceCollection.uuid)
+
+        resourcePageAddEvent =
+            AddResourcePageEventData.init
+                |> AddResourcePageEvent
+                |> eventMsg resourceCollection.uuid Nothing
+
+        resourceCollectionEditorTitle =
+            editorTitle appState
+                { title = gettext "Resource Collection" appState.locale
+                , uuid = resourceCollection.uuid
+                , wrapMsg = wrapMsg
+                , copyUuidButton = True
+                , mbDeleteModalState = Just ResourceCollectionState
+                , mbMovingEntity = Nothing
+                }
+
+        titleInput =
+            Input.string
+                { name = "title"
+                , label = gettext "Title" appState.locale
+                , value = resourceCollection.title
+                , onInput = createEditEvent setTitle
+                }
+
+        resourcePagesInput =
+            Input.reorderable appState
+                { name = "resourcePages"
+                , label = gettext "Resource Pages" appState.locale
+                , items = EditorBranch.filterDeleted editorBranch resourceCollection.resourcePageUuids
+                , entityUuid = resourceCollection.uuid
+                , getReorderableState = flip Dict.get model.reorderableStates
+                , toMsg = compose2 wrapMsg ReorderableMsg
+                , updateList = createEditEvent setResourcePageUuids
+                , getRoute = editorRoute editorBranch
+                , getName = KnowledgeModel.getResourcePageName editorBranch.branch.knowledgeModel
+                , untitledLabel = gettext "Untitled resource page" appState.locale
+                , addChildLabel = gettext "Add resource page" appState.locale
+                , addChildMsg = resourcePageAddEvent
+                , addChildDataCy = "resource-page"
+                }
+
+        annotationsInput =
+            Input.annotations appState
+                { annotations = resourceCollection.annotations
+                , onEdit = createEditEvent setAnnotations
+                }
+    in
+    editor ("resource-collection-" ++ resourceCollection.uuid)
+        [ resourceCollectionEditorTitle
+        , titleInput
+        , resourcePagesInput
+        , annotationsInput
+        ]
+
+
+viewResourcePageEditor : EditorConfig msg -> ResourcePage -> Html msg
+viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } resourcePage =
+    let
+        parentUuid =
+            EditorBranch.getParentUuid resourcePage.uuid editorBranch
+
+        createEditEvent map value =
+            EditResourcePageEventData.init
+                |> map value
+                |> EditResourcePageEvent
+                |> eventMsg parentUuid (Just resourcePage.uuid)
+
+        resourcePageEditorTitle =
+            editorTitle appState
+                { title = gettext "Resource Page" appState.locale
+                , uuid = resourcePage.uuid
+                , wrapMsg = wrapMsg
+                , copyUuidButton = True
+                , mbDeleteModalState = Just ResourcePageState
+                , mbMovingEntity = Nothing
+                }
+
+        titleInput =
+            Input.string
+                { name = "title"
+                , label = gettext "Title" appState.locale
+                , value = resourcePage.title
+                , onInput = createEditEvent setTitle
+                }
+
+        contentInput =
+            Input.markdown appState
+                { name = "content"
+                , label = gettext "Content" appState.locale
+                , value = resourcePage.content
+                , onInput = createEditEvent setContent
+                , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
+                , entityUuid = resourcePage.uuid
+                , markdownPreviews = model.markdownPreviews
+                }
+
+        annotationsInput =
+            Input.annotations appState
+                { annotations = resourcePage.annotations
+                , onEdit = createEditEvent setAnnotations
+                }
+
+        viewQuestionLink question =
+            let
+                questionTitle =
+                    Question.getTitle question
+
+                questionTitleNode =
+                    if String.isEmpty questionTitle then
+                        i [] [ text (gettext "Untitled question" appState.locale) ]
+
+                    else
+                        text questionTitle
+            in
+            li []
+                [ linkTo appState
+                    (editorRoute editorBranch (Question.getUuid question))
+                    []
+                    [ questionTitleNode ]
+                ]
+
+        wrapQuestionsWithIntegration questions =
+            if List.isEmpty questions then
+                div [] [ i [] [ text (gettext "No questions" appState.locale) ] ]
+
+            else
+                ul [] questions
+
+        filterQuestionByResourcePageUuid questionUuid =
+            KnowledgeModel.getQuestionReferences questionUuid editorBranch.branch.knowledgeModel
+                |> List.filterMap Reference.getResourcePageUuid
+                |> List.member resourcePage.uuid
+
+        questionsWithResourcePage =
+            KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
+                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                |> List.filter (filterQuestionByResourcePageUuid << Question.getUuid)
+                |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
+                |> List.sortBy Question.getTitle
+                |> List.map viewQuestionLink
+                |> wrapQuestionsWithIntegration
+    in
+    editor ("resource-page-" ++ resourcePage.uuid)
+        [ resourcePageEditorTitle
+        , titleInput
+        , contentInput
+        , annotationsInput
+        , FormGroup.plainGroup questionsWithResourcePage (gettext "Questions using this resource page" appState.locale)
         ]
 
 
@@ -2107,6 +2320,20 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                     , getContent
                         (gettext "Are you sure you want to delete this integration?" appState.locale)
                         (createEvent DeleteIntegrationEvent uuid)
+                    )
+
+                ResourceCollectionState uuid ->
+                    ( True
+                    , getContent
+                        (gettext "Are you sure you want to delete this resource collection?" appState.locale)
+                        (createEvent DeleteResourceCollectionEvent uuid)
+                    )
+
+                ResourcePageState uuid ->
+                    ( True
+                    , getContent
+                        (gettext "Are you sure you want to delete this resource page?" appState.locale)
+                        (createEvent DeleteResourcePageEvent uuid)
                     )
 
                 AnswerState uuid ->

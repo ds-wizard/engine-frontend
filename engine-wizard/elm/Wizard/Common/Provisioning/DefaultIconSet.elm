@@ -78,6 +78,8 @@ iconSet =
         , ( "km.phase", "far fa-clock" )
         , ( "km.question", "far fa-comment" )
         , ( "km.reference", "far fa-bookmark" )
+        , ( "km.resourceCollection", "fas fa-book" )
+        , ( "km.resourcePage", "far fa-file-lines" )
         , ( "km.tag", "fas fa-tag" )
         , ( "kmEditor.collapseAll", "fas fa-angle-double-up" )
         , ( "kmEditor.copyUuid", "fas fa-paste" )

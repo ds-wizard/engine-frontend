@@ -20,6 +20,7 @@ type alias EditKnowledgeModelEventData =
     , phaseUuids : EventField (List String)
     , tagUuids : EventField (List String)
     , integrationUuids : EventField (List String)
+    , resourceCollectionUuids : EventField (List String)
     , annotations : EventField (List Annotation)
     }
 
@@ -32,6 +33,7 @@ decoder =
         |> D.required "phaseUuids" (EventField.decoder (D.list D.string))
         |> D.required "tagUuids" (EventField.decoder (D.list D.string))
         |> D.required "integrationUuids" (EventField.decoder (D.list D.string))
+        |> D.required "resourceCollectionUuids" (EventField.decoder (D.list D.string))
         |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
@@ -43,6 +45,7 @@ encode data =
     , ( "phaseUuids", EventField.encode (E.list E.string) data.phaseUuids )
     , ( "tagUuids", EventField.encode (E.list E.string) data.tagUuids )
     , ( "integrationUuids", EventField.encode (E.list E.string) data.integrationUuids )
+    , ( "resourceCollectionUuids", EventField.encode (E.list E.string) data.resourceCollectionUuids )
     , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
 
@@ -54,6 +57,7 @@ init =
     , phaseUuids = EventField.empty
     , tagUuids = EventField.empty
     , integrationUuids = EventField.empty
+    , resourceCollectionUuids = EventField.empty
     , annotations = EventField.empty
     }
 
@@ -66,5 +70,6 @@ apply eventData km =
         , phaseUuids = EventField.applyChildren eventData.phaseUuids km.phaseUuids
         , tagUuids = EventField.applyChildren eventData.tagUuids km.tagUuids
         , integrationUuids = EventField.applyChildren eventData.integrationUuids km.integrationUuids
+        , resourceCollectionUuids = EventField.applyChildren eventData.resourceCollectionUuids km.resourceCollectionUuids
         , annotations = EventField.getValueWithDefault eventData.annotations km.annotations
     }
