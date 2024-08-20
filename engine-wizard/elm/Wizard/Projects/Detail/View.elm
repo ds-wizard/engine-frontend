@@ -364,7 +364,7 @@ viewProjectContent appState route model questionnaire =
                             , toolbarEnabled = True
                             , questionLinksEnabled = True
                             }
-                        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
+                        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel (DefaultQuestionnaireRenderer.defaultResourcePageToRoute qm.questionnaire.packageId)
                         , wrapMsg = QuestionnaireMsg
                         , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
                         , revertQuestionnaireMsg = Just OpenRevertModal

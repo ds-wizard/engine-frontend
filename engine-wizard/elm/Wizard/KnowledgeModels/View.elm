@@ -8,6 +8,7 @@ import Wizard.KnowledgeModels.Index.View
 import Wizard.KnowledgeModels.Models exposing (Model)
 import Wizard.KnowledgeModels.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Preview.View
+import Wizard.KnowledgeModels.ResourcePage.View
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
@@ -25,3 +26,6 @@ view route appState model =
 
         PreviewRoute _ _ ->
             Html.map PreviewMsg <| Wizard.KnowledgeModels.Preview.View.view appState model.previewModel
+
+        ResourcePageRoute _ _ ->
+            Html.map ResourcePageMsg <| Wizard.KnowledgeModels.ResourcePage.View.view appState model.resourcePageModel

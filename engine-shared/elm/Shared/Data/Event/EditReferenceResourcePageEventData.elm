@@ -13,7 +13,7 @@ import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 
 
 type alias EditReferenceResourcePageEventData =
-    { shortUuid : EventField String
+    { resourcePageUuid : EventField String
     , annotations : EventField (List Annotation)
     }
 
@@ -21,20 +21,20 @@ type alias EditReferenceResourcePageEventData =
 decoder : Decoder EditReferenceResourcePageEventData
 decoder =
     D.succeed EditReferenceResourcePageEventData
-        |> D.required "shortUuid" (EventField.decoder D.string)
+        |> D.required "resourcePageUuid" (EventField.decoder D.string)
         |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
 encode : EditReferenceResourcePageEventData -> List ( String, E.Value )
 encode data =
     [ ( "referenceType", E.string "ResourcePageReference" )
-    , ( "shortUuid", EventField.encode E.string data.shortUuid )
+    , ( "resourcePageUuid", EventField.encode E.string data.resourcePageUuid )
     , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
 
 
 init : EditReferenceResourcePageEventData
 init =
-    { shortUuid = EventField.empty
+    { resourcePageUuid = EventField.empty
     , annotations = EventField.empty
     }

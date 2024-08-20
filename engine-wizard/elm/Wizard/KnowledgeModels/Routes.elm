@@ -8,3 +8,4 @@ type Route
     | ImportRoute (Maybe String)
     | IndexRoute PaginationQueryString
     | PreviewRoute String (Maybe String)
+    | ResourcePageRoute String String

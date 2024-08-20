@@ -27,7 +27,9 @@ knowledgeModelEntitiesDecoderTest =
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -42,6 +44,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -68,7 +72,9 @@ knowledgeModelEntitiesDecoderTest =
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -93,6 +99,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -127,7 +135,9 @@ knowledgeModelEntitiesDecoderTest =
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -159,6 +169,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -186,7 +198,9 @@ knowledgeModelEntitiesDecoderTest =
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -212,6 +226,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -236,7 +252,9 @@ knowledgeModelEntitiesDecoderTest =
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -259,6 +277,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -284,7 +304,9 @@ knowledgeModelEntitiesDecoderTest =
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -308,6 +330,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -326,14 +350,16 @@ knowledgeModelEntitiesDecoderTest =
                                 "8a703cfa-450f-421a-8819-875619ccb54d": {
                                     "referenceType": "ResourcePageReference",
                                     "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
-                                    "shortUuid": "atq",
+                                    "resourcePageUuid": "ba931b74-6254-403e-a10e-ba14bd55e384",
                                     "annotations": []
                                 }
                             },
                             "integrations": {},
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -348,7 +374,7 @@ knowledgeModelEntitiesDecoderTest =
                                 [ ( "8a703cfa-450f-421a-8819-875619ccb54d"
                                   , ResourcePageReference
                                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                                        , shortUuid = "atq"
+                                        , resourcePageUuid = "ba931b74-6254-403e-a10e-ba14bd55e384"
                                         , annotations = []
                                         }
                                   )
@@ -357,6 +383,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -394,7 +422,9 @@ knowledgeModelEntitiesDecoderTest =
                             },
                             "tags": {},
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -431,6 +461,8 @@ knowledgeModelEntitiesDecoderTest =
                         , tags = Dict.empty
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected
@@ -457,7 +489,9 @@ knowledgeModelEntitiesDecoderTest =
                                 }
                             },
                             "metrics": {},
-                            "phases": {}
+                            "phases": {},
+                            "resourceCollections": {},
+                            "resourcePages": {}
                         }
                         """
 
@@ -482,6 +516,8 @@ knowledgeModelEntitiesDecoderTest =
                                 ]
                         , metrics = Dict.empty
                         , phases = Dict.empty
+                        , resourceCollections = Dict.empty
+                        , resourcePages = Dict.empty
                         }
                 in
                 expectDecoder KnowledgeModelEntities.decoder raw expected

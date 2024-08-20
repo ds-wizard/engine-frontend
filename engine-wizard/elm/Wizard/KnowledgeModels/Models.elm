@@ -6,6 +6,7 @@ import Wizard.KnowledgeModels.Detail.Models
 import Wizard.KnowledgeModels.Import.Models
 import Wizard.KnowledgeModels.Index.Models
 import Wizard.KnowledgeModels.Preview.Models
+import Wizard.KnowledgeModels.ResourcePage.Models
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
@@ -14,6 +15,7 @@ type alias Model =
     , importModel : Wizard.KnowledgeModels.Import.Models.Model
     , indexModel : Wizard.KnowledgeModels.Index.Models.Model
     , previewModel : Wizard.KnowledgeModels.Preview.Models.Model
+    , resourcePageModel : Wizard.KnowledgeModels.ResourcePage.Models.Model
     }
 
 
@@ -23,6 +25,7 @@ initialModel appState =
     , importModel = Wizard.KnowledgeModels.Import.Models.initialModel appState Nothing
     , indexModel = Wizard.KnowledgeModels.Index.Models.initialModel PaginationQueryString.empty
     , previewModel = Wizard.KnowledgeModels.Preview.Models.initialModel Nothing
+    , resourcePageModel = Wizard.KnowledgeModels.ResourcePage.Models.initialModel ""
     }
 
 
@@ -40,3 +43,6 @@ initLocalModel route appState model =
 
         PreviewRoute _ mbQuestionUuid ->
             { model | previewModel = Wizard.KnowledgeModels.Preview.Models.initialModel mbQuestionUuid }
+
+        ResourcePageRoute _ resourcePageUuid ->
+            { model | resourcePageModel = Wizard.KnowledgeModels.ResourcePage.Models.initialModel resourcePageUuid }

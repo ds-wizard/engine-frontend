@@ -18,6 +18,8 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Utils exposing (flip)
@@ -44,6 +46,8 @@ type alias CreateEvents msg =
     , createChoice : String -> msg
     , createExpert : String -> msg
     , createReference : String -> msg
+    , createResourceCollection : String -> msg
+    , createResourcePage : String -> msg
     , createIntegration : String -> msg
     , createTag : String -> msg
     , createMetric : String -> msg
@@ -141,6 +145,18 @@ treeNodeKM props appState editorBranch =
                 (props.createEvents.createIntegration uuid)
                 (gettext "Add integration" appState.locale)
 
+        resourceCollections =
+            KnowledgeModel.getResourceCollections knowledgeModel
+                |> EditorBranch.sortDeleted .uuid editorBranch
+
+        resourceCollectionNodes =
+            List.map (treeNodeResourceCollection props appState editorBranch) resourceCollections
+
+        addResourceCollection =
+            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid resourceCollections))
+                (props.createEvents.createResourceCollection uuid)
+                (gettext "Add resource collection" appState.locale)
+
         config =
             { uuid = uuid
             , icon = faSet "km.knowledgeModel" appState
@@ -157,6 +173,8 @@ treeNodeKM props appState editorBranch =
                     , addTag
                     , integrationNodes
                     , addIntegration
+                    , resourceCollectionNodes
+                    , addResourceCollection
                     ]
             , untitledLabel = ""
             }
@@ -381,7 +399,7 @@ treeNodeReference props appState editorBranch reference =
         config =
             { uuid = Reference.getUuid reference
             , icon = faSet "km.reference" appState
-            , label = Reference.getVisibleName reference
+            , label = Reference.getVisibleName (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel) reference
             , children = []
             , untitledLabel = gettext "Untitled reference" appState.locale
             }
@@ -398,6 +416,46 @@ treeNodeExperts props appState editorBranch expert =
             , label = Expert.getVisibleName expert
             , children = []
             , untitledLabel = gettext "Untitled expert" appState.locale
+            }
+    in
+    treeNode props appState editorBranch config
+
+
+treeNodeResourceCollection : ViewProps msg -> AppState -> EditorBranch -> ResourceCollection -> Html msg
+treeNodeResourceCollection props appState editorBranch resourceCollection =
+    let
+        resourcePages =
+            KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid editorBranch.branch.knowledgeModel
+                |> EditorBranch.sortDeleted .uuid editorBranch
+
+        resourcePageNodes =
+            List.map (treeNodeResourcePage props appState editorBranch) resourcePages
+
+        addResourcePage =
+            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid resourcePages))
+                (props.createEvents.createResourcePage resourceCollection.uuid)
+                (gettext "Add resource page" appState.locale)
+
+        config =
+            { uuid = resourceCollection.uuid
+            , icon = faSet "km.resourceCollection" appState
+            , label = resourceCollection.title
+            , children = resourcePageNodes ++ addResourcePage
+            , untitledLabel = gettext "Untitled resource collection" appState.locale
+            }
+    in
+    treeNode props appState editorBranch config
+
+
+treeNodeResourcePage : ViewProps msg -> AppState -> EditorBranch -> ResourcePage -> Html msg
+treeNodeResourcePage props appState editorBranch resourcePage =
+    let
+        config =
+            { uuid = resourcePage.uuid
+            , icon = faSet "km.resourcePage" appState
+            , label = resourcePage.title
+            , children = []
+            , untitledLabel = gettext "Untitled resource page" appState.locale
             }
     in
     treeNode props appState editorBranch config

@@ -24,7 +24,7 @@ create : AppState -> QuestionnaireMigration -> QuestionnaireChanges -> Knowledge
 create appState migration changes km mbSelectedChange =
     let
         defaultRenderer =
-            DefaultQuestionnaireRenderer.create appState km
+            DefaultQuestionnaireRenderer.create appState km (DefaultQuestionnaireRenderer.defaultResourcePageToRoute migration.newQuestionnaire.packageId)
 
         getExtraQuestionClass question =
             if Just (Question.getUuid question) == Maybe.map QuestionChange.getQuestionUuid mbSelectedChange then

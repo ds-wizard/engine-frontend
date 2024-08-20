@@ -18,6 +18,8 @@ import Shared.Data.Event.AddMetricEventData as AddMetricEventData exposing (AddM
 import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData exposing (AddPhaseEventData)
 import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData exposing (AddQuestionEventData)
 import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
+import Shared.Data.Event.AddResourceCollectionEventData as AddResourceCollectionEventData exposing (AddResourceCollectionEventData)
+import Shared.Data.Event.AddResourcePageEventData as AddResourcePageEventData exposing (AddResourcePageEventData)
 import Shared.Data.Event.AddTagEventData as AddTagEventData exposing (AddTagEventData)
 import Shared.Data.Event.CommonEventData as CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData exposing (EditAnswerEventData)
@@ -30,6 +32,8 @@ import Shared.Data.Event.EditMetricEventData as EditMetricEventData exposing (Ed
 import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData exposing (EditPhaseEventData)
 import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData exposing (EditQuestionEventData)
 import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData)
+import Shared.Data.Event.EditResourceCollectionEventData as EditResourceCollectionEventData exposing (EditResourceCollectionEventData)
+import Shared.Data.Event.EditResourcePageEventData as EditResourcePageEventData exposing (EditResourcePageEventData)
 import Shared.Data.Event.EditTagEventData as EditTagEventData exposing (EditTagEventData)
 import Shared.Data.Event.EventField as EventField
 import Shared.Data.Event.MoveEventData as MoveEventData exposing (MoveEventData)
@@ -68,6 +72,12 @@ type Event
     | AddExpertEvent AddExpertEventData CommonEventData
     | EditExpertEvent EditExpertEventData CommonEventData
     | DeleteExpertEvent CommonEventData
+    | AddResourceCollectionEvent AddResourceCollectionEventData CommonEventData
+    | EditResourceCollectionEvent EditResourceCollectionEventData CommonEventData
+    | DeleteResourceCollectionEvent CommonEventData
+    | AddResourcePageEvent AddResourcePageEventData CommonEventData
+    | EditResourcePageEvent EditResourcePageEventData CommonEventData
+    | DeleteResourcePageEvent CommonEventData
     | MoveQuestionEvent MoveEventData CommonEventData
     | MoveAnswerEvent MoveEventData CommonEventData
     | MoveChoiceEvent MoveEventData CommonEventData
@@ -179,6 +189,24 @@ decoderByType eventType =
 
         "DeleteExpertEvent" ->
             D.map DeleteExpertEvent CommonEventData.decoder
+
+        "AddResourceCollectionEvent" ->
+            D.map2 AddResourceCollectionEvent AddResourceCollectionEventData.decoder CommonEventData.decoder
+
+        "EditResourceCollectionEvent" ->
+            D.map2 EditResourceCollectionEvent EditResourceCollectionEventData.decoder CommonEventData.decoder
+
+        "DeleteResourceCollectionEvent" ->
+            D.map DeleteResourceCollectionEvent CommonEventData.decoder
+
+        "AddResourcePageEvent" ->
+            D.map2 AddResourcePageEvent AddResourcePageEventData.decoder CommonEventData.decoder
+
+        "EditResourcePageEvent" ->
+            D.map2 EditResourcePageEvent EditResourcePageEventData.decoder CommonEventData.decoder
+
+        "DeleteResourcePageEvent" ->
+            D.map DeleteResourcePageEvent CommonEventData.decoder
 
         "MoveQuestionEvent" ->
             D.map2 MoveQuestionEvent MoveEventData.decoder CommonEventData.decoder
@@ -299,6 +327,24 @@ encode event =
 
                 DeleteExpertEvent commonData ->
                     ( [ ( "eventType", E.string "DeleteExpertEvent" ) ], CommonEventData.encode commonData )
+
+                AddResourceCollectionEvent eventData commonData ->
+                    ( AddResourceCollectionEventData.encode eventData, CommonEventData.encode commonData )
+
+                EditResourceCollectionEvent eventData commonData ->
+                    ( EditResourceCollectionEventData.encode eventData, CommonEventData.encode commonData )
+
+                DeleteResourceCollectionEvent commonData ->
+                    ( [ ( "eventType", E.string "DeleteResourceCollectionEvent" ) ], CommonEventData.encode commonData )
+
+                AddResourcePageEvent eventData commonData ->
+                    ( AddResourcePageEventData.encode eventData, CommonEventData.encode commonData )
+
+                EditResourcePageEvent eventData commonData ->
+                    ( EditResourcePageEventData.encode eventData, CommonEventData.encode commonData )
+
+                DeleteResourcePageEvent commonData ->
+                    ( [ ( "eventType", E.string "DeleteResourcePageEvent" ) ], CommonEventData.encode commonData )
 
                 MoveQuestionEvent eventData commonData ->
                     ( MoveEventData.encode "MoveQuestionEvent" eventData, CommonEventData.encode commonData )
@@ -422,6 +468,24 @@ getCommonData event =
         DeleteExpertEvent commonData ->
             commonData
 
+        AddResourceCollectionEvent _ commonData ->
+            commonData
+
+        EditResourceCollectionEvent _ commonData ->
+            commonData
+
+        DeleteResourceCollectionEvent commonData ->
+            commonData
+
+        AddResourcePageEvent _ commonData ->
+            commonData
+
+        EditResourcePageEvent _ commonData ->
+            commonData
+
+        DeleteResourcePageEvent commonData ->
+            commonData
+
         MoveQuestionEvent _ commonData ->
             commonData
 
@@ -506,6 +570,18 @@ getEntityVisibleName event =
 
         EditExpertEvent eventData _ ->
             EventField.getValue eventData.name
+
+        AddResourceCollectionEvent eventData _ ->
+            Just eventData.title
+
+        EditResourceCollectionEvent eventData _ ->
+            EventField.getValue eventData.title
+
+        AddResourcePageEvent eventData _ ->
+            Just eventData.title
+
+        EditResourcePageEvent eventData _ ->
+            EventField.getValue eventData.title
 
         _ ->
             Nothing

@@ -156,7 +156,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
                 , toolbarEnabled = False
                 , questionLinksEnabled = False
                 }
-            , renderer = DefaultQuestionnaireRenderer.create appState questionnaire.knowledgeModel
+            , renderer = DefaultQuestionnaireRenderer.create appState questionnaire.knowledgeModel (DefaultQuestionnaireRenderer.defaultResourcePageToRoute questionnaire.packageId)
             , wrapMsg = QuestionnaireMsg
             , previewQuestionnaireEventMsg = Nothing
             , revertQuestionnaireMsg = Nothing

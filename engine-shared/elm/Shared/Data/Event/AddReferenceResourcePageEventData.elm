@@ -13,7 +13,7 @@ import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
 
 
 type alias AddReferenceResourcePageEventData =
-    { shortUuid : String
+    { resourcePageUuid : String
     , annotations : List Annotation
     }
 
@@ -21,14 +21,14 @@ type alias AddReferenceResourcePageEventData =
 decoder : Decoder AddReferenceResourcePageEventData
 decoder =
     D.succeed AddReferenceResourcePageEventData
-        |> D.required "shortUuid" D.string
+        |> D.required "resourcePageUuid" D.string
         |> D.required "annotations" (D.list Annotation.decoder)
 
 
 encode : AddReferenceResourcePageEventData -> List ( String, E.Value )
 encode data =
     [ ( "referenceType", E.string "ResourcePageReference" )
-    , ( "shortUuid", E.string data.shortUuid )
+    , ( "resourcePageUuid", E.string data.resourcePageUuid )
     , ( "annotations", E.list Annotation.encode data.annotations )
     ]
 
@@ -37,6 +37,6 @@ toReference : String -> AddReferenceResourcePageEventData -> Reference
 toReference uuid data =
     ResourcePageReference
         { uuid = uuid
-        , shortUuid = data.shortUuid
+        , resourcePageUuid = data.resourcePageUuid
         , annotations = data.annotations
         }

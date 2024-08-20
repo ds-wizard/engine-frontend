@@ -6,6 +6,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setChapterUuids
     , setChoiceUuids
     , setColor
+    , setContent
     , setDescription
     , setEmail
     , setExpertUuids
@@ -30,10 +31,12 @@ module Shared.Data.Event.EditEventSetters exposing
     , setRequestMethod
     , setRequestUrl
     , setRequiredPhaseUuid
+    , setResourceCollectionUuids
+    , setResourcePageUuid
+    , setResourcePageUuids
     , setResponseItemId
     , setResponseItemTemplate
     , setResponseListField
-    , setShortUuid
     , setTagUuids
     , setText
     , setTitle
@@ -78,6 +81,11 @@ setChoiceUuids value data =
 setColor : a -> { b | color : EventField a } -> { b | color : EventField a }
 setColor value data =
     { data | color = EventField.create value True }
+
+
+setContent : a -> { b | content : EventField a } -> { b | content : EventField a }
+setContent value data =
+    { data | content = EventField.create value True }
 
 
 setDescription : a -> { b | description : EventField a } -> { b | description : EventField a }
@@ -200,6 +208,21 @@ setRequiredPhaseUuid value data =
     { data | requiredPhaseUuid = EventField.create value True }
 
 
+setResourceCollectionUuids : a -> { b | resourceCollectionUuids : EventField a } -> { b | resourceCollectionUuids : EventField a }
+setResourceCollectionUuids value data =
+    { data | resourceCollectionUuids = EventField.create value True }
+
+
+setResourcePageUuid : a -> { b | resourcePageUuid : EventField a } -> { b | resourcePageUuid : EventField a }
+setResourcePageUuid value data =
+    { data | resourcePageUuid = EventField.create value True }
+
+
+setResourcePageUuids : a -> { b | resourcePageUuids : EventField a } -> { b | resourcePageUuids : EventField a }
+setResourcePageUuids value data =
+    { data | resourcePageUuids = EventField.create value True }
+
+
 setResponseItemId : a -> { b | responseItemId : EventField a } -> { b | responseItemId : EventField a }
 setResponseItemId value data =
     { data | responseItemId = EventField.create value True }
@@ -213,11 +236,6 @@ setResponseItemTemplate value data =
 setResponseListField : a -> { b | responseListField : EventField a } -> { b | responseListField : EventField a }
 setResponseListField value data =
     { data | responseListField = EventField.create value True }
-
-
-setShortUuid : a -> { b | shortUuid : EventField a } -> { b | shortUuid : EventField a }
-setShortUuid value data =
-    { data | shortUuid = EventField.create value True }
 
 
 setTagUuids : a -> { b | tagUuids : EventField a } -> { b | tagUuids : EventField a }
