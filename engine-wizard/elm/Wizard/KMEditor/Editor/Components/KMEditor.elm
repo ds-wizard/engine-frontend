@@ -1898,11 +1898,21 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
 
                         resourcePageOption resourcePageUuid =
                             KnowledgeModel.getResourcePage resourcePageUuid editorBranch.branch.knowledgeModel
-                                |> Maybe.map (\rp -> ( rp.uuid, rp.title ))
+                                |> Maybe.map
+                                    (\rp ->
+                                        let
+                                            title =
+                                                if String.isEmpty rp.title then
+                                                    gettext "Untitled resource page" appState.locale
+
+                                                else
+                                                    rp.title
+                                        in
+                                        ( rp.uuid, title )
+                                    )
 
                         resourcePageUuidOptions =
-                            KnowledgeModel.getResourceCollections editorBranch.branch.knowledgeModel
-                                |> EditorBranch.filterDeletedWith .uuid editorBranch
+                            KnowledgeModel.getResourceCollections (EditorBranch.getFilteredKM editorBranch)
                                 |> List.map (\rc -> ( rc.title, List.filterMap resourcePageOption rc.resourcePageUuids ))
 
                         resourcePageUuidSelect =

@@ -194,11 +194,15 @@ getFilteredKM editorBranch =
         filterAnswer _ answer =
             { answer | followUpUuids = filterDeleted editorBranch answer.followUpUuids }
 
+        filterResourceCollection _ resourceCollection =
+            { resourceCollection | resourcePageUuids = filterDeleted editorBranch resourceCollection.resourcePageUuids }
+
         entities =
             { knowledgeModelEntities
                 | chapters = Dict.map filterChapter knowledgeModelEntities.chapters
                 , questions = Dict.map filterQuestion knowledgeModelEntities.questions
                 , answers = Dict.map filterAnswer knowledgeModelEntities.answers
+                , resourceCollections = Dict.map filterResourceCollection knowledgeModelEntities.resourceCollections
             }
     in
     { knowledgeModel
@@ -207,6 +211,7 @@ getFilteredKM editorBranch =
         , integrationUuids = filterDeleted editorBranch knowledgeModel.integrationUuids
         , metricUuids = filterDeleted editorBranch knowledgeModel.metricUuids
         , phaseUuids = filterDeleted editorBranch knowledgeModel.phaseUuids
+        , resourceCollectionUuids = filterDeleted editorBranch knowledgeModel.resourceCollectionUuids
         , entities = entities
     }
 
