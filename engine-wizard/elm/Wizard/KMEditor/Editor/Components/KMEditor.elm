@@ -1909,10 +1909,10 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                             Input.selectWithGroups
                                 { name = "resourcePageUuid"
                                 , label = gettext "Resource Page" appState.locale
-                                , value = data.resourcePageUuid
-                                , defaultOption = ( Uuid.toString Uuid.nil, gettext "- select resource page -" appState.locale )
+                                , value = Maybe.withDefault "" data.resourcePageUuid
+                                , defaultOption = ( "", gettext "- select resource page -" appState.locale )
                                 , options = resourcePageUuidOptions
-                                , onChange = createTypeEditEvent setResourcePageUuid
+                                , onChange = createTypeEditEvent setResourcePageUuid << String.toMaybe
                                 }
 
                         annotationsInput =

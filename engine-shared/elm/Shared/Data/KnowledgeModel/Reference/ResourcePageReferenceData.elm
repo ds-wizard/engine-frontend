@@ -12,7 +12,7 @@ import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 
 type alias ResourcePageReferenceData =
     { uuid : String
-    , resourcePageUuid : String
+    , resourcePageUuid : Maybe String
     , annotations : List Annotation
     }
 
@@ -21,13 +21,13 @@ decoder : Decoder ResourcePageReferenceData
 decoder =
     D.succeed ResourcePageReferenceData
         |> D.required "uuid" D.string
-        |> D.required "resourcePageUuid" D.string
+        |> D.required "resourcePageUuid" (D.maybe D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
 
 
 toLabel : List ResourcePage -> ResourcePageReferenceData -> String
 toLabel resourcePages data =
-    case List.head <| List.filter (\rp -> rp.uuid == data.resourcePageUuid) resourcePages of
+    case List.head <| List.filter (\rp -> Just rp.uuid == data.resourcePageUuid) resourcePages of
         Just resourcePage ->
             resourcePage.title
 

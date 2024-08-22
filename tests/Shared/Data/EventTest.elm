@@ -1382,7 +1382,7 @@ addResourcePageReferenceEvent : Event
 addResourcePageReferenceEvent =
     AddReferenceEvent
         (AddReferenceResourcePageEvent
-            { resourcePageUuid = "ba931b74-6254-403e-a10e-ba14bd55e384"
+            { resourcePageUuid = Just "ba931b74-6254-403e-a10e-ba14bd55e384"
             , annotations = []
             }
         )
@@ -1458,7 +1458,7 @@ editResourcePageReferenceEvent =
         (EditReferenceResourcePageEvent
             { resourcePageUuid =
                 { changed = True
-                , value = Just "ba931b74-6254-403e-a10e-ba14bd55e384"
+                , value = Just (Just "ba931b74-6254-403e-a10e-ba14bd55e384")
                 }
             , annotations =
                 { changed = False

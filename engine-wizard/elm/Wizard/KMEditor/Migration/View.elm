@@ -62,6 +62,7 @@ import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Data.Migration exposing (Migration)
 import Shared.Data.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
 import Shared.Html exposing (emptyNode, faSet)
+import Shared.Utils exposing (flip)
 import String.Format as String exposing (format)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -1671,7 +1672,7 @@ viewAddResourcePageReferenceDiff appState data =
                     , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , data.resourcePageUuid
+                    , Maybe.withDefault "" data.resourcePageUuid
                     ]
 
         annotationsDiff =
@@ -1734,10 +1735,10 @@ viewEditReferenceDiff appState event reference =
                             , gettext "Resource Page UUID" appState.locale
                             ]
                             [ gettext "Resource Page" appState.locale
-                            , referenceData.resourcePageUuid
+                            , Maybe.withDefault "" referenceData.resourcePageUuid
                             ]
                             [ gettext "Resource Page" appState.locale
-                            , EventField.getValueWithDefault eventData.resourcePageUuid referenceData.resourcePageUuid
+                            , Maybe.withDefault "" <| EventField.getValueWithDefault eventData.resourcePageUuid referenceData.resourcePageUuid
                             ]
 
                 annotationsDiff =
@@ -1798,7 +1799,7 @@ viewEditReferenceDiff appState event reference =
 
                 addReference =
                     EditReferenceEventData.map
-                        (viewEditResourcePageReferenceDiff appState)
+                        (flip (viewEditResourcePageReferenceDiff appState) Nothing)
                         (viewEditURLReferenceDiff appState)
                         (viewEditCrossReferenceDiff appState)
                         otherEvent
@@ -1806,8 +1807,8 @@ viewEditReferenceDiff appState event reference =
             div [] [ deleteReference, addReference ]
 
 
-viewEditResourcePageReferenceDiff : AppState -> EditReferenceResourcePageEventData -> Html Msg
-viewEditResourcePageReferenceDiff appState data =
+viewEditResourcePageReferenceDiff : AppState -> EditReferenceResourcePageEventData -> Maybe ResourcePageReferenceData -> Html Msg
+viewEditResourcePageReferenceDiff appState data mbResourcePageReference =
     let
         fieldDiff =
             viewAdd <|
@@ -1816,7 +1817,7 @@ viewEditResourcePageReferenceDiff appState data =
                     , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , EventField.getValueWithDefault data.resourcePageUuid ""
+                    , Maybe.withDefault "" <| EventField.getValueWithDefault data.resourcePageUuid (Maybe.andThen .resourcePageUuid mbResourcePageReference)
                     ]
 
         annotationsDiff =
@@ -1885,7 +1886,7 @@ viewDeleteResourcePageReferenceDiff appState data =
                     , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , data.resourcePageUuid
+                    , Maybe.withDefault "" data.resourcePageUuid
                     ]
 
         annotationsDiff =
@@ -1954,7 +1955,7 @@ viewMoveResourcePageReference appState data =
                     , gettext "Resource Page UUID" appState.locale
                     ]
                     [ gettext "Resource Page" appState.locale
-                    , data.resourcePageUuid
+                    , Maybe.withDefault "" data.resourcePageUuid
                     ]
 
         annotationsDiff =

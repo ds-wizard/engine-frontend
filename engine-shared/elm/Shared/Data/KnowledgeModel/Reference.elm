@@ -96,7 +96,7 @@ getAnnotations =
 
 getResourcePageUuid : Reference -> Maybe String
 getResourcePageUuid =
-    map (Just << .resourcePageUuid) (always Nothing) (always Nothing)
+    map .resourcePageUuid (always Nothing) (always Nothing)
 
 
 getUrl : Reference -> Maybe String

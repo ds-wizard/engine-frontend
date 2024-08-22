@@ -61,7 +61,7 @@ apply event reference =
         EditReferenceResourcePageEvent eventData ->
             ResourcePageReference
                 { uuid = Reference.getUuid reference
-                , resourcePageUuid = EventField.getValueWithDefault eventData.resourcePageUuid (Maybe.withDefault "" (Reference.getResourcePageUuid reference))
+                , resourcePageUuid = EventField.getValueWithDefault eventData.resourcePageUuid (Reference.getResourcePageUuid reference)
                 , annotations = EventField.getValueWithDefault eventData.annotations (Reference.getAnnotations reference)
                 }
 
@@ -83,8 +83,16 @@ apply event reference =
 
 
 getEntityVisibleName : EditReferenceEventData -> Maybe String
-getEntityVisibleName =
-    EventField.getValue << map .resourcePageUuid .label .targetUuid
+getEntityVisibleName reference =
+    case reference of
+        EditReferenceResourcePageEvent data ->
+            Maybe.withDefault Nothing (EventField.getValue data.resourcePageUuid)
+
+        EditReferenceURLEvent data ->
+            EventField.getValue data.label
+
+        EditReferenceCrossEvent data ->
+            EventField.getValue data.targetUuid
 
 
 map :

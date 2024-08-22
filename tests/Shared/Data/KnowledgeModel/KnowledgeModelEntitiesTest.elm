@@ -374,7 +374,7 @@ knowledgeModelEntitiesDecoderTest =
                                 [ ( "8a703cfa-450f-421a-8819-875619ccb54d"
                                   , ResourcePageReference
                                         { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
-                                        , resourcePageUuid = "ba931b74-6254-403e-a10e-ba14bd55e384"
+                                        , resourcePageUuid = Just "ba931b74-6254-403e-a10e-ba14bd55e384"
                                         , annotations = []
                                         }
                                   )

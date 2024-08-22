@@ -1016,7 +1016,7 @@ computeReferenceWarnings appState reference =
     in
     case reference of
         Reference.ResourcePageReference data ->
-            if String.isEmpty data.resourcePageUuid || data.resourcePageUuid == Uuid.toString Uuid.nil then
+            if Maybe.isNothing data.resourcePageUuid then
                 createError (gettext "No resource page selected for resource page reference" appState.locale)
 
             else

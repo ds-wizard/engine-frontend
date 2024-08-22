@@ -8,12 +8,13 @@ module Shared.Data.Event.AddReferenceResourcePageEventData exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Reference exposing (Reference(..))
 
 
 type alias AddReferenceResourcePageEventData =
-    { resourcePageUuid : String
+    { resourcePageUuid : Maybe String
     , annotations : List Annotation
     }
 
@@ -21,14 +22,14 @@ type alias AddReferenceResourcePageEventData =
 decoder : Decoder AddReferenceResourcePageEventData
 decoder =
     D.succeed AddReferenceResourcePageEventData
-        |> D.required "resourcePageUuid" D.string
+        |> D.required "resourcePageUuid" (D.nullable D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
 
 
 encode : AddReferenceResourcePageEventData -> List ( String, E.Value )
 encode data =
     [ ( "referenceType", E.string "ResourcePageReference" )
-    , ( "resourcePageUuid", E.string data.resourcePageUuid )
+    , ( "resourcePageUuid", E.maybe E.string data.resourcePageUuid )
     , ( "annotations", E.list Annotation.encode data.annotations )
     ]
 

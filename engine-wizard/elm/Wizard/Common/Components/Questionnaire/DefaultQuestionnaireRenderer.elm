@@ -231,7 +231,7 @@ viewResourcePageReferences appState km resourcePageToRoute resourcePageReference
     let
         resources =
             Dict.filterGroupBy
-                (flip KnowledgeModel.getResourceCollectionUuidByResourcePageUuid km << .resourcePageUuid)
+                (Maybe.andThen (flip KnowledgeModel.getResourceCollectionUuidByResourcePageUuid km) << .resourcePageUuid)
                 resourcePageReferences
 
         viewResourceCollection ( resourceCollectionUuid, collectionResourcePageReferences ) =
@@ -262,7 +262,7 @@ viewResourcePageReferences appState km resourcePageToRoute resourcePageReference
 
 viewResourcePageReference : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> ResourcePageReferenceData -> Html msg
 viewResourcePageReference appState km resourcePageToRoute data =
-    case KnowledgeModel.getResourcePage data.resourcePageUuid km of
+    case Maybe.andThen (flip KnowledgeModel.getResourcePage km) data.resourcePageUuid of
         Just resourcePage ->
             linkTo appState
                 (resourcePageToRoute resourcePage.uuid)
