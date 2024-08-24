@@ -54,7 +54,7 @@
     "axios": "1.7.3",
     "axios-retry": "^4.5.0",
     "bootstrap": "^5.3.3",
-    "chart.js": "^3.9.1",
+    "chart.js": "^4.4.4",
     "codemirror": "^6.0.1",
     "flatpickr": "^4.6.13",
     "po2json": "^1.0.0-beta",
