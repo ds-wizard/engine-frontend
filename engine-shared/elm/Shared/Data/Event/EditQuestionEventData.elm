@@ -12,6 +12,7 @@ import Dict
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData exposing (EditQuestionIntegrationEventData)
+import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData exposing (EditQuestionItemSelectEventData)
 import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData exposing (EditQuestionListEventData)
 import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData exposing (EditQuestionMultiChoiceEventData)
 import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData exposing (EditQuestionOptionsEventData)
@@ -27,6 +28,7 @@ type EditQuestionEventData
     | EditQuestionValueEvent EditQuestionValueEventData
     | EditQuestionIntegrationEvent EditQuestionIntegrationEventData
     | EditQuestionMultiChoiceEvent EditQuestionMultiChoiceEventData
+    | EditQuestionItemSelectEvent EditQuestionItemSelectEventData
 
 
 decoder : Decoder EditQuestionEventData
@@ -50,6 +52,9 @@ decoder =
                     "MultiChoiceQuestion" ->
                         D.map EditQuestionMultiChoiceEvent EditQuestionMultiChoiceEventData.decoder
 
+                    "ItemSelectQuestion" ->
+                        D.map EditQuestionItemSelectEvent EditQuestionItemSelectEventData.decoder
+
                     _ ->
                         D.fail <| "Unknown question type: " ++ questionType
             )
@@ -65,6 +70,7 @@ encode data =
                 EditQuestionValueEventData.encode
                 EditQuestionIntegrationEventData.encode
                 EditQuestionMultiChoiceEventData.encode
+                EditQuestionItemSelectEventData.encode
                 data
     in
     ( "eventType", E.string "EditQuestionEvent" ) :: eventData
@@ -116,20 +122,27 @@ apply event question =
                 { choiceUuids = EventField.applyChildren eventData.choiceUuids (Question.getChoiceUuids question)
                 }
 
+        EditQuestionItemSelectEvent eventData ->
+            ItemSelectQuestion
+                (applyCommonData eventData)
+                { listQuestionUuid = EventField.getValueWithDefault eventData.listQuestionUuid (Question.getListQuestionUuid question)
+                }
+
 
 getTypeString : EditQuestionEventData -> String
 getTypeString =
     map
-        (\_ -> "Options")
-        (\_ -> "List")
-        (\_ -> "Value")
-        (\_ -> "Integration")
-        (\_ -> "MultiChoice")
+        (always "Options")
+        (always "List")
+        (always "Value")
+        (always "Integration")
+        (always "MultiChoice")
+        (always "ItemSelect")
 
 
 getEntityVisibleName : EditQuestionEventData -> Maybe String
 getEntityVisibleName =
-    EventField.getValue << map .title .title .title .title .title
+    EventField.getValue << map .title .title .title .title .title .title
 
 
 map :
@@ -138,9 +151,10 @@ map :
     -> (EditQuestionValueEventData -> a)
     -> (EditQuestionIntegrationEventData -> a)
     -> (EditQuestionMultiChoiceEventData -> a)
+    -> (EditQuestionItemSelectEventData -> a)
     -> EditQuestionEventData
     -> a
-map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion question =
+map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion itemSelectQuestion question =
     case question of
         EditQuestionOptionsEvent data ->
             optionsQuestion data
@@ -156,3 +170,6 @@ map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQu
 
         EditQuestionMultiChoiceEvent data ->
             multiChoiceQuestion data
+
+        EditQuestionItemSelectEvent data ->
+            itemSelectQuestion data

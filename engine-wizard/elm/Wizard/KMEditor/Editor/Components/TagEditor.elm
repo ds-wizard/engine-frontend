@@ -17,6 +17,7 @@ import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditEventSetters exposing (setTagUuids)
 import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
+import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
 import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
 import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
 import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
@@ -98,6 +99,11 @@ view appState wrapMsg eventMsg editorBranch model =
                             EditQuestionMultiChoiceEventData.init
                                 |> setTagUuids tagUuids
                                 |> EditQuestionMultiChoiceEvent
+
+                        ItemSelectQuestion _ _ ->
+                            EditQuestionItemSelectEventData.init
+                                |> setTagUuids tagUuids
+                                |> EditQuestionItemSelectEvent
 
         content =
             if List.isEmpty editorBranch.branch.knowledgeModel.tagUuids then
@@ -226,6 +232,9 @@ foldQuestion appState props model indent tags question =
             questionRow
 
         MultiChoiceQuestion _ _ ->
+            questionRow
+
+        ItemSelectQuestion _ _ ->
             questionRow
 
 

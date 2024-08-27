@@ -12,6 +12,7 @@ module Shared.Data.KnowledgeModel.Question exposing
     , getExpertUuids
     , getIntegrationUuid
     , getItemTemplateQuestionUuids
+    , getListQuestionUuid
     , getPropValue
     , getProps
     , getReferenceUuids
@@ -40,6 +41,7 @@ import List.Extra as List
 import Shared.Data.KnowledgeModel.Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
 import Shared.Data.KnowledgeModel.Question.IntegrationQuestionData as IntegrationQuestionData exposing (IntegrationQuestionData)
+import Shared.Data.KnowledgeModel.Question.ItemSelectQuestionData as ItemSelectQuestionData exposing (ItemSelectQuestionData)
 import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData exposing (ListQuestionData)
 import Shared.Data.KnowledgeModel.Question.MultiChoiceQuestionData as MultiChoiceQuestionData exposing (MultiChoiceQuestionData)
 import Shared.Data.KnowledgeModel.Question.OptionsQuestionData as OptionsQuestionData exposing (OptionsQuestionData)
@@ -54,6 +56,7 @@ type Question
     | ValueQuestion CommonQuestionData ValueQuestionData
     | IntegrationQuestion CommonQuestionData IntegrationQuestionData
     | MultiChoiceQuestion CommonQuestionData MultiChoiceQuestionData
+    | ItemSelectQuestion CommonQuestionData ItemSelectQuestionData
 
 
 
@@ -68,6 +71,7 @@ decoder =
         , D.when QuestionType.decoder ((==) ValueQuestionType) valueQuestionDecoder
         , D.when QuestionType.decoder ((==) IntegrationQuestionType) integrationQuestionDecoder
         , D.when QuestionType.decoder ((==) MultiChoiceQuestionType) multiChoiceQuestionDecoder
+        , D.when QuestionType.decoder ((==) ItemSelectQuestionType) itemSelectQuestionDecoder
         ]
 
 
@@ -94,6 +98,11 @@ integrationQuestionDecoder =
 multiChoiceQuestionDecoder : Decoder Question
 multiChoiceQuestionDecoder =
     D.map2 MultiChoiceQuestion CommonQuestionData.decoder MultiChoiceQuestionData.decoder
+
+
+itemSelectQuestionDecoder : Decoder Question
+itemSelectQuestionDecoder =
+    D.map2 ItemSelectQuestion CommonQuestionData.decoder ItemSelectQuestionData.decoder
 
 
 
@@ -204,6 +213,9 @@ mapCommonQuestionData map question =
         MultiChoiceQuestion commonData questionData ->
             MultiChoiceQuestion (map commonData) questionData
 
+        ItemSelectQuestion commonData questionData ->
+            ItemSelectQuestion (map commonData) questionData
+
 
 getCommonQuestionData : Question -> CommonQuestionData
 getCommonQuestionData question =
@@ -221,6 +233,9 @@ getCommonQuestionData question =
             data
 
         MultiChoiceQuestion data _ ->
+            data
+
+        ItemSelectQuestion data _ ->
             data
 
 
@@ -256,6 +271,9 @@ getTypeString question =
 
         MultiChoiceQuestion _ _ ->
             "MultiChoice"
+
+        ItemSelectQuestion _ _ ->
+            "ItemSelect"
 
 
 getRequiredPhaseUuid : Question -> Maybe String
@@ -348,6 +366,16 @@ getPropValue prop question =
     case question of
         IntegrationQuestion _ data ->
             Dict.get prop data.props
+
+        _ ->
+            Nothing
+
+
+getListQuestionUuid : Question -> Maybe String
+getListQuestionUuid question =
+    case question of
+        ItemSelectQuestion _ data ->
+            data.listQuestionUuid
 
         _ ->
             Nothing

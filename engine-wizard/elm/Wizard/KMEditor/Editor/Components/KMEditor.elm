@@ -40,7 +40,7 @@ import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
 import Shared.Data.Event.EditChapterEventData as EditChapterEventData
 import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
+import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData
 import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
@@ -50,6 +50,7 @@ import Shared.Data.Event.EditMetricEventData as EditMetricEventData
 import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
 import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
+import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEvent
 import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
 import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
 import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
@@ -731,7 +732,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         parentUuid =
             EditorBranch.getParentUuid questionUuid editorBranch
 
-        createEditEvent setOptions setList setValue setIntegration setMultiChoice value =
+        createEditEvent setOptions setList setValue setIntegration setMultiChoice setItemSelect value =
             eventMsg parentUuid (Just questionUuid) <|
                 EditQuestionEvent <|
                     case question of
@@ -760,6 +761,11 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> setMultiChoice value
                                 |> EditQuestionMultiChoiceEvent
 
+                        ItemSelectQuestion _ _ ->
+                            EditQuestionItemSelectEvent.init
+                                |> setItemSelect value
+                                |> EditQuestionItemSelectEvent
+
         onTypeChange value =
             eventMsg parentUuid (Just questionUuid) <|
                 case value of
@@ -785,6 +791,11 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             |> EditQuestionMultiChoiceEvent
                             |> EditQuestionEvent
 
+                    "ItemSelect" ->
+                        EditQuestionItemSelectEvent.init
+                            |> EditQuestionItemSelectEvent
+                            |> EditQuestionEvent
+
                     _ ->
                         EditQuestionOptionsEventData.init
                             |> EditQuestionOptionsEvent
@@ -806,6 +817,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             , ( "Value", gettext "Value" appState.locale )
             , ( "Integration", gettext "Integration" appState.locale )
             , ( "MultiChoice", gettext "Multi-Choice" appState.locale )
+            , ( "ItemSelect", gettext "Item Select" appState.locale )
             ]
 
         requiredPhaseUuidOptions =
@@ -831,6 +843,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , value = Question.getTypeString question
                 , options = questionTypeOptions
                 , onChange = onTypeChange
+                , extra = Nothing
                 }
 
         typeWarning =
@@ -873,7 +886,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { name = "title"
                 , label = gettext "Title" appState.locale
                 , value = Question.getTitle question
-                , onInput = createEditEvent setTitle setTitle setTitle setTitle setTitle
+                , onInput = createEditEvent setTitle setTitle setTitle setTitle setTitle setTitle
                 }
 
         textInput =
@@ -881,7 +894,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { name = "text"
                 , label = gettext "Text" appState.locale
                 , value = Maybe.withDefault "" (Question.getText question)
-                , onInput = createEditEvent setText setText setText setText setText << String.toMaybe
+                , onInput = createEditEvent setText setText setText setText setText setText << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = questionUuid
                 , markdownPreviews = model.markdownPreviews
@@ -893,7 +906,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , label = gettext "When does this question become desirable?" appState.locale
                 , value = String.fromMaybe <| Question.getRequiredPhaseUuid question
                 , options = requiredPhaseUuidOptions
-                , onChange = createEditEvent setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid << String.toMaybe
+                , onChange = createEditEvent setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid << String.toMaybe
+                , extra = Nothing
                 }
 
         tagUuidsInput =
@@ -901,7 +915,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { label = gettext "Question Tags" appState.locale
                 , tags = EditorBranch.filterDeletedWith .uuid editorBranch <| KnowledgeModel.getTags editorBranch.branch.knowledgeModel
                 , selected = Question.getTagUuids question
-                , onChange = createEditEvent setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids
+                , onChange = createEditEvent setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids
                 }
 
         referencesInput =
@@ -912,7 +926,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
-                , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
+                , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getReferenceName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled reference" appState.locale
@@ -929,7 +943,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
-                , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
+                , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getExpertName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled expert" appState.locale
@@ -941,7 +955,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         annotationsInput =
             Input.annotations appState
                 { annotations = Question.getAnnotations question
-                , onEdit = createEditEvent setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations
+                , onEdit = createEditEvent setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations
                 }
 
         questionTypeInputs =
@@ -1045,6 +1059,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , value = QuestionValueType.toString <| Maybe.withDefault QuestionValueType.default <| Question.getValueType question
                                 , options = questionValueTypeOptions
                                 , onChange = createTypeEditEvent setValueType << Maybe.withDefault QuestionValueType.default << QuestionValueType.fromString
+                                , extra = Nothing
                                 }
                     in
                     [ valueTypeInput ]
@@ -1105,6 +1120,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , value = String.fromMaybe <| Question.getIntegrationUuid question
                                 , options = integrationUuidOptions
                                 , onChange = createTypeEditEvent setIntegrationUuid
+                                , extra = Nothing
                                 }
                     in
                     [ integrationUuidInput
@@ -1142,6 +1158,69 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 }
                     in
                     [ choicesInput ]
+
+                ItemSelectQuestion _ _ ->
+                    let
+                        createTypeEditEvent map value =
+                            EditQuestionItemSelectEvent.init
+                                |> map value
+                                |> (EditQuestionEvent << EditQuestionItemSelectEvent)
+                                |> eventMsg parentUuid (Just questionUuid)
+
+                        listQuestionUuidOptions =
+                            KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
+                                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                |> List.filter Question.isList
+                                |> List.sortBy Question.getTitle
+                                |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
+                                |> (::) ( "", gettext "- select list question -" appState.locale )
+
+                        listQuestionUuidInput =
+                            Input.select
+                                { name = "listQuestionUuid"
+                                , label = gettext "List Question" appState.locale
+                                , value = String.fromMaybe <| Question.getListQuestionUuid question
+                                , options = listQuestionUuidOptions
+                                , onChange = createTypeEditEvent setListQuestionUuid << String.toMaybe
+                                , extra =
+                                    case Question.getListQuestionUuid question of
+                                        Just listQuestionUuid ->
+                                            if EditorBranch.isDeleted listQuestionUuid editorBranch then
+                                                Nothing
+
+                                            else
+                                                Just <|
+                                                    div [ class "mt-1" ]
+                                                        [ linkTo appState (editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
+                                                        ]
+
+                                        Nothing ->
+                                            Nothing
+                                }
+                    in
+                    [ listQuestionUuidInput
+                    ]
+
+        wrapQuestionsWithIntegration questions =
+            if List.isEmpty questions then
+                emptyNode
+
+            else
+                FormGroup.plainGroup (ul [] questions) (gettext "Item select questions using this list question" appState.locale)
+
+        itemSelectQuestionsWithListQuestion =
+            case question of
+                ListQuestion _ _ ->
+                    KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
+                        |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                        |> List.filter ((==) (Just questionUuid) << Question.getListQuestionUuid)
+                        |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
+                        |> List.sortBy Question.getTitle
+                        |> List.map (viewQuestionLink appState editorBranch)
+                        |> wrapQuestionsWithIntegration
+
+                _ ->
+                    emptyNode
     in
     editor ("question-" ++ questionUuid)
         ([ questionEditorTitle
@@ -1156,6 +1235,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             ++ [ referencesInput
                , expertsInput
                , annotationsInput
+               , itemSelectQuestionsWithListQuestion
                ]
         )
 
@@ -1428,6 +1508,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                 , value = Integration.getTypeString integration
                 , options = integrationTypeOptions
                 , onChange = onTypeChange
+                , extra = Nothing
                 }
 
         idInput =
@@ -1500,6 +1581,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 , value = data.requestMethod
                                 , options = httpMethodOptions
                                 , onChange = createTypeEditEvent setRequestMethod
+                                , extra = Nothing
                                 }
 
                         requestHeadersInput =
@@ -1600,25 +1682,6 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                     , FormExtra.mdAfter (gettext "Defines the URL to the selected item. Use `${id}` value returned from the widget, for example `https://example.com/${id}`." appState.locale)
                     ]
 
-        viewQuestionLink question =
-            let
-                questionTitle =
-                    Question.getTitle question
-
-                questionTitleNode =
-                    if String.isEmpty questionTitle then
-                        i [] [ text (gettext "Untitled question" appState.locale) ]
-
-                    else
-                        text questionTitle
-            in
-            li []
-                [ linkTo appState
-                    (editorRoute editorBranch (Question.getUuid question))
-                    []
-                    [ questionTitleNode ]
-                ]
-
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
                 div [] [ i [] [ text (gettext "No questions" appState.locale) ] ]
@@ -1632,7 +1695,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                 |> List.filter ((==) (Just integrationUuid) << Question.getIntegrationUuid)
                 |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
                 |> List.sortBy Question.getTitle
-                |> List.map viewQuestionLink
+                |> List.map (viewQuestionLink appState editorBranch)
                 |> wrapQuestionsWithIntegration
 
         prefabsView =
@@ -1884,6 +1947,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                 , value = Reference.getTypeString reference
                 , options = referenceTypeOptions
                 , onChange = onTypeChange
+                , extra = Nothing
                 }
 
         referenceTypeInputs =
@@ -2144,25 +2208,6 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
                 , onEdit = createEditEvent setAnnotations
                 }
 
-        viewQuestionLink question =
-            let
-                questionTitle =
-                    Question.getTitle question
-
-                questionTitleNode =
-                    if String.isEmpty questionTitle then
-                        i [] [ text (gettext "Untitled question" appState.locale) ]
-
-                    else
-                        text questionTitle
-            in
-            li []
-                [ linkTo appState
-                    (editorRoute editorBranch (Question.getUuid question))
-                    []
-                    [ questionTitleNode ]
-                ]
-
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
                 div [] [ i [] [ text (gettext "No questions" appState.locale) ] ]
@@ -2181,7 +2226,7 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
                 |> List.filter (filterQuestionByResourcePageUuid << Question.getUuid)
                 |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
                 |> List.sortBy Question.getTitle
-                |> List.map viewQuestionLink
+                |> List.map (viewQuestionLink appState editorBranch)
                 |> wrapQuestionsWithIntegration
     in
     editor ("resource-page-" ++ resourcePage.uuid)
@@ -2275,6 +2320,27 @@ editorTitle appState config =
             , moveButton
             , deleteButton
             ]
+        ]
+
+
+viewQuestionLink : AppState -> EditorBranch -> Question -> Html msg
+viewQuestionLink appState editorBranch question =
+    let
+        questionTitle =
+            Question.getTitle question
+
+        questionTitleNode =
+            if String.isEmpty questionTitle then
+                i [] [ text (gettext "Untitled question" appState.locale) ]
+
+            else
+                text questionTitle
+    in
+    li []
+        [ linkTo appState
+            (editorRoute editorBranch (Question.getUuid question))
+            []
+            [ questionTitleNode ]
         ]
 
 

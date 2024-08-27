@@ -1066,6 +1066,23 @@ $toolbar-height: 40px;
             }
         }
 
+        .question-item-select {
+            select {
+                position: relative;
+                z-index: 1;
+            }
+
+            &-link {
+                @include border-radius-bottom($border-radius);
+                margin-top: -$border-radius;
+                border: 1px solid $border-color;
+                position: relative;
+                background: $light;
+                padding: ($input-padding-y + $border-radius) $input-padding-x $input-padding-y;
+
+            }
+        }
+
         &-disabled {
             .radio {
                 label {

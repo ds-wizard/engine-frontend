@@ -5,6 +5,7 @@ module Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing
     , getAnswerUuid
     , getChoiceUuid
     , getItemUuids
+    , getSelectedItemUuid
     , getStringReply
     , isEmpty
     )
@@ -22,6 +23,7 @@ type ReplyValue
     | MultiChoiceReply (List String)
     | ItemListReply (List String)
     | IntegrationReply IntegrationReplyType
+    | ItemSelectReply String
 
 
 decoder : Decoder ReplyValue
@@ -32,6 +34,7 @@ decoder =
         , D.when replyValueType ((==) "MultiChoiceReply") decodeMultiChoiceReply
         , D.when replyValueType ((==) "ItemListReply") decodeItemListReply
         , D.when replyValueType ((==) "IntegrationReply") decodeIntegrationReply
+        , D.when replyValueType ((==) "ItemSelectReply") decodeItemSelectReply
         ]
 
 
@@ -70,6 +73,12 @@ decodeIntegrationReply =
         |> D.required "value" IntegrationReplyValue.decoder
 
 
+decodeItemSelectReply : Decoder ReplyValue
+decodeItemSelectReply =
+    D.succeed ItemSelectReply
+        |> D.required "value" D.string
+
+
 encode : ReplyValue -> E.Value
 encode replyValue =
     case replyValue of
@@ -99,6 +108,12 @@ encode replyValue =
 
         IntegrationReply integrationReplyValue ->
             IntegrationReplyValue.encode integrationReplyValue
+
+        ItemSelectReply itemUuid ->
+            E.object
+                [ ( "type", E.string "ItemSelectReply" )
+                , ( "value", E.string itemUuid )
+                ]
 
 
 getItemUuids : ReplyValue -> List String
@@ -144,6 +159,16 @@ getStringReply replyValue =
 
                 IntegrationType _ value ->
                     value
+
+        _ ->
+            ""
+
+
+getSelectedItemUuid : ReplyValue -> String
+getSelectedItemUuid replyValue =
+    case replyValue of
+        ItemSelectReply itemUuid ->
+            itemUuid
 
         _ ->
             ""

@@ -39,7 +39,7 @@ import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exp
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Html exposing (faSet)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -134,6 +134,7 @@ type alias SelectInputConfig msg =
     , value : String
     , options : List ( String, String )
     , onChange : String -> msg
+    , extra : Maybe (Html msg)
     }
 
 
@@ -153,6 +154,7 @@ select config =
             , onInput config.onChange
             ]
             (List.map viewOption config.options)
+        , Maybe.withDefault emptyNode config.extra
         ]
 
 
