@@ -17,6 +17,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setItemTemplateQuestionUuids
     , setItemUrl
     , setLabel
+    , setListQuestionUuid
     , setLogo
     , setMetricMeasures
     , setMetricUuids
@@ -136,6 +137,11 @@ setItemUrl value data =
 setLabel : a -> { b | label : EventField a } -> { b | label : EventField a }
 setLabel value data =
     { data | label = EventField.create value True }
+
+
+setListQuestionUuid : a -> { b | listQuestionUuid : EventField a } -> { b | listQuestionUuid : EventField a }
+setListQuestionUuid value data =
+    { data | listQuestionUuid = EventField.create value True }
 
 
 setLogo : a -> { b | logo : EventField a } -> { b | logo : EventField a }

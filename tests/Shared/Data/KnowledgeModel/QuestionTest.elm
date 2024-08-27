@@ -260,4 +260,38 @@ questionDecoderTest =
                             }
                 in
                 expectDecoder Question.decoder raw expected
+        , test "should decode item select question type" <|
+            \_ ->
+                let
+                    raw =
+                        """
+                        {
+                            "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
+                            "questionType": "ItemSelectQuestion",
+                            "title": "Can you answer this question?",
+                            "text": "Please answer the question",
+                            "requiredPhaseUuid": null,
+                            "tagUuids": [],
+                            "referenceUuids": [],
+                            "expertUuids": [],
+                            "listQuestionUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
+                            "annotations": []
+                        }
+                        """
+
+                    expected =
+                        ItemSelectQuestion
+                            { uuid = "8a703cfa-450f-421a-8819-875619ccb54d"
+                            , title = "Can you answer this question?"
+                            , text = Just "Please answer the question"
+                            , requiredPhaseUuid = Nothing
+                            , tagUuids = []
+                            , referenceUuids = []
+                            , expertUuids = []
+                            , annotations = []
+                            }
+                            { listQuestionUuid = Just "b50bf5ce-2fc3-4779-9756-5f176c233374"
+                            }
+                in
+                expectDecoder Question.decoder raw expected
         ]

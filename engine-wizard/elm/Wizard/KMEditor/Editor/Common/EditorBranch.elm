@@ -191,6 +191,9 @@ getFilteredKM editorBranch =
                     MultiChoiceQuestion (filterCommonData commonData)
                         { multichoiceData | choiceUuids = filterDeleted editorBranch multichoiceData.choiceUuids }
 
+                ItemSelectQuestion commonData itemSelectData ->
+                    ItemSelectQuestion (filterCommonData commonData) itemSelectData
+
         filterAnswer _ answer =
             { answer | followUpUuids = filterDeleted editorBranch answer.followUpUuids }
 
@@ -875,7 +878,7 @@ computeWarnings appState editorBranch =
             getFilteredKM editorBranch
 
         warnings =
-            List.concatMap (computeChapterWarnings appState filteredKM) (KnowledgeModel.getChapters filteredKM)
+            List.concatMap (computeChapterWarnings appState editorBranch filteredKM) (KnowledgeModel.getChapters filteredKM)
                 |> flip (++) (List.concatMap (computeMetricWarnings appState) (KnowledgeModel.getMetrics filteredKM))
                 |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases filteredKM))
                 |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags filteredKM))
@@ -885,8 +888,8 @@ computeWarnings appState editorBranch =
     { editorBranch | warnings = warnings }
 
 
-computeChapterWarnings : AppState -> KnowledgeModel -> Chapter -> List EditorBranchWarning
-computeChapterWarnings appState km chapter =
+computeChapterWarnings : AppState -> EditorBranch -> KnowledgeModel -> Chapter -> List EditorBranchWarning
+computeChapterWarnings appState editorBranch km chapter =
     let
         titleWarning =
             if String.isEmpty chapter.title then
@@ -900,14 +903,14 @@ computeChapterWarnings appState km chapter =
 
         questionWarnings =
             List.concatMap
-                (computeQuestionWarnings appState km)
+                (computeQuestionWarnings appState editorBranch km)
                 (KnowledgeModel.getChapterQuestions chapter.uuid km)
     in
     titleWarning ++ questionWarnings
 
 
-computeQuestionWarnings : AppState -> KnowledgeModel -> Question -> List EditorBranchWarning
-computeQuestionWarnings appState km question =
+computeQuestionWarnings : AppState -> EditorBranch -> KnowledgeModel -> Question -> List EditorBranchWarning
+computeQuestionWarnings appState editorBranch km question =
     let
         questionUuid =
             Question.getUuid question
@@ -933,7 +936,7 @@ computeQuestionWarnings appState km question =
 
                     else
                         List.concatMap
-                            (computeAnswerWarnings appState km)
+                            (computeAnswerWarnings appState editorBranch km)
                             (KnowledgeModel.getQuestionAnswers questionUuid km)
 
                 Question.ListQuestion _ data ->
@@ -942,7 +945,7 @@ computeQuestionWarnings appState km question =
 
                     else
                         List.concatMap
-                            (computeQuestionWarnings appState km)
+                            (computeQuestionWarnings appState editorBranch km)
                             (KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km)
 
                 Question.IntegrationQuestion _ data ->
@@ -961,6 +964,22 @@ computeQuestionWarnings appState km question =
                             (computeChoiceWarnings appState)
                             (KnowledgeModel.getQuestionChoices questionUuid km)
 
+                Question.ItemSelectQuestion _ data ->
+                    let
+                        listQuestionNotSelected =
+                            case data.listQuestionUuid of
+                                Just listQuestionUuid ->
+                                    isDeleted listQuestionUuid editorBranch
+
+                                Nothing ->
+                                    True
+                    in
+                    if listQuestionNotSelected then
+                        createError (gettext "No list question selected for item select question" appState.locale)
+
+                    else
+                        []
+
                 _ ->
                     []
 
@@ -977,8 +996,8 @@ computeQuestionWarnings appState km question =
     titleWarning ++ typeWarnings ++ referencesWarnings ++ expertWarnings
 
 
-computeAnswerWarnings : AppState -> KnowledgeModel -> Answer -> List EditorBranchWarning
-computeAnswerWarnings appState km answer =
+computeAnswerWarnings : AppState -> EditorBranch -> KnowledgeModel -> Answer -> List EditorBranchWarning
+computeAnswerWarnings appState editorBranch km answer =
     let
         labelWarning =
             if String.isEmpty answer.label then
@@ -992,7 +1011,7 @@ computeAnswerWarnings appState km answer =
 
         followUpQuestionsWarnings =
             List.concatMap
-                (computeQuestionWarnings appState km)
+                (computeQuestionWarnings appState editorBranch km)
                 (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km)
     in
     labelWarning ++ followUpQuestionsWarnings
