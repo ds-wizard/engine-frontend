@@ -3661,8 +3661,14 @@ viewQuestionItemSelect appState cfg model path question =
                 [ text optionLabel ]
 
         options =
-            itemToOption ( "", gettext "- select -" appState.locale )
-                :: List.map itemToOption items
+            List.map itemToOption items
+
+        optionsWithSelect =
+            if Maybe.isJust mbSelectedItem then
+                options
+
+            else
+                itemToOption ( "", gettext "- select -" appState.locale ) :: options
 
         itemLink =
             case QuestionnaireQuestionnaire.itemSelectQuestionItemPath model.questionnaire mbListQuestionUuid (pathToString path) of
@@ -3688,7 +3694,7 @@ viewQuestionItemSelect appState cfg model path question =
                 emptyNode
     in
     div [ class "question-item-select" ]
-        [ select (class "form-control" :: extraAttrs) options
+        [ select (class "form-control" :: extraAttrs) optionsWithSelect
         , itemLink
         , clearReplyButton
         , missingItemWarning
