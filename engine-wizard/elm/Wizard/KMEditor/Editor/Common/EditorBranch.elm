@@ -331,6 +331,12 @@ getEditorName appState uuid editorBranch =
 
         getExpertName =
             getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert
+
+        getResourceCollectionName =
+            getEditorName_ (String.withDefault (gettext "Untitled resource collection" appState.locale) << .title) KnowledgeModel.getResourceCollection
+
+        getResourcePageName =
+            getEditorName_ (String.withDefault (gettext "Untitled resource page" appState.locale) << .title) KnowledgeModel.getResourcePage
     in
     getKnowledgeModelName
         |> Maybe.orElse getChapterName
@@ -343,6 +349,8 @@ getEditorName appState uuid editorBranch =
         |> Maybe.orElse getChoiceName
         |> Maybe.orElse getReferenceName
         |> Maybe.orElse getExpertName
+        |> Maybe.orElse getResourceCollectionName
+        |> Maybe.orElse getResourcePageName
         |> Maybe.withDefault ""
 
 
