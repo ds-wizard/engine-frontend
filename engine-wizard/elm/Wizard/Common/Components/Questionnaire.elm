@@ -3660,11 +3660,14 @@ viewQuestionItemSelect appState cfg model path question =
             option [ value optionValue, selected (Just optionValue == mbSelectedItem) ]
                 [ text optionLabel ]
 
+        itemMissing =
+            QuestionnaireQuestionnaire.itemSelectQuestionItemMissing model.questionnaire mbListQuestionUuid (pathToString path)
+
         options =
             List.map itemToOption items
 
         optionsWithSelect =
-            if Maybe.isJust mbSelectedItem then
+            if Maybe.isJust mbSelectedItem && not itemMissing then
                 options
 
             else
@@ -3687,7 +3690,7 @@ viewQuestionItemSelect appState cfg model path question =
             viewQuestionClearButton appState cfg path (Maybe.isJust mbSelectedItem)
 
         missingItemWarning =
-            if QuestionnaireQuestionnaire.itemSelectQuestionItemMissing model.questionnaire mbListQuestionUuid (pathToString path) then
+            if itemMissing then
                 Flash.warning appState (gettext "The selected item was deleted." appState.locale)
 
             else
