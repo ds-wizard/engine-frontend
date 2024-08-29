@@ -225,11 +225,21 @@ menuItems appState =
 
 view : Model -> Html Wizard.Msgs.Msg
 view model =
+    let
+        viewAiAssistant =
+            div []
+                [ a [ class "sidebar-ai-assistant" ]
+                    [ fa "fas fa-fw fa-wand-magic-sparkles"
+                    , span [ class "sidebar-link" ] [ text "AI Assistant" ]
+                    ]
+                ]
+    in
     div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ viewLogo model
         , viewMenu model
         , viewSessionWarning model
         , viewSessionWarningCollapsed model
+        , viewAiAssistant
         , viewProfileMenu model
         , viewCollapseLink model
         ]

@@ -423,6 +423,26 @@ body {
         display: none;
     }
 
+    .sidebar-ai-assistant {
+        display: flex;
+        align-items: baseline;
+        padding: 9px;
+        font-weight: 500;
+        text-decoration: none;
+        margin: 1rem 0.75rem 0;
+
+        .fa-fw {
+            flex-basis: 1.25rem;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link {
+            margin-left: $side-navigation-icon-spacing;
+        }
+
+    }
+
     .profile-info {
         border: 1px solid $side-navigation-border-color;
         background: $white;
