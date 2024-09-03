@@ -27,7 +27,7 @@ parsers wrapRoute =
         wrappedIndexRoute pqs q =
             wrapRoute <| IndexRoute pqs q
     in
-    [ map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "name")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteEnabledFilterId))
+    [ map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "createdAt,desc")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteEnabledFilterId))
     , map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
     , map (wrapRoute << DetailRoute) (s moduleRoot </> uuid)
     ]

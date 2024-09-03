@@ -8,6 +8,7 @@ import Wizard.KnowledgeModels.Index.Update
 import Wizard.KnowledgeModels.Models exposing (Model)
 import Wizard.KnowledgeModels.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Preview.Update
+import Wizard.KnowledgeModels.ResourcePage.Update
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Msgs
 
@@ -26,6 +27,10 @@ fetchData route appState =
         PreviewRoute packageId _ ->
             Cmd.map PreviewMsg <|
                 Wizard.KnowledgeModels.Preview.Update.fetchData appState packageId
+
+        ResourcePageRoute kmId _ ->
+            Cmd.map ResourcePageMsg <|
+                Wizard.KnowledgeModels.ResourcePage.Update.fetchData appState kmId
 
         _ ->
             Cmd.none
@@ -61,3 +66,10 @@ update msg wrapMsg appState model =
                     Wizard.KnowledgeModels.Preview.Update.update pMsg (wrapMsg << PreviewMsg) appState model.previewModel
             in
             ( newSeed, { model | previewModel = projectModel }, cmd )
+
+        ResourcePageMsg rpMsg ->
+            let
+                ( resourcePageModel, cmd ) =
+                    Wizard.KnowledgeModels.ResourcePage.Update.update appState rpMsg model.resourcePageModel
+            in
+            ( appState.seed, { model | resourcePageModel = resourcePageModel }, cmd )

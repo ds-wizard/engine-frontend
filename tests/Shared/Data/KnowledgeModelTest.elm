@@ -23,6 +23,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": [],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "resourceCollectionUuids": [],
                             "annotations": [],
                             "entities": {
                                 "chapters": {},
@@ -34,7 +35,9 @@ knowledgeModelDecoderTest =
                                 "integrations": {},
                                 "tags": {},
                                 "metrics": {},
-                                "phases": {}
+                                "phases": {},
+                                "resourceCollections": {},
+                                "resourcePages": {}
                             }
                         }
                         """
@@ -46,6 +49,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = []
                         , metricUuids = []
                         , phaseUuids = []
+                        , resourceCollectionUuids = []
                         , annotations = []
                         , entities =
                             { chapters = Dict.empty
@@ -58,6 +62,8 @@ knowledgeModelDecoderTest =
                             , tags = Dict.empty
                             , metrics = Dict.empty
                             , phases = Dict.empty
+                            , resourceCollections = Dict.empty
+                            , resourcePages = Dict.empty
                             }
                         }
                 in
@@ -74,6 +80,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": [],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "resourceCollectionUuids": [],
                             "annotations": [],
                             "entities": {
                                 "chapters": {
@@ -93,7 +100,9 @@ knowledgeModelDecoderTest =
                                 "integrations": {},
                                 "tags": {},
                                 "metrics": {},
-                                "phases": {}
+                                "phases": {},
+                                "resourceCollections": {},
+                                "resourcePages": {}
                             }
                         }
                         """
@@ -105,6 +114,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = []
                         , metricUuids = []
                         , phaseUuids = []
+                        , resourceCollectionUuids = []
                         , annotations = []
                         , entities =
                             { chapters =
@@ -127,6 +137,8 @@ knowledgeModelDecoderTest =
                             , tags = Dict.empty
                             , metrics = Dict.empty
                             , phases = Dict.empty
+                            , resourceCollections = Dict.empty
+                            , resourcePages = Dict.empty
                             }
                         }
                 in
@@ -143,6 +155,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": [],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "resourceCollectionUuids": [],
                             "annotations": [],
                             "entities": {
                                 "chapters": {},
@@ -162,7 +175,9 @@ knowledgeModelDecoderTest =
                                     }
                                 },
                                 "metrics": {},
-                                "phases": {}
+                                "phases": {},
+                                "resourceCollections": {},
+                                "resourcePages": {}
                             }
                         }
                         """
@@ -174,6 +189,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = []
                         , metricUuids = []
                         , phaseUuids = []
+                        , resourceCollectionUuids = []
                         , annotations = []
                         , entities =
                             { chapters = Dict.empty
@@ -196,6 +212,8 @@ knowledgeModelDecoderTest =
                                     ]
                             , metrics = Dict.empty
                             , phases = Dict.empty
+                            , resourceCollections = Dict.empty
+                            , resourcePages = Dict.empty
                             }
                         }
                 in
@@ -212,6 +230,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "resourceCollectionUuids": [],
                             "annotations": [],
                             "entities": {
                                 "chapters": {},
@@ -242,7 +261,9 @@ knowledgeModelDecoderTest =
                                 },
                                 "tags": {},
                                 "metrics": {},
-                                "phases": {}
+                                "phases": {},
+                                "resourceCollections": {},
+                                "resourcePages": {}
                             }
                         }
                         """
@@ -254,6 +275,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
                         , metricUuids = []
                         , phaseUuids = []
+                        , resourceCollectionUuids = []
                         , annotations = []
                         , entities =
                             { chapters = Dict.empty
@@ -288,6 +310,8 @@ knowledgeModelDecoderTest =
                             , tags = Dict.empty
                             , metrics = Dict.empty
                             , phases = Dict.empty
+                            , resourceCollections = Dict.empty
+                            , resourcePages = Dict.empty
                             }
                         }
                 in
@@ -304,6 +328,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "resourceCollectionUuids": [],
                             "annotations": [],
                             "entities": {
                                 "chapters": {},
@@ -323,7 +348,9 @@ knowledgeModelDecoderTest =
                                         "annotations": []
                                     }
                                 },
-                                "phases": {}
+                                "phases": {},
+                                "resourceCollections": {},
+                                "resourcePages": {}
                             }
                         }
                         """
@@ -335,6 +362,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
                         , metricUuids = []
                         , phaseUuids = []
+                        , resourceCollectionUuids = []
                         , annotations = []
                         , entities =
                             { chapters = Dict.empty
@@ -357,6 +385,8 @@ knowledgeModelDecoderTest =
                                       )
                                     ]
                             , phases = Dict.empty
+                            , resourceCollections = Dict.empty
+                            , resourcePages = Dict.empty
                             }
                         }
                 in
@@ -373,6 +403,7 @@ knowledgeModelDecoderTest =
                             "integrationUuids": ["aae37504-aec6-4be8-b703-5bcb3502f3e6"],
                             "metricUuids": [],
                             "phaseUuids": [],
+                            "resourceCollectionUuids": [],
                             "annotations": [],
                             "entities": {
                                 "chapters": {},
@@ -391,7 +422,9 @@ knowledgeModelDecoderTest =
                                         "description": "This is a phase",
                                         "annotations": []
                                     }
-                                }
+                                },
+                                "resourceCollections": {},
+                                "resourcePages": {}
                             }
                         }
                         """
@@ -403,6 +436,7 @@ knowledgeModelDecoderTest =
                         , integrationUuids = [ "aae37504-aec6-4be8-b703-5bcb3502f3e6" ]
                         , metricUuids = []
                         , phaseUuids = []
+                        , resourceCollectionUuids = []
                         , annotations = []
                         , entities =
                             { chapters = Dict.empty
@@ -424,6 +458,8 @@ knowledgeModelDecoderTest =
                                         }
                                       )
                                     ]
+                            , resourceCollections = Dict.empty
+                            , resourcePages = Dict.empty
                             }
                         }
                 in

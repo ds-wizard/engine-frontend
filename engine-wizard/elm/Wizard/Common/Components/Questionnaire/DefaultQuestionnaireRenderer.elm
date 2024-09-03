@@ -1,5 +1,7 @@
-module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create)
+module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create, defaultResourcePageToRoute)
 
+import Dict
+import Dict.Extra as Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
@@ -18,15 +20,18 @@ import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (
 import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
+import Shared.Utils exposing (flip)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
+import Wizard.Common.Html exposing (linkTo)
+import Wizard.Routes
 
 
-create : AppState -> KnowledgeModel -> QuestionnaireRenderer msg
-create appState km =
+create : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> QuestionnaireRenderer msg
+create appState km resourcePageToRoute =
     { renderQuestionLabel = renderQuestionLabel
-    , renderQuestionDescription = renderQuestionDescription appState km
+    , renderQuestionDescription = renderQuestionDescription appState km resourcePageToRoute
     , getQuestionExtraClass = always Nothing
     , renderAnswerLabel = renderAnswerLabel
     , renderAnswerBadges = renderAnswerBadges (KnowledgeModel.getMetrics km)
@@ -35,13 +40,18 @@ create appState km =
     }
 
 
+defaultResourcePageToRoute : String -> String -> Wizard.Routes.Route
+defaultResourcePageToRoute packageId =
+    Wizard.Routes.knowledgeModelsResourcePage packageId
+
+
 renderQuestionLabel : Question -> Html msg
 renderQuestionLabel question =
     text <| Question.getTitle question
 
 
-renderQuestionDescription : AppState -> KnowledgeModel -> QuestionnaireViewSettings -> Question -> Html msg
-renderQuestionDescription appState km qvs question =
+renderQuestionDescription : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> QuestionnaireViewSettings -> Question -> Html msg
+renderQuestionDescription appState km resourcePageToRoute qvs question =
     let
         description =
             Question.getText question
@@ -52,7 +62,7 @@ renderQuestionDescription appState km qvs question =
             KnowledgeModel.getPhases km
 
         extraData =
-            viewExtraData appState qvs phases <| createQuestionExtraData km question
+            viewExtraData appState qvs km resourcePageToRoute phases <| createQuestionExtraData km question
     in
     div [ class "description" ]
         [ description
@@ -155,8 +165,8 @@ createQuestionExtraData km question =
         |> List.foldl foldReferences newExtraData
 
 
-viewExtraData : AppState -> QuestionnaireViewSettings -> List Phase -> FormExtraData -> Html msg
-viewExtraData appState qvs phases data =
+viewExtraData : AppState -> QuestionnaireViewSettings -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> List Phase -> FormExtraData -> Html msg
+viewExtraData appState qvs km resourcePageToRoute phases data =
     let
         isEmpty =
             List.isEmpty data.resourcePageReferences
@@ -169,11 +179,12 @@ viewExtraData appState qvs phases data =
 
     else
         p [ class "extra-data" ]
-            [ viewRequiredLevel appState qvs phases data.requiredPhaseUuid
-            , viewResourcePageReferences appState data.resourcePageReferences
-            , viewUrlReferences appState data.urlReferences
-            , viewExperts appState data.experts
-            ]
+            (viewRequiredLevel appState qvs phases data.requiredPhaseUuid
+                :: viewResourcePageReferences appState km resourcePageToRoute data.resourcePageReferences
+                ++ [ viewUrlReferences appState data.urlReferences
+                   , viewExperts appState data.experts
+                   ]
+            )
 
 
 viewRequiredLevel : AppState -> QuestionnaireViewSettings -> List Phase -> Maybe String -> Html msg
@@ -215,19 +226,51 @@ viewExtraItems cfg list =
             (span [ class "caption" ] [ cfg.icon, text (cfg.label ++ ": ") ] :: items)
 
 
-viewResourcePageReferences : AppState -> List ResourcePageReferenceData -> Html msg
-viewResourcePageReferences appState =
-    viewExtraItems
-        { icon = faSet "questionnaire.resourcePageReferences" appState
-        , label = "Data Stewardship for Open Science"
-        , viewItem = viewResourcePageReference
-        }
+viewResourcePageReferences : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> List ResourcePageReferenceData -> List (Html msg)
+viewResourcePageReferences appState km resourcePageToRoute resourcePageReferences =
+    let
+        resources =
+            Dict.filterGroupBy
+                (Maybe.andThen (flip KnowledgeModel.getResourceCollectionUuidByResourcePageUuid km) << .resourcePageUuid)
+                resourcePageReferences
+
+        viewResourceCollection ( resourceCollectionUuid, collectionResourcePageReferences ) =
+            let
+                resourceCollection =
+                    KnowledgeModel.getResourceCollection resourceCollectionUuid km
+            in
+            case resourceCollection of
+                Just rc ->
+                    Just <|
+                        ( rc.title
+                        , viewExtraItems
+                            { icon = faSet "questionnaire.resourcePageReferences" appState
+                            , label = rc.title
+                            , viewItem = viewResourcePageReference appState km resourcePageToRoute
+                            }
+                            collectionResourcePageReferences
+                        )
+
+                Nothing ->
+                    Nothing
+    in
+    Dict.toList resources
+        |> List.filterMap viewResourceCollection
+        |> List.sortBy Tuple.first
+        |> List.map Tuple.second
 
 
-viewResourcePageReference : ResourcePageReferenceData -> Html msg
-viewResourcePageReference data =
-    a [ href <| "/wizard/book-references/" ++ data.shortUuid, target "_blank" ]
-        [ text data.shortUuid ]
+viewResourcePageReference : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> ResourcePageReferenceData -> Html msg
+viewResourcePageReference appState km resourcePageToRoute data =
+    case Maybe.andThen (flip KnowledgeModel.getResourcePage km) data.resourcePageUuid of
+        Just resourcePage ->
+            linkTo appState
+                (resourcePageToRoute resourcePage.uuid)
+                [ target "_blank" ]
+                [ text resourcePage.title ]
+
+        Nothing ->
+            emptyNode
 
 
 viewUrlReferences : AppState -> List URLReferenceData -> Html msg

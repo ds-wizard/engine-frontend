@@ -3,7 +3,6 @@ module Wizard.Public.View exposing (view)
 import Html exposing (Html)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Public.Auth.View
-import Wizard.Public.BookReference.View
 import Wizard.Public.ForgottenPassword.View
 import Wizard.Public.ForgottenPasswordConfirmation.View
 import Wizard.Public.Login.View
@@ -21,10 +20,6 @@ view route appState model =
         AuthCallback _ _ _ _ ->
             Html.map AuthMsg <|
                 Wizard.Public.Auth.View.view appState model.authModel
-
-        BookReferenceRoute _ ->
-            Html.map BookReferenceMsg <|
-                Wizard.Public.BookReference.View.view appState model.bookReferenceModel
 
         ForgottenPasswordRoute ->
             Html.map ForgottenPasswordMsg <|

@@ -161,7 +161,7 @@ viewContent appState qm =
             , toolbarEnabled = False
             , questionLinksEnabled = False
             }
-        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
+        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel (DefaultQuestionnaireRenderer.defaultResourcePageToRoute qm.questionnaire.packageId)
         , wrapMsg = QuestionnaireMsg
         , previewQuestionnaireEventMsg = Nothing
         , revertQuestionnaireMsg = Nothing

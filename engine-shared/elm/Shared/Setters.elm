@@ -3,7 +3,6 @@ module Shared.Setters exposing
     , setApiKeys
     , setAppKeys
     , setAssets
-    , setBookReference
     , setCommentThreads
     , setDebouncer
     , setDropdownState
@@ -48,11 +47,6 @@ setAppKeys value record =
 setAssets : a -> { b | assets : a } -> { b | assets : a }
 setAssets value record =
     { record | assets = value }
-
-
-setBookReference : a -> { b | bookReference : a } -> { b | bookReference : a }
-setBookReference value record =
-    { record | bookReference = value }
 
 
 setCommentThreads : a -> { b | commentThreads : a } -> { b | commentThreads : a }

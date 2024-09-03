@@ -8,6 +8,8 @@ module Shared.Data.EventTest exposing
     , addPhaseEventTest
     , addQuestionEventTest
     , addReferenceEventTest
+    , addResourceCollectionEventTest
+    , addResourcePageEventTest
     , addTagEventTest
     , deleteAnswerEventTest
     , deleteChapterEventTest
@@ -18,6 +20,8 @@ module Shared.Data.EventTest exposing
     , deletePhaseEventTest
     , deleteQuestionEventTest
     , deleteReferenceEventTest
+    , deleteResourceCollectionEventTest
+    , deleteResourcePageEventTest
     , deleteTagEventTest
     , editAnswerEventTest
     , editChapterEventTest
@@ -29,6 +33,8 @@ module Shared.Data.EventTest exposing
     , editPhaseEventTest
     , editQuestionEventTest
     , editReferenceEventTest
+    , editResourceCollectionEventTest
+    , editResourcePageEventTest
     , editTagEventTest
     , moveAnswerEventTest
     , moveChoiceEventTest
@@ -77,6 +83,10 @@ editKnowledgeModelEvent =
             , value = Nothing
             }
         , phaseUuids =
+            { changed = False
+            , value = Nothing
+            }
+        , resourceCollectionUuids =
             { changed = False
             , value = Nothing
             }
@@ -1372,7 +1382,7 @@ addResourcePageReferenceEvent : Event
 addResourcePageReferenceEvent =
     AddReferenceEvent
         (AddReferenceResourcePageEvent
-            { shortUuid = "atq"
+            { resourcePageUuid = Just "ba931b74-6254-403e-a10e-ba14bd55e384"
             , annotations = []
             }
         )
@@ -1431,7 +1441,7 @@ addReferenceEventTest =
             \event ->
                 Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid event)
         , parametrized
-            [ ( addResourcePageReferenceEvent, "atq" )
+            [ ( addResourcePageReferenceEvent, "ba931b74-6254-403e-a10e-ba14bd55e384" )
             , ( addURLReferenceEvent, "Example" )
             , ( addCrossReferenceEvent, "072af95a-2dfd-11e9-b210-d663bd873d93" )
             ]
@@ -1446,9 +1456,9 @@ editResourcePageReferenceEvent : Event
 editResourcePageReferenceEvent =
     EditReferenceEvent
         (EditReferenceResourcePageEvent
-            { shortUuid =
+            { resourcePageUuid =
                 { changed = True
-                , value = Just "atq"
+                , value = Just (Just "ba931b74-6254-403e-a10e-ba14bd55e384")
                 }
             , annotations =
                 { changed = False
@@ -1529,7 +1539,7 @@ editReferenceEventTest =
             \event ->
                 Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid event)
         , parametrized
-            [ ( editResourcePageReferenceEvent, Just "atq" )
+            [ ( editResourcePageReferenceEvent, Just "ba931b74-6254-403e-a10e-ba14bd55e384" )
             , ( editURLReferenceEvent, Just "Example" )
             , ( editCrossReferenceEvent, Nothing )
             ]
@@ -1731,6 +1741,243 @@ moveExpertEventTest =
         , test "get event entity visible name" <|
             \_ ->
                 Expect.equal Nothing (Event.getEntityVisibleName moveExpertEvent)
+        ]
+
+
+
+{- resource collection events -}
+
+
+addResourceCollectionEvent : Event
+addResourceCollectionEvent =
+    AddResourceCollectionEvent
+        { title = "Collection"
+        , annotations = []
+        }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        , createdAt = Time.millisToPosix 1642607898
+        }
+
+
+addResourceCollectionEventTest : Test
+addResourceCollectionEventTest =
+    describe "AddResourceCollectionEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode addResourceCollectionEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid addResourceCollectionEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Collection") (Event.getEntityVisibleName addResourceCollectionEvent)
+        ]
+
+
+editResourceCollectionEvent : Event
+editResourceCollectionEvent =
+    EditResourceCollectionEvent
+        { title =
+            { changed = True
+            , value = Just "New Collection"
+            }
+        , resourcePageUuids =
+            { changed = True
+            , value = Just [ "ba931b74-6254-403e-a10e-ba14bd55e384", "bf2e14ca-67b9-4c00-b02e-b75213952992" ]
+            }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
+        }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        , createdAt = Time.millisToPosix 1642607898
+        }
+
+
+editResourceCollectionEventTest : Test
+editResourceCollectionEventTest =
+    describe "EditResourceCollectionEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editResourceCollectionEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid editResourceCollectionEvent)
+        , test "get event entity visible name when not changed" <|
+            \_ ->
+                let
+                    event =
+                        EditResourceCollectionEvent
+                            { title =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , resourcePageUuids =
+                                { changed = True
+                                , value = Just [ "ba931b74-6254-403e-a10e-ba14bd55e384", "bf2e14ca-67b9-4c00-b02e-b75213952992" ]
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            }
+                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                            , createdAt = Time.millisToPosix 1642607898
+                            }
+                in
+                Expect.equal Nothing (Event.getEntityVisibleName event)
+        , test "get event entity visible name when changed" <|
+            \_ ->
+                Expect.equal (Just "New Collection") (Event.getEntityVisibleName editResourceCollectionEvent)
+        ]
+
+
+deleteResourceCollectionEvent : Event
+deleteResourceCollectionEvent =
+    DeleteResourceCollectionEvent
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        , createdAt = Time.millisToPosix 1642607898
+        }
+
+
+deleteResourceCollectionEventTest : Test
+deleteResourceCollectionEventTest =
+    describe "DeleteResourceCollectionEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode deleteResourceCollectionEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid deleteResourceCollectionEvent)
+        , test "get entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName deleteResourceCollectionEvent)
+        ]
+
+
+
+{- resource page events -}
+
+
+addResourcePageEvent : Event
+addResourcePageEvent =
+    AddResourcePageEvent
+        { title = "Page"
+        , content = "Content"
+        , annotations = []
+        }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        , createdAt = Time.millisToPosix 1642607898
+        }
+
+
+addResourcePageEventTest : Test
+addResourcePageEventTest =
+    describe "AddResourcePageEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode addResourcePageEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid addResourcePageEvent)
+        , test "get event entity visible name" <|
+            \_ ->
+                Expect.equal (Just "Page") (Event.getEntityVisibleName addResourcePageEvent)
+        ]
+
+
+editResourcePageEvent : Event
+editResourcePageEvent =
+    EditResourcePageEvent
+        { title =
+            { changed = True
+            , value = Just "New Page"
+            }
+        , content =
+            { changed = True
+            , value = Just "New Content"
+            }
+        , annotations =
+            { changed = False
+            , value = Nothing
+            }
+        }
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        , createdAt = Time.millisToPosix 1642607898
+        }
+
+
+editResourcePageEventTest : Test
+editResourcePageEventTest =
+    describe "EditResourcePageEvent"
+        [ test "should encode and decode" <|
+            \_ -> expectEventEncodeDecode editResourcePageEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid editResourcePageEvent)
+        , test "get event entity visible name when not changed" <|
+            \_ ->
+                let
+                    event =
+                        EditResourcePageEvent
+                            { title =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            , content =
+                                { changed = True
+                                , value = Just "New Content"
+                                }
+                            , annotations =
+                                { changed = False
+                                , value = Nothing
+                                }
+                            }
+                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                            , createdAt = Time.millisToPosix 1642607898
+                            }
+                in
+                Expect.equal Nothing (Event.getEntityVisibleName event)
+        , test "get event entity visible name when changed" <|
+            \_ ->
+                Expect.equal (Just "New Page") (Event.getEntityVisibleName editResourcePageEvent)
+        ]
+
+
+deleteResourcePageEvent : Event
+deleteResourcePageEvent =
+    DeleteResourcePageEvent
+        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+        , createdAt = Time.millisToPosix 1642607898
+        }
+
+
+deleteResourcePageEventTest : Test
+deleteResourcePageEventTest =
+    describe "DeleteResourcePageEvent"
+        [ test "should encode and decode" <|
+            \_ ->
+                expectEventEncodeDecode deleteResourcePageEvent
+        , test "get event uuid" <|
+            \_ ->
+                Expect.equal "349624f6-2dfc-11e9-b210-d663bd873d93" (Event.getUuid deleteResourcePageEvent)
+        , test "get entity visible name" <|
+            \_ ->
+                Expect.equal Nothing (Event.getEntityVisibleName deleteResourcePageEvent)
         ]
 
 

@@ -155,7 +155,7 @@ selection appState selectionConfig knowledgeModelResult =
             else
                 viewContent <|
                     Flash.info appState <|
-                        gettext "There are no question tags for this knowledge model." appState.locale
+                        gettext "No need to choose question tags for this knowledge model." appState.locale
 
 
 readOnlyList : AppState -> List String -> List Tag -> Html msg

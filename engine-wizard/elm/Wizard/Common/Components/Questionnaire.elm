@@ -36,9 +36,10 @@ import CharIdentifier
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Gettext exposing (gettext, ngettext)
-import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, p, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, src, target, type_, value)
+import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, span, strong, text, ul)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
+import Html.Events.Extra exposing (onChange)
 import Json.Decode as D exposing (Decoder, decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
@@ -109,7 +110,7 @@ import Wizard.Common.Components.Questionnaire.UserSuggestionDropdown as UserSugg
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.ElementScrollTop as ElementScrollTop
 import Wizard.Common.Feature as Feature
-import Wizard.Common.Html exposing (illustratedMessage, linkTo, resizableTextarea)
+import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Common.Integrations as Integrations
@@ -1369,6 +1370,7 @@ handleScrollToPath model immediate path =
     in
     ( { model
         | activePage = PageChapter chapterUuid
+        , removeItem = Nothing
         , collapsedItems = newCollapsedItems
       }
     , Cmd.batch
@@ -1587,34 +1589,17 @@ view appState cfg ctx model =
             else
                 ( emptyNode, False )
 
-        ( migrationWarning, migrationWarningEnabled ) =
-            case model.questionnaire.migrationUuid of
-                Just migrationUuid ->
-                    let
-                        warningLink =
-                            linkTo appState (Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
-
-                        warning =
-                            gettext "There is an ongoing %s. Finish it before you can continue editing this project." appState.locale
-                                |> flip String.formatHtml [ warningLink ]
-                    in
-                    ( div [ class "questionnaire__warning" ]
-                        [ div [ class "alert alert-warning" ] warning ]
-                    , True
-                    )
-
-                Nothing ->
-                    ( emptyNode, False )
-
         splitPaneConfig =
             SplitPane.createViewConfig
                 { toMsg = cfg.wrapMsg << SplitPaneMsg
                 , customSplitter = Nothing
                 }
     in
-    div [ class "questionnaire", classList [ ( "toolbar-enabled", toolbarEnabled ), ( "warning-enabled", migrationWarningEnabled ) ] ]
+    div
+        [ class "questionnaire"
+        , classList [ ( "toolbar-enabled", toolbarEnabled ) ]
+        ]
         [ toolbar
-        , migrationWarning
         , div [ class "questionnaire__body" ]
             [ SplitPane.view splitPaneConfig
                 (Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model)
@@ -2176,10 +2161,18 @@ viewQuestionnaireRightPanelCommentsOverview : AppState -> Model -> Html Msg
 viewQuestionnaireRightPanelCommentsOverview appState model =
     let
         viewChapterComments group =
-            div []
-                [ strong [] [ text group.chapter.title ]
-                , ul [ class "fa-ul" ] (List.map viewQuestionComments group.comments)
-                ]
+            let
+                anyUnresolvedComments =
+                    List.any (\c -> c.unresolvedComments > 0) group.comments
+            in
+            if not model.commentsViewResolved && not anyUnresolvedComments then
+                emptyNode
+
+            else
+                div []
+                    [ strong [] [ text group.chapter.title ]
+                    , ul [ class "fa-ul" ] (List.map viewQuestionComments group.comments)
+                    ]
 
         viewQuestionComments comment =
             if not model.commentsViewResolved && comment.unresolvedComments == 0 then
@@ -2922,6 +2915,9 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
 
+                ItemSelectQuestion _ _ ->
+                    ( viewQuestionItemSelect appState cfg model newPath question, [] )
+
         ( questionClass, questionState ) =
             case
                 ( QuestionnaireQuestionnaire.hasReply (pathToString newPath) model.questionnaire
@@ -3613,6 +3609,101 @@ viewQuestionIntegrationLink integration mbId =
             emptyNode
 
 
+viewQuestionItemSelect : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
+viewQuestionItemSelect appState cfg model path question =
+    let
+        mbSelectedItem =
+            Dict.get (pathToString path) model.questionnaire.replies
+                |> Maybe.map (.value >> ReplyValue.getSelectedItemUuid)
+
+        extraAttrs =
+            if cfg.features.readonly then
+                [ disabled True ]
+
+            else
+                [ onChange (SetReply (pathToString path) << createReply appState << ItemSelectReply) ]
+
+        mbListQuestionUuid =
+            Question.getListQuestionUuid question
+
+        mbItemQuestionUuid =
+            mbListQuestionUuid
+                |> Maybe.andThen (\uuid -> KnowledgeModel.getQuestion uuid model.questionnaire.knowledgeModel)
+                |> Maybe.map Question.getUuid
+
+        items =
+            case mbItemQuestionUuid of
+                Just itemQuestionUuid ->
+                    let
+                        itemTemplateQuestions =
+                            KnowledgeModel.getQuestionItemTemplateQuestions itemQuestionUuid model.questionnaire.knowledgeModel
+
+                        itemsToOptions ( itemQuestionPath, reply ) =
+                            ReplyValue.getItemUuids reply.value
+                                |> List.indexedMap
+                                    (\i itemUuid ->
+                                        ( itemUuid
+                                        , QuestionnaireQuestionnaire.getItemTitle model.questionnaire (String.split "." itemQuestionPath ++ [ itemUuid ]) itemTemplateQuestions
+                                            |> Maybe.withDefault (String.format (gettext "Item %s" appState.locale) [ String.fromInt (i + 1) ])
+                                        )
+                                    )
+                    in
+                    model.questionnaire.replies
+                        |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                        |> Dict.toList
+                        |> List.concatMap itemsToOptions
+
+                Nothing ->
+                    []
+
+        itemToOption ( optionValue, optionLabel ) =
+            option [ value optionValue, selected (Just optionValue == mbSelectedItem) ]
+                [ text optionLabel ]
+
+        itemMissing =
+            QuestionnaireQuestionnaire.itemSelectQuestionItemMissing model.questionnaire mbListQuestionUuid (pathToString path)
+
+        options =
+            List.map itemToOption items
+
+        optionsWithSelect =
+            if Maybe.isJust mbSelectedItem && not itemMissing then
+                options
+
+            else
+                itemToOption ( "", gettext "- select -" appState.locale ) :: options
+
+        itemLink =
+            case QuestionnaireQuestionnaire.itemSelectQuestionItemPath model.questionnaire mbListQuestionUuid (pathToString path) of
+                Just itemPath ->
+                    div [ class "question-item-select-link" ]
+                        [ a [ onClick (ScrollToPath itemPath) ]
+                            [ text (gettext "Go to item" appState.locale)
+                            , fa "fas fa-arrow-right ms-1"
+                            ]
+                        ]
+
+                Nothing ->
+                    emptyNode
+
+        clearReplyButton =
+            viewQuestionClearButton appState cfg path (Maybe.isJust mbSelectedItem)
+
+        missingItemWarning =
+            if itemMissing then
+                Flash.warning appState (gettext "The selected item was deleted." appState.locale)
+
+            else
+                emptyNode
+    in
+    div [ class "question-item-select" ]
+        [ select (class "form-control" :: extraAttrs) optionsWithSelect
+        , itemLink
+        , clearReplyButton
+        , missingItemWarning
+        ]
+
+
 viewChoice : AppState -> Config msg -> List String -> List String -> Int -> Choice -> Html Msg
 viewChoice appState cfg path selectedChoicesUuids order choice =
     let
@@ -3826,9 +3917,52 @@ viewCopyLinkAction appState cfg model path =
 viewRemoveItemModal : AppState -> Model -> Html Msg
 viewRemoveItemModal appState model =
     let
+        removeItemUuid =
+            Maybe.map Tuple.second model.removeItem
+
+        mapItem ( path, reply ) =
+            case String.toMaybe (ReplyValue.getSelectedItemUuid reply.value) of
+                Just selectedItemUuid ->
+                    if Just selectedItemUuid == removeItemUuid then
+                        String.split "." path
+                            |> List.last
+                            |> Maybe.andThen (flip KnowledgeModel.getQuestion model.questionnaire.knowledgeModel)
+                            |> Maybe.map (\q -> ( path, Question.getTitle q ))
+
+                    else
+                        Nothing
+
+                Nothing ->
+                    Nothing
+
+        viewLink ( path, label ) =
+            li []
+                [ a [ onClick (ScrollToPath path) ]
+                    [ text label ]
+                ]
+
+        wrapItemLinks links =
+            if List.isEmpty links then
+                emptyNode
+
+            else
+                p [ class "mt-3" ]
+                    [ text (gettext "There are some item select questions using this item:" appState.locale)
+                    , ul [] links
+                    ]
+
+        items =
+            Dict.toList model.questionnaire.replies
+                |> List.filterMap mapItem
+                |> List.map viewLink
+                |> wrapItemLinks
+
         cfg =
             { modalTitle = gettext "Remove Item" appState.locale
-            , modalContent = [ text (gettext "Are you sure you want to remove this item?" appState.locale) ]
+            , modalContent =
+                [ text (gettext "Are you sure you want to remove this item?" appState.locale)
+                , items
+                ]
             , visible = Maybe.isJust model.removeItem
             , actionResult = Unset
             , actionName = gettext "Remove" appState.locale

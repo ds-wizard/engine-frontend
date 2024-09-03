@@ -476,6 +476,13 @@ viewEventDetailSetReply appState cfg data question =
                 IntegrationType _ reply ->
                     eventView [ ( fa "fas fa-link", Markdown.toString reply ) ]
 
+        ItemSelectReply itemUuid ->
+            let
+                itemLabel =
+                    QuestionnaireQuestionnaire.getItemSelectQuestionValueLabel appState cfg.questionnaire (Question.getUuid question) itemUuid
+            in
+            eventView [ ( fa "far fa-square-caret-down", itemLabel ) ]
+
         _ ->
             emptyNode
 

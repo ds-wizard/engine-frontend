@@ -9,6 +9,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , PropsInputConfig
     , ReorderableInputConfig
     , SelectInputConfig
+    , SelectWithGroupsInputConfig
     , TagsInputConfig
     , annotations
     , checkbox
@@ -19,13 +20,14 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , props
     , reorderable
     , select
+    , selectWithGroups
     , string
     , tags
     , textarea
     )
 
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, input, label, li, option, span, text, ul)
+import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, for, id, name, placeholder, rows, selected, step, style, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Keyed
@@ -37,7 +39,7 @@ import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exp
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Html exposing (faSet)
+import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -132,6 +134,7 @@ type alias SelectInputConfig msg =
     , value : String
     , options : List ( String, String )
     , onChange : String -> msg
+    , extra : Maybe (Html msg)
     }
 
 
@@ -151,6 +154,40 @@ select config =
             , onInput config.onChange
             ]
             (List.map viewOption config.options)
+        , Maybe.withDefault emptyNode config.extra
+        ]
+
+
+type alias SelectWithGroupsInputConfig msg =
+    { name : String
+    , label : String
+    , value : String
+    , defaultOption : ( String, String )
+    , options : List ( String, List ( String, String ) )
+    , onChange : String -> msg
+    }
+
+
+selectWithGroups : SelectWithGroupsInputConfig msg -> Html msg
+selectWithGroups config =
+    let
+        viewGroup ( groupTitle, groupOptions ) =
+            optgroup [ attribute "label" groupTitle ]
+                (List.map viewOption groupOptions)
+
+        viewOption ( optionValue, optionLabel ) =
+            option [ value optionValue, selected (optionValue == config.value) ]
+                [ text optionLabel ]
+    in
+    div [ class "form-group" ]
+        [ label [ for config.name ] [ text config.label ]
+        , Html.select
+            [ class "form-control"
+            , id config.name
+            , name config.name
+            , onInput config.onChange
+            ]
+            (viewOption config.defaultOption :: List.map viewGroup config.options)
         ]
 
 

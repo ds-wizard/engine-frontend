@@ -18,11 +18,15 @@ parsers appState wrapRoute =
     let
         moduleRoot =
             lr "knowledgeModels" appState
+
+        wrapResourcePageRoute kmId resourcePageUuid =
+            wrapRoute <| ResourcePageRoute kmId resourcePageUuid
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "knowledgeModels.import" appState) <?> Query.string (lr "knowledgeModels.import.packageId" appState))
     , map (detail wrapRoute) (s moduleRoot </> string)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     , map (project wrapRoute) (s moduleRoot </> string </> s (lr "knowledgeModels.preview" appState) <?> Query.string (lr "knowledgeModels.preview.questionUuid" appState))
+    , map wrapResourcePageRoute (s moduleRoot </> string </> s "resource-pages" </> string)
     ]
 
 
@@ -65,6 +69,9 @@ toUrl appState route =
                 Nothing ->
                     [ moduleRoot, packageId, lr "knowledgeModels.preview" appState ]
 
+        ResourcePageRoute kmId resourcePageUuid ->
+            [ moduleRoot, kmId, "resource-pages", resourcePageUuid ]
+
 
 isAllowed : Route -> AppState -> Bool
 isAllowed route appState =
@@ -72,11 +79,14 @@ isAllowed route appState =
         DetailRoute _ ->
             True
 
+        ImportRoute _ ->
+            Feature.knowledgeModelsImport appState
+
         PreviewRoute _ _ ->
             True
 
-        ImportRoute _ ->
-            Feature.knowledgeModelsImport appState
+        ResourcePageRoute _ _ ->
+            True
 
         _ ->
             Feature.knowledgeModelsView appState

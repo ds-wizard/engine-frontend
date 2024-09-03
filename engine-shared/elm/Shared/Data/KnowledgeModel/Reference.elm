@@ -4,7 +4,7 @@ module Shared.Data.KnowledgeModel.Reference exposing
     , getAnnotations
     , getDescription
     , getLabel
-    , getShortUuid
+    , getResourcePageUuid
     , getTargetUuid
     , getTypeString
     , getUrl
@@ -20,6 +20,7 @@ import Shared.Data.KnowledgeModel.Reference.CrossReferenceData as CrossReference
 import Shared.Data.KnowledgeModel.Reference.ReferenceType as ReferenceType exposing (ReferenceType(..))
 import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData as ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Shared.Data.KnowledgeModel.Reference.URLReferenceData as URLReferenceData exposing (URLReferenceData)
+import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 
 
 type Reference
@@ -83,9 +84,9 @@ getUuid =
     map .uuid .uuid .uuid
 
 
-getVisibleName : Reference -> String
-getVisibleName =
-    map .shortUuid URLReferenceData.toLabel .targetUuid
+getVisibleName : List ResourcePage -> Reference -> String
+getVisibleName resourcePages =
+    map (ResourcePageReferenceData.toLabel resourcePages) URLReferenceData.toLabel .targetUuid
 
 
 getAnnotations : Reference -> List Annotation
@@ -93,9 +94,9 @@ getAnnotations =
     map .annotations .annotations .annotations
 
 
-getShortUuid : Reference -> Maybe String
-getShortUuid =
-    map (Just << .shortUuid) (always Nothing) (always Nothing)
+getResourcePageUuid : Reference -> Maybe String
+getResourcePageUuid =
+    map .resourcePageUuid (always Nothing) (always Nothing)
 
 
 getUrl : Reference -> Maybe String

@@ -6,6 +6,7 @@ module Shared.Data.KnowledgeModel exposing
     , empty
     , filterWithTags
     , getAllQuestions
+    , getAllResourcePages
     , getAnswer
     , getAnswerFollowupQuestions
     , getAnswerName
@@ -36,6 +37,14 @@ module Shared.Data.KnowledgeModel exposing
     , getQuestionReferences
     , getReference
     , getReferenceName
+    , getResourceCollection
+    , getResourceCollectionByResourcePageUuid
+    , getResourceCollectionName
+    , getResourceCollectionResourcePages
+    , getResourceCollectionUuidByResourcePageUuid
+    , getResourceCollections
+    , getResourcePage
+    , getResourcePageName
     , getTag
     , getTagName
     , getTags
@@ -48,6 +57,8 @@ module Shared.Data.KnowledgeModel exposing
     , insertPhase
     , insertQuestion
     , insertReference
+    , insertResourceCollection
+    , insertResourcePage
     , insertTag
     , moveAnswer
     , moveChoice
@@ -63,12 +74,15 @@ module Shared.Data.KnowledgeModel exposing
     , updatePhase
     , updateQuestion
     , updateReference
+    , updateResourceCollection
+    , updateResourcePage
     , updateTag
     )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Answer exposing (Answer)
@@ -81,6 +95,8 @@ import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
 import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
+import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Utils exposing (nilUuid)
 import Uuid exposing (Uuid)
@@ -93,6 +109,7 @@ type alias KnowledgeModel =
     , integrationUuids : List String
     , metricUuids : List String
     , phaseUuids : List String
+    , resourceCollectionUuids : List String
     , entities : KnowledgeModelEntities
     , annotations : List Annotation
     }
@@ -111,6 +128,7 @@ decoder =
         |> D.required "integrationUuids" (D.list D.string)
         |> D.required "metricUuids" (D.list D.string)
         |> D.required "phaseUuids" (D.list D.string)
+        |> D.required "resourceCollectionUuids" (D.list D.string)
         |> D.required "entities" KnowledgeModelEntities.decoder
         |> D.required "annotations" (D.list Annotation.decoder)
 
@@ -123,6 +141,7 @@ empty =
     , integrationUuids = []
     , metricUuids = []
     , phaseUuids = []
+    , resourceCollectionUuids = []
     , entities = KnowledgeModelEntities.empty
     , annotations = []
     }
@@ -189,6 +208,19 @@ insertReference reference parentUuid km =
     { km | entities = KnowledgeModelEntities.insertReference reference parentUuid km.entities }
 
 
+insertResourceCollection : ResourceCollection -> String -> KnowledgeModel -> KnowledgeModel
+insertResourceCollection resourceCollection _ km =
+    { km
+        | resourceCollectionUuids = km.resourceCollectionUuids ++ [ resourceCollection.uuid ]
+        , entities = KnowledgeModelEntities.insertResourceCollection resourceCollection km.entities
+    }
+
+
+insertResourcePage : ResourcePage -> String -> KnowledgeModel -> KnowledgeModel
+insertResourcePage resourcePage parentUuid km =
+    { km | entities = KnowledgeModelEntities.insertResourcePage resourcePage parentUuid km.entities }
+
+
 insertTag : Tag -> String -> KnowledgeModel -> KnowledgeModel
 insertTag tag _ km =
     { km
@@ -244,6 +276,16 @@ updateQuestion question km =
 updateReference : Reference -> KnowledgeModel -> KnowledgeModel
 updateReference reference km =
     { km | entities = KnowledgeModelEntities.updateReference reference km.entities }
+
+
+updateResourceCollection : ResourceCollection -> KnowledgeModel -> KnowledgeModel
+updateResourceCollection resourceCollection km =
+    { km | entities = KnowledgeModelEntities.updateResourceCollection resourceCollection km.entities }
+
+
+updateResourcePage : ResourcePage -> KnowledgeModel -> KnowledgeModel
+updateResourcePage resourcePage km =
+    { km | entities = KnowledgeModelEntities.updateResourcePage resourcePage km.entities }
 
 
 updateTag : Tag -> KnowledgeModel -> KnowledgeModel
@@ -334,6 +376,33 @@ getReference uuid km =
     Dict.get uuid km.entities.references
 
 
+getResourceCollection : String -> KnowledgeModel -> Maybe ResourceCollection
+getResourceCollection uuid km =
+    Dict.get uuid km.entities.resourceCollections
+
+
+getResourceCollectionUuidByResourcePageUuid : String -> KnowledgeModel -> Maybe String
+getResourceCollectionUuidByResourcePageUuid resourcePageUuid km =
+    getResourceCollectionByResourcePageUuid resourcePageUuid km
+        |> Maybe.map .uuid
+
+
+getResourceCollectionByResourcePageUuid : String -> KnowledgeModel -> Maybe ResourceCollection
+getResourceCollectionByResourcePageUuid resourcePageUuid km =
+    Dict.values km.entities.resourceCollections
+        |> List.find (\rc -> List.member resourcePageUuid rc.resourcePageUuids)
+
+
+getResourcePage : String -> KnowledgeModel -> Maybe ResourcePage
+getResourcePage uuid km =
+    Dict.get uuid km.entities.resourcePages
+
+
+getAllResourcePages : KnowledgeModel -> List ResourcePage
+getAllResourcePages km =
+    Dict.values km.entities.resourcePages
+
+
 getExpert : String -> KnowledgeModel -> Maybe Expert
 getExpert uuid km =
     Dict.get uuid km.entities.experts
@@ -385,7 +454,17 @@ getExpertName km uuid =
 
 getReferenceName : KnowledgeModel -> String -> String
 getReferenceName km uuid =
-    Maybe.unwrap "" Reference.getVisibleName <| getReference uuid km
+    Maybe.unwrap "" (Reference.getVisibleName (getAllResourcePages km)) <| getReference uuid km
+
+
+getResourceCollectionName : KnowledgeModel -> String -> String
+getResourceCollectionName km uuid =
+    Maybe.unwrap "" .title <| getResourceCollection uuid km
+
+
+getResourcePageName : KnowledgeModel -> String -> String
+getResourcePageName km uuid =
+    Maybe.unwrap "" .title <| getResourcePage uuid km
 
 
 getChoiceName : KnowledgeModel -> String -> String
@@ -415,6 +494,11 @@ getMetrics km =
 getPhases : KnowledgeModel -> List Phase
 getPhases km =
     resolveEntities km.entities.phases km.phaseUuids
+
+
+getResourceCollections : KnowledgeModel -> List ResourceCollection
+getResourceCollections km =
+    resolveEntities km.entities.resourceCollections km.resourceCollectionUuids
 
 
 getTags : KnowledgeModel -> List Tag
@@ -457,6 +541,11 @@ getAnswerFollowupQuestions =
     getEntities .answers .followUpUuids .questions
 
 
+getResourceCollectionResourcePages : String -> KnowledgeModel -> List ResourcePage
+getResourceCollectionResourcePages =
+    getEntities .resourceCollections .resourcePageUuids .resourcePages
+
+
 getEntities :
     (KnowledgeModelEntities -> Dict String parent)
     -> (parent -> List String)
@@ -497,6 +586,7 @@ createParentMap km =
                 |> insert_ .phaseUuids
                 |> insert_ .tagUuids
                 |> insert_ .integrationUuids
+                |> insert_ .resourceCollectionUuids
 
         processChapter chapter dict =
             let
@@ -526,6 +616,14 @@ createParentMap km =
             dict
                 |> insert_ .followUpUuids
 
+        processResourceCollection resourceCollection dict =
+            let
+                insert_ getChildUuids =
+                    insert resourceCollection.uuid (getChildUuids resourceCollection)
+            in
+            dict
+                |> insert_ .resourcePageUuids
+
         processChapters chapters dict =
             List.foldl processChapter dict <| Dict.values chapters
 
@@ -534,12 +632,16 @@ createParentMap km =
 
         processAnswers answers dict =
             List.foldl processAnswer dict <| Dict.values answers
+
+        processResourceCollections resourceCollections dict =
+            List.foldl processResourceCollection dict <| Dict.values resourceCollections
     in
     Dict.empty
         |> processKM km
         |> processChapters km.entities.chapters
         |> processQuestions km.entities.questions
         |> processAnswers km.entities.answers
+        |> processResourceCollections km.entities.resourceCollections
 
 
 getParent : ParentMap -> String -> String

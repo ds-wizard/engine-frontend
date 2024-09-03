@@ -5,7 +5,7 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
 import Shared.Components.Badge as Badge
@@ -13,6 +13,8 @@ import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
+import Shared.Utils exposing (flip)
+import String.Format as String
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.DetailNavigation as DetailNavigation
@@ -20,6 +22,7 @@ import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Feature as Features
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.ActionButton as ActionButton
@@ -89,6 +92,24 @@ viewError appState =
 viewProject : ProjectDetailRoute -> AppState -> Model -> QuestionnaireCommon -> Html Msg
 viewProject route appState model questionnaire =
     let
+        ( migrationWarning, migrationWarningEnabled ) =
+            case questionnaire.migrationUuid of
+                Just migrationUuid ->
+                    let
+                        warningLink =
+                            linkTo appState (Wizard.Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
+
+                        warningContent =
+                            gettext "There is an ongoing %s. Finish it before you can continue editing this project." appState.locale
+                                |> flip String.formatHtml [ warningLink ]
+                    in
+                    ( div [ class "Projects__Detail__Warning" ] [ div [] warningContent ]
+                    , True
+                    )
+
+                Nothing ->
+                    ( emptyNode, False )
+
         navigation =
             if AppState.isFullscreen appState then
                 emptyNode
@@ -107,8 +128,12 @@ viewProject route appState model questionnaire =
                     |> ActionResult.withDefault []
             }
     in
-    div [ class "Projects__Detail col-full flex-column" ]
-        [ navigation
+    div
+        [ class "Projects__Detail col-full flex-column"
+        , classList [ ( "Projects__Detail--Warning", migrationWarningEnabled ) ]
+        ]
+        [ migrationWarning
+        , navigation
         , viewProjectContent appState route model questionnaire
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
         , Html.map QuestionnaireVersionViewModalMsg <| QuestionnaireVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
@@ -339,7 +364,7 @@ viewProjectContent appState route model questionnaire =
                             , toolbarEnabled = True
                             , questionLinksEnabled = True
                             }
-                        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel
+                        , renderer = DefaultQuestionnaireRenderer.create appState qm.questionnaire.knowledgeModel (DefaultQuestionnaireRenderer.defaultResourcePageToRoute qm.questionnaire.packageId)
                         , wrapMsg = QuestionnaireMsg
                         , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
                         , revertQuestionnaireMsg = Just OpenRevertModal

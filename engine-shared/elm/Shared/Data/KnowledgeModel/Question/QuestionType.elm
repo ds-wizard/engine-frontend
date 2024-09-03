@@ -12,6 +12,7 @@ type QuestionType
     | ValueQuestionType
     | IntegrationQuestionType
     | MultiChoiceQuestionType
+    | ItemSelectQuestionType
 
 
 decoder : Decoder QuestionType
@@ -34,6 +35,9 @@ decoder =
 
                     "MultiChoiceQuestion" ->
                         D.succeed MultiChoiceQuestionType
+
+                    "ItemSelectQuestion" ->
+                        D.succeed ItemSelectQuestionType
 
                     valueType ->
                         D.fail <| "Unknown question type: " ++ valueType

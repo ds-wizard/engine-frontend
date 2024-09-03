@@ -40,7 +40,10 @@ viewProject appState model ( package, questionnaireModel ) =
                     , toolbarEnabled = False
                     , questionLinksEnabled = False
                     }
-                , renderer = DefaultQuestionnaireRenderer.create appState questionnaireModel.questionnaire.knowledgeModel
+                , renderer =
+                    DefaultQuestionnaireRenderer.create appState
+                        questionnaireModel.questionnaire.knowledgeModel
+                        (DefaultQuestionnaireRenderer.defaultResourcePageToRoute questionnaireModel.questionnaire.packageId)
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing

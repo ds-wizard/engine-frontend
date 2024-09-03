@@ -156,7 +156,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
                 , toolbarEnabled = False
                 , questionLinksEnabled = False
                 }
-            , renderer = DefaultQuestionnaireRenderer.create appState questionnaire.knowledgeModel
+            , renderer = DefaultQuestionnaireRenderer.create appState questionnaire.knowledgeModel (DefaultQuestionnaireRenderer.defaultResourcePageToRoute questionnaire.packageId)
             , wrapMsg = QuestionnaireMsg
             , previewQuestionnaireEventMsg = Nothing
             , revertQuestionnaireMsg = Nothing
@@ -275,3 +275,7 @@ viewReply appState questionnaire question data =
 
                 IntegrationReplyType.IntegrationType _ reply ->
                     eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
+
+        ReplyValue.ItemSelectReply _ ->
+            -- TODO
+            eventView [ ( fa "fas fa-plus", text (gettext "Added item" appState.locale) ) ]

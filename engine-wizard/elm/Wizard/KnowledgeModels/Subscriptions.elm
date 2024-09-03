@@ -23,3 +23,6 @@ subscriptions route model =
 
         PreviewRoute _ _ ->
             Sub.map PreviewMsg <| Wizard.KnowledgeModels.Preview.Subscriptions.subscriptions model.previewModel
+
+        _ ->
+            Sub.none

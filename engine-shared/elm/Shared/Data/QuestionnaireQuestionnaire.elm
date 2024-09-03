@@ -12,12 +12,15 @@ module Shared.Data.QuestionnaireQuestionnaire exposing
     , decoder
     , generateReplies
     , getComments
+    , getItemSelectQuestionValueLabel
     , getItemTitle
     , getTodos
     , getUnresolvedCommentCount
     , getWarnings
     , hasReply
     , isCurrentVersion
+    , itemSelectQuestionItemMissing
+    , itemSelectQuestionItemPath
     , removeCommentThreadFromCount
     , setLabels
     , setPhaseUuid
@@ -32,6 +35,7 @@ module Shared.Data.QuestionnaireQuestionnaire exposing
 
 import Dict exposing (Dict)
 import Dict.Extra as Dict
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
@@ -56,9 +60,11 @@ import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (boolToInt, getUuidString)
 import String.Extra as String
+import String.Format as String
 import Time
 import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias QuestionnaireQuestionnaire =
@@ -331,6 +337,111 @@ getComments questionnaire =
     concatMapVisibleQuestions fn questionnaire
 
 
+itemSelectQuestionItemMissing : QuestionnaireQuestionnaire -> Maybe String -> String -> Bool
+itemSelectQuestionItemMissing questionnaire itemSelectQuestionListQuestionUuid path =
+    case getReplyValue questionnaire path of
+        Just replyValue ->
+            case replyValue of
+                ItemSelectReply itemUuid ->
+                    let
+                        mbItemQuestionUuid =
+                            itemSelectQuestionListQuestionUuid
+                                |> Maybe.andThen (\uuid -> KnowledgeModel.getQuestion uuid questionnaire.knowledgeModel)
+                                |> Maybe.map Question.getUuid
+                    in
+                    case mbItemQuestionUuid of
+                        Just itemQuestionUuid ->
+                            let
+                                itemExists =
+                                    questionnaire.replies
+                                        |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                        |> Dict.values
+                                        |> List.any (List.member itemUuid << ReplyValue.getItemUuids << .value)
+                            in
+                            not itemExists
+
+                        Nothing ->
+                            False
+
+                _ ->
+                    False
+
+        Nothing ->
+            False
+
+
+itemSelectQuestionItemPath : QuestionnaireQuestionnaire -> Maybe String -> String -> Maybe String
+itemSelectQuestionItemPath questionnaire itemSelectQuestionListQuestionUuid path =
+    case getReplyValue questionnaire path of
+        Just replyValue ->
+            case replyValue of
+                ItemSelectReply itemUuid ->
+                    let
+                        mbItemQuestionUuid =
+                            itemSelectQuestionListQuestionUuid
+                                |> Maybe.andThen (\uuid -> KnowledgeModel.getQuestion uuid questionnaire.knowledgeModel)
+                                |> Maybe.map Question.getUuid
+                    in
+                    case mbItemQuestionUuid of
+                        Just itemQuestionUuid ->
+                            questionnaire.replies
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.toList
+                                |> List.find (List.member itemUuid << ReplyValue.getItemUuids << .value << Tuple.second)
+                                |> Maybe.map (\( key, _ ) -> key ++ "." ++ itemUuid)
+
+                        Nothing ->
+                            Nothing
+
+                _ ->
+                    Nothing
+
+        Nothing ->
+            Nothing
+
+
+getItemSelectQuestionValueLabel : AppState -> QuestionnaireQuestionnaire -> String -> String -> String
+getItemSelectQuestionValueLabel appState questionnaire itemSelectQuestionUuid itemUuid =
+    let
+        mbItemSelectQuestion =
+            KnowledgeModel.getQuestion itemSelectQuestionUuid questionnaire.knowledgeModel
+
+        mbListQuestionUuid =
+            mbItemSelectQuestion
+                |> Maybe.andThen Question.getListQuestionUuid
+                |> Maybe.andThen (\uuid -> KnowledgeModel.getQuestion uuid questionnaire.knowledgeModel)
+                |> Maybe.map Question.getUuid
+
+        fallbackItemName =
+            gettext "Item" appState.locale
+    in
+    case mbListQuestionUuid of
+        Just listQuestionUuid ->
+            let
+                itemTemplateQuestions =
+                    KnowledgeModel.getQuestionItemTemplateQuestions listQuestionUuid questionnaire.knowledgeModel
+
+                itemsToOptions ( itemQuestionPath, reply ) =
+                    ReplyValue.getItemUuids reply.value
+                        |> List.indexedMap
+                            (\i iUuid ->
+                                ( iUuid
+                                , getItemTitle questionnaire (String.split "." itemQuestionPath ++ [ itemUuid ]) itemTemplateQuestions
+                                    |> Maybe.withDefault (String.format (gettext "Item %s" appState.locale) [ String.fromInt (i + 1) ])
+                                )
+                            )
+            in
+            questionnaire.replies
+                |> Dict.filter (\key _ -> String.endsWith listQuestionUuid key)
+                |> Dict.find (\_ value -> List.member itemUuid (ReplyValue.getItemUuids value.value))
+                |> Maybe.unwrap [] itemsToOptions
+                |> List.find (\( iUuid, _ ) -> iUuid == itemUuid)
+                |> Maybe.unwrap fallbackItemName Tuple.second
+
+        Nothing ->
+            fallbackItemName
+
+
 type alias QuestionnaireWarning =
     { chapter : Chapter
     , question : Question
@@ -395,6 +506,13 @@ getWarnings questionnaire =
 
                         Nothing ->
                             []
+
+                ItemSelectQuestion _ questionData ->
+                    if itemSelectQuestionItemMissing questionnaire questionData.listQuestionUuid (pathToString currentPath) then
+                        [ questionnaireWarning ]
+
+                    else
+                        []
 
                 _ ->
                     []

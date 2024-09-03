@@ -13,14 +13,6 @@ $toolbar-height: 40px;
         }
     }
 
-    &.warning-enabled {
-        position: relative;
-
-        .questionnaire__body {
-            padding-top: 45px;
-        }
-    }
-
     &__warning {
         position: absolute;
         width: 100%;
@@ -1071,6 +1063,23 @@ $toolbar-height: 40px;
                         border-bottom: 1px solid $gray-300;
                     }
                 }
+            }
+        }
+
+        .question-item-select {
+            select {
+                position: relative;
+                z-index: 1;
+            }
+
+            &-link {
+                @include border-radius-bottom($border-radius);
+                margin-top: -$border-radius;
+                border: 1px solid $border-color;
+                position: relative;
+                background: $light;
+                padding: ($input-padding-y + $border-radius) $input-padding-x $input-padding-y;
+
             }
         }
 

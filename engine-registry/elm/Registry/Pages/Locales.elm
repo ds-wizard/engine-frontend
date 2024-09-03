@@ -68,7 +68,7 @@ viewLocales appState documentTemplates =
     let
         localeView =
             documentTemplates
-                |> List.sortBy (Time.toMillis appState.timeZone << .createdAt)
+                |> List.sortBy ((*) -1 << Time.posixToMillis << .createdAt)
                 |> List.map (ListItem.view appState { toRoute = Routes.localeDetail << .id })
                 |> div []
     in
