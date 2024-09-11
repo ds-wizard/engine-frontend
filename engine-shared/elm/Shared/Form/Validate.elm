@@ -123,7 +123,7 @@ uuid =
 
 organizationId : Validation FormError String
 organizationId =
-    regex RegexPatterns.organizationId "Organization ID can only contain alphanumeric characters, hyphens, and dots. It must start and end with an alphanumeric character."
+    regex RegexPatterns.organizationId "Organization ID can only contain alphanumeric characters and dots. It must start and end with an alphanumeric character."
 
 
 kmId : Validation FormError String
