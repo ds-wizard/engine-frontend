@@ -14,6 +14,7 @@ import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Html exposing (emptyNode)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Components.CookieConsent as CookieConsent
 import Wizard.Common.Components.SessionModal as SessionModal
 import Wizard.Common.Html exposing (linkTo)
@@ -139,17 +140,35 @@ publicHeader fluidFull model =
 app : Model -> Html Msg -> Document Msg
 app model content =
     let
+        rightPanel =
+            if not model.appState.session.rightPanelCollapsed then
+                div [ class "right-panel" ]
+                    [ div [ class "right-panel-content" ]
+                        [ AIAssistant.view
+                            { appState = model.appState
+                            , wrapMsg = Wizard.Msgs.AIAssistantMsg
+                            , closeMsg = Wizard.Msgs.SetRightPanelCollapsed True
+                            }
+                            model.aiAssistantState
+                        ]
+                    ]
+
+            else
+                emptyNode
+
         html =
             div
                 [ class "app-view"
                 , classList
                     [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed )
                     , ( "app-fullscreen", AppState.isFullscreen model.appState )
+                    , ( "app-right-panel", not model.appState.session.rightPanelCollapsed )
                     ]
                 ]
                 [ Menu.view model
                 , div [ class "page row justify-content-center" ]
                     [ content ]
+                , rightPanel
                 , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
                 , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.recentlyCopied model.menuModel.apiBuildInfo
                 , viewLanguagesModal model.appState model.menuModel.languagesOpen

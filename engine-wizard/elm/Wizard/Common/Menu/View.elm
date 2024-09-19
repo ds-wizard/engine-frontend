@@ -227,12 +227,19 @@ view : Model -> Html Wizard.Msgs.Msg
 view model =
     let
         viewAiAssistant =
-            div []
-                [ a [ class "sidebar-ai-assistant" ]
-                    [ fa "fas fa-fw fa-wand-magic-sparkles"
-                    , span [ class "sidebar-link" ] [ text "AI Assistant" ]
+            if Admin.isEnabled model.appState.config.admin then
+                div []
+                    [ a
+                        [ class "sidebar-ai-assistant"
+                        , onClick (Wizard.Msgs.SetRightPanelCollapsed False)
+                        ]
+                        [ fa "fas fa-fw fa-wand-magic-sparkles"
+                        , span [ class "sidebar-link" ] [ text "AI Assistant" ]
+                        ]
                     ]
-                ]
+
+            else
+                emptyNode
     in
     div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ viewLogo model

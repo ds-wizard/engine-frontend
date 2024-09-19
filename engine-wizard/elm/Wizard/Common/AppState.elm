@@ -1,6 +1,7 @@
 module Wizard.Common.AppState exposing
     ( AppState
     , acceptCookies
+    , getAIAssistantApiUrl
     , getClientUrlRoot
     , getUserRole
     , init
@@ -206,3 +207,8 @@ sessionRemainingTime appState =
                 |> String.padLeft 2 '0'
     in
     timeLeftMin ++ ":" ++ timeLeftSec
+
+
+getAIAssistantApiUrl : AppState -> String
+getAIAssistantApiUrl appState =
+    String.replace "/wizard" "/ai-assistant" appState.apiUrl

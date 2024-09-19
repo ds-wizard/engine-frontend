@@ -20,6 +20,10 @@ body {
             display: none;
         }
     }
+
+    &.app-right-panel {
+        margin-right: $right-panel-width;
+    }
 }
 
 .page {
@@ -428,7 +432,7 @@ body {
         align-items: baseline;
         padding: 9px;
         font-weight: 500;
-        text-decoration: none;
+        text-decoration: none !important;
         margin: 1rem 0.75rem 0;
 
         .fa-fw {

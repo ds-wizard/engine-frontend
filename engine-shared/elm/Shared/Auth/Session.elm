@@ -8,6 +8,7 @@ module Shared.Auth.Session exposing
     , expiresSoon
     , init
     , setFullscreen
+    , setRightPanelCollapsed
     , setSidebarCollapsed
     , setToken
     )
@@ -22,9 +23,10 @@ import Time
 type alias Session =
     { token : Token
     , sidebarCollapsed : Bool
+    , rightPanelCollapsed : Bool
     , fullscreen : Bool
     , apiUrl : String
-    , v8 : Bool
+    , v9 : Bool
     }
 
 
@@ -32,9 +34,10 @@ init : String -> Session
 init apiUrl =
     { token = Token.empty
     , sidebarCollapsed = False
+    , rightPanelCollapsed = True
     , fullscreen = False
     , apiUrl = apiUrl
-    , v8 = True
+    , v9 = True
     }
 
 
@@ -48,6 +51,11 @@ setSidebarCollapsed session collapsed =
     { session | sidebarCollapsed = collapsed }
 
 
+setRightPanelCollapsed : Session -> Bool -> Session
+setRightPanelCollapsed session collapsed =
+    { session | rightPanelCollapsed = collapsed }
+
+
 setFullscreen : Session -> Bool -> Session
 setFullscreen session fullscreen =
     { session | fullscreen = fullscreen }
@@ -58,9 +66,10 @@ decoder =
     D.succeed Session
         |> D.required "token" Token.decoder
         |> D.optional "sidebarCollapsed" D.bool False
+        |> D.optional "rightPanelCollapsed" D.bool True
         |> D.optional "fullscreen" D.bool False
         |> D.required "apiUrl" D.string
-        |> D.required "v8" D.bool
+        |> D.required "v9" D.bool
 
 
 encode : Session -> E.Value
@@ -68,9 +77,10 @@ encode session =
     E.object
         [ ( "token", Token.encode session.token )
         , ( "sidebarCollapsed", E.bool session.sidebarCollapsed )
+        , ( "rightPanelCollapsed", E.bool session.rightPanelCollapsed )
         , ( "fullscreen", E.bool session.fullscreen )
         , ( "apiUrl", E.string session.apiUrl )
-        , ( "v8", E.bool session.v8 )
+        , ( "v9", E.bool session.v9 )
         ]
 
 

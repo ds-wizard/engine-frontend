@@ -3,10 +3,12 @@ module Wizard exposing (main)
 import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
-import Shared.Utils exposing (dispatch)
+import Shared.Data.BootstrapConfig.Admin as Admin
+import Shared.Utils as Taks exposing (dispatch)
 import Shared.Utils.Theme as Theme
 import Url exposing (Url)
 import Wizard.Common.AppState as AppState
+import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Time as Time
 import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
@@ -48,10 +50,18 @@ init flags location key =
 
                             Nothing ->
                                 Cmd.none
+
+                    aiAssistantCmd =
+                        if Admin.isEnabled appState.config.admin then
+                            Taks.dispatch (Wizard.Msgs.AIAssistantMsg AIAssistant.init)
+
+                        else
+                            Cmd.none
                 in
                 Cmd.batch
                     [ decideInitialRoute model location route originalRoute
                     , setThemeCmd
+                    , aiAssistantCmd
                     , Time.getTime
                     , Time.getTimeZone
                     ]

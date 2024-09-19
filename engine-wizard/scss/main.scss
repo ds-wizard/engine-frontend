@@ -21,6 +21,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'animations';
 @import 'layout';
 
+@import 'elements/ai-assistant';
 @import 'elements/alert';
 @import 'elements/animation';
 @import 'elements/code';
@@ -42,6 +43,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'elements/modal';
 @import 'elements/nav';
 @import 'elements/pre';
+@import 'elements/right-panel';
 @import 'elements/table';
 @import 'elements/tag-selection';
 @import 'elements/text';
