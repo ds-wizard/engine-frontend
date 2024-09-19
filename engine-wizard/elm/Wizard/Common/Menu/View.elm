@@ -231,7 +231,7 @@ view model =
                 div []
                     [ a
                         [ class "sidebar-ai-assistant"
-                        , onClick (Wizard.Msgs.SetRightPanelCollapsed False)
+                        , onClick (Wizard.Msgs.SetRightPanelCollapsed (not model.appState.session.rightPanelCollapsed))
                         ]
                         [ fa "fas fa-fw fa-wand-magic-sparkles"
                         , span [ class "sidebar-link" ] [ text "AI Assistant" ]
