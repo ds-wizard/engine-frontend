@@ -1,6 +1,6 @@
 module Uuid exposing
     ( Uuid, uuidGenerator, fromString, toString, encode, decoder
-    , fromUuidString, nil
+    , fromUuidString, nil, randomUuid
     )
 
 {-| This module provides an opaque type for Uuids, helpers to serialize
@@ -102,6 +102,11 @@ map them to other types etc.
 uuidGenerator : Generator Uuid
 uuidGenerator =
     map Uuid uuidStringGenerator
+
+
+randomUuid : Seed -> ( Uuid, Seed )
+randomUuid =
+    step uuidGenerator
 
 
 {-| Encode Uuid to Json

@@ -9,6 +9,10 @@
     right: 0;
     z-index: 10;
 
+    .app-right-panel & {
+        right: $right-panel-width;
+    }
+
     .top-header-content {
         background: $gray-100;
         border-bottom: 1px solid $gray-400;

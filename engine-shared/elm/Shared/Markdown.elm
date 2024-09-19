@@ -1,4 +1,8 @@
-module Shared.Markdown exposing (toHtml, toString)
+module Shared.Markdown exposing
+    ( sanitizeHtml
+    , toHtml
+    , toString
+    )
 
 import Html exposing (Html, text)
 import Html.Attributes as Attr
@@ -6,6 +10,12 @@ import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser as Markdown
 import Markdown.Renderer
+
+
+sanitizeHtml : String -> String
+sanitizeHtml html =
+    html
+        |> String.replace "<" "&lt;"
 
 
 toHtml : List (Html.Attribute msg) -> String -> Html msg

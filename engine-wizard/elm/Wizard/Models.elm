@@ -13,6 +13,7 @@ import Shared.Auth.Session as Session exposing (Session)
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Comments.Models
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Menu.Models
 import Wizard.Dashboard.Models
 import Wizard.Dev.Models
@@ -36,6 +37,7 @@ import Wizard.Users.Models
 type alias Model =
     { appState : AppState
     , menuModel : Wizard.Common.Menu.Models.Model
+    , aiAssistantState : AIAssistant.State
     , adminModel : Wizard.Dev.Models.Model
     , commentsModel : Wizard.Comments.Models.Model
     , dashboardModel : Wizard.Dashboard.Models.Model
@@ -60,6 +62,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { appState = appState
     , menuModel = Wizard.Common.Menu.Models.initialModel
+    , aiAssistantState = AIAssistant.initialState
     , adminModel = Wizard.Dev.Models.initialModel
     , commentsModel = Wizard.Comments.Models.initialModel PaginationQueryString.empty Nothing
     , tenantsModel = Wizard.Tenants.Models.initialModel

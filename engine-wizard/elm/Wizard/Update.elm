@@ -8,6 +8,7 @@ import Url
 import Wizard.Auth.Update
 import Wizard.Comments.Update
 import Wizard.Common.AppState as AppState
+import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.LocalStorageData as LocalStorageData
 import Wizard.Common.Menu.Update
 import Wizard.Common.Time as Time
@@ -223,10 +224,34 @@ update msg model =
             Wizard.Msgs.AuthMsg authMsg ->
                 Wizard.Auth.Update.update authMsg model
 
+            Wizard.Msgs.AIAssistantMsg aiAssistantMsg ->
+                let
+                    updateConfig =
+                        { appState = model.appState
+                        , seed = model.appState.seed
+                        }
+
+                    ( newSeed, aiAssistantState, aiAssistantCmd ) =
+                        AIAssistant.update updateConfig aiAssistantMsg model.aiAssistantState
+                in
+                ( setSeed newSeed <| { model | aiAssistantState = aiAssistantState }
+                , Cmd.map AIAssistantMsg aiAssistantCmd
+                )
+
             Wizard.Msgs.SetSidebarCollapsed collapsed ->
                 let
                     newSession =
                         Session.setSidebarCollapsed model.appState.session collapsed
+
+                    newModel =
+                        setSession newSession model
+                in
+                ( newModel, Ports.storeSession <| Session.encode newSession )
+
+            Wizard.Msgs.SetRightPanelCollapsed collapsed ->
+                let
+                    newSession =
+                        Session.setRightPanelCollapsed model.appState.session collapsed
 
                     newModel =
                         setSession newSession model

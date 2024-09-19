@@ -9,6 +9,7 @@ import Time
 import Url exposing (Url)
 import Wizard.Auth.Msgs
 import Wizard.Comments.Msgs
+import Wizard.Common.Components.AIAssistant
 import Wizard.Common.Menu.Msgs
 import Wizard.Dashboard.Msgs
 import Wizard.Dev.Msgs
@@ -37,7 +38,9 @@ type Msg
     | OnTimeZone Time.Zone
     | AcceptCookies
     | AuthMsg Wizard.Auth.Msgs.Msg
+    | AIAssistantMsg Wizard.Common.Components.AIAssistant.Msg
     | SetSidebarCollapsed Bool
+    | SetRightPanelCollapsed Bool
     | SetFullscreen Bool
     | SetLocale String
     | HideSessionExpiresSoonModal
