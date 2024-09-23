@@ -9,6 +9,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , TypeHints
     , addComment
     , addEvent
+    , addFile
     , assignCommentThread
     , clearReply
     , deleteComment
@@ -40,6 +41,7 @@ import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, op
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
+import Html.Extra as Html
 import Json.Decode as D exposing (Decoder, decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
@@ -50,10 +52,12 @@ import Regex
 import Roman
 import Set exposing (Set)
 import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
+import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Auth.Session as Session
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
@@ -77,6 +81,7 @@ import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (Questionnair
 import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Shared.Data.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
 import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
@@ -102,6 +107,7 @@ import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Common.Components.Questionnaire.FeedbackModal as FeedbackModal
+import Wizard.Common.Components.Questionnaire.FileUploadModal as FileUploadModal
 import Wizard.Common.Components.Questionnaire.History as History
 import Wizard.Common.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
@@ -110,6 +116,8 @@ import Wizard.Common.Components.Questionnaire.UserSuggestionDropdown as UserSugg
 import Wizard.Common.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Common.ElementScrollTop as ElementScrollTop
 import Wizard.Common.Feature as Feature
+import Wizard.Common.FileDownloader as FileDownloader
+import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue exposing (IntegrationWidgetValue)
@@ -141,9 +149,12 @@ type alias Model =
     , questionnaireVersions : ActionResult (List QuestionnaireVersion)
     , phaseModalOpen : Bool
     , removeItem : Maybe ( String, String )
+    , deleteFile : Maybe ( Uuid, String )
+    , deletingFile : ActionResult ()
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
     , feedbackModalModel : FeedbackModal.Model
+    , fileUploadModalModel : FileUploadModal.Model
     , viewSettings : QuestionnaireViewSettings
     , viewSettingsDropdown : Dropdown.State
     , historyModel : History.Model
@@ -212,9 +223,12 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , questionnaireVersions = ActionResult.Unset
             , phaseModalOpen = False
             , removeItem = Nothing
+            , deleteFile = Nothing
+            , deletingFile = ActionResult.Unset
             , typeHints = Nothing
             , typeHintsDebounce = Debounce.init
             , feedbackModalModel = FeedbackModal.init
+            , fileUploadModalModel = FileUploadModal.init questionnaire.uuid
             , viewSettings = QuestionnaireViewSettings.default
             , viewSettingsDropdown = Dropdown.initialState
             , historyModel = History.init appState
@@ -460,6 +474,11 @@ isQuestionDesirable model =
         (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
 
 
+addFile : QuestionnaireFileSimple -> Model -> Model
+addFile file model =
+    { model | questionnaire = QuestionnaireQuestionnaire.addFile file model.questionnaire }
+
+
 type alias Config msg =
     { features : FeaturesConfig
     , renderer : QuestionnaireRenderer Msg
@@ -576,13 +595,21 @@ type Msg
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) String (Result ApiError (List TypeHint))
     | FeedbackModalMsg FeedbackModal.Msg
+    | FileUploadModalMsg FileUploadModal.Msg
     | PhaseModalUpdate Bool (Maybe Uuid)
     | SetReply String Reply
+    | SetFile String QuestionnaireFileSimple
     | ClearReply String
     | AddItem String (List String)
     | RemoveItem String String
     | RemoveItemConfirm
     | RemoveItemCancel
+    | DeleteFile Uuid String
+    | DeleteFileConfirm
+    | DeleteFileCompleted String (Result ApiError ())
+    | DeleteFileCancel
+    | DownloadFile Uuid
+    | FileDownloaderMsg FileDownloader.Msg
     | MoveItemUp String String
     | MoveItemDown String String
     | OpenIntegrationWidget String String
@@ -764,6 +791,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         FeedbackModalMsg feedbackModalMsg ->
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
 
+        FileUploadModalMsg fileUploadModalMsg ->
+            withSeed <| handleFileUploadModalMsg appState model fileUploadModalMsg
+
         PhaseModalUpdate open mbPhaseUuid ->
             let
                 modelWithPhase =
@@ -777,6 +807,16 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         SetReply path replyValue ->
             wrap <| setReply path replyValue model
+
+        SetFile path file ->
+            let
+                modelWithFile =
+                    updateQuestionnaire (QuestionnaireQuestionnaire.addFile file) model
+
+                reply =
+                    createReply appState (FileReply file.uuid)
+            in
+            withSeed <| ( modelWithFile, dispatch (SetReply path reply) )
 
         ClearReply path ->
             wrap <| clearReply path model
@@ -811,6 +851,48 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         RemoveItemCancel ->
             wrap <| { model | removeItem = Nothing }
+
+        DeleteFile fileUuid path ->
+            wrap <|
+                { model
+                    | deleteFile = Just ( fileUuid, path )
+                    , deletingFile = ActionResult.Unset
+                }
+
+        DeleteFileConfirm ->
+            case model.deleteFile of
+                Just ( fileUuid, path ) ->
+                    let
+                        deleteFileCmd =
+                            QuestionnaireFilesApi.deleteFile model.uuid fileUuid appState (DeleteFileCompleted path)
+
+                        modelWithDeletingFile =
+                            { model | deletingFile = ActionResult.Loading }
+                    in
+                    withSeed ( modelWithDeletingFile, deleteFileCmd )
+
+                Nothing ->
+                    wrap model
+
+        DeleteFileCompleted path result ->
+            case result of
+                Ok _ ->
+                    withSeed
+                        ( { model | deleteFile = Nothing }
+                        , dispatch (ClearReply path)
+                        )
+
+                Err err ->
+                    wrap { model | deletingFile = ApiError.toActionResult appState (gettext "Unable to delete file." appState.locale) err }
+
+        DeleteFileCancel ->
+            wrap <| { model | deleteFile = Nothing }
+
+        DownloadFile uuid ->
+            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile appState (QuestionnaireFilesApi.fileUrl model.uuid uuid appState)) )
+
+        FileDownloaderMsg fileDownloaderMsg ->
+            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.update fileDownloaderMsg) )
 
         MoveItemUp path itemUuid ->
             let
@@ -1482,6 +1564,22 @@ handleFeedbackModalMsg appState model feedbackModalMsg =
     )
 
 
+handleFileUploadModalMsg : AppState -> Model -> FileUploadModal.Msg -> ( Model, Cmd Msg )
+handleFileUploadModalMsg appState model fileUploadModalMsg =
+    let
+        updateConfig =
+            { wrapMsg = FileUploadModalMsg
+            , setFileMsg = SetFile
+            }
+
+        ( fileUploadModalModel, fileUploadModalCmd ) =
+            FileUploadModal.update appState updateConfig fileUploadModalMsg model.fileUploadModalModel
+    in
+    ( { model | fileUploadModalModel = fileUploadModalModel }
+    , fileUploadModalCmd
+    )
+
+
 handleAddItem : AppState -> (Msg -> msg) -> Model -> String -> List String -> ( Seed, Model, Cmd msg )
 handleAddItem appState wrapMsg model path originalItems =
     let
@@ -1610,7 +1708,9 @@ view appState cfg ctx model =
         , Html.map cfg.wrapMsg <| viewActionResultModal appState model
         , Html.map cfg.wrapMsg <| viewPhaseModal appState model
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
+        , Html.map (cfg.wrapMsg << FileUploadModalMsg) <| FileUploadModal.view appState model.fileUploadModalModel
         , Html.map cfg.wrapMsg <| viewRemoveItemModal appState model
+        , Html.map cfg.wrapMsg <| viewFileDeleteModal appState model
         ]
 
 
@@ -2918,6 +3018,9 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 ItemSelectQuestion _ _ ->
                     ( viewQuestionItemSelect appState cfg model newPath question, [] )
 
+                FileQuestion _ _ ->
+                    ( viewQuestionFile appState cfg model newPath question, [] )
+
         ( questionClass, questionState ) =
             case
                 ( QuestionnaireQuestionnaire.hasReply (pathToString newPath) model.questionnaire
@@ -3704,6 +3807,64 @@ viewQuestionItemSelect appState cfg model path question =
         ]
 
 
+viewQuestionFile : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
+viewQuestionFile appState cfg model path question =
+    let
+        mbAnswer =
+            Dict.get (pathToString path) model.questionnaire.replies
+                |> Maybe.map .value
+                |> Maybe.andThen ReplyValue.getFileUuid
+
+        fileView fileUuid =
+            case QuestionnaireQuestionnaire.getFile model.questionnaire fileUuid of
+                Just file ->
+                    div [ class "questionnaire-file" ]
+                        [ fa ("me-2 " ++ FileIcon.getFileIcon file.fileName file.contentType)
+                        , a [ onClick (DownloadFile file.uuid) ] [ text file.fileName ]
+                        , span [ class "text-muted ms-2" ]
+                            [ text ("(" ++ (ByteUnits.toReadable file.fileSize ++ ")")) ]
+                        , Html.viewIf (not cfg.features.readonly) <|
+                            div [ class "flex-grow-1 text-end" ]
+                                [ a
+                                    (onClick (DeleteFile fileUuid (pathToString path))
+                                        :: dataCy "file-delete"
+                                        :: class "btn-link text-danger"
+                                        :: tooltip (gettext "Delete" appState.locale)
+                                    )
+                                    [ faSet "_global.delete" appState ]
+                                ]
+                        ]
+
+                Nothing ->
+                    div []
+                        [ Flash.warning appState (gettext "The file was deleted." appState.locale)
+                        , viewQuestionClearButton appState cfg path True
+                        ]
+
+        questionContent =
+            case mbAnswer of
+                Just fileUuid ->
+                    fileView fileUuid
+
+                Nothing ->
+                    let
+                        fileConfig =
+                            { fileTypes = Question.getFileTypes question
+                            , maxSize = Question.getMaxSize question
+                            }
+                    in
+                    div []
+                        [ button
+                            [ class "btn btn-outline-primary"
+                            , onClick (FileUploadModalMsg (FileUploadModal.open (pathToString path) fileConfig))
+                            , disabled cfg.features.readonly
+                            ]
+                            [ text (gettext "Upload File" appState.locale) ]
+                        ]
+    in
+    div [] [ questionContent ]
+
+
 viewChoice : AppState -> Config msg -> List String -> List String -> Int -> Choice -> Html Msg
 viewChoice appState cfg path selectedChoicesUuids order choice =
     let
@@ -3970,6 +4131,39 @@ viewRemoveItemModal appState model =
             , cancelMsg = Just RemoveItemCancel
             , dangerous = True
             , dataCy = "remove-item"
+            }
+    in
+    Modal.confirm appState cfg
+
+
+viewFileDeleteModal : AppState -> Model -> Html Msg
+viewFileDeleteModal appState model =
+    let
+        fileName =
+            case model.deleteFile of
+                Just ( fileUuid, _ ) ->
+                    case QuestionnaireQuestionnaire.getFile model.questionnaire fileUuid of
+                        Just file ->
+                            file.fileName
+
+                        Nothing ->
+                            ""
+
+                Nothing ->
+                    ""
+
+        cfg =
+            { modalTitle = gettext "Delete File" appState.locale
+            , modalContent =
+                String.formatHtml (gettext "Are you sure you want to delete %s?" appState.locale)
+                    [ strong [] [ text fileName ] ]
+            , visible = Maybe.isJust model.deleteFile
+            , actionResult = ActionResult.map (always "") model.deletingFile
+            , actionName = gettext "Delete" appState.locale
+            , actionMsg = DeleteFileConfirm
+            , cancelMsg = Just DeleteFileCancel
+            , dangerous = True
+            , dataCy = "delete-file"
             }
     in
     Modal.confirm appState cfg

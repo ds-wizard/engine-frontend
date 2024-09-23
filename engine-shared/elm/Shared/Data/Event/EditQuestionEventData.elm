@@ -12,6 +12,7 @@ module Shared.Data.Event.EditQuestionEventData exposing
 import Dict
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import Shared.Data.Event.EditQuestionFileEventData as EditQuestionFileEventData exposing (EditQuestionFileEventData)
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData exposing (EditQuestionIntegrationEventData)
 import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData exposing (EditQuestionItemSelectEventData)
 import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData exposing (EditQuestionListEventData)
@@ -30,6 +31,7 @@ type EditQuestionEventData
     | EditQuestionIntegrationEvent EditQuestionIntegrationEventData
     | EditQuestionMultiChoiceEvent EditQuestionMultiChoiceEventData
     | EditQuestionItemSelectEvent EditQuestionItemSelectEventData
+    | EditQuestionFileEvent EditQuestionFileEventData
 
 
 decoder : Decoder EditQuestionEventData
@@ -56,6 +58,9 @@ decoder =
                     "ItemSelectQuestion" ->
                         D.map EditQuestionItemSelectEvent EditQuestionItemSelectEventData.decoder
 
+                    "FileQuestion" ->
+                        D.map EditQuestionFileEvent EditQuestionFileEventData.decoder
+
                     _ ->
                         D.fail <| "Unknown question type: " ++ questionType
             )
@@ -72,6 +77,7 @@ encode data =
                 EditQuestionIntegrationEventData.encode
                 EditQuestionMultiChoiceEventData.encode
                 EditQuestionItemSelectEventData.encode
+                EditQuestionFileEventData.encode
                 data
     in
     ( "eventType", E.string "EditQuestionEvent" ) :: eventData
@@ -129,6 +135,13 @@ apply event question =
                 { listQuestionUuid = EventField.getValueWithDefault eventData.listQuestionUuid (Question.getListQuestionUuid question)
                 }
 
+        EditQuestionFileEvent eventData ->
+            FileQuestion
+                (applyCommonData eventData)
+                { maxSize = EventField.getValueWithDefault eventData.maxSize (Question.getMaxSize question)
+                , fileTypes = EventField.getValueWithDefault eventData.fileTypes (Question.getFileTypes question)
+                }
+
 
 getTypeString : EditQuestionEventData -> String
 getTypeString =
@@ -139,11 +152,12 @@ getTypeString =
         (always "Integration")
         (always "MultiChoice")
         (always "ItemSelect")
+        (always "File")
 
 
 getEntityVisibleName : EditQuestionEventData -> Maybe String
 getEntityVisibleName =
-    EventField.getValue << map .title .title .title .title .title .title
+    EventField.getValue << map .title .title .title .title .title .title .title
 
 
 map :
@@ -153,9 +167,10 @@ map :
     -> (EditQuestionIntegrationEventData -> a)
     -> (EditQuestionMultiChoiceEventData -> a)
     -> (EditQuestionItemSelectEventData -> a)
+    -> (EditQuestionFileEventData -> a)
     -> EditQuestionEventData
     -> a
-map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion itemSelectQuestion question =
+map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion itemSelectQuestion fileQuestion question =
     case question of
         EditQuestionOptionsEvent data ->
             optionsQuestion data
@@ -174,6 +189,9 @@ map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQu
 
         EditQuestionItemSelectEvent data ->
             itemSelectQuestion data
+
+        EditQuestionFileEvent data ->
+            fileQuestion data
 
 
 squash : EditQuestionEventData -> EditQuestionEventData -> EditQuestionEventData
@@ -196,6 +214,9 @@ squash old new =
 
         ( EditQuestionItemSelectEvent oldData, EditQuestionItemSelectEvent newData ) ->
             EditQuestionItemSelectEvent (EditQuestionItemSelectEventData.squash oldData newData)
+
+        ( EditQuestionFileEvent oldData, EditQuestionFileEvent newData ) ->
+            EditQuestionFileEvent (EditQuestionFileEventData.squash oldData newData)
 
         _ ->
             new

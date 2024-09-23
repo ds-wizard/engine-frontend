@@ -1,6 +1,8 @@
 module Wizard.Common.View.ItemIcon exposing
     ( Config
     , ConfigExtra
+    , IconFaConfig
+    , iconFa
     , view
     , viewExtra
     )
@@ -73,3 +75,23 @@ viewExtra config =
     in
     div (class "ItemIcon" :: backgroundColorStyle ++ config.attributes)
         [ content ]
+
+
+
+-- Font Awesome Icon
+
+
+type alias IconFaConfig msg =
+    { icon : Html msg
+    , extraClass : Maybe String
+    }
+
+
+iconFa : IconFaConfig msg -> Html msg
+iconFa cfg =
+    let
+        extraClass =
+            Maybe.withDefault "" cfg.extraClass
+    in
+    div [ class ("ItemIcon " ++ extraClass) ]
+        [ cfg.icon ]

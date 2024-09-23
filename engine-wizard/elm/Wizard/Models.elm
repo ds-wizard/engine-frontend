@@ -24,6 +24,7 @@ import Wizard.KMEditor.Models
 import Wizard.KnowledgeModels.Models
 import Wizard.Locales.Models
 import Wizard.ProjectActions.Models
+import Wizard.ProjectFiles.Models
 import Wizard.ProjectImporters.Models
 import Wizard.Projects.Models
 import Wizard.Public.Models
@@ -48,6 +49,7 @@ type alias Model =
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
     , localeModel : Wizard.Locales.Models.Model
     , projectActionsModel : Wizard.ProjectActions.Models.Model
+    , projectFilesModel : Wizard.ProjectFiles.Models.Model
     , projectImportersModel : Wizard.ProjectImporters.Models.Model
     , projectsModel : Wizard.Projects.Models.Model
     , publicModel : Wizard.Public.Models.Model
@@ -74,6 +76,7 @@ initialModel appState =
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
     , localeModel = Wizard.Locales.Models.initialModel appState
     , projectActionsModel = Wizard.ProjectActions.Models.initialModel
+    , projectFilesModel = Wizard.ProjectFiles.Models.initialModel
     , projectImportersModel = Wizard.ProjectImporters.Models.initialModel
     , projectsModel = Wizard.Projects.Models.initialModel appState
     , publicModel = Wizard.Public.Models.initialModel appState
@@ -161,6 +164,9 @@ initLocalModel model =
 
         Routes.ProjectActionsRoute route ->
             { model | projectActionsModel = Wizard.ProjectActions.Models.initLocalModel route model.projectActionsModel }
+
+        Routes.ProjectFilesRoute route ->
+            { model | projectFilesModel = Wizard.ProjectFiles.Models.initLocalModel route model.projectFilesModel }
 
         Routes.ProjectImportersRoute route ->
             { model | projectImportersModel = Wizard.ProjectImporters.Models.initLocalModel route model.projectImportersModel }

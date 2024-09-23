@@ -279,3 +279,7 @@ viewReply appState questionnaire question data =
         ReplyValue.ItemSelectReply _ ->
             -- TODO
             eventView [ ( fa "fas fa-plus", text (gettext "Added item" appState.locale) ) ]
+
+        ReplyValue.FileReply _ ->
+            -- TODO
+            eventView [ ( fa "fas fa-plus", text (gettext "Added file" appState.locale) ) ]
