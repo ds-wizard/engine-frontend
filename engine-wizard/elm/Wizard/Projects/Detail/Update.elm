@@ -882,6 +882,12 @@ handleWebsocketMsg websocketMsg appState model =
                         ServerQuestionnaireAction.SetQuestionnaire data ->
                             updateQuestionnaireData data
 
+                        ServerQuestionnaireAction.AddFile file ->
+                            ( appState.seed
+                            , { model | questionnaireModel = ActionResult.map (Questionnaire.addFile file) model.questionnaireModel }
+                            , Cmd.none
+                            )
+
                 WebSocketServerAction.Error ->
                     ( appState.seed, { model | error = True }, Cmd.none )
 

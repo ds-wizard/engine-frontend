@@ -40,6 +40,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
+import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.Page as Page
 import Wizard.Routes as Routes
@@ -482,6 +483,19 @@ viewEventDetailSetReply appState cfg data question =
                     QuestionnaireQuestionnaire.getItemSelectQuestionValueLabel appState cfg.questionnaire (Question.getUuid question) itemUuid
             in
             eventView [ ( fa "far fa-square-caret-down", itemLabel ) ]
+
+        FileReply fileUuid ->
+            case QuestionnaireQuestionnaire.getFile cfg.questionnaire fileUuid of
+                Just file ->
+                    eventView
+                        [ ( fa (FileIcon.getFileIcon file.fileName file.contentType)
+                          , file.fileName
+                          )
+                        ]
+
+                Nothing ->
+                    eventView
+                        [ ( fa FileIcon.defaultIcon, gettext "Deleted file" appState.locale ) ]
 
         _ ->
             emptyNode

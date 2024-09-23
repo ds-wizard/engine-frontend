@@ -4,6 +4,7 @@ module Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing
     , encode
     , getAnswerUuid
     , getChoiceUuid
+    , getFileUuid
     , getItemUuids
     , getSelectedItemUuid
     , getStringReply
@@ -15,6 +16,7 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyValue exposing (IntegrationReplyType(..))
+import Uuid exposing (Uuid)
 
 
 type ReplyValue
@@ -24,6 +26,7 @@ type ReplyValue
     | ItemListReply (List String)
     | IntegrationReply IntegrationReplyType
     | ItemSelectReply String
+    | FileReply Uuid
 
 
 decoder : Decoder ReplyValue
@@ -35,6 +38,7 @@ decoder =
         , D.when replyValueType ((==) "ItemListReply") decodeItemListReply
         , D.when replyValueType ((==) "IntegrationReply") decodeIntegrationReply
         , D.when replyValueType ((==) "ItemSelectReply") decodeItemSelectReply
+        , D.when replyValueType ((==) "FileReply") decodeFileReply
         ]
 
 
@@ -79,6 +83,12 @@ decodeItemSelectReply =
         |> D.required "value" D.string
 
 
+decodeFileReply : Decoder ReplyValue
+decodeFileReply =
+    D.succeed FileReply
+        |> D.required "value" Uuid.decoder
+
+
 encode : ReplyValue -> E.Value
 encode replyValue =
     case replyValue of
@@ -113,6 +123,12 @@ encode replyValue =
             E.object
                 [ ( "type", E.string "ItemSelectReply" )
                 , ( "value", E.string itemUuid )
+                ]
+
+        FileReply fileUuid ->
+            E.object
+                [ ( "type", E.string "FileReply" )
+                , ( "value", Uuid.encode fileUuid )
                 ]
 
 
@@ -172,6 +188,16 @@ getSelectedItemUuid replyValue =
 
         _ ->
             ""
+
+
+getFileUuid : ReplyValue -> Maybe Uuid
+getFileUuid replyValue =
+    case replyValue of
+        FileReply fileUuid ->
+            Just fileUuid
+
+        _ ->
+            Nothing
 
 
 isEmpty : ReplyValue -> Bool

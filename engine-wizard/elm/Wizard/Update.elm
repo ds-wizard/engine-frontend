@@ -24,6 +24,7 @@ import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSess
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
 import Wizard.ProjectActions.Update
+import Wizard.ProjectFiles.Update
 import Wizard.ProjectImporters.Update
 import Wizard.Projects.Update
 import Wizard.Public.Update
@@ -81,6 +82,10 @@ fetchData model =
         Routes.ProjectActionsRoute _ ->
             Cmd.map Wizard.Msgs.ProjectActionsMsg <|
                 Wizard.ProjectActions.Update.fetchData
+
+        Routes.ProjectFilesRoute _ ->
+            Cmd.map Wizard.Msgs.ProjectFilesMsg <|
+                Wizard.ProjectFiles.Update.fetchData
 
         Routes.ProjectImportersRoute _ ->
             Cmd.map Wizard.Msgs.ProjectImportersMsg <|
@@ -368,6 +373,13 @@ update msg model =
                         Wizard.ProjectActions.Update.update projectActionsMsg Wizard.Msgs.ProjectActionsMsg model.appState model.projectActionsModel
                 in
                 ( { model | projectActionsModel = projectActionsModel }, cmd )
+
+            Wizard.Msgs.ProjectFilesMsg projectFilesMsg ->
+                let
+                    ( projectFilesModel, cmd ) =
+                        Wizard.ProjectFiles.Update.update projectFilesMsg Wizard.Msgs.ProjectFilesMsg model.appState model.projectFilesModel
+                in
+                ( { model | projectFilesModel = projectFilesModel }, cmd )
 
             Wizard.Msgs.ProjectImportersMsg projectImporterMsg ->
                 let

@@ -14,6 +14,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , annotations
     , checkbox
     , color
+    , fileSize
     , headers
     , markdown
     , metrics
@@ -34,6 +35,7 @@ import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -75,6 +77,42 @@ string config =
             , onInput config.onInput
             ]
             []
+        ]
+
+
+fileSize : InputConfig msg -> Html msg
+fileSize config =
+    let
+        readableValue =
+            case String.toInt config.value of
+                Just size ->
+                    if size > 0 then
+                        span [ class "input-group-text" ]
+                            [ text "≈ "
+                            , text (ByteUnits.toReadable size)
+                            ]
+
+                    else
+                        emptyNode
+
+                Nothing ->
+                    emptyNode
+    in
+    div [ class "form-group" ]
+        [ label [ for config.name ] [ text config.label ]
+        , div [ class "input-group" ]
+            [ input
+                [ type_ "number"
+                , step "1"
+                , class "form-control"
+                , id config.name
+                , name config.name
+                , value config.value
+                , onInput config.onInput
+                ]
+                []
+            , readableValue
+            ]
         ]
 
 

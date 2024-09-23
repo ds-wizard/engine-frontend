@@ -40,7 +40,7 @@ import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
 import Shared.Data.Event.EditChapterEventData as EditChapterEventData
 import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
+import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData
 import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
@@ -49,8 +49,9 @@ import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventD
 import Shared.Data.Event.EditMetricEventData as EditMetricEventData
 import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
 import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Shared.Data.Event.EditQuestionFileEventData as EditQuestionFileEventData
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
-import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEvent
+import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
 import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
 import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
 import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
@@ -732,7 +733,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         parentUuid =
             EditorBranch.getParentUuid questionUuid editorBranch
 
-        createEditEvent setOptions setList setValue setIntegration setMultiChoice setItemSelect value =
+        createEditEvent setOptions setList setValue setIntegration setMultiChoice setItemSelect setFile value =
             eventMsg True parentUuid (Just questionUuid) <|
                 EditQuestionEvent <|
                     case question of
@@ -762,9 +763,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> EditQuestionMultiChoiceEvent
 
                         ItemSelectQuestion _ _ ->
-                            EditQuestionItemSelectEvent.init
+                            EditQuestionItemSelectEventData.init
                                 |> setItemSelect value
                                 |> EditQuestionItemSelectEvent
+
+                        FileQuestion _ _ ->
+                            EditQuestionFileEventData.init
+                                |> setFile value
+                                |> EditQuestionFileEvent
 
         onTypeChange value =
             eventMsg False parentUuid (Just questionUuid) <|
@@ -792,8 +798,13 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             |> EditQuestionEvent
 
                     "ItemSelect" ->
-                        EditQuestionItemSelectEvent.init
+                        EditQuestionItemSelectEventData.init
                             |> EditQuestionItemSelectEvent
+                            |> EditQuestionEvent
+
+                    "File" ->
+                        EditQuestionFileEventData.init
+                            |> EditQuestionFileEvent
                             |> EditQuestionEvent
 
                     _ ->
@@ -818,6 +829,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             , ( "Integration", gettext "Integration" appState.locale )
             , ( "MultiChoice", gettext "Multi-Choice" appState.locale )
             , ( "ItemSelect", gettext "Item Select" appState.locale )
+            , ( "File", gettext "File" appState.locale )
             ]
 
         requiredPhaseUuidOptions =
@@ -886,7 +898,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { name = "title"
                 , label = gettext "Title" appState.locale
                 , value = Question.getTitle question
-                , onInput = createEditEvent setTitle setTitle setTitle setTitle setTitle setTitle
+                , onInput = createEditEvent setTitle setTitle setTitle setTitle setTitle setTitle setTitle
                 }
 
         textInput =
@@ -894,7 +906,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { name = "text"
                 , label = gettext "Text" appState.locale
                 , value = Maybe.withDefault "" (Question.getText question)
-                , onInput = createEditEvent setText setText setText setText setText setText << String.toMaybe
+                , onInput = createEditEvent setText setText setText setText setText setText setText << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = questionUuid
                 , markdownPreviews = model.markdownPreviews
@@ -906,7 +918,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , label = gettext "When does this question become desirable?" appState.locale
                 , value = String.fromMaybe <| Question.getRequiredPhaseUuid question
                 , options = requiredPhaseUuidOptions
-                , onChange = createEditEvent setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid << String.toMaybe
+                , onChange = createEditEvent setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid setRequiredPhaseUuid << String.toMaybe
                 , extra = Nothing
                 }
 
@@ -915,7 +927,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 { label = gettext "Question Tags" appState.locale
                 , tags = EditorBranch.filterDeletedWith .uuid editorBranch <| KnowledgeModel.getTags editorBranch.branch.knowledgeModel
                 , selected = Question.getTagUuids question
-                , onChange = createEditEvent setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids
+                , onChange = createEditEvent setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids
                 }
 
         referencesInput =
@@ -926,7 +938,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
-                , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
+                , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getReferenceName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled reference" appState.locale
@@ -943,7 +955,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
-                , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
+                , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
                 , getRoute = editorRoute editorBranch
                 , getName = KnowledgeModel.getExpertName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled expert" appState.locale
@@ -955,7 +967,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         annotationsInput =
             Input.annotations appState
                 { annotations = Question.getAnnotations question
-                , onEdit = createEditEvent setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations
+                , onEdit = createEditEvent setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations
                 }
 
         questionTypeInputs =
@@ -1162,7 +1174,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 ItemSelectQuestion _ _ ->
                     let
                         createTypeEditEvent map value =
-                            EditQuestionItemSelectEvent.init
+                            EditQuestionItemSelectEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionItemSelectEvent)
                                 |> eventMsg False parentUuid (Just questionUuid)
@@ -1199,6 +1211,35 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 }
                     in
                     [ listQuestionUuidInput
+                    ]
+
+                FileQuestion _ _ ->
+                    let
+                        createTypeEditEvent map value =
+                            EditQuestionFileEventData.init
+                                |> map value
+                                |> (EditQuestionEvent << EditQuestionFileEvent)
+                                |> eventMsg True parentUuid (Just questionUuid)
+
+                        fileTypesInput =
+                            Input.string
+                                { name = "fileTypes"
+                                , label = gettext "File Types" appState.locale
+                                , value = Maybe.withDefault "" <| Question.getFileTypes question
+                                , onInput = createTypeEditEvent setFileTypes << String.toMaybe
+                                }
+
+                        maxSizeInput =
+                            Input.fileSize
+                                { name = "maxSize"
+                                , label = gettext "Max Size (bytes)" appState.locale
+                                , value = Maybe.unwrap "" String.fromInt (Question.getMaxSize question)
+                                , onInput = createTypeEditEvent setMaxSize << Maybe.andThen String.toInt << String.toMaybe
+                                }
+                    in
+                    [ fileTypesInput
+                    , FormExtra.mdAfter (gettext "You can limit file type selection by providing comma separated list of extensions, mime types, or combination. For example, `application/pdf` or `.xls,.xlsx`." appState.locale)
+                    , maxSizeInput
                     ]
 
         wrapQuestionsWithIntegration questions =

@@ -10,6 +10,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setDescription
     , setEmail
     , setExpertUuids
+    , setFileTypes
     , setFollowUpUuids
     , setId
     , setIntegrationUuid
@@ -19,6 +20,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setLabel
     , setListQuestionUuid
     , setLogo
+    , setMaxSize
     , setMetricMeasures
     , setMetricUuids
     , setName
@@ -104,6 +106,11 @@ setExpertUuids value data =
     { data | expertUuids = EventField.create value True }
 
 
+setFileTypes : a -> { b | fileTypes : EventField a } -> { b | fileTypes : EventField a }
+setFileTypes value data =
+    { data | fileTypes = EventField.create value True }
+
+
 setFollowUpUuids : a -> { b | followUpUuids : EventField a } -> { b | followUpUuids : EventField a }
 setFollowUpUuids value data =
     { data | followUpUuids = EventField.create value True }
@@ -147,6 +154,11 @@ setListQuestionUuid value data =
 setLogo : a -> { b | logo : EventField a } -> { b | logo : EventField a }
 setLogo value data =
     { data | logo = EventField.create value True }
+
+
+setMaxSize : a -> { b | maxSize : EventField a } -> { b | maxSize : EventField a }
+setMaxSize value data =
+    { data | maxSize = EventField.create value True }
 
 
 setMetricMeasures : a -> { b | metricMeasures : EventField a } -> { b | metricMeasures : EventField a }

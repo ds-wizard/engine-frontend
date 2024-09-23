@@ -9,6 +9,7 @@ import Shared.Data.Event exposing (Event(..))
 import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditEventSetters exposing (setRequiredPhaseUuid)
 import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Shared.Data.Event.EditQuestionFileEventData as EditQuestionFileEventData
 import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
 import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
 import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
@@ -96,6 +97,11 @@ view appState wrapMsg eventMsg editorBranch model =
                             EditQuestionItemSelectEventData.init
                                 |> setRequiredPhaseUuid mbPhaseUuid
                                 |> EditQuestionItemSelectEvent
+
+                        FileQuestion _ _ ->
+                            EditQuestionFileEventData.init
+                                |> setRequiredPhaseUuid mbPhaseUuid
+                                |> EditQuestionFileEvent
 
         content =
             if List.isEmpty editorBranch.branch.knowledgeModel.phaseUuids then
@@ -225,6 +231,9 @@ foldQuestion appState props model indent phase question =
             questionRow
 
         ItemSelectQuestion _ _ ->
+            questionRow
+
+        FileQuestion _ _ ->
             questionRow
 
 

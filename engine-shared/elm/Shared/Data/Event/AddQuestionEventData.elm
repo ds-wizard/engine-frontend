@@ -11,6 +11,7 @@ module Shared.Data.Event.AddQuestionEventData exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import Shared.Data.Event.AddQuestionFileEventData as AddQuestionFileEventData exposing (AddQuestionFileEventData)
 import Shared.Data.Event.AddQuestionIntegrationEventData as AddQuestionIntegrationEventData exposing (AddQuestionIntegrationEventData)
 import Shared.Data.Event.AddQuestionItemSelectEventData as AddQuestionItemSelectEventData exposing (AddQuestionItemSelectEventData)
 import Shared.Data.Event.AddQuestionListEventData as AddQuestionListEventData exposing (AddQuestionListEventData)
@@ -27,6 +28,7 @@ type AddQuestionEventData
     | AddQuestionIntegrationEvent AddQuestionIntegrationEventData
     | AddQuestionMultiChoiceEvent AddQuestionMultiChoiceEventData
     | AddQuestionItemSelectEvent AddQuestionItemSelectEventData
+    | AddQuestionFileEvent AddQuestionFileEventData
 
 
 decoder : Decoder AddQuestionEventData
@@ -53,6 +55,9 @@ decoder =
                     "ItemSelectQuestion" ->
                         D.map AddQuestionItemSelectEvent AddQuestionItemSelectEventData.decoder
 
+                    "FileQuestion" ->
+                        D.map AddQuestionFileEvent AddQuestionFileEventData.decoder
+
                     _ ->
                         D.fail <| "Unknown question type: " ++ questionType
             )
@@ -69,6 +74,7 @@ encode data =
                 AddQuestionIntegrationEventData.encode
                 AddQuestionMultiChoiceEventData.encode
                 AddQuestionItemSelectEventData.encode
+                AddQuestionFileEventData.encode
                 data
     in
     ( "eventType", E.string "AddQuestionEvent" ) :: eventData
@@ -100,6 +106,9 @@ toQuestion questionUuid data =
         AddQuestionItemSelectEvent eventData ->
             AddQuestionItemSelectEventData.toQuestion questionUuid eventData
 
+        AddQuestionFileEvent eventData ->
+            AddQuestionFileEventData.toQuestion questionUuid eventData
+
 
 getTypeString : AddQuestionEventData -> String
 getTypeString =
@@ -110,11 +119,12 @@ getTypeString =
         (always "Integration")
         (always "MultiChoice")
         (always "ItemSelect")
+        (always "File")
 
 
 getEntityVisibleName : AddQuestionEventData -> Maybe String
 getEntityVisibleName =
-    Just << map .title .title .title .title .title .title
+    Just << map .title .title .title .title .title .title .title
 
 
 map :
@@ -124,9 +134,10 @@ map :
     -> (AddQuestionIntegrationEventData -> a)
     -> (AddQuestionMultiChoiceEventData -> a)
     -> (AddQuestionItemSelectEventData -> a)
+    -> (AddQuestionFileEventData -> a)
     -> AddQuestionEventData
     -> a
-map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion itemSelectQuestion question =
+map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQuestion itemSelectQuestion fileQuestion question =
     case question of
         AddQuestionOptionsEvent data ->
             optionsQuestion data
@@ -145,3 +156,6 @@ map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQu
 
         AddQuestionItemSelectEvent data ->
             itemSelectQuestion data
+
+        AddQuestionFileEvent data ->
+            fileQuestion data
