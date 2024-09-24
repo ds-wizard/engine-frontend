@@ -186,7 +186,7 @@ unsupportedMetamodelVersionWarning appState template =
         in
         div [ class "alert alert-danger" ]
             ([ faSet "_global.warning" appState
-             , text (gettext "This document template is not supported in this version of DSW." appState.locale)
+             , text (gettext "This document template is not supported in the current version." appState.locale)
              ]
                 ++ link
             )

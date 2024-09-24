@@ -181,7 +181,7 @@ view appState model =
                 [ div [ class "col-border-left" ]
                     [ Markdown.toHtml []
                         (String.format
-                            (gettext "You can generate an API key for every application you use that needs access to [DSW API](%s)." appState.locale)
+                            (gettext "You can generate an API key for every application you use that needs access to the [API](%s)." appState.locale)
                             [ appState.apiUrl ++ "/swagger-ui/" ]
                         )
                     ]
