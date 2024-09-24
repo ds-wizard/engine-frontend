@@ -28,7 +28,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, for, id, name, placeholder, rows, selected, step, style, type_, value)
+import Html.Attributes exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Keyed
 import List.Extra as List
@@ -41,7 +41,9 @@ import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (Metri
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
+import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute)
 import Wizard.Common.View.Tag as Tag
@@ -256,7 +258,9 @@ markdown appState config =
                 ]
             , div [ class "card-body" ] [ content ]
             , div [ class "card-footer text-muted" ]
-                [ text (gettext "You can use Markdown and see the result in the preview tab." appState.locale) ]
+                (String.formatHtml (gettext "You can use %s and see the result in the preview tab." appState.locale)
+                    [ a [ href (GuideLinks.markdownCheatsheet appState.guideLinks), target "_blank" ] [ text "Markdown" ] ]
+                )
             ]
         ]
 
