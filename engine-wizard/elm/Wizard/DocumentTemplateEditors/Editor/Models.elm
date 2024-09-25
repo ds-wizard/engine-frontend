@@ -7,6 +7,8 @@ module Wizard.DocumentTemplateEditors.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Shared.Data.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
+import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
@@ -24,6 +26,8 @@ type alias Model =
     , previewModel : Preview.Model
     , publishModalModel : PublishModal.Model
     , unloadMessageSet : Bool
+    , documentTemplateFormatPrefabs : ActionResult (List DocumentTemplateFormatDraft)
+    , documentTemplateFormatStepPrefabs : ActionResult (List DocumentTemplateFormatStep)
     }
 
 
@@ -44,6 +48,8 @@ initialModel documentTemplateId editorRoute =
         , previewModel = Preview.initialModel
         , publishModalModel = PublishModal.initialModel
         , unloadMessageSet = False
+        , documentTemplateFormatPrefabs = ActionResult.Loading
+        , documentTemplateFormatStepPrefabs = ActionResult.Loading
         }
 
 

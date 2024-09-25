@@ -1,15 +1,22 @@
 module Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor.DocumentTemplateForm exposing
     ( DocumentTemplateForm
     , encode
+    , fillFormat
+    , fillStep
     , init
     , initEmpty
+    , isFormatEmpty
+    , isStepEmpty
     , validation
     )
 
+import Dict
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
+import Maybe.Extra as Maybe
+import Shared.Data.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
@@ -90,3 +97,84 @@ encode phase form =
         , ( "version", E.string version )
         , ( "phase", DocumentTemplatePhase.encode phase )
         ]
+
+
+isFormatEmpty : Int -> Form FormError DocumentTemplateForm -> Bool
+isFormatEmpty index form =
+    let
+        isFieldEmpty field =
+            Maybe.isNothing <| (Form.getFieldAsString ("formats." ++ fromInt index ++ "." ++ field) form).value
+
+        isStepsEmpty =
+            List.isEmpty <| Form.getListIndexes ("formats." ++ fromInt index ++ ".steps") form
+    in
+    List.all identity
+        [ isFieldEmpty "name"
+        , isFieldEmpty "icon"
+        , isStepsEmpty
+        ]
+
+
+fillFormat : Int -> DocumentTemplateFormatDraft -> Form FormError DocumentTemplateForm -> Form FormError DocumentTemplateForm
+fillFormat index format form =
+    let
+        toFormMsg field value =
+            Form.Input ("formats." ++ fromInt index ++ "." ++ field) Form.Text (Field.String value)
+
+        applyFormMsg formMsg =
+            Form.update validation formMsg
+
+        formatMsg =
+            [ toFormMsg "name" format.name
+            , toFormMsg "icon" format.icon
+            ]
+
+        appendStepsMsgs =
+            List.repeat (List.length format.steps) (Form.Append ("formats." ++ fromInt index ++ ".steps"))
+
+        form_ =
+            List.foldl applyFormMsg form (formatMsg ++ appendStepsMsgs)
+    in
+    List.indexedMap (fillStep index) format.steps
+        |> List.foldl (\a f -> a f) form_
+
+
+isStepEmpty : Int -> Int -> Form FormError DocumentTemplateForm -> Bool
+isStepEmpty formatIndex stepIndex form =
+    let
+        isFieldEmpty field =
+            Maybe.isNothing <| (Form.getFieldAsString ("formats." ++ fromInt formatIndex ++ ".steps." ++ fromInt stepIndex ++ "." ++ field) form).value
+
+        isOptionsEmpty =
+            List.isEmpty <| Form.getListIndexes ("formats." ++ fromInt formatIndex ++ ".steps." ++ fromInt stepIndex ++ ".options") form
+    in
+    List.all identity
+        [ isFieldEmpty "name"
+        , isOptionsEmpty
+        ]
+
+
+fillStep : Int -> Int -> DocumentTemplateFormatStep -> Form FormError DocumentTemplateForm -> Form FormError DocumentTemplateForm
+fillStep formatIndex stepIndex step form =
+    let
+        toFormMsg field value =
+            Form.Input ("formats." ++ fromInt formatIndex ++ ".steps." ++ fromInt stepIndex ++ "." ++ field) Form.Text (Field.String value)
+
+        toOptionMsg i ( key, value ) =
+            [ Form.Append ("formats." ++ fromInt formatIndex ++ ".steps." ++ fromInt stepIndex ++ ".options")
+            , toFormMsg ("options." ++ fromInt i ++ ".key") key
+            , toFormMsg ("options." ++ fromInt i ++ ".value") value
+            ]
+
+        applyFormMsg formMsg =
+            Form.update validation formMsg
+
+        formMsgs =
+            [ toFormMsg "name" step.name
+            ]
+
+        optionsMsgs =
+            List.foldr (++) [] <|
+                List.indexedMap toOptionMsg (Dict.toList step.options)
+    in
+    List.foldl applyFormMsg form (formMsgs ++ optionsMsgs)

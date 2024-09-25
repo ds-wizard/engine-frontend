@@ -34,8 +34,14 @@ viewTemplateEditor appState route model documentTemplate =
         content =
             case model.currentEditor of
                 TemplateEditor ->
+                    let
+                        viewConfig =
+                            { documentTemplateFormatPrefabs = model.documentTemplateFormatPrefabs
+                            , documentTemplateFormatStepPrefabs = model.documentTemplateFormatStepPrefabs
+                            }
+                    in
                     Html.map SettingsMsg <|
-                        Settings.view appState model.settingsModel
+                        Settings.view appState viewConfig model.settingsModel
 
                 FilesEditor ->
                     let
