@@ -4,6 +4,7 @@ module Wizard.Common.GuideLinks exposing
     , default
     , documentTemplates
     , integrationQuestionSecrets
+    , markdownCheatsheet
     , merge
     )
 
@@ -27,6 +28,7 @@ default =
         Dict.fromList
             [ ( "documentTemplates", "https://guide.ds-wizard.org/en/latest/more/development/document-templates/index.html" )
             , ( "integrationQuestionSecrets", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties" )
+            , ( "markdownCheatsheet", "https://guide.ds-wizard.org/en/latest/more/miscellaneous/markdown-cheatsheet.html" )
             ]
 
 
@@ -56,3 +58,8 @@ documentTemplates =
 integrationQuestionSecrets : GuideLinks -> String
 integrationQuestionSecrets =
     get "integrationQuestionSecrets"
+
+
+markdownCheatsheet : GuideLinks -> String
+markdownCheatsheet =
+    get "markdownCheatsheet"

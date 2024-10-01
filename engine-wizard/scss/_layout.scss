@@ -20,6 +20,10 @@ body {
             display: none;
         }
     }
+
+    &.app-right-panel {
+        margin-right: $right-panel-width;
+    }
 }
 
 .page {
@@ -421,6 +425,26 @@ body {
 
     .session-warning-collapsed {
         display: none;
+    }
+
+    .sidebar-ai-assistant {
+        display: flex;
+        align-items: baseline;
+        padding: 9px;
+        font-weight: 500;
+        text-decoration: none !important;
+        margin: 1rem 0.75rem 0;
+
+        .fa-fw {
+            flex-basis: 1.25rem;
+            flex-grow: 0;
+            flex-shrink: 0;
+        }
+
+        .sidebar-link {
+            margin-left: $side-navigation-icon-spacing;
+        }
+
     }
 
     .profile-info {

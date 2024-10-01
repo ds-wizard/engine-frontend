@@ -156,7 +156,7 @@ sidePanelLocaleInfo appState locale =
                 []
 
             else
-                [ ( gettext "DSW Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion ) ]
+                [ ( gettext "Wizard Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion ) ]
 
         localeInfoList =
             [ ( gettext "ID" appState.locale, "id", text locale.id )

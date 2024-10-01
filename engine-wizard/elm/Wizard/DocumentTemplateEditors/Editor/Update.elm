@@ -8,6 +8,7 @@ import ActionResult
 import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Shared.Api.Prefabs as PrefabsApi
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail
 import Shared.Error.ApiError as ApiError
 import Shared.Utils exposing (dispatch)
@@ -33,6 +34,8 @@ fetchData appState documentTemplateId subroute model =
     else
         Cmd.batch
             [ DocumentTemplateDraftsApi.getDraft documentTemplateId appState GetTemplateCompleted
+            , PrefabsApi.getDocumentTemplateFormatPrefabs appState GetDocumentTemplateFormatPrefabsCompleted
+            , PrefabsApi.getDocumentTemplateFormatStepPrefabs appState GetDocumentTemplateFormatStepPrefabsCompleted
             , Cmd.map FileEditorMsg (FileEditor.fetchData documentTemplateId appState)
             , loadPreviewCmd (subroute == DTEditorRoute.Preview)
             ]
@@ -142,6 +145,22 @@ update appState wrapMsg msg model =
                         ( { model | documentTemplate = ApiError.toActionResult appState (gettext "Unable to get document template" appState.locale) error }
                         , getResultCmd Wizard.Msgs.logoutMsg result
                         )
+
+        GetDocumentTemplateFormatPrefabsCompleted result ->
+            case result of
+                Ok prefabs ->
+                    withSeed ( { model | documentTemplateFormatPrefabs = ActionResult.Success <| List.map .content prefabs }, Cmd.none )
+
+                Err _ ->
+                    withSeed ( { model | documentTemplateFormatPrefabs = ActionResult.Error "" }, Cmd.none )
+
+        GetDocumentTemplateFormatStepPrefabsCompleted result ->
+            case result of
+                Ok prefabs ->
+                    withSeed ( { model | documentTemplateFormatStepPrefabs = ActionResult.Success <| List.map .content prefabs }, Cmd.none )
+
+                Err _ ->
+                    withSeed ( { model | documentTemplateFormatStepPrefabs = ActionResult.Error "" }, Cmd.none )
 
         SettingsMsg settingsMsg ->
             let

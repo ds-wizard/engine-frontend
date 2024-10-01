@@ -225,11 +225,28 @@ menuItems appState =
 
 view : Model -> Html Wizard.Msgs.Msg
 view model =
+    let
+        viewAiAssistant =
+            if Admin.isEnabled model.appState.config.admin then
+                div []
+                    [ a
+                        [ class "sidebar-ai-assistant"
+                        , onClick (Wizard.Msgs.SetRightPanelCollapsed (not model.appState.session.rightPanelCollapsed))
+                        ]
+                        [ fa "fas fa-fw fa-wand-magic-sparkles"
+                        , span [ class "sidebar-link" ] [ text "AI Assistant" ]
+                        ]
+                    ]
+
+            else
+                emptyNode
+    in
     div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ viewLogo model
         , viewMenu model
         , viewSessionWarning model
         , viewSessionWarningCollapsed model
+        , viewAiAssistant
         , viewProfileMenu model
         , viewCollapseLink model
         ]

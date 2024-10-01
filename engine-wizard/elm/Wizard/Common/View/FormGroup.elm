@@ -38,7 +38,7 @@ import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, for, id, name, readonly, rows, type_, value)
+import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
@@ -47,11 +47,13 @@ import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
+import String.Format as String
 import Uuid
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
 import Wizard.Common.View.FormExtra as FormExtra
 
@@ -457,7 +459,7 @@ markdownEditor : AppState -> Form FormError o -> String -> String -> Html Form.M
 markdownEditor appState =
     markupEditor
         { toPreview = Markdown.toHtml []
-        , hint = gettext "You can use Markdown and see the result in the preview tab." appState.locale
+        , hint = gettext "You can use %s and see the result in the preview tab." appState.locale
         , extraClass = "form-group-markdown"
         }
         appState
@@ -467,7 +469,7 @@ htmlOrMarkdownEditor : AppState -> Form FormError o -> String -> String -> Html 
 htmlOrMarkdownEditor appState =
     markupEditor
         { toPreview = MarkdownOrHtml.view []
-        , hint = gettext "You can use HTML or Markdown and see the result in the preview tab." appState.locale
+        , hint = gettext "You can use HTML or %s and see the result in the preview tab." appState.locale
         , extraClass = ""
         }
         appState
@@ -559,7 +561,7 @@ markupEditor cfg appState form fieldName labelText =
                 [ content
                 ]
             , div [ class "card-footer text-muted" ]
-                [ text cfg.hint ]
+                (String.formatHtml cfg.hint [ a [ href (GuideLinks.markdownCheatsheet appState.guideLinks), target "_blank" ] [ text "Markdown" ] ])
             ]
         , error
         ]

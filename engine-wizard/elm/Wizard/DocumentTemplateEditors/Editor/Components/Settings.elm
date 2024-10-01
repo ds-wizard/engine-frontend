@@ -3,6 +3,7 @@ module Wizard.DocumentTemplateEditors.Editor.Components.Settings exposing
     , Model
     , Msg
     , UpdateConfig
+    , ViewConfig
     , formChanged
     , getFormOutput
     , initialModel
@@ -17,13 +18,15 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, label, span, text)
+import Html exposing (Html, a, button, div, label, span, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Random exposing (Seed)
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Shared.Data.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
@@ -91,6 +94,8 @@ type Msg
     | SetTemplateEditor CurrentTemplateEditor
     | Save
     | PutTemplateCompleted (Result ApiError DocumentTemplateDraftDetail)
+    | FillFormat Int DocumentTemplateFormatDraft
+    | FillStep Int Int DocumentTemplateFormatStep
 
 
 saveMsg : Msg
@@ -204,13 +209,25 @@ update cfg appState msg model =
                         , getResultCmd cfg.logoutMsg result
                         )
 
+        FillFormat i format ->
+            wrap { model | form = DocumentTemplateForm.fillFormat i format model.form }
+
+        FillStep formatIndex stepIndex step ->
+            wrap { model | form = DocumentTemplateForm.fillStep formatIndex stepIndex step model.form }
+
 
 
 -- VIEW
 
 
-view : AppState -> Model -> Html Msg
-view appState model =
+type alias ViewConfig =
+    { documentTemplateFormatPrefabs : ActionResult (List DocumentTemplateFormatDraft)
+    , documentTemplateFormatStepPrefabs : ActionResult (List DocumentTemplateFormatStep)
+    }
+
+
+view : AppState -> ViewConfig -> Model -> Html Msg
+view appState cfg model =
     let
         navLink templateEditor linkLabel cy =
             a
@@ -230,7 +247,7 @@ view appState model =
                     formViewKnowledgeModel appState model
 
                 FormatsTemplateEditor ->
-                    formViewFormats appState model
+                    formViewFormats appState cfg model
     in
     div [ class "DocumentTemplateEditor__MetadataEditor" ]
         [ div [ class "DocumentTemplateEditor__MetadataEditor__Navigation" ]
@@ -321,16 +338,33 @@ allowedPackageFormView appState form index =
 -- VIEW - Formats
 
 
-formViewFormats : AppState -> Model -> Html Msg
-formViewFormats appState model =
-    Html.map FormMsg <|
-        div []
-            [ FormGroup.list appState (formatFormView appState) model.form "formats" (gettext "Formats" appState.locale) (gettext "Add format" appState.locale) ]
+formViewFormats : AppState -> ViewConfig -> Model -> Html Msg
+formViewFormats appState cfg model =
+    div []
+        [ FormGroup.listWithCustomMsg appState FormMsg (formatFormView appState cfg) model.form "formats" (gettext "Formats" appState.locale) (gettext "Add format" appState.locale) ]
 
 
-formatFormView : AppState -> Form FormError DocumentTemplateForm -> Int -> Html Form.Msg
-formatFormView appState form index =
+formatFormView : AppState -> ViewConfig -> Form FormError DocumentTemplateForm -> Int -> Html Msg
+formatFormView appState cfg form index =
     let
+        formatPrefabs =
+            case ( DocumentTemplateForm.isFormatEmpty index form, cfg.documentTemplateFormatPrefabs ) of
+                ( True, ActionResult.Success formats ) ->
+                    let
+                        viewFormat format =
+                            a
+                                [ onClick (FillFormat index format)
+                                , class "btn btn-outline-primary me-1 with-icon"
+                                ]
+                                [ fa format.icon
+                                , text format.name
+                                ]
+                    in
+                    prefabsView appState (List.map viewFormat formats)
+
+                _ ->
+                    emptyNode
+
         nameField =
             "formats." ++ String.fromInt index ++ ".name"
 
@@ -348,38 +382,57 @@ formatFormView appState form index =
     in
     div [ class "card bg-light mb-4" ]
         [ div [ class "card-body" ]
-            [ div [ class "row" ]
-                [ div [ class "col" ]
-                    [ FormGroup.input appState form nameField (gettext "Name" appState.locale)
-                    ]
-                , div [ class "col text-end" ]
-                    [ a
-                        [ class "btn btn-danger with-icon"
-                        , onClick (Form.RemoveItem "formats" index)
-                        , dataCy "document-template-editor_format_remove-button"
+            [ formatPrefabs
+            , Html.map FormMsg <|
+                div [ class "row" ]
+                    [ div [ class "col" ]
+                        [ FormGroup.input appState form nameField (gettext "Name" appState.locale)
                         ]
-                        [ faSet "_global.delete" appState
-                        , text (gettext "Remove" appState.locale)
+                    , div [ class "col text-end" ]
+                        [ a
+                            [ class "btn btn-danger with-icon"
+                            , onClick (Form.RemoveItem "formats" index)
+                            , dataCy "document-template-editor_format_remove-button"
+                            ]
+                            [ faSet "_global.delete" appState
+                            , text (gettext "Remove" appState.locale)
+                            ]
                         ]
                     ]
-                ]
-            , div [ class "row" ]
-                [ div [ class "col" ]
-                    [ FormGroup.input appState form iconField (gettext "Icon" appState.locale) ]
-                , div [ class "col" ]
-                    [ FormGroup.plainGroup
-                        (label [ class "export-link" ] [ fa iconValue, text nameValue ])
-                        (gettext "Preview" appState.locale)
+            , Html.map FormMsg <|
+                div [ class "row" ]
+                    [ div [ class "col" ]
+                        [ FormGroup.input appState form iconField (gettext "Icon" appState.locale) ]
+                    , div [ class "col" ]
+                        [ FormGroup.plainGroup
+                            (label [ class "export-link" ] [ fa iconValue, text nameValue ])
+                            (gettext "Preview" appState.locale)
+                        ]
                     ]
-                ]
-            , FormGroup.list appState (stepFormView appState stepsField) form stepsField (gettext "Steps" appState.locale) (gettext "Add step" appState.locale)
+            , FormGroup.listWithCustomMsg appState FormMsg (stepFormView appState cfg stepsField index) form stepsField (gettext "Steps" appState.locale) (gettext "Add step" appState.locale)
             ]
         ]
 
 
-stepFormView : AppState -> String -> Form FormError DocumentTemplateForm -> Int -> Html Form.Msg
-stepFormView appState prefix form index =
+stepFormView : AppState -> ViewConfig -> String -> Int -> Form FormError DocumentTemplateForm -> Int -> Html Msg
+stepFormView appState cfg prefix formatIndex form index =
     let
+        stepPrefabs =
+            case ( DocumentTemplateForm.isStepEmpty formatIndex index form, cfg.documentTemplateFormatStepPrefabs ) of
+                ( True, ActionResult.Success formats ) ->
+                    let
+                        viewStep step =
+                            a
+                                [ onClick (FillStep formatIndex index step)
+                                , class "btn btn-outline-primary me-1 btn-wide"
+                                ]
+                                [ text step.name ]
+                    in
+                    prefabsView appState (List.map viewStep formats)
+
+                _ ->
+                    emptyNode
+
         nameField =
             prefix ++ "." ++ String.fromInt index ++ ".name"
 
@@ -388,24 +441,27 @@ stepFormView appState prefix form index =
     in
     div [ class "card bg-light mb-4" ]
         [ div [ class "card-body" ]
-            [ div [ class "row" ]
-                [ div [ class "col-11" ]
-                    [ FormGroup.input appState form nameField (gettext "Name" appState.locale) ]
-                , div [ class "col text-end" ]
-                    [ a
-                        [ class "btn btn-link text-danger"
-                        , onClick (Form.RemoveItem prefix index)
-                        , dataCy "document-template-editor_step_remove-button"
-                        ]
-                        [ faSet "_global.delete" appState
+            [ stepPrefabs
+            , Html.map FormMsg <|
+                div [ class "row" ]
+                    [ div [ class "col-11" ]
+                        [ FormGroup.input appState form nameField (gettext "Name" appState.locale) ]
+                    , div [ class "col text-end" ]
+                        [ a
+                            [ class "btn btn-link text-danger"
+                            , onClick (Form.RemoveItem prefix index)
+                            , dataCy "document-template-editor_step_remove-button"
+                            ]
+                            [ faSet "_global.delete" appState
+                            ]
                         ]
                     ]
-                ]
-            , div [ class "input-table" ]
-                [ label [] [ text (gettext "Options" appState.locale) ]
-                , serviceParametersHeader appState optionsField form
-                , FormGroup.list appState (stepOptionFormView appState optionsField) form optionsField "" (gettext "Add option" appState.locale)
-                ]
+            , Html.map FormMsg <|
+                div [ class "input-table" ]
+                    [ label [] [ text (gettext "Options" appState.locale) ]
+                    , serviceParametersHeader appState optionsField form
+                    , FormGroup.list appState (stepOptionFormView appState optionsField) form optionsField "" (gettext "Add option" appState.locale)
+                    ]
             ]
         ]
 
@@ -454,4 +510,16 @@ stepOptionFormView appState prefix form i =
             ]
         , div [ class "col-1 text-end" ]
             [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faSet "_global.delete" appState ] ]
+        ]
+
+
+prefabsView : AppState -> List (Html msg) -> Html msg
+prefabsView appState prefabButtons =
+    div [ class "row" ]
+        [ div [ class "col" ]
+            [ div [ class "py-2 px-3 bg-gray-200 rounded mb-3" ]
+                [ strong [ class "d-block mb-2" ] [ text (gettext "Quick setup" appState.locale) ]
+                , div [] prefabButtons
+                ]
+            ]
         ]
