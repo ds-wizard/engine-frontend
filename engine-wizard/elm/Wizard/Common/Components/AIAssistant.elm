@@ -10,7 +10,7 @@ module Wizard.Common.Components.AIAssistant exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Html exposing (Html, a, div, form, h5, input, p, text)
+import Html exposing (Html, a, button, div, form, h5, input, p, text)
 import Html.Attributes exposing (class, disabled, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Random exposing (Seed)
@@ -240,7 +240,7 @@ viewNewConversation cfg =
             ]
 
         viewSampleMessage message =
-            a [ class "btn btn-outline-primary mb-2 text-start", onClick (cfg.wrapMsg (SubmitSampleMessage message)) ]
+            button [ class "btn btn-outline-primary mb-2 text-start", onClick (cfg.wrapMsg (SubmitSampleMessage message)) ]
                 [ text message ]
     in
     div [ class "flex-grow-1 px-3 py-3 overflow-auto" ]
