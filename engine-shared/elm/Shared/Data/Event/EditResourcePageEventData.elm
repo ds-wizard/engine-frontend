@@ -4,6 +4,7 @@ module Shared.Data.Event.EditResourcePageEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -52,4 +53,12 @@ apply eventData resourcePage =
         | title = EventField.getValueWithDefault eventData.title resourcePage.title
         , content = EventField.getValueWithDefault eventData.content resourcePage.content
         , annotations = EventField.getValueWithDefault eventData.annotations resourcePage.annotations
+    }
+
+
+squash : EditResourcePageEventData -> EditResourcePageEventData -> EditResourcePageEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , content = EventField.squash oldData.content newData.content
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

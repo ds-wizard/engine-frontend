@@ -4,6 +4,7 @@ module Shared.Data.Event.EditResourceCollectionEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -52,4 +53,12 @@ apply eventData resourceCollection =
         | title = EventField.getValueWithDefault eventData.title resourceCollection.title
         , resourcePageUuids = EventField.applyChildren eventData.resourcePageUuids resourceCollection.resourcePageUuids
         , annotations = EventField.getValueWithDefault eventData.annotations resourceCollection.annotations
+    }
+
+
+squash : EditResourceCollectionEventData -> EditResourceCollectionEventData -> EditResourceCollectionEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , resourcePageUuids = EventField.squash oldData.resourcePageUuids newData.resourcePageUuids
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

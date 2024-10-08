@@ -3,6 +3,7 @@ module Shared.Data.Event.EditIntegrationApiEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -87,4 +88,23 @@ init =
     , responseListField = EventField.empty
     , responseItemId = EventField.empty
     , responseItemTemplate = EventField.empty
+    }
+
+
+squash : EditIntegrationApiEventData -> EditIntegrationApiEventData -> EditIntegrationApiEventData
+squash oldData newData =
+    { id = EventField.squash oldData.id newData.id
+    , name = EventField.squash oldData.name newData.name
+    , props = EventField.squash oldData.props newData.props
+    , logo = EventField.squash oldData.logo newData.logo
+    , itemUrl = EventField.squash oldData.itemUrl newData.itemUrl
+    , annotations = EventField.squash oldData.annotations newData.annotations
+    , requestMethod = EventField.squash oldData.requestMethod newData.requestMethod
+    , requestUrl = EventField.squash oldData.requestUrl newData.requestUrl
+    , requestHeaders = EventField.squash oldData.requestHeaders newData.requestHeaders
+    , requestBody = EventField.squash oldData.requestBody newData.requestBody
+    , requestEmptySearch = EventField.squash oldData.requestEmptySearch newData.requestEmptySearch
+    , responseListField = EventField.squash oldData.responseListField newData.responseListField
+    , responseItemId = EventField.squash oldData.responseItemId newData.responseItemId
+    , responseItemTemplate = EventField.squash oldData.responseItemTemplate newData.responseItemTemplate
     }

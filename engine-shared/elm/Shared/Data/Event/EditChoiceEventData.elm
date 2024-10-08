@@ -4,6 +4,7 @@ module Shared.Data.Event.EditChoiceEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -47,4 +48,11 @@ apply eventData choice =
     { choice
         | label = EventField.getValueWithDefault eventData.label choice.label
         , annotations = EventField.getValueWithDefault eventData.annotations choice.annotations
+    }
+
+
+squash : EditChoiceEventData -> EditChoiceEventData -> EditChoiceEventData
+squash oldData newData =
+    { label = EventField.squash oldData.label newData.label
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

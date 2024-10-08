@@ -4,6 +4,7 @@ module Shared.Data.Event.EditAnswerEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -64,4 +65,14 @@ apply eventData answer =
         , metricMeasures = EventField.getValueWithDefault eventData.metricMeasures answer.metricMeasures
         , followUpUuids = EventField.applyChildren eventData.followUpUuids answer.followUpUuids
         , annotations = EventField.getValueWithDefault eventData.annotations answer.annotations
+    }
+
+
+squash : EditAnswerEventData -> EditAnswerEventData -> EditAnswerEventData
+squash oldData newData =
+    { label = EventField.squash oldData.label newData.label
+    , advice = EventField.squash oldData.advice newData.advice
+    , metricMeasures = EventField.squash oldData.metricMeasures newData.metricMeasures
+    , followUpUuids = EventField.squash oldData.followUpUuids newData.followUpUuids
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

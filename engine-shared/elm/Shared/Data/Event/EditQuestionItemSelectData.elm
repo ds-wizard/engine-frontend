@@ -3,6 +3,7 @@ module Shared.Data.Event.EditQuestionItemSelectData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -62,4 +63,17 @@ init =
     , expertUuids = EventField.empty
     , listQuestionUuid = EventField.empty
     , annotations = EventField.empty
+    }
+
+
+squash : EditQuestionItemSelectEventData -> EditQuestionItemSelectEventData -> EditQuestionItemSelectEventData
+squash left right =
+    { title = EventField.squash left.title right.title
+    , text = EventField.squash left.text right.text
+    , requiredPhaseUuid = EventField.squash left.requiredPhaseUuid right.requiredPhaseUuid
+    , tagUuids = EventField.squash left.tagUuids right.tagUuids
+    , referenceUuids = EventField.squash left.referenceUuids right.referenceUuids
+    , expertUuids = EventField.squash left.expertUuids right.expertUuids
+    , listQuestionUuid = EventField.squash left.listQuestionUuid right.listQuestionUuid
+    , annotations = EventField.squash left.annotations right.annotations
     }

@@ -4,6 +4,7 @@ module Shared.Data.Event.EditMetricEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -58,4 +59,13 @@ apply eventData metric =
         , abbreviation = EventField.getValueWithDefault eventData.abbreviation metric.abbreviation
         , description = EventField.getValueWithDefault eventData.description metric.description
         , annotations = EventField.getValueWithDefault eventData.annotations metric.annotations
+    }
+
+
+squash : EditMetricEventData -> EditMetricEventData -> EditMetricEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , abbreviation = EventField.squash oldData.abbreviation newData.abbreviation
+    , description = EventField.squash oldData.description newData.description
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

@@ -3,6 +3,7 @@ module Shared.Data.Event.EditReferenceResourcePageEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -38,4 +39,11 @@ init : EditReferenceResourcePageEventData
 init =
     { resourcePageUuid = EventField.empty
     , annotations = EventField.empty
+    }
+
+
+squash : EditReferenceResourcePageEventData -> EditReferenceResourcePageEventData -> EditReferenceResourcePageEventData
+squash oldData newData =
+    { resourcePageUuid = EventField.squash oldData.resourcePageUuid newData.resourcePageUuid
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }
