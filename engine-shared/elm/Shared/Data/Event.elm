@@ -4,6 +4,7 @@ module Shared.Data.Event exposing
     , encode
     , getEntityVisibleName
     , getUuid
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -585,3 +586,46 @@ getEntityVisibleName event =
 
         _ ->
             Nothing
+
+
+squash : Event -> Event -> Event
+squash old new =
+    case ( old, new ) of
+        ( EditChapterEvent oldEditChapterData _, EditChapterEvent newEditChapterData commonData ) ->
+            EditChapterEvent (EditChapterEventData.squash oldEditChapterData newEditChapterData) commonData
+
+        ( EditMetricEvent oldEditMetricData _, EditMetricEvent newEditMetricData commonData ) ->
+            EditMetricEvent (EditMetricEventData.squash oldEditMetricData newEditMetricData) commonData
+
+        ( EditPhaseEvent oldEditPhaseData _, EditPhaseEvent newEditPhaseData commonData ) ->
+            EditPhaseEvent (EditPhaseEventData.squash oldEditPhaseData newEditPhaseData) commonData
+
+        ( EditTagEvent oldEditTagData _, EditTagEvent newEditTagData commonData ) ->
+            EditTagEvent (EditTagEventData.squash oldEditTagData newEditTagData) commonData
+
+        ( EditIntegrationEvent oldEditIntegrationData _, EditIntegrationEvent newEditIntegrationData commonData ) ->
+            EditIntegrationEvent (EditIntegrationEventData.squash oldEditIntegrationData newEditIntegrationData) commonData
+
+        ( EditQuestionEvent oldEditQuestionData _, EditQuestionEvent newEditQuestionData commonData ) ->
+            EditQuestionEvent (EditQuestionEventData.squash oldEditQuestionData newEditQuestionData) commonData
+
+        ( EditAnswerEvent oldEditAnswerData _, EditAnswerEvent newEditAnswerData commonData ) ->
+            EditAnswerEvent (EditAnswerEventData.squash oldEditAnswerData newEditAnswerData) commonData
+
+        ( EditChoiceEvent oldEditChoiceData _, EditChoiceEvent newEditChoiceData commonData ) ->
+            EditChoiceEvent (EditChoiceEventData.squash oldEditChoiceData newEditChoiceData) commonData
+
+        ( EditReferenceEvent oldEditReferenceData _, EditReferenceEvent newEditReferenceData commonData ) ->
+            EditReferenceEvent (EditReferenceEventData.squash oldEditReferenceData newEditReferenceData) commonData
+
+        ( EditExpertEvent oldEditExpertData _, EditExpertEvent newEditExpertData commonData ) ->
+            EditExpertEvent (EditExpertEventData.squash oldEditExpertData newEditExpertData) commonData
+
+        ( EditResourceCollectionEvent oldEditResourceCollectionData _, EditResourceCollectionEvent newEditResourceCollectionData commonData ) ->
+            EditResourceCollectionEvent (EditResourceCollectionEventData.squash oldEditResourceCollectionData newEditResourceCollectionData) commonData
+
+        ( EditResourcePageEvent oldEditResourcePageData _, EditResourcePageEvent newEditResourcePageData commonData ) ->
+            EditResourcePageEvent (EditResourcePageEventData.squash oldEditResourcePageData newEditResourcePageData) commonData
+
+        _ ->
+            new

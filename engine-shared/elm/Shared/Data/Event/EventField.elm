@@ -7,6 +7,7 @@ module Shared.Data.Event.EventField exposing
     , encode
     , getValue
     , getValueWithDefault
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -97,3 +98,12 @@ applyChildren eventField currentValues =
 
         Nothing ->
             currentValues
+
+
+squash : EventField a -> EventField a -> EventField a
+squash field1 field2 =
+    if field2.changed then
+        field2
+
+    else
+        field1

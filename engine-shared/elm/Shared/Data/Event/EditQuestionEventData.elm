@@ -6,6 +6,7 @@ module Shared.Data.Event.EditQuestionEventData exposing
     , getEntityVisibleName
     , getTypeString
     , map
+    , squash
     )
 
 import Dict
@@ -173,3 +174,28 @@ map optionsQuestion listQuestion valueQuestion integrationQuestion multiChoiceQu
 
         EditQuestionItemSelectEvent data ->
             itemSelectQuestion data
+
+
+squash : EditQuestionEventData -> EditQuestionEventData -> EditQuestionEventData
+squash old new =
+    case ( old, new ) of
+        ( EditQuestionOptionsEvent oldData, EditQuestionOptionsEvent newData ) ->
+            EditQuestionOptionsEvent (EditQuestionOptionsEventData.squash oldData newData)
+
+        ( EditQuestionListEvent oldData, EditQuestionListEvent newData ) ->
+            EditQuestionListEvent (EditQuestionListEventData.squash oldData newData)
+
+        ( EditQuestionValueEvent oldData, EditQuestionValueEvent newData ) ->
+            EditQuestionValueEvent (EditQuestionValueEventData.squash oldData newData)
+
+        ( EditQuestionIntegrationEvent oldData, EditQuestionIntegrationEvent newData ) ->
+            EditQuestionIntegrationEvent (EditQuestionIntegrationEventData.squash oldData newData)
+
+        ( EditQuestionMultiChoiceEvent oldData, EditQuestionMultiChoiceEvent newData ) ->
+            EditQuestionMultiChoiceEvent (EditQuestionMultiChoiceEventData.squash oldData newData)
+
+        ( EditQuestionItemSelectEvent oldData, EditQuestionItemSelectEvent newData ) ->
+            EditQuestionItemSelectEvent (EditQuestionItemSelectEventData.squash oldData newData)
+
+        _ ->
+            new

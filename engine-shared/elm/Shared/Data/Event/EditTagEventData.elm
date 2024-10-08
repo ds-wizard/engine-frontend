@@ -4,6 +4,7 @@ module Shared.Data.Event.EditTagEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -58,4 +59,13 @@ apply eventData tag =
         , description = EventField.getValueWithDefault eventData.description tag.description
         , color = EventField.getValueWithDefault eventData.color tag.color
         , annotations = EventField.getValueWithDefault eventData.annotations tag.annotations
+    }
+
+
+squash : EditTagEventData -> EditTagEventData -> EditTagEventData
+squash oldData newData =
+    { name = EventField.squash oldData.name newData.name
+    , description = EventField.squash oldData.description newData.description
+    , color = EventField.squash oldData.color newData.color
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

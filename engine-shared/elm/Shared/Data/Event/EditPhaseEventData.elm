@@ -4,6 +4,7 @@ module Shared.Data.Event.EditPhaseEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -53,4 +54,12 @@ apply eventData phase =
         | title = EventField.getValueWithDefault eventData.title phase.title
         , description = EventField.getValueWithDefault eventData.description phase.description
         , annotations = EventField.getValueWithDefault eventData.annotations phase.annotations
+    }
+
+
+squash : EditPhaseEventData -> EditPhaseEventData -> EditPhaseEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , description = EventField.squash oldData.description newData.description
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }
