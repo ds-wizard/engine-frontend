@@ -4,6 +4,7 @@ module Shared.Data.Event.EditExpertEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -52,4 +53,12 @@ apply eventData expert =
         | name = EventField.getValueWithDefault eventData.name expert.name
         , email = EventField.getValueWithDefault eventData.email expert.email
         , annotations = EventField.getValueWithDefault eventData.annotations expert.annotations
+    }
+
+
+squash : EditExpertEventData -> EditExpertEventData -> EditExpertEventData
+squash oldData newData =
+    { name = EventField.squash oldData.name newData.name
+    , email = EventField.squash oldData.email newData.email
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

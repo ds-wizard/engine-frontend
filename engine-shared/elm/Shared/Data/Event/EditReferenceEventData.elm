@@ -5,6 +5,7 @@ module Shared.Data.Event.EditReferenceEventData exposing
     , encode
     , getEntityVisibleName
     , map
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -111,3 +112,19 @@ map resourcePageReference urlReference crossReference reference =
 
         EditReferenceCrossEvent data ->
             crossReference data
+
+
+squash : EditReferenceEventData -> EditReferenceEventData -> EditReferenceEventData
+squash old new =
+    case ( old, new ) of
+        ( EditReferenceResourcePageEvent oldData, EditReferenceResourcePageEvent newData ) ->
+            EditReferenceResourcePageEvent (EditReferenceResourcePageEventData.squash oldData newData)
+
+        ( EditReferenceURLEvent oldData, EditReferenceURLEvent newData ) ->
+            EditReferenceURLEvent (EditReferenceURLEventData.squash oldData newData)
+
+        ( EditReferenceCrossEvent oldData, EditReferenceCrossEvent newData ) ->
+            EditReferenceCrossEvent (EditReferenceCrossEventData.squash oldData newData)
+
+        _ ->
+            new

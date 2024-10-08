@@ -229,10 +229,10 @@ viewKMEditorContent appState route model editorBranch =
             KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) editorBranch
 
         KMEditorRoute.Phases ->
-            PhaseEditor.view appState PhaseEditorMsg EventMsg editorBranch model.phaseEditorModel
+            PhaseEditor.view appState PhaseEditorMsg (EventMsg False) editorBranch model.phaseEditorModel
 
         KMEditorRoute.QuestionTags ->
-            TagEditor.view appState TagEditorMsg EventMsg editorBranch model.tagEditorModel
+            TagEditor.view appState TagEditorMsg (EventMsg False) editorBranch model.tagEditorModel
 
         KMEditorRoute.Preview ->
             Html.map PreviewMsg <|

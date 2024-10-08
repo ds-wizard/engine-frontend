@@ -7,10 +7,14 @@ module Wizard.KMEditor.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Debounce exposing (Debounce)
+import Dict exposing (Dict)
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
+import Shared.Data.Event exposing (Event)
 import Shared.Data.KnowledgeModel.Integration exposing (Integration)
 import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
+import Shared.Data.WebSockets.BranchAction.SetContentBranchAction exposing (SetContentBranchAction)
 import Shared.WebSocket as WebSocket exposing (WebSocket)
 import String.Extra as String
 import Uuid exposing (Uuid)
@@ -43,6 +47,8 @@ type alias Model =
     , settingsModel : Settings.Model
     , integrationPrefabs : ActionResult (List Integration)
     , publishModalModel : PublishModal.Model
+    , eventsLastEvent : Dict String Event
+    , eventsWebsocketDebounce : Dict String (Debounce SetContentBranchAction)
     }
 
 
@@ -64,6 +70,8 @@ init appState uuid mbEditorUuid =
     , settingsModel = Settings.initialModel
     , integrationPrefabs = ActionResult.Loading
     , publishModalModel = PublishModal.initialModel
+    , eventsLastEvent = Dict.empty
+    , eventsWebsocketDebounce = Dict.empty
     }
 
 

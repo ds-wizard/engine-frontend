@@ -1,4 +1,4 @@
-module Shared.Data.Event.EditQuestionMultiChoiceEventData exposing (EditQuestionMultiChoiceEventData, decoder, encode, init)
+module Shared.Data.Event.EditQuestionMultiChoiceEventData exposing (EditQuestionMultiChoiceEventData, decoder, encode, init, squash)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -57,4 +57,17 @@ init =
     , expertUuids = EventField.empty
     , choiceUuids = EventField.empty
     , annotations = EventField.empty
+    }
+
+
+squash : EditQuestionMultiChoiceEventData -> EditQuestionMultiChoiceEventData -> EditQuestionMultiChoiceEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , text = EventField.squash oldData.text newData.text
+    , requiredPhaseUuid = EventField.squash oldData.requiredPhaseUuid newData.requiredPhaseUuid
+    , tagUuids = EventField.squash oldData.tagUuids newData.tagUuids
+    , referenceUuids = EventField.squash oldData.referenceUuids newData.referenceUuids
+    , expertUuids = EventField.squash oldData.expertUuids newData.expertUuids
+    , choiceUuids = EventField.squash oldData.choiceUuids newData.choiceUuids
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

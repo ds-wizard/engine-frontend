@@ -3,6 +3,7 @@ module Shared.Data.Event.EditIntegrationWidgetEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -58,4 +59,16 @@ init =
     , itemUrl = EventField.empty
     , annotations = EventField.empty
     , widgetUrl = EventField.empty
+    }
+
+
+squash : EditIntegrationWidgetEventData -> EditIntegrationWidgetEventData -> EditIntegrationWidgetEventData
+squash oldData newData =
+    { id = EventField.squash oldData.id newData.id
+    , name = EventField.squash oldData.name newData.name
+    , props = EventField.squash oldData.props newData.props
+    , logo = EventField.squash oldData.logo newData.logo
+    , itemUrl = EventField.squash oldData.itemUrl newData.itemUrl
+    , annotations = EventField.squash oldData.annotations newData.annotations
+    , widgetUrl = EventField.squash oldData.widgetUrl newData.widgetUrl
     }

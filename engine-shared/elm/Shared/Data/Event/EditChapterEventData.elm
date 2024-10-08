@@ -4,6 +4,7 @@ module Shared.Data.Event.EditChapterEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -58,4 +59,13 @@ apply eventData chapter =
         , text = EventField.getValueWithDefault eventData.text chapter.text
         , questionUuids = EventField.applyChildren eventData.questionUuids chapter.questionUuids
         , annotations = EventField.getValueWithDefault eventData.annotations chapter.annotations
+    }
+
+
+squash : EditChapterEventData -> EditChapterEventData -> EditChapterEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , text = EventField.squash oldData.text newData.text
+    , questionUuids = EventField.squash oldData.questionUuids newData.questionUuids
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }
