@@ -6,14 +6,16 @@ module Wizard.KMEditor.Editor.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Debounce
 import Dict
 import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Prefabs as PrefabsApi
 import Shared.Data.Branch.BranchState as BranchState
+import Shared.Data.Event as Event
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
-import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction
+import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
 import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
 import Shared.Data.WebSockets.ServerBranchAction as ServerBranchAction
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
@@ -295,7 +297,7 @@ update wrapMsg msg appState model =
             in
             withSeed ( { model | publishModalModel = publishModalModel }, publishModalCmd )
 
-        EventMsg parentUuid mbEntityUuid createEvent ->
+        EventMsg shouldDebounce parentUuid mbEntityUuid createEvent ->
             let
                 ( kmEventUuid, newSeed1 ) =
                     getUuidString appState.seed
@@ -319,37 +321,104 @@ update wrapMsg msg appState model =
                         , createdAt = appState.currentTime
                         }
 
-                wsEvent =
-                    SetContentBranchAction.AddBranchEvent
-                        { uuid = wsEventUuid
-                        , event = event
-                        }
-
-                newModel =
-                    addSavingActionUuid wsEventUuid model
-
-                wsCmd =
-                    wsEvent
-                        |> ClientBranchAction.SetContent
-                        |> ClientBranchAction.encode
-                        |> WebSocket.send model.websocket
-
                 newBranchModel =
                     ActionResult.map (EditorBranch.applyEvent appState True event) model.branchModel
 
                 setUnloadMessageCmd =
                     Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
-
-                navigateCmd =
-                    getNavigateCmd appState model.uuid model.branchModel newBranchModel
             in
-            ( newSeed3
-            , { newModel
-                | branchModel = newBranchModel
-                , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
-              }
-            , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd ]
-            )
+            if shouldDebounce then
+                let
+                    squashedEvent =
+                        case Dict.get entityUuid model.eventsLastEvent of
+                            Just lastEvent ->
+                                Event.squash lastEvent event
+
+                            Nothing ->
+                                event
+
+                    wsEvent =
+                        SetContentBranchAction.AddBranchEvent
+                            { uuid = wsEventUuid
+                            , event = squashedEvent
+                            }
+
+                    ( debounce, debounceCmd ) =
+                        Debounce.push (debounceConfig appState entityUuid)
+                            wsEvent
+                            (getDebounceModel entityUuid model)
+                in
+                ( newSeed3
+                , { model
+                    | branchModel = newBranchModel
+                    , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
+                    , eventsWebsocketDebounce = Dict.insert entityUuid debounce model.eventsWebsocketDebounce
+                    , eventsLastEvent = Dict.insert entityUuid squashedEvent model.eventsLastEvent
+                  }
+                , Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd ]
+                )
+
+            else
+                let
+                    wsEvent =
+                        SetContentBranchAction.AddBranchEvent
+                            { uuid = wsEventUuid
+                            , event = event
+                            }
+
+                    newModel =
+                        addSavingActionUuid wsEventUuid model
+
+                    wsCmd =
+                        wsEvent
+                            |> ClientBranchAction.SetContent
+                            |> ClientBranchAction.encode
+                            |> WebSocket.send model.websocket
+
+                    navigateCmd =
+                        getNavigateCmd appState model.uuid model.branchModel newBranchModel
+                in
+                ( newSeed3
+                , { newModel
+                    | branchModel = newBranchModel
+                    , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
+                  }
+                , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd ]
+                )
+
+        EventDebounceMsg entityUuid debounceMsg ->
+            let
+                send event =
+                    let
+                        wsCmd =
+                            event
+                                |> ClientBranchAction.SetContent
+                                |> ClientBranchAction.encode
+                                |> WebSocket.send model.websocket
+                    in
+                    Cmd.batch
+                        [ wsCmd
+                        , dispatch (EventAddSavingUuid (SetContentBranchAction.getUuid event) entityUuid)
+                        ]
+
+                ( debounce, cmd ) =
+                    Debounce.update
+                        (debounceConfig appState entityUuid)
+                        (Debounce.takeLast send)
+                        debounceMsg
+                        (getDebounceModel entityUuid model)
+            in
+            withSeed <|
+                ( { model | eventsWebsocketDebounce = Dict.insert entityUuid debounce model.eventsWebsocketDebounce }
+                , Cmd.map wrapMsg cmd
+                )
+
+        EventAddSavingUuid eventUuid entityUuid ->
+            let
+                newModel =
+                    { model | eventsLastEvent = Dict.remove entityUuid model.eventsLastEvent }
+            in
+            withSeed ( addSavingActionUuid eventUuid newModel, Cmd.none )
 
 
 handleWebSocketMsg : WebSocket.RawMsg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -427,3 +496,15 @@ getNavigateCmd appState uuid oldEditorBranch newEditorBranch =
 
     else
         Cmd.none
+
+
+debounceConfig : AppState -> String -> Debounce.Config Msg
+debounceConfig appState entityUuid =
+    { strategy = Debounce.soon appState.websocketThrottleDelay
+    , transform = EventDebounceMsg entityUuid
+    }
+
+
+getDebounceModel : String -> Model -> Debounce.Debounce SetContentBranchAction
+getDebounceModel entityUuid model =
+    Maybe.withDefault Debounce.init (Dict.get entityUuid model.eventsWebsocketDebounce)

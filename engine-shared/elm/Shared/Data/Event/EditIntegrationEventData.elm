@@ -6,6 +6,7 @@ module Shared.Data.Event.EditIntegrationEventData exposing
     , getEntityVisibleName
     , getTypeString
     , map
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -108,3 +109,16 @@ map apiIntegration widgetIntegration integration =
 
         EditIntegrationWidgetEvent data ->
             widgetIntegration data
+
+
+squash : EditIntegrationEventData -> EditIntegrationEventData -> EditIntegrationEventData
+squash old new =
+    case ( old, new ) of
+        ( EditIntegrationApiEvent oldData, EditIntegrationApiEvent newData ) ->
+            EditIntegrationApiEvent (EditIntegrationApiEventData.squash oldData newData)
+
+        ( EditIntegrationWidgetEvent oldData, EditIntegrationWidgetEvent newData ) ->
+            EditIntegrationWidgetEvent (EditIntegrationWidgetEventData.squash oldData newData)
+
+        _ ->
+            new

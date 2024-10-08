@@ -3,6 +3,7 @@ module Shared.Data.Event.EditQuestionIntegrationEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Dict exposing (Dict)
@@ -67,4 +68,18 @@ init =
     , integrationUuid = EventField.empty
     , props = EventField.empty
     , annotations = EventField.empty
+    }
+
+
+squash : EditQuestionIntegrationEventData -> EditQuestionIntegrationEventData -> EditQuestionIntegrationEventData
+squash oldData newData =
+    { title = EventField.squash oldData.title newData.title
+    , text = EventField.squash oldData.text newData.text
+    , requiredPhaseUuid = EventField.squash oldData.requiredPhaseUuid newData.requiredPhaseUuid
+    , tagUuids = EventField.squash oldData.tagUuids newData.tagUuids
+    , referenceUuids = EventField.squash oldData.referenceUuids newData.referenceUuids
+    , expertUuids = EventField.squash oldData.expertUuids newData.expertUuids
+    , integrationUuid = EventField.squash oldData.integrationUuid newData.integrationUuid
+    , props = EventField.squash oldData.props newData.props
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

@@ -3,6 +3,7 @@ module Shared.Data.WebSockets.BranchAction.SetContentBranchAction exposing
     , SetContentBranchAction(..)
     , decoder
     , encode
+    , getUuid
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -50,3 +51,10 @@ encode action =
                 , ( "uuid", Uuid.encode data.uuid )
                 , ( "event", Event.encode data.event )
                 ]
+
+
+getUuid : SetContentBranchAction -> Uuid
+getUuid action =
+    case action of
+        AddBranchEvent data ->
+            data.uuid

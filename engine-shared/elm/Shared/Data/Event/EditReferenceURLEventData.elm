@@ -3,6 +3,7 @@ module Shared.Data.Event.EditReferenceURLEventData exposing
     , decoder
     , encode
     , init
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -41,4 +42,12 @@ init =
     { url = EventField.empty
     , label = EventField.empty
     , annotations = EventField.empty
+    }
+
+
+squash : EditReferenceURLEventData -> EditReferenceURLEventData -> EditReferenceURLEventData
+squash oldData newData =
+    { url = EventField.squash oldData.url newData.url
+    , label = EventField.squash oldData.label newData.label
+    , annotations = EventField.squash oldData.annotations newData.annotations
     }

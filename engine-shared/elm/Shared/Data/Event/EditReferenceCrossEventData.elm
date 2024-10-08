@@ -2,6 +2,7 @@ module Shared.Data.Event.EditReferenceCrossEventData exposing
     ( EditReferenceCrossEventData
     , decoder
     , encode
+    , squash
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -33,3 +34,11 @@ encode data =
     , ( "description", EventField.encode E.string data.description )
     , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
+
+
+squash : EditReferenceCrossEventData -> EditReferenceCrossEventData -> EditReferenceCrossEventData
+squash oldData newData =
+    { targetUuid = EventField.squash oldData.targetUuid newData.targetUuid
+    , description = EventField.squash oldData.description newData.description
+    , annotations = EventField.squash oldData.annotations newData.annotations
+    }

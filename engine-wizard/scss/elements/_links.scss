@@ -17,7 +17,7 @@ a {
         text-decoration: underline;
     }
 
-    &:not([href]):not([tabindex]):not(.btn) {
+    &:not([href]):not([tabindex]) {
         color: var(--bs-link-color);
 
         &:hover, &:active, &:focus {
