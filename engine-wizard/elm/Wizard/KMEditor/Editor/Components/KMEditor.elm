@@ -376,7 +376,7 @@ viewWarningsPanel appState editorBranch =
             else
                 ul [] (List.map viewWarning editorBranch.warnings)
     in
-    div [ class "right-panel" ]
+    div [ class "editor-right-panel" ]
         [ warnings ]
 
 
