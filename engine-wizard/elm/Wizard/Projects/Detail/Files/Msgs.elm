@@ -1,4 +1,4 @@
-module Wizard.ProjectFiles.Index.Msgs exposing (Msg(..))
+module Wizard.Projects.Detail.Files.Msgs exposing (Msg(..))
 
 import Shared.Data.QuestionnaireFile exposing (QuestionnaireFile)
 import Shared.Error.ApiError exposing (ApiError)

@@ -10,4 +10,5 @@ type ProjectDetailRoute
     | Metrics
     | Documents PaginationQueryString
     | NewDocument (Maybe Uuid)
+    | Files PaginationQueryString
     | Settings

@@ -8,6 +8,7 @@ module Shared.Api.Questionnaires exposing
     , fetchQuestionnaireMigration
     , getDocumentPreview
     , getDocuments
+    , getFiles
     , getProjectTagsSuggestions
     , getQuestionnaire
     , getQuestionnaireComments
@@ -51,6 +52,7 @@ import Shared.Data.QuestionnaireContent as QuestionnaireContent exposing (Questi
 import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetailWrapper as QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Shared.Data.QuestionnaireFile as QuestionnaireFile exposing (QuestionnaireFile)
 import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Data.QuestionnairePreview as QuestionnairePreview exposing (QuestionnairePreview)
 import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireDetail exposing (QuestionnaireQuestionnaire)
@@ -274,6 +276,18 @@ getDocuments questionnaireUuid _ qs =
             "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/documents" ++ PaginationQueryString.toApiUrl qs
     in
     jwtOrHttpGet url (Pagination.decoder "documents" Document.decoder)
+
+
+getFiles : Uuid -> PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination QuestionnaireFile) msg -> Cmd msg
+getFiles questionnaireUuid _ qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl qs
+
+        url =
+            "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "questionnaireFiles" QuestionnaireFile.decoder)
 
 
 postVersion : Uuid -> Value -> AbstractAppState a -> ToMsg QuestionnaireVersion msg -> Cmd msg
