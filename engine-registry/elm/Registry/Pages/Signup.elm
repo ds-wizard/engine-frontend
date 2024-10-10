@@ -90,7 +90,7 @@ successView appState =
     Page.illustratedMessage
         { image = Undraw.confirmation
         , heading = gettext "Sign up was successful!" appState.locale
-        , msg = gettext "Check your email address for the activation link." appState.locale
+        , msg = gettext "Check your email for the activation link." appState.locale
         }
 
 
