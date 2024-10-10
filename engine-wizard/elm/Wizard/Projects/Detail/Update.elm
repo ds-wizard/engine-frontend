@@ -42,6 +42,7 @@ import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Update as Documents
+import Wizard.Projects.Detail.Files.Update as Files
 import Wizard.Projects.Detail.Models exposing (Model, addQuestionnaireEvent, addSavingActionUuid, removeSavingActionUuid)
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
@@ -95,6 +96,20 @@ fetchSubrouteData appState model =
 
                 ProjectDetailRoute.NewDocument _ ->
                     QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireSettingsCompleted
+
+                ProjectDetailRoute.Files _ ->
+                    let
+                        commonCmd =
+                            if ActionResult.isSuccess model.questionnaireCommon then
+                                Cmd.map FilesMsg Files.fetchData
+
+                            else
+                                QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCommonCompleted
+                    in
+                    Cmd.batch
+                        [ commonCmd
+                        , Cmd.map FilesMsg Files.fetchData
+                        ]
 
                 ProjectDetailRoute.Settings ->
                     QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireSettingsCompleted
@@ -538,6 +553,16 @@ update wrapMsg msg appState model =
 
                 _ ->
                     withSeed ( model, Cmd.none )
+
+        FilesMsg filesMsg ->
+            let
+                ( filesModel, filesCmd ) =
+                    Files.update filesMsg (wrapMsg << FilesMsg) appState model.uuid model.filesModel
+            in
+            withSeed <|
+                ( { model | filesModel = filesModel }
+                , filesCmd
+                )
 
         GetQuestionnaireCommonCompleted result ->
             case result of

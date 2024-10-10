@@ -83,6 +83,7 @@ module Wizard.Routes exposing
     , projectsDetailDocuments
     , projectsDetailDocumentsNew
     , projectsDetailDocumentsWithFilters
+    , projectsDetailFilesWithFilters
     , projectsDetailQuestionnaire
     , projectsDetailSettings
     , projectsIndex
@@ -668,6 +669,11 @@ projectsDetailDocumentsWithFilters uuid _ pagination =
 projectsDetailDocumentsNew : Uuid -> Maybe Uuid -> Route
 projectsDetailDocumentsNew uuid mbEventUuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.NewDocument mbEventUuid
+
+
+projectsDetailFilesWithFilters : Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
+projectsDetailFilesWithFilters uuid _ pagination =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Files pagination
 
 
 projectsDetailSettings : Uuid -> Route

@@ -22,6 +22,7 @@ type alias QuestionnaireCommon =
     , visibility : QuestionnaireVisibility
     , migrationUuid : Maybe Uuid
     , packageId : String
+    , fileCount : Int
     }
 
 
@@ -36,6 +37,7 @@ decoder =
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "migrationUuid" (D.nullable Uuid.decoder)
         |> D.required "packageId" D.string
+        |> D.required "fileCount" D.int
 
 
 updateWithQuestionnaireData : SetQuestionnaireData -> QuestionnaireCommon -> QuestionnaireCommon

@@ -36,6 +36,7 @@ import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.View as Documents
+import Wizard.Projects.Detail.Files.View as Files
 import Wizard.Projects.Detail.Models exposing (Model)
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute exposing (ProjectDetailRoute)
@@ -275,6 +276,14 @@ viewProjectNavigationNav appState route model questionnaire =
                 _ ->
                     False
 
+        isFilesRoute =
+            case route of
+                ProjectDetailRoute.Files _ ->
+                    True
+
+                _ ->
+                    False
+
         questionnaireLink =
             { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing Nothing)
             , label = gettext "Questionnaire" appState.locale
@@ -311,6 +320,18 @@ viewProjectNavigationNav appState route model questionnaire =
             , dataCy = "project_nav_documents"
             }
 
+        filesVisible =
+            questionnaire.fileCount > 0
+
+        filesLink =
+            { route = projectRoute (ProjectDetailRoute.Files PaginationQueryString.empty)
+            , label = gettext "Files" appState.locale
+            , icon = faSet "project.files" appState
+            , isActive = isFilesRoute
+            , isVisible = filesVisible
+            , dataCy = "project_nav_files"
+            }
+
         settingsLink =
             { route = projectRoute ProjectDetailRoute.Settings
             , label = gettext "Settings" appState.locale
@@ -325,6 +346,7 @@ viewProjectNavigationNav appState route model questionnaire =
             , metricsLink
             , previewLink
             , documentsLink
+            , filesLink
             , settingsLink
             ]
     in
@@ -406,6 +428,9 @@ viewProjectContent appState route model questionnaire =
 
             else
                 forbiddenPage
+
+        ProjectDetailRoute.Files _ ->
+            Html.map FilesMsg <| Files.view appState model.filesModel
 
         ProjectDetailRoute.Settings ->
             let

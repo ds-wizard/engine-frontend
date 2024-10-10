@@ -52,8 +52,8 @@ type alias ViewConfig msg =
 
 view : AppState -> ViewConfig msg -> Model -> Html msg
 view appState cfg model =
-    div [ class "Projects__Detail__Content Projects__Detail__Content--Documents" ]
-        [ div [ class "container" ]
+    div [ class "Projects__Detail__Content" ]
+        [ div [ class "container my-4" ]
             [ FormResult.successOnlyView appState model.deletingDocument
             , Listing.view appState (listingConfig cfg appState) model.documents
             , deleteModal cfg appState model

@@ -31,6 +31,7 @@ import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Models as Documents
+import Wizard.Projects.Detail.Files.Models as Files
 import Wizard.Projects.Detail.ProjectDetailRoute as PlanDetailRoute exposing (ProjectDetailRoute)
 
 
@@ -53,6 +54,7 @@ type alias Model =
     , questionnaireSettings : ActionResult QuestionnaireSettings
     , questionnaireWebSocketDebounce : Dict String (Debounce QuestionnaireEvent)
     , documentsModel : Documents.Model
+    , filesModel : Files.Model
     , settingsModel : Settings.Model
     , newDocumentModel : NewDocument.Model
     , questionnaireVersionViewModalModel : QuestionnaireVersionViewModal.Model
@@ -82,6 +84,7 @@ init appState uuid mbSelectedPath mbCommentThreadUuid =
     , questionnaireSettings = Loading
     , questionnaireWebSocketDebounce = Dict.empty
     , documentsModel = Documents.initialModel PaginationQueryString.empty
+    , filesModel = Files.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty
     , settingsModel = Settings.init appState Nothing
     , questionnaireVersionViewModalModel = QuestionnaireVersionViewModal.initEmpty
@@ -99,6 +102,9 @@ initPageModel appState route model =
 
         PlanDetailRoute.NewDocument _ ->
             { model | newDocumentModel = NewDocument.initEmpty }
+
+        PlanDetailRoute.Files paginationQueryString ->
+            { model | filesModel = Files.initialModel paginationQueryString }
 
         PlanDetailRoute.Settings ->
             { model | settingsModel = Settings.init appState (ActionResult.toMaybe model.questionnaireSettings) }

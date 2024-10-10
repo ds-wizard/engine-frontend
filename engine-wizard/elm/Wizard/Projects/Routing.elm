@@ -62,6 +62,7 @@ parsers appState wrapRoute =
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
     , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
     , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.uuid "eventUuid")
+    , map (detailFilesRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "files"))
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
     , map (PaginationQueryString.wrapRoute7 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
@@ -72,6 +73,11 @@ parsers appState wrapRoute =
 detailDocumentsRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
 detailDocumentsRoute wrapRoute questionnaireUuid =
     PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Documents) (Just "createdAt,desc")
+
+
+detailFilesRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
+detailFilesRoute wrapRoute questionnaireUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Files) (Just "createdAt,desc")
 
 
 toUrl : AppState -> Route -> List String
@@ -122,6 +128,9 @@ toUrl appState route =
 
                         Nothing ->
                             [ moduleRoot, Uuid.toString uuid, "documents", "new" ]
+
+                ProjectDetailRoute.Files paginationQueryString ->
+                    [ moduleRoot, Uuid.toString uuid, "files" ++ PaginationQueryString.toUrl paginationQueryString ]
 
                 ProjectDetailRoute.Settings ->
                     [ moduleRoot, Uuid.toString uuid, "settings" ]
