@@ -338,7 +338,7 @@ formView appState questionnaire model =
                 templateFlash =
                     case ( questionnaire.documentTemplateState, questionnaire.documentTemplatePhase ) of
                         ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
-                            Flash.error appState (gettext "This document template is no longer supported." appState.locale)
+                            Flash.error appState (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
 
                         ( _, Just DocumentTemplatePhase.Deprecated ) ->
                             Flash.warning appState (gettext "This document template is now deprecated." appState.locale)
