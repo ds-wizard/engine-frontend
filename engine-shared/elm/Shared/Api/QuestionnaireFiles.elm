@@ -1,14 +1,15 @@
-module Shared.Api.QuestionnaireFiles exposing (deleteFile, fileUrl, getQuestionnaireFiles, postFile)
+module Shared.Api.QuestionnaireFiles exposing (deleteFile, fileUrl, getFileUrl, getQuestionnaireFiles, postFile)
 
 import File exposing (File)
 import Http
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtGet, jwtOrHttpDelete, jwtOrHttpFetchFileWithData)
+import Shared.Api exposing (ToMsg, jwtGet, jwtOrHttpDelete, jwtOrHttpFetchFileWithData, jwtOrHttpGet)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.QuestionnaireFile as QuestionnaireFile exposing (QuestionnaireFile)
 import Shared.Data.QuestionnaireFileSimple as QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
+import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
 import Uuid exposing (Uuid)
 
 
@@ -35,6 +36,11 @@ postFile questionnaireUuid file =
 deleteFile : Uuid -> Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 deleteFile questionnaireUuid fileUuid =
     jwtOrHttpDelete ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files/" ++ Uuid.toString fileUuid)
+
+
+getFileUrl : Uuid -> Uuid -> AbstractAppState a -> ToMsg UrlResponse msg -> Cmd msg
+getFileUrl projectUuid fileUuid =
+    jwtOrHttpGet ("/questionnaires/" ++ Uuid.toString projectUuid ++ "/files/" ++ Uuid.toString fileUuid) UrlResponse.decoder
 
 
 fileUrl : Uuid -> Uuid -> AbstractAppState a -> String

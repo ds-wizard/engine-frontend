@@ -72,7 +72,6 @@ module Wizard.Routes exposing
     , projectActionsIndexWithFilters
     , projectFilesIndex
     , projectFilesIndexWithFilters
-    , projectImport
     , projectImportersIndex
     , projectImportersIndexWithFilters
     , projectsCreate
@@ -86,6 +85,8 @@ module Wizard.Routes exposing
     , projectsDetailFilesWithFilters
     , projectsDetailQuestionnaire
     , projectsDetailSettings
+    , projectsFileDownload
+    , projectsImport
     , projectsIndex
     , projectsIndexWithFilters
     , projectsMigration
@@ -738,8 +739,8 @@ projectsMigration =
     ProjectsRoute << Wizard.Projects.Routes.MigrationRoute
 
 
-projectImport : Uuid -> String -> Route
-projectImport uuid importerId =
+projectsImport : Uuid -> String -> Route
+projectsImport uuid importerId =
     ProjectsRoute <| Wizard.Projects.Routes.ImportRoute uuid importerId
 
 
@@ -760,6 +761,11 @@ isProjectSubroute route =
 
         _ ->
             False
+
+
+projectsFileDownload : Uuid -> Uuid -> Route
+projectsFileDownload projectUuid documentUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.FileDownloadRoute projectUuid documentUuid
 
 
 

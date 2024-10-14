@@ -11,6 +11,7 @@ import Wizard.Msgs
 import Wizard.Projects.Create.Update
 import Wizard.Projects.CreateMigration.Update
 import Wizard.Projects.Detail.Update
+import Wizard.Projects.FileDownload.Update
 import Wizard.Projects.Import.Update
 import Wizard.Projects.Index.Update
 import Wizard.Projects.Migration.Update
@@ -46,6 +47,10 @@ fetchData route appState model =
         ImportRoute uuid importerId ->
             Cmd.map ImportMsg <|
                 Wizard.Projects.Import.Update.fetchData appState uuid importerId
+
+        FileDownloadRoute projectUuid fileUuid ->
+            Cmd.map FileDownloadMsg <|
+                Wizard.Projects.FileDownload.Update.fetchData appState projectUuid fileUuid
 
 
 isGuarded : Route -> AppState -> Wizard.Routes.Route -> Model -> Maybe String
@@ -113,3 +118,10 @@ update wrapMsg msg appState model =
                     Wizard.Projects.Import.Update.update (wrapMsg << ImportMsg) iMsg appState model.importModel
             in
             ( newSeed, { model | importModel = importModel }, cmd )
+
+        FileDownloadMsg fdMsg ->
+            let
+                ( fileDownloadModel, cmd ) =
+                    Wizard.Projects.FileDownload.Update.update appState fdMsg model.fileDownload
+            in
+            ( appState.seed, { model | fileDownload = fileDownloadModel }, Cmd.map (wrapMsg << FileDownloadMsg) cmd )

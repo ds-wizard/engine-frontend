@@ -14,7 +14,7 @@ import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports
-import Wizard.Projects.Routes as PlansRoutes
+import Wizard.Projects.Routes as ProjectsRoutes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -84,7 +84,10 @@ decideInitialRoute model location route originalRoute =
                 _ ->
                     dispatchUrlChange
 
-        Routes.ProjectsRoute (PlansRoutes.DetailRoute _ _) ->
+        Routes.ProjectsRoute (ProjectsRoutes.DetailRoute _ _) ->
+            dispatchUrlChange
+
+        Routes.ProjectsRoute (ProjectsRoutes.FileDownloadRoute _ _) ->
             dispatchUrlChange
 
         Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute _) ->

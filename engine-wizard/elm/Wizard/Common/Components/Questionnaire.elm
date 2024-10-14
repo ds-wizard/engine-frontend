@@ -1794,7 +1794,7 @@ viewQuestionnaireToolbar appState cfg model =
 
         importerDropdownItem importer =
             Dropdown.anchorItem
-                (class "dropdown-item" :: linkToAttributes appState (Routes.projectImport model.uuid importer.id))
+                (class "dropdown-item" :: linkToAttributes appState (Routes.projectsImport model.uuid importer.id))
                 [ text importer.name ]
 
         actionsDropdown =

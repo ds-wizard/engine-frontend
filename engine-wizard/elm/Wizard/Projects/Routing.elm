@@ -54,6 +54,9 @@ parsers appState wrapRoute =
         -- Project Import
         projectImportRoute uuid string =
             wrapRoute <| ImportRoute uuid string
+
+        fileDownloadRoute projectUuid documentUuid =
+            wrapRoute <| FileDownloadRoute projectUuid documentUuid
     in
     [ map projectCreateRoute (s moduleRoot </> s (lr "projects.create" appState) <?> Query.uuid (lr "projects.create.selectedProjectTemplate" appState) <?> Query.string (lr "projects.create.selectedKnowledgeModel" appState))
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "projects.createMigration" appState) </> uuid)
@@ -67,6 +70,7 @@ parsers appState wrapRoute =
     , map (PaginationQueryString.wrapRoute7 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
     , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
+    , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
     ]
 
 
@@ -156,11 +160,17 @@ toUrl appState route =
         ImportRoute uuid importerId ->
             [ moduleRoot, "import", Uuid.toString uuid, importerId ]
 
+        FileDownloadRoute projectUuid documentUuid ->
+            [ moduleRoot, Uuid.toString projectUuid, "files", Uuid.toString documentUuid, "download" ]
+
 
 isAllowed : Route -> AppState -> Bool
 isAllowed route appState =
     case route of
         DetailRoute _ _ ->
+            True
+
+        FileDownloadRoute _ _ ->
             True
 
         _ ->
