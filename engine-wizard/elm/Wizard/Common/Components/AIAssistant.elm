@@ -245,8 +245,9 @@ viewNewConversation cfg =
     in
     div [ class "flex-grow-1 px-3 py-3 overflow-auto" ]
         ([ h5 [] [ text "👋 Hello!" ]
-         , p [] [ text "I'm AI Assistant, here to help you navigate and make the most of FAIR Wizard." ]
-         , p [] [ text "Ask me anything about FAIR Wizard’s features, capabilities, or best practices, or choose a sample question below to start a conversation." ]
+         , p [] [ text "I'm the AI Assistant, here to help you understand and get the most out of FAIR Wizard." ]
+         , p [] [ text "I don’t have access to your data but can assist you using information from official guides and web resources." ]
+         , p [] [ text "Feel free to ask me anything about FAIR Wizard’s features, capabilities, or best practices, or choose a sample question below to get started." ]
          ]
             ++ List.map viewSampleMessage sampleMessages
         )
