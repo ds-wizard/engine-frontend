@@ -33,7 +33,6 @@ import Wizard.Common.FileUtils as FileUtils
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
-import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Modal as Modal
 
@@ -234,14 +233,6 @@ view appState model =
 contentFileView : AppState -> Model -> File -> Html Msg
 contentFileView appState model file =
     let
-        submitError =
-            case model.submitting of
-                ActionResult.Error error ->
-                    Flash.error appState error
-
-                _ ->
-                    Html.nothing
-
         fileTypeError =
             if isValidFileType model.fileConfig file then
                 Html.nothing
@@ -276,8 +267,7 @@ contentFileView appState model file =
                     ]
     in
     div []
-        [ submitError
-        , fileTypeError
+        [ fileTypeError
         , fileSizeError
         , div [ class "rounded-3 bg-light mb-1 px-3 py-3 d-flex justify-content-between align-items-center" ]
             [ div []
