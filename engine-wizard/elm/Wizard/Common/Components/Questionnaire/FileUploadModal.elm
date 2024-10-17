@@ -30,6 +30,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.FileUtils as FileUtils
+import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
@@ -185,7 +186,10 @@ view appState model =
                 , result = model.submitting
                 , msg = Save
                 , dangerous = False
-                , attrs = [ disabled submitButtonDisabled ]
+                , attrs =
+                    [ disabled submitButtonDisabled
+                    , dataCy "modal_action-button"
+                    ]
                 }
 
         cancelButton =
@@ -193,6 +197,7 @@ view appState model =
                 [ class "btn btn-secondary"
                 , onClick Close
                 , disabled (ActionResult.isLoading model.submitting)
+                , dataCy "modal_cancel-button"
                 ]
                 [ text (gettext "Cancel" appState.locale) ]
 

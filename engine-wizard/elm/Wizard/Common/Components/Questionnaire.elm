@@ -3858,6 +3858,7 @@ viewQuestionFile appState cfg model path question =
                             [ class "btn btn-outline-primary"
                             , onClick (FileUploadModalMsg (FileUploadModal.open (pathToString path) fileConfig))
                             , disabled cfg.features.readonly
+                            , dataCy "file-upload"
                             ]
                             [ text (gettext "Upload File" appState.locale) ]
                         ]
