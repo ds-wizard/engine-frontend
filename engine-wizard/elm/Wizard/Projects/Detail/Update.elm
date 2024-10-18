@@ -856,7 +856,7 @@ handleWebsocketMsg websocketMsg appState model =
             ( appState.seed
             , { model
                 | questionnaireCommon = ActionResult.map (QuestionnaireCommon.updateWithQuestionnaireData data) model.questionnaireCommon
-                , questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData data) model.questionnaireModel
+                , questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData appState data) model.questionnaireModel
               }
             , Cmd.none
             )

@@ -298,11 +298,43 @@ setActiveChapterUuid uuid model =
     }
 
 
-updateWithQuestionnaireData : SetQuestionnaireData -> Model -> Model
-updateWithQuestionnaireData data model =
+updateWithQuestionnaireData : AppState -> SetQuestionnaireData -> Model -> Model
+updateWithQuestionnaireData appState data model =
+    let
+        updatedQuestionnaire =
+            QuestionnaireQuestionnaire.updateWithQuestionnaireData data model.questionnaire
+
+        setNewPanel panel allowed =
+            if allowed then
+                panel
+
+            else
+                RightPanel.None
+
+        rightPanel =
+            case model.rightPanel of
+                RightPanel.TODOs ->
+                    setNewPanel RightPanel.TODOs <|
+                        Feature.projectTodos appState updatedQuestionnaire
+
+                RightPanel.VersionHistory ->
+                    setNewPanel RightPanel.VersionHistory <|
+                        Feature.projectVersionHistory appState updatedQuestionnaire
+
+                RightPanel.CommentsOverview ->
+                    setNewPanel RightPanel.CommentsOverview <|
+                        Feature.projectCommentAdd appState updatedQuestionnaire
+
+                RightPanel.Comments path ->
+                    setNewPanel (RightPanel.Comments path) <|
+                        Feature.projectCommentAdd appState updatedQuestionnaire
+
+                _ ->
+                    model.rightPanel
+    in
     { model
-        | questionnaire = QuestionnaireQuestionnaire.updateWithQuestionnaireData data model.questionnaire
-        , rightPanel = RightPanel.None
+        | questionnaire = updatedQuestionnaire
+        , rightPanel = rightPanel
     }
 
 
