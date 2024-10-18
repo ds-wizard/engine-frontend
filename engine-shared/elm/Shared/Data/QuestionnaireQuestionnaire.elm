@@ -520,6 +520,27 @@ getWarnings questionnaire =
                     else
                         []
 
+                FileQuestion _ _ ->
+                    let
+                        fileExists =
+                            case getReplyValue questionnaire (pathToString currentPath) of
+                                Just replyValue ->
+                                    case replyValue of
+                                        FileReply fileUuid ->
+                                            Maybe.isJust (getFile questionnaire fileUuid)
+
+                                        _ ->
+                                            False
+
+                                Nothing ->
+                                    False
+                    in
+                    if fileExists then
+                        []
+
+                    else
+                        [ questionnaireWarning ]
+
                 _ ->
                     []
     in
