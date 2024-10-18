@@ -320,8 +320,12 @@ viewProjectNavigationNav appState route model questionnaire =
             , dataCy = "project_nav_documents"
             }
 
+        questionnaireFiles =
+            model.questionnaireModel
+                |> ActionResult.unwrap 0 (List.length << .files << .questionnaire)
+
         filesVisible =
-            questionnaire.fileCount > 0
+            questionnaire.fileCount > 0 || questionnaireFiles > 0
 
         filesLink =
             { route = projectRoute (ProjectDetailRoute.Files PaginationQueryString.empty)
