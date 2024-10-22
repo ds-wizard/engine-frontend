@@ -140,8 +140,11 @@ publicHeader fluidFull model =
 app : Model -> Html Msg -> Document Msg
 app model content =
     let
+        rightPanelVisible =
+            not model.appState.session.rightPanelCollapsed && model.appState.config.aiAssistant.enabled
+
         rightPanel =
-            if not model.appState.session.rightPanelCollapsed then
+            if rightPanelVisible then
                 div [ class "right-panel" ]
                     [ div [ class "right-panel-content" ]
                         [ AIAssistant.view
@@ -162,7 +165,7 @@ app model content =
                 , classList
                     [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed )
                     , ( "app-fullscreen", AppState.isFullscreen model.appState )
-                    , ( "app-right-panel", not model.appState.session.rightPanelCollapsed )
+                    , ( "app-right-panel", rightPanelVisible )
                     ]
                 ]
                 [ Menu.view model

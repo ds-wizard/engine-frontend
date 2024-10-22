@@ -6,6 +6,7 @@ module Shared.Data.BootstrapConfig exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.BootstrapConfig.AIAssistantConfig as AIAssistantConfig exposing (AIAssistantConfig)
 import Shared.Data.BootstrapConfig.Admin as AdminConfig exposing (Admin)
 import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
@@ -25,6 +26,7 @@ import Shared.Data.UserInfo as UserInfo exposing (UserInfo)
 
 type alias BootstrapConfig =
     { admin : Admin
+    , aiAssistant : AIAssistantConfig
     , authentication : AuthenticationConfig
     , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , registry : RegistryConfig
@@ -45,6 +47,7 @@ type alias BootstrapConfig =
 default : BootstrapConfig
 default =
     { admin = AdminConfig.default
+    , aiAssistant = AIAssistantConfig.default
     , authentication = AuthenticationConfig.default
     , dashboardAndLoginScreen = DashboardAndLoginScreenConfig.default
     , registry = RegistryConfig.default
@@ -66,6 +69,7 @@ decoder : Decoder BootstrapConfig
 decoder =
     D.succeed BootstrapConfig
         |> D.required "admin" AdminConfig.decoder
+        |> D.required "aiAssistant" AIAssistantConfig.decoder
         |> D.required "authentication" AuthenticationConfig.decoder
         |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "registry" RegistryConfig.decoder
