@@ -29,7 +29,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
+import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Keyed
 import List.Extra as List
@@ -83,6 +83,25 @@ string config =
 fileSize : InputConfig msg -> Html msg
 fileSize config =
     let
+        maxValue =
+            1000000000
+
+        preProcess value =
+            case String.toInt value of
+                Just size ->
+                    if size > 0 then
+                        if size <= maxValue then
+                            value
+
+                        else
+                            String.fromInt maxValue
+
+                    else
+                        ""
+
+                Nothing ->
+                    ""
+
         readableValue =
             case String.toInt config.value of
                 Just size ->
@@ -108,7 +127,8 @@ fileSize config =
                 , id config.name
                 , name config.name
                 , value config.value
-                , onInput config.onInput
+                , onInput (config.onInput << preProcess)
+                , Attribute.max (String.fromInt maxValue)
                 ]
                 []
             , readableValue

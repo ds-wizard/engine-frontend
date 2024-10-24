@@ -1240,6 +1240,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                     [ fileTypesInput
                     , FormExtra.mdAfter (gettext "You can limit file type selection by providing comma separated list of extensions, mime types, or combination. For example, `application/pdf` or `.xls,.xlsx`." appState.locale)
                     , maxSizeInput
+                    , FormExtra.mdAfter (gettext "Uploaded files cannot be larger than 1 GB, but you can set a smaller limit." appState.locale)
                     ]
 
         wrapQuestionsWithIntegration questions =

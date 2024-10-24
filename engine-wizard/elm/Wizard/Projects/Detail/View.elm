@@ -394,6 +394,7 @@ viewProjectContent appState route model questionnaire =
                         , wrapMsg = QuestionnaireMsg
                         , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
                         , revertQuestionnaireMsg = Just OpenRevertModal
+                        , isKmEditor = False
                         }
                         { events = [] }
                         qm

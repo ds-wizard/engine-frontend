@@ -30,7 +30,7 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.FileUtils as FileUtils
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
@@ -168,10 +168,10 @@ update appState cfg msg model =
                     )
 
 
-view : AppState -> Model -> Html Msg
-view appState model =
+view : AppState -> Bool -> Model -> Html Msg
+view appState isKmEditor model =
     let
-        submitButtonDisabled =
+        invalidFileSelection =
             case model.file of
                 Just file ->
                     not (isValidFileType model.fileConfig file) || not (isValidFileSize model.fileConfig file)
@@ -179,17 +179,33 @@ view appState model =
                 Nothing ->
                     True
 
+        submitButtonDisabled =
+            if isKmEditor then
+                True
+
+            else
+                invalidFileSelection
+
+        submitButtonTooltip =
+            if isKmEditor && not invalidFileSelection then
+                tooltip (gettext "File upload is not available in the KM editor." appState.locale)
+
+            else
+                []
+
         submitButton =
-            ActionButton.buttonWithAttrs appState
-                { label = gettext "Save" appState.locale
-                , result = model.submitting
-                , msg = Save
-                , dangerous = False
-                , attrs =
-                    [ disabled submitButtonDisabled
-                    , dataCy "modal_action-button"
-                    ]
-                }
+            span submitButtonTooltip
+                [ ActionButton.buttonWithAttrs appState
+                    { label = gettext "Upload" appState.locale
+                    , result = model.submitting
+                    , msg = Save
+                    , dangerous = False
+                    , attrs =
+                        [ disabled submitButtonDisabled
+                        , dataCy "modal_action-button"
+                        ]
+                    }
+                ]
 
         cancelButton =
             button
@@ -270,15 +286,15 @@ contentFileView appState model file =
         [ fileTypeError
         , fileSizeError
         , div [ class "rounded-3 bg-light mb-1 px-3 py-3 d-flex justify-content-between align-items-center" ]
-            [ div []
+            [ div [ class "d-flex overflow-hidden" ]
                 [ span [ class "me-2" ] [ fa (FileIcon.getFileIcon (File.name file) (File.mime file)) ]
-                , text (File.name file)
-                , span [ class "text-muted ms-2" ]
+                , span [ class "flex-grow-1 text-truncate" ] [ text (File.name file) ]
+                , span [ class "text-muted ms-2 text-nowrap" ]
                     [ text ("(" ++ (ByteUnits.toReadable (File.size file) ++ ")")) ]
                 ]
             , Html.viewIf (not (ActionResult.isLoading model.submitting)) <|
                 a
-                    [ class "text-danger"
+                    [ class "text-danger ms-2"
                     , onClick ClearFile
                     , disabled (ActionResult.isLoading model.submitting)
                     ]

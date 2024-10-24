@@ -517,6 +517,7 @@ type alias Config msg =
     , wrapMsg : Msg -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
     , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
+    , isKmEditor : Bool
     }
 
 
@@ -1740,7 +1741,7 @@ view appState cfg ctx model =
         , Html.map cfg.wrapMsg <| viewActionResultModal appState model
         , Html.map cfg.wrapMsg <| viewPhaseModal appState model
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
-        , Html.map (cfg.wrapMsg << FileUploadModalMsg) <| FileUploadModal.view appState model.fileUploadModalModel
+        , Html.map (cfg.wrapMsg << FileUploadModalMsg) <| FileUploadModal.view appState cfg.isKmEditor model.fileUploadModalModel
         , Html.map cfg.wrapMsg <| viewRemoveItemModal appState model
         , Html.map cfg.wrapMsg <| viewFileDeleteModal appState model
         ]

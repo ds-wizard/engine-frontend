@@ -165,6 +165,7 @@ viewContent appState qm =
         , wrapMsg = QuestionnaireMsg
         , previewQuestionnaireEventMsg = Nothing
         , revertQuestionnaireMsg = Nothing
+        , isKmEditor = False
         }
         { events = [] }
         qm

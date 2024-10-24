@@ -160,6 +160,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
             , wrapMsg = QuestionnaireMsg
             , previewQuestionnaireEventMsg = Nothing
             , revertQuestionnaireMsg = Nothing
+            , isKmEditor = False
             }
             { events = [] }
             questionnaireModel

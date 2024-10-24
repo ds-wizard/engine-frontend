@@ -194,6 +194,7 @@ view appState editorBranch model =
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
+                , isKmEditor = True
                 }
                 { events = []
                 }
