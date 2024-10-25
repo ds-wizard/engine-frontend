@@ -5,6 +5,7 @@ import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Common.ByteUnits as ByteUnits
+import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Data.QuestionnaireFile exposing (QuestionnaireFile)
 import Shared.Data.User as User
 import Shared.Html exposing (fa, faSet)
@@ -14,6 +15,7 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.ItemIcon as ItemIcon
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.UserIcon as UserIcon
@@ -23,22 +25,22 @@ import Wizard.Projects.Detail.Files.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 
 
-view : AppState -> Model -> Html Msg
-view appState model =
+view : AppState -> QuestionnaireCommon -> Model -> Html Msg
+view appState questionnaire model =
     div [ class "Projects__Detail__Content" ]
         [ div [ class "container my-4" ]
-            [ Listing.view appState (listingConfig appState) model.questionnaireFiles
+            [ Listing.view appState (listingConfig appState questionnaire) model.questionnaireFiles
             , deleteModal appState model
             ]
         ]
 
 
-listingConfig : AppState -> ViewConfig QuestionnaireFile Msg
-listingConfig appState =
+listingConfig : AppState -> QuestionnaireCommon -> ViewConfig QuestionnaireFile Msg
+listingConfig appState questionnaire =
     { title = listingTitle
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
-    , dropdownItems = listingActions appState
+    , dropdownItems = listingActions appState questionnaire
     , textTitle = .fileName
     , emptyText = gettext "There are no project files." appState.locale
     , updated =
@@ -74,7 +76,9 @@ iconView questionnaireFile =
 
 listingTitle : QuestionnaireFile -> Html Msg
 listingTitle questionnaireFile =
-    a [ onClick (DownloadFile questionnaireFile) ] [ text questionnaireFile.fileName ]
+    span []
+        [ a [ onClick (DownloadFile questionnaireFile) ] [ text questionnaireFile.fileName ]
+        ]
 
 
 listingDescription : AppState -> QuestionnaireFile -> Html Msg
@@ -103,8 +107,8 @@ listingDescription appState questionnaireFile =
         ]
 
 
-listingActions : AppState -> QuestionnaireFile -> List (ListingDropdownItem Msg)
-listingActions appState questionnaireFile =
+listingActions : AppState -> QuestionnaireCommon -> QuestionnaireFile -> List (ListingDropdownItem Msg)
+listingActions appState questionnaire questionnaireFile =
     let
         downloadFile =
             ListingDropdown.dropdownAction
@@ -114,6 +118,9 @@ listingActions appState questionnaireFile =
                 , msg = ListingActionMsg (DownloadFile questionnaireFile)
                 , dataCy = "download"
                 }
+
+        deleteFileVisible =
+            QuestionnaireUtils.isEditor appState questionnaire
 
         deleteFile =
             ListingDropdown.dropdownAction
@@ -126,7 +133,7 @@ listingActions appState questionnaireFile =
 
         groups =
             [ [ ( downloadFile, True ) ]
-            , [ ( deleteFile, True ) ]
+            , [ ( deleteFile, deleteFileVisible ) ]
             ]
     in
     ListingDropdown.itemsFromGroups groups

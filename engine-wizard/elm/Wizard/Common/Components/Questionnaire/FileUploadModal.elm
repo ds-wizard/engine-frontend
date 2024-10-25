@@ -18,6 +18,7 @@ import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Json.Decode as D
+import List.Extra as List
 import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Data.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
@@ -145,8 +146,14 @@ update appState cfg msg model =
         Save ->
             case model.file of
                 Just file ->
+                    let
+                        questionUuidString =
+                            String.split "." model.questionPath
+                                |> List.last
+                                |> Maybe.withDefault ""
+                    in
                     ( { model | submitting = ActionResult.Loading }
-                    , QuestionnaireFilesApi.postFile model.questionnaireUuid file appState (cfg.wrapMsg << SaveCompleted)
+                    , QuestionnaireFilesApi.postFile model.questionnaireUuid questionUuidString file appState (cfg.wrapMsg << SaveCompleted)
                     )
 
                 Nothing ->

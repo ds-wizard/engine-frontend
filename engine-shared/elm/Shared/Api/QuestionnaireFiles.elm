@@ -25,9 +25,9 @@ getQuestionnaireFiles _ qs =
     jwtGet url (Pagination.decoder "questionnaireFiles" QuestionnaireFile.decoder)
 
 
-postFile : Uuid -> File -> AbstractAppState a -> ToMsg QuestionnaireFileSimple msg -> Cmd msg
-postFile questionnaireUuid file =
-    jwtOrHttpFetchFileWithData ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files")
+postFile : Uuid -> String -> File -> AbstractAppState a -> ToMsg QuestionnaireFileSimple msg -> Cmd msg
+postFile questionnaireUuid questionUuidString file =
+    jwtOrHttpFetchFileWithData ("/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files/" ++ questionUuidString)
         [ Http.stringPart "fileName" (File.name file) ]
         QuestionnaireFileSimple.decoder
         file

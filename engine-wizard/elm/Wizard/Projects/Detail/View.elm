@@ -435,7 +435,7 @@ viewProjectContent appState route model questionnaire =
                 forbiddenPage
 
         ProjectDetailRoute.Files _ ->
-            Html.map FilesMsg <| Files.view appState model.filesModel
+            Html.map FilesMsg <| Files.view appState questionnaire model.filesModel
 
         ProjectDetailRoute.Settings ->
             let

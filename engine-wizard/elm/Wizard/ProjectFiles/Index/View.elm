@@ -75,7 +75,9 @@ iconView questionnaireFile =
 
 listingTitle : QuestionnaireFile -> Html Msg
 listingTitle questionnaireFile =
-    a [ onClick (DownloadFile questionnaireFile) ] [ text questionnaireFile.fileName ]
+    span []
+        [ a [ onClick (DownloadFile questionnaireFile) ] [ text questionnaireFile.fileName ]
+        ]
 
 
 listingDescription : AppState -> QuestionnaireFile -> Html Msg

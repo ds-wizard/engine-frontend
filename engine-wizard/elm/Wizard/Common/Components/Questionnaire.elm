@@ -3853,15 +3853,15 @@ viewQuestionFile appState cfg model path question =
                 Just file ->
                     div [ class "questionnaire-file" ]
                         [ fa ("me-2 " ++ FileIcon.getFileIcon file.fileName file.contentType)
-                        , a [ onClick (DownloadFile file.uuid) ] [ text file.fileName ]
-                        , span [ class "text-muted ms-2" ]
+                        , a [ onClick (DownloadFile file.uuid), class "text-truncate" ] [ text file.fileName ]
+                        , span [ class "text-muted ms-2 text-nowrap" ]
                             [ text ("(" ++ (ByteUnits.toReadable file.fileSize ++ ")")) ]
                         , Html.viewIf (not cfg.features.readonly) <|
                             div [ class "flex-grow-1 text-end" ]
                                 [ a
                                     (onClick (DeleteFile fileUuid (pathToString path))
                                         :: dataCy "file-delete"
-                                        :: class "btn-link text-danger"
+                                        :: class "btn-link text-danger ms-2 d-block"
                                         :: tooltip (gettext "Delete" appState.locale)
                                     )
                                     [ faSet "_global.delete" appState ]
@@ -4190,7 +4190,7 @@ viewFileDeleteModal appState model =
             { modalTitle = gettext "Delete File" appState.locale
             , modalContent =
                 String.formatHtml (gettext "Are you sure you want to delete %s?" appState.locale)
-                    [ strong [] [ text fileName ] ]
+                    [ strong [ class "text-break" ] [ text fileName ] ]
             , visible = Maybe.isJust model.deleteFile
             , actionResult = ActionResult.map (always "") model.deletingFile
             , actionName = gettext "Delete" appState.locale

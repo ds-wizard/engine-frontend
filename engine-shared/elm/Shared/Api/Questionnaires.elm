@@ -287,7 +287,7 @@ getFiles questionnaireUuid _ qs =
         url =
             "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files" ++ queryString
     in
-    jwtGet url (Pagination.decoder "questionnaireFiles" QuestionnaireFile.decoder)
+    jwtOrHttpGet url (Pagination.decoder "questionnaireFiles" QuestionnaireFile.decoder)
 
 
 postVersion : Uuid -> Value -> AbstractAppState a -> ToMsg QuestionnaireVersion msg -> Cmd msg
