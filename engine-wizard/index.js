@@ -93,6 +93,12 @@ function bootstrapErrorHTML(errorCode) {
     return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
 }
 
+function housekeepingHTML() {
+    const title = 'Housekeeping in progress'
+    const message = 'We are currently upgrading the data to the latest version to enhance your experience.'
+    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_logistics.svg"><div><h1>' + title + '</h1><p>' + message + '</p></div></div>'
+}
+
 function clientUrl() {
     return (window.app && window.app['clientUrl']) || (window.location.origin + '/wizard')
 }
@@ -174,10 +180,14 @@ window.onload = function () {
 
     axios.all(promises)
         .then(function (results) {
-            const config = results[0].data
-            const locale = results[1].data
-            const provisioning = hasProvisioning ? results[2].data : null
-            loadApp(config, locale, provisioning)
+            if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
+                document.body.innerHTML = housekeepingHTML()
+            } else {
+                const config = results[0].data
+                const locale = results[1].data
+                const provisioning = hasProvisioning ? results[2].data : null
+                loadApp(config, locale, provisioning)
+            }
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null
