@@ -83,6 +83,10 @@ function getWebSocketThrottleDelay() {
     return window.app && window.app['webSocketThrottleDelay']
 }
 
+function getMaxUploadFileSize() {
+    return window.app && window.app['maxUploadFileSize']
+}
+
 function bootstrapErrorHTML(errorCode) {
     const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
     const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
@@ -121,6 +125,7 @@ function loadApp(config, locale, provisioning) {
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),
         guideLinks: guideLinks(),
+        maxUploadFileSize: getMaxUploadFileSize(),
     }
 
     if (Object.keys(locale).length > 0) {

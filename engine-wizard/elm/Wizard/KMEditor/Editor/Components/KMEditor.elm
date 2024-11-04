@@ -21,6 +21,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
 import Shared.Data.Event exposing (Event(..))
@@ -82,6 +83,7 @@ import Shared.Markdown as Markdown
 import Shared.Utils exposing (compose2, dispatch, flip, httpMethodOptions, nilUuid)
 import SplitPane
 import String.Extra as String
+import String.Format as String
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -1235,12 +1237,13 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , label = gettext "Max Size (bytes)" appState.locale
                                 , value = Maybe.unwrap "" String.fromInt (Question.getMaxSize question)
                                 , onInput = createTypeEditEvent setMaxSize << Maybe.andThen String.toInt << String.toMaybe
+                                , maxFileSize = appState.maxUploadFileSize
                                 }
                     in
                     [ fileTypesInput
                     , FormExtra.mdAfter (gettext "You can limit file type selection by providing comma separated list of extensions, mime types, or combination. For example, `application/pdf` or `.xls,.xlsx`." appState.locale)
                     , maxSizeInput
-                    , FormExtra.mdAfter (gettext "Uploaded files cannot be larger than 1 GB, but you can set a smaller limit." appState.locale)
+                    , FormExtra.mdAfter (String.format (gettext "Uploaded files cannot be larger than %s, but you can set a smaller limit." appState.locale) [ ByteUnits.toReadable appState.maxUploadFileSize ])
                     ]
 
         wrapQuestionsWithIntegration questions =

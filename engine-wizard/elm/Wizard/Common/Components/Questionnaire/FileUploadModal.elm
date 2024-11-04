@@ -19,6 +19,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Json.Decode as D
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Data.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
@@ -181,7 +182,7 @@ view appState isKmEditor model =
         invalidFileSelection =
             case model.file of
                 Just file ->
-                    not (isValidFileType model.fileConfig file) || not (isValidFileSize model.fileConfig file)
+                    not (isValidFileType model.fileConfig file) || not (isValidFileSize appState model.fileConfig file)
 
                 Nothing ->
                     True
@@ -277,7 +278,7 @@ contentFileView appState model file =
                     ]
 
         fileSizeError =
-            if isValidFileSize model.fileConfig file then
+            if isValidFileSize appState model.fileConfig file then
                 Html.nothing
 
             else
@@ -285,7 +286,7 @@ contentFileView appState model file =
                     [ Markdown.toHtml []
                         (String.format
                             (gettext "The file cannot be larger than %s." appState.locale)
-                            [ ByteUnits.toReadable (Maybe.withDefault 0 model.fileConfig.maxSize) ]
+                            [ ByteUnits.toReadable (getFileMaxSize appState model.fileConfig) ]
                         )
                     ]
     in
@@ -353,11 +354,11 @@ isValidFileType fileConfig file =
             True
 
 
-isValidFileSize : FileConfig -> File -> Bool
-isValidFileSize fileConfig file =
-    case fileConfig.maxSize of
-        Just maxSize ->
-            File.size file <= maxSize
+isValidFileSize : AppState -> FileConfig -> File -> Bool
+isValidFileSize appState fileConfig file =
+    File.size file <= getFileMaxSize appState fileConfig
 
-        Nothing ->
-            True
+
+getFileMaxSize : AppState -> FileConfig -> Int
+getFileMaxSize appState fileConfig =
+    Maybe.unwrap appState.maxUploadFileSize (min appState.maxUploadFileSize) fileConfig.maxSize

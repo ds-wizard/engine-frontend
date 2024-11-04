@@ -4,6 +4,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , ColorInputConfig
     , HeadersInputConfig
     , InputConfig
+    , InputFileConfig
     , MarkdownInputConfig
     , MetricsInputConfig
     , PropsInputConfig
@@ -80,21 +81,27 @@ string config =
         ]
 
 
-fileSize : InputConfig msg -> Html msg
+type alias InputFileConfig msg =
+    { name : String
+    , label : String
+    , value : String
+    , onInput : String -> msg
+    , maxFileSize : Int
+    }
+
+
+fileSize : InputFileConfig msg -> Html msg
 fileSize config =
     let
-        maxValue =
-            1000000000
-
         preProcess value =
             case String.toInt value of
                 Just size ->
                     if size > 0 then
-                        if size <= maxValue then
+                        if size <= config.maxFileSize then
                             value
 
                         else
-                            String.fromInt maxValue
+                            String.fromInt config.maxFileSize
 
                     else
                         ""
@@ -128,7 +135,7 @@ fileSize config =
                 , name config.name
                 , value config.value
                 , onInput (config.onInput << preProcess)
-                , Attribute.max (String.fromInt maxValue)
+                , Attribute.max (String.fromInt config.maxFileSize)
                 ]
                 []
             , readableValue
