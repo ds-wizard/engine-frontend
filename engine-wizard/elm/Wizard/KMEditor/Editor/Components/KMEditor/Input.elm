@@ -4,6 +4,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , ColorInputConfig
     , HeadersInputConfig
     , InputConfig
+    , InputFileConfig
     , MarkdownInputConfig
     , MetricsInputConfig
     , PropsInputConfig
@@ -14,6 +15,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , annotations
     , checkbox
     , color
+    , fileSize
     , headers
     , markdown
     , metrics
@@ -28,12 +30,13 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
+import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
@@ -75,6 +78,68 @@ string config =
             , onInput config.onInput
             ]
             []
+        ]
+
+
+type alias InputFileConfig msg =
+    { name : String
+    , label : String
+    , value : String
+    , onInput : String -> msg
+    , maxFileSize : Int
+    }
+
+
+fileSize : InputFileConfig msg -> Html msg
+fileSize config =
+    let
+        preProcess value =
+            case String.toInt value of
+                Just size ->
+                    if size > 0 then
+                        if size <= config.maxFileSize then
+                            value
+
+                        else
+                            String.fromInt config.maxFileSize
+
+                    else
+                        ""
+
+                Nothing ->
+                    ""
+
+        readableValue =
+            case String.toInt config.value of
+                Just size ->
+                    if size > 0 then
+                        span [ class "input-group-text" ]
+                            [ text "≈ "
+                            , text (ByteUnits.toReadable size)
+                            ]
+
+                    else
+                        emptyNode
+
+                Nothing ->
+                    emptyNode
+    in
+    div [ class "form-group" ]
+        [ label [ for config.name ] [ text config.label ]
+        , div [ class "input-group" ]
+            [ input
+                [ type_ "number"
+                , step "1"
+                , class "form-control"
+                , id config.name
+                , name config.name
+                , value config.value
+                , onInput (config.onInput << preProcess)
+                , Attribute.max (String.fromInt config.maxFileSize)
+                ]
+                []
+            , readableValue
+            ]
         ]
 
 

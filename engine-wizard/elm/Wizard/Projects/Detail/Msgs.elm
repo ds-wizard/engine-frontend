@@ -22,6 +22,7 @@ import Wizard.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Msgs as Documents
+import Wizard.Projects.Detail.Files.Msgs as Files
 
 
 type Msg
@@ -40,6 +41,7 @@ type Msg
     | SummaryReportMsg SummaryReport.Msg
     | DocumentsMsg Documents.Msg
     | NewDocumentMsg NewDocument.Msg
+    | FilesMsg Files.Msg
     | ShareModalMsg ShareModal.Msg
     | ShareDropdownMsg Dropdown.State
     | ShareDropdownCopyLink

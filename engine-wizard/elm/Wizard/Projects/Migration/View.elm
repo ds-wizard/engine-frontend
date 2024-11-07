@@ -164,6 +164,7 @@ questionnaireView appState model migration =
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
+                , isKmEditor = False
                 }
                 { events = []
                 }

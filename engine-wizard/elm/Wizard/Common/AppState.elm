@@ -59,6 +59,7 @@ type alias AppState =
     , sessionExpiresSoonModalHidden : Bool
     , theme : Maybe Theme
     , guideLinks : GuideLinks
+    , maxUploadFileSize : Int
     }
 
 
@@ -127,6 +128,7 @@ init flagsValue key =
       , sessionExpiresSoonModalHidden = False
       , theme = theme
       , guideLinks = GuideLinks.merge flags.guideLinks GuideLinks.default
+      , maxUploadFileSize = Maybe.withDefault 100000000 flags.maxUploadFileSize
       }
     , flagsCmd
     )

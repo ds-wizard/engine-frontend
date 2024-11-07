@@ -149,6 +149,11 @@ menuItems appState =
               , route = Routes.projectsIndex appState
               , isActive = Routes.isProjectsIndex
               }
+            , { title = gettext "Files" appState.locale
+              , id = "projects-files"
+              , route = Routes.projectFilesIndex
+              , isActive = Routes.isProjectFilesIndex
+              }
             , { title = gettext "Actions" appState.locale
               , id = "projects-actions"
               , route = Routes.projectActionsIndex

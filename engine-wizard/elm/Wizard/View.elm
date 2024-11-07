@@ -19,6 +19,7 @@ import Wizard.Locales.View
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.ProjectActions.View
+import Wizard.ProjectFiles.View
 import Wizard.ProjectImporters.View
 import Wizard.Projects.View
 import Wizard.Public.View
@@ -96,6 +97,12 @@ view model =
                 model.projectActionsModel
                     |> Wizard.ProjectActions.View.view model.appState
                     |> Html.map ProjectActionsMsg
+                    |> Layout.app model
+
+            Routes.ProjectFilesRoute _ ->
+                model.projectFilesModel
+                    |> Wizard.ProjectFiles.View.view model.appState
+                    |> Html.map ProjectFilesMsg
                     |> Layout.app model
 
             Routes.ProjectImportersRoute _ ->

@@ -947,8 +947,8 @@ viewAddQuestionDiff appState km event =
                 , gettext "Text" appState.locale
                 ]
                 [ AddQuestionEventQuestionData.getTypeString event
-                , AddQuestionEventQuestionData.map .title .title .title .title .title .title event
-                , AddQuestionEventQuestionData.map .text .text .text .text .text .text event |> Maybe.withDefault ""
+                , AddQuestionEventQuestionData.map .title .title .title .title .title .title .title event
+                , AddQuestionEventQuestionData.map .text .text .text .text .text .text .text event |> Maybe.withDefault ""
                 ]
 
         extraFields =
@@ -981,7 +981,7 @@ viewAddQuestionDiff appState km event =
             KnowledgeModel.getTags km
 
         tagUuids =
-            AddQuestionEventQuestionData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event
+            AddQuestionEventQuestionData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event
 
         tagNames =
             Dict.fromList <| List.map (\t -> ( t.uuid, t.name )) tags
@@ -993,7 +993,7 @@ viewAddQuestionDiff appState km event =
             viewDiffChildren (gettext "Question Tags" appState.locale) originalTags tagUuids tagNames
 
         annotations =
-            AddQuestionEventQuestionData.map .annotations .annotations .annotations .annotations .annotations .annotations event
+            AddQuestionEventQuestionData.map .annotations .annotations .annotations .annotations .annotations .annotations .annotations event
 
         annotationsDiff =
             viewAnnotationsDiff appState [] annotations
@@ -1010,10 +1010,10 @@ viewEditQuestionDiff appState km event question =
             Question.getUuid question
 
         title =
-            EditQuestionEventData.map .title .title .title .title .title .title event
+            EditQuestionEventData.map .title .title .title .title .title .title .title event
 
         questionText =
-            EditQuestionEventData.map .text .text .text .text .text .text event
+            EditQuestionEventData.map .text .text .text .text .text .text .text event
 
         fields =
             List.map3 (\a b c -> ( a, b, c ))
@@ -1105,7 +1105,7 @@ viewEditQuestionDiff appState km event question =
         tagsDiff =
             viewDiffChildren (gettext "Question Tags" appState.locale)
                 originalTags
-                (EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags)
+                (EventField.getValueWithDefault (EditQuestionEventData.map .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids .tagUuids event) originalTags)
                 tagNames
 
         -- Answers
@@ -1176,7 +1176,7 @@ viewEditQuestionDiff appState km event question =
         referencesDiff =
             viewDiffChildren (gettext "References" appState.locale)
                 originalReferences
-                (EventField.getValueWithDefault (EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids event) originalReferences)
+                (EventField.getValueWithDefault (EditQuestionEventData.map .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids .referenceUuids event) originalReferences)
                 referenceNames
 
         -- Experts
@@ -1192,7 +1192,7 @@ viewEditQuestionDiff appState km event question =
         expertsDiff =
             viewDiffChildren (gettext "Experts" appState.locale)
                 originalExperts
-                (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
+                (EventField.getValueWithDefault (EditQuestionEventData.map .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids .expertUuids event) originalExperts)
                 expertNames
 
         -- Annotations
@@ -1201,7 +1201,7 @@ viewEditQuestionDiff appState km event question =
 
         annotations =
             EventField.getValueWithDefault
-                (EditQuestionEventData.map .annotations .annotations .annotations .annotations .annotations .annotations event)
+                (EditQuestionEventData.map .annotations .annotations .annotations .annotations .annotations .annotations .annotations event)
                 originalAnnotations
 
         annotationsDiff =

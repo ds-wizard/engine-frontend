@@ -14,6 +14,7 @@ import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
 import Wizard.ProjectActions.Subscriptions
+import Wizard.ProjectFiles.Subscriptions
 import Wizard.ProjectImporters.Subscriptions
 import Wizard.Projects.Subscriptions
 import Wizard.Public.Subscriptions
@@ -56,6 +57,9 @@ subscriptions model =
 
                 Routes.ProjectActionsRoute _ ->
                     Sub.map ProjectActionsMsg <| Wizard.ProjectActions.Subscriptions.subscriptions model.projectActionsModel
+
+                Routes.ProjectFilesRoute _ ->
+                    Sub.map ProjectFilesMsg <| Wizard.ProjectFiles.Subscriptions.subscriptions model.projectFilesModel
 
                 Routes.ProjectImportersRoute _ ->
                     Sub.map ProjectImportersMsg <| Wizard.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel

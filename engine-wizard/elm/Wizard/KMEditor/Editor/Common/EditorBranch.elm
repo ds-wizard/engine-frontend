@@ -194,6 +194,9 @@ getFilteredKM editorBranch =
                 ItemSelectQuestion commonData itemSelectData ->
                     ItemSelectQuestion (filterCommonData commonData) itemSelectData
 
+                FileQuestion commonData fileData ->
+                    FileQuestion (filterCommonData commonData) fileData
+
         filterAnswer _ answer =
             { answer | followUpUuids = filterDeleted editorBranch answer.followUpUuids }
 

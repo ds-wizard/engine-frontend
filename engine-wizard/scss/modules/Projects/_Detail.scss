@@ -112,12 +112,6 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
             }
         }
 
-        &--Documents {
-            .container {
-                margin: 2rem auto;
-            }
-        }
-
         &--NewDocument {
             .container {
                 margin: 2rem auto;

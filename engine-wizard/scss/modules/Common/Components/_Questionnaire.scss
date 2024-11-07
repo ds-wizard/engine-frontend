@@ -809,6 +809,11 @@ $toolbar-height: 40px;
                     background: $gray-300;
                 }
             }
+
+            .questionnaire-file {
+                background: $gray-200;
+            }
+
         }
 
         .alert {
@@ -867,6 +872,14 @@ $toolbar-height: 40px;
                     cursor: default;
                 }
             }
+        }
+
+        .questionnaire-file {
+            @include border-radius($border-radius);
+            background: $gray-100;
+            padding: 10px 15px;
+            display: flex;
+            align-items: center;
         }
 
         .custom-actions {

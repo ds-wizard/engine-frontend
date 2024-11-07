@@ -130,6 +130,7 @@ iconSet =
         , ( "menu.tenants", "fas fa-server" )
         , ( "persistentCommand.retry", "fas fa-sync-alt" )
         , ( "project.documents", "fa far fa-copy" )
+        , ( "project.files", "fa far fa-folder-closed" )
         , ( "project.metrics", "fa far fa-chart-bar" )
         , ( "project.questionnaire", "fa far fa-list-alt" )
         , ( "project.sharing.private", "fa-fw fa-lock" )

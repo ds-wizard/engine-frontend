@@ -83,10 +83,20 @@ function getWebSocketThrottleDelay() {
     return window.app && window.app['webSocketThrottleDelay']
 }
 
+function getMaxUploadFileSize() {
+    return window.app && window.app['maxUploadFileSize']
+}
+
 function bootstrapErrorHTML(errorCode) {
     const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
     const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
     return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+}
+
+function housekeepingHTML() {
+    const title = 'Housekeeping in progress'
+    const message = 'We are currently upgrading the data to the latest version to enhance your experience.'
+    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_logistics.svg"><div><h1>' + title + '</h1><p>' + message + '</p></div></div>'
 }
 
 function clientUrl() {
@@ -121,6 +131,7 @@ function loadApp(config, locale, provisioning) {
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),
         guideLinks: guideLinks(),
+        maxUploadFileSize: getMaxUploadFileSize(),
     }
 
     if (Object.keys(locale).length > 0) {
@@ -169,10 +180,14 @@ window.onload = function () {
 
     axios.all(promises)
         .then(function (results) {
-            const config = results[0].data
-            const locale = results[1].data
-            const provisioning = hasProvisioning ? results[2].data : null
-            loadApp(config, locale, provisioning)
+            if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
+                document.body.innerHTML = housekeepingHTML()
+            } else {
+                const config = results[0].data
+                const locale = results[1].data
+                const provisioning = hasProvisioning ? results[2].data : null
+                loadApp(config, locale, provisioning)
+            }
         })
         .catch(function (err) {
             const errorCode = err.response ? err.response.status : null

@@ -34,3 +34,6 @@ subscriptions route model =
 
         ImportRoute _ _ ->
             Sub.map ImportMsg <| Wizard.Projects.Import.Subscriptions.subscriptions model.importModel
+
+        _ ->
+            Sub.none

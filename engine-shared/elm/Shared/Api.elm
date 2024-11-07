@@ -15,7 +15,9 @@ module Shared.Api exposing
     , jwtFetchString
     , jwtGet
     , jwtGetString
+    , jwtOrHttpDelete
     , jwtOrHttpFetch
+    , jwtOrHttpFetchFileWithData
     , jwtOrHttpGet
     , jwtOrHttpPut
     , jwtPost
@@ -54,6 +56,16 @@ jwtOrHttpPut url body appState =
 jwtOrHttpFetch : String -> Decoder a -> E.Value -> AbstractAppState b -> ToMsg a msg -> Cmd msg
 jwtOrHttpFetch url decoder body appState =
     jwtOrHttp appState jwtFetch httpFetch url decoder body appState
+
+
+jwtOrHttpFetchFileWithData : String -> List Http.Part -> Decoder a -> File -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+jwtOrHttpFetchFileWithData url data decoder file appState =
+    jwtOrHttp appState jwtFetchFileWithData httpFetchFileWithData url data decoder file appState
+
+
+jwtOrHttpDelete : String -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+jwtOrHttpDelete url appState =
+    jwtOrHttp appState jwtDelete httpDelete url appState
 
 
 jwtGet : String -> Decoder a -> AbstractAppState b -> ToMsg a msg -> Cmd msg
@@ -205,6 +217,15 @@ httpFetch url decoder body appState toMsg =
         }
 
 
+httpFetchFileWithData : String -> List Http.Part -> Decoder a -> File -> AbstractAppState b -> ToMsg a msg -> Cmd msg
+httpFetchFileWithData url data decoder file appState toMsg =
+    Http.post
+        { url = appState.apiUrl ++ url
+        , body = Http.multipartBody (Http.filePart "file" file :: data)
+        , expect = expectJson toMsg decoder
+        }
+
+
 httpPut : String -> E.Value -> AbstractAppState b -> ToMsg () msg -> Cmd msg
 httpPut url body appState toMsg =
     Http.request
@@ -212,6 +233,19 @@ httpPut url body appState toMsg =
         , headers = []
         , url = appState.apiUrl ++ url
         , body = Http.jsonBody body
+        , expect = expectWhatever toMsg
+        , timeout = Nothing
+        , tracker = Nothing
+        }
+
+
+httpDelete : String -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+httpDelete url appState toMsg =
+    Http.request
+        { method = "DELETE"
+        , headers = []
+        , url = appState.apiUrl ++ url
+        , body = Http.emptyBody
         , expect = expectWhatever toMsg
         , timeout = Nothing
         , tracker = Nothing

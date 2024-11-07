@@ -3,6 +3,7 @@ module Shared.Data.QuestionnaireQuestionnaire exposing
     , QuestionnaireQuestionnaire
     , QuestionnaireWarning
     , addCommentCount
+    , addFile
     , addReopenedCommentThreadToCount
     , addResolvedCommentThreadToCount
     , calculateUnansweredQuestionsForChapter
@@ -12,6 +13,7 @@ module Shared.Data.QuestionnaireQuestionnaire exposing
     , decoder
     , generateReplies
     , getComments
+    , getFile
     , getItemSelectQuestionValueLabel
     , getItemTitle
     , getTodos
@@ -55,6 +57,7 @@ import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Shared.Data.QuestionnaireDetail.Reply as Reply exposing (Reply)
 import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Shared.Data.QuestionnaireFileSimple as QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
 import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
@@ -85,6 +88,7 @@ type alias QuestionnaireQuestionnaire =
     , questionnaireActionsAvailable : Int
     , questionnaireImportersAvailable : Int
     , selectedQuestionTagUuids : List String
+    , files : List QuestionnaireFileSimple
     }
 
 
@@ -108,6 +112,7 @@ decoder =
         |> D.required "questionnaireActionsAvailable" D.int
         |> D.required "questionnaireImportersAvailable" D.int
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
+        |> D.required "files" (D.list QuestionnaireFileSimple.decoder)
 
 
 addCommentCount : String -> Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
@@ -227,6 +232,7 @@ createQuestionnaireDetail package km =
     , questionnaireActionsAvailable = 0
     , questionnaireImportersAvailable = 0
     , selectedQuestionTagUuids = []
+    , files = []
     }
 
 
@@ -514,6 +520,23 @@ getWarnings questionnaire =
                     else
                         []
 
+                FileQuestion _ _ ->
+                    case getReplyValue questionnaire (pathToString currentPath) of
+                        Just replyValue ->
+                            case replyValue of
+                                FileReply fileUuid ->
+                                    if Maybe.isJust (getFile questionnaire fileUuid) then
+                                        []
+
+                                    else
+                                        [ questionnaireWarning ]
+
+                                _ ->
+                                    []
+
+                        Nothing ->
+                            []
+
                 _ ->
                     []
     in
@@ -631,6 +654,16 @@ getItemTitle questionnaire itemPath itemTemplateQuestions =
     Dict.get (pathToString (itemPath ++ [ firstQuestionUuid ])) questionnaire.replies
         |> Maybe.andThen (.value >> ReplyValue.getStringReply >> titleFromMarkdown)
         |> Maybe.andThen String.toMaybe
+
+
+getFile : QuestionnaireQuestionnaire -> Uuid -> Maybe QuestionnaireFileSimple
+getFile questionnaire fileUuid =
+    List.find (\file -> file.uuid == fileUuid) questionnaire.files
+
+
+addFile : QuestionnaireFileSimple -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
+addFile file questionnaire =
+    { questionnaire | files = file :: questionnaire.files }
 
 
 

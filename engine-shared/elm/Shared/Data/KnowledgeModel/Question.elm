@@ -10,9 +10,11 @@ module Shared.Data.KnowledgeModel.Question exposing
     , getAnswerUuids
     , getChoiceUuids
     , getExpertUuids
+    , getFileTypes
     , getIntegrationUuid
     , getItemTemplateQuestionUuids
     , getListQuestionUuid
+    , getMaxSize
     , getPropValue
     , getProps
     , getReferenceUuids
@@ -40,6 +42,7 @@ import Json.Decode.Extra as D
 import List.Extra as List
 import Shared.Data.KnowledgeModel.Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
+import Shared.Data.KnowledgeModel.Question.FileQuestionData as FileQuestionData exposing (FileQuestionData)
 import Shared.Data.KnowledgeModel.Question.IntegrationQuestionData as IntegrationQuestionData exposing (IntegrationQuestionData)
 import Shared.Data.KnowledgeModel.Question.ItemSelectQuestionData as ItemSelectQuestionData exposing (ItemSelectQuestionData)
 import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData exposing (ListQuestionData)
@@ -57,6 +60,7 @@ type Question
     | IntegrationQuestion CommonQuestionData IntegrationQuestionData
     | MultiChoiceQuestion CommonQuestionData MultiChoiceQuestionData
     | ItemSelectQuestion CommonQuestionData ItemSelectQuestionData
+    | FileQuestion CommonQuestionData FileQuestionData
 
 
 
@@ -72,6 +76,7 @@ decoder =
         , D.when QuestionType.decoder ((==) IntegrationQuestionType) integrationQuestionDecoder
         , D.when QuestionType.decoder ((==) MultiChoiceQuestionType) multiChoiceQuestionDecoder
         , D.when QuestionType.decoder ((==) ItemSelectQuestionType) itemSelectQuestionDecoder
+        , D.when QuestionType.decoder ((==) FileQuestionType) fileQuestionDecoder
         ]
 
 
@@ -103,6 +108,11 @@ multiChoiceQuestionDecoder =
 itemSelectQuestionDecoder : Decoder Question
 itemSelectQuestionDecoder =
     D.map2 ItemSelectQuestion CommonQuestionData.decoder ItemSelectQuestionData.decoder
+
+
+fileQuestionDecoder : Decoder Question
+fileQuestionDecoder =
+    D.map2 FileQuestion CommonQuestionData.decoder FileQuestionData.decoder
 
 
 
@@ -216,6 +226,9 @@ mapCommonQuestionData map question =
         ItemSelectQuestion commonData questionData ->
             ItemSelectQuestion (map commonData) questionData
 
+        FileQuestion commonData questionData ->
+            FileQuestion (map commonData) questionData
+
 
 getCommonQuestionData : Question -> CommonQuestionData
 getCommonQuestionData question =
@@ -236,6 +249,9 @@ getCommonQuestionData question =
             data
 
         ItemSelectQuestion data _ ->
+            data
+
+        FileQuestion data _ ->
             data
 
 
@@ -274,6 +290,9 @@ getTypeString question =
 
         ItemSelectQuestion _ _ ->
             "ItemSelect"
+
+        FileQuestion _ _ ->
+            "File"
 
 
 getRequiredPhaseUuid : Question -> Maybe String
@@ -346,6 +365,26 @@ getIntegrationUuid question =
     case question of
         IntegrationQuestion _ data ->
             Just data.integrationUuid
+
+        _ ->
+            Nothing
+
+
+getMaxSize : Question -> Maybe Int
+getMaxSize question =
+    case question of
+        FileQuestion _ data ->
+            data.maxSize
+
+        _ ->
+            Nothing
+
+
+getFileTypes : Question -> Maybe String
+getFileTypes question =
+    case question of
+        FileQuestion _ data ->
+            data.fileTypes
 
         _ ->
             Nothing

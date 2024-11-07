@@ -34,6 +34,7 @@ module Wizard.Routes exposing
     , isLocalesRoute
     , isPersistentCommandsIndex
     , isProjectActionsIndex
+    , isProjectFilesIndex
     , isProjectImportersIndex
     , isProjectSubroute
     , isProjectsDetail
@@ -69,7 +70,8 @@ module Wizard.Routes exposing
     , persistentCommandsIndexWithFilters
     , projectActionsIndex
     , projectActionsIndexWithFilters
-    , projectImport
+    , projectFilesIndex
+    , projectFilesIndexWithFilters
     , projectImportersIndex
     , projectImportersIndexWithFilters
     , projectsCreate
@@ -80,8 +82,11 @@ module Wizard.Routes exposing
     , projectsDetailDocuments
     , projectsDetailDocumentsNew
     , projectsDetailDocumentsWithFilters
+    , projectsDetailFilesWithFilters
     , projectsDetailQuestionnaire
     , projectsDetailSettings
+    , projectsFileDownload
+    , projectsImport
     , projectsIndex
     , projectsIndexWithFilters
     , projectsMigration
@@ -129,6 +134,7 @@ import Wizard.KMEditor.Routes
 import Wizard.KnowledgeModels.Routes
 import Wizard.Locales.Routes
 import Wizard.ProjectActions.Routes
+import Wizard.ProjectFiles.Routes
 import Wizard.ProjectImporters.Routes
 import Wizard.Projects.Detail.ProjectDetailRoute
 import Wizard.Projects.Routes
@@ -152,6 +158,7 @@ type Route
     | LocalesRoute Wizard.Locales.Routes.Route
     | ProjectsRoute Wizard.Projects.Routes.Route
     | ProjectActionsRoute Wizard.ProjectActions.Routes.Route
+    | ProjectFilesRoute Wizard.ProjectFiles.Routes.Route
     | ProjectImportersRoute Wizard.ProjectImporters.Routes.Route
     | PublicRoute Wizard.Public.Routes.Route
     | RegistryRoute Wizard.Registry.Routes.Route
@@ -210,6 +217,7 @@ listingRouteMatchers =
     , isKnowledgeModelsIndex
     , isLocalesIndex
     , isPersistentCommandsIndex
+    , isProjectFilesIndex
     , isProjectImportersIndex
     , isProjectsIndex
     , isUsersIndex
@@ -568,6 +576,30 @@ isProjectActionsIndex route =
 
 
 
+-- Project Files
+
+
+projectFilesIndex : Route
+projectFilesIndex =
+    ProjectFilesRoute (Wizard.ProjectFiles.Routes.IndexRoute PaginationQueryString.empty)
+
+
+projectFilesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
+projectFilesIndexWithFilters _ pagination =
+    ProjectFilesRoute (Wizard.ProjectFiles.Routes.IndexRoute pagination)
+
+
+isProjectFilesIndex : Route -> Bool
+isProjectFilesIndex route =
+    case route of
+        ProjectFilesRoute (Wizard.ProjectFiles.Routes.IndexRoute _) ->
+            True
+
+        _ ->
+            False
+
+
+
 -- Project Importers
 
 
@@ -640,6 +672,11 @@ projectsDetailDocumentsNew uuid mbEventUuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.NewDocument mbEventUuid
 
 
+projectsDetailFilesWithFilters : Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
+projectsDetailFilesWithFilters uuid _ pagination =
+    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Files pagination
+
+
 projectsDetailSettings : Uuid -> Route
 projectsDetailSettings uuid =
     ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Settings
@@ -702,8 +739,8 @@ projectsMigration =
     ProjectsRoute << Wizard.Projects.Routes.MigrationRoute
 
 
-projectImport : Uuid -> String -> Route
-projectImport uuid importerId =
+projectsImport : Uuid -> String -> Route
+projectsImport uuid importerId =
     ProjectsRoute <| Wizard.Projects.Routes.ImportRoute uuid importerId
 
 
@@ -719,8 +756,16 @@ isProjectSubroute route =
         ProjectImportersRoute _ ->
             True
 
+        ProjectFilesRoute _ ->
+            True
+
         _ ->
             False
+
+
+projectsFileDownload : Uuid -> Uuid -> Route
+projectsFileDownload projectUuid documentUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.FileDownloadRoute projectUuid documentUuid
 
 
 

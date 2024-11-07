@@ -47,6 +47,7 @@ viewProject appState model ( package, questionnaireModel ) =
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
+                , isKmEditor = False
                 }
                 { events = [] }
                 questionnaireModel

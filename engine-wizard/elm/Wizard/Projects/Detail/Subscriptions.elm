@@ -9,6 +9,7 @@ import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Projects.Detail.Components.Settings as Settings
 import Wizard.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Projects.Detail.Documents.Subscriptions as Documents
+import Wizard.Projects.Detail.Files.Subscriptions as Files
 import Wizard.Projects.Detail.Models exposing (Model)
 import Wizard.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute exposing (ProjectDetailRoute)
@@ -35,6 +36,10 @@ subscriptions route model =
                 ProjectDetailRoute.NewDocument _ ->
                     Sub.map NewDocumentMsg <|
                         NewDocument.subscriptions model.newDocumentModel
+
+                ProjectDetailRoute.Files _ ->
+                    Sub.map FilesMsg <|
+                        Files.subscriptions model.filesModel
 
                 ProjectDetailRoute.Settings ->
                     Sub.map SettingsMsg <|

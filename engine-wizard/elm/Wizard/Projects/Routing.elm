@@ -54,6 +54,9 @@ parsers appState wrapRoute =
         -- Project Import
         projectImportRoute uuid string =
             wrapRoute <| ImportRoute uuid string
+
+        fileDownloadRoute projectUuid documentUuid =
+            wrapRoute <| FileDownloadRoute projectUuid documentUuid
     in
     [ map projectCreateRoute (s moduleRoot </> s (lr "projects.create" appState) <?> Query.uuid (lr "projects.create.selectedProjectTemplate" appState) <?> Query.string (lr "projects.create.selectedKnowledgeModel" appState))
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s (lr "projects.createMigration" appState) </> uuid)
@@ -62,16 +65,23 @@ parsers appState wrapRoute =
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Metrics) (s moduleRoot </> uuid </> s "metrics")
     , map (detailDocumentsRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "documents"))
     , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.uuid "eventUuid")
+    , map (detailFilesRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "files"))
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
     , map (PaginationQueryString.wrapRoute7 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "projects.migration" appState) </> uuid)
     , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
+    , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
     ]
 
 
 detailDocumentsRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
 detailDocumentsRoute wrapRoute questionnaireUuid =
     PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Documents) (Just "createdAt,desc")
+
+
+detailFilesRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
+detailFilesRoute wrapRoute questionnaireUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Files) (Just "createdAt,desc")
 
 
 toUrl : AppState -> Route -> List String
@@ -123,6 +133,9 @@ toUrl appState route =
                         Nothing ->
                             [ moduleRoot, Uuid.toString uuid, "documents", "new" ]
 
+                ProjectDetailRoute.Files paginationQueryString ->
+                    [ moduleRoot, Uuid.toString uuid, "files" ++ PaginationQueryString.toUrl paginationQueryString ]
+
                 ProjectDetailRoute.Settings ->
                     [ moduleRoot, Uuid.toString uuid, "settings" ]
 
@@ -147,11 +160,17 @@ toUrl appState route =
         ImportRoute uuid importerId ->
             [ moduleRoot, "import", Uuid.toString uuid, importerId ]
 
+        FileDownloadRoute projectUuid documentUuid ->
+            [ moduleRoot, Uuid.toString projectUuid, "files", Uuid.toString documentUuid, "download" ]
+
 
 isAllowed : Route -> AppState -> Bool
 isAllowed route appState =
     case route of
         DetailRoute _ _ ->
+            True
+
+        FileDownloadRoute _ _ ->
             True
 
         _ ->
