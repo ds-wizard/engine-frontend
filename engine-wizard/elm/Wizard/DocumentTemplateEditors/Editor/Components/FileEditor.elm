@@ -2,6 +2,7 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor exposing
     ( AssetCacheItem
     , Model
     , Msg
+    , RenameModalState
     , Selected
     , UpdateConfig
     , ViewConfig
@@ -79,6 +80,9 @@ type alias Model =
     , addFileModalOpen : Bool
     , addFileModalFileName : String
     , addingFile : ActionResult String
+    , renameFileModal : RenameModalState
+    , renameFileModalInput : String
+    , renamingFile : ActionResult String
     , addFolderModalOpen : Bool
     , addFolderModalFolderName : String
     , deleteModalOpen : Bool
@@ -97,6 +101,12 @@ type Selected
     = SelectedFile String
     | SelectedAsset String
     | SelectedFolder String
+
+
+type RenameModalState
+    = RenameModalClosed
+    | RenameModalFile DocumentTemplateFile
+    | RenameModalAsset DocumentTemplateAsset
 
 
 initialModel : Model
@@ -120,6 +130,9 @@ initialModel =
     , addFileModalOpen = False
     , addFileModalFileName = ""
     , addingFile = ActionResult.Unset
+    , renameFileModal = RenameModalClosed
+    , renameFileModalInput = ""
+    , renamingFile = ActionResult.Unset
     , addFolderModalOpen = False
     , addFolderModalFolderName = ""
     , deleteModalOpen = False
@@ -238,6 +251,10 @@ type Msg
     | AddFileModalInput String
     | AddFileModalSubmit
     | AddFileCompleted (Result ApiError DocumentTemplateFile)
+    | SetRenameFileModalState RenameModalState
+    | RenameFileModalInput String
+    | RenameFileModalSubmit
+    | RenameFileCompleted String (Result ApiError ())
     | SetAddFolderModalOpen Bool
     | AddFolderModalInput String
     | AddFolderModalSubmit
@@ -691,6 +708,126 @@ update cfg appState msg model =
                     , getResultCmd cfg.logoutMsg result
                     )
 
+        SetRenameFileModalState state ->
+            let
+                renameFileModalInput =
+                    case state of
+                        RenameModalFile file ->
+                            getFileName file
+
+                        RenameModalAsset asset ->
+                            getFileName asset
+
+                        _ ->
+                            ""
+            in
+            ( { model
+                | renameFileModal = state
+                , renameFileModalInput = renameFileModalInput
+              }
+            , Cmd.none
+            )
+
+        RenameFileModalInput input ->
+            ( { model | renameFileModalInput = input }, Cmd.none )
+
+        RenameFileModalSubmit ->
+            case model.renameFileModal of
+                RenameModalFile file ->
+                    let
+                        fileName =
+                            String.join "/" (List.filter (not << String.isEmpty) [ getSelectedFolderPath model, model.renameFileModalInput ])
+
+                        fileContent =
+                            Dict.get (Uuid.toString file.uuid) model.fileContents
+                                |> Maybe.withDefault (ActionResult.Success "")
+                                |> ActionResult.withDefault ""
+
+                        templateFile =
+                            { file | fileName = fileName }
+
+                        cmd =
+                            DocumentTemplateDraftsApi.putFile cfg.documentTemplateId templateFile fileContent appState (cfg.wrapMsg << RenameFileCompleted fileName)
+                    in
+                    ( { model | renamingFile = ActionResult.Loading }
+                    , cmd
+                    )
+
+                RenameModalAsset asset ->
+                    let
+                        assetName =
+                            String.join "/" (List.filter (not << String.isEmpty) [ getSelectedFolderPath model, model.renameFileModalInput ])
+
+                        templateAsset =
+                            { asset | fileName = assetName }
+
+                        cmd =
+                            DocumentTemplateDraftsApi.putAsset cfg.documentTemplateId templateAsset appState (cfg.wrapMsg << RenameFileCompleted assetName)
+                    in
+                    ( { model | renamingFile = ActionResult.Loading }
+                    , cmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        RenameFileCompleted newName result ->
+            case result of
+                Ok _ ->
+                    let
+                        updateModel uuid m =
+                            let
+                                editorGroup1 =
+                                    EditorGroup.removeEditorByUuid uuid model.editorGroup1
+
+                                editorGroup2 =
+                                    EditorGroup.removeEditorByUuid uuid model.editorGroup2
+                            in
+                            consolidateEditorGroups
+                                { m
+                                    | renamingFile = ActionResult.Unset
+                                    , renameFileModal = RenameModalClosed
+                                    , editorGroup1 = editorGroup1
+                                    , editorGroup2 = editorGroup2
+                                }
+                    in
+                    case model.renameFileModal of
+                        RenameModalFile file ->
+                            let
+                                mapFile f =
+                                    if f.uuid == file.uuid then
+                                        { f | fileName = newName }
+
+                                    else
+                                        f
+                            in
+                            ( updateModel file.uuid
+                                { model | files = ActionResult.map (List.map mapFile) model.files }
+                            , dispatch (cfg.wrapMsg <| OpenFile model.activeGroup file.uuid newName)
+                            )
+
+                        RenameModalAsset asset ->
+                            let
+                                mapAsset a =
+                                    if a.uuid == asset.uuid then
+                                        { a | fileName = newName }
+
+                                    else
+                                        a
+                            in
+                            ( updateModel asset.uuid
+                                { model | assets = ActionResult.map (List.map mapAsset) model.assets }
+                            , dispatch (cfg.wrapMsg <| OpenAsset model.activeGroup asset.uuid newName)
+                            )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                Err error ->
+                    ( { model | renamingFile = ApiError.toActionResult appState "Unable to rename file." error }
+                    , getResultCmd cfg.logoutMsg result
+                    )
+
         SetAddFolderModalOpen open ->
             ( { model | addFolderModalOpen = open, addFolderModalFolderName = "" }, Ports.focus "#folder-name" )
 
@@ -880,6 +1017,7 @@ viewFileEditor cfg appState model ( files, assets ) =
             model.filesSplitPane
         , viewAddFileModal appState model
         , viewAddFolderModal appState model
+        , viewRenameFileModal appState model
         , viewDeleteModal appState model
         , Html.map AssetUploadModalMsg <| AssetUploadModal.view appState model.assetUploadModal
         ]
@@ -927,34 +1065,58 @@ viewSidebar appState model documentTemplate files assets =
                     ]
                 }
 
+        renameAction mbRenameModalState =
+            case mbRenameModalState of
+                Just renameModalState ->
+                    a
+                        (onClick (SetRenameFileModalState renameModalState)
+                            :: class "me-3"
+                            :: tooltipLeft (gettext "Rename" appState.locale)
+                        )
+                        [ fa "fas fa-pen-to-square" ]
+
+                Nothing ->
+                    emptyNode
+
+        moveGroupAction =
+            if List.length model.editorGroup1.tabs + List.length model.editorGroup2.tabs > 1 then
+                a
+                    (onClick MoveCurrentEditor
+                        :: class "me-3"
+                        :: tooltipLeft (gettext "Move to opposite group" appState.locale)
+                    )
+                    [ fa "fas fa-columns" ]
+
+            else
+                emptyNode
+
+        deleteAction =
+            a
+                ([ class "text-danger"
+                 , onClick (SetDeleteModalOpen True)
+                 , dataCy "dt-editor_file-tree_delete"
+                 ]
+                    ++ tooltipLeft (gettext "Delete" appState.locale)
+                )
+                [ faSet "_global.delete" appState ]
+
         actions =
             case model.selected of
                 SelectedFolder _ ->
                     emptyNode
 
-                _ ->
-                    let
-                        groupLink =
-                            if List.length model.editorGroup1.tabs + List.length model.editorGroup2.tabs > 1 then
-                                a
-                                    ([ onClick MoveCurrentEditor, class "me-3" ]
-                                        ++ tooltipLeft (gettext "Move to opposite group" appState.locale)
-                                    )
-                                    [ fa "fas fa-columns" ]
-
-                            else
-                                emptyNode
-                    in
+                SelectedAsset assetPath ->
                     span []
-                        [ groupLink
-                        , a
-                            ([ class "text-danger"
-                             , onClick (SetDeleteModalOpen True)
-                             , dataCy "dt-editor_file-tree_delete"
-                             ]
-                                ++ tooltipLeft (gettext "Delete" appState.locale)
-                            )
-                            [ faSet "_global.delete" appState ]
+                        [ renameAction (Maybe.map RenameModalAsset (getAssetByPath assetPath model))
+                        , moveGroupAction
+                        , deleteAction
+                        ]
+
+                SelectedFile filePath ->
+                    span []
+                        [ renameAction (Maybe.map RenameModalFile (getFileByPath filePath model))
+                        , moveGroupAction
+                        , deleteAction
                         ]
     in
     div [ class "w-100 d-flex flex-column" ]
@@ -1116,7 +1278,7 @@ viewEditorGroup appState model editorGroup =
                             case fileActionResult of
                                 ActionResult.Success content ->
                                     Html.Keyed.node "div" [ class "w-100 overflow-auto" ] <|
-                                        [ ( Uuid.toString file.uuid
+                                        [ ( file.fileName
                                           , CodeEditor.codeEditor
                                                 [ CodeEditor.value content
                                                 , CodeEditor.onChange (FileChanged file.uuid)
@@ -1285,6 +1447,34 @@ viewAddFolderModal appState model =
     Modal.simple
         { modalContent = modalContent
         , visible = model.addFolderModalOpen
+        , dataCy = "add-file-modal"
+        }
+
+
+viewRenameFileModal : AppState -> Model -> Html Msg
+viewRenameFileModal appState model =
+    let
+        modalContent =
+            [ form [ onSubmit AddFileModalSubmit ]
+                [ input
+                    [ class "form-control"
+                    , id "new-file-name"
+                    , value model.renameFileModalInput
+                    , onInput RenameFileModalInput
+                    ]
+                    []
+                ]
+            ]
+    in
+    Modal.confirm appState
+        { modalTitle = gettext "Rename file" appState.locale
+        , modalContent = modalContent
+        , visible = model.renameFileModal /= RenameModalClosed
+        , actionResult = model.renamingFile
+        , actionName = gettext "Rename" appState.locale
+        , actionMsg = RenameFileModalSubmit
+        , cancelMsg = Just (SetRenameFileModalState RenameModalClosed)
+        , dangerous = False
         , dataCy = "add-file-modal"
         }
 

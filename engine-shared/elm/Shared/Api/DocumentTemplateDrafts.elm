@@ -11,7 +11,9 @@ module Shared.Api.DocumentTemplateDrafts exposing
     , getPreview
     , postDraft
     , postFile
+    , putAsset
     , putDraft
+    , putFile
     , putFileContent
     , putPreviewSettings
     , uploadAsset
@@ -22,7 +24,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizationHeaders, expectMetadataAndJson, jwtDelete, jwtFetch, jwtFetchFileWithData, jwtFetchPut, jwtGet, jwtGetString, jwtPutString)
+import Shared.Api exposing (ToMsg, authorizationHeaders, expectMetadataAndJson, jwtDelete, jwtFetch, jwtFetchFileWithData, jwtFetchPut, jwtGet, jwtGetString, jwtPut, jwtPutString)
 import Shared.Data.DocumentTemplate.DocumentTemplateAsset as DocumentTemplateAsset exposing (DocumentTemplateAsset)
 import Shared.Data.DocumentTemplate.DocumentTemplateFile as DocumentTemplateFile exposing (DocumentTemplateFile)
 import Shared.Data.DocumentTemplateDraft as DocumentTemplateDraft exposing (DocumentTemplateDraft)
@@ -82,6 +84,11 @@ postFile templateId file fileContent =
     jwtFetch ("/document-template-drafts/" ++ templateId ++ "/files") DocumentTemplateFile.decoder (DocumentTemplateFile.encode file fileContent)
 
 
+putFile : String -> DocumentTemplateFile -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putFile templateId file fileContent =
+    jwtPut ("/document-template-drafts/" ++ templateId ++ "/files/" ++ Uuid.toString file.uuid) (DocumentTemplateFile.encode file fileContent)
+
+
 putFileContent : String -> Uuid -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putFileContent templateId fileUuid fileContent =
     jwtPutString ("/document-template-drafts/" ++ templateId ++ "/files/" ++ Uuid.toString fileUuid ++ "/content") "text/plain;charset=utf-8" fileContent
@@ -100,6 +107,11 @@ getAssets templateId =
 getAsset : String -> Uuid -> AbstractAppState a -> ToMsg DocumentTemplateAsset msg -> Cmd msg
 getAsset templateId assetUuid =
     jwtGet ("/document-template-drafts/" ++ templateId ++ "/assets/" ++ Uuid.toString assetUuid) DocumentTemplateAsset.decoder
+
+
+putAsset : String -> DocumentTemplateAsset -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putAsset templateId asset =
+    jwtPut ("/document-template-drafts/" ++ templateId ++ "/assets/" ++ Uuid.toString asset.uuid) (DocumentTemplateAsset.encode asset)
 
 
 deleteAsset : String -> Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
