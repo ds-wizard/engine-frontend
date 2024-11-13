@@ -9,6 +9,7 @@ module Shared.Api.DocumentTemplateDrafts exposing
     , getFileContent
     , getFiles
     , getPreview
+    , moveFolder
     , postDraft
     , postFile
     , putAsset
@@ -24,7 +25,7 @@ import Http
 import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, authorizationHeaders, expectMetadataAndJson, jwtDelete, jwtFetch, jwtFetchFileWithData, jwtFetchPut, jwtGet, jwtGetString, jwtPut, jwtPutString)
+import Shared.Api exposing (ToMsg, authorizationHeaders, expectMetadataAndJson, jwtDelete, jwtFetch, jwtFetchFileWithData, jwtFetchPut, jwtGet, jwtGetString, jwtPost, jwtPut, jwtPutString)
 import Shared.Data.DocumentTemplate.DocumentTemplateAsset as DocumentTemplateAsset exposing (DocumentTemplateAsset)
 import Shared.Data.DocumentTemplate.DocumentTemplateFile as DocumentTemplateFile exposing (DocumentTemplateFile)
 import Shared.Data.DocumentTemplateDraft as DocumentTemplateDraft exposing (DocumentTemplateDraft)
@@ -144,3 +145,15 @@ uploadAsset templateId fileName =
     jwtFetchFileWithData ("/document-template-drafts/" ++ templateId ++ "/assets")
         [ Http.stringPart "fileName" fileName ]
         DocumentTemplateAsset.decoder
+
+
+moveFolder : String -> String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+moveFolder templateId currentPath newPath =
+    let
+        body =
+            E.object
+                [ ( "current", E.string currentPath )
+                , ( "new", E.string newPath )
+                ]
+    in
+    jwtPost ("/document-template-drafts/" ++ templateId ++ "/folders/move") body
