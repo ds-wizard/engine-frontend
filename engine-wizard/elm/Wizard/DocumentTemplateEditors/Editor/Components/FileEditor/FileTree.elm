@@ -7,6 +7,7 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.FileTree expo
     , addFile
     , addFolder
     , compare
+    , getName
     , getPath
     , root
     )

@@ -52,6 +52,7 @@ import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUploadMo
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.Editor as Editor exposing (Editor)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.EditorGroup as EditorGroup exposing (EditorGroup)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.FileTree as FileTree exposing (FileTree(..))
+import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.MoveModal as MoveModal
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.RenameModal as RenameModal
 import Wizard.Ports as Ports
 
@@ -80,16 +81,13 @@ type alias Model =
     , addFileModalOpen : Bool
     , addFileModalFileName : String
     , addingFile : ActionResult String
-
-    --, renameFileModal : RenameModalState
-    --, renameFileModalInput : String
-    --, renamingFile : ActionResult String
     , addFolderModalOpen : Bool
     , addFolderModalFolderName : String
     , deleteModalOpen : Bool
     , deleting : ActionResult String
     , assetUploadModal : AssetUploadModal.Model
     , renameModal : RenameModal.Model
+    , moveModal : MoveModal.Model
     }
 
 
@@ -132,6 +130,7 @@ initialModel =
     , deleting = ActionResult.Unset
     , assetUploadModal = AssetUploadModal.initialModel
     , renameModal = RenameModal.initialModel
+    , moveModal = MoveModal.initialModel
     }
 
 
@@ -256,6 +255,7 @@ type Msg
     | AddAsset DocumentTemplateAsset
     | AddFile DocumentTemplateFile
     | RenameModalMsg RenameModal.Msg
+    | MoveModalMsg MoveModal.Msg
     | RenameFile Uuid String
     | RenameAsset Uuid String
     | RenameFolder String String
@@ -898,6 +898,26 @@ update cfg appState msg model =
             in
             ( { model | renameModal = renameModal }, cmd )
 
+        MoveModalMsg moveModalMsg ->
+            let
+                moveModalConfig =
+                    { wrapMsg = cfg.wrapMsg << MoveModalMsg
+                    , logoutMsg = cfg.logoutMsg
+                    , documentTemplateId = cfg.documentTemplateId
+                    , fileContents = model.fileContents
+                    , onRenameFile = compose2 cfg.wrapMsg RenameFile
+                    , onRenameAsset = compose2 cfg.wrapMsg RenameAsset
+                    , onRenameFolder = compose2 cfg.wrapMsg RenameFolder
+                    }
+
+                ( moveModal, cmd ) =
+                    MoveModal.update moveModalConfig
+                        appState
+                        moveModalMsg
+                        model.moveModal
+            in
+            ( { model | moveModal = moveModal }, cmd )
+
         RenameFile fileUuid newName ->
             let
                 mapFile f =
@@ -967,6 +987,9 @@ view cfg appState model =
 viewFileEditor : ViewConfig -> AppState -> Model -> ( List DocumentTemplateFile, List DocumentTemplateAsset ) -> Html Msg
 viewFileEditor cfg appState model ( files, assets ) =
     let
+        fileTree =
+            buildFileTree cfg.documentTemplate files assets model.newFolders
+
         splitPaneConfig =
             SplitPane.createViewConfig
                 { toMsg = FilesSplitPaneMsg
@@ -975,7 +998,7 @@ viewFileEditor cfg appState model ( files, assets ) =
     in
     div []
         [ SplitPane.view splitPaneConfig
-            (viewSidebar appState model cfg.documentTemplate files assets)
+            (viewSidebar appState model fileTree)
             (viewEditorContent appState model)
             model.filesSplitPane
         , viewAddFileModal appState model
@@ -983,15 +1006,13 @@ viewFileEditor cfg appState model ( files, assets ) =
         , viewDeleteModal appState model
         , Html.map AssetUploadModalMsg <| AssetUploadModal.view appState model.assetUploadModal
         , Html.map RenameModalMsg <| RenameModal.view appState model.renameModal
+        , Html.map MoveModalMsg <| MoveModal.view appState fileTree model.moveModal
         ]
 
 
-viewSidebar : AppState -> Model -> DocumentTemplateDraftDetail -> List DocumentTemplateFile -> List DocumentTemplateAsset -> Html Msg
-viewSidebar appState model documentTemplate files assets =
+viewSidebar : AppState -> Model -> FileTree -> Html Msg
+viewSidebar appState model fileTree =
     let
-        fileTree =
-            buildFileTree documentTemplate files assets model.newFolders
-
         addDropdown =
             Dropdown.dropdown model.addDropdownState
                 { options = []
@@ -1041,7 +1062,20 @@ viewSidebar appState model documentTemplate files assets =
                 Nothing ->
                     emptyNode
 
-        moveGroupAction =
+        moveAction mbMoveActionMsg =
+            case mbMoveActionMsg of
+                Just moveActionMsg ->
+                    a
+                        (onClick moveActionMsg
+                            :: class "ms-3"
+                            :: tooltipLeft (gettext "Move" appState.locale)
+                        )
+                        [ fa "fas fa-file-import" ]
+
+                Nothing ->
+                    emptyNode
+
+        moveToOppositeGroupAction =
             if List.length model.editorGroup1.tabs + List.length model.editorGroup2.tabs > 1 then
                 a
                     (onClick MoveCurrentEditor
@@ -1065,22 +1099,29 @@ viewSidebar appState model documentTemplate files assets =
 
         actions =
             case model.selected of
-                SelectedFolder _ ->
-                    span []
-                        [ renameAction (Just (RenameModalMsg (RenameModal.openFolder (getSelectedFolderPath model))))
-                        ]
+                SelectedFolder path ->
+                    if String.isEmpty path then
+                        emptyNode
+
+                    else
+                        span []
+                            [ renameAction (Just (RenameModalMsg (RenameModal.openFolder (getSelectedFolderPath model))))
+                            , moveAction (Just (MoveModalMsg (MoveModal.openFolder (getSelectedFolderPath model))))
+                            ]
 
                 SelectedAsset assetPath ->
                     span []
                         [ renameAction (Maybe.map (RenameModalMsg << RenameModal.openAsset) (getAssetByPath assetPath model))
-                        , moveGroupAction
+                        , moveAction (Maybe.map (MoveModalMsg << MoveModal.openAsset) (getAssetByPath assetPath model))
+                        , moveToOppositeGroupAction
                         , deleteAction
                         ]
 
                 SelectedFile filePath ->
                     span []
                         [ renameAction (Maybe.map (RenameModalMsg << RenameModal.openFile) (getFileByPath filePath model))
-                        , moveGroupAction
+                        , moveAction (Maybe.map (MoveModalMsg << MoveModal.openFile) (getFileByPath filePath model))
+                        , moveToOppositeGroupAction
                         , deleteAction
                         ]
     in

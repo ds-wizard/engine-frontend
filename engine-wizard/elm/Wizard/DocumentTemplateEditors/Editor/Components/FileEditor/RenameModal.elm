@@ -200,7 +200,7 @@ update cfg appState msg model =
                             ( model, Cmd.none )
 
                 Err error ->
-                    ( { model | renaming = ApiError.toActionResult appState "Unable to rename file." error }
+                    ( { model | renaming = ApiError.toActionResult appState (gettext "Rename failed." appState.locale) error }
                     , getResultCmd cfg.logoutMsg result
                     )
 
@@ -228,7 +228,7 @@ view appState model =
             ]
     in
     Modal.confirm appState
-        { modalTitle = gettext "Rename file" appState.locale
+        { modalTitle = gettext "Rename" appState.locale
         , modalContent = modalContent
         , visible = model.state /= Closed
         , actionResult = model.renaming
