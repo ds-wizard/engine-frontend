@@ -14,8 +14,8 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.RenameModal e
 import ActionResult exposing (ActionResult)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, form, input)
-import Html.Attributes exposing (class, id, value)
+import Html exposing (Html, form, input, p, text)
+import Html.Attributes exposing (class, classList, id, value)
 import Html.Events exposing (onInput, onSubmit)
 import List.Extra as List
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
@@ -116,66 +116,69 @@ update cfg appState msg model =
             ( { model | input = input }, Cmd.none )
 
         RenameSubmit ->
-            -- TODO check for non empty string or existig name
-            case model.state of
-                RenamingFile file ->
-                    let
-                        fileName =
-                            String.join "/" (List.filter (not << String.isEmpty) [ cfg.selectedFolderPath, model.input ])
+            if not (String.isEmpty model.input) then
+                case model.state of
+                    RenamingFile file ->
+                        let
+                            fileName =
+                                String.join "/" (List.filter (not << String.isEmpty) [ cfg.selectedFolderPath, model.input ])
 
-                        fileContent =
-                            Dict.get (Uuid.toString file.uuid) cfg.fileContents
-                                |> Maybe.withDefault (ActionResult.Success "")
-                                |> ActionResult.withDefault ""
+                            fileContent =
+                                Dict.get (Uuid.toString file.uuid) cfg.fileContents
+                                    |> Maybe.withDefault (ActionResult.Success "")
+                                    |> ActionResult.withDefault ""
 
-                        templateFile =
-                            { file | fileName = fileName }
+                            templateFile =
+                                { file | fileName = fileName }
 
-                        cmd =
-                            DocumentTemplateDraftsApi.putFile cfg.documentTemplateId templateFile fileContent appState (cfg.wrapMsg << RenameCompleted fileName)
-                    in
-                    ( { model | renaming = ActionResult.Loading }
-                    , cmd
-                    )
+                            cmd =
+                                DocumentTemplateDraftsApi.putFile cfg.documentTemplateId templateFile fileContent appState (cfg.wrapMsg << RenameCompleted fileName)
+                        in
+                        ( { model | renaming = ActionResult.Loading }
+                        , cmd
+                        )
 
-                RenamingAsset asset ->
-                    let
-                        assetName =
-                            String.join "/" (List.filter (not << String.isEmpty) [ cfg.selectedFolderPath, model.input ])
+                    RenamingAsset asset ->
+                        let
+                            assetName =
+                                String.join "/" (List.filter (not << String.isEmpty) [ cfg.selectedFolderPath, model.input ])
 
-                        templateAsset =
-                            { asset | fileName = assetName }
+                            templateAsset =
+                                { asset | fileName = assetName }
 
-                        cmd =
-                            DocumentTemplateDraftsApi.putAsset cfg.documentTemplateId templateAsset appState (cfg.wrapMsg << RenameCompleted assetName)
-                    in
-                    ( { model | renaming = ActionResult.Loading }
-                    , cmd
-                    )
+                            cmd =
+                                DocumentTemplateDraftsApi.putAsset cfg.documentTemplateId templateAsset appState (cfg.wrapMsg << RenameCompleted assetName)
+                        in
+                        ( { model | renaming = ActionResult.Loading }
+                        , cmd
+                        )
 
-                RenamingFolder path ->
-                    let
-                        currentName =
-                            path
+                    RenamingFolder path ->
+                        let
+                            currentName =
+                                path
 
-                        parts =
-                            String.split "/" path
+                            parts =
+                                String.split "/" path
 
-                        newPath =
-                            List.removeAt (List.length parts - 1) parts
+                            newPath =
+                                List.removeAt (List.length parts - 1) parts
 
-                        newName =
-                            String.join "/" (newPath ++ [ model.input ])
+                            newName =
+                                String.join "/" (newPath ++ [ model.input ])
 
-                        cmd =
-                            DocumentTemplateDraftsApi.moveFolder cfg.documentTemplateId currentName newName appState (cfg.wrapMsg << RenameCompleted newName)
-                    in
-                    ( { model | renaming = ActionResult.Loading }
-                    , cmd
-                    )
+                            cmd =
+                                DocumentTemplateDraftsApi.moveFolder cfg.documentTemplateId currentName newName appState (cfg.wrapMsg << RenameCompleted newName)
+                        in
+                        ( { model | renaming = ActionResult.Loading }
+                        , cmd
+                        )
 
-                _ ->
-                    ( model, Cmd.none )
+                    _ ->
+                        ( model, Cmd.none )
+
+            else
+                ( model, Cmd.none )
 
         RenameCompleted newName result ->
             case result of
@@ -219,11 +222,13 @@ view appState model =
             [ form [ onSubmit RenameSubmit ]
                 [ input
                     [ class "form-control"
+                    , classList [ ( "is-invalid", String.isEmpty model.input ) ]
                     , id "new-file-name"
                     , value model.input
                     , onInput RenameInput
                     ]
                     []
+                , p [ class "invalid-feedback" ] [ text (gettext "Name cannot be empty." appState.locale) ]
                 ]
             ]
     in
