@@ -1,0 +1,50 @@
+.move-modal-tree {
+    border: 1px solid var(--bs-border-color);
+    border-radius: var(--bs-border-radius);
+    padding: 0.5rem;
+
+    ul {
+        padding: 0;
+
+        li {
+            list-style: none;
+
+            ul {
+                padding-left: 1.5rem;
+            }
+
+            a {
+                color: var(--bs-body-color) !important;
+                word-break: break-word;
+                display: inline-flex;
+                align-items: baseline;
+                text-decoration: none !important;
+
+                &:hover {
+                    span {
+                        text-decoration: underline;
+                    }
+                }
+
+                &.disabled {
+                    color: var(--bs-gray-500) !important;
+                    cursor: default;
+
+                    &:hover {
+                        span {
+                            text-decoration: none;
+                        }
+                    }
+                }
+
+                &.selected {
+                    color: var(--bs-btn-primary-color) !important;
+                    background: var(--bs-primary);
+                    padding: 0.25rem 0.5rem;
+                    margin-left: -0.5rem;
+                    border-radius: var(--bs-border-radius);
+                }
+            }
+        }
+    }
+}
