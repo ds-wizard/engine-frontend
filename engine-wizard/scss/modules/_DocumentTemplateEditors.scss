@@ -15,9 +15,15 @@
 
             a {
                 color: var(--bs-body-color) !important;
+                word-break: break-word;
+                display: inline-flex;
+                align-items: baseline;
+                text-decoration: none !important;
 
                 &:hover {
-                    text-decoration: underline;
+                    span {
+                        text-decoration: underline;
+                    }
                 }
 
                 &.disabled {
@@ -25,7 +31,9 @@
                     cursor: default;
 
                     &:hover {
-                        text-decoration: none;
+                        span {
+                            text-decoration: none;
+                        }
                     }
                 }
 

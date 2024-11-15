@@ -14,7 +14,7 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.MoveModal exp
 import ActionResult exposing (ActionResult)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, li, strong, text, ul)
+import Html exposing (Html, a, div, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import List.Extra as List
@@ -93,6 +93,7 @@ update cfg appState msg model =
             ( { model
                 | state = state
                 , moving = ActionResult.Unset
+                , selected = Nothing
               }
             , Cmd.none
             )
@@ -105,11 +106,19 @@ update cfg appState msg model =
         MoveSubmit ->
             case model.selected of
                 Just path ->
+                    let
+                        parts =
+                            if String.isEmpty path then
+                                []
+
+                            else
+                                String.split "/" path
+                    in
                     case model.state of
                         MovingFile file ->
                             let
                                 fileName =
-                                    path ++ "/" ++ getNameFromPath file.fileName
+                                    String.join "/" (parts ++ [ getNameFromPath file.fileName ])
 
                                 fileContent =
                                     Dict.get (Uuid.toString file.uuid) cfg.fileContents
@@ -127,7 +136,7 @@ update cfg appState msg model =
                         MovingAsset asset ->
                             let
                                 assetName =
-                                    path ++ "/" ++ getNameFromPath asset.fileName
+                                    String.join "/" (parts ++ [ getNameFromPath asset.fileName ])
 
                                 templateAsset =
                                     { asset | fileName = assetName }
@@ -140,7 +149,7 @@ update cfg appState msg model =
                         MovingFolder currentPath ->
                             let
                                 newPath =
-                                    path ++ "/" ++ getNameFromPath currentPath
+                                    String.join "/" (parts ++ [ getNameFromPath currentPath ])
 
                                 cmd =
                                     DocumentTemplateDraftsApi.moveFolder cfg.documentTemplateId currentPath newPath appState (cfg.wrapMsg << MoveCompleted newPath)
@@ -246,7 +255,7 @@ viewFolder appState model folderData =
                 :: onClickHandler
             )
             [ fas "fa-folder me-2"
-            , text folderData.name
+            , span [] [ text folderData.name ]
             ]
         , ul [] children
         ]
@@ -255,8 +264,8 @@ viewFolder appState model folderData =
 isAllowed : Model -> String -> Bool
 isAllowed model path =
     case model.state of
-        MovingFile _ ->
-            True
+        MovingFile file ->
+            path /= getParentFolderPath file.fileName
 
         MovingAsset _ ->
             True
@@ -273,3 +282,12 @@ getNameFromPath path =
     String.split "/" path
         |> List.last
         |> Maybe.withDefault path
+
+
+getParentFolderPath : String -> String
+getParentFolderPath path =
+    String.split "/" path
+        |> List.reverse
+        |> List.drop 1
+        |> List.reverse
+        |> String.join "/"
