@@ -11,6 +11,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 
 
@@ -20,6 +21,7 @@ type alias AddQuestionValueEventData =
     , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     , valueType : QuestionValueType
+    , validations : List QuestionValidation
     , annotations : List Annotation
     }
 
@@ -32,6 +34,7 @@ decoder =
         |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "valueType" QuestionValueType.decoder
+        |> D.required "validations" (D.list QuestionValidation.decoder)
         |> D.required "annotations" (D.list Annotation.decoder)
 
 
@@ -43,6 +46,7 @@ encode data =
     , ( "requiredPhaseUuid", E.maybe E.string data.requiredPhaseUuid )
     , ( "tagUuids", E.list E.string data.tagUuids )
     , ( "valueType", QuestionValueType.encode data.valueType )
+    , ( "validations", E.list QuestionValidation.encode data.validations )
     , ( "annotations", E.list Annotation.encode data.annotations )
     ]
 
@@ -60,4 +64,5 @@ toQuestion uuid data =
         , annotations = data.annotations
         }
         { valueType = QuestionValueType.StringQuestionValueType
+        , validations = data.validations
         }

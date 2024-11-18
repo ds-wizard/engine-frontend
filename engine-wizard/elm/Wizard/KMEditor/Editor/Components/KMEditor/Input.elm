@@ -8,6 +8,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , MarkdownInputConfig
     , MetricsInputConfig
     , PropsInputConfig
+    , QuestionValidationsInputConfig
     , ReorderableInputConfig
     , SelectInputConfig
     , SelectWithGroupsInputConfig
@@ -20,6 +21,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , markdown
     , metrics
     , props
+    , questionValidations
     , reorderable
     , select
     , selectWithGroups
@@ -32,6 +34,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
 import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
+import Html.Events.Extra exposing (onChange)
 import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -41,14 +44,17 @@ import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
 import Shared.Data.KnowledgeModel.Metric exposing (Metric)
 import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
+import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute, tooltipLeft)
 import Wizard.Common.View.Tag as Tag
 import Wizard.Routes
 
@@ -527,6 +533,357 @@ tags appState config =
         [ label [] [ text config.label ]
         , Tag.list appState tagListConfig config.tags
         ]
+
+
+
+-- Question Validations Input
+
+
+type alias QuestionValidationsInputConfig msg =
+    { label : String
+    , valueType : QuestionValueType
+    , validations : List QuestionValidation
+    , onChange : List QuestionValidation -> msg
+    }
+
+
+questionValidations : AppState -> QuestionValidationsInputConfig msg -> Html msg
+questionValidations appState config =
+    let
+        filteredValidationOptions =
+            List.filter (List.member config.valueType << .questionTypes) (validationOptions appState)
+
+        mbDefaultValidation =
+            case config.valueType of
+                QuestionValueType.StringQuestionValueType ->
+                    Just QuestionValidation.minLength
+
+                QuestionValueType.NumberQuestionValueType ->
+                    Just QuestionValidation.minNumber
+
+                QuestionValueType.DateQuestionValueType ->
+                    Just QuestionValidation.fromDate
+
+                QuestionValueType.DateTimeQuestionValueType ->
+                    Just QuestionValidation.fromDateTime
+
+                QuestionValueType.TimeQuestionValueType ->
+                    Just QuestionValidation.fromTime
+
+                QuestionValueType.TextQuestionValueType ->
+                    Just QuestionValidation.minLength
+
+                QuestionValueType.EmailQuestionValueType ->
+                    Just QuestionValidation.domain
+
+                QuestionValueType.UrlQuestionValueType ->
+                    Just QuestionValidation.regex
+
+                QuestionValueType.ColorQuestionValueType ->
+                    Nothing
+
+        filteredValidations =
+            List.filter (\v -> List.member (QuestionValidation.toOptionString v) (List.map .value filteredValidationOptions)) config.validations
+
+        removeValidationMsg i =
+            config.onChange <| List.removeAt i config.validations
+
+        changeValidationMsg i value =
+            case value of
+                "MinLength" ->
+                    config.onChange (List.setAt i QuestionValidation.minLength config.validations)
+
+                "MaxLength" ->
+                    config.onChange (List.setAt i QuestionValidation.maxLength config.validations)
+
+                "Regex" ->
+                    config.onChange (List.setAt i QuestionValidation.regex config.validations)
+
+                "Orcid" ->
+                    config.onChange (List.setAt i QuestionValidation.orcid config.validations)
+
+                "MinNumber" ->
+                    config.onChange (List.setAt i QuestionValidation.minNumber config.validations)
+
+                "MaxNumber" ->
+                    config.onChange (List.setAt i QuestionValidation.maxNumber config.validations)
+
+                "FromDate" ->
+                    config.onChange (List.setAt i QuestionValidation.fromDate config.validations)
+
+                "ToDate" ->
+                    config.onChange (List.setAt i QuestionValidation.toDate config.validations)
+
+                "FromDateTime" ->
+                    config.onChange (List.setAt i QuestionValidation.fromDateTime config.validations)
+
+                "ToDateTime" ->
+                    config.onChange (List.setAt i QuestionValidation.toDateTime config.validations)
+
+                "FromTime" ->
+                    config.onChange (List.setAt i QuestionValidation.fromTime config.validations)
+
+                "ToTime" ->
+                    config.onChange (List.setAt i QuestionValidation.toTime config.validations)
+
+                "Domain" ->
+                    config.onChange (List.setAt i QuestionValidation.domain config.validations)
+
+                _ ->
+                    config.onChange config.validations
+
+        viewValidationTypeOption validation validationOption =
+            option
+                [ value validationOption.value
+                , selected (QuestionValidation.toOptionString validation == validationOption.value)
+                ]
+                [ text validationOption.label ]
+
+        intInput i createValidation data =
+            div [ class "mt-3" ]
+                [ label [] [ text (gettext "Value" appState.locale) ]
+                , input
+                    [ type_ "number"
+                    , class "form-control"
+                    , value (String.fromInt data.value)
+                    , onInput (\newValue -> config.onChange (List.setAt i (createValidation { value = Maybe.withDefault 0 <| String.toInt newValue }) config.validations))
+                    ]
+                    []
+                ]
+
+        floatInput i createValidation data =
+            div [ class "mt-3" ]
+                [ label [] [ text (gettext "Value" appState.locale) ]
+                , input
+                    [ type_ "number"
+                    , class "form-control"
+                    , value (String.fromFloat data.value)
+                    , onInput (\newValue -> config.onChange (List.setAt i (createValidation { value = Maybe.withDefault 0 <| String.toFloat newValue }) config.validations))
+                    ]
+                    []
+                ]
+
+        stringInput i createValidation data =
+            div [ class "mt-3" ]
+                [ label [] [ text (gettext "Value" appState.locale) ]
+                , input
+                    [ type_ "text"
+                    , class "form-control"
+                    , value data.value
+                    , onInput (\newValue -> config.onChange (List.setAt i (createValidation { value = newValue }) config.validations))
+                    ]
+                    []
+                ]
+
+        dateInput i createValidation data =
+            div [ class "mt-3" ]
+                [ label [] [ text (gettext "Value" appState.locale) ]
+                , DatePicker.datePicker
+                    [ DatePicker.value data.value
+                    , DatePicker.onChange (\newValue -> config.onChange (List.setAt i (createValidation { value = newValue }) config.validations))
+                    ]
+                ]
+
+        dateTimeInput i createValidation data =
+            div [ class "mt-3" ]
+                [ label [] [ text (gettext "Value" appState.locale) ]
+                , DatePicker.dateTimePicker
+                    [ DatePicker.value data.value
+                    , DatePicker.onChange (\newValue -> config.onChange (List.setAt i (createValidation { value = newValue }) config.validations))
+                    ]
+                ]
+
+        timeInput i createValidation data =
+            div [ class "mt-3" ]
+                [ label [] [ text (gettext "Value" appState.locale) ]
+                , DatePicker.timePicker
+                    [ DatePicker.value data.value
+                    , DatePicker.onChange (\newValue -> config.onChange (List.setAt i (createValidation { value = newValue }) config.validations))
+                    ]
+                ]
+
+        validationInput i validation =
+            case validation of
+                QuestionValidation.MinLength data ->
+                    intInput i QuestionValidation.MinLength data
+
+                QuestionValidation.MaxLength data ->
+                    intInput i QuestionValidation.MaxLength data
+
+                QuestionValidation.Regex data ->
+                    stringInput i QuestionValidation.Regex data
+
+                QuestionValidation.Orcid ->
+                    emptyNode
+
+                QuestionValidation.Doi ->
+                    emptyNode
+
+                QuestionValidation.MinNumber data ->
+                    floatInput i QuestionValidation.MinNumber data
+
+                QuestionValidation.MaxNumber data ->
+                    floatInput i QuestionValidation.MaxNumber data
+
+                QuestionValidation.FromDate data ->
+                    dateInput i QuestionValidation.FromDate data
+
+                QuestionValidation.ToDate data ->
+                    dateInput i QuestionValidation.ToDate data
+
+                QuestionValidation.FromDateTime data ->
+                    dateTimeInput i QuestionValidation.FromDateTime data
+
+                QuestionValidation.ToDateTime data ->
+                    dateTimeInput i QuestionValidation.ToDateTime data
+
+                QuestionValidation.FromTime data ->
+                    timeInput i QuestionValidation.FromTime data
+
+                QuestionValidation.ToTime data ->
+                    timeInput i QuestionValidation.ToTime data
+
+                QuestionValidation.Domain data ->
+                    stringInput i QuestionValidation.Domain data
+
+        viewValidation i validation =
+            div [ class "card bg-light" ]
+                [ div [ class "card-body" ]
+                    [ a
+                        (class "text-danger delete"
+                            :: onClick (removeValidationMsg i)
+                            :: tooltipLeft (gettext "Remove validation" appState.locale)
+                        )
+                        [ faSet "_global.delete" appState ]
+                    , div []
+                        [ label [] [ text (gettext "Validation type" appState.locale) ]
+                        , Html.select
+                            [ class "form-control"
+                            , onChange (changeValidationMsg i)
+                            ]
+                            (List.map (viewValidationTypeOption validation) filteredValidationOptions)
+                        ]
+                    , validationInput i validation
+                    ]
+                ]
+
+        addQuestionValidationMsg validation =
+            config.onChange <| List.append filteredValidations [ validation ]
+    in
+    case mbDefaultValidation of
+        Just defaultValidation ->
+            div [ class "form-group question-validations" ]
+                [ label [] [ text config.label ]
+                , div [] (List.indexedMap viewValidation filteredValidations)
+                , div []
+                    [ a
+                        [ onClick (addQuestionValidationMsg defaultValidation)
+                        , class "link-add-child with-icon"
+                        , dataCy "km-editor_question-validations_add-button"
+                        ]
+                        [ faSet "_global.add" appState
+                        , text (gettext "Add validation" appState.locale)
+                        ]
+                    ]
+                ]
+
+        Nothing ->
+            emptyNode
+
+
+type alias ValidationOption =
+    { value : String
+    , label : String
+    , questionTypes : List QuestionValueType
+    }
+
+
+validationOptions : AppState -> List ValidationOption
+validationOptions appState =
+    [ { value = "MinLength"
+      , label = gettext "Min Length" appState.locale
+      , questionTypes =
+            [ QuestionValueType.StringQuestionValueType
+            , QuestionValueType.TextQuestionValueType
+            ]
+      }
+    , { value = "MaxLength"
+      , label = gettext "Max Length" appState.locale
+      , questionTypes =
+            [ QuestionValueType.StringQuestionValueType
+            , QuestionValueType.TextQuestionValueType
+            ]
+      }
+    , { value = "Regex"
+      , label = gettext "Regex" appState.locale
+      , questionTypes =
+            [ QuestionValueType.StringQuestionValueType
+            , QuestionValueType.TextQuestionValueType
+            , QuestionValueType.EmailQuestionValueType
+            , QuestionValueType.UrlQuestionValueType
+            ]
+      }
+    , { value = "Orcid"
+      , label = gettext "ORCID" appState.locale
+      , questionTypes =
+            [ QuestionValueType.StringQuestionValueType
+            ]
+      }
+    , { value = "MinNumber"
+      , label = gettext "Min Number" appState.locale
+      , questionTypes =
+            [ QuestionValueType.NumberQuestionValueType
+            ]
+      }
+    , { value = "MaxNumber"
+      , label = gettext "Max Number" appState.locale
+      , questionTypes =
+            [ QuestionValueType.NumberQuestionValueType
+            ]
+      }
+    , { value = "FromDate"
+      , label = gettext "From Date" appState.locale
+      , questionTypes =
+            [ QuestionValueType.DateQuestionValueType
+            ]
+      }
+    , { value = "ToDate"
+      , label = gettext "To Date" appState.locale
+      , questionTypes =
+            [ QuestionValueType.DateQuestionValueType
+            ]
+      }
+    , { value = "FromDateTime"
+      , label = gettext "From Date Time" appState.locale
+      , questionTypes =
+            [ QuestionValueType.DateTimeQuestionValueType
+            ]
+      }
+    , { value = "ToDateTime"
+      , label = gettext "To Date Time" appState.locale
+      , questionTypes =
+            [ QuestionValueType.DateTimeQuestionValueType
+            ]
+      }
+    , { value = "FromTime"
+      , label = gettext "From Time" appState.locale
+      , questionTypes =
+            [ QuestionValueType.TimeQuestionValueType
+            ]
+      }
+    , { value = "ToTime"
+      , label = gettext "To Time" appState.locale
+      , questionTypes =
+            [ QuestionValueType.TimeQuestionValueType
+            ]
+      }
+    , { value = "Domain"
+      , label = gettext "Domain" appState.locale
+      , questionTypes =
+            [ QuestionValueType.EmailQuestionValueType
+            ]
+      }
+    ]
 
 
 
