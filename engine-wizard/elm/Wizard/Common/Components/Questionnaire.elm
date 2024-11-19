@@ -2926,8 +2926,16 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
 
         questionViews =
             if List.isEmpty questions then
+                let
+                    emptyMessage =
+                        if List.isEmpty model.questionnaire.selectedQuestionTagUuids then
+                            gettext "This chapter contains no questions." appState.locale
+
+                        else
+                            gettext "There are no questions matching the selected question tags." appState.locale
+                in
                 div [ class "flex-grow-1" ]
-                    [ Flash.info appState (gettext "This chapter contains no questions." appState.locale)
+                    [ Flash.info appState emptyMessage
                     ]
 
             else
