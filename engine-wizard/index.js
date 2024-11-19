@@ -95,8 +95,8 @@ function bootstrapErrorHTML(errorCode) {
 
 function housekeepingHTML() {
     const title = 'Housekeeping in progress'
-    const message = 'We are currently upgrading the data to the latest version to enhance your experience.'
-    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_logistics.svg"><div><h1>' + title + '</h1><p>' + message + '</p></div></div>'
+    const message = 'We are currently upgrading the data to the latest version to enhance your experience. This process will be completed shortly.'
+    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_logistics.svg"><div><h1><i class="fa fas fa-spinner fa-spin me-2 text-lighter"></i>' + title + '</h1><p>' + message + '</p></div></div>'
 }
 
 function clientUrl() {
@@ -164,38 +164,54 @@ function loadApp(config, locale, provisioning) {
 window.onload = function () {
     const session = JSON.parse(localStorage.getItem(sessionKey))
     const token = session?.token?.token
-    const headers = token ? { headers: {'Authorization': `Bearer ${token}`}} : {}
+    const headers = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
     const apiUrl = session?.apiUrl
 
-    const promises = [
-        axios.get(configUrl(apiUrl), headers),
-        axios.get(localeUrl(apiUrl)).catch(() => {
-            return {data: {}}
-        })
-    ]
-    const hasProvisioning = !!provisioningUrl()
-    if (hasProvisioning) {
-        promises.push(axios.get(provisioningUrl()))
+    const defaultRetryTime = 2;
+    const maxRetryTime = 15;
+
+    let retryTime = defaultRetryTime
+
+    function load() {
+        const promises = [
+            axios.get(configUrl(apiUrl), headers),
+            axios.get(localeUrl(apiUrl)).catch(() => {
+                return {data: {}}
+            })
+        ]
+        const hasProvisioning = !!provisioningUrl()
+        if (hasProvisioning) {
+            promises.push(axios.get(provisioningUrl()))
+        }
+
+        axios.all(promises)
+            .then(function (results) {
+                if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
+                    if (retryTime <= defaultRetryTime) {
+                        document.body.innerHTML = housekeepingHTML()
+                    }
+
+                    setTimeout(() => {
+                        retryTime = Math.min(maxRetryTime, retryTime + 1)
+                        load()
+                    }, retryTime * 1000)
+                } else {
+                    const config = results[0].data
+                    const locale = results[1].data
+                    const provisioning = hasProvisioning ? results[2].data : null
+                    loadApp(config, locale, provisioning)
+                }
+            })
+            .catch(function (err) {
+                const errorCode = err.response ? err.response.status : null
+                if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                    localStorage.removeItem(sessionKey)
+                    window.location.reload()
+                } else {
+                    document.body.innerHTML = bootstrapErrorHTML(errorCode)
+                }
+            })
     }
 
-    axios.all(promises)
-        .then(function (results) {
-            if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
-                document.body.innerHTML = housekeepingHTML()
-            } else {
-                const config = results[0].data
-                const locale = results[1].data
-                const provisioning = hasProvisioning ? results[2].data : null
-                loadApp(config, locale, provisioning)
-            }
-        })
-        .catch(function (err) {
-            const errorCode = err.response ? err.response.status : null
-            if (Math.floor(errorCode / 100) === 4 && session !== null) {
-                localStorage.removeItem(sessionKey)
-                window.location.reload()
-            } else {
-                document.body.innerHTML = bootstrapErrorHTML(errorCode)
-            }
-        })
+    load()
 }
