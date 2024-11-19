@@ -52,6 +52,7 @@ import Shared.Data.Event.AddReferenceEventData exposing (AddReferenceEventData(.
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
 import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
 import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Utils exposing (nilUuid)
 import Test exposing (Test, describe, test)
@@ -844,6 +845,7 @@ addValueQuestionEvent =
             , requiredPhaseUuid = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
             , valueType = NumberQuestionValueType
+            , validations = []
             , annotations = []
             }
         )
@@ -951,6 +953,7 @@ editValueQuestionEvent =
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
             , valueType = { changed = True, value = Just DateQuestionValueType }
+            , validations = { changed = True, value = Just [ QuestionValidation.FromDate { value = "2024-11-19" } ] }
             , annotations = { changed = False, value = Nothing }
             }
         )

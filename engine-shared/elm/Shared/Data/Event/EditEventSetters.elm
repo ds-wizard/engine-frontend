@@ -44,6 +44,7 @@ module Shared.Data.Event.EditEventSetters exposing
     , setText
     , setTitle
     , setUrl
+    , setValidations
     , setValueType
     , setWidgetUrl
     )
@@ -274,6 +275,11 @@ setTitle value data =
 setUrl : a -> { b | url : EventField a } -> { b | url : EventField a }
 setUrl value data =
     { data | url = EventField.create value True }
+
+
+setValidations : a -> { b | validations : EventField a } -> { b | validations : EventField a }
+setValidations value data =
+    { data | validations = EventField.create value True }
 
 
 setValueType : a -> { b | valueType : EventField a } -> { b | valueType : EventField a }
