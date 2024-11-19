@@ -2,6 +2,7 @@ module Shared.Data.KnowledgeModel.Question.QuestionValidation exposing
     ( QuestionValidation(..)
     , QuestionValidationData
     , decoder
+    , doi
     , domain
     , encode
     , fromDate
@@ -17,11 +18,17 @@ module Shared.Data.KnowledgeModel.Question.QuestionValidation exposing
     , toDateTime
     , toOptionString
     , toTime
+    , validate
     )
 
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Regex
+import Shared.RegexPatterns as RegexPatterns
+import Shared.Utils.DateTimeString as DateTimeString
+import String.Format as String
 
 
 type QuestionValidation
@@ -59,6 +66,11 @@ regex =
 orcid : QuestionValidation
 orcid =
     Orcid
+
+
+doi : QuestionValidation
+doi =
+    Doi
 
 
 minNumber : QuestionValidation
@@ -285,3 +297,143 @@ encodeValidationWithData type_ valueEncoder data =
         [ ( "type", E.string type_ )
         , ( "value", valueEncoder data.value )
         ]
+
+
+validate : { a | locale : Gettext.Locale } -> QuestionValidation -> String -> Result String ()
+validate appState validation value =
+    case validation of
+        MinLength data ->
+            if String.length value >= data.value then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Answer must be at least %s characters long." [ String.fromInt data.value ]) appState.locale
+
+        MaxLength data ->
+            if String.length value <= data.value then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Answer must be at most %s characters long." [ String.fromInt data.value ]) appState.locale
+
+        Regex data ->
+            if Regex.contains (RegexPatterns.fromString data.value) value then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Answer does not match the required pattern (%s)." [ data.value ]) appState.locale
+
+        Orcid ->
+            if Regex.contains RegexPatterns.orcid value then
+                Ok ()
+
+            else
+                Err <| gettext "Answer must be a valid ORCID." appState.locale
+
+        Doi ->
+            if Regex.contains RegexPatterns.doi value then
+                Ok ()
+
+            else
+                Err <| gettext "Answer must be a valid DOI." appState.locale
+
+        MinNumber data ->
+            if Maybe.withDefault 0.0 (String.toFloat value) >= data.value then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Answer must be at least %s." [ String.fromFloat data.value ]) appState.locale
+
+        MaxNumber data ->
+            if Maybe.withDefault 0.0 (String.toFloat value) <= data.value then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Answer must be at most %s." [ String.fromFloat data.value ]) appState.locale
+
+        FromDate data ->
+            let
+                selectedValue =
+                    DateTimeString.date value
+
+                validationValue =
+                    DateTimeString.date data.value
+            in
+            if DateTimeString.dateGte selectedValue validationValue then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Date must be at least %s." [ data.value ]) appState.locale
+
+        ToDate data ->
+            let
+                selectedValue =
+                    DateTimeString.date value
+
+                validationValue =
+                    DateTimeString.date data.value
+            in
+            if DateTimeString.dateLte selectedValue validationValue then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Date must be at most %s." [ data.value ]) appState.locale
+
+        FromDateTime data ->
+            let
+                selectedValue =
+                    DateTimeString.dateTime value
+
+                validationValue =
+                    DateTimeString.dateTime data.value
+            in
+            if DateTimeString.dateTimeGte selectedValue validationValue then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Date and time must be at least %s." [ data.value ]) appState.locale
+
+        ToDateTime data ->
+            let
+                selectedValue =
+                    DateTimeString.dateTime value
+
+                validationValue =
+                    DateTimeString.dateTime data.value
+            in
+            if DateTimeString.dateTimeLte selectedValue validationValue then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Date and time must be at most %s." [ data.value ]) appState.locale
+
+        FromTime data ->
+            let
+                selectedValue =
+                    DateTimeString.time value
+
+                validationValue =
+                    DateTimeString.time data.value
+            in
+            if DateTimeString.timeGte selectedValue validationValue then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Time must be at least %s." [ data.value ]) appState.locale
+
+        ToTime data ->
+            let
+                selectedValue =
+                    DateTimeString.time value
+
+                validationValue =
+                    DateTimeString.time data.value
+            in
+            if DateTimeString.timeLte selectedValue validationValue then
+                Ok ()
+
+            else
+                Err <| gettext (String.format "Time must be at most %s." [ data.value ]) appState.locale
+
+        _ ->
+            Ok ()

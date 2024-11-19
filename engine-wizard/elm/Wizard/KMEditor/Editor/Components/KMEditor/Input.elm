@@ -602,6 +602,9 @@ questionValidations appState config =
                 "Orcid" ->
                     config.onChange (List.setAt i QuestionValidation.orcid config.validations)
 
+                "Doi" ->
+                    config.onChange (List.setAt i QuestionValidation.doi config.validations)
+
                 "MinNumber" ->
                     config.onChange (List.setAt i QuestionValidation.minNumber config.validations)
 
@@ -825,6 +828,12 @@ validationOptions appState =
       }
     , { value = "Orcid"
       , label = gettext "ORCID" appState.locale
+      , questionTypes =
+            [ QuestionValueType.StringQuestionValueType
+            ]
+      }
+    , { value = "Doi"
+      , label = gettext "DOI" appState.locale
       , questionTypes =
             [ QuestionValueType.StringQuestionValueType
             ]

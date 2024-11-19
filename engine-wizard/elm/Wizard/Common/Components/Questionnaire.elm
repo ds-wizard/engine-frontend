@@ -73,6 +73,7 @@ import Shared.Data.KnowledgeModel.Integration.CommonIntegrationData exposing (Co
 import Shared.Data.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
@@ -3568,10 +3569,26 @@ viewQuestionValue appState cfg model path question =
                 _ ->
                     defaultInput
 
+        validationWarning validation =
+            case QuestionValidation.validate appState validation answer of
+                Ok _ ->
+                    emptyNode
+
+                Err error ->
+                    Flash.warning appState error
+
+        validationWarnings =
+            case ( Question.getValidations question, mbAnswer ) of
+                ( Just validations, Just _ ) ->
+                    List.map validationWarning validations
+
+                _ ->
+                    []
+
         clearReplyButton =
             viewQuestionClearButton appState cfg path (Maybe.isJust mbAnswer)
     in
-    div [] (inputView ++ [ clearReplyButton ])
+    div [] (inputView ++ validationWarnings ++ [ clearReplyButton ])
 
 
 viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg

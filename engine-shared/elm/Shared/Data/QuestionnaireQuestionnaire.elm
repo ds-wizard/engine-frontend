@@ -44,9 +44,11 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
+import Result.Extra as Result
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.Package exposing (Package)
 import Shared.Data.Permission as Permission exposing (Permission)
@@ -485,27 +487,49 @@ getWarnings questionnaire =
                         Just replyValue ->
                             case replyValue of
                                 StringReply value ->
-                                    case questionData.valueType of
-                                        DateQuestionValueType ->
-                                            checkValue RegexPatterns.date value
+                                    let
+                                        typeWarnings =
+                                            case questionData.valueType of
+                                                DateQuestionValueType ->
+                                                    checkValue RegexPatterns.date value
 
-                                        DateTimeQuestionValueType ->
-                                            checkValue RegexPatterns.datetime value
+                                                DateTimeQuestionValueType ->
+                                                    checkValue RegexPatterns.datetime value
 
-                                        TimeQuestionValueType ->
-                                            checkValue RegexPatterns.time value
+                                                TimeQuestionValueType ->
+                                                    checkValue RegexPatterns.time value
 
-                                        EmailQuestionValueType ->
-                                            checkValue RegexPatterns.email value
+                                                EmailQuestionValueType ->
+                                                    checkValue RegexPatterns.email value
 
-                                        UrlQuestionValueType ->
-                                            checkValue RegexPatterns.url value
+                                                UrlQuestionValueType ->
+                                                    checkValue RegexPatterns.url value
 
-                                        ColorQuestionValueType ->
-                                            checkValue RegexPatterns.color value
+                                                ColorQuestionValueType ->
+                                                    checkValue RegexPatterns.color value
 
-                                        _ ->
-                                            []
+                                                _ ->
+                                                    []
+
+                                        validate validation =
+                                            QuestionValidation.validate
+                                                { locale = Gettext.defaultLocale }
+                                                validation
+                                                value
+
+                                        anyValidationWarning =
+                                            questionData.validations
+                                                |> List.map validate
+                                                |> List.any Result.isErr
+
+                                        validationWarnings =
+                                            if List.isEmpty typeWarnings && anyValidationWarning then
+                                                [ questionnaireWarning ]
+
+                                            else
+                                                []
+                                    in
+                                    typeWarnings ++ validationWarnings
 
                                 _ ->
                                     []

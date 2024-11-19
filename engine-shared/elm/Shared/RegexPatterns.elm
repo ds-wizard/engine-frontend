@@ -1,4 +1,4 @@
-module Shared.RegexPatterns exposing (color, date, datetime, email, kmId, organizationId, projectTag, time, url, uuid)
+module Shared.RegexPatterns exposing (color, date, datetime, doi, email, fromString, kmId, orcid, organizationId, projectTag, time, url, uuid)
 
 import Regex exposing (Regex)
 
@@ -18,6 +18,16 @@ url =
     fromString "^(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z]{2,}(\\.[a-zA-Z]{2,})(\\.[a-zA-Z]{2,})?\\/[a-zA-Z0-9]{2,}|((https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z]{2,}(\\.[a-zA-Z]{2,})(\\.[a-zA-Z]{2,})?)|(https:\\/\\/www\\.|http:\\/\\/www\\.|https:\\/\\/|http:\\/\\/)?[a-zA-Z0-9]{2,}\\.[a-zA-Z0-9]{2,}\\.[a-zA-Z0-9]{2,}(\\.[a-zA-Z0-9]{2,})?"
 
 
+orcid : Regex
+orcid =
+    fromString "^(\\d{4}-){3}\\d{3}(\\d|X)$"
+
+
+doi : Regex
+doi =
+    fromString "10\\.[0-9]{4,}[^\\s\\/]+\\/[\\S]+$"
+
+
 organizationId : Regex
 organizationId =
     fromString "^^(?![.])(?!.*[.]$)[a-zA-Z0-9.]+$"
@@ -35,7 +45,7 @@ projectTag =
 
 datetime : Regex
 datetime =
-    fromString "^[0-9]{4}-((0[0-9])|(1[012]))-((0[1-9])|([12][0-9])|(3[01])) (([01][1-9])|2[0-3]):[0-5][0-9]$"
+    fromString "^[0-9]{4}-((0[0-9])|(1[012]))-((0[1-9])|([12][0-9])|(3[01])) (([01][0-9])|2[0-3]):[0-5][0-9]$"
 
 
 date : Regex
