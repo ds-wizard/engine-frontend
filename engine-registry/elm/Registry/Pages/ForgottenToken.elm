@@ -76,7 +76,7 @@ successView appState =
     Page.illustratedMessage
         { image = Undraw.confirmation
         , heading = gettext "Token recovery successful!" appState.locale
-        , msg = gettext "Check your email address for the recovery link." appState.locale
+        , msg = gettext "Check your email for the recovery link." appState.locale
         }
 
 
