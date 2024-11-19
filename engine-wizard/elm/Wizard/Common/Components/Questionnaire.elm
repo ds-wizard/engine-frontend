@@ -280,6 +280,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
         [ scrollCmd
         , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
         , Ports.localStorageGet (localStorageViewResolvedKey questionnaire.uuid)
+        , Ports.localStorageGet (localStorageNamedOnlyKey questionnaire.uuid)
         , Ports.localStorageGet localStorageViewSettingsKey
         , rightPanelCmd
         ]
@@ -604,6 +605,16 @@ localStorageViewResolvedKey uuid =
 
 localStorageViewResolvedDecoder : Decoder (LocalStorageData Bool)
 localStorageViewResolvedDecoder =
+    LocalStorageData.decoder D.bool
+
+
+localStorageNamedOnlyKey : Uuid -> String
+localStorageNamedOnlyKey uuid =
+    "project-" ++ Uuid.toString uuid ++ "-named-only"
+
+
+localStorageNamedOnlyDecoder : Decoder (LocalStorageData Bool)
+localStorageNamedOnlyDecoder =
     LocalStorageData.decoder D.bool
 
 
@@ -1035,7 +1046,19 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         { model | questionnaireVersions = Error (gettext "Unable to get version history." appState.locale) }
 
         HistoryMsg historyMsg ->
-            wrap { model | historyModel = History.update historyMsg model.historyModel }
+            let
+                newModel =
+                    { model | historyModel = History.update historyMsg model.historyModel }
+
+                cmd =
+                    case historyMsg of
+                        History.SetNamedOnly _ ->
+                            localStorageNamedOnlyCmd newModel
+
+                        _ ->
+                            Cmd.none
+            in
+            withSeed ( newModel, cmd )
 
         VersionModalMsg versionModalMsg ->
             let
@@ -1308,6 +1331,14 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             Err _ ->
                                 wrap model
 
+                    else if key == localStorageNamedOnlyKey model.uuid then
+                        case decodeValue localStorageNamedOnlyDecoder value of
+                            Ok data ->
+                                wrap { model | historyModel = History.setNamedOnly data.value model.historyModel }
+
+                            Err _ ->
+                                wrap model
+
                     else
                         wrap model
 
@@ -1440,6 +1471,19 @@ localStorageViewResolvedCmd model =
         data =
             { key = localStorageViewResolvedKey model.uuid
             , value = model.commentsViewResolved
+            }
+    in
+    data
+        |> LocalStorageData.encode E.bool
+        |> Ports.localStorageSet
+
+
+localStorageNamedOnlyCmd : Model -> Cmd msg
+localStorageNamedOnlyCmd model =
+    let
+        data =
+            { key = localStorageNamedOnlyKey model.uuid
+            , value = model.historyModel.namedOnly
             }
     in
     data
