@@ -21,6 +21,8 @@ module Wizard.Common.Feature exposing
     , knowledgeModelEditorsPublish
     , knowledgeModelEditorsUpgrade
     , knowledgeModelEditorsView
+    , knowledgeModelRestore
+    , knowledgeModelSetDeprecated
     , knowledgeModelsDelete
     , knowledgeModelsExport
     , knowledgeModelsImport
@@ -83,6 +85,7 @@ import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Data.Document as Document exposing (Document)
 import Shared.Data.Document.DocumentState exposing (DocumentState(..))
+import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
 import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState
@@ -185,6 +188,18 @@ knowledgeModelsDelete =
 knowledgeModelsPreview : AppState -> Bool
 knowledgeModelsPreview _ =
     True
+
+
+knowledgeModelSetDeprecated : AppState -> { a | phase : PackagePhase } -> Bool
+knowledgeModelSetDeprecated appState package =
+    adminOr Perm.packageManagementWrite appState
+        && (package.phase == PackagePhase.Released)
+
+
+knowledgeModelRestore : AppState -> { a | phase : PackagePhase } -> Bool
+knowledgeModelRestore appState package =
+    adminOr Perm.packageManagementWrite appState
+        && (package.phase == PackagePhase.Deprecated)
 
 
 
