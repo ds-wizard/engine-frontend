@@ -1193,7 +1193,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
                         listQuestionUuidOptions =
                             KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                |> List.filter (not << flip EditorBranch.isQuestionDeletedInHierarchy editorBranch << Question.getUuid)
                                 |> List.filter Question.isList
                                 |> List.sortBy Question.getTitle
                                 |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
@@ -1209,7 +1209,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , extra =
                                     case Question.getListQuestionUuid question of
                                         Just listQuestionUuid ->
-                                            if EditorBranch.isDeleted listQuestionUuid editorBranch then
+                                            if EditorBranch.isQuestionDeletedInHierarchy listQuestionUuid editorBranch then
                                                 Nothing
 
                                             else

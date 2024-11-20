@@ -17,6 +17,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , isDeleted
     , isEdited
     , isEmptyIntegrationEditorUuid
+    , isQuestionDeletedInHierarchy
     , isReachable
     , setActiveEditor
     , sortDeleted
@@ -149,6 +150,36 @@ filterDeleted =
 filterDeletedWith : (a -> String) -> EditorBranch -> List a -> List a
 filterDeletedWith toUuid editorBranch =
     List.filter (not << flip isDeleted editorBranch << toUuid)
+
+
+isQuestionDeletedInHierarchy : String -> EditorBranch -> Bool
+isQuestionDeletedInHierarchy questionUuid editorBranch =
+    if isDeleted questionUuid editorBranch then
+        True
+
+    else
+        let
+            parentUuid =
+                getParentUuid questionUuid editorBranch
+        in
+        if parentUuid == Uuid.toString editorBranch.branch.knowledgeModel.uuid then
+            False
+
+        else if Maybe.isJust (KnowledgeModel.getQuestion parentUuid editorBranch.branch.knowledgeModel) then
+            isQuestionDeletedInHierarchy parentUuid editorBranch
+
+        else if Maybe.isJust (KnowledgeModel.getChapter parentUuid editorBranch.branch.knowledgeModel) then
+            isDeleted parentUuid editorBranch
+
+        else if Maybe.isJust (KnowledgeModel.getAnswer parentUuid editorBranch.branch.knowledgeModel) then
+            if isDeleted parentUuid editorBranch then
+                True
+
+            else
+                isQuestionDeletedInHierarchy (getParentUuid parentUuid editorBranch) editorBranch
+
+        else
+            True
 
 
 getFilteredKM : EditorBranch -> KnowledgeModel
