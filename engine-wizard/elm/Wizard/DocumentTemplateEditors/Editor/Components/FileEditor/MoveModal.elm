@@ -271,7 +271,12 @@ isAllowed model path =
             True
 
         MovingFolder folderPath ->
-            not (String.startsWith folderPath path)
+            if String.isEmpty path then
+                -- if path is root the folder should not be in root
+                String.contains "/" folderPath
+
+            else
+                not (String.startsWith folderPath path) && (path /= getParentFolderPath folderPath)
 
         _ ->
             False
