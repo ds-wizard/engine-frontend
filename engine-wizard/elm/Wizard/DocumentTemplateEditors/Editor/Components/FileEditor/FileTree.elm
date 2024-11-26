@@ -161,7 +161,12 @@ addRecursive constructor currentPath parts fileTree =
                         newPath =
                             pathToString (currentPath ++ [ file ])
                     in
-                    Folder { folderData | children = folderData.children ++ [ constructor file newPath ] }
+                    -- Check if a folder with the same path already exists
+                    if List.any (\child -> getPath identity (always "") (always "") child == newPath) folderData.children then
+                        fileTree
+
+                    else
+                        Folder { folderData | children = folderData.children ++ [ constructor file newPath ] }
 
                 folder :: rest ->
                     let
