@@ -25,7 +25,7 @@ orcid =
 
 doi : Regex
 doi =
-    fromString "10\\.[0-9]{4,}[^\\s\\/]+\\/[\\S]+$"
+    fromStringIC "^10\\.\\d{4,9}\\/[-._;()\\/:A-Z0-9]+$"
 
 
 organizationId : Regex
@@ -70,4 +70,4 @@ fromString =
 
 fromStringIC : String -> Regex
 fromStringIC =
-    Maybe.withDefault Regex.never << Regex.fromStringWith { caseInsensitive = False, multiline = False }
+    Maybe.withDefault Regex.never << Regex.fromStringWith { caseInsensitive = True, multiline = False }

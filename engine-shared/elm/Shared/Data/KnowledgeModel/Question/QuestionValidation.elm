@@ -25,6 +25,7 @@ import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import List.Extra as List
 import Regex
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils.DateTimeString as DateTimeString
@@ -435,5 +436,23 @@ validate appState validation value =
             else
                 Err <| gettext (String.format "Time must be at most %s." [ data.value ]) appState.locale
 
-        _ ->
-            Ok ()
+        Domain data ->
+            -- Validate domain only for valid emails
+            if Regex.contains RegexPatterns.email value then
+                let
+                    emailDomain =
+                        String.split "@" value
+                            |> List.last
+                            |> Maybe.withDefault ""
+
+                    allowedDomains =
+                        List.map String.trim (String.split "," data.value)
+                in
+                if List.member emailDomain allowedDomains then
+                    Ok ()
+
+                else
+                    Err <| gettext (String.format "Email domain must be one of the following: %s." [ data.value ]) appState.locale
+
+            else
+                Ok ()
