@@ -13,7 +13,6 @@ import Wizard.Settings.LookAndFeel.Update
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.Update
-import Wizard.Settings.Plans.Update
 import Wizard.Settings.PrivacyAndSupport.Update
 import Wizard.Settings.Projects.Update
 import Wizard.Settings.Registry.Update
@@ -46,8 +45,6 @@ fetchData route appState _ =
         LookAndFeelRoute ->
             genericFetch LookAndFeelMsg
 
-        --Cmd.map LookAndFeelMsg <|
-        --    Wizard.Settings.LookAndFeel.Update.fetchData appState
         RegistryRoute ->
             Cmd.map RegistryMsg <|
                 Wizard.Settings.Registry.Update.fetchData appState
@@ -65,10 +62,6 @@ fetchData route appState _ =
         UsageRoute ->
             Cmd.map UsageMsg <|
                 Wizard.Settings.Usage.Update.fetchData appState
-
-        PlansRoute ->
-            Cmd.map PlansMsg <|
-                Wizard.Settings.Plans.Update.fetchData appState
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -143,10 +136,3 @@ update wrapMsg msg appState model =
                     Wizard.Settings.Usage.Update.update usageMsg appState model.usageModel
             in
             ( { model | usageModel = usageModel }, cmd )
-
-        PlansMsg plansMsg ->
-            let
-                ( plansModel, cmd ) =
-                    Wizard.Settings.Plans.Update.update plansMsg appState model.plansModel
-            in
-            ( { model | plansModel = plansModel }, cmd )

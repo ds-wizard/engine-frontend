@@ -86,7 +86,7 @@ content appState tenantDetail =
         [ editWarning
         , div [ DetailPage.contentInnerClass ]
             [ h3 [] [ text (gettext "Usage" appState.locale) ]
-            , UsageTable.view appState tenantDetail.usage
+            , UsageTable.view appState False tenantDetail.usage
             , hr [ class "my-5" ] []
             , h3 [] [ text (gettext "Plans" appState.locale) ]
             , PlansList.view appState { actions = Just planActions } tenantDetail.plans

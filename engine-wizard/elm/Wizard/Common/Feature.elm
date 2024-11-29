@@ -35,7 +35,6 @@ module Wizard.Common.Feature exposing
     , localeImport
     , localeSetDefault
     , localeView
-    , plans
     , projectActions
     , projectCancelMigration
     , projectClone
@@ -430,11 +429,6 @@ documentSubmit appState document =
 settings : AppState -> Bool
 settings =
     adminOr Perm.settings
-
-
-plans : AppState -> Bool
-plans appState =
-    appState.config.cloud.enabled && not (Admin.isEnabled appState.config.admin)
 
 
 registry : AppState -> Bool

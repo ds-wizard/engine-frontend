@@ -33,7 +33,6 @@ parsers appState wrapRoute =
         |> listInsertIf (map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s (lr "settings.submission" appState))) True
         |> listInsertIf (map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s (lr "settings.knowledgeModel" appState))) True
         |> listInsertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s (lr "settings.usage" appState))) True
-        |> listInsertIf (map (wrapRoute <| PlansRoute) (s moduleRoot </> s (lr "settings.plans" appState))) (Feature.plans appState)
 
 
 toUrl : AppState -> Route -> List String
@@ -73,18 +72,12 @@ toUrl appState route =
         UsageRoute ->
             [ moduleRoot, lr "settings.usage" appState ]
 
-        PlansRoute ->
-            [ moduleRoot, lr "settings.plans" appState ]
-
 
 isAllowed : Route -> AppState -> Bool
 isAllowed route appState =
     case route of
         RegistryRoute ->
             Feature.settings appState && Feature.registry appState
-
-        PlansRoute ->
-            Feature.settings appState && Feature.plans appState
 
         _ ->
             Feature.settings appState

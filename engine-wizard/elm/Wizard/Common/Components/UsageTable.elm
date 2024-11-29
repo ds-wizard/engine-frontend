@@ -3,69 +3,83 @@ module Wizard.Common.Components.UsageTable exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, style)
+import Registry.Components.FontAwesome exposing (fas)
 import Shared.Common.ByteUnits as ByteUnits
+import Shared.Components.Badge as Badge
 import Shared.Data.Usage exposing (Usage, UsageValue)
-import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
 
 
-view : AppState -> Usage -> Html msg
-view appState usage =
+view : AppState -> Bool -> Usage -> Html msg
+view appState showSoftLimits usage =
     table [ class "table table-usage table-hover" ]
         [ tbody []
-            [ viewUsageRowSimple (gettext "Users" appState.locale) usage.users
-            , viewUsageRowSimple (gettext "Active Users" appState.locale) usage.activeUsers
-            , viewUsageRowSimple (gettext "Knowledge Model Editors" appState.locale) usage.branches
-            , viewUsageRowSimple (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
-            , viewUsageRowSimple (gettext "Document Template Editors" appState.locale) usage.documentTemplateDrafts
-            , viewUsageRowSimple (gettext "Document Templates" appState.locale) usage.documentTemplates
-            , viewUsageRowSimple (gettext "Projects" appState.locale) usage.questionnaires
-            , viewUsageRowSimple (gettext "Documents" appState.locale) usage.documents
-            , viewUsageRowSimple (gettext "Locales" appState.locale) usage.locales
-            , viewUsageRowBytes (gettext "Storage" appState.locale) usage.storage
+            [ viewUsageRowSimple appState showSoftLimits (gettext "Users" appState.locale) usage.users
+            , viewUsageRowSimple appState showSoftLimits (gettext "Active Users" appState.locale) usage.activeUsers
+            , viewUsageRowSimple appState showSoftLimits (gettext "Knowledge Model Editors" appState.locale) usage.branches
+            , viewUsageRowSimple appState showSoftLimits (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
+            , viewUsageRowSimple appState showSoftLimits (gettext "Document Template Editors" appState.locale) usage.documentTemplateDrafts
+            , viewUsageRowSimple appState showSoftLimits (gettext "Document Templates" appState.locale) usage.documentTemplates
+            , viewUsageRowSimple appState showSoftLimits (gettext "Projects" appState.locale) usage.questionnaires
+            , viewUsageRowSimple appState showSoftLimits (gettext "Documents" appState.locale) usage.documents
+            , viewUsageRowSimple appState showSoftLimits (gettext "Locales" appState.locale) usage.locales
+            , viewUsageRowBytes appState showSoftLimits (gettext "Storage" appState.locale) usage.storage
             ]
         ]
 
 
-viewUsageRowSimple : String -> UsageValue -> Html msg
-viewUsageRowSimple =
-    viewUsageRow String.fromInt
+viewUsageRowSimple : AppState -> Bool -> String -> UsageValue -> Html msg
+viewUsageRowSimple appState showSoftLimits =
+    viewUsageRow appState showSoftLimits String.fromInt
 
 
-viewUsageRowBytes : String -> UsageValue -> Html msg
-viewUsageRowBytes =
-    viewUsageRow ByteUnits.toReadable
+viewUsageRowBytes : AppState -> Bool -> String -> UsageValue -> Html msg
+viewUsageRowBytes appState showSoftLimits =
+    viewUsageRow appState showSoftLimits ByteUnits.toReadable
 
 
-viewUsageRow : (Int -> String) -> String -> UsageValue -> Html msg
-viewUsageRow mapValue usageLabel usageValue =
+viewUsageRow : AppState -> Bool -> (Int -> String) -> String -> UsageValue -> Html msg
+viewUsageRow appState showSoftLimits mapValue usageLabel usageValue =
     let
+        max =
+            usageValue.max
+
         ( visibleValue, progressBar ) =
-            case usageValue.max of
-                Just max ->
-                    let
-                        width =
-                            String.fromFloat (toFloat usageValue.current * 100 / toFloat max) ++ "%"
+            if max > 0 then
+                let
+                    width =
+                        String.fromFloat (toFloat usageValue.current * 100 / toFloat max) ++ "%"
 
-                        barColorClass =
-                            if usageValue.current == max then
-                                "bg-danger"
+                    barColorClass =
+                        if usageValue.current == max then
+                            "bg-danger"
 
-                            else if (toFloat usageValue.current / toFloat max) >= 0.8 then
-                                "bg-warning"
+                        else if (toFloat usageValue.current / toFloat max) >= 0.8 then
+                            "bg-warning"
 
-                            else
-                                "bg-info"
-                    in
-                    ( mapValue usageValue.current ++ " / " ++ mapValue max
-                    , div [ class "progress" ]
-                        [ div [ class ("progress-bar " ++ barColorClass), style "width" width ] [] ]
-                    )
+                        else
+                            "bg-info"
+                in
+                ( mapValue usageValue.current ++ " / " ++ mapValue max
+                , div [ class "progress" ]
+                    [ div [ class ("progress-bar " ++ barColorClass), style "width" width ] [] ]
+                )
 
-                _ ->
-                    ( mapValue usageValue.current
-                    , emptyNode
-                    )
+            else
+                let
+                    limit =
+                        if showSoftLimits then
+                            " / " ++ mapValue -max
+
+                        else
+                            ""
+                in
+                ( mapValue usageValue.current ++ limit
+                , Badge.info []
+                    [ fas "fa-infinity me-1"
+                    , text (gettext "Unlimited" appState.locale)
+                    ]
+                )
     in
     tr []
         [ th [] [ text usageLabel ]
