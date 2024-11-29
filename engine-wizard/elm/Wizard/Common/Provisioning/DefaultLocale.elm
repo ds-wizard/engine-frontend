@@ -49,7 +49,6 @@ locale =
         , ( "__routing.settings.knowledgeModel", "knowledge-models" )
         , ( "__routing.settings.lookAndFeel", "look-and-feel" )
         , ( "__routing.settings.organization", "organization" )
-        , ( "__routing.settings.plans", "plans" )
         , ( "__routing.settings.privacyAndSupport", "privacy-and-support" )
         , ( "__routing.settings.projects", "projects" )
         , ( "__routing.settings.submission", "submission" )

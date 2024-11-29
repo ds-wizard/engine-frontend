@@ -16,7 +16,6 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
-import Wizard.Tenants.Common.PlanForm as PlanForm
 import Wizard.Tenants.Common.TenantEditForm as AppEditForm
 import Wizard.Tenants.Detail.Models exposing (Model)
 import Wizard.Tenants.Detail.Msgs exposing (Msg(..))
@@ -50,42 +49,6 @@ update msg wrapMsg appState model =
 
         PutAppComplete result ->
             handlePutAppComplete appState model result
-
-        AddPlanModalOpen ->
-            ( { model | addPlanForm = Just PlanForm.initEmpty }, Cmd.none )
-
-        AddPlanModalClose ->
-            ( { model | addPlanForm = Nothing }, Cmd.none )
-
-        AddPlanModalFormMsg formMsg ->
-            handleAddPlanModalFormMsg formMsg wrapMsg appState model
-
-        PostPlanComplete result ->
-            handlePostPlanComplete appState model result
-
-        EditPlanModalOpen plan ->
-            ( { model | editPlanForm = Just ( plan.uuid, PlanForm.init appState plan ) }, Cmd.none )
-
-        EditPlanModalClose ->
-            ( { model | editPlanForm = Nothing }, Cmd.none )
-
-        EditPlanModalFormMsg formMsg ->
-            handleEditPlanModalFormMsg formMsg wrapMsg appState model
-
-        PutPlanComplete result ->
-            handlePutPlanComplete appState model result
-
-        DeletePlanModalOpen plan ->
-            ( { model | deletePlan = Just plan }, Cmd.none )
-
-        DeletePlanModalClose ->
-            ( { model | deletePlan = Nothing }, Cmd.none )
-
-        DeletePlanModalConfirm ->
-            handleDeletePlanModalConfirm wrapMsg appState model
-
-        DeletePlanComplete result ->
-            handleDeletePlanComplete appState model result
 
 
 handleEditFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -125,119 +88,6 @@ handlePutAppComplete appState model result =
             ( { model
                 | savingTenant = ApiError.toActionResult appState (gettext "Tenant could not be saved." appState.locale) error
                 , editForm = Maybe.map (setFormErrors appState error) model.editForm
-              }
-            , getResultCmd Wizard.Msgs.logoutMsg result
-            )
-
-
-handleAddPlanModalFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleAddPlanModalFormMsg formMsg wrapMsg appState model =
-    case model.addPlanForm of
-        Just form ->
-            case ( formMsg, Form.getOutput form ) of
-                ( Form.Submit, Just addPlanForm ) ->
-                    let
-                        body =
-                            PlanForm.encode appState addPlanForm
-
-                        cmd =
-                            Cmd.map wrapMsg <|
-                                TenantsApi.postPlan model.uuid body appState PostPlanComplete
-                    in
-                    ( { model | addingPlan = Loading }, cmd )
-
-                _ ->
-                    let
-                        newModel =
-                            { model | addPlanForm = Just <| Form.update PlanForm.validation formMsg form }
-                    in
-                    ( newModel, Cmd.none )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-handlePostPlanComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePostPlanComplete appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
-
-        Err error ->
-            ( { model
-                | addingPlan = ApiError.toActionResult appState (gettext "Plan could not be created." appState.locale) error
-                , addPlanForm = Maybe.map (setFormErrors appState error) model.addPlanForm
-              }
-            , getResultCmd Wizard.Msgs.logoutMsg result
-            )
-
-
-handleEditPlanModalFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleEditPlanModalFormMsg formMsg wrapMsg appState model =
-    case model.editPlanForm of
-        Just ( planUuid, form ) ->
-            case ( formMsg, Form.getOutput form ) of
-                ( Form.Submit, Just editPlanForm ) ->
-                    let
-                        body =
-                            PlanForm.encode appState editPlanForm
-
-                        cmd =
-                            Cmd.map wrapMsg <|
-                                TenantsApi.putPlan model.uuid planUuid body appState PutPlanComplete
-                    in
-                    ( { model | editingPlan = Loading }, cmd )
-
-                _ ->
-                    let
-                        newModel =
-                            { model | editPlanForm = Just ( planUuid, Form.update PlanForm.validation formMsg form ) }
-                    in
-                    ( newModel, Cmd.none )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-handlePutPlanComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePutPlanComplete appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
-
-        Err error ->
-            ( { model
-                | editingPlan = ApiError.toActionResult appState (gettext "Plan could not be saved." appState.locale) error
-                , editPlanForm = Maybe.map (Tuple.mapSecond (setFormErrors appState error)) model.editPlanForm
-              }
-            , getResultCmd Wizard.Msgs.logoutMsg result
-            )
-
-
-handleDeletePlanModalConfirm : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeletePlanModalConfirm wrapMsg appState model =
-    case model.deletePlan of
-        Just plan ->
-            let
-                cmd =
-                    Cmd.map wrapMsg <|
-                        TenantsApi.deletePlan model.uuid plan.uuid appState DeletePlanComplete
-            in
-            ( { model | deletingPlan = Loading }, cmd )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-handleDeletePlanComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeletePlanComplete appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
-
-        Err error ->
-            ( { model
-                | deletingPlan = ApiError.toActionResult appState (gettext "Plan could not be deleted." appState.locale) error
               }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )

@@ -1,19 +1,16 @@
 module Shared.Api.Tenants exposing
-    ( deletePlan
-    , getCurrentConfig
+    ( getCurrentConfig
     , getTenant
     , getTenantUsage
     , getTenants
-    , postPlan
     , postTenant
     , putCurrentConfig
-    , putPlan
     , putTenant
     )
 
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPost, jwtPut)
+import Shared.Api exposing (ToMsg, jwtGet, jwtPost, jwtPut)
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
@@ -55,21 +52,6 @@ postTenant =
 putTenant : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putTenant uuid =
     jwtPut ("/tenants/" ++ Uuid.toString uuid)
-
-
-postPlan : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-postPlan uuid =
-    jwtPost ("/tenants/" ++ Uuid.toString uuid ++ "/plans")
-
-
-putPlan : Uuid -> Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putPlan tenantUuid planUuid =
-    jwtPut ("/tenants/" ++ Uuid.toString tenantUuid ++ "/plans/" ++ Uuid.toString planUuid)
-
-
-deletePlan : Uuid -> Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-deletePlan tenantUuid planUuid =
-    jwtDelete ("/tenants/" ++ Uuid.toString tenantUuid ++ "/plans/" ++ Uuid.toString planUuid)
 
 
 getCurrentConfig : AbstractAppState a -> ToMsg EditableConfig msg -> Cmd msg
