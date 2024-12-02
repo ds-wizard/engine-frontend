@@ -6,6 +6,7 @@ module Shared.Api.Tenants exposing
     , postTenant
     , putCurrentConfig
     , putTenant
+    , putTenantLimits
     )
 
 import Json.Encode as E
@@ -67,3 +68,8 @@ putCurrentConfig =
 getTenantUsage : UuidOrCurrent -> AbstractAppState a -> ToMsg Usage msg -> Cmd msg
 getTenantUsage tenantUuid =
     jwtGet ("/tenants/" ++ UuidOrCurrent.toString tenantUuid ++ "/usages/wizard") Usage.decoder
+
+
+putTenantLimits : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putTenantLimits tenantUuid =
+    jwtPut ("/tenants/" ++ Uuid.toString tenantUuid ++ "/limits")

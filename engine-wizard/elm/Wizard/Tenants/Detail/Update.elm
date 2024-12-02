@@ -16,20 +16,21 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
-import Wizard.Tenants.Common.TenantEditForm as AppEditForm
+import Wizard.Tenants.Common.TenantEditForm as TenantEditForm
+import Wizard.Tenants.Common.TenantLimitsForm as TenantLimitsForm
 import Wizard.Tenants.Detail.Models exposing (Model)
 import Wizard.Tenants.Detail.Msgs exposing (Msg(..))
 
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    TenantsApi.getTenant uuid appState GetAppComplete
+    TenantsApi.getTenant uuid appState GetTenantComplete
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetAppComplete result ->
+        GetTenantComplete result ->
             applyResult appState
                 { setResult = setTenant
                 , defaultError = gettext "Unable to get tenant." appState.locale
@@ -39,7 +40,7 @@ update msg wrapMsg appState model =
                 }
 
         EditModalOpen ->
-            ( { model | editForm = ActionResult.unwrap Nothing (Just << AppEditForm.init) model.tenant }, Cmd.none )
+            ( { model | editForm = ActionResult.unwrap Nothing (Just << TenantEditForm.init) model.tenant }, Cmd.none )
 
         EditModalClose ->
             ( { model | editForm = Nothing }, Cmd.none )
@@ -47,8 +48,20 @@ update msg wrapMsg appState model =
         EditModalFormMsg formMsg ->
             handleEditFormMsg formMsg wrapMsg appState model
 
-        PutAppComplete result ->
+        PutTenantComplete result ->
             handlePutAppComplete appState model result
+
+        EditLimitsModalOpen ->
+            ( { model | limitsForm = ActionResult.unwrap Nothing (Just << TenantLimitsForm.init) model.tenant }, Cmd.none )
+
+        EditLimitsModalClose ->
+            ( { model | limitsForm = Nothing }, Cmd.none )
+
+        EditLimitsModalFormMsg formMsg ->
+            handleEditLimitsFormMsg formMsg wrapMsg appState model
+
+        PutTenantLimitsComplete result ->
+            handlePutAppLimitsComplete appState model result
 
 
 handleEditFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -59,18 +72,18 @@ handleEditFormMsg formMsg wrapMsg appState model =
                 ( Form.Submit, Just appEditForm ) ->
                     let
                         body =
-                            AppEditForm.encode appEditForm
+                            TenantEditForm.encode appEditForm
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                TenantsApi.putTenant model.uuid body appState PutAppComplete
+                                TenantsApi.putTenant model.uuid body appState PutTenantComplete
                     in
                     ( { model | savingTenant = Loading }, cmd )
 
                 _ ->
                     let
                         newModel =
-                            { model | editForm = Just <| Form.update AppEditForm.validation formMsg form }
+                            { model | editForm = Just <| Form.update TenantEditForm.validation formMsg form }
                     in
                     ( newModel, Cmd.none )
 
@@ -88,6 +101,48 @@ handlePutAppComplete appState model result =
             ( { model
                 | savingTenant = ApiError.toActionResult appState (gettext "Tenant could not be saved." appState.locale) error
                 , editForm = Maybe.map (setFormErrors appState error) model.editForm
+              }
+            , getResultCmd Wizard.Msgs.logoutMsg result
+            )
+
+
+handleEditLimitsFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleEditLimitsFormMsg formMsg wrapMsg appState model =
+    case model.limitsForm of
+        Just form ->
+            case ( formMsg, Form.getOutput form ) of
+                ( Form.Submit, Just appLimitsForm ) ->
+                    let
+                        body =
+                            TenantLimitsForm.encode appLimitsForm
+
+                        cmd =
+                            Cmd.map wrapMsg <|
+                                TenantsApi.putTenantLimits model.uuid body appState PutTenantLimitsComplete
+                    in
+                    ( { model | savingTenant = Loading }, cmd )
+
+                _ ->
+                    let
+                        newModel =
+                            { model | limitsForm = Just <| Form.update TenantLimitsForm.validation formMsg form }
+                    in
+                    ( newModel, Cmd.none )
+
+        Nothing ->
+            ( model, Cmd.none )
+
+
+handlePutAppLimitsComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePutAppLimitsComplete appState model result =
+    case result of
+        Ok _ ->
+            ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
+
+        Err error ->
+            ( { model
+                | savingTenant = ApiError.toActionResult appState (gettext "Tenant limits could not be saved." appState.locale) error
+                , limitsForm = Maybe.map (setFormErrors appState error) model.limitsForm
               }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )

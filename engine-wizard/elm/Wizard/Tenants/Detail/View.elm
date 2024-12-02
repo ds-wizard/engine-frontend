@@ -7,6 +7,7 @@ import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
+import Registry.Components.FontAwesome exposing (fas)
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.Admin as Admin
@@ -42,6 +43,7 @@ viewApp appState model app =
         , content appState app
         , sidePanel appState app
         , viewEditModal appState model
+        , viewEditLimitsModal appState model
         ]
 
 
@@ -54,13 +56,19 @@ header appState tenantDetail =
                 , text (gettext "Edit" appState.locale)
                 ]
 
+        editLimitsAction =
+            a [ onClick EditLimitsModalOpen, dataCy "tenant-detail_edit-limits" ]
+                [ fas "fa fa-sliders"
+                , text (gettext "Edit limits" appState.locale)
+                ]
+
         title =
             span [ class "top-header-title-with-icon" ]
                 [ TenantIcon.view tenantDetail
                 , text tenantDetail.name
                 ]
     in
-    DetailPage.header title [ editAction ]
+    DetailPage.header title [ editAction, editLimitsAction ]
 
 
 content : AppState -> TenantDetail -> Html Msg
@@ -168,6 +176,42 @@ viewEditModal appState model =
             , cancelMsg = Just EditModalClose
             , dangerous = False
             , dataCy = "tenant-edit"
+            }
+    in
+    Modal.confirm appState config
+
+
+viewEditLimitsModal : AppState -> Model -> Html Msg
+viewEditLimitsModal appState model =
+    let
+        modalContent =
+            case model.limitsForm of
+                Just form ->
+                    [ Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "users" <| gettext "Users" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "activeUsers" <| gettext "Active Users" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "branches" <| gettext "Knowledge Model Editors" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "knowledgeModels" <| gettext "Knowledge Models" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documentTemplateDrafts" <| gettext "Document Template Editors" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documentTemplates" <| gettext "Document Templates" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "questionnaires" <| gettext "Projects" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documents" <| gettext "Documents" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "locales" <| gettext "Locales" appState.locale
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.fileSize appState form "storage" <| gettext "Storage" appState.locale
+                    ]
+
+                Nothing ->
+                    []
+
+        config =
+            { modalTitle = gettext "Edit limits" appState.locale
+            , modalContent = modalContent
+            , visible = Maybe.isJust model.limitsForm
+            , actionResult = model.savingTenant
+            , actionName = gettext "Save" appState.locale
+            , actionMsg = EditLimitsModalFormMsg Form.Submit
+            , cancelMsg = Just EditLimitsModalClose
+            , dangerous = False
+            , dataCy = "tenant-edit-limits"
             }
     in
     Modal.confirm appState config

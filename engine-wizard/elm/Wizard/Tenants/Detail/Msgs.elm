@@ -6,8 +6,12 @@ import Shared.Error.ApiError exposing (ApiError)
 
 
 type Msg
-    = GetAppComplete (Result ApiError TenantDetail)
+    = GetTenantComplete (Result ApiError TenantDetail)
     | EditModalOpen
     | EditModalClose
     | EditModalFormMsg Form.Msg
-    | PutAppComplete (Result ApiError ())
+    | PutTenantComplete (Result ApiError ())
+    | EditLimitsModalOpen
+    | EditLimitsModalClose
+    | EditLimitsModalFormMsg Form.Msg
+    | PutTenantLimitsComplete (Result ApiError ())

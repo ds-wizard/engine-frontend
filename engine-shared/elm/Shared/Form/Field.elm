@@ -1,5 +1,6 @@
 module Shared.Form.Field exposing
     ( dict
+    , int
     , maybeString
     )
 
@@ -26,3 +27,8 @@ dict valueField inputDict =
                 |> List.map (Field.group << initEntry)
     in
     Field.list values
+
+
+int : Int -> Field
+int =
+    Field.string << String.fromInt

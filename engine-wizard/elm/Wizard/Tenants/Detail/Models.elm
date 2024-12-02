@@ -9,12 +9,14 @@ import Shared.Data.TenantDetail exposing (TenantDetail)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Tenants.Common.TenantEditForm exposing (TenantEditForm)
+import Wizard.Tenants.Common.TenantLimitsForm exposing (TenantLimitsForm)
 
 
 type alias Model =
     { uuid : Uuid
     , tenant : ActionResult TenantDetail
     , editForm : Maybe (Form FormError TenantEditForm)
+    , limitsForm : Maybe (Form FormError TenantLimitsForm)
     , savingTenant : ActionResult String
     }
 
@@ -24,5 +26,6 @@ initialModel uuid =
     { uuid = uuid
     , tenant = ActionResult.Loading
     , editForm = Nothing
+    , limitsForm = Nothing
     , savingTenant = Unset
     }

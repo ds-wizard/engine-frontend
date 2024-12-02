@@ -3,6 +3,7 @@ module Wizard.Common.View.FormGroup exposing
     , alertRadioGroup
     , codeView
     , date
+    , fileSize
     , formGroupCustom
     , formatRadioGroup
     , getErrors
@@ -40,6 +41,7 @@ import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
@@ -185,6 +187,31 @@ secret appState form fieldName labelText =
             div [ class "input-secret" ]
                 [ inputField
                 , showHideIcon
+                ]
+    in
+    formGroup inputFn [] appState form fieldName labelText
+
+
+fileSize : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+fileSize appState form fieldName labelText =
+    let
+        inputFn field attributes =
+            let
+                value =
+                    (Form.getFieldAsString fieldName form).value
+                        |> Maybe.andThen String.toInt
+                        |> Maybe.withDefault 0
+            in
+            div [ class "input-group" ]
+                [ Input.textInput field
+                    (attributes
+                        ++ [ class "form-control"
+                           ]
+                    )
+                , span [ class "input-group-text" ]
+                    [ text "≈ "
+                    , text (ByteUnits.toReadable value)
+                    ]
                 ]
     in
     formGroup inputFn [] appState form fieldName labelText

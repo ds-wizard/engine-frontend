@@ -15,11 +15,11 @@ type alias TenantEditForm =
 
 
 init : TenantDetail -> Form FormError TenantEditForm
-init appDetail =
+init tenantDetail =
     let
         fields =
-            [ ( "tenantId", Field.string appDetail.tenantId )
-            , ( "name", Field.string appDetail.name )
+            [ ( "tenantId", Field.string tenantDetail.tenantId )
+            , ( "name", Field.string tenantDetail.name )
             ]
     in
     Form.initial fields validation
