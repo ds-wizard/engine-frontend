@@ -4,8 +4,15 @@ import Round
 
 
 toReadable : Int -> String
-toReadable =
+toReadable num =
     let
+        sign =
+            if num < 0 then
+                "-"
+
+            else
+                ""
+
         units =
             [ "B", "kB", "MB", "GB", "TB", "PB" ]
 
@@ -27,4 +34,4 @@ toReadable =
                 [] ->
                     ""
     in
-    fold units << toFloat
+    sign ++ fold units (toFloat (abs num))
