@@ -948,16 +948,23 @@ update cfg appState msg model =
 
         RenameFolder currentName newName ->
             let
+                mapNewFolder f =
+                    if f == currentName then
+                        newName
+
+                    else
+                        f
+
                 mapFile f =
                     if String.startsWith currentName f.fileName then
-                        { f | fileName = String.replace currentName newName f.fileName }
+                        { f | fileName = newName ++ String.dropLeft (String.length currentName) f.fileName }
 
                     else
                         f
 
                 mapAsset a =
                     if String.startsWith currentName a.fileName then
-                        { a | fileName = String.replace currentName newName a.fileName }
+                        { a | fileName = newName ++ String.dropLeft (String.length currentName) a.fileName }
 
                     else
                         a
@@ -966,6 +973,7 @@ update cfg appState msg model =
                 { model
                     | files = ActionResult.map (List.map mapFile) model.files
                     , assets = ActionResult.map (List.map mapAsset) model.assets
+                    , newFolders = List.map mapNewFolder model.newFolders
                 }
             , Cmd.none
             )
@@ -1055,6 +1063,7 @@ viewSidebar appState model fileTree =
                     a
                         (onClick renameActionMsg
                             :: class "ms-3"
+                            :: dataCy "dt-editor_file-tree_rename"
                             :: tooltipLeft (gettext "Rename" appState.locale)
                         )
                         [ fa "fas fa-pen-to-square" ]
@@ -1068,6 +1077,7 @@ viewSidebar appState model fileTree =
                     a
                         (onClick moveActionMsg
                             :: class "ms-3"
+                            :: dataCy "dt-editor_file-tree_move"
                             :: tooltipLeft (gettext "Move" appState.locale)
                         )
                         [ fa "fas fa-file-import" ]
@@ -1089,11 +1099,10 @@ viewSidebar appState model fileTree =
 
         deleteAction =
             a
-                ([ class "text-danger ms-3"
-                 , onClick (SetDeleteModalOpen True)
-                 , dataCy "dt-editor_file-tree_delete"
-                 ]
-                    ++ tooltipLeft (gettext "Delete" appState.locale)
+                (class "text-danger ms-3"
+                    :: onClick (SetDeleteModalOpen True)
+                    :: dataCy "dt-editor_file-tree_delete"
+                    :: tooltipLeft (gettext "Delete" appState.locale)
                 )
                 [ faSet "_global.delete" appState ]
 
