@@ -635,6 +635,9 @@ questionValidations appState config =
                 _ ->
                     config.onChange config.validations
 
+        inputName i =
+            "validation-" ++ String.fromInt i ++ "-value"
+
         viewValidationTypeOption validation validationOption =
             option
                 [ value validationOption.value
@@ -647,6 +650,8 @@ questionValidations appState config =
                 [ label [] [ text (gettext "Value" appState.locale) ]
                 , input
                     [ type_ "number"
+                    , name (inputName i)
+                    , id (inputName i)
                     , class "form-control"
                     , value (String.fromInt data.value)
                     , onInput (\newValue -> config.onChange (List.setAt i (createValidation { value = Maybe.withDefault 0 <| String.toInt newValue }) config.validations))
@@ -659,6 +664,8 @@ questionValidations appState config =
                 [ label [] [ text (gettext "Value" appState.locale) ]
                 , input
                     [ type_ "number"
+                    , name (inputName i)
+                    , id (inputName i)
                     , class "form-control"
                     , value (String.fromFloat data.value)
                     , onInput (\newValue -> config.onChange (List.setAt i (createValidation { value = Maybe.withDefault 0 <| String.toFloat newValue }) config.validations))
@@ -671,6 +678,8 @@ questionValidations appState config =
                 [ label [] [ text (gettext "Value" appState.locale) ]
                 , input
                     [ type_ "text"
+                    , name (inputName i)
+                    , id (inputName i)
                     , class "form-control"
                     , value data.value
                     , onInput (\newValue -> config.onChange (List.setAt i (createValidation { value = newValue }) config.validations))
@@ -762,6 +771,8 @@ questionValidations appState config =
                         [ label [] [ text (gettext "Validation type" appState.locale) ]
                         , Html.select
                             [ class "form-control"
+                            , name ("validation-" ++ String.fromInt i ++ "-type")
+                            , id ("validation-" ++ String.fromInt i ++ "-type")
                             , onChange (changeValidationMsg i)
                             ]
                             (List.map (viewValidationTypeOption validation) filteredValidationOptions)
