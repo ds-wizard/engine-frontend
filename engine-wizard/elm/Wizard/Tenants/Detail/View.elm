@@ -50,17 +50,25 @@ viewApp appState model app =
 header : AppState -> TenantDetail -> Html Msg
 header appState tenantDetail =
     let
-        editAction =
-            a [ onClick EditModalOpen, dataCy "tenant-detail_edit" ]
-                [ faSet "_global.edit" appState
-                , text (gettext "Edit" appState.locale)
-                ]
+        actions =
+            if Admin.isEnabled appState.config.admin then
+                []
 
-        editLimitsAction =
-            a [ onClick EditLimitsModalOpen, dataCy "tenant-detail_edit-limits" ]
-                [ fas "fa fa-sliders"
-                , text (gettext "Edit limits" appState.locale)
-                ]
+            else
+                let
+                    editAction =
+                        a [ onClick EditModalOpen, dataCy "tenant-detail_edit" ]
+                            [ faSet "_global.edit" appState
+                            , text (gettext "Edit" appState.locale)
+                            ]
+
+                    editLimitsAction =
+                        a [ onClick EditLimitsModalOpen, dataCy "tenant-detail_edit-limits" ]
+                            [ fas "fa fa-sliders"
+                            , text (gettext "Edit limits" appState.locale)
+                            ]
+                in
+                [ editAction, editLimitsAction ]
 
         title =
             span [ class "top-header-title-with-icon" ]
@@ -68,7 +76,7 @@ header appState tenantDetail =
                 , text tenantDetail.name
                 ]
     in
-    DetailPage.header title [ editAction, editLimitsAction ]
+    DetailPage.header title actions
 
 
 content : AppState -> TenantDetail -> Html Msg
@@ -85,7 +93,7 @@ content appState tenantDetail =
         [ editWarning
         , div [ DetailPage.contentInnerClass ]
             [ h3 [] [ text (gettext "Usage" appState.locale) ]
-            , UsageTable.view appState False tenantDetail.usage
+            , UsageTable.view appState True tenantDetail.usage
             ]
         ]
 
