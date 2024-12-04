@@ -51,7 +51,7 @@ viewUsageRow appState showSoftLimits mapValue usageLabel usageValue =
                         String.fromFloat (toFloat usageValue.current * 100 / toFloat max) ++ "%"
 
                     barColorClass =
-                        if usageValue.current == max then
+                        if usageValue.current >= max then
                             "bg-danger"
 
                         else if (toFloat usageValue.current / toFloat max) >= 0.8 then
