@@ -88,15 +88,38 @@ function getMaxUploadFileSize() {
 }
 
 function bootstrapErrorHTML(errorCode) {
-    const title = errorCode ? (errorCode === 423 ? 'Plan expired' : 'Bootstrap Error') : 'Bootstrap Error'
-    const message = errorCode ? (errorCode === 423 ? 'The application does not have any active plan.' : 'Server responded with an error code ' + errorCode + '.') : 'Configuration cannot be loaded due to server unavailable.'
-    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '<br>Please, contact the application provider.</p></div></div>'
+    function getErrorMessage() {
+        if (!errorCode) {
+            return {
+                title: 'Bootstrap Error',
+                message: 'Configuration cannot be loaded due to server unavailable.<br>Please, contact the application provider.'
+            }
+        }
+        if (errorCode === 404) {
+            return {
+                title: 'Application Not Found or Inactive',
+                message: 'We couldn\'t find an active application for this subdomain.<br>Please verify the details or contact support for assistance.'
+            }
+        }
+
+        return {
+            title: 'Bootstrap Error',
+            message: 'Server responded with an error code ' + errorCode + '.<br>Please, contact the application provider.'
+        }
+    }
+
+    const error = getErrorMessage()
+    return messageHTML(error.title, error.message)
 }
 
 function housekeepingHTML() {
-    const title = 'Housekeeping in progress'
+    const title = '<i class="fa fas fa-spinner fa-spin me-2 text-lighter"></i>Housekeeping in progress'
     const message = 'We are currently upgrading the data to the latest version to enhance your experience. This process will be completed shortly.'
-    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_logistics.svg"><div><h1><i class="fa fas fa-spinner fa-spin me-2 text-lighter"></i>' + title + '</h1><p>' + message + '</p></div></div>'
+    return messageHTML(title, message)
+}
+
+function messageHTML(title, message) {
+    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '</p></div></div>'
 }
 
 function clientUrl() {
@@ -167,8 +190,8 @@ window.onload = function () {
     const headers = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
     const apiUrl = session?.apiUrl
 
-    const defaultRetryTime = 2;
-    const maxRetryTime = 15;
+    const defaultRetryTime = 2
+    const maxRetryTime = 15
 
     let retryTime = defaultRetryTime
 
