@@ -335,16 +335,26 @@ formView appState questionnaire model =
 
         typeHintInput isInvalid =
             let
+                selectedTemplateId =
+                    Maybe.map .id model.templateTypeHintInputModel.selected
+
+                questionnaireTemplateId =
+                    Maybe.map .id questionnaire.documentTemplate
+
                 templateFlash =
-                    case ( questionnaire.documentTemplateState, questionnaire.documentTemplatePhase ) of
-                        ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
-                            Flash.error appState (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
+                    if selectedTemplateId == questionnaireTemplateId then
+                        case ( questionnaire.documentTemplateState, questionnaire.documentTemplatePhase ) of
+                            ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
+                                Flash.error appState (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
 
-                        ( _, Just DocumentTemplatePhase.Deprecated ) ->
-                            Flash.warning appState (gettext "This document template is now deprecated." appState.locale)
+                            ( _, Just DocumentTemplatePhase.Deprecated ) ->
+                                Flash.warning appState (gettext "This document template is now deprecated." appState.locale)
 
-                        _ ->
-                            emptyNode
+                            _ ->
+                                emptyNode
+
+                    else
+                        emptyNode
             in
             div []
                 [ templateFlash
