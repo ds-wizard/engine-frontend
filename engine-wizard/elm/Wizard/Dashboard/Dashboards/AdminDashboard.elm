@@ -15,7 +15,8 @@ import Maybe.Extra as Maybe
 import Shared.Api.CommentThreads as CommentThreadsApi
 import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Shared.Api.Packages as PackagesApi
-import Shared.Api.Usage as UsageApi
+import Shared.Api.Tenants as TenantsApi
+import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig
 import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
@@ -75,7 +76,7 @@ fetchData appState =
             DocumentTemplatesApi.getOutdatedTemplates appState GetTemplatesComplete
 
         usageCmd =
-            UsageApi.getUsage appState GetUsageComplete
+            TenantsApi.getTenantUsage UuidOrCurrent.current appState GetUsageComplete
     in
     Cmd.batch [ packagesCmd, templatesCmd, usageCmd, fetchCommentThreads appState ]
 

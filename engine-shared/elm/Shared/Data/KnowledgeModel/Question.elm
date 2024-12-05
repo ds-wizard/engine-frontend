@@ -24,6 +24,7 @@ module Shared.Data.KnowledgeModel.Question exposing
     , getTitle
     , getTypeString
     , getUuid
+    , getValidations
     , getValueType
     , isDesirable
     , isList
@@ -49,6 +50,7 @@ import Shared.Data.KnowledgeModel.Question.ListQuestionData as ListQuestionData 
 import Shared.Data.KnowledgeModel.Question.MultiChoiceQuestionData as MultiChoiceQuestionData exposing (MultiChoiceQuestionData)
 import Shared.Data.KnowledgeModel.Question.OptionsQuestionData as OptionsQuestionData exposing (OptionsQuestionData)
 import Shared.Data.KnowledgeModel.Question.QuestionType as QuestionType exposing (QuestionType(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValidation exposing (QuestionValidation)
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType)
 import Shared.Data.KnowledgeModel.Question.ValueQuestionData as ValueQuestionData exposing (ValueQuestionData)
 
@@ -355,6 +357,16 @@ getValueType question =
     case question of
         ValueQuestion _ data ->
             Just data.valueType
+
+        _ ->
+            Nothing
+
+
+getValidations : Question -> Maybe (List QuestionValidation)
+getValidations question =
+    case question of
+        ValueQuestion _ data ->
+            Just data.validations
 
         _ ->
             Nothing

@@ -15,7 +15,6 @@ type Route
     | SubmissionRoute
     | KnowledgeModelsRoute
     | UsageRoute
-    | PlansRoute
 
 
 defaultRoute : Route

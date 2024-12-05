@@ -20,5 +20,5 @@ viewContent : AppState -> Usage -> Html Msg
 viewContent appState usage =
     div [ class "Usage" ]
         [ Page.header (gettext "Usage" appState.locale) []
-        , UsageTable.view appState usage
+        , UsageTable.view appState False usage
         ]

@@ -305,6 +305,26 @@ $breadcrumbs-height: 40px;
         }
     }
 
+    .question-validations {
+        .card {
+            &:not(:last-child) {
+                margin-bottom: $spacer-3;
+            }
+
+            .card-body {
+                position: relative;
+
+                .delete {
+                    position: absolute;
+                    right: 0;
+                    top: 0;
+                    padding: 0 1rem;
+                    margin-top: 0.5rem;
+                }
+            }
+        }
+    }
+
     .prefab-selection {
         background: $gray-100;
         padding: .5rem 1rem;

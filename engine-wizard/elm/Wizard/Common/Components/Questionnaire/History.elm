@@ -1,8 +1,9 @@
 module Wizard.Common.Components.Questionnaire.History exposing
     ( Model
-    , Msg
+    , Msg(..)
     , ViewConfig
     , init
+    , setNamedOnly
     , subscriptions
     , update
     , view
@@ -13,7 +14,7 @@ import Bootstrap.Dropdown as Dropdown
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, br, div, em, h5, img, input, label, li, span, strong, text, ul)
-import Html.Attributes exposing (class, src, type_)
+import Html.Attributes exposing (checked, class, src, type_)
 import Html.Events exposing (onCheck, onClick)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -76,6 +77,11 @@ init appState =
     , dropdownStates = Dict.empty
     , namedOnly = False
     }
+
+
+setNamedOnly : Bool -> Model -> Model
+setNamedOnly namedOnly model =
+    { model | namedOnly = namedOnly }
 
 
 
@@ -166,7 +172,13 @@ viewHistory appState cfg model ( versions, events ) =
         namedOnlySelect =
             div [ class "form-check" ]
                 [ label [ class "form-check-label form-check-toggle" ]
-                    [ input [ type_ "checkbox", class "form-check-input", onCheck (cfg.wrapMsg << SetNamedOnly) ] []
+                    [ input
+                        [ type_ "checkbox"
+                        , class "form-check-input"
+                        , checked model.namedOnly
+                        , onCheck (cfg.wrapMsg << SetNamedOnly)
+                        ]
+                        []
                     , span [] [ text (gettext "Named versions only" appState.locale) ]
                     ]
                 ]

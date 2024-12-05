@@ -19,7 +19,7 @@ type alias Usage =
 
 
 type alias UsageValue =
-    { max : Maybe Int
+    { max : Int
     , current : Int
     }
 
@@ -42,5 +42,5 @@ decoder =
 decodeUsageValue : Decoder UsageValue
 decodeUsageValue =
     D.succeed UsageValue
-        |> D.required "max" (D.maybe D.int)
+        |> D.required "max" D.int
         |> D.required "current" D.int

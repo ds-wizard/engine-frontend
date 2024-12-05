@@ -1,7 +1,8 @@
 module Wizard.Settings.Usage.Update exposing (fetchData, update)
 
 import Gettext exposing (gettext)
-import Shared.Api.Usage as UsageApi
+import Shared.Api.Tenants as TenantsApi
+import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Setters exposing (setUsage)
 import Wizard.Common.Api exposing (applyResult)
 import Wizard.Common.AppState exposing (AppState)
@@ -12,7 +13,7 @@ import Wizard.Settings.Usage.Msgs exposing (Msg(..))
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    UsageApi.getUsage appState GetUsageComplete
+    TenantsApi.getTenantUsage UuidOrCurrent.current appState GetUsageComplete
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

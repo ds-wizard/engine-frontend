@@ -26,6 +26,7 @@ questionDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "questionType": "ValueQuestion",
                             "valueType": "$type",
+                            "validations": [],
                             "title": "Can you answer this question?",
                             "text": null,
                             "requiredPhaseUuid": "6832055b-5416-43ae-9896-1d9135ced2c4",
@@ -49,6 +50,7 @@ questionDecoderTest =
                             , annotations = []
                             }
                             { valueType = parsedType
+                            , validations = []
                             }
                 in
                 expectDecoder Question.decoder raw expected
@@ -67,6 +69,7 @@ questionDecoderTest =
                             "referenceUuids": [],
                             "expertUuids": [],
                             "valueType": "StringQuestionValueType",
+                            "validations": [],
                             "annotations": []
                         }
                         """
@@ -83,6 +86,7 @@ questionDecoderTest =
                             , annotations = []
                             }
                             { valueType = StringQuestionValueType
+                            , validations = []
                             }
                 in
                 expectDecoder Question.decoder raw expected
@@ -95,6 +99,7 @@ questionDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "questionType": "ValueQuestion",
                             "valueType": "StringQuestionValueType",
+                            "validations": [],
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredPhaseUuid": null,
@@ -117,6 +122,7 @@ questionDecoderTest =
                             , annotations = []
                             }
                             { valueType = StringQuestionValueType
+                            , validations = []
                             }
                 in
                 expectDecoder Question.decoder raw expected
@@ -129,6 +135,7 @@ questionDecoderTest =
                             "uuid": "8a703cfa-450f-421a-8819-875619ccb54d",
                             "questionType": "ValueQuestion",
                             "valueType": "StringQuestionValueType",
+                            "validations": [],
                             "title": "Can you answer this question?",
                             "text": "Please answer the question",
                             "requiredPhaseUuid": "0948bd26-d985-4549-b7c8-95e9061d6413",
@@ -151,6 +158,7 @@ questionDecoderTest =
                             , annotations = []
                             }
                             { valueType = StringQuestionValueType
+                            , validations = []
                             }
                 in
                 expectDecoder Question.decoder raw expected

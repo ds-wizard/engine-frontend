@@ -16,7 +16,6 @@ import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
 import Wizard.Settings.Msgs exposing (Msg(..))
 import Wizard.Settings.Organization.View
-import Wizard.Settings.Plans.View
 import Wizard.Settings.PrivacyAndSupport.View
 import Wizard.Settings.Projects.View
 import Wizard.Settings.Registry.View
@@ -69,10 +68,6 @@ view route appState model =
                 UsageRoute ->
                     Html.map UsageMsg <|
                         Wizard.Settings.Usage.View.view appState model.usageModel
-
-                PlansRoute ->
-                    Html.map PlansMsg <|
-                        Wizard.Settings.Plans.View.view appState model.plansModel
     in
     div [ settingsClass "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation appState route ]
@@ -164,16 +159,8 @@ navigationContentLinks appState =
 
 navigationStatisticsLinks : AppState -> List ( Route, String )
 navigationStatisticsLinks appState =
-    let
-        items =
-            [ ( UsageRoute, gettext "Usage" appState.locale )
-            ]
-    in
-    if Feature.plans appState then
-        ( PlansRoute, gettext "Plans" appState.locale ) :: items
-
-    else
-        items
+    [ ( UsageRoute, gettext "Usage" appState.locale )
+    ]
 
 
 navigationLink : AppState -> Route -> ( Route, String ) -> Html Msg

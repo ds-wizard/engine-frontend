@@ -5,6 +5,7 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.EditorGroup e
     , isEditorOpen
     , isEmpty
     , removeEditor
+    , removeEditorByPath
     , removeEditorByUuid
     )
 
@@ -75,7 +76,7 @@ removeEditor editor group =
 
 
 removeEditorByUuid : Uuid -> EditorGroup -> EditorGroup
-removeEditorByUuid uuid group =
+removeEditorByUuid uuid =
     let
         predicate e =
             case e of
@@ -88,6 +89,28 @@ removeEditorByUuid uuid group =
                 _ ->
                     False
     in
+    removeEditorBy predicate
+
+
+removeEditorByPath : String -> EditorGroup -> EditorGroup
+removeEditorByPath path =
+    let
+        predicate e =
+            case e of
+                Editor.File file ->
+                    String.startsWith path file.fileName
+
+                Editor.Asset asset ->
+                    String.startsWith path asset.fileName
+
+                _ ->
+                    False
+    in
+    removeEditorBy predicate
+
+
+removeEditorBy : (Editor -> Bool) -> EditorGroup -> EditorGroup
+removeEditorBy predicate group =
     List.find predicate group.tabs
         |> Maybe.map (flip removeEditor group)
         |> Maybe.withDefault group

@@ -41,7 +41,7 @@ import Shared.Data.Event.CommonEventData exposing (CommonEventData)
 import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
 import Shared.Data.Event.EditChapterEventData as EditChapterEventData
 import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValueType, setWidgetUrl)
+import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValidations, setValueType, setWidgetUrl)
 import Shared.Data.Event.EditExpertEventData as EditExpertEventData
 import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
@@ -1075,8 +1075,18 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , onChange = createTypeEditEvent setValueType << Maybe.withDefault QuestionValueType.default << QuestionValueType.fromString
                                 , extra = Nothing
                                 }
+
+                        validationsInput =
+                            Input.questionValidations appState
+                                { label = gettext "Validations" appState.locale
+                                , valueType = Maybe.withDefault QuestionValueType.default <| Question.getValueType question
+                                , validations = Maybe.withDefault [] <| Question.getValidations question
+                                , onChange = createTypeEditEvent setValidations
+                                }
                     in
-                    [ valueTypeInput ]
+                    [ valueTypeInput
+                    , validationsInput
+                    ]
 
                 IntegrationQuestion _ _ ->
                     let
@@ -1183,7 +1193,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
                         listQuestionUuidOptions =
                             KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                |> List.filter (not << flip EditorBranch.isQuestionDeletedInHierarchy editorBranch << Question.getUuid)
                                 |> List.filter Question.isList
                                 |> List.sortBy Question.getTitle
                                 |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
@@ -1199,7 +1209,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , extra =
                                     case Question.getListQuestionUuid question of
                                         Just listQuestionUuid ->
-                                            if EditorBranch.isDeleted listQuestionUuid editorBranch then
+                                            if EditorBranch.isQuestionDeletedInHierarchy listQuestionUuid editorBranch then
                                                 Nothing
 
                                             else

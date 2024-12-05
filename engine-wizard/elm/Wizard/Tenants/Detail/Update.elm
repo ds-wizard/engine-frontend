@@ -16,21 +16,21 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
-import Wizard.Tenants.Common.PlanForm as PlanForm
-import Wizard.Tenants.Common.TenantEditForm as AppEditForm
+import Wizard.Tenants.Common.TenantEditForm as TenantEditForm
+import Wizard.Tenants.Common.TenantLimitsForm as TenantLimitsForm
 import Wizard.Tenants.Detail.Models exposing (Model)
 import Wizard.Tenants.Detail.Msgs exposing (Msg(..))
 
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    TenantsApi.getTenant uuid appState GetAppComplete
+    TenantsApi.getTenant uuid appState GetTenantComplete
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetAppComplete result ->
+        GetTenantComplete result ->
             applyResult appState
                 { setResult = setTenant
                 , defaultError = gettext "Unable to get tenant." appState.locale
@@ -40,7 +40,7 @@ update msg wrapMsg appState model =
                 }
 
         EditModalOpen ->
-            ( { model | editForm = ActionResult.unwrap Nothing (Just << AppEditForm.init) model.tenant }, Cmd.none )
+            ( { model | editForm = ActionResult.unwrap Nothing (Just << TenantEditForm.init) model.tenant }, Cmd.none )
 
         EditModalClose ->
             ( { model | editForm = Nothing }, Cmd.none )
@@ -48,44 +48,20 @@ update msg wrapMsg appState model =
         EditModalFormMsg formMsg ->
             handleEditFormMsg formMsg wrapMsg appState model
 
-        PutAppComplete result ->
+        PutTenantComplete result ->
             handlePutAppComplete appState model result
 
-        AddPlanModalOpen ->
-            ( { model | addPlanForm = Just PlanForm.initEmpty }, Cmd.none )
+        EditLimitsModalOpen ->
+            ( { model | limitsForm = ActionResult.unwrap Nothing (Just << TenantLimitsForm.init) model.tenant }, Cmd.none )
 
-        AddPlanModalClose ->
-            ( { model | addPlanForm = Nothing }, Cmd.none )
+        EditLimitsModalClose ->
+            ( { model | limitsForm = Nothing }, Cmd.none )
 
-        AddPlanModalFormMsg formMsg ->
-            handleAddPlanModalFormMsg formMsg wrapMsg appState model
+        EditLimitsModalFormMsg formMsg ->
+            handleEditLimitsFormMsg formMsg wrapMsg appState model
 
-        PostPlanComplete result ->
-            handlePostPlanComplete appState model result
-
-        EditPlanModalOpen plan ->
-            ( { model | editPlanForm = Just ( plan.uuid, PlanForm.init appState plan ) }, Cmd.none )
-
-        EditPlanModalClose ->
-            ( { model | editPlanForm = Nothing }, Cmd.none )
-
-        EditPlanModalFormMsg formMsg ->
-            handleEditPlanModalFormMsg formMsg wrapMsg appState model
-
-        PutPlanComplete result ->
-            handlePutPlanComplete appState model result
-
-        DeletePlanModalOpen plan ->
-            ( { model | deletePlan = Just plan }, Cmd.none )
-
-        DeletePlanModalClose ->
-            ( { model | deletePlan = Nothing }, Cmd.none )
-
-        DeletePlanModalConfirm ->
-            handleDeletePlanModalConfirm wrapMsg appState model
-
-        DeletePlanComplete result ->
-            handleDeletePlanComplete appState model result
+        PutTenantLimitsComplete result ->
+            handlePutAppLimitsComplete appState model result
 
 
 handleEditFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -96,18 +72,18 @@ handleEditFormMsg formMsg wrapMsg appState model =
                 ( Form.Submit, Just appEditForm ) ->
                     let
                         body =
-                            AppEditForm.encode appEditForm
+                            TenantEditForm.encode appEditForm
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                TenantsApi.putTenant model.uuid body appState PutAppComplete
+                                TenantsApi.putTenant model.uuid body appState PutTenantComplete
                     in
                     ( { model | savingTenant = Loading }, cmd )
 
                 _ ->
                     let
                         newModel =
-                            { model | editForm = Just <| Form.update AppEditForm.validation formMsg form }
+                            { model | editForm = Just <| Form.update TenantEditForm.validation formMsg form }
                     in
                     ( newModel, Cmd.none )
 
@@ -130,26 +106,26 @@ handlePutAppComplete appState model result =
             )
 
 
-handleAddPlanModalFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleAddPlanModalFormMsg formMsg wrapMsg appState model =
-    case model.addPlanForm of
+handleEditLimitsFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleEditLimitsFormMsg formMsg wrapMsg appState model =
+    case model.limitsForm of
         Just form ->
             case ( formMsg, Form.getOutput form ) of
-                ( Form.Submit, Just addPlanForm ) ->
+                ( Form.Submit, Just appLimitsForm ) ->
                     let
                         body =
-                            PlanForm.encode appState addPlanForm
+                            TenantLimitsForm.encode appLimitsForm
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                TenantsApi.postPlan model.uuid body appState PostPlanComplete
+                                TenantsApi.putTenantLimits model.uuid body appState PutTenantLimitsComplete
                     in
-                    ( { model | addingPlan = Loading }, cmd )
+                    ( { model | savingTenant = Loading }, cmd )
 
                 _ ->
                     let
                         newModel =
-                            { model | addPlanForm = Just <| Form.update PlanForm.validation formMsg form }
+                            { model | limitsForm = Just <| Form.update TenantLimitsForm.validation formMsg form }
                     in
                     ( newModel, Cmd.none )
 
@@ -157,87 +133,16 @@ handleAddPlanModalFormMsg formMsg wrapMsg appState model =
             ( model, Cmd.none )
 
 
-handlePostPlanComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePostPlanComplete appState model result =
+handlePutAppLimitsComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePutAppLimitsComplete appState model result =
     case result of
         Ok _ ->
             ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
 
         Err error ->
             ( { model
-                | addingPlan = ApiError.toActionResult appState (gettext "Plan could not be created." appState.locale) error
-                , addPlanForm = Maybe.map (setFormErrors appState error) model.addPlanForm
-              }
-            , getResultCmd Wizard.Msgs.logoutMsg result
-            )
-
-
-handleEditPlanModalFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleEditPlanModalFormMsg formMsg wrapMsg appState model =
-    case model.editPlanForm of
-        Just ( planUuid, form ) ->
-            case ( formMsg, Form.getOutput form ) of
-                ( Form.Submit, Just editPlanForm ) ->
-                    let
-                        body =
-                            PlanForm.encode appState editPlanForm
-
-                        cmd =
-                            Cmd.map wrapMsg <|
-                                TenantsApi.putPlan model.uuid planUuid body appState PutPlanComplete
-                    in
-                    ( { model | editingPlan = Loading }, cmd )
-
-                _ ->
-                    let
-                        newModel =
-                            { model | editPlanForm = Just ( planUuid, Form.update PlanForm.validation formMsg form ) }
-                    in
-                    ( newModel, Cmd.none )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-handlePutPlanComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePutPlanComplete appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
-
-        Err error ->
-            ( { model
-                | editingPlan = ApiError.toActionResult appState (gettext "Plan could not be saved." appState.locale) error
-                , editPlanForm = Maybe.map (Tuple.mapSecond (setFormErrors appState error)) model.editPlanForm
-              }
-            , getResultCmd Wizard.Msgs.logoutMsg result
-            )
-
-
-handleDeletePlanModalConfirm : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeletePlanModalConfirm wrapMsg appState model =
-    case model.deletePlan of
-        Just plan ->
-            let
-                cmd =
-                    Cmd.map wrapMsg <|
-                        TenantsApi.deletePlan model.uuid plan.uuid appState DeletePlanComplete
-            in
-            ( { model | deletingPlan = Loading }, cmd )
-
-        Nothing ->
-            ( model, Cmd.none )
-
-
-handleDeletePlanComplete : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeletePlanComplete appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState (Routes.tenantsDetail model.uuid) )
-
-        Err error ->
-            ( { model
-                | deletingPlan = ApiError.toActionResult appState (gettext "Plan could not be deleted." appState.locale) error
+                | savingTenant = ApiError.toActionResult appState (gettext "Tenant limits could not be saved." appState.locale) error
+                , limitsForm = Maybe.map (setFormErrors appState error) model.limitsForm
               }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )

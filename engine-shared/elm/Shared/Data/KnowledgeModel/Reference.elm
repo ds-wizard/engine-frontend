@@ -106,7 +106,7 @@ getUrl =
 
 getLabel : Reference -> Maybe String
 getLabel =
-    map (always Nothing) (Just << URLReferenceData.toLabel) (always Nothing)
+    map (always Nothing) (Just << .label) (always Nothing)
 
 
 getTargetUuid : Reference -> Maybe String

@@ -3,6 +3,7 @@ module Wizard.Common.View.FormGroup exposing
     , alertRadioGroup
     , codeView
     , date
+    , fileSize
     , formGroupCustom
     , formatRadioGroup
     , getErrors
@@ -24,7 +25,6 @@ module Wizard.Common.View.FormGroup exposing
     , richRadioGroup
     , secret
     , select
-    , simpleDate
     , textView
     , textarea
     , textareaAttrs
@@ -41,6 +41,7 @@ import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
+import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
@@ -186,6 +187,31 @@ secret appState form fieldName labelText =
             div [ class "input-secret" ]
                 [ inputField
                 , showHideIcon
+                ]
+    in
+    formGroup inputFn [] appState form fieldName labelText
+
+
+fileSize : AppState -> Form FormError o -> String -> String -> Html Form.Msg
+fileSize appState form fieldName labelText =
+    let
+        inputFn field attributes =
+            let
+                value =
+                    (Form.getFieldAsString fieldName form).value
+                        |> Maybe.andThen String.toInt
+                        |> Maybe.withDefault 0
+            in
+            div [ class "input-group" ]
+                [ Input.textInput field
+                    (attributes
+                        ++ [ class "form-control"
+                           ]
+                    )
+                , span [ class "input-group-text" ]
+                    [ text "≈ "
+                    , text (ByteUnits.toReadable value)
+                    ]
                 ]
     in
     formGroup inputFn [] appState form fieldName labelText
@@ -562,44 +588,6 @@ markupEditor cfg appState form fieldName labelText =
                 ]
             , div [ class "card-footer text-muted" ]
                 (String.formatHtml cfg.hint [ a [ href (GuideLinks.markdownCheatsheet appState.guideLinks), target "_blank" ] [ text "Markdown" ] ])
-            ]
-        , error
-        ]
-
-
-simpleDate : AppState -> Form FormError o -> String -> String -> String -> String -> Html.Html Form.Msg
-simpleDate appState form yearFieldName monthFieldName dayFieldName labelText =
-    let
-        yearField =
-            Form.getFieldAsString yearFieldName form
-
-        ( yearFieldError, yearFieldErrorClass ) =
-            getErrors appState yearField labelText
-
-        monthField =
-            Form.getFieldAsString monthFieldName form
-
-        ( monthFieldError, monthFieldErrorClass ) =
-            getErrors appState monthField labelText
-
-        dayField =
-            Form.getFieldAsString dayFieldName form
-
-        ( dayFieldError, dayFieldErrorClass ) =
-            getErrors appState dayField labelText
-
-        error =
-            [ yearFieldError, monthFieldError, dayFieldError ]
-                |> List.filter ((/=) emptyNode)
-                |> List.head
-                |> Maybe.withDefault emptyNode
-    in
-    div [ class "form-group form-group-simple-date" ]
-        [ label [] [ text labelText ]
-        , div [ class "date-inputs" ]
-            [ Input.textInput dayField [ class <| "form-control " ++ dayFieldErrorClass, id dayFieldName, name dayFieldName ]
-            , Input.textInput monthField [ class <| "form-control " ++ monthFieldErrorClass, id monthFieldName, name monthFieldName ]
-            , Input.textInput yearField [ class <| "form-control " ++ yearFieldErrorClass, id yearFieldName, name yearFieldName ]
             ]
         , error
         ]

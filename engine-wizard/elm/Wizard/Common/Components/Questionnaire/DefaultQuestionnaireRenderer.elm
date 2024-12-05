@@ -21,6 +21,7 @@ import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLRefere
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (flip)
+import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
@@ -284,8 +285,12 @@ viewUrlReferences appState =
 
 viewUrlReference : URLReferenceData -> Html msg
 viewUrlReference data =
+    let
+        urlLabel =
+            String.withDefault data.url data.label
+    in
     a [ href data.url, target "_blank" ]
-        [ text data.label ]
+        [ text urlLabel ]
 
 
 viewExperts : AppState -> List Expert -> Html msg

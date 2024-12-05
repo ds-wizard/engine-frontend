@@ -1,11 +1,13 @@
 module Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing
     ( DocumentTemplateAsset
     , decoder
+    , encode
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import Json.Encode as E
 import Time
 import Uuid exposing (Uuid)
 
@@ -27,3 +29,10 @@ decoder =
         |> D.required "contentType" D.string
         |> D.required "url" D.string
         |> D.required "urlExpiration" D.datetime
+
+
+encode : DocumentTemplateAsset -> E.Value
+encode asset =
+    E.object
+        [ ( "fileName", E.string asset.fileName )
+        ]

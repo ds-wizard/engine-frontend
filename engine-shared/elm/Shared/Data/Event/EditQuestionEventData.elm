@@ -114,6 +114,7 @@ apply event question =
             ValueQuestion
                 (applyCommonData eventData)
                 { valueType = EventField.getValueWithDefault eventData.valueType (Maybe.withDefault QuestionValueType.default (Question.getValueType question))
+                , validations = EventField.getValueWithDefault eventData.validations (Maybe.withDefault [] (Question.getValidations question))
                 }
 
         EditQuestionIntegrationEvent eventData ->

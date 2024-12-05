@@ -25,5 +25,5 @@ view appState usage =
 
             Success usageData ->
                 [ h2 [ class "fs-4 fw-bold mb-4" ] [ text (gettext "Usage" appState.locale) ]
-                , UsageTable.view appState usageData
+                , UsageTable.view appState False usageData
                 ]

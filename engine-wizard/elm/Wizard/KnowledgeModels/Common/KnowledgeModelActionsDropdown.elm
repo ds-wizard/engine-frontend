@@ -9,6 +9,7 @@ module Wizard.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposing
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html)
+import Shared.Auth.Session as Session
 import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
@@ -112,7 +113,7 @@ actions appState cfg package =
                 }
 
         createProjectActionVisible =
-            Feature.projectsCreateCustom appState
+            Session.exists appState.session && Feature.projectsCreateCustom appState
 
         setDeprecatedAction =
             ListingDropdown.dropdownAction
@@ -124,7 +125,7 @@ actions appState cfg package =
                 }
 
         setDeprecatedActionVisible =
-            package.phase == PackagePhase.Released
+            Feature.knowledgeModelSetDeprecated appState package
 
         restoreAction =
             ListingDropdown.dropdownAction
@@ -136,7 +137,7 @@ actions appState cfg package =
                 }
 
         restoreActionVisible =
-            package.phase == PackagePhase.Deprecated
+            Feature.knowledgeModelRestore appState package
 
         deleteAction =
             ListingDropdown.dropdownAction

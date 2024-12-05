@@ -1,9 +1,5 @@
 module Shared.Common.TimeUtils exposing
-    ( fromYMD
-    , isAfter
-    , isBefore
-    , isBetween
-    , monthToInt
+    ( monthToInt
     , monthToString
     , toReadableDate
     , toReadableDateTime
@@ -12,7 +8,6 @@ module Shared.Common.TimeUtils exposing
 
 import Gettext exposing (gettext)
 import Time exposing (Month(..))
-import Time.Extra as Time
 
 
 toReadableDateTime : Time.Zone -> Time.Posix -> String
@@ -63,12 +58,6 @@ toReadableTime timeZone time =
     hour ++ ":" ++ min
 
 
-fromYMD : Time.Zone -> Int -> Int -> Int -> Time.Posix
-fromYMD timeZone year month day =
-    Time.partsToPosix timeZone <|
-        Time.Parts year (intToMonth month) day 0 0 0 0
-
-
 monthToInt : Month -> Int
 monthToInt month =
     case month of
@@ -109,46 +98,6 @@ monthToInt month =
             12
 
 
-intToMonth : Int -> Month
-intToMonth month =
-    case month of
-        1 ->
-            Jan
-
-        2 ->
-            Feb
-
-        3 ->
-            Mar
-
-        4 ->
-            Apr
-
-        5 ->
-            May
-
-        6 ->
-            Jun
-
-        7 ->
-            Jul
-
-        8 ->
-            Aug
-
-        9 ->
-            Sep
-
-        10 ->
-            Oct
-
-        11 ->
-            Nov
-
-        _ ->
-            Dec
-
-
 monthToString : { a | locale : Gettext.Locale } -> Month -> String
 monthToString appState month =
     case month of
@@ -187,42 +136,3 @@ monthToString appState month =
 
         Dec ->
             gettext "December" appState.locale
-
-
-isBetween : Time.Posix -> Time.Posix -> Time.Posix -> Bool
-isBetween start end time =
-    let
-        startMillis =
-            Time.posixToMillis start
-
-        endMillis =
-            Time.posixToMillis end
-
-        timeMillis =
-            Time.posixToMillis time
-    in
-    startMillis < timeMillis && endMillis > timeMillis
-
-
-isBefore : Time.Posix -> Time.Posix -> Bool
-isBefore expected time =
-    let
-        expectedMillis =
-            Time.posixToMillis expected
-
-        timeMillis =
-            Time.posixToMillis time
-    in
-    timeMillis < expectedMillis
-
-
-isAfter : Time.Posix -> Time.Posix -> Bool
-isAfter expected time =
-    let
-        expectedMillis =
-            Time.posixToMillis expected
-
-        timeMillis =
-            Time.posixToMillis time
-    in
-    timeMillis < expectedMillis

@@ -73,6 +73,7 @@ import Shared.Data.KnowledgeModel.Integration.CommonIntegrationData exposing (Co
 import Shared.Data.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Shared.Data.KnowledgeModel.Phase exposing (Phase)
 import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
 import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
@@ -279,6 +280,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
         [ scrollCmd
         , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
         , Ports.localStorageGet (localStorageViewResolvedKey questionnaire.uuid)
+        , Ports.localStorageGet (localStorageNamedOnlyKey questionnaire.uuid)
         , Ports.localStorageGet localStorageViewSettingsKey
         , rightPanelCmd
         ]
@@ -603,6 +605,16 @@ localStorageViewResolvedKey uuid =
 
 localStorageViewResolvedDecoder : Decoder (LocalStorageData Bool)
 localStorageViewResolvedDecoder =
+    LocalStorageData.decoder D.bool
+
+
+localStorageNamedOnlyKey : Uuid -> String
+localStorageNamedOnlyKey uuid =
+    "project-" ++ Uuid.toString uuid ++ "-named-only"
+
+
+localStorageNamedOnlyDecoder : Decoder (LocalStorageData Bool)
+localStorageNamedOnlyDecoder =
     LocalStorageData.decoder D.bool
 
 
@@ -1034,7 +1046,19 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         { model | questionnaireVersions = Error (gettext "Unable to get version history." appState.locale) }
 
         HistoryMsg historyMsg ->
-            wrap { model | historyModel = History.update historyMsg model.historyModel }
+            let
+                newModel =
+                    { model | historyModel = History.update historyMsg model.historyModel }
+
+                cmd =
+                    case historyMsg of
+                        History.SetNamedOnly _ ->
+                            localStorageNamedOnlyCmd newModel
+
+                        _ ->
+                            Cmd.none
+            in
+            withSeed ( newModel, cmd )
 
         VersionModalMsg versionModalMsg ->
             let
@@ -1307,6 +1331,14 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             Err _ ->
                                 wrap model
 
+                    else if key == localStorageNamedOnlyKey model.uuid then
+                        case decodeValue localStorageNamedOnlyDecoder value of
+                            Ok data ->
+                                wrap { model | historyModel = History.setNamedOnly data.value model.historyModel }
+
+                            Err _ ->
+                                wrap model
+
                     else
                         wrap model
 
@@ -1439,6 +1471,19 @@ localStorageViewResolvedCmd model =
         data =
             { key = localStorageViewResolvedKey model.uuid
             , value = model.commentsViewResolved
+            }
+    in
+    data
+        |> LocalStorageData.encode E.bool
+        |> Ports.localStorageSet
+
+
+localStorageNamedOnlyCmd : Model -> Cmd msg
+localStorageNamedOnlyCmd model =
+    let
+        data =
+            { key = localStorageNamedOnlyKey model.uuid
+            , value = model.historyModel.namedOnly
             }
     in
     data
@@ -2925,8 +2970,16 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
 
         questionViews =
             if List.isEmpty questions then
+                let
+                    emptyMessage =
+                        if List.isEmpty model.questionnaire.selectedQuestionTagUuids then
+                            gettext "This chapter contains no questions." appState.locale
+
+                        else
+                            gettext "There are no questions matching the selected question tags." appState.locale
+                in
                 div [ class "flex-grow-1" ]
-                    [ Flash.info appState (gettext "This chapter contains no questions." appState.locale)
+                    [ Flash.info appState emptyMessage
                     ]
 
             else
@@ -3568,10 +3621,26 @@ viewQuestionValue appState cfg model path question =
                 _ ->
                     defaultInput
 
+        validationWarning validation =
+            case QuestionValidation.validate appState validation answer of
+                Ok _ ->
+                    emptyNode
+
+                Err error ->
+                    Flash.warning appState error
+
+        validationWarnings =
+            case ( Question.getValidations question, mbAnswer ) of
+                ( Just validations, Just _ ) ->
+                    List.map validationWarning validations
+
+                _ ->
+                    []
+
         clearReplyButton =
             viewQuestionClearButton appState cfg path (Maybe.isJust mbAnswer)
     in
-    div [] (inputView ++ [ clearReplyButton ])
+    div [] (inputView ++ validationWarnings ++ [ clearReplyButton ])
 
 
 viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg

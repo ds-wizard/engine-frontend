@@ -12,6 +12,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Data.Event.EventField as EventField exposing (EventField)
 import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
 import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 
 
@@ -23,6 +24,7 @@ type alias EditQuestionValueEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , valueType : EventField QuestionValueType
+    , validations : EventField (List QuestionValidation)
     , annotations : EventField (List Annotation)
     }
 
@@ -37,6 +39,7 @@ decoder =
         |> D.required "referenceUuids" (EventField.decoder (D.list D.string))
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "valueType" (EventField.decoder QuestionValueType.decoder)
+        |> D.required "validations" (EventField.decoder (D.list QuestionValidation.decoder))
         |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
@@ -50,6 +53,7 @@ encode data =
     , ( "referenceUuids", EventField.encode (E.list E.string) data.referenceUuids )
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "valueType", EventField.encode QuestionValueType.encode data.valueType )
+    , ( "validations", EventField.encode (E.list QuestionValidation.encode) data.validations )
     , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
 
@@ -63,6 +67,7 @@ init =
     , referenceUuids = EventField.empty
     , expertUuids = EventField.empty
     , valueType = EventField.empty
+    , validations = EventField.empty
     , annotations = EventField.empty
     }
 
@@ -76,5 +81,6 @@ squash oldData newData =
     , referenceUuids = EventField.squash oldData.referenceUuids newData.referenceUuids
     , expertUuids = EventField.squash oldData.expertUuids newData.expertUuids
     , valueType = EventField.squash oldData.valueType newData.valueType
+    , validations = EventField.squash oldData.validations newData.validations
     , annotations = EventField.squash oldData.annotations newData.annotations
     }

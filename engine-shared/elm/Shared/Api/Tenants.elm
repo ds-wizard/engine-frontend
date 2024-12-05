@@ -1,27 +1,25 @@
 module Shared.Api.Tenants exposing
-    ( deletePlan
-    , getCurrentConfig
-    , getCurrentPlans
+    ( getCurrentConfig
     , getTenant
+    , getTenantUsage
     , getTenants
-    , postPlan
     , postTenant
     , putCurrentConfig
-    , putPlan
     , putTenant
+    , putTenantLimits
     )
 
-import Json.Decode as D
 import Json.Encode as E
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPost, jwtPut)
+import Shared.Api exposing (ToMsg, jwtGet, jwtPost, jwtPut)
+import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.Plan as Plan exposing (Plan)
 import Shared.Data.Tenant as Tenant exposing (Tenant)
 import Shared.Data.TenantDetail as TenantDetail exposing (TenantDetail)
+import Shared.Data.Usage as Usage exposing (Usage)
 import Uuid exposing (Uuid)
 
 
@@ -57,26 +55,6 @@ putTenant uuid =
     jwtPut ("/tenants/" ++ Uuid.toString uuid)
 
 
-postPlan : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-postPlan uuid =
-    jwtPost ("/tenants/" ++ Uuid.toString uuid ++ "/plans")
-
-
-putPlan : Uuid -> Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-putPlan tenantUuid planUuid =
-    jwtPut ("/tenants/" ++ Uuid.toString tenantUuid ++ "/plans/" ++ Uuid.toString planUuid)
-
-
-deletePlan : Uuid -> Uuid -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-deletePlan tenantUuid planUuid =
-    jwtDelete ("/tenants/" ++ Uuid.toString tenantUuid ++ "/plans/" ++ Uuid.toString planUuid)
-
-
-getCurrentPlans : AbstractAppState a -> ToMsg (List Plan) msg -> Cmd msg
-getCurrentPlans =
-    jwtGet "/tenants/current/plans" (D.list Plan.decoder)
-
-
 getCurrentConfig : AbstractAppState a -> ToMsg EditableConfig msg -> Cmd msg
 getCurrentConfig =
     jwtGet "/tenants/current/config" EditableConfig.decoder
@@ -85,3 +63,13 @@ getCurrentConfig =
 putCurrentConfig : E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
 putCurrentConfig =
     jwtPut "/tenants/current/config"
+
+
+getTenantUsage : UuidOrCurrent -> AbstractAppState a -> ToMsg Usage msg -> Cmd msg
+getTenantUsage tenantUuid =
+    jwtGet ("/tenants/" ++ UuidOrCurrent.toString tenantUuid ++ "/usages/wizard") Usage.decoder
+
+
+putTenantLimits : Uuid -> E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+putTenantLimits tenantUuid =
+    jwtPut ("/tenants/" ++ Uuid.toString tenantUuid ++ "/limits")
