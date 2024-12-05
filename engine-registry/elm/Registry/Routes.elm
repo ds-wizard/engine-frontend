@@ -13,6 +13,7 @@ module Registry.Routes exposing
     , navigate
     , organizationDetail
     , parse
+    , redirect
     , signup
     , toUrl
     )
@@ -133,6 +134,18 @@ isAllowed appState route =
 navigate : Navigation.Key -> Route -> Cmd msg
 navigate key =
     Navigation.pushUrl key << toUrl
+
+
+redirect : Url -> Maybe Url
+redirect url =
+    if url.path == "/templates" then
+        Just { url | path = "/document-templates" }
+
+    else if String.startsWith "/templates/" url.path then
+        Just { url | path = "/document-templates/" ++ String.dropLeft 11 url.path }
+
+    else
+        Nothing
 
 
 
