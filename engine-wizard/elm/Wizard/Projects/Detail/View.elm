@@ -26,6 +26,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.ActionButton as ActionButton
+import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.Common.View exposing (shareIcon, shareTooltipHtml)
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
@@ -139,7 +140,26 @@ viewProject route appState model questionnaire =
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
         , Html.map QuestionnaireVersionViewModalMsg <| QuestionnaireVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
         , Html.map RevertModalMsg <| RevertModal.view appState model.revertModalModel
+        , disconnectedModal appState model
         ]
+
+
+disconnectedModal : AppState -> Model -> Html Msg
+disconnectedModal appState model =
+    Modal.confirm appState
+        { modalTitle = gettext "Refresh Required" appState.locale
+        , modalContent =
+            [ p [] [ text (gettext "Another user has made significant changes to the questionnaire (e.g., reverting to a previous version). To ensure everyone is using the latest version, you’ve been disconnected." appState.locale) ]
+            , p [] [ text (gettext "Refresh the page to reconnect." appState.locale) ]
+            ]
+        , visible = model.forceDisconnect && (model.revertModalModel.revertResult /= ActionResult.Loading)
+        , actionResult = ActionResult.Unset
+        , actionName = gettext "Refresh" appState.locale
+        , actionMsg = Refresh
+        , cancelMsg = Nothing
+        , dangerous = False
+        , dataCy = "disconnected_modal"
+        }
 
 
 

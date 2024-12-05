@@ -464,7 +464,7 @@ handleWebSocketMsg websocketMsg appState model =
                                 SetContentBranchAction.AddBranchEvent data ->
                                     updateModel data
 
-                WebSocketServerAction.Error ->
+                WebSocketServerAction.Error _ ->
                     ( appState.seed, { model | error = True }, Cmd.none )
 
         WebSocket.Close ->

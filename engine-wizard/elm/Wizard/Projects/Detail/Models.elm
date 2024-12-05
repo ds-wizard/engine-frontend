@@ -42,6 +42,7 @@ type alias Model =
     , websocket : WebSocket
     , offline : Bool
     , error : Bool
+    , forceDisconnect : Bool
     , onlineUsers : List OnlineUserInfo
     , savingActionUuids : List Uuid
     , projectSavingModel : ProjectSaving.Model
@@ -72,6 +73,7 @@ init appState uuid mbSelectedPath mbCommentThreadUuid =
     , websocket = WebSocket.init (QuestionnaireApi.websocket uuid appState)
     , offline = False
     , error = False
+    , forceDisconnect = False
     , onlineUsers = []
     , savingActionUuids = []
     , projectSavingModel = ProjectSaving.init

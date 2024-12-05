@@ -9,7 +9,7 @@ import Json.Decode.Pipeline as D
 
 type WebSocketServerAction a
     = Success a
-    | Error
+    | Error String
 
 
 decoder : Decoder a -> Decoder (WebSocketServerAction a)
@@ -27,6 +27,7 @@ decoderByType messageDecoder actionType =
 
         "Error_ServerAction" ->
             D.succeed Error
+                |> D.requiredAt [ "data", "message", "code" ] D.string
 
         _ ->
             D.fail <| "Unknown WebSocketServerAction: " ++ actionType
