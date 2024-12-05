@@ -2,6 +2,7 @@ module Shared.Api.DocumentTemplateDrafts exposing
     ( deleteAsset
     , deleteDraft
     , deleteFile
+    , deleteFolder
     , getAsset
     , getAssets
     , getDraft
@@ -157,3 +158,14 @@ moveFolder templateId currentPath newPath =
                 ]
     in
     jwtPost ("/document-template-drafts/" ++ templateId ++ "/folders/move") body
+
+
+deleteFolder : String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+deleteFolder templateId path =
+    let
+        body =
+            E.object
+                [ ( "path", E.string path )
+                ]
+    in
+    jwtPost ("/document-template-drafts/" ++ templateId ++ "/folders/delete") body
