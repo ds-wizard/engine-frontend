@@ -381,6 +381,30 @@ $toolbar-height: 40px;
         }
 
         .Comments {
+            .comments-navigation {
+                position: sticky;
+                top: -1rem;
+                z-index: 200;
+                background: $gray-100;
+                margin: -1rem -1rem 0 -1rem;
+                padding: 0;
+                border-bottom: 1px solid $gray-400;
+                margin-bottom: 1rem;
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+
+                a {
+                    @include not-selectable;
+                    padding: $spacer-2 $spacer-3;
+                    text-align: center;
+                    text-decoration: none;
+
+                    &:hover {
+                        background: $gray-200;
+                    }
+                }
+            }
+
             .form-check {
                 background: $gray-100;
                 margin: -1rem -1rem 0 -1rem;

@@ -97,6 +97,7 @@ import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
+import Shared.Utils.ListUtils as ListUtils
 import SplitPane
 import String
 import String.Extra as String
@@ -2458,6 +2459,35 @@ viewQuestionnaireRightPanelComments appState model path =
 viewQuestionnaireRightPanelCommentsLoaded : AppState -> Model -> String -> List CommentThread -> Html Msg
 viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
     let
+        comments =
+            List.map .path <|
+                QuestionnaireQuestionnaire.getComments model.questionnaire
+
+        nextPrevNavigation =
+            if List.length comments > 1 then
+                let
+                    previousCommentsPath =
+                        Maybe.withDefault "" <|
+                            ListUtils.findPreviousInfinite path comments
+
+                    nextCommentsPath =
+                        Maybe.withDefault "" <|
+                            ListUtils.findNextInfinite path comments
+                in
+                div [ class "comments-navigation" ]
+                    [ a [ onClick (OpenComments False previousCommentsPath) ]
+                        [ fa "fas fa-arrow-left me-2"
+                        , text (gettext "Previous" appState.locale)
+                        ]
+                    , a [ onClick (OpenComments False nextCommentsPath) ]
+                        [ text (gettext "Next" appState.locale)
+                        , fa "fas fa-arrow-right ms-2"
+                        ]
+                    ]
+
+            else
+                emptyNode
+
         navigationView =
             if Feature.projectCommentPrivate appState model.questionnaire then
                 viewCommentsNavigation appState model commentThreads
@@ -2508,7 +2538,8 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 |> List.sum
     in
     div [ class "Comments" ]
-        [ viewCommentsResolvedSelect appState model resolvedCommentsCount
+        [ nextPrevNavigation
+        , viewCommentsResolvedSelect appState model resolvedCommentsCount
         , navigationView
         , resolvedThreadsView
         , commentThreadsView
