@@ -166,6 +166,9 @@ secret appState form fieldName labelText =
         visibleActiveMsg =
             Form.Input visibleFieldName Form.Checkbox << Field.Bool
 
+        ( _, errorClass ) =
+            getErrors appState (Form.getFieldAsString fieldName form) labelText
+
         inputFn field attributes =
             let
                 inputField =
@@ -184,7 +187,7 @@ secret appState form fieldName labelText =
                         a [ onClick (visibleActiveMsg True) ]
                             [ faSet "_global.secretShow" appState ]
             in
-            div [ class "input-secret" ]
+            div [ class ("input-secret " ++ errorClass) ]
                 [ inputField
                 , showHideIcon
                 ]

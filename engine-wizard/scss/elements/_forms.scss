@@ -353,6 +353,11 @@ select {
 
         input {
             padding-right: 2rem;
+
+            &.is-invalid {
+                padding-right: 3.5rem;
+                background-position: right 2rem center;
+            }
         }
 
         a {
