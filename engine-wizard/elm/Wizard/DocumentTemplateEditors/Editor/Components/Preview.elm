@@ -1,10 +1,12 @@
 module Wizard.DocumentTemplateEditors.Editor.Components.Preview exposing
     ( Model
     , Msg
+    , PreviewMode
     , UpdateConfig
     , ViewConfig
     , initialModel
     , loadPreviewMsg
+    , setSelectedBranch
     , setSelectedQuestionnaire
     , subscriptions
     , update
@@ -13,13 +15,16 @@ module Wizard.DocumentTemplateEditors.Editor.Components.Preview exposing
 
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, iframe, option, p, pre, select, text)
-import Html.Attributes exposing (class, href, id, name, selected, src, target, value)
-import Html.Events exposing (onInput)
+import Html exposing (Html, a, button, div, iframe, option, p, pre, select, text)
+import Html.Attributes exposing (class, classList, href, id, name, selected, src, target, value)
+import Html.Events exposing (onClick, onInput)
 import Http
+import Maybe.Extra as Maybe
 import Process
+import Shared.Api.Branches as BranchesApi
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.BranchSuggestion exposing (BranchSuggestion)
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
@@ -28,7 +33,7 @@ import Shared.Data.UrlResponse exposing (UrlResponse)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Error.ServerError as ServerError
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Setters exposing (setFormatUuid, setQuestionnaireUuid, setSelected)
+import Shared.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch)
 import String.Format as String
@@ -50,21 +55,57 @@ import Wizard.Routes as Routes
 
 
 type alias Model =
-    { typeHintInputModel : TypeHintInput.Model QuestionnaireSuggestion
+    { questionnaireHintInputModel : TypeHintInput.Model QuestionnaireSuggestion
+    , branchTypeHintInputModal : TypeHintInput.Model BranchSuggestion
     , urlResponse : ActionResult UrlResponse
+    , mode : PreviewMode
     }
+
+
+type PreviewMode
+    = QuestionnaireMode
+    | BranchMode
 
 
 initialModel : Model
 initialModel =
-    { typeHintInputModel = TypeHintInput.init "uuid"
+    { questionnaireHintInputModel = TypeHintInput.init "uuid"
+    , branchTypeHintInputModal = TypeHintInput.init "uuid"
     , urlResponse = ActionResult.Unset
+    , mode = QuestionnaireMode
     }
 
 
 setSelectedQuestionnaire : Maybe QuestionnaireSuggestion -> Model -> Model
 setSelectedQuestionnaire questionnaire model =
-    { model | typeHintInputModel = setSelected questionnaire model.typeHintInputModel }
+    let
+        newMode =
+            if Maybe.isJust questionnaire then
+                QuestionnaireMode
+
+            else
+                model.mode
+    in
+    { model
+        | questionnaireHintInputModel = setSelected questionnaire model.questionnaireHintInputModel
+        , mode = newMode
+    }
+
+
+setSelectedBranch : Maybe BranchSuggestion -> Model -> Model
+setSelectedBranch branch model =
+    let
+        newMode =
+            if Maybe.isJust branch then
+                BranchMode
+
+            else
+                model.mode
+    in
+    { model
+        | branchTypeHintInputModal = setSelected branch model.branchTypeHintInputModal
+        , mode = newMode
+    }
 
 
 
@@ -74,6 +115,9 @@ setSelectedQuestionnaire questionnaire model =
 type Msg
     = QuestionnaireTypeHintInputMsg (TypeHintInput.Msg QuestionnaireSuggestion)
     | QuestionnaireTypeHintInputSelect Uuid
+    | BranchTypeHintInputMsg (TypeHintInput.Msg BranchSuggestion)
+    | BranchTypeHintInputSelect Uuid
+    | SetMode PreviewMode
     | FormatSelected String
     | PutPreviewSettingsCompleted (Result ApiError DocumentTemplateDraftPreviewSettings)
     | GetPreviewRequest
@@ -92,8 +136,12 @@ loadPreviewMsg =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map QuestionnaireTypeHintInputMsg <|
-        TypeHintInput.subscriptions model.typeHintInputModel
+    Sub.batch
+        [ Sub.map QuestionnaireTypeHintInputMsg <|
+            TypeHintInput.subscriptions model.questionnaireHintInputModel
+        , Sub.map BranchTypeHintInputMsg <|
+            TypeHintInput.subscriptions model.branchTypeHintInputModal
+        ]
 
 
 
@@ -142,12 +190,40 @@ update cfg appState msg model =
                     }
 
                 ( typeHintInputModel, typeHintInputCmd ) =
-                    TypeHintInput.update updateCfg typeHintInputMsg appState model.typeHintInputModel
+                    TypeHintInput.update updateCfg typeHintInputMsg appState model.questionnaireHintInputModel
             in
-            ( { model | typeHintInputModel = typeHintInputModel }, typeHintInputCmd )
+            ( { model | questionnaireHintInputModel = typeHintInputModel }, typeHintInputCmd )
 
         QuestionnaireTypeHintInputSelect uuid ->
             ( model, updatePreviewSettings (setQuestionnaireUuid (Just uuid)) )
+
+        BranchTypeHintInputMsg typeHintInputMsg ->
+            let
+                updateCfg =
+                    { wrapMsg = cfg.wrapMsg << BranchTypeHintInputMsg
+                    , getTypeHints = BranchesApi.getBranchSuggestions PaginationQueryFilters.empty
+                    , getError = gettext "Unable to get KM editors." appState.locale
+                    , setReply = cfg.wrapMsg << BranchTypeHintInputSelect << .uuid
+                    , clearReply = Nothing
+                    , filterResults = Nothing
+                    }
+
+                ( typeHintInputModel, typeHintInputCmd ) =
+                    TypeHintInput.update updateCfg typeHintInputMsg appState model.branchTypeHintInputModal
+            in
+            ( { model | branchTypeHintInputModal = typeHintInputModel }, typeHintInputCmd )
+
+        BranchTypeHintInputSelect uuid ->
+            ( model, updatePreviewSettings (setBranchUuid (Just uuid)) )
+
+        SetMode mode ->
+            ( { model
+                | mode = mode
+                , questionnaireHintInputModel = TypeHintInput.clear model.questionnaireHintInputModel
+                , branchTypeHintInputModal = TypeHintInput.clear model.branchTypeHintInputModal
+              }
+            , updatePreviewSettings DocumentTemplateDraftPreviewSettings.clearQuestionnaireAndBranch
+            )
 
         FormatSelected uuidString ->
             ( model, updatePreviewSettings (setFormatUuid (Just (Uuid.fromUuidString uuidString))) )
@@ -226,23 +302,57 @@ view cfg appState model =
             option [ value (Uuid.toString format.uuid), selected (Just format.uuid == previewSettings.formatUuid) ]
                 [ text format.name ]
 
-        typeHintInputCfg =
-            { viewItem = TypeHintItem.simple .name
-            , wrapMsg = QuestionnaireTypeHintInputMsg
-            , nothingSelectedItem = text "--"
-            , clearEnabled = False
-            }
+        ( typeHintInput, link ) =
+            case model.mode of
+                QuestionnaireMode ->
+                    let
+                        projectTypeHintInputCfg =
+                            { viewItem = TypeHintItem.simple .name
+                            , wrapMsg = QuestionnaireTypeHintInputMsg
+                            , nothingSelectedItem = text "--"
+                            , clearEnabled = False
+                            }
 
-        projectLink =
-            case model.typeHintInputModel.selected of
-                Just questionnaireSuggestion ->
-                    linkTo appState
-                        (Routes.projectsDetail questionnaireSuggestion.uuid)
-                        (class "project-link" :: target "_blank" :: tooltip (gettext "Open project" appState.locale))
-                        [ fa "fa-external-link-alt" ]
+                        projectTypeHintInput =
+                            TypeHintInput.view appState projectTypeHintInputCfg model.questionnaireHintInputModel False
 
-                Nothing ->
-                    emptyNode
+                        projectLink =
+                            case model.questionnaireHintInputModel.selected of
+                                Just questionnaireSuggestion ->
+                                    linkTo appState
+                                        (Routes.projectsDetail questionnaireSuggestion.uuid)
+                                        (class "source-link" :: target "_blank" :: tooltip (gettext "Open project" appState.locale))
+                                        [ fa "fa-external-link-alt" ]
+
+                                Nothing ->
+                                    emptyNode
+                    in
+                    ( projectTypeHintInput, projectLink )
+
+                BranchMode ->
+                    let
+                        branchTypeHintInputCfg =
+                            { viewItem = TypeHintItem.simple .name
+                            , wrapMsg = BranchTypeHintInputMsg
+                            , nothingSelectedItem = text "--"
+                            , clearEnabled = False
+                            }
+
+                        branchTypeHintInput =
+                            TypeHintInput.view appState branchTypeHintInputCfg model.branchTypeHintInputModal False
+
+                        branchLink =
+                            case model.branchTypeHintInputModal.selected of
+                                Just branchSuggestion ->
+                                    linkTo appState
+                                        (Routes.kmEditorEditor branchSuggestion.uuid Nothing)
+                                        (class "source-link" :: target "_blank" :: tooltip (gettext "Open KM editor" appState.locale))
+                                        [ fa "fa-external-link-alt" ]
+
+                                Nothing ->
+                                    emptyNode
+                    in
+                    ( branchTypeHintInput, branchLink )
 
         content =
             if DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
@@ -250,13 +360,34 @@ view cfg appState model =
 
             else
                 viewNotSet appState
+
+        modeSelect =
+            div [ class "btn-group" ]
+                [ button
+                    [ class "btn"
+                    , classList
+                        [ ( "btn-primary", model.mode == QuestionnaireMode )
+                        , ( "btn-outline-primary", model.mode /= QuestionnaireMode )
+                        ]
+                    , onClick (SetMode QuestionnaireMode)
+                    ]
+                    [ text (gettext "Project" appState.locale) ]
+                , button
+                    [ class "btn"
+                    , classList
+                        [ ( "btn-primary", model.mode == BranchMode )
+                        , ( "btn-outline-primary", model.mode /= BranchMode )
+                        ]
+                    , onClick (SetMode BranchMode)
+                    ]
+                    [ text (gettext "KM editor" appState.locale) ]
+                ]
     in
     div [ class "DocumentTemplateEditor__PreviewEditor w-100 h-100 d-flex flex-column " ]
         [ div [ class "DocumentTemplateEditor__PreviewEditor__Toolbar bg-light d-flex align-items-center" ]
-            [ text (gettext "Project" appState.locale)
-            , text ":"
-            , TypeHintInput.view appState typeHintInputCfg model.typeHintInputModel False
-            , projectLink
+            [ modeSelect
+            , typeHintInput
+            , link
             , text (gettext "Format" appState.locale)
             , text ":"
             , select [ class "form-select", onInput FormatSelected, id "format", name "format" ]
@@ -272,7 +403,7 @@ viewNotSet appState =
     Page.illustratedMessage
         { image = Undraw.settingsTab
         , heading = gettext "Preview not set" appState.locale
-        , lines = [ gettext "Select project and format you want to preview." appState.locale ]
+        , lines = [ gettext "Select project or KM editor and format you want to preview." appState.locale ]
         , cy = "preview-not-set"
         }
 

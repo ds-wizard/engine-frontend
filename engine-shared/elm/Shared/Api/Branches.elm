@@ -2,6 +2,7 @@ module Shared.Api.Branches exposing
     ( deleteBranch
     , deleteMigration
     , getBranch
+    , getBranchSuggestions
     , getBranches
     , getMigration
     , postBranch
@@ -17,6 +18,7 @@ import Shared.AbstractAppState exposing (AbstractAppState)
 import Shared.Api exposing (ToMsg, jwtDelete, jwtFetch, jwtGet, jwtPost, jwtPostEmpty, jwtPut, wsUrl)
 import Shared.Data.Branch as Branch exposing (Branch)
 import Shared.Data.BranchDetail as BranchDetail exposing (BranchDetail)
+import Shared.Data.BranchSuggestion as BranchSuggestion exposing (BranchSuggestion)
 import Shared.Data.Migration as Migration exposing (Migration)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -34,6 +36,18 @@ getBranches _ qs =
             "/branches" ++ queryString
     in
     jwtGet url (Pagination.decoder "branches" Branch.decoder)
+
+
+getBranchSuggestions : PaginationQueryFilters -> PaginationQueryString -> AbstractAppState a -> ToMsg (Pagination BranchSuggestion) msg -> Cmd msg
+getBranchSuggestions _ qs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl qs
+
+        url =
+            "/branches/suggestions" ++ queryString
+    in
+    jwtGet url (Pagination.decoder "branches" BranchSuggestion.decoder)
 
 
 getBranch : Uuid -> AbstractAppState a -> ToMsg BranchDetail msg -> Cmd msg

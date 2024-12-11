@@ -3,12 +3,14 @@ module Shared.Data.BranchDetail exposing
     , decoder
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.Branch.BranchState as BranchState exposing (BranchState)
 import Shared.Data.Event as Event exposing (Event)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.Package as Package exposing (Package)
+import Shared.Data.QuestionnaireDetail.Reply as Reply exposing (Reply)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 
@@ -27,6 +29,7 @@ type alias BranchDetail =
     , previousPackageId : Maybe String
     , events : List Event
     , state : BranchState
+    , replies : Dict String Reply
     }
 
 
@@ -46,3 +49,4 @@ decoder =
         |> D.required "previousPackageId" (D.nullable D.string)
         |> D.required "events" (D.list Event.decoder)
         |> D.required "state" BranchState.decoder
+        |> D.required "replies" (D.dict Reply.decoder)

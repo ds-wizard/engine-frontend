@@ -413,6 +413,24 @@ update wrapMsg msg appState model =
                 , Cmd.map wrapMsg cmd
                 )
 
+        SavePreviewReplies ->
+            let
+                ( eventUuid, newSeed ) =
+                    getUuid appState.seed
+
+                event =
+                    { uuid = eventUuid
+                    , replies = model.previewModel.questionnaireModel.questionnaire.replies
+                    }
+
+                wsCmd =
+                    event
+                        |> ClientBranchAction.SetReplies
+                        |> ClientBranchAction.encode
+                        |> WebSocket.send model.websocket
+            in
+            ( newSeed, addSavingActionUuid eventUuid model, wsCmd )
+
         EventAddSavingUuid eventUuid entityUuid ->
             let
                 newModel =
@@ -463,6 +481,13 @@ handleWebSocketMsg websocketMsg appState model =
                             case setContentBranchAction of
                                 SetContentBranchAction.AddBranchEvent data ->
                                     updateModel data
+
+                        ServerBranchAction.SetReplies event ->
+                            let
+                                ( newModel, _ ) =
+                                    removeSavingActionUuid event.uuid model
+                            in
+                            ( appState.seed, newModel, Cmd.none )
 
                 WebSocketServerAction.Error _ ->
                     ( appState.seed, { model | error = True }, Cmd.none )

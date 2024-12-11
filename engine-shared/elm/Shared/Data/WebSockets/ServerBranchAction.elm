@@ -7,11 +7,13 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.OnlineUserInfo as OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
+import Shared.Data.WebSockets.BranchAction.SetRepliesBranchAction as SetRepliesBranchAction exposing (SetRepliesBranchAction)
 
 
 type ServerBranchAction
     = SetUserList (List OnlineUserInfo)
     | SetContent SetContentBranchAction
+    | SetReplies SetRepliesBranchAction
 
 
 decoder : Decoder ServerBranchAction
@@ -28,6 +30,9 @@ decoderByType actionType =
 
         "SetContent_ServerBranchAction" ->
             buildDecoder SetContent SetContentBranchAction.decoder
+
+        "SetReplies_ServerBranchAction" ->
+            buildDecoder SetReplies SetRepliesBranchAction.decoder
 
         _ ->
             D.fail <| "Unknown ServerBranchAction: " ++ actionType

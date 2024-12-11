@@ -34,4 +34,5 @@ type Msg
     | EventMsg Bool String (Maybe String) (CommonEventData -> Event)
     | EventDebounceMsg String Debounce.Msg
     | EventAddSavingUuid Uuid String
+    | SavePreviewReplies
     | ResetModel

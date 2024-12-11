@@ -801,10 +801,13 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
 
         ( newSeed, mbChapterUuid, replies ) =
             foldReplies currentTime km parentMap seed questionUuid Dict.empty
+
+        originalReplies =
+            questionnaireDetail.replies
     in
     ( newSeed
     , mbChapterUuid
-    , { questionnaireDetail | replies = replies }
+    , { questionnaireDetail | replies = Dict.union replies originalReplies }
     )
 
 
