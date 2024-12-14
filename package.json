@@ -48,7 +48,7 @@
     "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/language": "^6.10.6",
     "@codemirror/legacy-modes": "^6.4.2",
-    "@codemirror/state": "^6.4.1",
+    "@codemirror/state": "^6.5.0",
     "@codemirror/view": "^6.35.2",
     "@fortawesome/fontawesome-free": "^6.7.1",
     "@lezer/lr": "^1.4.2",
