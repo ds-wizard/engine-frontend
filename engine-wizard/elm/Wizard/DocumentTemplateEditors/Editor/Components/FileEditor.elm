@@ -1511,11 +1511,19 @@ viewDeleteModal appState model =
     let
         fileName =
             getSelectedName model
+
+        message =
+            case model.selected of
+                SelectedFolder _ ->
+                    gettext "Are you sure you want to permanently delete %s and all its contents?" appState.locale
+
+                _ ->
+                    gettext "Are you sure you want to permanently delete %s?" appState.locale
     in
     Modal.confirm appState
         { modalTitle = "Delete"
         , modalContent =
-            String.formatHtml (gettext "Are you sure you want to permanently delete %s?" appState.locale)
+            String.formatHtml message
                 [ strong [] [ text (Maybe.withDefault "" fileName) ] ]
         , visible = model.deleteModalOpen && Maybe.isJust fileName
         , actionResult = model.deleting
