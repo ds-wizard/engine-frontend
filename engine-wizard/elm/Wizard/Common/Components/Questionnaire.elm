@@ -2460,30 +2460,52 @@ viewQuestionnaireRightPanelCommentsLoaded : AppState -> Model -> String -> List 
 viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
     let
         comments =
-            List.map .path <|
-                QuestionnaireQuestionnaire.getComments model.questionnaire
+            QuestionnaireQuestionnaire.getComments model.questionnaire
+                |> List.filter (\group -> group.unresolvedComments > 0)
+                |> List.map .path
 
         nextPrevNavigation =
             if List.length comments > 1 then
-                let
-                    previousCommentsPath =
-                        Maybe.withDefault "" <|
-                            ListUtils.findPreviousInfinite path comments
+                case List.elemIndex path comments of
+                    Just index ->
+                        let
+                            previousCommentsPath =
+                                Maybe.withDefault "" <|
+                                    ListUtils.findPreviousInfinite path comments
 
-                    nextCommentsPath =
-                        Maybe.withDefault "" <|
-                            ListUtils.findNextInfinite path comments
-                in
-                div [ class "comments-navigation" ]
-                    [ a [ onClick (OpenComments False previousCommentsPath) ]
-                        [ fa "fas fa-arrow-left me-2"
-                        , text (gettext "Previous" appState.locale)
-                        ]
-                    , a [ onClick (OpenComments False nextCommentsPath) ]
-                        [ text (gettext "Next" appState.locale)
-                        , fa "fas fa-arrow-right ms-2"
-                        ]
-                    ]
+                            nextCommentsPath =
+                                Maybe.withDefault "" <|
+                                    ListUtils.findNextInfinite path comments
+
+                            numberText =
+                                span
+                                    (class "text-muted"
+                                        :: tooltip (gettext "Unresolved comments" appState.locale)
+                                    )
+                                    [ text
+                                        (String.format "%s/%s"
+                                            [ String.fromInt (index + 1)
+                                            , String.fromInt (List.length comments)
+                                            ]
+                                        )
+                                    ]
+                        in
+                        div
+                            [ class "comments-navigation"
+                            ]
+                            [ a [ onClick (OpenComments False previousCommentsPath) ]
+                                [ fa "fas fa-arrow-left me-2"
+                                , text (gettext "Previous" appState.locale)
+                                ]
+                            , numberText
+                            , a [ onClick (OpenComments False nextCommentsPath) ]
+                                [ text (gettext "Next" appState.locale)
+                                , fa "fas fa-arrow-right ms-2"
+                                ]
+                            ]
+
+                    Nothing ->
+                        emptyNode
 
             else
                 emptyNode

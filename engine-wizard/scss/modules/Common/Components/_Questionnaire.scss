@@ -391,13 +391,19 @@ $toolbar-height: 40px;
                 border-bottom: 1px solid $gray-400;
                 margin-bottom: 1rem;
                 display: grid;
-                grid-template-columns: 1fr 1fr;
+                grid-template-columns: 2fr 1fr 2fr;
+
+                span {
+                    padding: $spacer-2 $spacer-3;
+                    text-align: center;
+                }
 
                 a {
                     @include not-selectable;
                     padding: $spacer-2 $spacer-3;
                     text-align: center;
                     text-decoration: none;
+                    white-space: nowrap;
 
                     &:hover {
                         background: $gray-200;
