@@ -487,7 +487,13 @@ handleWebSocketMsg websocketMsg appState model =
                                 ( newModel, _ ) =
                                     removeSavingActionUuid event.uuid model
                             in
-                            ( appState.seed, newModel, Cmd.none )
+                            ( appState.seed
+                            , { newModel
+                                | branchModel = ActionResult.map (EditorBranch.setReplies event.replies) newModel.branchModel
+                                , previewModel = Preview.setReplies event.replies newModel.previewModel
+                              }
+                            , Cmd.none
+                            )
 
                 WebSocketServerAction.Error _ ->
                     ( appState.seed, { model | error = True }, Cmd.none )
