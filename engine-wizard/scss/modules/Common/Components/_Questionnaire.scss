@@ -414,7 +414,7 @@ $toolbar-height: 40px;
             .form-check {
                 background: $gray-100;
                 margin: -1rem -1rem 0 -1rem;
-                padding: 1rem;
+                padding: $spacer-2 $spacer-3;
                 border-bottom: 1px solid $gray-400;
                 margin-bottom: 1rem;
 
@@ -515,6 +515,12 @@ $toolbar-height: 40px;
 
                 &--Resolved {
                     color: $gray-500;
+
+                    .Comment:last-child {
+                        border-bottom: none;
+                        margin-bottom: 0;
+                        padding-bottom: 0;
+                    }
 
                     .Comment__Header__User__Time {
                         color: $gray-500 !important;
