@@ -3430,27 +3430,23 @@ viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> 
 viewQuestionList appState cfg ctx model path humanIdentifiers question =
     let
         expandAndCollapseButtons =
-            if List.length itemUuids > 1 then
-                let
-                    allItemsPaths =
-                        List.map (\uuid -> pathToString (path ++ [ uuid ])) itemUuids
-                in
-                div [ class "mb-3" ]
-                    [ a [ onClick (ExpandItems allItemsPaths) ]
-                        [ faSet "questionnaire.item.expandAll" appState
-                        , span [ class "ms-1" ] [ text (gettext "Expand all" appState.locale) ]
-                        ]
-                    , a
-                        [ onClick (CollapseItems allItemsPaths)
-                        , class "ms-3"
-                        ]
-                        [ faSet "questionnaire.item.collapseAll" appState
-                        , span [ class "ms-1" ] [ text (gettext "Collapse all" appState.locale) ]
-                        ]
+            let
+                allItemsPaths =
+                    List.map (\uuid -> pathToString (path ++ [ uuid ])) itemUuids
+            in
+            div [ class "mb-3" ]
+                [ a [ onClick (ExpandItems allItemsPaths) ]
+                    [ faSet "questionnaire.item.expandAll" appState
+                    , span [ class "ms-1" ] [ text (gettext "Expand all" appState.locale) ]
                     ]
-
-            else
-                emptyNode
+                , a
+                    [ onClick (CollapseItems allItemsPaths)
+                    , class "ms-3"
+                    ]
+                    [ faSet "questionnaire.item.collapseAll" appState
+                    , span [ class "ms-1" ] [ text (gettext "Collapse all" appState.locale) ]
+                    ]
+                ]
 
         viewItem =
             viewQuestionListItem appState cfg ctx model question path humanIdentifiers (List.length itemUuids)
@@ -3467,8 +3463,9 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
                 emptyNode
     in
     div []
-        [ expandAndCollapseButtons
+        [ Html.viewIf (List.length itemUuids > 1) <| expandAndCollapseButtons
         , div [] (List.indexedMap viewItem itemUuids)
+        , Html.viewIf (List.length itemUuids > 2) <| expandAndCollapseButtons
         , viewQuestionListAdd appState cfg itemUuids path
         , noAnswersInfo
         ]
