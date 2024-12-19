@@ -1,6 +1,7 @@
 module Shared.Api.Documents exposing
     ( deleteDocument
     , downloadDocumentUrl
+    , getDocumentUrl
     , getDocuments
     , getSubmissionServices
     , postDocument
@@ -18,6 +19,7 @@ import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Submission as Submission exposing (Submission)
 import Shared.Data.SubmissionService as SubmissionService exposing (SubmissionService)
+import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
 import Uuid exposing (Uuid)
 
 
@@ -48,6 +50,11 @@ deleteDocument uuid =
 getSubmissionServices : String -> AbstractAppState a -> ToMsg (List SubmissionService) msg -> Cmd msg
 getSubmissionServices documentId =
     jwtGet ("/documents/" ++ documentId ++ "/available-submission-services") (D.list SubmissionService.decoder)
+
+
+getDocumentUrl : Uuid -> AbstractAppState a -> ToMsg UrlResponse msg -> Cmd msg
+getDocumentUrl uuid =
+    jwtGet ("/documents/" ++ Uuid.toString uuid ++ "/download") UrlResponse.decoder
 
 
 downloadDocumentUrl : Uuid -> AbstractAppState a -> String

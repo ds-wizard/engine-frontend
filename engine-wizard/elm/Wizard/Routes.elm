@@ -70,6 +70,7 @@ module Wizard.Routes exposing
     , persistentCommandsIndexWithFilters
     , projectActionsIndex
     , projectActionsIndexWithFilters
+    , projectDocumentDownload
     , projectFilesIndex
     , projectFilesIndexWithFilters
     , projectImportersIndex
@@ -766,6 +767,11 @@ isProjectSubroute route =
 projectsFileDownload : Uuid -> Uuid -> Route
 projectsFileDownload projectUuid documentUuid =
     ProjectsRoute <| Wizard.Projects.Routes.FileDownloadRoute projectUuid documentUuid
+
+
+projectDocumentDownload : Uuid -> Uuid -> Route
+projectDocumentDownload projectUuid documentUuid =
+    ProjectsRoute <| Wizard.Projects.Routes.DocumentDownloadRoute projectUuid documentUuid
 
 
 

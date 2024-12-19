@@ -7,6 +7,7 @@ import Wizard.Projects.Create.Models
 import Wizard.Projects.CreateMigration.Models
 import Wizard.Projects.Detail.Models as Detail
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
+import Wizard.Projects.DocumentDownload.Models
 import Wizard.Projects.FileDownload.Models
 import Wizard.Projects.Import.Models
 import Wizard.Projects.Index.Models
@@ -21,6 +22,7 @@ type alias Model =
     , indexModel : Wizard.Projects.Index.Models.Model
     , migrationModel : Wizard.Projects.Migration.Models.Model
     , importModel : Wizard.Projects.Import.Models.Model
+    , documentDownload : Wizard.Projects.DocumentDownload.Models.Model
     , fileDownload : Wizard.Projects.FileDownload.Models.Model
     }
 
@@ -33,6 +35,7 @@ initialModel appState =
     , indexModel = Wizard.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
     , migrationModel = Wizard.Projects.Migration.Models.initialModel Uuid.nil
     , importModel = Wizard.Projects.Import.Models.initialModel Uuid.nil ""
+    , documentDownload = Wizard.Projects.DocumentDownload.Models.initialModel Uuid.nil Uuid.nil
     , fileDownload = Wizard.Projects.FileDownload.Models.initialModel Uuid.nil Uuid.nil
     }
 
@@ -70,6 +73,9 @@ initLocalModel appState route model =
 
         ImportRoute uuid importerId ->
             { model | importModel = Wizard.Projects.Import.Models.initialModel uuid importerId }
+
+        DocumentDownloadRoute questionnaireUuid fileUuid ->
+            { model | documentDownload = Wizard.Projects.DocumentDownload.Models.initialModel questionnaireUuid fileUuid }
 
         FileDownloadRoute questionnaireUuid fileUuid ->
             { model | fileDownload = Wizard.Projects.FileDownload.Models.initialModel questionnaireUuid fileUuid }
