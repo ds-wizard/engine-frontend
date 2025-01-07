@@ -97,6 +97,7 @@ import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
+import Shared.Utils.ListUtils as ListUtils
 import SplitPane
 import String
 import String.Extra as String
@@ -2422,26 +2423,19 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
 
             else
                 List.map viewChapterComments (groupComments questionnaireComments)
-
-        resolvedCommentsCount =
-            List.sum <| List.map .resolvedComments questionnaireComments
     in
     div [ class "comments-overview Comments" ]
-        (viewCommentsResolvedSelect appState model resolvedCommentsCount :: content)
+        (viewCommentsResolvedSelect appState model :: content)
 
 
-viewCommentsResolvedSelect : AppState -> Model -> Int -> Html Msg
-viewCommentsResolvedSelect appState model resolvedCommentsCount =
-    if resolvedCommentsCount > 0 then
-        div [ class "form-check" ]
-            [ label [ class "form-check-label form-check-toggle" ]
-                [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
-                , span [] [ text (String.format (gettext "View resolved comments (%s)" appState.locale) [ String.fromInt resolvedCommentsCount ]) ]
-                ]
+viewCommentsResolvedSelect : AppState -> Model -> Html Msg
+viewCommentsResolvedSelect appState model =
+    div [ class "form-check" ]
+        [ label [ class "form-check-label form-check-toggle" ]
+            [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
+            , span [] [ text (gettext "View resolved comments" appState.locale) ]
             ]
-
-    else
-        emptyNode
+        ]
 
 
 
@@ -2458,6 +2452,81 @@ viewQuestionnaireRightPanelComments appState model path =
 viewQuestionnaireRightPanelCommentsLoaded : AppState -> Model -> String -> List CommentThread -> Html Msg
 viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
     let
+        filter =
+            if model.commentsViewResolved then
+                always True
+
+            else
+                \group -> group.unresolvedComments > 0
+
+        questionnaireComments =
+            QuestionnaireQuestionnaire.getComments model.questionnaire
+
+        comments =
+            questionnaireComments
+                |> List.filter filter
+                |> List.map .path
+
+        nextPrevNavigation =
+            if List.length comments > 1 then
+                case List.elemIndex path comments of
+                    Just index ->
+                        let
+                            previousCommentsPath =
+                                Maybe.withDefault "" <|
+                                    ListUtils.findPreviousInfinite path comments
+
+                            nextCommentsPath =
+                                Maybe.withDefault "" <|
+                                    ListUtils.findNextInfinite path comments
+
+                            commentCountTooltip =
+                                if model.commentsViewResolved then
+                                    gettext "Resolved and unresolved comments" appState.locale
+
+                                else
+                                    gettext "Unresolved comments" appState.locale
+
+                            numberText =
+                                span
+                                    (class "text-muted"
+                                        :: dataCy "comments_nav_count"
+                                        :: tooltip commentCountTooltip
+                                    )
+                                    [ text
+                                        (String.format "%s/%s"
+                                            [ String.fromInt (index + 1)
+                                            , String.fromInt (List.length comments)
+                                            ]
+                                        )
+                                    ]
+                        in
+                        div
+                            [ class "comments-navigation"
+                            ]
+                            [ a
+                                [ onClick (OpenComments False previousCommentsPath)
+                                , dataCy "comments_nav_prev"
+                                ]
+                                [ fa "fas fa-arrow-left me-2"
+                                , text (gettext "Previous" appState.locale)
+                                ]
+                            , numberText
+                            , a
+                                [ onClick (OpenComments False nextCommentsPath)
+                                , dataCy "comments_nav_next"
+                                ]
+                                [ text (gettext "Next" appState.locale)
+                                , fa "fas fa-arrow-right ms-2"
+                                ]
+                            ]
+
+                    Nothing ->
+                        emptyNode
+
+            else
+                emptyNode
+
         navigationView =
             if Feature.projectCommentPrivate appState model.questionnaire then
                 viewCommentsNavigation appState model commentThreads
@@ -2501,14 +2570,10 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 , mbThreadUuid = Nothing
                 , private = model.commentsViewPrivate
                 }
-
-        resolvedCommentsCount =
-            List.filter .resolved commentThreads
-                |> List.map (List.length << .comments)
-                |> List.sum
     in
     div [ class "Comments" ]
-        [ viewCommentsResolvedSelect appState model resolvedCommentsCount
+        [ nextPrevNavigation
+        , viewCommentsResolvedSelect appState model
         , navigationView
         , resolvedThreadsView
         , commentThreadsView
@@ -3365,27 +3430,23 @@ viewQuestionList : AppState -> Config msg -> Context -> Model -> List String -> 
 viewQuestionList appState cfg ctx model path humanIdentifiers question =
     let
         expandAndCollapseButtons =
-            if List.length itemUuids > 1 then
-                let
-                    allItemsPaths =
-                        List.map (\uuid -> pathToString (path ++ [ uuid ])) itemUuids
-                in
-                div [ class "mb-3" ]
-                    [ a [ onClick (ExpandItems allItemsPaths) ]
-                        [ faSet "questionnaire.item.expandAll" appState
-                        , span [ class "ms-1" ] [ text (gettext "Expand all" appState.locale) ]
-                        ]
-                    , a
-                        [ onClick (CollapseItems allItemsPaths)
-                        , class "ms-3"
-                        ]
-                        [ faSet "questionnaire.item.collapseAll" appState
-                        , span [ class "ms-1" ] [ text (gettext "Collapse all" appState.locale) ]
-                        ]
+            let
+                allItemsPaths =
+                    List.map (\uuid -> pathToString (path ++ [ uuid ])) itemUuids
+            in
+            div [ class "mb-3" ]
+                [ a [ onClick (ExpandItems allItemsPaths) ]
+                    [ faSet "questionnaire.item.expandAll" appState
+                    , span [ class "ms-1" ] [ text (gettext "Expand all" appState.locale) ]
                     ]
-
-            else
-                emptyNode
+                , a
+                    [ onClick (CollapseItems allItemsPaths)
+                    , class "ms-3"
+                    ]
+                    [ faSet "questionnaire.item.collapseAll" appState
+                    , span [ class "ms-1" ] [ text (gettext "Collapse all" appState.locale) ]
+                    ]
+                ]
 
         viewItem =
             viewQuestionListItem appState cfg ctx model question path humanIdentifiers (List.length itemUuids)
@@ -3402,8 +3463,9 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
                 emptyNode
     in
     div []
-        [ expandAndCollapseButtons
+        [ Html.viewIf (List.length itemUuids > 1) <| expandAndCollapseButtons
         , div [] (List.indexedMap viewItem itemUuids)
+        , Html.viewIf (List.length itemUuids > 2) <| expandAndCollapseButtons
         , viewQuestionListAdd appState cfg itemUuids path
         , noAnswersInfo
         ]

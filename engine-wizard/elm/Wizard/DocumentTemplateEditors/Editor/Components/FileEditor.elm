@@ -195,15 +195,20 @@ getSelectedName model =
             getAssetByPath path model
                 |> Maybe.map getFileName
 
-        _ ->
-            Nothing
+        SelectedFolder path ->
+            Just (getNameFromPath path)
 
 
 getFileName : { a | fileName : String } -> String
 getFileName file =
-    String.split "/" file.fileName
+    getNameFromPath file.fileName
+
+
+getNameFromPath : String -> String
+getNameFromPath path =
+    String.split "/" path
         |> List.last
-        |> Maybe.withDefault file.fileName
+        |> Maybe.withDefault path
 
 
 updateFile : Uuid -> String -> Model -> Model
@@ -251,6 +256,7 @@ type Msg
     | DeleteSelected
     | DeleteSelectedFileCompleted Uuid (Result ApiError ())
     | DeleteSelectedAssetCompleted Uuid (Result ApiError ())
+    | DeleteSelectedFolderCompleted String (Result ApiError ())
     | AssetUploadModalMsg AssetUploadModal.Msg
     | AddAsset DocumentTemplateAsset
     | AddFile DocumentTemplateFile
@@ -766,8 +772,10 @@ update cfg appState msg model =
                         Nothing ->
                             ( model, Cmd.none )
 
-                SelectedFolder _ ->
-                    ( model, Cmd.none )
+                SelectedFolder path ->
+                    ( { model | deleting = ActionResult.Loading }
+                    , DocumentTemplateDraftsApi.deleteFolder cfg.documentTemplateId path appState (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
+                    )
 
         DeleteSelectedFileCompleted uuid result ->
             case result of
@@ -850,6 +858,37 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete asset." error }
+                    , getResultCmd cfg.logoutMsg result
+                    )
+
+        DeleteSelectedFolderCompleted path result ->
+            case result of
+                Ok _ ->
+                    let
+                        editorGroup1 =
+                            EditorGroup.removeEditorByPath path model.editorGroup1
+
+                        editorGroup2 =
+                            EditorGroup.removeEditorByPath path model.editorGroup2
+                    in
+                    ( consolidateEditorGroups
+                        { model
+                            | deleting = ActionResult.Unset
+                            , deleteModalOpen = False
+                            , files = ActionResult.map (List.filter (not << String.startsWith path << .fileName)) model.files
+                            , assets = ActionResult.map (List.filter (not << String.startsWith path << .fileName)) model.assets
+                            , changedFiles = Set.filter (not << String.startsWith path) model.changedFiles
+                            , savingFiles = Dict.filter (\k _ -> not (String.startsWith path k)) model.savingFiles
+                            , newFolders = List.filter (not << String.startsWith path) model.newFolders
+                            , selected = SelectedFolder ""
+                            , editorGroup1 = editorGroup1
+                            , editorGroup2 = editorGroup2
+                        }
+                    , Cmd.none
+                    )
+
+                Err error ->
+                    ( { model | deleting = ApiError.toActionResult appState "Unable to delete folder." error }
                     , getResultCmd cfg.logoutMsg result
                     )
 
@@ -1116,6 +1155,7 @@ viewSidebar appState model fileTree =
                         span []
                             [ renameAction (Just (RenameModalMsg (RenameModal.openFolder (getSelectedFolderPath model))))
                             , moveAction (Just (MoveModalMsg (MoveModal.openFolder (getSelectedFolderPath model))))
+                            , deleteAction
                             ]
 
                 SelectedAsset assetPath ->
@@ -1471,11 +1511,19 @@ viewDeleteModal appState model =
     let
         fileName =
             getSelectedName model
+
+        message =
+            case model.selected of
+                SelectedFolder _ ->
+                    gettext "Are you sure you want to permanently delete %s and all its contents?" appState.locale
+
+                _ ->
+                    gettext "Are you sure you want to permanently delete %s?" appState.locale
     in
     Modal.confirm appState
         { modalTitle = "Delete"
         , modalContent =
-            String.formatHtml (gettext "Are you sure you want to permanently delete %s?" appState.locale)
+            String.formatHtml message
                 [ strong [] [ text (Maybe.withDefault "" fileName) ] ]
         , visible = model.deleteModalOpen && Maybe.isJust fileName
         , actionResult = model.deleting

@@ -5,6 +5,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Projects.Create.View
 import Wizard.Projects.CreateMigration.View
 import Wizard.Projects.Detail.View as Detail
+import Wizard.Projects.DocumentDownload.View
 import Wizard.Projects.FileDownload.View
 import Wizard.Projects.Import.View
 import Wizard.Projects.Index.View
@@ -40,6 +41,10 @@ view route appState model =
         ImportRoute _ _ ->
             Html.map ImportMsg <|
                 Wizard.Projects.Import.View.view appState model.importModel
+
+        DocumentDownloadRoute _ _ ->
+            Html.map FileDownloadMsg <|
+                Wizard.Projects.DocumentDownload.View.view appState model.documentDownload
 
         FileDownloadRoute _ _ ->
             Html.map FileDownloadMsg <|

@@ -11,9 +11,7 @@ const component = `engine-${process.env.COMPONENT}`
 const components = {
     'engine-wizard': {
         port: 8080,
-        extraEntries: [
-            './node_modules/chart.js/dist/chart.js'
-        ],
+        extraEntries: [],
         publicPath: '/wizard/'
     },
     'engine-registry': {

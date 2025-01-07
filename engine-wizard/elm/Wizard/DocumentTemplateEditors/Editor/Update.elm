@@ -135,7 +135,10 @@ update appState wrapMsg msg model =
                         ( { model
                             | documentTemplate = ActionResult.Success documentTemplate
                             , settingsModel = Settings.setDocumentTemplate documentTemplate model.settingsModel
-                            , previewModel = Preview.setSelectedQuestionnaire documentTemplate.questionnaire model.previewModel
+                            , previewModel =
+                                model.previewModel
+                                    |> Preview.setSelectedQuestionnaire documentTemplate.questionnaire
+                                    |> Preview.setSelectedBranch documentTemplate.branch
                           }
                         , Cmd.none
                         )

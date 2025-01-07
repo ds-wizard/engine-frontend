@@ -20,6 +20,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , isQuestionDeletedInHierarchy
     , isReachable
     , setActiveEditor
+    , setReplies
     , sortDeleted
     , treeCollapseAll
     , treeExpandAll
@@ -27,7 +28,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     , treeSetNodeOpen
     )
 
-import Dict
+import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -75,6 +76,7 @@ import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
 import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
 import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Shared.Data.KnowledgeModel.Tag exposing (Tag)
+import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (flip)
 import String.Extra as String
@@ -122,6 +124,15 @@ init appState branch mbEditorUuid =
     List.foldl (applyEvent appState False) editorBranch editorBranch.branch.events
         |> setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)
         |> computeWarnings appState
+
+
+setReplies : Dict String Reply -> EditorBranch -> EditorBranch
+setReplies replies editorBranch =
+    let
+        branch =
+            editorBranch.branch
+    in
+    { editorBranch | branch = { branch | replies = replies } }
 
 
 getEditUuid : String -> EditorBranch -> Maybe Uuid

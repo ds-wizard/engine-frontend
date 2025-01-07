@@ -3,6 +3,7 @@ module Shared.Setters exposing
     , setApiKeys
     , setAppKeys
     , setAssets
+    , setBranchUuid
     , setCommentThreads
     , setDebouncer
     , setDropdownState
@@ -46,6 +47,11 @@ setAppKeys value record =
 setAssets : a -> { b | assets : a } -> { b | assets : a }
 setAssets value record =
     { record | assets = value }
+
+
+setBranchUuid : a -> { b | branchUuid : a } -> { b | branchUuid : a }
+setBranchUuid value record =
+    { record | branchUuid = value }
 
 
 setCommentThreads : a -> { b | commentThreads : a } -> { b | commentThreads : a }

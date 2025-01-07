@@ -235,8 +235,14 @@ viewKMEditorContent appState route model editorBranch =
             TagEditor.view appState TagEditorMsg (EventMsg False) editorBranch model.tagEditorModel
 
         KMEditorRoute.Preview ->
-            Html.map PreviewMsg <|
-                Preview.view appState editorBranch model.previewModel
+            let
+                previewViewConfig =
+                    { editorBranch = editorBranch
+                    , wrapMsg = PreviewMsg
+                    , saveRepliesMsg = SavePreviewReplies
+                    }
+            in
+            Preview.view appState previewViewConfig model.previewModel
 
         KMEditorRoute.Settings ->
             Html.map SettingsMsg <|

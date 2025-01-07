@@ -1,3 +1,5 @@
+import Chart from 'chart.js/auto'
+
 customElements.define('chart-radar', class extends HTMLElement {
     constructor() {
         super()

@@ -1,34 +1,45 @@
 @import '../../../variables';
 @import 'variables';
 
-$tag-selection-height: 80px;
+$toolbar-height: 53px;
+$toolbar-height-with-tags: 90px;
 
 .KMEditor__Editor__Preview {
     height: calc(100vh - #{$editor-header-height});
     padding: 0;
 
-    .tag-selection {
+    .toolbar {
         padding: 0.5rem 1rem;
-        height: $tag-selection-height;
+        height: $toolbar-height;
         background: $gray-100;
         border-bottom: 1px solid $gray-400;
 
-        .tag-selection-header {
-            margin-bottom: .125rem;
+        .btn-link {
+            white-space: nowrap;
+            color: $body-color !important;
 
-            a {
-                margin-left: 1rem;
+            .fas {
+                color: $gray-600 !important;
+            }
+
+            &:hover {
+                background: $gray-200;
             }
         }
+
     }
 
     .questionnaire {
-        height:  calc(100vh - #{$editor-header-height});
+        height: calc(100vh - #{$editor-header-height} - #{$toolbar-height});
     }
 
     &--WithTags {
+        .toolbar {
+            height: $toolbar-height-with-tags;
+        }
+
         .questionnaire {
-            height:  calc(100vh - #{$editor-header-height} - #{$tag-selection-height});
+            height: calc(100vh - #{$editor-header-height} - #{$toolbar-height-with-tags});
         }
 
         .tag-selection {

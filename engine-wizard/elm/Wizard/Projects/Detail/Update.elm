@@ -913,8 +913,12 @@ handleWebsocketMsg websocketMsg appState model =
                             , Cmd.none
                             )
 
-                WebSocketServerAction.Error ->
-                    ( appState.seed, { model | error = True }, Cmd.none )
+                WebSocketServerAction.Error code ->
+                    if code == "error.service.qtn.collaboration.force_disconnect" then
+                        ( appState.seed, { model | forceDisconnect = True }, Cmd.none )
+
+                    else
+                        ( appState.seed, { model | error = True }, Cmd.none )
 
         WebSocket.Close ->
             ( appState.seed, { model | offline = True }, Cmd.none )

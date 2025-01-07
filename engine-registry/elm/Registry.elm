@@ -80,13 +80,18 @@ init flags url key =
         ( appState, cmd ) =
             case AppState.init flags key of
                 Just appStateWithoutRoute ->
-                    let
-                        originalRoute =
-                            Routes.parse appStateWithoutRoute.config url
-                    in
-                    ( { appStateWithoutRoute | route = routeIfAllowed appStateWithoutRoute originalRoute }
-                    , dispatch (OnUrlChange url)
-                    )
+                    case Routes.redirect url of
+                        Just redirectUrl ->
+                            ( appStateWithoutRoute, Navigation.pushUrl key (Url.toString redirectUrl) )
+
+                        Nothing ->
+                            let
+                                originalRoute =
+                                    Routes.parse appStateWithoutRoute.config url
+                            in
+                            ( { appStateWithoutRoute | route = routeIfAllowed appStateWithoutRoute originalRoute }
+                            , dispatch (OnUrlChange url)
+                            )
 
                 Nothing ->
                     ( AppState.default key, Cmd.none )

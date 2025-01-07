@@ -381,10 +381,40 @@ $toolbar-height: 40px;
         }
 
         .Comments {
+            .comments-navigation {
+                position: sticky;
+                top: -1rem;
+                z-index: 200;
+                background: $gray-100;
+                margin: -1rem -1rem 0 -1rem;
+                padding: 0;
+                border-bottom: 1px solid $gray-400;
+                margin-bottom: 1rem;
+                display: grid;
+                grid-template-columns: 2fr 1fr 2fr;
+
+                span {
+                    padding: $spacer-2 $spacer-3;
+                    text-align: center;
+                }
+
+                a {
+                    @include not-selectable;
+                    padding: $spacer-2 $spacer-3;
+                    text-align: center;
+                    text-decoration: none;
+                    white-space: nowrap;
+
+                    &:hover {
+                        background: $gray-200;
+                    }
+                }
+            }
+
             .form-check {
                 background: $gray-100;
                 margin: -1rem -1rem 0 -1rem;
-                padding: 1rem;
+                padding: $spacer-2 $spacer-3;
                 border-bottom: 1px solid $gray-400;
                 margin-bottom: 1rem;
 
@@ -485,6 +515,12 @@ $toolbar-height: 40px;
 
                 &--Resolved {
                     color: $gray-500;
+
+                    .Comment:last-child {
+                        border-bottom: none;
+                        margin-bottom: 0;
+                        padding-bottom: 0;
+                    }
 
                     .Comment__Header__User__Time {
                         color: $gray-500 !important;

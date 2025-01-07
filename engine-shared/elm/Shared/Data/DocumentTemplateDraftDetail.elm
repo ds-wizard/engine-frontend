@@ -9,6 +9,7 @@ module Shared.Data.DocumentTemplateDraftDetail exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import Shared.Data.BranchSuggestion as BranchSuggestion exposing (BranchSuggestion)
 import Shared.Data.DocumentTemplate.DocumentTemplateAllowedPackage as AllowedPackage
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
@@ -33,6 +34,8 @@ type alias DocumentTemplateDraftDetail =
     , formatUuid : Maybe Uuid
     , questionnaireUuid : Maybe Uuid
     , questionnaire : Maybe QuestionnaireSuggestion
+    , branchUuid : Maybe Uuid
+    , branch : Maybe BranchSuggestion
     }
 
 
@@ -52,6 +55,8 @@ decoder =
         |> D.optional "formatUuid" (D.maybe Uuid.decoder) Nothing
         |> D.optional "questionnaireUuid" (D.maybe Uuid.decoder) Nothing
         |> D.optional "questionnaire" (D.maybe QuestionnaireSuggestion.decoder) Nothing
+        |> D.optional "branchUuid" (D.maybe Uuid.decoder) Nothing
+        |> D.optional "branch" (D.maybe BranchSuggestion.decoder) Nothing
 
 
 getPreviewSettings : DocumentTemplateDraftDetail -> DocumentTemplateDraftPreviewSettings
@@ -59,6 +64,8 @@ getPreviewSettings detail =
     { formatUuid = detail.formatUuid
     , questionnaireUuid = detail.questionnaireUuid
     , questionnaire = detail.questionnaire
+    , branchUuid = detail.branchUuid
+    , branch = detail.branch
     }
 
 
@@ -68,6 +75,8 @@ updatePreviewSettings previewSettings detail =
         | formatUuid = previewSettings.formatUuid
         , questionnaireUuid = previewSettings.questionnaireUuid
         , questionnaire = previewSettings.questionnaire
+        , branchUuid = previewSettings.branchUuid
+        , branch = previewSettings.branch
     }
 
 

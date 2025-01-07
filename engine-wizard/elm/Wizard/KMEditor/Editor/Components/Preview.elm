@@ -1,25 +1,30 @@
 module Wizard.KMEditor.Editor.Components.Preview exposing
     ( Model
     , Msg
+    , ViewConfig
     , generateReplies
     , initialModel
     , setActiveChapterIfNot
     , setPackageId
     , setPhase
+    , setReplies
     , subscriptions
     , update
     , view
     )
 
+import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Registry.Components.FontAwesome exposing (fas)
 import Set exposing (Set)
 import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Data.Package as Package
+import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
@@ -43,13 +48,22 @@ initialModel appState packageId =
     let
         questionnaire =
             createQuestionnaireDetail packageId KnowledgeModel.empty
-
-        ( questionnaireModel, _ ) =
-            Questionnaire.initSimple appState questionnaire
     in
-    { questionnaireModel = questionnaireModel
+    { questionnaireModel = initQuestionnaireModel appState questionnaire
     , tags = Set.empty
     }
+
+
+initQuestionnaireModel : AppState -> QuestionnaireQuestionnaire -> Questionnaire.Model
+initQuestionnaireModel appState questionnaire =
+    let
+        ( questionnaireModel, _ ) =
+            Questionnaire.initSimple appState questionnaire
+
+        viewSettings =
+            questionnaireModel.viewSettings
+    in
+    { questionnaireModel | viewSettings = { viewSettings | answeredBy = False } }
 
 
 setActiveChapterIfNot : String -> Model -> Model
@@ -76,10 +90,22 @@ setPackageId appState packageId model =
         questionnaire =
             createQuestionnaireDetail packageId KnowledgeModel.empty
 
-        ( questionnaireModel, _ ) =
-            Questionnaire.initSimple appState questionnaire
+        questionnaireModel =
+            initQuestionnaireModel appState questionnaire
     in
     { model | questionnaireModel = questionnaireModel }
+
+
+setReplies : Dict String Reply -> Model -> Model
+setReplies replies model =
+    let
+        questionnaire =
+            model.questionnaireModel.questionnaire
+
+        questionnaireModel =
+            model.questionnaireModel
+    in
+    { model | questionnaireModel = { questionnaireModel | questionnaire = { questionnaire | replies = replies } } }
 
 
 generateReplies : AppState -> String -> KnowledgeModel -> Model -> ( Seed, Model )
@@ -165,8 +191,15 @@ subscriptions model =
         Questionnaire.subscriptions model.questionnaireModel
 
 
-view : AppState -> EditorBranch -> Model -> Html Msg
-view appState editorBranch model =
+type alias ViewConfig msg =
+    { editorBranch : EditorBranch
+    , wrapMsg : Msg -> msg
+    , saveRepliesMsg : msg
+    }
+
+
+view : AppState -> ViewConfig msg -> Model -> Html msg
+view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
     let
         knowledgeModel =
             EditorBranch.getFilteredKM editorBranch
@@ -210,8 +243,54 @@ view appState editorBranch model =
         , classList [ ( "KMEditor__Editor__Preview--WithTags", tagSelectionVisible knowledgeModel ) ]
         , dataCy "km-editor_preview"
         ]
-        [ tagSelection appState model.tags knowledgeModel
-        , questionnaire
+        [ toolbar appState wrapMsg saveRepliesMsg model knowledgeModel
+        , Html.map wrapMsg questionnaire
+        ]
+
+
+toolbar : AppState -> (Msg -> msg) -> msg -> Model -> KnowledgeModel -> Html msg
+toolbar appState wrapMsg saveRepliesMsg model km =
+    let
+        tagHeader =
+            if tagSelectionVisible km then
+                Html.map wrapMsg <|
+                    div [ class "d-flex align-items-center mb-1" ]
+                        [ strong [ class "me-1" ] [ text (gettext "Tags" appState.locale) ]
+                        , a
+                            [ onClick SelectAllTags
+                            , dataCy "km-editor_preview_tags_select-all"
+                            , class "btn btn-link"
+                            ]
+                            [ fas "fa-check-double me-1"
+                            , text (gettext "Select all" appState.locale)
+                            ]
+                        , a
+                            [ onClick SelectNoneTags
+                            , dataCy "km-editor_preview_tags_select-none"
+                            , class "btn btn-link"
+                            ]
+                            [ fas "fa-times me-1"
+                            , text (gettext "Select none" appState.locale)
+                            ]
+                        ]
+
+            else
+                div [] []
+    in
+    div [ class "toolbar" ]
+        [ div [ class "d-flex justify-content-between" ]
+            [ tagHeader
+            , div []
+                [ a
+                    [ class "btn btn-link ms-3"
+                    , onClick saveRepliesMsg
+                    ]
+                    [ fas "fa-save me-1"
+                    , text (gettext "Save preview values" appState.locale)
+                    ]
+                ]
+            ]
+        , Html.map wrapMsg <| tagSelection appState model.tags km
         ]
 
 
@@ -235,12 +314,7 @@ tagSelection appState selected knowledgeModel =
                 }
         in
         div [ class "tag-selection" ]
-            [ div [ class "tag-selection-header" ]
-                [ strong [] [ text (gettext "Tags" appState.locale) ]
-                , a [ onClick SelectAllTags, dataCy "km-editor_preview_tags_select-all" ] [ text (gettext "Select all" appState.locale) ]
-                , a [ onClick SelectNoneTags, dataCy "km-editor_preview_tags_select-none" ] [ text (gettext "Select none" appState.locale) ]
-                ]
-            , Tag.list appState tagListConfig tags
+            [ Tag.list appState tagListConfig tags
             ]
 
     else
