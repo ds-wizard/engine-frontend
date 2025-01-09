@@ -370,6 +370,7 @@ view cfg appState model =
                         , ( "btn-outline-primary", model.mode /= QuestionnaireMode )
                         ]
                     , onClick (SetMode QuestionnaireMode)
+                    , dataCy "dt-editor_preview-mode_project"
                     ]
                     [ text (gettext "Project" appState.locale) ]
                 , button
@@ -379,6 +380,7 @@ view cfg appState model =
                         , ( "btn-outline-primary", model.mode /= BranchMode )
                         ]
                     , onClick (SetMode BranchMode)
+                    , dataCy "dt-editor_preview-mode_km-editor"
                     ]
                     [ text (gettext "KM editor" appState.locale) ]
                 ]
