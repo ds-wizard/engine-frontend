@@ -2,6 +2,7 @@ module Shared.Data.UserInfo exposing
     ( UserInfo
     , decoder
     , isAdmin
+    , isDataSteward
     , toUserSuggestion
     )
 
@@ -41,6 +42,11 @@ decoder =
 isAdmin : Maybe UserInfo -> Bool
 isAdmin =
     Maybe.map (.role >> (==) Role.admin) >> Maybe.withDefault False
+
+
+isDataSteward : Maybe UserInfo -> Bool
+isDataSteward =
+    Maybe.map (.role >> (==) Role.dataSteward) >> Maybe.withDefault False
 
 
 toUserSuggestion : UserInfo -> UserSuggestion

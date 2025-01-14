@@ -1,5 +1,6 @@
 module Shared.Auth.Role exposing
     ( admin
+    , dataSteward
     , options
     , researcher
     , switch
