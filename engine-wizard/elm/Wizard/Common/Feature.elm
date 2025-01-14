@@ -9,6 +9,8 @@ module Wizard.Common.Feature exposing
     , documentTemplatesImport
     , documentTemplatesView
     , documentsView
+    , isAdmin
+    , isDataSteward
     , isDefaultLanguage
     , knowledgeModelEditorCancelMigration
     , knowledgeModelEditorContinueMigration
@@ -52,6 +54,7 @@ module Wizard.Common.Feature exposing
     , projectCreateMigration
     , projectDelete
     , projectDocumentsView
+    , projectFiles
     , projectImporters
     , projectMetrics
     , projectOpen
@@ -379,6 +382,15 @@ projectCommentPrivate appState questionnaire =
 
 
 
+-- Project Files
+
+
+projectFiles : AppState -> Bool
+projectFiles =
+    adminOr Perm.questionnaireFile
+
+
+
 -- Project Actions
 
 
@@ -555,6 +567,11 @@ dev appState =
 
 
 -- Helpers
+
+
+isDataSteward : AppState -> Bool
+isDataSteward appState =
+    UserInfo.isDataSteward appState.config.user
 
 
 isAdmin : AppState -> Bool
