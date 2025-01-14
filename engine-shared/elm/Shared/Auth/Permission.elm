@@ -10,6 +10,7 @@ module Shared.Auth.Permission exposing
     , packageManagementWrite
     , questionnaire
     , questionnaireAction
+    , questionnaireFile
     , questionnaireImporter
     , questionnaireTemplate
     , settings
@@ -85,6 +86,11 @@ questionnaireAction =
 questionnaireImporter : String
 questionnaireImporter =
     "QTN_IMPORTER_PERM"
+
+
+questionnaireFile : String
+questionnaireFile =
+    "QTN_FILE_PERM"
 
 
 settings : String
