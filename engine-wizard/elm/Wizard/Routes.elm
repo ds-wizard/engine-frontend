@@ -747,21 +747,23 @@ projectsImport uuid importerId =
 
 isProjectSubroute : Route -> Bool
 isProjectSubroute route =
-    case route of
-        ProjectsRoute _ ->
-            True
+    isDocumentsIndex route
+        || (case route of
+                ProjectsRoute _ ->
+                    True
 
-        ProjectActionsRoute _ ->
-            True
+                ProjectActionsRoute _ ->
+                    True
 
-        ProjectImportersRoute _ ->
-            True
+                ProjectImportersRoute _ ->
+                    True
 
-        ProjectFilesRoute _ ->
-            True
+                ProjectFilesRoute _ ->
+                    True
 
-        _ ->
-            False
+                _ ->
+                    False
+           )
 
 
 projectsFileDownload : Uuid -> Uuid -> Route
