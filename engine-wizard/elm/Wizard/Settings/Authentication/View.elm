@@ -229,7 +229,7 @@ serviceParametersHeader : AppState -> String -> Form FormError AuthenticationCon
 serviceParametersHeader appState field form =
     let
         isEmpty =
-            List.length (Form.getListIndexes field form) == 0
+            List.isEmpty (Form.getListIndexes field form)
     in
     if isEmpty then
         emptyNode

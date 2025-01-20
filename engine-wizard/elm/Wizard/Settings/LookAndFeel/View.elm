@@ -127,7 +127,7 @@ customMenuLinksHeader : AppState -> Form FormError EditableLookAndFeelConfig -> 
 customMenuLinksHeader appState form =
     let
         isEmpty =
-            List.length (Form.getListIndexes "customMenuLinks" form) == 0
+            List.isEmpty (Form.getListIndexes "customMenuLinks" form)
     in
     if isEmpty then
         emptyNode

@@ -66,7 +66,6 @@ contentTypes =
         , ( "json", "application/json" )
         , ( "jsonld", "application/ld+json" )
         , ( "midi", "audio/midi, audio/x-midi" )
-        , ( "midi", "audio/midi, audio/x-midi" )
         , ( "mjs", "text/javascript" )
         , ( "mp3", "audio/mpeg" )
         , ( "mp4", "video/mp4" )

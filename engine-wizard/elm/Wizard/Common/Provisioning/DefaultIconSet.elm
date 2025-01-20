@@ -144,7 +144,6 @@ iconSet =
         , ( "questionnaire.copyLinkCopied", "fas fa-fw fa-check" )
         , ( "questionnaire.desirable", "far fa-check-square" )
         , ( "questionnaire.expand", "fas fa-expand" )
-        , ( "questionnaire.expand", "fas fa-expand" )
         , ( "questionnaire.experts", "far fa-address-book" )
         , ( "questionnaire.feedback", "fas fa-exclamation" )
         , ( "questionnaire.followUpsIndication", "fas fa-list-ul" )

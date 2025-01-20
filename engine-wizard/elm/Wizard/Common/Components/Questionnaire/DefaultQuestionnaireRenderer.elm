@@ -214,7 +214,7 @@ type alias ViewExtraItemsConfig a msg =
 
 viewExtraItems : ViewExtraItemsConfig a msg -> List a -> Html msg
 viewExtraItems cfg list =
-    if List.length list == 0 then
+    if List.isEmpty list then
         emptyNode
 
     else
