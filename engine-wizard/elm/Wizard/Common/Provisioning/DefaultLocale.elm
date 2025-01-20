@@ -8,7 +8,7 @@ locale =
     Dict.fromList
         [ -- Routing
           ( "__routing.dashboard", "dashboard" )
-        , ( "__routing.documents", "documents" )
+        , ( "__routing.documents", "project-documents" )
         , ( "__routing.documents.index.questionnaireUuid", "questionnaireUuid" )
         , ( "__routing.documentTemplateEditors", "document-template-editors" )
         , ( "__routing.kmEditor", "km-editor" )

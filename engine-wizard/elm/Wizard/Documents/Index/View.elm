@@ -72,7 +72,7 @@ viewDocuments appState model mbQuestionnaire =
             Maybe.map questionnaireFilterView mbQuestionnaire
     in
     div [ listClass "Documents__Index" ]
-        [ Page.header (gettext "Documents" appState.locale) []
+        [ Page.header (gettext "Project Documents" appState.locale) []
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
