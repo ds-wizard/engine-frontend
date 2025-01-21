@@ -9,6 +9,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (compose2)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.FontAwesome as FontAwesome
@@ -27,6 +28,7 @@ viewProps =
     { locTitle = gettext "Privacy & Support"
     , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
+    , guideLink = GuideLinks.settingsPrivacyAndSupport
     , wrapMsg = FormMsg
     }
 

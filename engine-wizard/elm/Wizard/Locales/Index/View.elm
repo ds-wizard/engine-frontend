@@ -182,15 +182,13 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete locale" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingLocale
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteLocale
-            , cancelMsg = Just <| ShowHideDeleteLocale Nothing
-            , dangerous = True
-            , dataCy = "locales-delete"
-            }
+            Modal.confirmConfig (gettext "Delete locale" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingLocale
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteLocale
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteLocale Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "locales-delete"
     in
     Modal.confirm appState modalConfig

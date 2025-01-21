@@ -1,10 +1,19 @@
 module Wizard.Common.View.Modal exposing
     ( ConfirmConfig
-    , ConfirmExtraConfig
     , ErrorConfig
     , SimpleConfig
     , confirm
-    , confirmExtra
+    , confirmConfig
+    , confirmConfigAction
+    , confirmConfigActionResult
+    , confirmConfigCancelMsg
+    , confirmConfigContent
+    , confirmConfigDangerous
+    , confirmConfigDataCy
+    , confirmConfigExtraClass
+    , confirmConfigGuideLink
+    , confirmConfigMbCancelMsg
+    , confirmConfigVisible
     , error
     , simple
     , simpleWithAttrs
@@ -15,8 +24,11 @@ import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, h5, pre, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks exposing (GuideLinks)
+import Wizard.Common.Html exposing (guideLink)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
@@ -44,61 +56,111 @@ simpleWithAttrs attributes cfg =
         ]
 
 
-type alias ConfirmConfig msg =
+type ConfirmConfig msg
+    = ConfirmConfig (ConfirmConfigData msg)
+
+
+type alias ConfirmConfigData msg =
     { modalTitle : String
     , modalContent : List (Html msg)
     , visible : Bool
     , actionResult : ActionResult String
-    , actionName : String
-    , actionMsg : msg
+    , action : Maybe ( String, msg )
     , cancelMsg : Maybe msg
     , dangerous : Bool
-    , dataCy : String
+    , extraClass : Maybe String
+    , guideLink : Maybe (GuideLinks -> String)
+    , dataCy : Maybe String
     }
 
 
-confirm : AppState -> ConfirmConfig msg -> Html msg
-confirm appState cfg =
-    confirmExtra appState
-        { modalTitle = cfg.modalTitle
-        , modalContent = cfg.modalContent
-        , visible = cfg.visible
-        , actionResult = cfg.actionResult
-        , actionName = cfg.actionName
-        , actionMsg = cfg.actionMsg
-        , cancelMsg = cfg.cancelMsg
-        , dangerous = cfg.dangerous
-        , extraClass = ""
-        , dataCy = cfg.dataCy
+confirmConfig : String -> ConfirmConfig msg
+confirmConfig title =
+    ConfirmConfig
+        { modalTitle = title
+        , modalContent = []
+        , visible = False
+        , actionResult = ActionResult.Unset
+        , action = Nothing
+        , cancelMsg = Nothing
+        , dangerous = False
+        , extraClass = Nothing
+        , guideLink = Nothing
+        , dataCy = Nothing
         }
 
 
-type alias ConfirmExtraConfig msg =
-    { modalTitle : String
-    , modalContent : List (Html msg)
-    , visible : Bool
-    , actionResult : ActionResult String
-    , actionName : String
-    , actionMsg : msg
-    , cancelMsg : Maybe msg
-    , dangerous : Bool
-    , extraClass : String
-    , dataCy : String
-    }
+confirmConfigContent : List (Html msg) -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigContent content (ConfirmConfig data) =
+    ConfirmConfig { data | modalContent = content }
 
 
-confirmExtra : AppState -> ConfirmExtraConfig msg -> Html msg
-confirmExtra appState cfg =
+confirmConfigVisible : Bool -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigVisible visible (ConfirmConfig data) =
+    ConfirmConfig { data | visible = visible }
+
+
+confirmConfigActionResult : ActionResult String -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigActionResult actionResult (ConfirmConfig data) =
+    ConfirmConfig { data | actionResult = actionResult }
+
+
+confirmConfigAction : String -> msg -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigAction actionName actionMsg (ConfirmConfig data) =
+    ConfirmConfig { data | action = Just ( actionName, actionMsg ) }
+
+
+confirmConfigCancelMsg : msg -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigCancelMsg cancelMsg (ConfirmConfig data) =
+    ConfirmConfig { data | cancelMsg = Just cancelMsg }
+
+
+confirmConfigMbCancelMsg : Maybe msg -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigMbCancelMsg cancelMsg (ConfirmConfig data) =
+    ConfirmConfig { data | cancelMsg = cancelMsg }
+
+
+confirmConfigDangerous : Bool -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigDangerous dangerous (ConfirmConfig data) =
+    ConfirmConfig { data | dangerous = dangerous }
+
+
+confirmConfigExtraClass : String -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigExtraClass extraClass (ConfirmConfig data) =
+    ConfirmConfig { data | extraClass = Just extraClass }
+
+
+confirmConfigGuideLink : (GuideLinks -> String) -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigGuideLink guideLink (ConfirmConfig data) =
+    ConfirmConfig { data | guideLink = Just guideLink }
+
+
+confirmConfigDataCy : String -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigDataCy dataCy (ConfirmConfig data) =
+    ConfirmConfig { data | dataCy = Just dataCy }
+
+
+confirm : AppState -> ConfirmConfig msg -> Html msg
+confirm appState (ConfirmConfig data) =
     let
         content =
-            FormResult.view appState cfg.actionResult :: cfg.modalContent
+            FormResult.view appState data.actionResult :: data.modalContent
+
+        actionButton =
+            case data.action of
+                Just ( actionName, actionMsg ) ->
+                    ActionButton.buttonWithAttrs appState <|
+                        ActionButton.ButtonWithAttrsConfig actionName data.actionResult actionMsg data.dangerous [ dataCy "modal_action-button" ]
+
+                Nothing ->
+                    emptyNode
 
         cancelButton =
-            case cfg.cancelMsg of
+            case data.cancelMsg of
                 Just cancelMsg ->
                     let
                         cancelDisabled =
-                            ActionResult.isLoading cfg.actionResult
+                            ActionResult.isLoading data.actionResult
                     in
                     button
                         [ onClick cancelMsg
@@ -110,20 +172,26 @@ confirmExtra appState cfg =
 
                 Nothing ->
                     emptyNode
+
+        mbGuideLink =
+            case data.guideLink of
+                Just link ->
+                    guideLink appState link
+
+                Nothing ->
+                    Html.nothing
     in
-    div [ class "modal modal-cover", class cfg.extraClass, classList [ ( "visible", cfg.visible ) ] ]
+    div [ class "modal modal-cover", class (Maybe.withDefault "" data.extraClass), classList [ ( "visible", data.visible ) ] ]
         [ div [ class "modal-dialog" ]
-            [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
+            [ div [ class "modal-content", dataCy ("modal_" ++ Maybe.withDefault "confirm" data.dataCy) ]
                 [ div [ class "modal-header" ]
-                    [ h5 [ class "modal-title" ] [ text cfg.modalTitle ]
+                    [ h5 [ class "modal-title" ] [ text data.modalTitle ]
+                    , mbGuideLink
                     ]
                 , div [ class "modal-body" ]
                     content
                 , div [ class "modal-footer" ]
-                    [ ActionButton.buttonWithAttrs appState <|
-                        ActionButton.ButtonWithAttrsConfig cfg.actionName cfg.actionResult cfg.actionMsg cfg.dangerous [ dataCy "modal_action-button" ]
-                    , cancelButton
-                    ]
+                    [ actionButton, cancelButton ]
                 ]
             ]
         ]

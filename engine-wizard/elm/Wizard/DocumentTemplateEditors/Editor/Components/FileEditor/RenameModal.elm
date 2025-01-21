@@ -231,15 +231,14 @@ view appState model =
                 , p [ class "invalid-feedback" ] [ text (gettext "Name cannot be empty." appState.locale) ]
                 ]
             ]
+
+        cfg =
+            Modal.confirmConfig (gettext "Rename" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (model.state /= Closed)
+                |> Modal.confirmConfigActionResult model.renaming
+                |> Modal.confirmConfigAction (gettext "Rename" appState.locale) RenameSubmit
+                |> Modal.confirmConfigCancelMsg (SetState Closed)
+                |> Modal.confirmConfigDataCy "add-file-modal"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Rename" appState.locale
-        , modalContent = modalContent
-        , visible = model.state /= Closed
-        , actionResult = model.renaming
-        , actionName = gettext "Rename" appState.locale
-        , actionMsg = RenameSubmit
-        , cancelMsg = Just (SetState Closed)
-        , dangerous = False
-        , dataCy = "add-file-modal"
-        }
+    Modal.confirm appState cfg

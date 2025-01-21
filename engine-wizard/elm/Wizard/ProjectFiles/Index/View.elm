@@ -13,6 +13,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.FileIcon as FileIcon
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ItemIcon as ItemIcon
@@ -28,7 +29,7 @@ import Wizard.Routes as Routes
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "ProjectFiles__Index" ]
-        [ Page.header (gettext "Project Files" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Project Files" appState.locale) GuideLinks.projectsFiles
         , Listing.view appState (listingConfig appState) model.questionnaireFiles
         , deleteModal appState model
         ]
@@ -155,15 +156,13 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete file" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingQuestionnaireFile
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteFileConfirm
-            , cancelMsg = Just <| ShowHideDeleteFile Nothing
-            , dangerous = True
-            , dataCy = "file-delete"
-            }
+            Modal.confirmConfig (gettext "Delete file" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingQuestionnaireFile
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteFileConfirm
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteFile Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "file-delete"
     in
     Modal.confirm appState modalConfig

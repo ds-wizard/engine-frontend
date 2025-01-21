@@ -782,16 +782,12 @@ viewReportIssueModal appState isOpen =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Report Issue" appState.locale
-            , modalContent = modalContent
-            , visible = isOpen
-            , actionResult = Unset
-            , actionName = gettext "OK" appState.locale
-            , actionMsg = Wizard.Msgs.MenuMsg <| SetReportIssueOpen False
-            , cancelMsg = Nothing
-            , dangerous = False
-            , dataCy = "report-issue"
-            }
+            Modal.confirmConfig (gettext "Report Issue" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible isOpen
+                |> Modal.confirmConfigActionResult Unset
+                |> Modal.confirmConfigAction (gettext "OK" appState.locale) (Wizard.Msgs.MenuMsg <| SetReportIssueOpen False)
+                |> Modal.confirmConfigDataCy "report-issue"
     in
     Modal.confirm appState modalConfig
 

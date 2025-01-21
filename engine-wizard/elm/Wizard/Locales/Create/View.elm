@@ -13,6 +13,7 @@ import Json.Decode as Decode
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
@@ -59,7 +60,7 @@ view appState model =
                 (ActionButton.ButtonConfig (gettext "Create" appState.locale) model.creatingLocale (FormMsg <| Form.Submit) False)
     in
     div [ detailClass "" ]
-        [ Page.header (gettext "Create Locale" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Create Locale" appState.locale) GuideLinks.localesCreate
         , formView
         , fileGroup
         , formActions

@@ -4283,20 +4283,19 @@ viewRemoveItemModal appState model =
                 |> List.map viewLink
                 |> wrapItemLinks
 
+        modalContent =
+            [ text (gettext "Are you sure you want to remove this item?" appState.locale)
+            , items
+            ]
+
         cfg =
-            { modalTitle = gettext "Remove Item" appState.locale
-            , modalContent =
-                [ text (gettext "Are you sure you want to remove this item?" appState.locale)
-                , items
-                ]
-            , visible = Maybe.isJust model.removeItem
-            , actionResult = Unset
-            , actionName = gettext "Remove" appState.locale
-            , actionMsg = RemoveItemConfirm
-            , cancelMsg = Just RemoveItemCancel
-            , dangerous = True
-            , dataCy = "remove-item"
-            }
+            Modal.confirmConfig (gettext "Remove Item" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (Maybe.isJust model.removeItem)
+                |> Modal.confirmConfigAction (gettext "Remove" appState.locale) RemoveItemConfirm
+                |> Modal.confirmConfigCancelMsg RemoveItemCancel
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "remove-item"
     in
     Modal.confirm appState cfg
 
@@ -4317,19 +4316,18 @@ viewFileDeleteModal appState model =
                 Nothing ->
                     ""
 
+        modalContent =
+            String.formatHtml (gettext "Are you sure you want to delete %s?" appState.locale)
+                [ strong [ class "text-break" ] [ text fileName ] ]
+
         cfg =
-            { modalTitle = gettext "Delete File" appState.locale
-            , modalContent =
-                String.formatHtml (gettext "Are you sure you want to delete %s?" appState.locale)
-                    [ strong [ class "text-break" ] [ text fileName ] ]
-            , visible = Maybe.isJust model.deleteFile
-            , actionResult = ActionResult.map (always "") model.deletingFile
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteFileConfirm
-            , cancelMsg = Just DeleteFileCancel
-            , dangerous = True
-            , dataCy = "delete-file"
-            }
+            Modal.confirmConfig (gettext "Delete File" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (Maybe.isJust model.deleteFile)
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteFileConfirm
+                |> Modal.confirmConfigCancelMsg DeleteFileCancel
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "delete-file"
     in
     Modal.confirm appState cfg
 

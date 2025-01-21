@@ -28,6 +28,7 @@ import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.FormActions as FormActions
@@ -180,7 +181,7 @@ view appState branchDetail model =
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]
         [ div [ detailClass "" ]
-            ([ Page.header (gettext "Settings" appState.locale) []
+            ([ Page.headerWithGuideLink appState (gettext "Settings" appState.locale) GuideLinks.kmEditorSettings
              , form [ onSubmit (FormMsg Form.Submit) ]
                 [ FormResult.errorOnlyView appState model.savingBranch
                 , Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)

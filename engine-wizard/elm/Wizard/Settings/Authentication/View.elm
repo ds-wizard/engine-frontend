@@ -12,6 +12,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import String.Extra as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
 import Wizard.Common.View.FormExtra as FormExtra
@@ -39,6 +40,7 @@ viewProps openIDPrefabs =
     { locTitle = gettext "Authentication"
     , locSave = gettext "Save"
     , formView = formView openIDPrefabs
+    , guideLink = GuideLinks.settingsAuthentication
     , wrapMsg = formMsg
     }
 

@@ -3,7 +3,6 @@ module Wizard.Common.Components.SessionModal exposing
     , expiresSoonModal
     )
 
-import ActionResult
 import Gettext exposing (gettext)
 import Html exposing (Html, text)
 import Shared.Auth.Session as Session
@@ -24,24 +23,29 @@ expiresSoonModal appState =
                 |> Routes.publicLogin
                 |> Wizard.Auth.Msgs.LogoutTo
                 |> Wizard.Msgs.AuthMsg
-    in
-    Modal.confirm appState
-        { modalTitle = gettext "Session Expires Soon" appState.locale
-        , modalContent =
+
+        modalContent =
             [ text
                 (String.format
                     (gettext "Your session expires in less than %s minutes. Log in again to refresh it." appState.locale)
                     [ String.fromInt Session.expirationWarningMins ]
                 )
             ]
-        , visible = AppState.sessionExpiresSoon appState && not (AppState.sessionExpired appState) && not appState.sessionExpiresSoonModalHidden
-        , actionResult = ActionResult.Unset
-        , actionName = gettext "Log in again" appState.locale
-        , actionMsg = logoutMsg
-        , cancelMsg = Just Wizard.Msgs.HideSessionExpiresSoonModal
-        , dangerous = False
-        , dataCy = "session-modal_expires-soon"
-        }
+
+        visible =
+            AppState.sessionExpiresSoon appState
+                && not (AppState.sessionExpired appState)
+                && not appState.sessionExpiresSoonModalHidden
+
+        cfg =
+            Modal.confirmConfig (gettext "Session Expires Soon" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigAction (gettext "Log in again" appState.locale) logoutMsg
+                |> Modal.confirmConfigCancelMsg Wizard.Msgs.HideSessionExpiresSoonModal
+                |> Modal.confirmConfigDataCy "session-modal_expires-soon"
+    in
+    Modal.confirm appState cfg
 
 
 expiredModal : AppState -> Html Wizard.Msgs.Msg
@@ -52,17 +56,15 @@ expiredModal appState =
                 |> Routes.publicLogin
                 |> Wizard.Auth.Msgs.LogoutTo
                 |> Wizard.Msgs.AuthMsg
+
+        modalContent =
+            [ text (gettext "Your session has expired. You need to log in again." appState.locale) ]
+
+        cfg =
+            Modal.confirmConfig (gettext "Session Expired" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (AppState.sessionExpired appState)
+                |> Modal.confirmConfigAction (gettext "Log in again" appState.locale) logoutMsg
+                |> Modal.confirmConfigDataCy "session-modal_expired"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Session Expired" appState.locale
-        , modalContent =
-            [ text (gettext "Your session has expired. You need to log in again." appState.locale)
-            ]
-        , visible = AppState.sessionExpired appState
-        , actionResult = ActionResult.Unset
-        , actionName = gettext "Log in again" appState.locale
-        , actionMsg = logoutMsg
-        , cancelMsg = Nothing
-        , dangerous = False
-        , dataCy = "session-modal_expired"
-        }
+    Modal.confirm appState cfg

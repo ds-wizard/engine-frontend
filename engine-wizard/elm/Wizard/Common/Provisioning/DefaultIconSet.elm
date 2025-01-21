@@ -21,6 +21,7 @@ iconSet =
         , ( "_global.error", "fas fa-exclamation-circle" )
         , ( "_global.export", "fas fa-download" )
         , ( "_global.externalLink", "fas fa-external-link-alt" )
+        , ( "_global.guideLink", "fas fa-circle-question" )
         , ( "_global.info", "fas fa-info-circle" )
         , ( "_global.knowledgeModel", "fas fa-sitemap" )
         , ( "_global.open", "far fa-folder-open" )

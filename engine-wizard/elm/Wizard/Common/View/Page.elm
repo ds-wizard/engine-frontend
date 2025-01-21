@@ -3,6 +3,7 @@ module Wizard.Common.View.Page exposing
     , actionResultViewWithError
     , error
     , header
+    , headerWithGuideLink
     , illustratedMessage
     , illustratedMessageHtml
     , loader
@@ -16,6 +17,8 @@ import Html.Attributes exposing (class)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks exposing (GuideLinks)
+import Wizard.Common.Html exposing (guideLink)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
@@ -24,6 +27,16 @@ header title actions =
     div [ class "header" ]
         [ h2 [] [ text title ]
         , headerActions actions
+        ]
+
+
+headerWithGuideLink : AppState -> String -> (GuideLinks -> String) -> Html msg
+headerWithGuideLink appState title getGuideLink =
+    div [ class "header" ]
+        [ h2 [] [ text title ]
+        , div []
+            [ guideLink appState getGuideLink
+            ]
         ]
 
 

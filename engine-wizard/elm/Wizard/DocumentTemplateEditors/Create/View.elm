@@ -8,6 +8,7 @@ import Html.Events exposing (onSubmit)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
@@ -36,7 +37,7 @@ view appState model =
 viewCreate : AppState -> Model -> a -> Html Msg
 viewCreate appState model _ =
     div [ detailClass "" ]
-        [ Page.header (gettext "Create Document Template" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Create Document Template" appState.locale) GuideLinks.documentTemplatesCreate
         , Html.form [ onSubmit (FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingDocumentTemplate
             , formView appState model

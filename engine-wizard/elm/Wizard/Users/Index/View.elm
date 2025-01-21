@@ -184,16 +184,14 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete user" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingUser
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteUser
-            , cancelMsg = Just <| ShowHideDeleteUser Nothing
-            , dangerous = True
-            , dataCy = "users-delete"
-            }
+            Modal.confirmConfig (gettext "Delete user" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingUser
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteUser
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteUser Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "users-delete"
     in
     Modal.confirm appState modalConfig
 

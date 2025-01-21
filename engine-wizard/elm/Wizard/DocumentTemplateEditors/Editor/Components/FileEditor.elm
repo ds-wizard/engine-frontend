@@ -1455,18 +1455,17 @@ viewAddFileModal appState model =
                     []
                 ]
             ]
+
+        cfg =
+            Modal.confirmConfig (gettext "New file" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible model.addFileModalOpen
+                |> Modal.confirmConfigActionResult model.addingFile
+                |> Modal.confirmConfigAction (gettext "Add file" appState.locale) AddFileModalSubmit
+                |> Modal.confirmConfigCancelMsg (SetAddFileModalOpen False)
+                |> Modal.confirmConfigDataCy "add-file-modal"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "New file" appState.locale
-        , modalContent = modalContent
-        , visible = model.addFileModalOpen
-        , actionResult = model.addingFile
-        , actionName = gettext "Add file" appState.locale
-        , actionMsg = AddFileModalSubmit
-        , cancelMsg = Just (SetAddFileModalOpen False)
-        , dangerous = False
-        , dataCy = "add-file-modal"
-        }
+    Modal.confirm appState cfg
 
 
 viewAddFolderModal : AppState -> Model -> Html Msg
@@ -1519,20 +1518,22 @@ viewDeleteModal appState model =
 
                 _ ->
                     gettext "Are you sure you want to permanently delete %s?" appState.locale
-    in
-    Modal.confirm appState
-        { modalTitle = "Delete"
-        , modalContent =
+
+        modalContent =
             String.formatHtml message
                 [ strong [] [ text (Maybe.withDefault "" fileName) ] ]
-        , visible = model.deleteModalOpen && Maybe.isJust fileName
-        , actionResult = model.deleting
-        , actionName = gettext "Delete" appState.locale
-        , actionMsg = DeleteSelected
-        , cancelMsg = Just (SetDeleteModalOpen False)
-        , dangerous = True
-        , dataCy = "document-template-editor_delete-modal"
-        }
+
+        cfg =
+            Modal.confirmConfig (gettext "Delete" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (model.deleteModalOpen && Maybe.isJust fileName)
+                |> Modal.confirmConfigActionResult model.deleting
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteSelected
+                |> Modal.confirmConfigCancelMsg (SetDeleteModalOpen False)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "document-template-editor_delete-modal"
+    in
+    Modal.confirm appState cfg
 
 
 buildFileTree : DocumentTemplateDraftDetail -> List DocumentTemplateFile -> List DocumentTemplateAsset -> List String -> FileTree

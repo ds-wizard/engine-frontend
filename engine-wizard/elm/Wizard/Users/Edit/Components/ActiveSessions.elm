@@ -29,6 +29,7 @@ import Time
 import UserAgent
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (tooltip)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -174,8 +175,8 @@ viewActiveSessions appState model tokens =
     in
     div []
         [ div [ class "row" ]
-            [ div [ class "col" ]
-                [ Page.header (gettext "Active Sessions" appState.locale) [] ]
+            [ div [ class "col-8" ]
+                [ Page.headerWithGuideLink appState (gettext "Active Sessions" appState.locale) GuideLinks.profileActiveSessions ]
             ]
         , div [ class "row" ]
             [ div [ class "col-8" ] [ div [ class "list-group" ] (List.map (viewActiveSession appState) activeSessions) ]
@@ -248,18 +249,18 @@ viewActiveSessionRevokeModal appState model =
 
                 Nothing ->
                     []
+
+        cfg =
+            Modal.confirmConfig (gettext "Revoke Active Session" appState.locale)
+                |> Modal.confirmConfigContent content
+                |> Modal.confirmConfigVisible (Maybe.isJust model.tokenToRevoke)
+                |> Modal.confirmConfigActionResult model.revokingToken
+                |> Modal.confirmConfigAction (gettext "Revoke" appState.locale) RevokeToken
+                |> Modal.confirmConfigCancelMsg (SetTokenToRevoke Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "active-session_revoke"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Revoke Active Session" appState.locale
-        , modalContent = content
-        , visible = Maybe.isJust model.tokenToRevoke
-        , actionResult = model.revokingToken
-        , actionName = gettext "Revoke" appState.locale
-        , actionMsg = RevokeToken
-        , cancelMsg = Just (SetTokenToRevoke Nothing)
-        , dangerous = True
-        , dataCy = "active-session_revoke"
-        }
+    Modal.confirm appState cfg
 
 
 viewRevokeAllModal : AppState -> Model -> Html Msg
@@ -267,18 +268,18 @@ viewRevokeAllModal appState model =
     let
         content =
             [ text (gettext "Are you sure you want to revoke all active sessions? This will log you out of all devices except for the current one." appState.locale) ]
+
+        cfg =
+            Modal.confirmConfig (gettext "Revoke All Active Sessions" appState.locale)
+                |> Modal.confirmConfigContent content
+                |> Modal.confirmConfigVisible model.revokeAllModalOpen
+                |> Modal.confirmConfigActionResult model.revokingAll
+                |> Modal.confirmConfigAction (gettext "Revoke all" appState.locale) RevokeAll
+                |> Modal.confirmConfigCancelMsg (RevokeAllModalOpen False)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "active-session_revoke-all"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Revoke All Active Sessions" appState.locale
-        , modalContent = content
-        , visible = model.revokeAllModalOpen
-        , actionResult = model.revokingAll
-        , actionName = gettext "Revoke all" appState.locale
-        , actionMsg = RevokeAll
-        , cancelMsg = Just (RevokeAllModalOpen False)
-        , dangerous = True
-        , dataCy = "active-session_revoke-all"
-        }
+    Modal.confirm appState cfg
 
 
 tokenToHtml : AppState -> Token -> Html msg

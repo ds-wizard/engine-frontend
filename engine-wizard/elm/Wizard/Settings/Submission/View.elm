@@ -16,6 +16,7 @@ import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
@@ -40,6 +41,7 @@ viewProps templates =
     { locTitle = gettext "Document Submission"
     , locSave = gettext "Save"
     , formView = formView templates
+    , guideLink = GuideLinks.settingsDocumentSubmission
     , wrapMsg = GenericMsg << GenericMsgs.FormMsg
     }
 

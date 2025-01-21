@@ -159,15 +159,13 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete file" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingQuestionnaireFile
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteFileConfirm
-            , cancelMsg = Just <| ShowHideDeleteFile Nothing
-            , dangerous = True
-            , dataCy = "file-delete"
-            }
+            Modal.confirmConfig (gettext "Delete file" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingQuestionnaireFile
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteFileConfirm
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteFile Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "file-delete"
     in
     Modal.confirm appState modalConfig

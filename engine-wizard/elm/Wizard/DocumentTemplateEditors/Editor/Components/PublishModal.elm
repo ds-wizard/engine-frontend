@@ -23,6 +23,7 @@ import Shared.Markdown as Markdown
 import String.Format as String
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
@@ -126,10 +127,8 @@ view cfg appState model =
                         ]
                     ]
                 )
-    in
-    Modal.confirmExtra appState
-        { modalTitle = gettext "Publish" appState.locale
-        , modalContent =
+
+        modalContent =
             [ info
             , FormGroup.readOnlyInput cfg.documentTemplate.name (gettext "Name" appState.locale)
             , FormGroup.readOnlyInput cfg.documentTemplate.description (gettext "Description" appState.locale)
@@ -138,12 +137,16 @@ view cfg appState model =
             , FormGroup.readOnlyInput cfg.documentTemplate.license (gettext "License" appState.locale)
             , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.documentTemplate.readme) (gettext "Readme" appState.locale)
             ]
-        , visible = model.open
-        , actionResult = model.publishing
-        , actionName = gettext "Publish" appState.locale
-        , actionMsg = Publish
-        , cancelMsg = Just (SetOpen False)
-        , dangerous = False
-        , extraClass = "modal-wide"
-        , dataCy = "document-template-editor_publish"
-        }
+
+        modalConfig =
+            Modal.confirmConfig (gettext "Publish" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible model.open
+                |> Modal.confirmConfigActionResult model.publishing
+                |> Modal.confirmConfigAction (gettext "Publish" appState.locale) Publish
+                |> Modal.confirmConfigCancelMsg (SetOpen False)
+                |> Modal.confirmConfigExtraClass "modal-wide"
+                |> Modal.confirmConfigGuideLink GuideLinks.documentTemplatesPublish
+                |> Modal.confirmConfigDataCy "document-template-editor_publish"
+    in
+    Modal.confirm appState modalConfig

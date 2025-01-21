@@ -164,15 +164,14 @@ view appState model =
 
                 Nothing ->
                     gettext "New version" appState.locale
+
+        cfg =
+            Modal.confirmConfig modalTitle
+                |> Modal.confirmConfigContent form
+                |> Modal.confirmConfigVisible (Maybe.isJust model.mbEventUuid)
+                |> Modal.confirmConfigActionResult (ActionResult.map (always "") model.versionResult)
+                |> Modal.confirmConfigAction (gettext "Save" appState.locale) (FormMsg Form.Submit)
+                |> Modal.confirmConfigCancelMsg Close
+                |> Modal.confirmConfigDataCy "project-version"
     in
-    Modal.confirm appState
-        { modalTitle = modalTitle
-        , modalContent = form
-        , visible = Maybe.isJust model.mbEventUuid
-        , actionResult = ActionResult.map (always "") model.versionResult
-        , actionName = gettext "Save" appState.locale
-        , actionMsg = FormMsg Form.Submit
-        , cancelMsg = Just Close
-        , dangerous = False
-        , dataCy = "project-version"
-        }
+    Modal.confirm appState cfg

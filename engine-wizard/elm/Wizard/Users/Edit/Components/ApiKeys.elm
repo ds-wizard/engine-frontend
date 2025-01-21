@@ -20,6 +20,7 @@ import String.Format as String
 import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.CopyableCodeBlock as CopyableCodeBlock
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
@@ -170,7 +171,11 @@ update cfg appState msg model =
 view : AppState -> Model -> Html Msg
 view appState model =
     div []
-        [ Page.header (gettext "API Keys" appState.locale) []
+        [ div [ class "row" ]
+            [ div [ class "col-8" ]
+                [ Page.headerWithGuideLink appState (gettext "API Keys" appState.locale) GuideLinks.profileApiKeys
+                ]
+            ]
         , div [ class "row" ]
             [ div [ class "col-8" ]
                 [ viewApiKeyForm appState model
@@ -274,16 +279,19 @@ viewApiKeysTable appState apiKeys =
 
 viewApiKeyDeleteModal : AppState -> Model -> Html Msg
 viewApiKeyDeleteModal appState model =
-    Modal.confirm appState
-        { modalTitle = gettext "Delete API Key" appState.locale
-        , modalContent =
+    let
+        modalContent =
             String.formatHtml (gettext "Are you sure you want to delete %s?" appState.locale)
                 [ strong [] [ text (Maybe.unwrap "" .name model.apiKeyToDelete) ] ]
-        , visible = Maybe.isJust model.apiKeyToDelete
-        , actionResult = model.deletingApiKey
-        , actionName = gettext "Delete" appState.locale
-        , actionMsg = DeleteApiKey
-        , cancelMsg = Just (SetApiKeyToDelete Nothing)
-        , dangerous = True
-        , dataCy = "api-keys_delete"
-        }
+
+        cfg =
+            Modal.confirmConfig (gettext "Delete API Key" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (Maybe.isJust model.apiKeyToDelete)
+                |> Modal.confirmConfigActionResult model.deletingApiKey
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteApiKey
+                |> Modal.confirmConfigCancelMsg (SetApiKeyToDelete Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "api-keys_delete"
+    in
+    Modal.confirm appState cfg

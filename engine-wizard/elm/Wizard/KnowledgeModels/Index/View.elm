@@ -175,15 +175,13 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete package" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingPackage
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeletePackage
-            , cancelMsg = Just <| ShowHideDeletePackage Nothing
-            , dangerous = True
-            , dataCy = "km-delete"
-            }
+            Modal.confirmConfig (gettext "Delete package" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingPackage
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeletePackage
+                |> Modal.confirmConfigCancelMsg (ShowHideDeletePackage Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "km-delete"
     in
     Modal.confirm appState modalConfig

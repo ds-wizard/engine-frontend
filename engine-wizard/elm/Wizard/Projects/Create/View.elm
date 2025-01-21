@@ -12,6 +12,7 @@ import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -41,7 +42,7 @@ view appState model =
 viewPageContent : AppState -> Model -> List a -> Html Msg
 viewPageContent appState model _ =
     div [ detailClass "Projects__Create" ]
-        [ Page.header (gettext "Create Project" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Create Project" appState.locale) GuideLinks.projectsCreate
         , formView appState model
         ]
 

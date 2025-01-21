@@ -24,6 +24,7 @@ import String.Format as String
 import Uuid exposing (Uuid)
 import Version
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
@@ -117,10 +118,8 @@ view cfg appState model =
                         ]
                     ]
                 )
-    in
-    Modal.confirmExtra appState
-        { modalTitle = gettext "Publish" appState.locale
-        , modalContent =
+
+        modalContent =
             [ info
             , FormGroup.readOnlyInput cfg.branch.name (gettext "Name" appState.locale)
             , FormGroup.readOnlyInput cfg.branch.description (gettext "Description" appState.locale)
@@ -129,12 +128,16 @@ view cfg appState model =
             , FormGroup.readOnlyInput cfg.branch.license (gettext "License" appState.locale)
             , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.branch.readme) (gettext "Readme" appState.locale)
             ]
-        , visible = model.open
-        , actionResult = model.publishing
-        , actionName = gettext "Publish" appState.locale
-        , actionMsg = Publish
-        , cancelMsg = Just (SetOpen False)
-        , dangerous = False
-        , extraClass = "modal-wide"
-        , dataCy = "km-editor_publish"
-        }
+
+        modalConfig =
+            Modal.confirmConfig (gettext "Publish" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible model.open
+                |> Modal.confirmConfigActionResult model.publishing
+                |> Modal.confirmConfigAction (gettext "Publish" appState.locale) Publish
+                |> Modal.confirmConfigCancelMsg (SetOpen False)
+                |> Modal.confirmConfigExtraClass "modal-wide"
+                |> Modal.confirmConfigGuideLink GuideLinks.kmEditorPublish
+                |> Modal.confirmConfigDataCy "km-editor_publish"
+    in
+    Modal.confirm appState modalConfig

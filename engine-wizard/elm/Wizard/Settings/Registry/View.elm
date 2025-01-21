@@ -11,6 +11,7 @@ import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
@@ -42,7 +43,7 @@ viewForm appState model _ =
             }
     in
     div [ wideDetailClass "" ]
-        [ Page.header (gettext "DSW Registry" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "DSW Registry" appState.locale) GuideLinks.settingsRegistry
         , form [ onSubmit (GenericMsg <| GenericMsgs.FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.genericModel.savingConfig
             , formView appState model.genericModel.form

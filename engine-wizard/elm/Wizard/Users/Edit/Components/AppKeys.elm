@@ -165,16 +165,19 @@ viewAppKeysTable appState appKeys =
 
 viewAppKeyDeleteModal : AppState -> Model -> Html Msg
 viewAppKeyDeleteModal appState model =
-    Modal.confirm appState
-        { modalTitle = gettext "Delete App Key" appState.locale
-        , modalContent =
+    let
+        modalContent =
             String.formatHtml (gettext "Are you sure you want to delete %s?" appState.locale)
                 [ strong [] [ text (Maybe.unwrap "" .name model.appKeyToDelete) ] ]
-        , visible = Maybe.isJust model.appKeyToDelete
-        , actionResult = model.deletingAppKey
-        , actionName = gettext "Delete" appState.locale
-        , actionMsg = DeleteAppKey
-        , cancelMsg = Just (SetAppKeyToDelete Nothing)
-        , dangerous = True
-        , dataCy = "app-keys_delete"
-        }
+
+        cfg =
+            Modal.confirmConfig (gettext "Delete App Key" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (Maybe.isJust model.appKeyToDelete)
+                |> Modal.confirmConfigActionResult model.deletingAppKey
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteAppKey
+                |> Modal.confirmConfigCancelMsg (SetAppKeyToDelete Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "app-keys_delete"
+    in
+    Modal.confirm appState cfg

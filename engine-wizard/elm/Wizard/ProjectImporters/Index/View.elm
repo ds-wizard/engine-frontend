@@ -10,6 +10,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
@@ -22,7 +23,7 @@ import Wizard.Routes as Routes
 view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "ProjectImporters__Index" ]
-        [ Page.header (gettext "Project Importers" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Project Importers" appState.locale) GuideLinks.projectImporters
         , FormResult.view appState model.togglingEnabled
         , Listing.view appState (listingConfig appState) model.questionnaireImporters
         ]

@@ -30,6 +30,7 @@ viewProps =
     { locTitle = gettext "Knowledge Models"
     , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
+    , guideLink = GuideLinks.settingsKnowledgeModels
     , wrapMsg = FormMsg
     }
 

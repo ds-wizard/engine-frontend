@@ -113,15 +113,15 @@ view appState model =
                     [ strong [] [ br [] [], text datetime ] ]
                 )
             ]
+
+        cfg =
+            Modal.confirmConfig (gettext "Revert questionnaire" appState.locale)
+                |> Modal.confirmConfigContent content
+                |> Modal.confirmConfigVisible (Maybe.isJust model.mbEvent)
+                |> Modal.confirmConfigActionResult (ActionResult.map (always "") model.revertResult)
+                |> Modal.confirmConfigAction (gettext "Revert" appState.locale) Revert
+                |> Modal.confirmConfigCancelMsg Close
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "project-revert"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Revert questionnaire" appState.locale
-        , modalContent = content
-        , visible = Maybe.isJust model.mbEvent
-        , actionResult = ActionResult.map (always "") model.revertResult
-        , actionName = gettext "Revert" appState.locale
-        , actionMsg = Revert
-        , cancelMsg = Just Close
-        , dangerous = True
-        , dataCy = "project-revert"
-        }
+    Modal.confirm appState cfg

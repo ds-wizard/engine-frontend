@@ -32,15 +32,12 @@ view appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Clone Project" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.cloningQuestionnaire
-            , actionName = gettext "Clone" appState.locale
-            , actionMsg = CloneQuestionnaire
-            , cancelMsg = Just <| ShowHideCloneQuestionnaire Nothing
-            , dangerous = False
-            , dataCy = "clone-project"
-            }
+            Modal.confirmConfig (gettext "Clone Project" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.cloningQuestionnaire
+                |> Modal.confirmConfigAction (gettext "Clone" appState.locale) CloneQuestionnaire
+                |> Modal.confirmConfigCancelMsg (ShowHideCloneQuestionnaire Nothing)
+                |> Modal.confirmConfigDataCy "clone-project"
     in
     Modal.confirm appState modalConfig
