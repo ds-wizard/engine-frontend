@@ -8,6 +8,11 @@
     "build:registry": "COMPONENT=registry ./scripts/build.sh",
     "build:wizard": "COMPONENT=wizard ./scripts/build.sh",
     "clean": "rm -rf dist",
+    "guide-links": "node scripts/create-guide-links.js",
+    "pot": "mkdir -p locale && npm run pot:registry && npm run pot:wizard",
+    "pot:registry": "COMPONENT=registry node scripts/create-pot-file.js",
+    "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js",
+    "review": "elm-review",
     "start": "npm run start:wizard",
     "start:registry": "COMPONENT=registry webpack serve",
     "start:wizard": "COMPONENT=wizard webpack serve",
@@ -16,11 +21,7 @@
     "test:registry": "npm run test:elm",
     "test:wizard": "npm run test:elm && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:wizard:icon-set": "COMPONENT=wizard node scripts/test-icon-set.js",
-    "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js",
-    "review": "elm-review",
-    "pot": "mkdir -p locale && npm run pot:registry && npm run pot:wizard",
-    "pot:registry": "COMPONENT=registry node scripts/create-pot-file.js",
-    "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js"
+    "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js"
   },
   "devDependencies": {
     "@lydell/elm": "^0.19.1-14",

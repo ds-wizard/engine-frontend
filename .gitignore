@@ -16,3 +16,6 @@ engine-wizard/static/wizard/config.js
 # locale
 !*/locale
 /locale
+
+# guide links
+guide-links.json
