@@ -157,9 +157,18 @@ registrySignupModal appState model =
                 ]
             ]
 
+        ( enterMsg, escMsg ) =
+            if ActionResult.isLoading model.registrySigningUp then
+                ( Nothing, Nothing )
+
+            else
+                ( Just (FormMsg Form.Submit), Just (ToggleRegistrySignup False) )
+
         modalConfig =
             { modalContent = content
             , visible = model.registrySignupOpen
+            , enterMsg = enterMsg
+            , escMsg = escMsg
             , dataCy = "registry-signup"
             }
     in

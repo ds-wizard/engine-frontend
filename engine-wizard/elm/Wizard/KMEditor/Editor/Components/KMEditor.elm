@@ -2409,7 +2409,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
         createEvent event uuid =
             eventMsg False (EditorBranch.getParentUuid uuid editorBranch) (Just uuid) event
 
-        ( visible, content ) =
+        ( visible, ( content, mbConfirmMsg ) ) =
             case deleteModalState of
                 ChapterState uuid ->
                     ( True
@@ -2496,33 +2496,37 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                     )
 
                 Closed ->
-                    ( False, [ emptyNode ] )
+                    ( False, ( [ emptyNode ], Nothing ) )
 
         getContent contentText onDelete =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text (gettext "Heads up!" appState.locale) ]
-                ]
-            , div [ class "modal-body" ]
-                [ text contentText ]
-            , div [ class "modal-footer" ]
-                [ button
-                    [ class "btn btn-danger"
-                    , dataCy "modal_action-button"
-                    , onClick onDelete
+            ( [ div [ class "modal-header" ]
+                    [ h5 [ class "modal-title" ] [ text (gettext "Heads up!" appState.locale) ]
                     ]
-                    [ text (gettext "Delete" appState.locale) ]
-                , button
-                    [ class "btn btn-secondary"
-                    , dataCy "modal_cancel-button"
-                    , onClick <| wrapMsg <| SetDeleteModalState Closed
+              , div [ class "modal-body" ]
+                    [ text contentText ]
+              , div [ class "modal-footer" ]
+                    [ button
+                        [ class "btn btn-danger"
+                        , dataCy "modal_action-button"
+                        , onClick onDelete
+                        ]
+                        [ text (gettext "Delete" appState.locale) ]
+                    , button
+                        [ class "btn btn-secondary"
+                        , dataCy "modal_cancel-button"
+                        , onClick <| wrapMsg <| SetDeleteModalState Closed
+                        ]
+                        [ text (gettext "Cancel" appState.locale) ]
                     ]
-                    [ text (gettext "Cancel" appState.locale) ]
-                ]
-            ]
+              ]
+            , Just onDelete
+            )
 
         modalConfig =
             { modalContent = content
             , visible = visible
+            , enterMsg = mbConfirmMsg
+            , escMsg = Just <| wrapMsg <| SetDeleteModalState Closed
             , dataCy = "km-editor-delete"
             }
     in
@@ -2536,7 +2540,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
 moveModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorBranch -> Maybe MoveModalState -> Html msg
 moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
     let
-        content =
+        ( content, mbConfirmMsg ) =
             case mbMoveModalState of
                 Just moveModalState ->
                     let
@@ -2573,36 +2577,40 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
                                 TreeInput.MovingExpert ->
                                     createEvent MoveExpertEvent
                     in
-                    [ div [ class "modal-header" ]
-                        [ h5 [ class "modal-title" ] [ text (gettext "Move" appState.locale) ]
-                        ]
-                    , div [ class "modal-body" ]
-                        [ label [] [ text (gettext "Select a new parent" appState.locale) ]
-                        , Html.map (wrapMsg << MoveModalMsg) <| TreeInput.view appState viewProps moveModalState.treeInputModel
-                        ]
-                    , div [ class "modal-footer" ]
-                        [ button
-                            [ class "btn btn-primary"
-                            , onClick onMove
-                            , disabled (String.isEmpty selectedUuid)
-                            , dataCy "modal_action-button"
+                    ( [ div [ class "modal-header" ]
+                            [ h5 [ class "modal-title" ] [ text (gettext "Move" appState.locale) ]
                             ]
-                            [ text (gettext "Move" appState.locale) ]
-                        , button
-                            [ class "btn btn-secondary"
-                            , onClick <| wrapMsg CloseMoveModal
-                            , dataCy "modal_cancel-button"
+                      , div [ class "modal-body" ]
+                            [ label [] [ text (gettext "Select a new parent" appState.locale) ]
+                            , Html.map (wrapMsg << MoveModalMsg) <| TreeInput.view appState viewProps moveModalState.treeInputModel
                             ]
-                            [ text (gettext "Cancel" appState.locale) ]
-                        ]
-                    ]
+                      , div [ class "modal-footer" ]
+                            [ button
+                                [ class "btn btn-primary"
+                                , onClick onMove
+                                , disabled (String.isEmpty selectedUuid)
+                                , dataCy "modal_action-button"
+                                ]
+                                [ text (gettext "Move" appState.locale) ]
+                            , button
+                                [ class "btn btn-secondary"
+                                , onClick <| wrapMsg CloseMoveModal
+                                , dataCy "modal_cancel-button"
+                                ]
+                                [ text (gettext "Cancel" appState.locale) ]
+                            ]
+                      ]
+                    , Just onMove
+                    )
 
                 Nothing ->
-                    []
+                    ( [], Nothing )
 
         modalConfig =
             { modalContent = content
             , visible = Maybe.isJust mbMoveModalState
+            , enterMsg = mbConfirmMsg
+            , escMsg = Just <| wrapMsg CloseMoveModal
             , dataCy = "km-editor-move"
             }
     in

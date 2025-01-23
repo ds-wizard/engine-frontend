@@ -8,6 +8,7 @@ const program = require('./elm/Wizard.elm')
 const charts = require('./js/components/charts')
 const codeEditor = require('./js/components/code-editor')
 const datetimePickers = require('./js/components/datetime-pickers')
+const shortcutElement = require('./js/components/shortcut-element')
 
 const cookies = require('./js/ports/cookies')
 const registerBrowserPorts = require('./js/ports/browser')

@@ -22,6 +22,7 @@ import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire expo
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet)
+import Shortcut
 import Triple
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
@@ -135,8 +136,16 @@ view cfg appState model =
             model.eventUuid
                 |> Maybe.andThen (QuestionnaireVersion.getVersionByEventUuid cfg.versions)
                 |> Maybe.unwrap emptyNode QuestionnaireVersionTag.version
+
+        shortcuts =
+            if visible then
+                [ Shortcut.simpleShortcut Shortcut.Escape Close ]
+
+            else
+                []
     in
-    div [ class "QuestionnaireVersionViewModal modal modal-cover", classList [ ( "visible", visible ) ] ]
+    Shortcut.shortcutElement shortcuts
+        [ class "QuestionnaireVersionViewModal modal modal-cover", classList [ ( "visible", visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy "modal_project-version" ]
                 [ div [ class "modal-header" ]

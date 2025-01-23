@@ -474,9 +474,18 @@ submitModal cfg appState model =
                 ]
             ]
 
+        ( enterMsg, escMsg ) =
+            if ActionResult.isLoading model.submittingDocument then
+                ( Nothing, Nothing )
+
+            else
+                ( Just (cfg.wrapMsg SubmitDocument), Just (cfg.wrapMsg (ShowHideSubmitDocument Nothing)) )
+
         modalConfig =
             { modalContent = content
             , visible = visible
+            , enterMsg = enterMsg
+            , escMsg = escMsg
             , dataCy = "document-submit"
             }
     in

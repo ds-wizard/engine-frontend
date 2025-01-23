@@ -2063,6 +2063,8 @@ viewActionResultModal appState model =
     Modal.simple
         { modalContent = modalContent
         , visible = Maybe.isJust model.questionnaireActionResult
+        , enterMsg = Just CloseActionResult
+        , escMsg = Just CloseActionResult
         , dataCy = "questionnaire-action-result"
         }
 
@@ -2185,6 +2187,8 @@ viewPhaseModal appState model =
                 [ div [] (List.indexedMap viewPhase phases)
                 ]
             ]
+        , enterMsg = Nothing
+        , escMsg = Just (PhaseModalUpdate False Nothing)
         , visible = model.phaseModalOpen
         , dataCy = "phase-selection"
         }

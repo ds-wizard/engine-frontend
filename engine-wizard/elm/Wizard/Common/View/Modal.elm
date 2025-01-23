@@ -7,6 +7,7 @@ module Wizard.Common.View.Modal exposing
     , confirmConfigAction
     , confirmConfigActionResult
     , confirmConfigCancelMsg
+    , confirmConfigCancelShortcutMsg
     , confirmConfigContent
     , confirmConfigDangerous
     , confirmConfigDataCy
@@ -25,7 +26,9 @@ import Html exposing (Attribute, Html, button, div, h5, pre, text)
 import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
+import Maybe.Extra as Maybe
 import Shared.Html exposing (emptyNode)
+import Shortcut
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks exposing (GuideLinks)
 import Wizard.Common.Html exposing (guideLink)
@@ -37,6 +40,8 @@ import Wizard.Common.View.FormResult as FormResult
 type alias SimpleConfig msg =
     { modalContent : List (Html msg)
     , visible : Bool
+    , enterMsg : Maybe msg
+    , escMsg : Maybe msg
     , dataCy : String
     }
 
@@ -48,7 +53,19 @@ simple =
 
 simpleWithAttrs : List (Attribute msg) -> SimpleConfig msg -> Html msg
 simpleWithAttrs attributes cfg =
-    div ([ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
+    let
+        shortcuts =
+            if cfg.visible then
+                Maybe.values
+                    [ Maybe.map (Shortcut.simpleShortcut Shortcut.Enter) cfg.enterMsg
+                    , Maybe.map (Shortcut.simpleShortcut Shortcut.Escape) cfg.escMsg
+                    ]
+
+            else
+                []
+    in
+    Shortcut.shortcutElement shortcuts
+        ([ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
                 cfg.modalContent
@@ -67,6 +84,7 @@ type alias ConfirmConfigData msg =
     , actionResult : ActionResult String
     , action : Maybe ( String, msg )
     , cancelMsg : Maybe msg
+    , cancelShortcutMsg : Maybe msg
     , dangerous : Bool
     , extraClass : Maybe String
     , guideLink : Maybe (GuideLinks -> String)
@@ -83,6 +101,7 @@ confirmConfig title =
         , actionResult = ActionResult.Unset
         , action = Nothing
         , cancelMsg = Nothing
+        , cancelShortcutMsg = Nothing
         , dangerous = False
         , extraClass = Nothing
         , guideLink = Nothing
@@ -120,6 +139,11 @@ confirmConfigMbCancelMsg cancelMsg (ConfirmConfig data) =
     ConfirmConfig { data | cancelMsg = cancelMsg }
 
 
+confirmConfigCancelShortcutMsg : msg -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigCancelShortcutMsg cancelShortcutMsg (ConfirmConfig data) =
+    ConfirmConfig { data | cancelShortcutMsg = Just cancelShortcutMsg }
+
+
 confirmConfigDangerous : Bool -> ConfirmConfig msg -> ConfirmConfig msg
 confirmConfigDangerous dangerous (ConfirmConfig data) =
     ConfirmConfig { data | dangerous = dangerous }
@@ -146,32 +170,61 @@ confirm appState (ConfirmConfig data) =
         content =
             FormResult.view appState data.actionResult :: data.modalContent
 
-        actionButton =
+        actionsDisabled =
+            not data.visible || ActionResult.isLoading data.actionResult
+
+        wrapShortcut shortcut =
+            if actionsDisabled then
+                Nothing
+
+            else
+                Just shortcut
+
+        ( actionButton, actionShortcut ) =
             case data.action of
                 Just ( actionName, actionMsg ) ->
-                    ActionButton.buttonWithAttrs appState <|
-                        ActionButton.ButtonWithAttrsConfig actionName data.actionResult actionMsg data.dangerous [ dataCy "modal_action-button" ]
+                    let
+                        btn =
+                            ActionButton.buttonWithAttrs appState <|
+                                ActionButton.ButtonWithAttrsConfig actionName data.actionResult actionMsg data.dangerous [ dataCy "modal_action-button" ]
+
+                        shortcut =
+                            wrapShortcut (Shortcut.simpleShortcut Shortcut.Enter actionMsg)
+                    in
+                    ( btn, shortcut )
 
                 Nothing ->
-                    emptyNode
+                    ( emptyNode, Nothing )
 
-        cancelButton =
+        ( cancelButton, cancelShortcut ) =
             case data.cancelMsg of
                 Just cancelMsg ->
                     let
-                        cancelDisabled =
-                            ActionResult.isLoading data.actionResult
+                        btn =
+                            button
+                                [ onClick cancelMsg
+                                , disabled actionsDisabled
+                                , class "btn btn-secondary"
+                                , dataCy "modal_cancel-button"
+                                ]
+                                [ text (gettext "Cancel" appState.locale) ]
+
+                        shortcut =
+                            wrapShortcut (Shortcut.simpleShortcut Shortcut.Escape cancelMsg)
                     in
-                    button
-                        [ onClick cancelMsg
-                        , disabled cancelDisabled
-                        , class "btn btn-secondary"
-                        , dataCy "modal_cancel-button"
-                        ]
-                        [ text (gettext "Cancel" appState.locale) ]
+                    ( btn, shortcut )
 
                 Nothing ->
-                    emptyNode
+                    case data.cancelShortcutMsg of
+                        Just cancelShortcutMsg ->
+                            let
+                                shortcut =
+                                    wrapShortcut (Shortcut.simpleShortcut Shortcut.Escape cancelShortcutMsg)
+                            in
+                            ( emptyNode, shortcut )
+
+                        Nothing ->
+                            ( emptyNode, Nothing )
 
         mbGuideLink =
             case data.guideLink of
@@ -180,8 +233,12 @@ confirm appState (ConfirmConfig data) =
 
                 Nothing ->
                     Html.nothing
+
+        shortcuts =
+            Maybe.values [ actionShortcut, cancelShortcut ]
     in
-    div [ class "modal modal-cover", class (Maybe.withDefault "" data.extraClass), classList [ ( "visible", data.visible ) ] ]
+    Shortcut.shortcutElement shortcuts
+        [ class "modal modal-cover", class (Maybe.withDefault "" data.extraClass), classList [ ( "visible", data.visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ Maybe.withDefault "confirm" data.dataCy) ]
                 [ div [ class "modal-header" ]
@@ -227,6 +284,8 @@ error appState cfg =
         modalConfig =
             { modalContent = modalContent
             , visible = cfg.visible
+            , enterMsg = Just cfg.actionMsg
+            , escMsg = Just cfg.actionMsg
             , dataCy = cfg.dataCy
             }
     in

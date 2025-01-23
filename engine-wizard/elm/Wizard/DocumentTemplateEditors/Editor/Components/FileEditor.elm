@@ -1501,6 +1501,8 @@ viewAddFolderModal appState model =
     Modal.simple
         { modalContent = modalContent
         , visible = model.addFolderModalOpen
+        , enterMsg = Just AddFolderModalSubmit
+        , escMsg = Just (SetAddFolderModalOpen False)
         , dataCy = "add-file-modal"
         }
 
