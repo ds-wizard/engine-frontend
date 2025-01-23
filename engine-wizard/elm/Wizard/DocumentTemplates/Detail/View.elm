@@ -20,6 +20,7 @@ import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
@@ -180,6 +181,15 @@ unsupportedMetamodelVersionWarning appState template =
 
                         else
                             []
+
+                    ( True, _, _ ) ->
+                        [ a
+                            [ href (GuideLinks.documentTemplatesUnsupportedMetamodel appState.guideLinks)
+                            , target "_blank"
+                            , class "ms-1"
+                            ]
+                            [ text (gettext "Learn more in guide" appState.locale) ]
+                        ]
 
                     _ ->
                         []

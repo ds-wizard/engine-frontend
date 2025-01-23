@@ -6,6 +6,7 @@ module Wizard.Common.GuideLinks exposing
     , documentTemplatesCreate
     , documentTemplatesImport
     , documentTemplatesPublish
+    , documentTemplatesUnsupportedMetamodel
     , integrationQuestionSecrets
     , kmEditorCreate
     , kmEditorMigration
@@ -62,6 +63,7 @@ default =
             , ( "documentTemplatesCreate", "https://guide.ds-wizard.org/en/latest/application/document-templates/editors/create.html" )
             , ( "documentTemplatesImport", "https://guide.ds-wizard.org/en/latest/application/document-templates/list/import.html" )
             , ( "documentTemplatesPublish", "https://guide.ds-wizard.org/en/latest/application/document-templates/editors/detail/publish.html" )
+            , ( "documentTemplatesUnsupportedMetamodel", "https://guide.ds-wizard.org/en/latest/more/self-hosted-dsw/faq-notes.html#document-templates-show-unsupported-metamodel-what-should-i-do" )
             , ( "integrationQuestionSecrets", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties" )
             , ( "kmEditorCreate", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/create.html" )
             , ( "kmEditorMigration", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/migration.html" )
@@ -136,6 +138,11 @@ documentTemplatesImport =
 documentTemplatesPublish : GuideLinks -> String
 documentTemplatesPublish =
     get "documentTemplatesPublish"
+
+
+documentTemplatesUnsupportedMetamodel : GuideLinks -> String
+documentTemplatesUnsupportedMetamodel =
+    get "documentTemplatesUnsupportedMetamodel"
 
 
 integrationQuestionSecrets : GuideLinks -> String
