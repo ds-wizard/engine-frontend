@@ -803,7 +803,7 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
             foldReplies currentTime km parentMap seed questionUuid Dict.empty
 
         reply =
-            findReplyBySuffix questionUuid replies
+            findReplyBySuffix questionUuid questionnaireDetail.replies
 
         newReplies =
             if Maybe.isJust reply then
