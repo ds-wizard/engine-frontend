@@ -86,6 +86,7 @@ import String.Extra as String
 import String.Format as String
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.Flash as Flash
@@ -1708,7 +1709,10 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             , responseItemId
                             , FormExtra.mdAfter (gettext "Use this to define an identifier for the item. This will be used in **Item URL** as `${id}` to compose a URL to the found item. You can use properties from the returned item in Jinja2 notation. For example, if the item has a field `id` use `{{item.id}}` here. You can also compose multiple fields together, e.g., `{{item.field1}}-{{item.field2}}`." appState.locale)
                             , responseItemTemplate
-                            , FormExtra.mdAfter (gettext "This defines how the found items will be displayed for the user. You can use properties from the returned item in Jinja2 notation, you can also use Markdown for some formatting. For example, if the returned item has a field called name, you can use `**{{item.name}}**` to display the name in bold." appState.locale)
+                            , FormExtra.mdAfter
+                                (String.format (gettext "This defines how the found items will be displayed for the user. You can use properties from the returned item in Jinja2 notation, you can also use [Markdown](%s) for some formatting. For example, if the returned item has a field called name, you can use `**{{item.name}}**` to display the name in bold." appState.locale)
+                                    [ GuideLinks.markdownCheatsheet appState.guideLinks ]
+                                )
                             ]
                         ]
                     , itemUrl
