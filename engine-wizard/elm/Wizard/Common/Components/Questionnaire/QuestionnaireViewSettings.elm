@@ -1,6 +1,7 @@
 module Wizard.Common.Components.Questionnaire.QuestionnaireViewSettings exposing
     ( QuestionnaireViewSettings
     , all
+    , anyHidden
     , decoder
     , default
     , encode
@@ -59,12 +60,7 @@ all =
 
 default : QuestionnaireViewSettings
 default =
-    { answeredBy = True
-    , phases = True
-    , tags = True
-    , nonDesirableQuestions = True
-    , metricValues = False
-    }
+    all
 
 
 none : QuestionnaireViewSettings
@@ -75,6 +71,11 @@ none =
     , nonDesirableQuestions = False
     , metricValues = False
     }
+
+
+anyHidden : QuestionnaireViewSettings -> Bool
+anyHidden qvs =
+    not qvs.answeredBy || not qvs.phases || not qvs.tags || not qvs.nonDesirableQuestions || not qvs.metricValues
 
 
 toggleAnsweredBy : QuestionnaireViewSettings -> QuestionnaireViewSettings

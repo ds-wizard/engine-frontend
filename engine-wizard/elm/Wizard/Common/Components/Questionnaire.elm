@@ -49,6 +49,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
+import Registry.Components.FontAwesome exposing (fas)
 import Roman
 import Set exposing (Set)
 import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
@@ -1811,6 +1812,13 @@ viewQuestionnaireToolbar appState cfg model =
 
                     else
                         emptyNode
+
+                hiddenOptionsTooltip =
+                    if QuestionnaireViewSettings.anyHidden viewSettings then
+                        tooltipRight "Some options are hidden"
+
+                    else
+                        []
             in
             div [ class "item-group" ]
                 [ Dropdown.dropdown model.viewSettingsDropdown
@@ -1818,7 +1826,11 @@ viewQuestionnaireToolbar appState cfg model =
                     , toggleMsg = ViewSettingsDropdownMsg
                     , toggleButton =
                         Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                            [ text (gettext "View" appState.locale) ]
+                            [ div hiddenOptionsTooltip
+                                [ text (gettext "View" appState.locale)
+                                , Html.viewIf (QuestionnaireViewSettings.anyHidden viewSettings) (span [ class "ms-2 text-danger" ] [ fas "fa-circle fa-2xs" ])
+                                ]
+                            ]
                     , items =
                         [ Dropdown.anchorItem
                             [ onClick (SetViewSettings QuestionnaireViewSettings.all) ]
