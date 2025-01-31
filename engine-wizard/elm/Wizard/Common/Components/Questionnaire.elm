@@ -3592,16 +3592,20 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
             else
                 emptyNode
 
-        collapseButton =
+        ( collapseAttributes, collapseIcon ) =
             if isCollapsed then
-                a [ onClick (ExpandItem itemPathString), dataCy "item-expand" ] [ faSet "questionnaire.item.expand" appState ]
+                ( [ onClick (ExpandItem itemPathString), dataCy "item-expand" ]
+                , span [ class "text-primary" ] [ faSet "questionnaire.item.expand" appState ]
+                )
 
             else
-                a [ onClick (CollapseItem itemPathString), dataCy "item-collapse" ] [ faSet "questionnaire.item.collapse" appState ]
+                ( [ onClick (CollapseItem itemPathString), dataCy "item-collapse" ]
+                , span [ class "text-primary" ] [ faSet "questionnaire.item.collapse" appState ]
+                )
 
         itemHeader =
             div [ class "item-header d-flex justify-content-between" ]
-                [ div [] [ collapseButton, itemTitle ]
+                [ div (class "flex-grow-1 me-3 cursor-pointer" :: collapseAttributes) [ collapseIcon, itemTitle ]
                 , div [] buttons
                 ]
     in
