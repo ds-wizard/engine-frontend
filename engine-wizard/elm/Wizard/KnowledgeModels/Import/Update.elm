@@ -1,8 +1,8 @@
 module Wizard.KnowledgeModels.Import.Update exposing (update)
 
+import Shared.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.KnowledgeModels.Import.FileImport.Models as FileImportModels
-import Wizard.KnowledgeModels.Import.FileImport.Update as FileImportUpdate
+import Wizard.Common.FileImport as FileImport
 import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model)
 import Wizard.KnowledgeModels.Import.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Import.OwlImport.Models as OwlImportModels
@@ -18,7 +18,14 @@ update msg wrapMsg appState model =
         ( FileImportMsg fileImportMsg, FileImportModel fileImportModel ) ->
             let
                 ( newFileImportModel, fileImportCmd ) =
-                    FileImportUpdate.update fileImportMsg (wrapMsg << FileImportMsg) appState fileImportModel
+                    FileImport.update
+                        { mimes = [ "*/*" ]
+                        , upload = PackagesApi.importPackage
+                        , wrapMsg = wrapMsg << FileImportMsg
+                        }
+                        appState
+                        fileImportMsg
+                        fileImportModel
             in
             ( { model | importModel = FileImportModel newFileImportModel }
             , fileImportCmd
@@ -48,7 +55,7 @@ update msg wrapMsg appState model =
             )
 
         ( ShowFileImport, _ ) ->
-            ( { model | importModel = FileImportModel FileImportModels.initialModel }
+            ( { model | importModel = FileImportModel FileImport.initialModel }
             , Cmd.none
             )
 

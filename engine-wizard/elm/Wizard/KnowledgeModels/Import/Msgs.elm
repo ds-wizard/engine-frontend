@@ -1,12 +1,12 @@
 module Wizard.KnowledgeModels.Import.Msgs exposing (Msg(..))
 
-import Wizard.KnowledgeModels.Import.FileImport.Msgs as FileImportMsgs
+import Wizard.Common.FileImport as FileImport
 import Wizard.KnowledgeModels.Import.OwlImport.Msgs as OwlImportMsgs
 import Wizard.KnowledgeModels.Import.RegistryImport.Msgs as RegistryImportMsgs
 
 
 type Msg
-    = FileImportMsg FileImportMsgs.Msg
+    = FileImportMsg FileImport.Msg
     | RegistryImportMsg RegistryImportMsgs.Msg
     | OwlImportMsg OwlImportMsgs.Msg
     | ShowRegistryImport

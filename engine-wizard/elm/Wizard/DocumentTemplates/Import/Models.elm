@@ -2,12 +2,12 @@ module Wizard.DocumentTemplates.Import.Models exposing (ImportModel(..), Model, 
 
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.DocumentTemplates.Import.FileImport.Models as FileImportModels
+import Wizard.Common.FileImport as FileImport
 import Wizard.DocumentTemplates.Import.RegistryImport.Models as RegistryImportModels
 
 
 type ImportModel
-    = FileImportModel FileImportModels.Model
+    = FileImportModel FileImport.Model
     | RegistryImportModel RegistryImportModels.Model
 
 
@@ -22,4 +22,4 @@ initialModel appState packageId =
             { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }
 
         _ ->
-            { importModel = FileImportModel <| FileImportModels.initialModel }
+            { importModel = FileImportModel <| FileImport.initialModel }

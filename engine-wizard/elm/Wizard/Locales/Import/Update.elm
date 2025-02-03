@@ -1,8 +1,8 @@
 module Wizard.Locales.Import.Update exposing (update)
 
+import Shared.Api.Locales as LocalesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Locales.Import.FileImport.Models as FileImportModels
-import Wizard.Locales.Import.FileImport.Update as FileImportUpdate
+import Wizard.Common.FileImport as FileImport
 import Wizard.Locales.Import.Models exposing (ImportModel(..), Model)
 import Wizard.Locales.Import.Msgs exposing (Msg(..))
 import Wizard.Locales.Import.RegistryImport.Models as RegistryImportModels
@@ -16,7 +16,14 @@ update msg wrapMsg appState model =
         ( FileImportMsg fileImportMsg, FileImportModel fileImportModel ) ->
             let
                 ( newFileImportModel, fileImportCmd ) =
-                    FileImportUpdate.update fileImportMsg (wrapMsg << FileImportMsg) appState fileImportModel
+                    FileImport.update
+                        { mimes = [ ".zip" ]
+                        , upload = LocalesApi.importLocale
+                        , wrapMsg = wrapMsg << FileImportMsg
+                        }
+                        appState
+                        fileImportMsg
+                        fileImportModel
             in
             ( { model | importModel = FileImportModel newFileImportModel }
             , fileImportCmd
@@ -37,7 +44,7 @@ update msg wrapMsg appState model =
             )
 
         ( ShowFileImport, _ ) ->
-            ( { model | importModel = FileImportModel FileImportModels.initialModel }
+            ( { model | importModel = FileImportModel FileImport.initialModel }
             , Cmd.none
             )
 
