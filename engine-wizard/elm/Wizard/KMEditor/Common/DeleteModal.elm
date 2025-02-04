@@ -97,15 +97,13 @@ view appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete knowledge model editor" appState.locale
-            , modalContent = content
-            , visible = visible
-            , actionResult = model.deletingBranch
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = Delete
-            , cancelMsg = Just Close
-            , dangerous = True
-            , dataCy = "km-editor-delete"
-            }
+            Modal.confirmConfig (gettext "Delete knowledge model editor" appState.locale)
+                |> Modal.confirmConfigContent content
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingBranch
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) Delete
+                |> Modal.confirmConfigCancelMsg Close
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "km-editor-delete"
     in
     Modal.confirm appState modalConfig

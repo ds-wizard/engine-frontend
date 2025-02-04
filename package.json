@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "4.14.1",
+  "version": "4.15.0",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -8,6 +8,11 @@
     "build:registry": "COMPONENT=registry ./scripts/build.sh",
     "build:wizard": "COMPONENT=wizard ./scripts/build.sh",
     "clean": "rm -rf dist",
+    "guide-links": "node scripts/create-guide-links.js",
+    "pot": "mkdir -p locale && npm run pot:registry && npm run pot:wizard",
+    "pot:registry": "COMPONENT=registry node scripts/create-pot-file.js",
+    "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js",
+    "review": "elm-review",
     "start": "npm run start:wizard",
     "start:registry": "COMPONENT=registry webpack serve",
     "start:wizard": "COMPONENT=wizard webpack serve",
@@ -16,11 +21,7 @@
     "test:registry": "npm run test:elm",
     "test:wizard": "npm run test:elm && npm run test:wizard:icon-set && npm run test:wizard:locale",
     "test:wizard:icon-set": "COMPONENT=wizard node scripts/test-icon-set.js",
-    "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js",
-    "review": "elm-review",
-    "pot": "mkdir -p locale && npm run pot:registry && npm run pot:wizard",
-    "pot:registry": "COMPONENT=registry node scripts/create-pot-file.js",
-    "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js"
+    "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js"
   },
   "devDependencies": {
     "@lydell/elm": "^0.19.1-14",
@@ -33,7 +34,7 @@
     "html-webpack-plugin": "^5.6.3",
     "lodash": "^4.17.21",
     "mini-css-extract-plugin": "^2.9.2",
-    "sass": "^1.83.0",
+    "sass": "^1.83.4",
     "sass-loader": "^16.0.4",
     "terser-webpack-plugin": "^5.3.11",
     "uglify-js": "^3.19.3",
@@ -42,14 +43,14 @@
     "webpack-dev-server": "^5.2.0"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.7.1",
+    "@codemirror/commands": "^6.8.0",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.9",
     "@codemirror/lang-xml": "^6.1.0",
     "@codemirror/language": "^6.10.8",
     "@codemirror/legacy-modes": "^6.4.2",
-    "@codemirror/state": "^6.5.0",
-    "@codemirror/view": "^6.36.1",
+    "@codemirror/state": "^6.5.1",
+    "@codemirror/view": "^6.36.2",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@lezer/lr": "^1.4.2",
     "axios": "1.7.9",

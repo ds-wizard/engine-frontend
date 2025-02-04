@@ -286,9 +286,18 @@ view appState model =
                 ]
             ]
 
+        ( enterMsg, escMsg ) =
+            if ActionResult.isLoading actionResult then
+                ( Nothing, Nothing )
+
+            else
+                ( Just Upload, Just (SetOpen False) )
+
         modalConfig =
             { modalContent = content
             , visible = model.open
+            , enterMsg = enterMsg
+            , escMsg = escMsg
             , dataCy = "logo-upload"
             }
     in

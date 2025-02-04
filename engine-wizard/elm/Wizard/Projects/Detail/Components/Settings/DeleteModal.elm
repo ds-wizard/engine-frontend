@@ -116,15 +116,13 @@ view appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete Project" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingQuestionnaire
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteQuestionnaire
-            , cancelMsg = Just <| ShowHideDeleteQuestionnaire Nothing
-            , dangerous = True
-            , dataCy = "project-delete"
-            }
+            Modal.confirmConfig (gettext "Delete Project" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingQuestionnaire
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteQuestionnaire
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteQuestionnaire Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "project-delete"
     in
     Modal.confirm appState modalConfig

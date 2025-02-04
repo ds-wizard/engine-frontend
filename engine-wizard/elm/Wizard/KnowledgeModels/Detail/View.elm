@@ -271,15 +271,13 @@ deleteVersionModal appState model package =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete version" appState.locale
-            , modalContent = modalContent
-            , visible = model.showDeleteDialog
-            , actionResult = model.deletingVersion
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteVersion
-            , cancelMsg = Just <| ShowDeleteDialog False
-            , dangerous = True
-            , dataCy = "km-delete-version"
-            }
+            Modal.confirmConfig (gettext "Delete version" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible model.showDeleteDialog
+                |> Modal.confirmConfigActionResult model.deletingVersion
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteVersion
+                |> Modal.confirmConfigCancelMsg (ShowDeleteDialog False)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "km-delete-version"
     in
     Modal.confirm appState modalConfig

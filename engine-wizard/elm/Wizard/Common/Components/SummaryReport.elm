@@ -107,7 +107,7 @@ viewMetrics : AppState -> List Metric -> List MetricReport -> ChartJS.Data -> Ht
 viewMetrics appState metrics metricReports chartData =
     let
         content =
-            if List.length metricReports == 0 then
+            if List.isEmpty metricReports then
                 []
 
             else if List.length metricReports > 2 then

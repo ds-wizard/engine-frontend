@@ -1,6 +1,6 @@
 module Wizard.Common.Menu.View exposing (view, viewAboutModal, viewLanguagesModal, viewReportIssueModal)
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
 import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
@@ -782,16 +782,12 @@ viewReportIssueModal appState isOpen =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Report Issue" appState.locale
-            , modalContent = modalContent
-            , visible = isOpen
-            , actionResult = Unset
-            , actionName = gettext "OK" appState.locale
-            , actionMsg = Wizard.Msgs.MenuMsg <| SetReportIssueOpen False
-            , cancelMsg = Nothing
-            , dangerous = False
-            , dataCy = "report-issue"
-            }
+            Modal.confirmConfig (gettext "Report Issue" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible isOpen
+                |> Modal.confirmConfigAction (gettext "OK" appState.locale) (Wizard.Msgs.MenuMsg <| SetReportIssueOpen False)
+                |> Modal.confirmConfigCancelShortcutMsg (Wizard.Msgs.MenuMsg <| SetReportIssueOpen False)
+                |> Modal.confirmConfigDataCy "report-issue"
     in
     Modal.confirm appState modalConfig
 
@@ -846,6 +842,8 @@ viewAboutModal appState isOpen recentlyCopied serverBuildInfoActionResult =
         modalConfig =
             { modalContent = modalContent
             , visible = isOpen
+            , enterMsg = Just (Wizard.Msgs.MenuMsg (SetAboutOpen False))
+            , escMsg = Just (Wizard.Msgs.MenuMsg (SetAboutOpen False))
             , dataCy = "about"
             }
     in
@@ -959,5 +957,7 @@ viewLanguagesModal appState visible =
     Modal.simple
         { modalContent = content
         , visible = visible
+        , enterMsg = Nothing
+        , escMsg = Just (Wizard.Msgs.MenuMsg (Wizard.Common.Menu.Msgs.SetLanguagesOpen False))
         , dataCy = "languages"
         }

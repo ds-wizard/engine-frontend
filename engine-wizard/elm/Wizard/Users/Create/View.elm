@@ -7,6 +7,7 @@ import Html.Events exposing (onSubmit)
 import Shared.Auth.Role as Role
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
@@ -21,7 +22,7 @@ import Wizard.Users.Create.Msgs exposing (Msg(..))
 view : AppState -> Model -> Html Msg
 view appState model =
     Html.form [ onSubmit (FormMsg Form.Submit), detailClass "Users__Create" ]
-        [ Page.header (gettext "Create user" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Create user" appState.locale) GuideLinks.usersCreate
         , FormResult.view appState model.savingUser
         , formView appState model.form |> Html.map FormMsg
         , FormActions.viewSubmit appState

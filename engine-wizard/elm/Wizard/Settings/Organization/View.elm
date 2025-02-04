@@ -7,6 +7,7 @@ import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.OrganizationConfigForm exposing (OrganizationConfigForm)
@@ -25,6 +26,7 @@ viewProps =
     { locTitle = gettext "Organization"
     , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
+    , guideLink = GuideLinks.settingsOrganization
     , wrapMsg = FormMsg
     }
 

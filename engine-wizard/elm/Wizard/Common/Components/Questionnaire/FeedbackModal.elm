@@ -143,19 +143,16 @@ view appState model =
                 _ ->
                     ( gettext "Send" appState.locale, FeedbackFormMsg Form.Submit, Just <| CloseFeedback )
 
-        modalConfig =
-            { modalTitle = gettext "Feedback" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = ActionResult.map (\_ -> gettext "Your feedback has been sent." appState.locale) model.feedbackResult
-            , actionName = actionName
-            , actionMsg = actionMsg
-            , cancelMsg = cancelMsg
-            , dangerous = False
-            , dataCy = "questionnaire-feedback"
-            }
+        cfg =
+            Modal.confirmConfig (gettext "Feedback" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult (ActionResult.map (\_ -> gettext "Your feedback has been sent." appState.locale) model.feedbackResult)
+                |> Modal.confirmConfigAction actionName actionMsg
+                |> Modal.confirmConfigMbCancelMsg cancelMsg
+                |> Modal.confirmConfigDataCy "questionnaire-feedback"
     in
-    Modal.confirm appState modalConfig
+    Modal.confirm appState cfg
 
 
 feedbackModalContent : AppState -> Model -> List (Html Msg)

@@ -12,6 +12,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -39,6 +40,7 @@ viewProps appState =
     { locTitle = locTitle
     , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
+    , guideLink = GuideLinks.settingsDashboardAndLoginScreen
     , wrapMsg = FormMsg
     }
 

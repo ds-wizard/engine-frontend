@@ -802,13 +802,25 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
         ( newSeed, mbChapterUuid, replies ) =
             foldReplies currentTime km parentMap seed questionUuid Dict.empty
 
-        originalReplies =
-            questionnaireDetail.replies
+        reply =
+            findReplyBySuffix questionUuid questionnaireDetail.replies
+
+        newReplies =
+            if Maybe.isJust reply then
+                questionnaireDetail.replies
+
+            else
+                Dict.union replies questionnaireDetail.replies
     in
     ( newSeed
     , mbChapterUuid
-    , { questionnaireDetail | replies = Dict.union replies originalReplies }
+    , { questionnaireDetail | replies = newReplies }
     )
+
+
+findReplyBySuffix : String -> Dict String Reply -> Maybe ( String, Reply )
+findReplyBySuffix suffix replies =
+    Dict.find (\key _ -> String.endsWith suffix key) replies
 
 
 foldReplies : Time.Posix -> KnowledgeModel -> KnowledgeModel.ParentMap -> Seed -> String -> Dict String Reply -> ( Seed, Maybe String, Dict String Reply )

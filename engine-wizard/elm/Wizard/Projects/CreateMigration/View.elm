@@ -12,6 +12,7 @@ import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (listClass)
 import Wizard.Common.View.ActionButton as ActionResult
 import Wizard.Common.View.Flash as Flash
@@ -77,7 +78,7 @@ createMigrationView appState model questionnaire =
                     FormGroup.textView "km" <| gettext "Select Knowledge Model first" appState.locale
     in
     div [ listClass "Questionnaires__CreateMigration" ]
-        [ Page.header (gettext "Create Migration" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Create Migration" appState.locale) GuideLinks.projectsMigration
         , Flash.info appState <| gettext "A new Project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
         , FormResult.view appState model.savingMigration
         , FormGroup.textView "project" questionnaire.name <| gettext "Project" appState.locale

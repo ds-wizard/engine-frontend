@@ -14,7 +14,6 @@ import Shared.Api.Branches as BranchesApi
 import Shared.Api.Prefabs as PrefabsApi
 import Shared.Data.Branch.BranchState as BranchState
 import Shared.Data.Event as Event
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
 import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
 import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
 import Shared.Data.WebSockets.ServerBranchAction as ServerBranchAction
@@ -75,47 +74,22 @@ fetchSubrouteData appState model =
 
         KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
             let
-                mbScrollPath =
-                    Dict.keys model.previewModel.questionnaireModel.questionnaire.replies
-                        |> List.sortBy String.length
-                        |> List.reverse
-                        |> List.head
-
                 mbActiveQuestionUuid =
                     ActionResult.toMaybe model.branchModel
                         |> Maybe.map EditorBranch.getActiveQuestionUuid
-
-                scrollIntoView parts =
-                    Ports.scrollIntoView ("[data-path=\"" ++ String.join "." parts ++ "\"]")
             in
-            case ( mbScrollPath, mbActiveQuestionUuid ) of
-                -- Somewhere deep in the questionnaire
-                ( Just scrollPath, Just activeQuestionUuid ) ->
+            case mbActiveQuestionUuid of
+                Just activeQuestionUuid ->
                     let
-                        value =
-                            Dict.get scrollPath model.previewModel.questionnaireModel.questionnaire.replies
-
-                        answerPathUuid =
-                            Maybe.withDefault "" <|
-                                case Maybe.map .value value of
-                                    Just (AnswerReply answerUuid) ->
-                                        Just answerUuid
-
-                                    Just (ItemListReply itemUuids) ->
-                                        List.head itemUuids
-
-                                    _ ->
-                                        Nothing
+                        scrollIntoView path =
+                            Ports.scrollIntoView ("[data-path=\"" ++ path ++ "\"]")
                     in
-                    scrollIntoView [ scrollPath, answerPathUuid, activeQuestionUuid ]
-
-                -- Top level question in a chapter
-                ( Nothing, Just activeQuestionUuid ) ->
-                    let
-                        chapterUuid =
-                            ActionResult.unwrap "" (EditorBranch.getChapterUuid activeQuestionUuid) model.branchModel
-                    in
-                    scrollIntoView [ chapterUuid, activeQuestionUuid ]
+                    -- TODO: There might be replies that are no longer accessible but there is no cleaning of replies in preview values now, so we just try to scroll them all
+                    model.previewModel.questionnaireModel.questionnaire.replies
+                        |> Dict.filter (\key _ -> String.endsWith activeQuestionUuid key)
+                        |> Dict.toList
+                        |> List.map (scrollIntoView << Tuple.first)
+                        |> Cmd.batch
 
                 _ ->
                     Cmd.none

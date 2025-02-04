@@ -153,8 +153,14 @@ $content-height: calc(100vh - #{$header-height});
             padding: 8px 16px;
             border-bottom: 1px solid $gray-400;
 
+            .btn-group {
+                .btn {
+                    white-space: nowrap;
+                }
+            }
+
             .TypeHintInput {
-                width: 250px;
+                width: 400px;
                 margin-left: $spacer-1;
                 margin-right: $spacer-3;
             }

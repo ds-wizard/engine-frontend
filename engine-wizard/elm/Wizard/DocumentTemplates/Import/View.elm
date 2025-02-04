@@ -7,6 +7,7 @@ import Html.Events exposing (onClick)
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
 import Wizard.DocumentTemplates.Import.FileImport.View as FileImportView
@@ -41,7 +42,7 @@ view appState model =
                     emptyNode
     in
     div [ detailClass "KnowledgeModels__Import" ]
-        [ Page.header (gettext "Import Document Template" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Import Document Template" appState.locale) GuideLinks.documentTemplatesImport
         , navbar
         , content
         ]

@@ -53,3 +53,12 @@ a {
         margin-left: $spacer-2;
     }
 }
+
+.guide-link {
+    color: $gray-400;
+    @include transition(color 0.15s ease-in-out);
+
+    &:hover {
+        color: var(--bs-primary);
+    }
+}

@@ -86,6 +86,7 @@ import String.Extra as String
 import String.Format as String
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.Flash as Flash
@@ -1708,7 +1709,10 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             , responseItemId
                             , FormExtra.mdAfter (gettext "Use this to define an identifier for the item. This will be used in **Item URL** as `${id}` to compose a URL to the found item. You can use properties from the returned item in Jinja2 notation. For example, if the item has a field `id` use `{{item.id}}` here. You can also compose multiple fields together, e.g., `{{item.field1}}-{{item.field2}}`." appState.locale)
                             , responseItemTemplate
-                            , FormExtra.mdAfter (gettext "This defines how the found items will be displayed for the user. You can use properties from the returned item in Jinja2 notation, you can also use Markdown for some formatting. For example, if the returned item has a field called name, you can use `**{{item.name}}**` to display the name in bold." appState.locale)
+                            , FormExtra.mdAfter
+                                (String.format (gettext "This defines how the found items will be displayed for the user. You can use properties from the returned item in Jinja2 notation, you can also use [Markdown](%s) for some formatting. For example, if the returned item has a field called name, you can use `**{{item.name}}**` to display the name in bold." appState.locale)
+                                    [ GuideLinks.markdownCheatsheet appState.guideLinks ]
+                                )
                             ]
                         ]
                     , itemUrl
@@ -2409,7 +2413,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
         createEvent event uuid =
             eventMsg False (EditorBranch.getParentUuid uuid editorBranch) (Just uuid) event
 
-        ( visible, content ) =
+        ( visible, ( content, mbConfirmMsg ) ) =
             case deleteModalState of
                 ChapterState uuid ->
                     ( True
@@ -2496,33 +2500,37 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                     )
 
                 Closed ->
-                    ( False, [ emptyNode ] )
+                    ( False, ( [ emptyNode ], Nothing ) )
 
         getContent contentText onDelete =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] [ text (gettext "Heads up!" appState.locale) ]
-                ]
-            , div [ class "modal-body" ]
-                [ text contentText ]
-            , div [ class "modal-footer" ]
-                [ button
-                    [ class "btn btn-danger"
-                    , dataCy "modal_action-button"
-                    , onClick onDelete
+            ( [ div [ class "modal-header" ]
+                    [ h5 [ class "modal-title" ] [ text (gettext "Heads up!" appState.locale) ]
                     ]
-                    [ text (gettext "Delete" appState.locale) ]
-                , button
-                    [ class "btn btn-secondary"
-                    , dataCy "modal_cancel-button"
-                    , onClick <| wrapMsg <| SetDeleteModalState Closed
+              , div [ class "modal-body" ]
+                    [ text contentText ]
+              , div [ class "modal-footer" ]
+                    [ button
+                        [ class "btn btn-danger"
+                        , dataCy "modal_action-button"
+                        , onClick onDelete
+                        ]
+                        [ text (gettext "Delete" appState.locale) ]
+                    , button
+                        [ class "btn btn-secondary"
+                        , dataCy "modal_cancel-button"
+                        , onClick <| wrapMsg <| SetDeleteModalState Closed
+                        ]
+                        [ text (gettext "Cancel" appState.locale) ]
                     ]
-                    [ text (gettext "Cancel" appState.locale) ]
-                ]
-            ]
+              ]
+            , Just onDelete
+            )
 
         modalConfig =
             { modalContent = content
             , visible = visible
+            , enterMsg = mbConfirmMsg
+            , escMsg = Just <| wrapMsg <| SetDeleteModalState Closed
             , dataCy = "km-editor-delete"
             }
     in
@@ -2536,7 +2544,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
 moveModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorBranch -> Maybe MoveModalState -> Html msg
 moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
     let
-        content =
+        ( content, mbConfirmMsg ) =
             case mbMoveModalState of
                 Just moveModalState ->
                     let
@@ -2573,36 +2581,40 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
                                 TreeInput.MovingExpert ->
                                     createEvent MoveExpertEvent
                     in
-                    [ div [ class "modal-header" ]
-                        [ h5 [ class "modal-title" ] [ text (gettext "Move" appState.locale) ]
-                        ]
-                    , div [ class "modal-body" ]
-                        [ label [] [ text (gettext "Select a new parent" appState.locale) ]
-                        , Html.map (wrapMsg << MoveModalMsg) <| TreeInput.view appState viewProps moveModalState.treeInputModel
-                        ]
-                    , div [ class "modal-footer" ]
-                        [ button
-                            [ class "btn btn-primary"
-                            , onClick onMove
-                            , disabled (String.isEmpty selectedUuid)
-                            , dataCy "modal_action-button"
+                    ( [ div [ class "modal-header" ]
+                            [ h5 [ class "modal-title" ] [ text (gettext "Move" appState.locale) ]
                             ]
-                            [ text (gettext "Move" appState.locale) ]
-                        , button
-                            [ class "btn btn-secondary"
-                            , onClick <| wrapMsg CloseMoveModal
-                            , dataCy "modal_cancel-button"
+                      , div [ class "modal-body" ]
+                            [ label [] [ text (gettext "Select a new parent" appState.locale) ]
+                            , Html.map (wrapMsg << MoveModalMsg) <| TreeInput.view appState viewProps moveModalState.treeInputModel
                             ]
-                            [ text (gettext "Cancel" appState.locale) ]
-                        ]
-                    ]
+                      , div [ class "modal-footer" ]
+                            [ button
+                                [ class "btn btn-primary"
+                                , onClick onMove
+                                , disabled (String.isEmpty selectedUuid)
+                                , dataCy "modal_action-button"
+                                ]
+                                [ text (gettext "Move" appState.locale) ]
+                            , button
+                                [ class "btn btn-secondary"
+                                , onClick <| wrapMsg CloseMoveModal
+                                , dataCy "modal_cancel-button"
+                                ]
+                                [ text (gettext "Cancel" appState.locale) ]
+                            ]
+                      ]
+                    , Just onMove
+                    )
 
                 Nothing ->
-                    []
+                    ( [], Nothing )
 
         modalConfig =
             { modalContent = content
             , visible = Maybe.isJust mbMoveModalState
+            , enterMsg = mbConfirmMsg
+            , escMsg = Just <| wrapMsg CloseMoveModal
             , dataCy = "km-editor-move"
             }
     in

@@ -8,7 +8,7 @@ locale =
     Dict.fromList
         [ -- Routing
           ( "__routing.dashboard", "dashboard" )
-        , ( "__routing.documents", "documents" )
+        , ( "__routing.documents", "project-documents" )
         , ( "__routing.documents.index.questionnaireUuid", "questionnaireUuid" )
         , ( "__routing.documentTemplateEditors", "document-template-editors" )
         , ( "__routing.kmEditor", "km-editor" )
@@ -36,7 +36,6 @@ locale =
         , ( "__routing.projects.create.selectedProjectTemplate", "selectedProjectTemplate" )
         , ( "__routing.projects.create.selectedKnowledgeModel", "selectedKnowledgeModel" )
         , ( "__routing.projects.createMigration", "create-migration" )
-        , ( "__routing.projects.migration", "migration" )
         , ( "__routing.projects.migration", "migration" )
         , ( "__routing.public.forgottenPassword", "forgotten-password" )
         , ( "__routing.public.signup", "signup" )

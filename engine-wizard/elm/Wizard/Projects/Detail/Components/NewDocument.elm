@@ -37,6 +37,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.SummaryReport exposing (viewIndications)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionResult
@@ -281,7 +282,7 @@ viewFormState : AppState -> QuestionnaireCommon -> Model -> ( SummaryReport, May
 viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
     div [ class "Projects__Detail__Content Projects__Detail__Content--NewDocument" ]
         [ div [ detailClass "container" ]
-            [ Page.header (gettext "New Document" appState.locale) []
+            [ Page.headerWithGuideLink appState (gettext "New Document" appState.locale) GuideLinks.projectsNewDocument
             , div []
                 [ FormResult.view appState model.savingDocument
                 , formView appState questionnaire mbEvent model summaryReport

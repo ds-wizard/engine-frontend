@@ -80,7 +80,6 @@ formView appState form branch =
         , Html.map FormMsg <| FormGroup.input appState form "description" <| gettext "Description" appState.locale
         , FormExtra.textAfter <| gettext "Short description of the Knowledge Model." appState.locale
         , Html.map FormMsg <| FormGroup.markdownEditor appState form "readme" <| gettext "Readme" appState.locale
-        , FormExtra.textAfter <| gettext "Describe the Knowledge Model, you can use Markdown." appState.locale
         ]
 
 

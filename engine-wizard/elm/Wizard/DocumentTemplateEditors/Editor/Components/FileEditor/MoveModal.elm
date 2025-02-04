@@ -199,18 +199,17 @@ view appState fileTree model =
                 [ ul [] [ viewNode appState model fileTree ]
                 ]
             ]
+
+        cfg =
+            Modal.confirmConfig (gettext "Move" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (model.state /= Closed)
+                |> Modal.confirmConfigActionResult model.moving
+                |> Modal.confirmConfigAction (gettext "Move" appState.locale) MoveSubmit
+                |> Modal.confirmConfigCancelMsg (SetState Closed)
+                |> Modal.confirmConfigDataCy "move-modal"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Move" appState.locale
-        , modalContent = modalContent
-        , visible = model.state /= Closed
-        , actionResult = model.moving
-        , actionName = gettext "Move" appState.locale
-        , actionMsg = MoveSubmit
-        , cancelMsg = Just (SetState Closed)
-        , dangerous = False
-        , dataCy = "move-modal"
-        }
+    Modal.confirm appState cfg
 
 
 viewNode : AppState -> Model -> FileTree -> Html Msg

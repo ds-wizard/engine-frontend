@@ -20,6 +20,7 @@ import Version
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon
@@ -180,6 +181,15 @@ unsupportedMetamodelVersionWarning appState template =
 
                         else
                             []
+
+                    ( True, _, _ ) ->
+                        [ a
+                            [ href (GuideLinks.documentTemplatesUnsupportedMetamodel appState.guideLinks)
+                            , target "_blank"
+                            , class "ms-1"
+                            ]
+                            [ text (gettext "Learn more in guide" appState.locale) ]
+                        ]
 
                     _ ->
                         []
@@ -357,15 +367,13 @@ deleteVersionModal appState model template =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete version" appState.locale
-            , modalContent = modalContent
-            , visible = model.showDeleteDialog
-            , actionResult = model.deletingVersion
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteVersion
-            , cancelMsg = Just <| ShowDeleteDialog False
-            , dangerous = True
-            , dataCy = "template-delete"
-            }
+            Modal.confirmConfig (gettext "Delete version" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible model.showDeleteDialog
+                |> Modal.confirmConfigActionResult model.deletingVersion
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteVersion
+                |> Modal.confirmConfigCancelMsg (ShowDeleteDialog False)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "template-delete"
     in
     Modal.confirm appState modalConfig

@@ -245,9 +245,18 @@ view appState isKmEditor model =
                 ]
             ]
 
+        ( enterMsg, escMsg ) =
+            if ActionResult.isLoading model.submitting then
+                ( Nothing, Nothing )
+
+            else
+                ( Just Save, Just Close )
+
         modalConfig =
             { modalContent = modalContent
             , visible = model.isOpen
+            , enterMsg = enterMsg
+            , escMsg = escMsg
             , dataCy = "file-upload"
             }
     in

@@ -36,12 +36,15 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (getUuid, withNoCmd, withSeed)
+import Shortcut
 import String.Format as String
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintInput
+import Wizard.Common.GuideLinks as GuideLinks
+import Wizard.Common.Html exposing (guideLink)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormExtra as FormExtra
@@ -393,12 +396,23 @@ view appState model =
             , usersView appState model
             , formView appState model.questionnaireEditForm
             ]
+
+        shortcuts =
+            if not model.visible || ActionResult.isLoading model.savingSharing then
+                []
+
+            else
+                [ Shortcut.simpleShortcut Shortcut.Enter Close
+                , Shortcut.simpleShortcut Shortcut.Escape Close
+                ]
     in
-    div [ class "modal modal-cover", classList [ ( "visible", model.visible ) ] ]
+    Shortcut.shortcutElement shortcuts
+        [ class "modal modal-cover", classList [ ( "visible", model.visible ) ] ]
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy "modal_project-share" ]
                 [ div [ class "modal-header" ]
                     [ h5 [ class "modal-title" ] [ text (gettext "Share Project" appState.locale) ]
+                    , guideLink appState GuideLinks.projectsSharing
                     ]
                 , div [ class "modal-body" ] modalContent
                 , div [ class "modal-footer" ]

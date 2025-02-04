@@ -15,6 +15,7 @@ import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -48,7 +49,7 @@ viewForm appState model _ =
                 gettext "Look & Feel" appState.locale
     in
     div [ class "LookAndFeel" ]
-        [ Page.header headerTitle []
+        [ Page.headerWithGuideLink appState headerTitle GuideLinks.settingsLookAndFeel
         , form [ onSubmit (GenericMsgs.FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingConfig
             , formView appState model.form
@@ -127,7 +128,7 @@ customMenuLinksHeader : AppState -> Form FormError EditableLookAndFeelConfig -> 
 customMenuLinksHeader appState form =
     let
         isEmpty =
-            List.length (Form.getListIndexes "customMenuLinks" form) == 0
+            List.isEmpty (Form.getListIndexes "customMenuLinks" form)
     in
     if isEmpty then
         emptyNode

@@ -42,6 +42,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.Feature as Feature
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Flash as Flash
@@ -303,16 +304,13 @@ subscriptions model =
 
 
 -- VIEW
---type alias ViewConfig =
---    { questionnaire : QuestionnaireSettings
---    }
 
 
 view : AppState -> QuestionnaireSettings -> Model -> Html Msg
 view appState questionnaire model =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Settings" ]
         [ div [ detailClass "" ]
-            [ Page.header (gettext "Settings" appState.locale) []
+            [ Page.headerWithGuideLink appState (gettext "Settings" appState.locale) GuideLinks.projectsSettings
             , formView appState questionnaire model
             , hr [ class "separator" ] []
             , knowledgeModel appState questionnaire

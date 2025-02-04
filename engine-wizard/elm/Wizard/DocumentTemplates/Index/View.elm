@@ -188,15 +188,13 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete document template" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingDocumentTemplate
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteDocumentTemplate
-            , cancelMsg = Just <| ShowHideDeleteDocumentTemplate Nothing
-            , dangerous = True
-            , dataCy = "templates-delete"
-            }
+            Modal.confirmConfig (gettext "Delete document template" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingDocumentTemplate
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteDocumentTemplate
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteDocumentTemplate Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "templates-delete"
     in
     Modal.confirm appState modalConfig

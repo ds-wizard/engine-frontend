@@ -175,16 +175,13 @@ viewEditModal appState model =
                     []
 
         config =
-            { modalTitle = gettext "Edit app" appState.locale
-            , modalContent = modalContent
-            , visible = Maybe.isJust model.editForm
-            , actionResult = model.savingTenant
-            , actionName = gettext "Save" appState.locale
-            , actionMsg = EditModalFormMsg Form.Submit
-            , cancelMsg = Just EditModalClose
-            , dangerous = False
-            , dataCy = "tenant-edit"
-            }
+            Modal.confirmConfig (gettext "Edit app" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (Maybe.isJust model.editForm)
+                |> Modal.confirmConfigActionResult model.savingTenant
+                |> Modal.confirmConfigAction (gettext "Save" appState.locale) (EditModalFormMsg Form.Submit)
+                |> Modal.confirmConfigCancelMsg EditModalClose
+                |> Modal.confirmConfigDataCy "tenant-edit"
     in
     Modal.confirm appState config
 
@@ -211,15 +208,12 @@ viewEditLimitsModal appState model =
                     []
 
         config =
-            { modalTitle = gettext "Edit limits" appState.locale
-            , modalContent = modalContent
-            , visible = Maybe.isJust model.limitsForm
-            , actionResult = model.savingTenant
-            , actionName = gettext "Save" appState.locale
-            , actionMsg = EditLimitsModalFormMsg Form.Submit
-            , cancelMsg = Just EditLimitsModalClose
-            , dangerous = False
-            , dataCy = "tenant-edit-limits"
-            }
+            Modal.confirmConfig (gettext "Edit limits" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (Maybe.isJust model.limitsForm)
+                |> Modal.confirmConfigActionResult model.savingTenant
+                |> Modal.confirmConfigAction (gettext "Save" appState.locale) (EditLimitsModalFormMsg Form.Submit)
+                |> Modal.confirmConfigCancelMsg EditLimitsModalClose
+                |> Modal.confirmConfigDataCy "tenant-edit-limits"
     in
     Modal.confirm appState config

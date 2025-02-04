@@ -122,15 +122,15 @@ view appState model =
 
                 Nothing ->
                     []
+
+        cfg =
+            Modal.confirmConfig (gettext "Delete version" appState.locale)
+                |> Modal.confirmConfigContent content
+                |> Modal.confirmConfigVisible (Maybe.isJust model.mbQuestionnaireVersion)
+                |> Modal.confirmConfigActionResult (ActionResult.map (always "") model.deleteResult)
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) Delete
+                |> Modal.confirmConfigCancelMsg Close
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "project-delete-version"
     in
-    Modal.confirm appState
-        { modalTitle = gettext "Delete version" appState.locale
-        , modalContent = content
-        , visible = Maybe.isJust model.mbQuestionnaireVersion
-        , actionResult = ActionResult.map (always "") model.deleteResult
-        , actionName = gettext "Delete" appState.locale
-        , actionMsg = Delete
-        , cancelMsg = Just Close
-        , dangerous = True
-        , dataCy = "project-delete-version"
-        }
+    Modal.confirm appState cfg

@@ -26,7 +26,8 @@ import Wizard.Common.Components.Listing.View as Listing
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Common.Feature as Feature
-import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.GuideLinks as GuideLinks
+import Wizard.Common.Html exposing (guideLink, linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip, tooltipCustom)
 import Wizard.Common.TimeDistance as TimeDistance
 import Wizard.Common.View.ActionButton as ActionButton
@@ -346,16 +347,14 @@ deleteModal cfg appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete document" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingDocument
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = cfg.wrapMsg <| DeleteDocument
-            , cancelMsg = Just <| cfg.wrapMsg <| ShowHideDeleteDocument Nothing
-            , dangerous = True
-            , dataCy = "documents-delete"
-            }
+            Modal.confirmConfig (gettext "Delete document" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingDocument
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) (cfg.wrapMsg DeleteDocument)
+                |> Modal.confirmConfigCancelMsg (cfg.wrapMsg (ShowHideDeleteDocument Nothing))
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "documents-delete"
     in
     Modal.confirm appState modalConfig
 
@@ -464,6 +463,7 @@ submitModal cfg appState model =
         content =
             [ div [ class "modal-header" ]
                 [ h5 [ class "modal-title" ] [ text <| String.format (gettext "Submit %s" appState.locale) [ name ] ]
+                , guideLink appState GuideLinks.projectsDocumentSubmission
                 ]
             , div [ class "modal-body" ]
                 [ body
@@ -474,9 +474,18 @@ submitModal cfg appState model =
                 ]
             ]
 
+        ( enterMsg, escMsg ) =
+            if ActionResult.isLoading model.submittingDocument then
+                ( Nothing, Nothing )
+
+            else
+                ( Just (cfg.wrapMsg SubmitDocument), Just (cfg.wrapMsg (ShowHideSubmitDocument Nothing)) )
+
         modalConfig =
             { modalContent = content
             , visible = visible
+            , enterMsg = enterMsg
+            , escMsg = escMsg
             , dataCy = "document-submit"
             }
     in

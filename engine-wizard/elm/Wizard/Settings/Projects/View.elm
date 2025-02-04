@@ -11,6 +11,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Utils exposing (compose2)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
@@ -29,6 +30,7 @@ viewProps =
     { locTitle = gettext "Projects"
     , locSave = gettext "Save"
     , formView = compose2 (Html.map FormMsg) formView
+    , guideLink = GuideLinks.settingsProjects
     , wrapMsg = FormMsg
     }
 

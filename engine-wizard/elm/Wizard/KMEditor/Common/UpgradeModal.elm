@@ -23,6 +23,7 @@ import Shared.Html exposing (emptyNode)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Page as Page
@@ -160,15 +161,13 @@ view appState model =
                     ]
 
         modalConfig =
-            { modalTitle = gettext "Create migration" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.creatingMigration
-            , actionName = gettext "Create" appState.locale
-            , actionMsg = FormMsg Form.Submit
-            , cancelMsg = Just Close
-            , dangerous = False
-            , dataCy = "km-editor-update"
-            }
+            Modal.confirmConfig (gettext "Create migration" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.creatingMigration
+                |> Modal.confirmConfigAction (gettext "Create" appState.locale) (FormMsg Form.Submit)
+                |> Modal.confirmConfigCancelMsg Close
+                |> Modal.confirmConfigGuideLink GuideLinks.kmEditorMigration
+                |> Modal.confirmConfigDataCy "km-editor-update"
     in
     Modal.confirm appState modalConfig

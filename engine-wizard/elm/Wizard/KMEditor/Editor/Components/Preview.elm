@@ -284,6 +284,7 @@ toolbar appState wrapMsg saveRepliesMsg model km =
                 [ a
                     [ class "btn btn-link ms-3"
                     , onClick saveRepliesMsg
+                    , dataCy "km-editor_preview_save-values"
                     ]
                     [ fas "fa-save me-1"
                     , text (gettext "Save preview values" appState.locale)

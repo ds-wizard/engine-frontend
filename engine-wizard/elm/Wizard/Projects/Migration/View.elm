@@ -39,7 +39,7 @@ contentView appState model migration =
                 emptyNode
 
         content =
-            if List.length model.changes.questions == 0 then
+            if List.isEmpty model.changes.questions then
                 div [ class "content" ]
                     [ Page.illustratedMessage
                         { image = Undraw.happyFeeling

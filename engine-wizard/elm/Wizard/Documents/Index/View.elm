@@ -23,6 +23,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
+import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, listClass, tooltip, tooltipCustom)
 import Wizard.Common.TimeDistance as TimeDistance
@@ -72,7 +73,7 @@ viewDocuments appState model mbQuestionnaire =
             Maybe.map questionnaireFilterView mbQuestionnaire
     in
     div [ listClass "Documents__Index" ]
-        [ Page.header (gettext "Documents" appState.locale) []
+        [ Page.headerWithGuideLink appState (gettext "Project Documents" appState.locale) GuideLinks.projectsDocuments
         , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
@@ -344,16 +345,14 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            { modalTitle = gettext "Delete document" appState.locale
-            , modalContent = modalContent
-            , visible = visible
-            , actionResult = model.deletingDocument
-            , actionName = gettext "Delete" appState.locale
-            , actionMsg = DeleteDocument
-            , cancelMsg = Just <| ShowHideDeleteDocument Nothing
-            , dangerous = True
-            , dataCy = "document-delete"
-            }
+            Modal.confirmConfig (gettext "Delete document" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible visible
+                |> Modal.confirmConfigActionResult model.deletingDocument
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteDocument
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteDocument Nothing)
+                |> Modal.confirmConfigDangerous True
+                |> Modal.confirmConfigDataCy "document-delete"
     in
     Modal.confirm appState modalConfig
 
@@ -472,9 +471,18 @@ submitModal appState model =
                 ]
             ]
 
+        ( enterMsg, escMsg ) =
+            if ActionResult.isLoading model.submittingDocument then
+                ( Nothing, Nothing )
+
+            else
+                ( Just SubmitDocument, Just (ShowHideSubmitDocument Nothing) )
+
         modalConfig =
             { modalContent = content
             , visible = visible
+            , enterMsg = enterMsg
+            , escMsg = escMsg
             , dataCy = "document-submit"
             }
     in

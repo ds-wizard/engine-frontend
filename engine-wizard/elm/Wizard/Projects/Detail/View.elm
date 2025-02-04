@@ -146,20 +146,20 @@ viewProject route appState model questionnaire =
 
 disconnectedModal : AppState -> Model -> Html Msg
 disconnectedModal appState model =
-    Modal.confirm appState
-        { modalTitle = gettext "Refresh Required" appState.locale
-        , modalContent =
+    let
+        modalContent =
             [ p [] [ text (gettext "Another user has made significant changes to the questionnaire (e.g., reverting to a previous version). To ensure everyone is using the latest version, you’ve been disconnected." appState.locale) ]
             , p [] [ text (gettext "Refresh the page to reconnect." appState.locale) ]
             ]
-        , visible = model.forceDisconnect && (model.revertModalModel.revertResult /= ActionResult.Loading)
-        , actionResult = ActionResult.Unset
-        , actionName = gettext "Refresh" appState.locale
-        , actionMsg = Refresh
-        , cancelMsg = Nothing
-        , dangerous = False
-        , dataCy = "disconnected_modal"
-        }
+
+        cfg =
+            Modal.confirmConfig (gettext "Refresh Required" appState.locale)
+                |> Modal.confirmConfigContent modalContent
+                |> Modal.confirmConfigVisible (model.forceDisconnect && (model.revertModalModel.revertResult /= ActionResult.Loading))
+                |> Modal.confirmConfigAction (gettext "Refresh" appState.locale) Refresh
+                |> Modal.confirmConfigDataCy "disconnected_modal"
+    in
+    Modal.confirm appState cfg
 
 
 
