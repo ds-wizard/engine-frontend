@@ -15,7 +15,7 @@ import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (tooltipLeft)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltipLeft)
 import Wizard.Common.Html.Events exposing (alwaysPreventDefaultOn)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
@@ -163,6 +163,7 @@ dropzone appState model =
         , alwaysPreventDefaultOn "dragover" (D.succeed DragEnter)
         , alwaysPreventDefaultOn "dragleave" (D.succeed DragLeave)
         , alwaysPreventDefaultOn "drop" dropDecoder
+        , dataCy "dropzone"
         ]
         [ button [ onClick Pick, class "btn btn-secondary" ] [ text (gettext "Choose files" appState.locale) ]
         , p [] [ text (gettext "Or just drop them here" appState.locale) ]
@@ -203,7 +204,7 @@ filesView cfg appState model files =
                             Html.nothing
 
         fileView file =
-            div [ class "rounded-3 bg-light d-flex mb-1 px-3 py-2" ]
+            div [ class "rounded-3 bg-light d-flex mb-1 px-3 py-2", dataCy "file-import_file" ]
                 [ span [ class "me-2" ] [ faSet "import.file" appState ]
                 , span [ class "flex-grow-1 text-truncate" ] [ text (File.name file) ]
                 , span [ class "ms-2" ] [ fileIcon file ]
@@ -228,7 +229,9 @@ filesView cfg appState model files =
                 div [ class "mt-4" ]
                     [ linkTo appState
                         cfg.doneRoute
-                        [ class "btn btn-primary btn-wide" ]
+                        [ class "btn btn-primary btn-wide"
+                        , dataCy "file-import_done"
+                        ]
                         [ text (gettext "Done" appState.locale) ]
                     ]
 
