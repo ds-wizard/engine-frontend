@@ -23,7 +23,7 @@ linkTo appState route attributes children =
 guideLink : AppState -> (GuideLinks -> String) -> Html msg
 guideLink appState getLink =
     a
-        (href (GuideLinks.wrap (getLink appState.guideLinks))
+        (href (GuideLinks.wrap appState (getLink appState.guideLinks))
             :: class "guide-link"
             :: target "_blank"
             :: tooltipLeft (gettext "Learn more in guide" appState.locale)

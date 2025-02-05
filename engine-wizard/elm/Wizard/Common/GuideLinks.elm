@@ -43,6 +43,8 @@ module Wizard.Common.GuideLinks exposing
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
+import Shared.AbstractAppState exposing (AbstractAppState)
+import Shared.Api.ExternalLink as ExternalLink
 
 
 type GuideLinks
@@ -109,9 +111,9 @@ merge (GuideLinks guideLinksA) (GuideLinks guideLinksB) =
             Dict.empty
 
 
-wrap : String -> String
+wrap : AbstractAppState a -> String -> String
 wrap =
-    identity
+    ExternalLink.externalLinkUrl
 
 
 get : String -> GuideLinks -> String
