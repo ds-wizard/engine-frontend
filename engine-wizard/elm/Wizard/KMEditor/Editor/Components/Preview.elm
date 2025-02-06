@@ -115,8 +115,7 @@ generateReplies appState questionUuid knowledgeModel model =
             model.questionnaireModel
 
         ( newSeed, mbChapterUuid, questionnaireDetail ) =
-            questionnaireModel.questionnaire
-                |> QuestionnaireQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel
+            QuestionnaireQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaireModel.questionnaire
 
         activePage =
             Maybe.unwrap questionnaireModel.activePage PageChapter mbChapterUuid

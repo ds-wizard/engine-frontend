@@ -802,20 +802,88 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
         ( newSeed, mbChapterUuid, replies ) =
             foldReplies currentTime km parentMap seed questionUuid Dict.empty
 
+        cleanedReplies =
+            cleanReplies km questionnaireDetail.replies
+
         reply =
-            findReplyBySuffix questionUuid questionnaireDetail.replies
+            findReplyBySuffix questionUuid cleanedReplies
 
         newReplies =
             if Maybe.isJust reply then
-                questionnaireDetail.replies
+                cleanedReplies
 
             else
-                Dict.union replies questionnaireDetail.replies
+                Dict.union replies cleanedReplies
     in
     ( newSeed
     , mbChapterUuid
     , { questionnaireDetail | replies = newReplies }
     )
+
+
+cleanReplies : KnowledgeModel -> Dict String Reply -> Dict String Reply
+cleanReplies km replies =
+    let
+        processChapter chapterUuid =
+            KnowledgeModel.getChapterQuestions chapterUuid km
+                |> List.map (processQuestion [ chapterUuid ])
+                |> List.foldl Dict.union Dict.empty
+
+        processQuestion path question =
+            let
+                questionPathKey =
+                    pathToString (path ++ [ Question.getUuid question ])
+            in
+            case question of
+                OptionsQuestion _ _ ->
+                    case Dict.get questionPathKey replies of
+                        Just reply ->
+                            case reply.value of
+                                AnswerReply answerUuid ->
+                                    case KnowledgeModel.getAnswer answerUuid km of
+                                        Just answer ->
+                                            KnowledgeModel.getAnswerFollowupQuestions answerUuid km
+                                                |> List.map (processQuestion (path ++ [ answer.uuid ]))
+                                                |> List.foldl Dict.union Dict.empty
+                                                |> Dict.insert questionPathKey reply
+
+                                        Nothing ->
+                                            Dict.empty
+
+                                _ ->
+                                    Dict.empty
+
+                        _ ->
+                            Dict.empty
+
+                ListQuestion commonData _ ->
+                    case Dict.get questionPathKey replies of
+                        Just reply ->
+                            case reply.value of
+                                ItemListReply itemUuids ->
+                                    let
+                                        processItem itemUuid =
+                                            KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid km
+                                                |> List.map (processQuestion (path ++ [ commonData.uuid, itemUuid ]))
+                                                |> List.foldl Dict.union Dict.empty
+                                    in
+                                    List.map processItem itemUuids
+                                        |> List.foldl Dict.union Dict.empty
+                                        |> Dict.insert questionPathKey reply
+
+                                _ ->
+                                    Dict.empty
+
+                        _ ->
+                            Dict.empty
+
+                _ ->
+                    Dict.get questionPathKey replies
+                        |> Maybe.unwrap Dict.empty (Dict.singleton questionPathKey)
+    in
+    KnowledgeModel.getChapters km
+        |> List.map (processChapter << .uuid)
+        |> List.foldl Dict.union Dict.empty
 
 
 findReplyBySuffix : String -> Dict String Reply -> Maybe ( String, Reply )
