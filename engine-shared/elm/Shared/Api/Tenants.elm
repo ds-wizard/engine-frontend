@@ -29,6 +29,7 @@ getTenants filters qs =
         extraParams =
             PaginationQueryString.filterParams
                 [ ( "enabled", PaginationQueryFilters.getValue "enabled" filters )
+                , ( "states", PaginationQueryFilters.getValue "states" filters )
                 ]
 
         queryString =

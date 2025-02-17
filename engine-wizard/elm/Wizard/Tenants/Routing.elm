@@ -13,7 +13,7 @@ import Url.Parser.Query as Query
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
-import Wizard.Tenants.Routes exposing (Route(..), indexRouteEnabledFilterId)
+import Wizard.Tenants.Routes exposing (Route(..), indexRouteEnabledFilterId, indexRouteStatesFilterId)
 
 
 moduleRoot : String
@@ -24,10 +24,10 @@ moduleRoot =
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     let
-        wrappedIndexRoute pqs q =
-            wrapRoute <| IndexRoute pqs q
+        wrappedIndexRoute pqs enabled states =
+            wrapRoute <| IndexRoute pqs enabled states
     in
-    [ map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "createdAt,desc")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteEnabledFilterId))
+    [ map (PaginationQueryString.wrapRoute2 wrappedIndexRoute (Just "createdAt,desc")) (PaginationQueryString.parser2 (s moduleRoot) (Query.string indexRouteEnabledFilterId) (Query.string indexRouteStatesFilterId))
     , map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
     , map (wrapRoute << DetailRoute) (s moduleRoot </> uuid)
     ]
@@ -36,10 +36,14 @@ parsers wrapRoute =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        IndexRoute paginationQueryString mbEnabled ->
+        IndexRoute paginationQueryString mbEnabled mbStates ->
             let
                 params =
-                    Dict.toList <| dictFromMaybeList [ ( indexRouteEnabledFilterId, mbEnabled ) ]
+                    Dict.toList <|
+                        dictFromMaybeList
+                            [ ( indexRouteEnabledFilterId, mbEnabled )
+                            , ( indexRouteStatesFilterId, mbStates )
+                            ]
             in
             [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]
 

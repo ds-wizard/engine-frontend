@@ -13,7 +13,7 @@ import Wizard.Tenants.Routes exposing (Route(..))
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        IndexRoute _ _ ->
+        IndexRoute _ _ _ ->
             Html.map IndexMsg <|
                 Wizard.Tenants.Index.View.view appState model.indexModel
 

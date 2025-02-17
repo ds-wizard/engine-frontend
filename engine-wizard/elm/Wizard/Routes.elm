@@ -871,7 +871,7 @@ tenantsDetail =
 
 tenantsIndex : Route
 tenantsIndex =
-    TenantsRoute (Wizard.Tenants.Routes.IndexRoute PaginationQueryString.empty Nothing)
+    TenantsRoute (Wizard.Tenants.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing)
 
 
 tenantsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
@@ -879,13 +879,14 @@ tenantsIndexWithFilters filters pagination =
     TenantsRoute
         (Wizard.Tenants.Routes.IndexRoute pagination
             (PaginationQueryFilters.getValue Wizard.Tenants.Routes.indexRouteEnabledFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Tenants.Routes.indexRouteStatesFilterId filters)
         )
 
 
 isTenantIndex : Route -> Bool
 isTenantIndex route =
     case route of
-        TenantsRoute (Wizard.Tenants.Routes.IndexRoute _ _) ->
+        TenantsRoute (Wizard.Tenants.Routes.IndexRoute _ _ _) ->
             True
 
         _ ->

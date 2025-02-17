@@ -16,7 +16,7 @@ import Wizard.Tenants.Routes exposing (Route(..))
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        IndexRoute _ _ ->
+        IndexRoute _ _ _ ->
             Cmd.map IndexMsg <|
                 Wizard.Tenants.Index.Update.fetchData
 
