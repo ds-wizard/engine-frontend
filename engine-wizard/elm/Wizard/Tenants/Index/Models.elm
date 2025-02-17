@@ -7,7 +7,7 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.Tenant exposing (Tenant)
 import Wizard.Common.Components.Listing.Models as Listing
-import Wizard.Tenants.Routes exposing (indexRouteEnabledFilterId)
+import Wizard.Tenants.Routes exposing (indexRouteEnabledFilterId, indexRouteStatesFilterId)
 
 
 type alias Model =
@@ -15,11 +15,14 @@ type alias Model =
     }
 
 
-initialModel : PaginationQueryString -> Maybe String -> Model
-initialModel paginationQueryString mbEnabled =
+initialModel : PaginationQueryString -> Maybe String -> Maybe String -> Model
+initialModel paginationQueryString mbEnabled mbStates =
     let
         paginationQueryFilters =
-            PaginationQueryFilters.fromValues [ ( indexRouteEnabledFilterId, mbEnabled ) ]
+            PaginationQueryFilters.fromValues
+                [ ( indexRouteEnabledFilterId, mbEnabled )
+                , ( indexRouteStatesFilterId, mbStates )
+                ]
     in
     { tenants = Listing.initialModelWithFilters paginationQueryString paginationQueryFilters
     }

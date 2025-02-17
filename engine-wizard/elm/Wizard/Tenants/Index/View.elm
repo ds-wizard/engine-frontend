@@ -7,6 +7,7 @@ import Html.Extra as Html
 import Shared.Components.Badge as Badge
 import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Tenant exposing (Tenant)
+import Shared.Data.TenantState as TenantState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
@@ -19,7 +20,7 @@ import Wizard.Common.View.TenantIcon as TenantIcon
 import Wizard.Routes as Routes
 import Wizard.Tenants.Index.Models exposing (Model)
 import Wizard.Tenants.Index.Msgs exposing (Msg(..))
-import Wizard.Tenants.Routes exposing (indexRouteEnabledFilterId)
+import Wizard.Tenants.Routes exposing (indexRouteEnabledFilterId, indexRouteStatesFilterId)
 
 
 view : AppState -> Model -> Html Msg
@@ -50,9 +51,16 @@ listingConfig appState =
                     , ( "false", gettext "Disabled only" appState.locale )
                     ]
                 }
+
+        stateFilter =
+            Listing.SimpleMultiFilter indexRouteStatesFilterId
+                { name = gettext "State" appState.locale
+                , options = TenantState.filterOptions appState
+                , maxVisibleValues = 1
+                }
     in
     { title = listingTitle appState
-    , description = listingDescription
+    , description = listingDescription appState
     , itemAdditionalData = always Nothing
     , dropdownItems = always []
     , textTitle = .name
@@ -73,6 +81,7 @@ listingConfig appState =
         ]
     , filters =
         [ enabledFilter
+        , stateFilter
         ]
     , toRoute = Routes.tenantsIndexWithFilters
     , toolbarExtra = Just (createButton appState)
@@ -95,14 +104,24 @@ listingTitle appState app =
         ]
 
 
-listingDescription : Tenant -> Html Msg
-listingDescription app =
+listingDescription : AppState -> Tenant -> Html Msg
+listingDescription appState tenant =
     let
         visibleUrl =
-            String.replace "https://" "" app.clientUrl
+            String.replace "https://" "" tenant.clientUrl
+
+        tenantState =
+            if tenant.state /= TenantState.ReadyForUse then
+                span [ class "fragment" ]
+                    [ span [ class "badge text-bg-light" ] [ text (TenantState.toReadableString appState tenant.state) ]
+                    ]
+
+            else
+                Html.nothing
     in
     span []
-        [ a [ href app.clientUrl, target "_blank" ] [ text visibleUrl ]
+        [ a [ href tenant.clientUrl, target "_blank", class "fragment" ] [ text visibleUrl ]
+        , tenantState
         ]
 
 
