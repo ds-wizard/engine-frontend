@@ -228,9 +228,7 @@ window.onload = function () {
 
         axios.all(promises)
             .then(function (results) {
-                if (results[0].data.type === 'NotSeededClientConfig') {
-                    showMessageAndRetry(notSeededHTML)
-                } else if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
+                if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
                     showMessageAndRetry(housekeepingHTML)
                 } else {
                     const config = results[0].data
@@ -240,12 +238,17 @@ window.onload = function () {
                 }
             })
             .catch(function (err) {
-                const errorCode = err.response ? err.response.status : null
-                if (Math.floor(errorCode / 100) === 4 && session !== null) {
-                    localStorage.removeItem(sessionKey)
-                    window.location.reload()
+                const response = err.response
+                if (response?.data?.error?.code === 'error.validation.not_seeded_tenant') {
+                    showMessageAndRetry(notSeededHTML)
                 } else {
-                    document.body.innerHTML = bootstrapErrorHTML(errorCode)
+                    const errorCode = response ? err.response.status : null
+                    if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                        localStorage.removeItem(sessionKey)
+                        window.location.reload()
+                    } else {
+                        document.body.innerHTML = bootstrapErrorHTML(errorCode)
+                    }
                 }
             })
     }
