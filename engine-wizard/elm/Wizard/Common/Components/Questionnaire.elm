@@ -2446,12 +2446,20 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
 
 viewCommentsResolvedSelect : AppState -> Model -> Html Msg
 viewCommentsResolvedSelect appState model =
-    div [ class "form-check" ]
-        [ label [ class "form-check-label form-check-toggle" ]
-            [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
-            , span [] [ text (gettext "View resolved comments" appState.locale) ]
+    let
+        questionnaireComments =
+            QuestionnaireQuestionnaire.getComments model.questionnaire
+
+        anyResolvedComments =
+            List.any ((<) 0 << .resolvedComments) questionnaireComments
+    in
+    Html.viewIf anyResolvedComments <|
+        div [ class "form-check" ]
+            [ label [ class "form-check-label form-check-toggle" ]
+                [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
+                , span [] [ text (gettext "View resolved comments" appState.locale) ]
+                ]
             ]
-        ]
 
 
 
