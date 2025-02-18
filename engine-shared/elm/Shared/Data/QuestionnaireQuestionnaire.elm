@@ -835,7 +835,7 @@ cleanReplies km replies =
                     pathToString (path ++ [ Question.getUuid question ])
             in
             case question of
-                OptionsQuestion _ _ ->
+                OptionsQuestion commonData _ ->
                     case Dict.get questionPathKey replies of
                         Just reply ->
                             case reply.value of
@@ -843,7 +843,7 @@ cleanReplies km replies =
                                     case KnowledgeModel.getAnswer answerUuid km of
                                         Just answer ->
                                             KnowledgeModel.getAnswerFollowupQuestions answerUuid km
-                                                |> List.map (processQuestion (path ++ [ answer.uuid ]))
+                                                |> List.map (processQuestion (path ++ [ commonData.uuid, answer.uuid ]))
                                                 |> List.foldl Dict.union Dict.empty
                                                 |> Dict.insert questionPathKey reply
 
