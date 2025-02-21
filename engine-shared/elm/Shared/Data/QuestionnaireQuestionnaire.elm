@@ -805,8 +805,16 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
         cleanedReplies =
             cleanReplies km questionnaireDetail.replies
 
+        mbParentQuestionUuid =
+            KnowledgeModel.getParentQuestionUuid parentMap km questionUuid
+
         reply =
-            findReplyBySuffix questionUuid cleanedReplies
+            case mbParentQuestionUuid of
+                Just parentQuestionUuid ->
+                    findReplyBySuffix parentQuestionUuid cleanedReplies
+
+                Nothing ->
+                    Nothing
 
         newReplies =
             if Maybe.isJust reply then
