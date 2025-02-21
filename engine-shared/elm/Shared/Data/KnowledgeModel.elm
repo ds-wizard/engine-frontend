@@ -25,7 +25,6 @@ module Shared.Data.KnowledgeModel exposing
     , getMetricName
     , getMetrics
     , getParent
-    , getParentQuestionUuid
     , getPhase
     , getPhaseName
     , getPhases
@@ -648,32 +647,6 @@ createParentMap km =
 getParent : ParentMap -> String -> String
 getParent parentMap uuid =
     Maybe.withDefault nilUuid <| Dict.get uuid parentMap
-
-
-getParentQuestionUuid : ParentMap -> KnowledgeModel -> String -> Maybe String
-getParentQuestionUuid parentMap km questionUuid =
-    let
-        mbParentUuid =
-            Dict.get questionUuid parentMap
-    in
-    case mbParentUuid of
-        Just parentUuid ->
-            case
-                ( getQuestion parentUuid km
-                , getAnswer parentUuid km
-                )
-            of
-                ( Just question, Nothing ) ->
-                    Just <| Question.getUuid question
-
-                ( Nothing, Just answer ) ->
-                    Dict.get answer.uuid parentMap
-
-                _ ->
-                    Nothing
-
-        Nothing ->
-            Nothing
 
 
 filterWithTags : List String -> KnowledgeModel -> KnowledgeModel

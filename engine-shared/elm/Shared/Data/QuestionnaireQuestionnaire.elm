@@ -805,23 +805,8 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
         cleanedReplies =
             cleanReplies km questionnaireDetail.replies
 
-        mbParentQuestionUuid =
-            KnowledgeModel.getParentQuestionUuid parentMap km questionUuid
-
-        reply =
-            case mbParentQuestionUuid of
-                Just parentQuestionUuid ->
-                    findReplyBySuffix parentQuestionUuid cleanedReplies
-
-                Nothing ->
-                    Nothing
-
         newReplies =
-            if Maybe.isJust reply then
-                cleanedReplies
-
-            else
-                Dict.union replies cleanedReplies
+            Dict.union replies cleanedReplies
     in
     ( newSeed
     , mbChapterUuid
@@ -892,11 +877,6 @@ cleanReplies km replies =
     KnowledgeModel.getChapters km
         |> List.map (processChapter << .uuid)
         |> List.foldl Dict.union Dict.empty
-
-
-findReplyBySuffix : String -> Dict String Reply -> Maybe ( String, Reply )
-findReplyBySuffix suffix replies =
-    Dict.find (\key _ -> String.endsWith suffix key) replies
 
 
 foldReplies : Time.Posix -> KnowledgeModel -> KnowledgeModel.ParentMap -> Seed -> String -> Dict String Reply -> ( Seed, Maybe String, Dict String Reply )
