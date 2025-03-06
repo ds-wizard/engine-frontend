@@ -119,6 +119,13 @@ function housekeepingHTML() {
     return messageHTML(title, message)
 }
 
+function notSeededHTML() {
+    const title = '<i class="fa fas fa-spinner fa-spin me-2 text-lighter"></i>Preparing your application...'
+    const message = 'We\'re setting things up and will be done shortly.'
+    return messageHTML(title, message)
+
+}
+
 function messageHTML(title, message) {
     return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '</p></div></div>'
 }
@@ -196,6 +203,17 @@ window.onload = function () {
 
     let retryTime = defaultRetryTime
 
+    function showMessageAndRetry(getMessage) {
+        if (retryTime <= defaultRetryTime) {
+            document.body.innerHTML = getMessage()
+        }
+
+        setTimeout(() => {
+            retryTime = Math.min(maxRetryTime, retryTime + 1)
+            load()
+        }, retryTime * 1000)
+    }
+
     function load() {
         const promises = [
             axios.get(configUrl(apiUrl), headers),
@@ -211,14 +229,7 @@ window.onload = function () {
         axios.all(promises)
             .then(function (results) {
                 if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
-                    if (retryTime <= defaultRetryTime) {
-                        document.body.innerHTML = housekeepingHTML()
-                    }
-
-                    setTimeout(() => {
-                        retryTime = Math.min(maxRetryTime, retryTime + 1)
-                        load()
-                    }, retryTime * 1000)
+                    showMessageAndRetry(housekeepingHTML)
                 } else {
                     const config = results[0].data
                     const locale = results[1].data
@@ -227,12 +238,17 @@ window.onload = function () {
                 }
             })
             .catch(function (err) {
-                const errorCode = err.response ? err.response.status : null
-                if (Math.floor(errorCode / 100) === 4 && session !== null) {
-                    localStorage.removeItem(sessionKey)
-                    window.location.reload()
+                const response = err.response
+                if (response?.data?.error?.code === 'error.validation.not_seeded_tenant') {
+                    showMessageAndRetry(notSeededHTML)
                 } else {
-                    document.body.innerHTML = bootstrapErrorHTML(errorCode)
+                    const errorCode = response ? err.response.status : null
+                    if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                        localStorage.removeItem(sessionKey)
+                        window.location.reload()
+                    } else {
+                        document.body.innerHTML = bootstrapErrorHTML(errorCode)
+                    }
                 }
             })
     }

@@ -6,6 +6,7 @@ module Shared.Data.Tenant exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
+import Shared.Data.TenantState as TenantState exposing (TenantState)
 import Time
 import Uuid exposing (Uuid)
 
@@ -17,6 +18,7 @@ type alias Tenant =
     , enabled : Bool
     , logoUrl : Maybe String
     , primaryColor : Maybe String
+    , state : TenantState
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
     , clientUrl : String
@@ -32,6 +34,7 @@ decoder =
         |> D.required "enabled" D.bool
         |> D.required "logoUrl" (D.maybe D.string)
         |> D.required "primaryColor" (D.maybe D.string)
+        |> D.required "state" TenantState.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "updatedAt" D.datetime
         |> D.required "clientUrl" D.string

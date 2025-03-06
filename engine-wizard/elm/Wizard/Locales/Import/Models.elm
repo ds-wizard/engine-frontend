@@ -2,12 +2,12 @@ module Wizard.Locales.Import.Models exposing (ImportModel(..), Model, initialMod
 
 import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Locales.Import.FileImport.Models as FileImportModels
+import Wizard.Common.FileImport as FileImport
 import Wizard.Locales.Import.RegistryImport.Models as RegistryImportModels
 
 
 type ImportModel
-    = FileImportModel FileImportModels.Model
+    = FileImportModel FileImport.Model
     | RegistryImportModel RegistryImportModels.Model
 
 
@@ -22,4 +22,4 @@ initialModel appState packageId =
             { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }
 
         _ ->
-            { importModel = FileImportModel <| FileImportModels.initialModel }
+            { importModel = FileImportModel <| FileImport.initialModel }

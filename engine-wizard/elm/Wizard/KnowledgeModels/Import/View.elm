@@ -1,5 +1,7 @@
 module Wizard.KnowledgeModels.Import.View exposing (view)
 
+import File exposing (File)
+import File.Extra as File
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
@@ -8,14 +10,15 @@ import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (listInsertIf)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.FileImport as FileImport
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.Page as Page
-import Wizard.KnowledgeModels.Import.FileImport.View as FileImportView
 import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model, isFileImportModel, isOwlImportModel, isRegistryImportModel)
 import Wizard.KnowledgeModels.Import.Msgs exposing (Msg(..))
 import Wizard.KnowledgeModels.Import.OwlImport.View as OwlImportView
 import Wizard.KnowledgeModels.Import.RegistryImport.View as RegistryImportView
+import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -63,7 +66,11 @@ view appState model =
             case model.importModel of
                 FileImportModel fileImportModel ->
                     Html.map FileImportMsg <|
-                        FileImportView.view appState fileImportModel
+                        FileImport.view appState
+                            { validate = Just (validateKmFile appState)
+                            , doneRoute = Routes.knowledgeModelsIndex
+                            }
+                            fileImportModel
 
                 RegistryImportModel registryImportModel ->
                     Html.map RegistryImportMsg <|
@@ -105,3 +112,16 @@ viewNavbarItem title icon isActive msg dataCyValue =
 viewNavbar : List (Html Msg) -> Html Msg
 viewNavbar items =
     ul [ class "nav nav-tabs" ] items
+
+
+validateKmFile : AppState -> File -> Maybe String
+validateKmFile appState file =
+    let
+        ext =
+            File.ext file
+    in
+    if ext == Just "km" || ext == Just "json" then
+        Nothing
+
+    else
+        Just (gettext "This doesn't look like a knowledge model. Are you sure you picked the correct file?" appState.locale)

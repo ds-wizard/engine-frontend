@@ -1,11 +1,11 @@
 module Wizard.Locales.Import.Msgs exposing (Msg(..))
 
-import Wizard.Locales.Import.FileImport.Msgs as FileImportMsgs
+import Wizard.Common.FileImport as FileImport
 import Wizard.Locales.Import.RegistryImport.Msgs as RegistryImportMsgs
 
 
 type Msg
-    = FileImportMsg FileImportMsgs.Msg
+    = FileImportMsg FileImport.Msg
     | RegistryImportMsg RegistryImportMsgs.Msg
     | ShowRegistryImport
     | ShowFileImport

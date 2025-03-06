@@ -44,7 +44,7 @@ select {
 .form-actions {
     display: flex;
     justify-content: space-between;
-    margin-top: 30px;
+    margin-top: $spacer-4;
     margin-bottom: 50px;
 
     .btn {

@@ -698,7 +698,7 @@ viewProfileMenu model =
                         Routes.usersEditCurrent
                         [ dataCy "menu_profile" ]
                         [ faSetFw "menu.profile" model.appState
-                        , text (gettext "Edit profile" model.appState.locale)
+                        , text (gettext "User settings" model.appState.locale)
                         ]
                     ]
                 , li []

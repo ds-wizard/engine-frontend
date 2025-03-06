@@ -2,17 +2,18 @@
 @import '../mixins';
 
 .dropzone {
+    @include transition(border-color 0.1s ease-in);
+    @include border-radius($border-radius);
     height: 300px;
     margin: auto;
     border: 10px dashed $gray-200;
-    @include transition(border-color 0.1s ease-in);
     display: flex;
     justify-content: center;
     align-items: center;
     flex-direction: column;
 
     &.active {
-        border: 10px dashed var(--bs-primary);
+        border-color: var(--bs-primary);
     }
 
     p {

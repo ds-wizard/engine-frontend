@@ -11,7 +11,7 @@ locale =
         , ( "__routing.documents", "project-documents" )
         , ( "__routing.documents.index.questionnaireUuid", "questionnaireUuid" )
         , ( "__routing.documentTemplateEditors", "document-template-editors" )
-        , ( "__routing.kmEditor", "km-editor" )
+        , ( "__routing.kmEditor", "knowledge-model-editors" )
         , ( "__routing.kmEditor.create", "create" )
         , ( "__routing.kmEditor.create.selected", "selected" )
         , ( "__routing.kmEditor.create.edit", "edit" )

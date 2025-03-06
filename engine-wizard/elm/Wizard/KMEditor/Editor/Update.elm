@@ -73,23 +73,9 @@ fetchSubrouteData appState model =
                 ]
 
         KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
-            let
-                mbActiveQuestionUuid =
-                    ActionResult.toMaybe model.branchModel
-                        |> Maybe.map EditorBranch.getActiveQuestionUuid
-            in
-            case mbActiveQuestionUuid of
-                Just activeQuestionUuid ->
-                    let
-                        scrollIntoView path =
-                            Ports.scrollIntoView ("[data-path=\"" ++ path ++ "\"]")
-                    in
-                    -- TODO: There might be replies that are no longer accessible but there is no cleaning of replies in preview values now, so we just try to scroll them all
-                    model.previewModel.questionnaireModel.questionnaire.replies
-                        |> Dict.filter (\key _ -> String.endsWith activeQuestionUuid key)
-                        |> Dict.toList
-                        |> List.map (scrollIntoView << Tuple.first)
-                        |> Cmd.batch
+            case model.branchModel of
+                Success branchModel ->
+                    Ports.scrollIntoView ("#question-" ++ EditorBranch.getActiveQuestionUuid branchModel)
 
                 _ ->
                     Cmd.none

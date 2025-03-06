@@ -23,7 +23,7 @@ initialModel : Model
 initialModel =
     { createModel = Wizard.Tenants.Create.Models.initialModel
     , detailModel = Wizard.Tenants.Detail.Models.initialModel Uuid.nil
-    , indexModel = Wizard.Tenants.Index.Models.initialModel PaginationQueryString.empty Nothing
+    , indexModel = Wizard.Tenants.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing
     }
 
 
@@ -36,5 +36,5 @@ initLocalModel route model =
         DetailRoute uuid ->
             { model | detailModel = Wizard.Tenants.Detail.Models.initialModel uuid }
 
-        IndexRoute paginationQueryString mbEnabled ->
-            { model | indexModel = Wizard.Tenants.Index.Models.initialModel paginationQueryString mbEnabled }
+        IndexRoute paginationQueryString mbEnabled mbStates ->
+            { model | indexModel = Wizard.Tenants.Index.Models.initialModel paginationQueryString mbEnabled mbStates }

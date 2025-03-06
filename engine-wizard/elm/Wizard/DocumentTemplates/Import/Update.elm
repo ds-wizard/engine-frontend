@@ -1,8 +1,8 @@
 module Wizard.DocumentTemplates.Import.Update exposing (update)
 
+import Shared.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.DocumentTemplates.Import.FileImport.Models as FileImportModels
-import Wizard.DocumentTemplates.Import.FileImport.Update as FileImportUpdate
+import Wizard.Common.FileImport as FileImport
 import Wizard.DocumentTemplates.Import.Models exposing (ImportModel(..), Model)
 import Wizard.DocumentTemplates.Import.Msgs exposing (Msg(..))
 import Wizard.DocumentTemplates.Import.RegistryImport.Models as RegistryImportModels
@@ -16,7 +16,14 @@ update msg wrapMsg appState model =
         ( FileImportMsg fileImportMsg, FileImportModel fileImportModel ) ->
             let
                 ( newFileImportModel, fileImportCmd ) =
-                    FileImportUpdate.update fileImportMsg (wrapMsg << FileImportMsg) appState fileImportModel
+                    FileImport.update
+                        { mimes = [ ".zip" ]
+                        , upload = DocumentTemplatesApi.importTemplate
+                        , wrapMsg = wrapMsg << FileImportMsg
+                        }
+                        appState
+                        fileImportMsg
+                        fileImportModel
             in
             ( { model | importModel = FileImportModel newFileImportModel }
             , fileImportCmd
@@ -37,7 +44,7 @@ update msg wrapMsg appState model =
             )
 
         ( ShowFileImport, _ ) ->
-            ( { model | importModel = FileImportModel FileImportModels.initialModel }
+            ( { model | importModel = FileImportModel FileImport.initialModel }
             , Cmd.none
             )
 

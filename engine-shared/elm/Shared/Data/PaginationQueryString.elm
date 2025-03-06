@@ -6,6 +6,7 @@ module Shared.Data.PaginationQueryString exposing
     , fromQ
     , parser
     , parser1
+    , parser2
     , parser7
     , resetPage
     , setPage
@@ -17,6 +18,7 @@ module Shared.Data.PaginationQueryString exposing
     , withSort
     , wrapRoute
     , wrapRoute1
+    , wrapRoute2
     , wrapRoute7
     )
 
@@ -93,6 +95,15 @@ wrapRoute1 route defaultSortBy page q sort =
     route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
 
 
+wrapRoute2 : (PaginationQueryString -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (c -> b -> a)
+wrapRoute2 route defaultSortBy page q sort =
+    let
+        ( sortBy, sortDirection ) =
+            parseSort defaultSortBy sort
+    in
+    route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
+
+
 wrapRoute7 : (PaginationQueryString -> h -> g -> f -> e -> d -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (h -> g -> f -> e -> d -> c -> b -> a)
 wrapRoute7 route defaultSortBy page q sort =
     let
@@ -110,6 +121,11 @@ parser p =
 parser1 : Parser a (Maybe Int -> Maybe String -> Maybe String -> c -> b) -> Query.Parser c -> Parser a b
 parser1 p qs =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs
+
+
+parser2 : Parser a (Maybe Int -> Maybe String -> Maybe String -> d -> c -> b) -> Query.Parser d -> Query.Parser c -> Parser a b
+parser2 p qs1 qs2 =
+    p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs1 <?> qs2
 
 
 parser7 :

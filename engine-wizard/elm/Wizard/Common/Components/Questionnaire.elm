@@ -49,6 +49,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
+import Registry.Components.FontAwesome exposing (fas)
 import Roman
 import Set exposing (Set)
 import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
@@ -1811,6 +1812,13 @@ viewQuestionnaireToolbar appState cfg model =
 
                     else
                         emptyNode
+
+                hiddenOptionsTooltip =
+                    if QuestionnaireViewSettings.anyHidden viewSettings then
+                        tooltipRight "Some options are hidden"
+
+                    else
+                        []
             in
             div [ class "item-group" ]
                 [ Dropdown.dropdown model.viewSettingsDropdown
@@ -1818,7 +1826,11 @@ viewQuestionnaireToolbar appState cfg model =
                     , toggleMsg = ViewSettingsDropdownMsg
                     , toggleButton =
                         Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                            [ text (gettext "View" appState.locale) ]
+                            [ div hiddenOptionsTooltip
+                                [ text (gettext "View" appState.locale)
+                                , Html.viewIf (QuestionnaireViewSettings.anyHidden viewSettings) (span [ class "ms-2 text-danger" ] [ fas "fa-circle fa-2xs" ])
+                                ]
+                            ]
                     , items =
                         [ Dropdown.anchorItem
                             [ onClick (SetViewSettings QuestionnaireViewSettings.all) ]
@@ -2434,12 +2446,20 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
 
 viewCommentsResolvedSelect : AppState -> Model -> Html Msg
 viewCommentsResolvedSelect appState model =
-    div [ class "form-check" ]
-        [ label [ class "form-check-label form-check-toggle" ]
-            [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
-            , span [] [ text (gettext "View resolved comments" appState.locale) ]
+    let
+        questionnaireComments =
+            QuestionnaireQuestionnaire.getComments model.questionnaire
+
+        anyResolvedComments =
+            List.any ((<) 0 << .resolvedComments) questionnaireComments
+    in
+    Html.viewIf anyResolvedComments <|
+        div [ class "form-check" ]
+            [ label [ class "form-check-label form-check-toggle" ]
+                [ input [ type_ "checkbox", class "form-check-input", onCheck CommentsViewResolved, checked model.commentsViewResolved ] []
+                , span [] [ text (gettext "View resolved comments" appState.locale) ]
+                ]
             ]
-        ]
 
 
 
@@ -3580,16 +3600,20 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
             else
                 emptyNode
 
-        collapseButton =
+        ( collapseAttributes, collapseIcon ) =
             if isCollapsed then
-                a [ onClick (ExpandItem itemPathString), dataCy "item-expand" ] [ faSet "questionnaire.item.expand" appState ]
+                ( [ onClick (ExpandItem itemPathString), dataCy "item-expand" ]
+                , span [ class "text-primary" ] [ faSet "questionnaire.item.expand" appState ]
+                )
 
             else
-                a [ onClick (CollapseItem itemPathString), dataCy "item-collapse" ] [ faSet "questionnaire.item.collapse" appState ]
+                ( [ onClick (CollapseItem itemPathString), dataCy "item-collapse" ]
+                , span [ class "text-primary" ] [ faSet "questionnaire.item.collapse" appState ]
+                )
 
         itemHeader =
             div [ class "item-header d-flex justify-content-between" ]
-                [ div [] [ collapseButton, itemTitle ]
+                [ div (class "flex-grow-1 me-3 cursor-pointer" :: collapseAttributes) [ collapseIcon, itemTitle ]
                 , div [] buttons
                 ]
     in
