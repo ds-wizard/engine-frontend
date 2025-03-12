@@ -81,6 +81,7 @@ module Wizard.Common.Feature exposing
 
 import Maybe.Extra as Maybe
 import Shared.Auth.Permission as Perm
+import Shared.Auth.Session as Session
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.Branch as Branch exposing (Branch)
@@ -358,7 +359,7 @@ projectCommentThreadResolve appState questionnaire commentThread =
 
 projectCommentThreadAssign : AppState -> QuestionnaireLike q -> CommentThread -> Bool
 projectCommentThreadAssign appState questionnaire commentThread =
-    QuestionnaireUtils.canComment appState questionnaire && not (CommentThread.isAssigned commentThread)
+    Session.exists appState.session && QuestionnaireUtils.canComment appState questionnaire && not (CommentThread.isAssigned commentThread)
 
 
 projectCommentThreadRemoveAssign : AppState -> QuestionnaireLike q -> CommentThread -> Bool
