@@ -46,7 +46,7 @@ update msg wrapMsg appState model =
             initQuestionnaireModel appState <|
                 applyResult appState
                     { setResult = setKnowledgeModel
-                    , defaultError = gettext "Unable to get the Knowledge Model." appState.locale
+                    , defaultError = gettext "Unable to get the knowledge model." appState.locale
                     , model = model
                     , result = result
                     , logoutMsg = Wizard.Msgs.logoutMsg
@@ -56,7 +56,7 @@ update msg wrapMsg appState model =
             initQuestionnaireModel appState <|
                 applyResult appState
                     { setResult = setPackage
-                    , defaultError = gettext "Unable to get Knowledge Models." appState.locale
+                    , defaultError = gettext "Unable to get knowledge models." appState.locale
                     , model = model
                     , result = result
                     , logoutMsg = Wizard.Msgs.logoutMsg

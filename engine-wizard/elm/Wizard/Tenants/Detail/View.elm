@@ -1,7 +1,6 @@
 module Wizard.Tenants.Detail.View exposing (view)
 
 import Form
-import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
@@ -60,13 +59,13 @@ header appState tenantDetail =
                     editAction =
                         a [ onClick EditModalOpen, dataCy "tenant-detail_edit" ]
                             [ faSet "_global.edit" appState
-                            , text (gettext "Edit" appState.locale)
+                            , text "Edit"
                             ]
 
                     editLimitsAction =
                         a [ onClick EditLimitsModalOpen, dataCy "tenant-detail_edit-limits" ]
                             [ fas "fa fa-sliders"
-                            , text (gettext "Edit limits" appState.locale)
+                            , text "Edit limits"
                             ]
                 in
                 [ editAction, editLimitsAction ]
@@ -93,7 +92,7 @@ content appState tenantDetail =
     DetailPage.content
         [ editWarning
         , div [ DetailPage.contentInnerClass ]
-            [ h3 [] [ text (gettext "Usage" appState.locale) ]
+            [ h3 [] [ text "Usage" ]
             , UsageTable.view appState True tenantDetail.usage
             ]
         ]
@@ -104,8 +103,8 @@ sidePanel appState tenantDetail =
     let
         sections =
             [ sidePanelInfo appState tenantDetail
-            , sidePanelUrls appState tenantDetail
-            , sidePanelAdmins appState tenantDetail
+            , sidePanelUrls tenantDetail
+            , sidePanelAdmins tenantDetail
             ]
     in
     DetailPage.sidePanel
@@ -117,35 +116,35 @@ sidePanelInfo appState tenantDetail =
     let
         enabledBadge =
             if tenantDetail.enabled then
-                Badge.success [] [ text (gettext "Enabled" appState.locale) ]
+                Badge.success [] [ text "Enabled" ]
 
             else
-                Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
+                Badge.danger [] [ text "Disabled" ]
 
         infoList =
-            [ ( gettext "Tenant ID" appState.locale, "tenant-id", text tenantDetail.tenantId )
-            , ( gettext "Enabled" appState.locale, "enabled", enabledBadge )
-            , ( gettext "State" appState.locale, "state", text (TenantState.toReadableString appState tenantDetail.state) )
-            , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone tenantDetail.createdAt )
-            , ( gettext "Updated at" appState.locale, "updated-at", text <| TimeUtils.toReadableDateTime appState.timeZone tenantDetail.updatedAt )
+            [ ( "Tenant ID", "tenant-id", text tenantDetail.tenantId )
+            , ( "Enabled", "enabled", enabledBadge )
+            , ( "State", "state", text (TenantState.toReadableString tenantDetail.state) )
+            , ( "Created at", "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone tenantDetail.createdAt )
+            , ( "Updated at", "updated-at", text <| TimeUtils.toReadableDateTime appState.timeZone tenantDetail.updatedAt )
             ]
     in
-    Just ( gettext "Info" appState.locale, "info", DetailPage.sidePanelList 4 8 infoList )
+    Just ( "Info", "info", DetailPage.sidePanelList 4 8 infoList )
 
 
-sidePanelUrls : AppState -> TenantDetail -> Maybe ( String, String, Html msg )
-sidePanelUrls appState tenantDetail =
+sidePanelUrls : TenantDetail -> Maybe ( String, String, Html msg )
+sidePanelUrls tenantDetail =
     let
         urlsList =
-            [ ( gettext "Client URL" appState.locale, "client-url", a [ href tenantDetail.clientUrl, target "_blank" ] [ text tenantDetail.clientUrl ] )
-            , ( gettext "Server URL" appState.locale, "server-url", a [ href tenantDetail.serverUrl, target "_blank" ] [ text tenantDetail.serverUrl ] )
+            [ ( "Client URL", "client-url", a [ href tenantDetail.clientUrl, target "_blank" ] [ text tenantDetail.clientUrl ] )
+            , ( "Server URL", "server-url", a [ href tenantDetail.serverUrl, target "_blank" ] [ text tenantDetail.serverUrl ] )
             ]
     in
-    Just ( gettext "URLs" appState.locale, "urls", DetailPage.sidePanelList 4 8 urlsList )
+    Just ( "URLs", "urls", DetailPage.sidePanelList 4 8 urlsList )
 
 
-sidePanelAdmins : AppState -> TenantDetail -> Maybe ( String, String, Html msg )
-sidePanelAdmins appState tenantDetail =
+sidePanelAdmins : TenantDetail -> Maybe ( String, String, Html msg )
+sidePanelAdmins tenantDetail =
     let
         users =
             tenantDetail.users
@@ -153,7 +152,7 @@ sidePanelAdmins appState tenantDetail =
                 |> List.sortWith User.compare
                 |> List.map viewUser
     in
-    Just ( gettext "Admins" appState.locale, "admins", div [] users )
+    Just ( "Admins", "admins", div [] users )
 
 
 viewUser : User -> Html msg
@@ -169,19 +168,19 @@ viewEditModal appState model =
         modalContent =
             case model.editForm of
                 Just form ->
-                    [ Html.map EditModalFormMsg <| FormGroup.input appState form "tenantId" <| gettext "Tenant ID" appState.locale
-                    , Html.map EditModalFormMsg <| FormGroup.input appState form "name" <| gettext "Name" appState.locale
+                    [ Html.map EditModalFormMsg <| FormGroup.input appState form "tenantId" "Tenant ID"
+                    , Html.map EditModalFormMsg <| FormGroup.input appState form "name" "Name"
                     ]
 
                 Nothing ->
                     []
 
         config =
-            Modal.confirmConfig (gettext "Edit app" appState.locale)
+            Modal.confirmConfig "Edit app"
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible (Maybe.isJust model.editForm)
                 |> Modal.confirmConfigActionResult model.savingTenant
-                |> Modal.confirmConfigAction (gettext "Save" appState.locale) (EditModalFormMsg Form.Submit)
+                |> Modal.confirmConfigAction "Save" (EditModalFormMsg Form.Submit)
                 |> Modal.confirmConfigCancelMsg EditModalClose
                 |> Modal.confirmConfigDataCy "tenant-edit"
     in
@@ -194,27 +193,27 @@ viewEditLimitsModal appState model =
         modalContent =
             case model.limitsForm of
                 Just form ->
-                    [ Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "users" <| gettext "Users" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "activeUsers" <| gettext "Active Users" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "branches" <| gettext "Knowledge Model Editors" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "knowledgeModels" <| gettext "Knowledge Models" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documentTemplateDrafts" <| gettext "Document Template Editors" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documentTemplates" <| gettext "Document Templates" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "questionnaires" <| gettext "Projects" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documents" <| gettext "Documents" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "locales" <| gettext "Locales" appState.locale
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.fileSize appState form "storage" <| gettext "Storage" appState.locale
+                    [ Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "users" "Users"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "activeUsers" "Active Users"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "branches" "Knowledge Model Editors"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "knowledgeModels" "Knowledge Models"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documentTemplateDrafts" "Document Template Editors"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documentTemplates" "Document Templates"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "questionnaires" "Projects"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "documents" "Documents"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState form "locales" "Locales"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.fileSize appState form "storage" "Storage"
                     ]
 
                 Nothing ->
                     []
 
         config =
-            Modal.confirmConfig (gettext "Edit limits" appState.locale)
+            Modal.confirmConfig "Edit limits"
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible (Maybe.isJust model.limitsForm)
                 |> Modal.confirmConfigActionResult model.savingTenant
-                |> Modal.confirmConfigAction (gettext "Save" appState.locale) (EditLimitsModalFormMsg Form.Submit)
+                |> Modal.confirmConfigAction "Save" (EditLimitsModalFormMsg Form.Submit)
                 |> Modal.confirmConfigCancelMsg EditLimitsModalClose
                 |> Modal.confirmConfigDataCy "tenant-edit-limits"
     in

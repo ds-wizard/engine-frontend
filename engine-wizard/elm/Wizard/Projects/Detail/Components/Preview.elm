@@ -227,7 +227,7 @@ viewTemplateUnsupported appState questionnaire =
                 ]
 
             else
-                [ p [] [ text (gettext "Ask the Project owner to update the default document template." appState.locale) ]
+                [ p [] [ text (gettext "Ask the project owner to update the default document template." appState.locale) ]
                 ]
     in
     Page.illustratedMessageHtml

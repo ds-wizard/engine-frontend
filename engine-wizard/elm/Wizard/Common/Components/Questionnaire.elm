@@ -2129,7 +2129,7 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
                     [ text selectedPhaseTitle ]
         in
         div [ class "questionnaire__left-panel__phase" ]
-            [ label [] [ text (gettext "Current Phase" appState.locale) ]
+            [ label [] [ text (gettext "Current phase" appState.locale) ]
             , phaseButton
             ]
 
@@ -3132,12 +3132,12 @@ viewPrevAndNextChapterLinks appState chapters currentChapter =
 
         viewPrevChapterLink =
             viewChapterLink "chapter-link-prev"
-                (gettext "Previous Chapter" appState.locale)
+                (gettext "Previous chapter" appState.locale)
                 (faSet "_global.chevronLeft" appState)
 
         viewNextChapterLink =
             viewChapterLink "chapter-link-next"
-                (gettext "Next Chapter" appState.locale)
+                (gettext "Next chapter" appState.locale)
                 (faSet "_global.chevronRight" appState)
 
         prevChapterLink =
@@ -3571,7 +3571,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                 (class "btn-link me-2"
                                     :: onClick (MoveItemUp (pathToString path) uuid)
                                     :: dataCy "item-move-up"
-                                    :: tooltip (gettext "Move Up" appState.locale)
+                                    :: tooltip (gettext "Move up" appState.locale)
                                 )
                                 [ faSet "questionnaire.item.moveUp" appState ]
 
@@ -3584,7 +3584,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                 (class "btn-link me-2"
                                     :: onClick (MoveItemDown (pathToString path) uuid)
                                     :: dataCy "item-move-down"
-                                    :: tooltip (gettext "Move Down" appState.locale)
+                                    :: tooltip (gettext "Move down" appState.locale)
                                 )
                                 [ faSet "questionnaire.item.moveDown" appState ]
                 in
@@ -4052,7 +4052,7 @@ viewQuestionFile appState cfg model path question =
                             , disabled cfg.features.readonly
                             , dataCy "file-upload"
                             ]
-                            [ text (gettext "Upload File" appState.locale) ]
+                            [ text (gettext "Upload file" appState.locale) ]
                         ]
     in
     div [] [ questionContent ]
@@ -4317,7 +4317,7 @@ viewRemoveItemModal appState model =
             ]
 
         cfg =
-            Modal.confirmConfig (gettext "Remove Item" appState.locale)
+            Modal.confirmConfig (gettext "Remove item" appState.locale)
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible (Maybe.isJust model.removeItem)
                 |> Modal.confirmConfigAction (gettext "Remove" appState.locale) RemoveItemConfirm
@@ -4349,7 +4349,7 @@ viewFileDeleteModal appState model =
                 [ strong [ class "text-break" ] [ text fileName ] ]
 
         cfg =
-            Modal.confirmConfig (gettext "Delete File" appState.locale)
+            Modal.confirmConfig (gettext "Delete file" appState.locale)
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible (Maybe.isJust model.deleteFile)
                 |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteFileConfirm

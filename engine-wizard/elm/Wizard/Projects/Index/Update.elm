@@ -257,7 +257,7 @@ update wrapMsg msg appState model =
         PackagesFilterSearchComplete result ->
             applyResult appState
                 { setResult = \r m -> { m | packagesFilterPackages = r }
-                , defaultError = gettext "Unable to get Knowledge Models." appState.locale
+                , defaultError = gettext "Unable to get knowledge models." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg

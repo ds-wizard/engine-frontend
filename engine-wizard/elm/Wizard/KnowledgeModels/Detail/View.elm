@@ -94,7 +94,7 @@ readme appState package =
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
-                    [ text (gettext "This is not the latest available version of this Knowledge Model." appState.locale) ]
+                    [ text (gettext "This is not the latest available version of this knowledge model." appState.locale) ]
 
             else
                 newVersionInRegistryWarning appState package

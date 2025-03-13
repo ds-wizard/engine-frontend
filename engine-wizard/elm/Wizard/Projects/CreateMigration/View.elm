@@ -75,11 +75,11 @@ createMigrationView appState model questionnaire =
                             always (Flash.loader appState)
 
                 Nothing ->
-                    FormGroup.textView "km" <| gettext "Select Knowledge Model first" appState.locale
+                    FormGroup.textView "km" <| gettext "Select knowledge model first" appState.locale
     in
     div [ listClass "Questionnaires__CreateMigration" ]
         [ Page.headerWithGuideLink appState (gettext "Create Migration" appState.locale) GuideLinks.projectsMigration
-        , Flash.info appState <| gettext "A new Project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
+        , Flash.info appState <| gettext "A new project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
         , FormResult.view appState model.savingMigration
         , FormGroup.textView "project" questionnaire.name <| gettext "Project" appState.locale
         , div [ class "form" ]

@@ -116,13 +116,13 @@ messageToReadable appState message =
     case message.code of
         -- Shared
         "error.validation.km_id_uniqueness" ->
-            Just <| gettext "Knowledge Model ID is already used." appState.locale
+            Just <| gettext "Knowledge model ID is already used." appState.locale
 
         "error.validation.pkg_id_uniqueness" ->
-            Just <| gettext "Knowledge Model already exists." appState.locale
+            Just <| gettext "Knowledge model already exists." appState.locale
 
         "error.validation.pkg_unsupported_metamodel_version" ->
-            Just <| gettext "Knowledge Model metamodel version is not supported." appState.locale
+            Just <| gettext "Knowledge model metamodel version is not supported." appState.locale
 
         "error.validation.tml_id_uniqueness" ->
             Just <| gettext "Document template already exists." appState.locale
@@ -175,7 +175,7 @@ messageToReadable appState message =
             Just <| gettext "File with this name already exists." appState.locale
 
         "error.validation.openid_code_absence" ->
-            Just <| gettext "Authentication Code is not provided." appState.locale
+            Just <| gettext "Authentication code is not provided." appState.locale
 
         "error.validation.openid_profile_info_absence" ->
             Just <| gettext "Profile Information from OpenID service is missing." appState.locale
@@ -195,7 +195,7 @@ messageToReadable appState message =
                     in
                     Just <|
                         String.format
-                            (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale)
+                            (gettext "Limit of %s reached (current: %s, limit: %s)." appState.locale)
                             [ gettext "storage" appState.locale, parseBytes current, parseBytes limit ]
 
                 what :: current :: limit :: [] ->
@@ -232,10 +232,10 @@ messageToReadable appState message =
                                 _ ->
                                     what
                     in
-                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) [ whatTranslated, current, limit ]
+                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)." appState.locale) [ whatTranslated, current, limit ]
 
                 _ ->
-                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)" appState.locale) message.params
+                    Just <| String.format (gettext "Limit of %s reached (current: %s, limit: %s)." appState.locale) message.params
 
         "error.service.lb.missing_locale_json" ->
             Just <| gettext "\"locale.json\" was not found in archive." appState.locale
@@ -247,13 +247,13 @@ messageToReadable appState message =
             Just <| String.format (gettext "File \"%s\" was not found in archive." appState.locale) message.params
 
         "error.service.lb.pull_non_existing_locale" ->
-            Just <| gettext "The locale not found in Registry" appState.locale
+            Just <| gettext "The locale not found in Registry." appState.locale
 
         "error.service.pkg.pkg_cant_be_deleted_because_it_is_used_by_some_other_entity" ->
-            Just <| gettext "Knowledge Model cannot be deleted because it is used in some Projects or Knowledge Model Editors." appState.locale
+            Just <| gettext "Knowledge model cannot be deleted because it is used in some projects or knowledge model editors." appState.locale
 
         "error.service.pb.pull_non_existing_pkg" ->
-            Just <| gettext "The Knowledge Model was not found in the Registry." appState.locale
+            Just <| gettext "The knowledge model was not found in the Registry." appState.locale
 
         "error.service.qtn.qtn_cant_be_deleted_because_it_is_used_in_migration" ->
             Just <| gettext "Project cannot be deleted because it is used in some project migration." appState.locale
@@ -262,10 +262,10 @@ messageToReadable appState message =
             Just <| gettext "The document template was not found in the Registry." appState.locale
 
         "error.service.token.incorrect_email_or_password" ->
-            Just <| gettext "Incorrect email or password" appState.locale
+            Just <| gettext "Incorrect email or password." appState.locale
 
         "error.service.token.incorrect_code" ->
-            Just <| gettext "Incorrect authentication code" appState.locale
+            Just <| gettext "Incorrect authentication code." appState.locale
 
         "error.service.token.account_is_not_activated" ->
             Just <| gettext "The account is not activated." appState.locale

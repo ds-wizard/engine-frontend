@@ -73,12 +73,12 @@ formView appState form branch =
         , Html.map FormMsg <| FormGroup.input appState form "license" <| gettext "License" appState.locale
         , FormExtra.blockAfter <|
             String.formatHtml
-                (gettext "Choose a %s so others can use your Knowledge Model." appState.locale)
+                (gettext "Choose a %s so others can use your knowledge model." appState.locale)
                 [ a [ href "https://spdx.org/licenses/", target "_blank" ]
                     [ text (gettext "license" appState.locale) ]
                 ]
         , Html.map FormMsg <| FormGroup.input appState form "description" <| gettext "Description" appState.locale
-        , FormExtra.textAfter <| gettext "Short description of the Knowledge Model." appState.locale
+        , FormExtra.textAfter <| gettext "Short description of the knowledge model." appState.locale
         , Html.map FormMsg <| FormGroup.markdownEditor appState form "readme" <| gettext "Readme" appState.locale
         ]
 

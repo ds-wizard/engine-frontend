@@ -155,7 +155,7 @@ getEventView appState model migration event =
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff appState eventData
-                |> viewEvent appState model event (gettext "Edit Knowledge Model" appState.locale)
+                |> viewEvent appState model event (gettext "Edit knowledge model" appState.locale)
 
         AddMetricEvent eventData _ ->
             viewAddMetricDiff appState eventData

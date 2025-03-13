@@ -236,7 +236,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = Success knowledgeModel }
 
                 Err error ->
-                    { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the Knowledge Model." appState.locale) error }
+                    { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the knowledge model." appState.locale) error }
 
         cmd =
             getResultCmd Wizard.Msgs.logoutMsg result
@@ -250,7 +250,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
         cfg =
             { wrapMsg = wrapMsg << PackageTypeHintInputMsg
             , getTypeHints = PackagesApi.getPackagesSuggestions Nothing
-            , getError = gettext "Unable to get Knowledge Models." appState.locale
+            , getError = gettext "Unable to get knowledge models." appState.locale
             , setReply = wrapMsg << SelectPackage
             , clearReply = Nothing
             , filterResults = Nothing

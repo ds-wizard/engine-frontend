@@ -51,7 +51,7 @@ update msg wrapMsg appState model =
                     )
 
                 Err error ->
-                    ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge Model could not be updated." appState.locale) error }
+                    ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be updated." appState.locale) error }
                     , getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
@@ -84,7 +84,7 @@ deletePackageCompleted wrapMsg appState model result =
             )
 
         Err error ->
-            ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
+            ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be deleted." appState.locale) error }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
 

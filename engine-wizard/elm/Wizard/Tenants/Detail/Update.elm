@@ -5,7 +5,6 @@ module Wizard.Tenants.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
-import Gettext exposing (gettext)
 import Shared.Api.Tenants as TenantsApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
@@ -33,7 +32,7 @@ update msg wrapMsg appState model =
         GetTenantComplete result ->
             applyResult appState
                 { setResult = setTenant
-                , defaultError = gettext "Unable to get tenant." appState.locale
+                , defaultError = "Unable to get tenant."
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
@@ -99,7 +98,7 @@ handlePutAppComplete appState model result =
 
         Err error ->
             ( { model
-                | savingTenant = ApiError.toActionResult appState (gettext "Tenant could not be saved." appState.locale) error
+                | savingTenant = ApiError.toActionResult appState "Tenant could not be saved." error
                 , editForm = Maybe.map (setFormErrors appState error) model.editForm
               }
             , getResultCmd Wizard.Msgs.logoutMsg result
@@ -141,7 +140,7 @@ handlePutAppLimitsComplete appState model result =
 
         Err error ->
             ( { model
-                | savingTenant = ApiError.toActionResult appState (gettext "Tenant limits could not be saved." appState.locale) error
+                | savingTenant = ApiError.toActionResult appState "Tenant limits could not be saved." error
                 , limitsForm = Maybe.map (setFormErrors appState error) model.limitsForm
               }
             , getResultCmd Wizard.Msgs.logoutMsg result

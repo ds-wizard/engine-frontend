@@ -82,7 +82,7 @@ menuItems appState =
         , isVisible = always True
         }
     , MenuItem
-        { title = gettext "Tenants" appState.locale
+        { title = "Tenants"
         , icon = faSetFw "menu.tenants" appState
         , id = "tenants"
         , route = Routes.tenantsIndex
@@ -182,20 +182,20 @@ menuItems appState =
             ]
         }
     , MenuGroup
-        { title = gettext "Dev" appState.locale
+        { title = "Dev"
         , icon = faSetFw "menu.dev" appState
         , id = "dev"
         , route = Routes.devOperations
         , isActive = Routes.isDevSubroute
         , isVisible = Feature.dev
         , items =
-            [ { title = gettext "Operations" appState.locale
+            [ { title = "Operations"
               , id = "dev-operations"
               , route = Routes.devOperations
               , isActive = Routes.isDevOperations
               , isVisible = always True
               }
-            , { title = gettext "Persistent Commands" appState.locale
+            , { title = "Persistent Commands"
               , id = "dev-persistent-commands"
               , route = Routes.persistentCommandsIndex
               , isActive = Routes.isPersistentCommandsIndex

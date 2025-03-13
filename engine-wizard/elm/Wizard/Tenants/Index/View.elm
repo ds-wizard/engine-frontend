@@ -1,6 +1,5 @@
 module Wizard.Tenants.Index.View exposing (view)
 
-import Gettext exposing (gettext)
 import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
@@ -34,7 +33,7 @@ view appState model =
                     ]
     in
     div [ listClass "Tenants__Index" ]
-        [ Page.header (gettext "Tenants" appState.locale) []
+        [ Page.header "Tenants" []
         , editWarning
         , Listing.view appState (listingConfig appState) model.tenants
         ]
@@ -45,26 +44,26 @@ listingConfig appState =
     let
         enabledFilter =
             Listing.SimpleFilter indexRouteEnabledFilterId
-                { name = gettext "Enabled" appState.locale
+                { name = "Enabled"
                 , options =
-                    [ ( "true", gettext "Enabled only" appState.locale )
-                    , ( "false", gettext "Disabled only" appState.locale )
+                    [ ( "true", "Enabled only" )
+                    , ( "false", "Disabled only" )
                     ]
                 }
 
         stateFilter =
             Listing.SimpleMultiFilter indexRouteStatesFilterId
-                { name = gettext "State" appState.locale
-                , options = TenantState.filterOptions appState
+                { name = "State"
+                , options = TenantState.filterOptions
                 , maxVisibleValues = 1
                 }
     in
     { title = listingTitle appState
-    , description = listingDescription appState
+    , description = listingDescription
     , itemAdditionalData = always Nothing
     , dropdownItems = always []
     , textTitle = .name
-    , emptyText = gettext "Click \"Create\" button to add a new tenant." appState.locale
+    , emptyText = "Click \"Create\" button to add a new tenant."
     , updated =
         Just
             { getTime = .updatedAt
@@ -72,12 +71,12 @@ listingConfig appState =
             }
     , wrapMsg = ListingMsg
     , iconView = Just TenantIcon.view
-    , searchPlaceholderText = Just (gettext "Search tenants..." appState.locale)
+    , searchPlaceholderText = Just "Search tenants..."
     , sortOptions =
-        [ ( "name", gettext "Name" appState.locale )
-        , ( "tenantId", gettext "Tenant ID" appState.locale )
-        , ( "createdAt", gettext "Created at" appState.locale )
-        , ( "updatedAt", gettext "Updated at" appState.locale )
+        [ ( "name", "Name" )
+        , ( "tenantId", "Tenant ID" )
+        , ( "createdAt", "Created at" )
+        , ( "updatedAt", "Updated at" )
         ]
     , filters =
         [ enabledFilter
@@ -93,7 +92,7 @@ listingTitle appState app =
     let
         disabledBadge =
             if not app.enabled then
-                Badge.danger [] [ text (gettext "Disabled" appState.locale) ]
+                Badge.danger [] [ text "Disabled" ]
 
             else
                 emptyNode
@@ -104,8 +103,8 @@ listingTitle appState app =
         ]
 
 
-listingDescription : AppState -> Tenant -> Html Msg
-listingDescription appState tenant =
+listingDescription : Tenant -> Html Msg
+listingDescription tenant =
     let
         visibleUrl =
             String.replace "https://" "" tenant.clientUrl
@@ -113,7 +112,7 @@ listingDescription appState tenant =
         tenantState =
             if tenant.state /= TenantState.ReadyForUse then
                 span [ class "fragment" ]
-                    [ span [ class "badge text-bg-light" ] [ text (TenantState.toReadableString appState tenant.state) ]
+                    [ span [ class "badge text-bg-light" ] [ text (TenantState.toReadableString tenant.state) ]
                     ]
 
             else
@@ -131,4 +130,4 @@ createButton appState =
         Routes.tenantsCreate
         [ class "btn btn-primary"
         ]
-        [ text (gettext "Create" appState.locale) ]
+        [ text "Create" ]

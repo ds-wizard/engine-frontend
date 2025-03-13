@@ -120,7 +120,7 @@ update cfg appState msg model =
                     )
 
                 Err error ->
-                    ( { model | savingBranch = ApiError.toActionResult appState (gettext "Knowledge Model could not be saved." appState.locale) error }
+                    ( { model | savingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be saved." appState.locale) error }
                     , Cmd.none
                     )
 

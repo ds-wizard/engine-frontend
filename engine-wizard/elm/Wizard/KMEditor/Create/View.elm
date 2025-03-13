@@ -37,7 +37,7 @@ view appState model =
 viewCreate : AppState -> Model -> a -> Html Msg
 viewCreate appState model _ =
     div [ detailClass "KMEditor__Create" ]
-        [ Page.headerWithGuideLink appState (gettext "Create Knowledge Model" appState.locale) GuideLinks.kmEditorCreate
+        [ Page.headerWithGuideLink appState (gettext "Create knowledge model" appState.locale) GuideLinks.kmEditorCreate
         , Html.form [ onSubmit (FormMsg Form.Submit) ]
             [ FormResult.errorOnlyView appState model.savingBranch
             , formView appState model
@@ -92,8 +92,8 @@ formView appState model =
     div []
         [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
         , Html.map FormMsg <| FormGroup.input appState model.form "kmId" <| gettext "Knowledge Model ID" appState.locale
-        , FormExtra.textAfter <| gettext "Knowledge Model ID can contain alphanumeric characters and dashes but cannot start or end with a dash." appState.locale
+        , FormExtra.textAfter <| gettext "Knowledge model ID can contain alphanumeric characters and dashes but cannot start or end with a dash." appState.locale
         , FormGroup.version appState versionInputConfig model.form
         , parentInput <| gettext "Based on" appState.locale
-        , FormExtra.textAfter <| gettext "You can create a new Knowledge Model based on the existing one or start from scratch." appState.locale
+        , FormExtra.textAfter <| gettext "You can create a new knowledge model based on the existing one or start from scratch." appState.locale
         ]
