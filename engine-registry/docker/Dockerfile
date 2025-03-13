@@ -1,4 +1,4 @@
-FROM nginx:1.27.0-alpine
+FROM nginx:1.27.4-alpine
 
 RUN apk --purge del curl
 RUN apk upgrade --no-cache
