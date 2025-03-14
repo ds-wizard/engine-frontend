@@ -18,6 +18,7 @@ import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
 import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Shared.Error.ApiError as ApiError exposing (ApiError)
@@ -39,6 +40,8 @@ import Wizard.Common.View.Page as Page
 
 type alias Model =
     { questionnaireModel : ActionResult Questionnaire.Model
+    , questionnaireContent : ActionResult QuestionnaireContent
+    , questionnaireQuestionnaire : ActionResult QuestionnaireQuestionnaire
     , eventUuid : Maybe Uuid
     }
 
@@ -46,14 +49,23 @@ type alias Model =
 initEmpty : Model
 initEmpty =
     { questionnaireModel = Unset
+    , questionnaireContent = Unset
+    , questionnaireQuestionnaire = Unset
     , eventUuid = Nothing
     }
 
 
 init : AppState -> Uuid -> Uuid -> ( Model, Cmd Msg )
 init appState questionnaireUuid eventUuid =
-    ( { questionnaireModel = Loading, eventUuid = Just eventUuid }
-    , QuestionnairesApi.fetchPreview questionnaireUuid eventUuid appState FetchPreviewComplete
+    ( { questionnaireModel = Loading
+      , questionnaireContent = Loading
+      , questionnaireQuestionnaire = Loading
+      , eventUuid = Just eventUuid
+      }
+    , Cmd.batch
+        [ QuestionnairesApi.fetchPreview questionnaireUuid eventUuid appState FetchPreviewComplete
+        , QuestionnairesApi.getQuestionnaireQuestionnaire questionnaireUuid appState GetQuestionnaireComplete
+        ]
     )
 
 
@@ -63,34 +75,58 @@ init appState questionnaireUuid eventUuid =
 
 type Msg
     = FetchPreviewComplete (Result ApiError QuestionnaireContent)
+    | GetQuestionnaireComplete (Result ApiError (QuestionnaireDetailWrapper QuestionnaireQuestionnaire))
     | QuestionnaireMsg Questionnaire.Msg
     | Close
 
 
-update : Msg -> QuestionnaireQuestionnaire -> AppState -> Model -> ( Model, Cmd Msg )
-update msg questionnaire appState model =
-    case msg of
-        FetchPreviewComplete result ->
-            case ( result, model.questionnaireModel ) of
-                ( Ok content, Loading ) ->
+update : AppState -> Msg -> Model -> ( Model, Cmd Msg )
+update appState msg model =
+    let
+        initQuestionnaireModel ( m, cmd ) =
+            let
+                actionResult =
+                    ActionResult.combine m.questionnaireContent m.questionnaireQuestionnaire
+            in
+            case actionResult of
+                Success ( content, questionnaire ) ->
                     let
                         questionnaireModel =
                             QuestionnaireQuestionnaire.updateContent questionnaire content
-                                |> (\q ->
-                                        Questionnaire.initSimple appState q
-                                            |> Tuple.first
-                                            |> Success
-                                   )
+                                |> Questionnaire.initSimple appState
+                                |> Tuple.first
+                                |> Success
                     in
-                    ( { model | questionnaireModel = questionnaireModel }, Cmd.none )
+                    ( { m | questionnaireModel = questionnaireModel }, cmd )
 
-                ( Err error, Loading ) ->
-                    ( { model | questionnaireModel = ApiError.toActionResult appState "Unable to fetch questionnaire." error }
-                    , Cmd.none
-                    )
+                Error e ->
+                    ( { m | questionnaireModel = Error e }, cmd )
 
                 _ ->
-                    ( model, Cmd.none )
+                    ( m, cmd )
+    in
+    case msg of
+        FetchPreviewComplete result ->
+            initQuestionnaireModel <|
+                case result of
+                    Ok content ->
+                        ( { model | questionnaireContent = Success content }, Cmd.none )
+
+                    Err error ->
+                        ( { model | questionnaireContent = ApiError.toActionResult appState "Unable to fetch questionnaire." error }
+                        , Cmd.none
+                        )
+
+        GetQuestionnaireComplete result ->
+            initQuestionnaireModel <|
+                case result of
+                    Ok questionnaire ->
+                        ( { model | questionnaireQuestionnaire = Success questionnaire.data }, Cmd.none )
+
+                    Err error ->
+                        ( { model | questionnaireQuestionnaire = ApiError.toActionResult appState "Unable to fetch questionnaire." error }
+                        , Cmd.none
+                        )
 
         QuestionnaireMsg questionnaireMsg ->
             let
@@ -108,7 +144,14 @@ update msg questionnaire appState model =
             )
 
         Close ->
-            ( { model | questionnaireModel = Unset, eventUuid = Nothing }, Cmd.none )
+            ( { model
+                | questionnaireModel = Unset
+                , questionnaireContent = Unset
+                , questionnaireQuestionnaire = Unset
+                , eventUuid = Nothing
+              }
+            , Cmd.none
+            )
 
 
 
