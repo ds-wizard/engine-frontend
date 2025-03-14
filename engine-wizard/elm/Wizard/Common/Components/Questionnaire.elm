@@ -2249,16 +2249,16 @@ viewQuestionnaireRightPanel appState cfg model =
             emptyNode
 
         RightPanel.TODOs ->
-            wrapPanel <|
-                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelTodos appState model ]
+            Html.viewIf (Feature.projectTodos appState model.questionnaire) <|
+                wrapPanel [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelTodos appState model ]
 
         RightPanel.CommentsOverview ->
-            wrapPanel <|
-                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelCommentsOverview appState model ]
+            Html.viewIf (Feature.projectCommentAdd appState model.questionnaire) <|
+                wrapPanel [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelCommentsOverview appState model ]
 
         RightPanel.Comments path ->
-            wrapPanel <|
-                [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelComments appState model path ]
+            Html.viewIf (Feature.projectCommentAdd appState model.questionnaire) <|
+                wrapPanel [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelComments appState model path ]
 
         RightPanel.VersionHistory ->
             let
@@ -2276,11 +2276,12 @@ viewQuestionnaireRightPanel appState cfg model =
                 versionsAndEvents =
                     ActionResult.combine model.questionnaireVersions model.questionnaireEvents
             in
-            wrapPanel <|
-                [ History.view appState historyCfg model.historyModel versionsAndEvents
-                , Html.map (cfg.wrapMsg << VersionModalMsg) <| VersionModal.view appState model.versionModalModel
-                , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
-                ]
+            Html.viewIf (Feature.projectVersionHistory appState model.questionnaire) <|
+                wrapPanel
+                    [ History.view appState historyCfg model.historyModel versionsAndEvents
+                    , Html.map (cfg.wrapMsg << VersionModalMsg) <| VersionModal.view appState model.versionModalModel
+                    , Html.map (cfg.wrapMsg << DeleteVersionModalMsg) <| DeleteVersionModal.view appState model.deleteVersionModalModel
+                    ]
 
         RightPanel.Warnings ->
             if QuestionnaireQuestionnaire.warningsLength model.questionnaire > 0 then
