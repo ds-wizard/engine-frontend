@@ -38,7 +38,7 @@ import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
-import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value)
+import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value, wrap)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
@@ -367,7 +367,7 @@ resizableTextarea appState form fieldName =
                 |> Maybe.withDefault 3
 
         attributes =
-            [ rows lines, class "resizable-textarea" ] ++ grammarlyAttributes
+            [ rows lines, wrap "off" ] ++ grammarlyAttributes
     in
     formGroup Input.textArea attributes appState form fieldName
 
