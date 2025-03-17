@@ -32,6 +32,7 @@ import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.FormActions as FormActions
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
@@ -51,18 +52,18 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { form = BranchEditForm.initEmpty
+initialModel : AppState -> Model
+initialModel appState =
+    { form = BranchEditForm.initEmpty appState
     , savingBranch = ActionResult.Unset
     , deleteModal = DeleteModal.initialModel
     , upgradeModal = UpgradeModal.initialModel
     }
 
 
-setBranchDetail : BranchDetail -> Model -> Model
-setBranchDetail branch model =
-    { model | form = BranchEditForm.init branch }
+setBranchDetail : AppState -> BranchDetail -> Model -> Model
+setBranchDetail appState branch model =
+    { model | form = BranchEditForm.init appState branch }
 
 
 type Msg
@@ -97,12 +98,12 @@ update cfg appState msg model =
                     ( { model | savingBranch = ActionResult.Loading }, cmd )
 
                 _ ->
-                    ( { model | form = Form.update BranchEditForm.validation formMsg model.form }, Cmd.none )
+                    ( { model | form = Form.update (BranchEditForm.validation appState) formMsg model.form }, Cmd.none )
 
         FormSetVersion version ->
             let
                 setFormValue field value =
-                    Form.update BranchEditForm.validation (Form.Input field Form.Text (Field.String value))
+                    Form.update (BranchEditForm.validation appState) (Form.Input field Form.Text (Field.String value))
 
                 form =
                     model.form
@@ -187,6 +188,7 @@ view appState branchDetail model =
                 , Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)
                 , Html.map FormMsg <| FormGroup.input appState model.form "description" (gettext "Description" appState.locale)
                 , Html.map FormMsg <| FormGroup.input appState model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
+                , FormExtra.textAfter <| gettext "Knowledge model ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
                 , FormGroup.version appState versionInputConfig model.form
                 , Html.map FormMsg <| FormGroup.input appState model.form "license" <| gettext "License" appState.locale
                 , Html.map FormMsg <| FormGroup.markdownEditor appState model.form "readme" <| gettext "Readme" appState.locale

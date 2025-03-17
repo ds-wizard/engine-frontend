@@ -5,6 +5,7 @@ import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
+import Registry.Data.AppState exposing (AppState)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 
@@ -18,15 +19,15 @@ type alias SignupForm =
     }
 
 
-init : Form FormError SignupForm
-init =
-    Form.initial [] validation
+init : AppState -> Form FormError SignupForm
+init appState =
+    Form.initial [] (validation appState)
 
 
-validation : Validation FormError SignupForm
-validation =
+validation : AppState -> Validation FormError SignupForm
+validation appState =
     V.succeed SignupForm
-        |> V.andMap (V.field "organizationId" V.organizationId)
+        |> V.andMap (V.field "organizationId" (V.organizationId appState))
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "email" V.email)
         |> V.andMap (V.field "description" V.string)

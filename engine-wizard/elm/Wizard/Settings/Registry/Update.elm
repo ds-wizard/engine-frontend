@@ -74,7 +74,7 @@ handleForm : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Mode
 handleForm wrapMsg formMsg appState model =
     let
         registrySignupForm =
-            Form.update RegistrySignupForm.validation formMsg model.registrySignupForm
+            Form.update (RegistrySignupForm.validation appState) formMsg model.registrySignupForm
     in
     case ( formMsg, Form.getOutput model.registrySignupForm ) of
         ( Form.Submit, Just form ) ->

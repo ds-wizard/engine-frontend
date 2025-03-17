@@ -7,6 +7,8 @@ module Wizard.Locales.Common.LocaleCreateForm exposing
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
 import Shared.Form.FormError exposing (FormError)
+import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias LocaleCreateFrom =
@@ -25,18 +27,18 @@ type alias LocaleCreateFrom =
     }
 
 
-init : Form FormError LocaleCreateFrom
-init =
-    Form.initial [] validation
+init : AppState -> Form FormError LocaleCreateFrom
+init appState =
+    Form.initial [] (validation appState)
 
 
-validation : Validation FormError LocaleCreateFrom
-validation =
+validation : AppState -> Validation FormError LocaleCreateFrom
+validation appState =
     V.succeed LocaleCreateFrom
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.string)
         |> V.andMap (V.field "code" V.string)
-        |> V.andMap (V.field "localeId" V.string)
+        |> V.andMap (V.field "localeId" (V.localeId appState))
         |> V.andMap (V.field "localeMajor" (V.int |> V.andThen (V.minInt 0)))
         |> V.andMap (V.field "localeMinor" (V.int |> V.andThen (V.minInt 0)))
         |> V.andMap (V.field "localePatch" (V.int |> V.andThen (V.minInt 0)))

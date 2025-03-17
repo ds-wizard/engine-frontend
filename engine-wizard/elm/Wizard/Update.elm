@@ -177,7 +177,7 @@ update msg model =
                 else
                     let
                         newModel =
-                            initLocalModel modelWithRoute
+                            initLocalModel model.appState modelWithRoute
                     in
                     ( newModel, Cmd.batch [ onUnload nextRoute model, fetchData newModel ] )
 

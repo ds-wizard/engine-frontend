@@ -107,7 +107,7 @@ init flags url key =
                 , locales = Locales.initialModel
                 , localesDetail = LocalesDetail.initialModel
                 , login = Login.initialModel
-                , signup = Signup.initialModel
+                , signup = Signup.initialModel appState
                 , signupConfirmation = SignupConfirmation.initialModel
                 , forgottenToken = ForgottenToken.initialModel
                 , forgottenTokenConfirmation = ForgottenTokenConfirmation.initialModel
@@ -444,7 +444,7 @@ initPage model =
                 pages =
                     model.pages
             in
-            ( { model | pages = { pages | signup = Signup.initialModel } }
+            ( { model | pages = { pages | signup = Signup.initialModel model.appState } }
             , Cmd.none
             )
 

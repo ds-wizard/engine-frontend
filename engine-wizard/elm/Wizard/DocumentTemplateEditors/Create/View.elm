@@ -88,7 +88,7 @@ formView appState model =
     div []
         [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
         , Html.map FormMsg <| FormGroup.input appState model.form "templateId" <| gettext "Document Template ID" appState.locale
-        , FormExtra.textAfter <| gettext "Document template ID can contain alphanumeric characters and dashes but cannot start or end with a dash." appState.locale
+        , FormExtra.textAfter <| gettext "Document template ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
         , FormGroup.version appState versionInputConfig model.form
         , parentInput <| gettext "Based on" appState.locale
         , FormExtra.textAfter <| gettext "You can create a new document template based on the existing one or start from scratch." appState.locale

@@ -7,6 +7,7 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm exposing (RegistrySignupForm)
 import Wizard.Settings.Generic.Model as GenericModel
 
@@ -19,10 +20,10 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : AppState -> Model
+initialModel appState =
     { genericModel = GenericModel.initialModel EditableRegistryConfig.initEmptyForm
     , registrySignupOpen = False
     , registrySigningUp = Unset
-    , registrySignupForm = RegistrySignupForm.initEmpty
+    , registrySignupForm = RegistrySignupForm.initEmpty appState
     }

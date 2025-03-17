@@ -1,8 +1,10 @@
 module Shared.Form.Validate exposing
     ( confirmation
     , dict
+    , documentTemplateId
     , ifElse
     , kmId
+    , localeId
     , maybeString
     , optionalInt
     , optionalString
@@ -121,14 +123,24 @@ uuid =
         |> V.map Uuid.fromUuidString
 
 
-organizationId : Validation FormError String
-organizationId =
-    regex RegexPatterns.organizationId "Organization ID can only contain alphanumeric characters and dots. It must start and end with an alphanumeric character."
+organizationId : { a | locale : Gettext.Locale } -> Validation FormError String
+organizationId appState =
+    regex RegexPatterns.organizationId (gettext "Fill in a valid organization ID." appState.locale)
 
 
-kmId : Validation FormError String
-kmId =
-    regex RegexPatterns.kmId "Knowledge Model ID can only contain alphanumeric characters and hyphens. It must start and end with an alphanumeric character."
+kmId : { a | locale : Gettext.Locale } -> Validation FormError String
+kmId appState =
+    regex RegexPatterns.kmId (gettext "Fill in a valid knowledge model ID." appState.locale)
+
+
+documentTemplateId : { a | locale : Gettext.Locale } -> Validation FormError String
+documentTemplateId appState =
+    regex RegexPatterns.documentTemplateId (gettext "Fill in a valid document template ID." appState.locale)
+
+
+localeId : { a | locale : Gettext.Locale } -> Validation FormError String
+localeId appState =
+    regex RegexPatterns.localeId (gettext "Fill in a valid locale ID." appState.locale)
 
 
 projectTag : { a | locale : Gettext.Locale } -> Validation FormError String

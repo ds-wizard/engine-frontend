@@ -49,7 +49,7 @@ update msg wrapMsg appState model =
             handleFormMsg wrapMsg formMsg appState model
 
         FormSetVersion version ->
-            handleFormSetVersion version model
+            handleFormSetVersion appState version model
 
         PostDocumentTemplateDraftCompleted result ->
             handlePostDocumentTemplateDraftCompleted appState model result
@@ -66,11 +66,11 @@ update msg wrapMsg appState model =
 
                         form =
                             model.form
-                                |> setDocumentTemplateEditorCreateFormValue "name" documentTemplate.name
-                                |> setDocumentTemplateEditorCreateFormValue "templateId" documentTemplate.templateId
-                                |> setDocumentTemplateEditorCreateFormValue "versionMajor" (String.fromInt (Version.getMajor nextVersion))
-                                |> setDocumentTemplateEditorCreateFormValue "versionMinor" (String.fromInt (Version.getMinor nextVersion))
-                                |> setDocumentTemplateEditorCreateFormValue "versionPatch" (String.fromInt (Version.getPatch nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue appState "name" documentTemplate.name
+                                |> setDocumentTemplateEditorCreateFormValue appState "templateId" documentTemplate.templateId
+                                |> setDocumentTemplateEditorCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor nextVersion))
+                                |> setDocumentTemplateEditorCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch nextVersion))
                     in
                     ( { model | documentTemplate = ActionResult.Success documentTemplate, form = form }, Cmd.none )
 
@@ -95,7 +95,7 @@ handleFormMsg wrapMsg formMsg appState model =
         _ ->
             let
                 newForm =
-                    Form.update DocumentTemplateEditorCreateForm.validation formMsg model.form
+                    Form.update (DocumentTemplateEditorCreateForm.validation appState) formMsg model.form
 
                 templateIdEmpty =
                     Maybe.unwrap True String.isEmpty (Form.getFieldAsString "templateId" model.form).value
@@ -108,7 +108,7 @@ handleFormMsg wrapMsg formMsg appState model =
                                     (Form.getFieldAsString "name" model.form).value
                                         |> Maybe.unwrap "" Normalize.slug
                             in
-                            setDocumentTemplateEditorCreateFormValue "templateId" suggestedTemplateId newForm
+                            setDocumentTemplateEditorCreateFormValue appState "templateId" suggestedTemplateId newForm
 
                         _ ->
                             newForm
@@ -116,14 +116,14 @@ handleFormMsg wrapMsg formMsg appState model =
             ( { model | form = formWithTemplateId }, Cmd.none )
 
 
-handleFormSetVersion : Version -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleFormSetVersion version model =
+handleFormSetVersion : AppState -> Version -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleFormSetVersion appState version model =
     let
         form =
             model.form
-                |> setDocumentTemplateEditorCreateFormValue "versionMajor" (String.fromInt (Version.getMajor version))
-                |> setDocumentTemplateEditorCreateFormValue "versionMinor" (String.fromInt (Version.getMinor version))
-                |> setDocumentTemplateEditorCreateFormValue "versionPatch" (String.fromInt (Version.getPatch version))
+                |> setDocumentTemplateEditorCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor version))
+                |> setDocumentTemplateEditorCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor version))
+                |> setDocumentTemplateEditorCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch version))
     in
     ( { model | form = form }, Cmd.none )
 
@@ -166,6 +166,6 @@ handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     ( { model | documentTemplateTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
 
-setDocumentTemplateEditorCreateFormValue : String -> String -> Form FormError DocumentTemplateEditorCreateForm -> Form FormError DocumentTemplateEditorCreateForm
-setDocumentTemplateEditorCreateFormValue field value =
-    Form.update DocumentTemplateEditorCreateForm.validation (Form.Input field Form.Text (Field.String value))
+setDocumentTemplateEditorCreateFormValue : AppState -> String -> String -> Form FormError DocumentTemplateEditorCreateForm -> Form FormError DocumentTemplateEditorCreateForm
+setDocumentTemplateEditorCreateFormValue appState field value =
+    Form.update (DocumentTemplateEditorCreateForm.validation appState) (Form.Input field Form.Text (Field.String value))

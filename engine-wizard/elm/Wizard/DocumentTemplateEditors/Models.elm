@@ -5,6 +5,7 @@ module Wizard.DocumentTemplateEditors.Models exposing
     )
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.DocumentTemplateEditors.Create.Models
 import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute
 import Wizard.DocumentTemplateEditors.Editor.Models
@@ -19,19 +20,19 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { createModel = Wizard.DocumentTemplateEditors.Create.Models.initialModel Nothing Nothing
+initialModel : AppState -> Model
+initialModel appState =
+    { createModel = Wizard.DocumentTemplateEditors.Create.Models.initialModel appState Nothing Nothing
     , indexModel = Wizard.DocumentTemplateEditors.Index.Models.initialModel PaginationQueryString.empty
-    , editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel "" DTEditorRoute.Settings
+    , editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel appState "" DTEditorRoute.Settings
     }
 
 
-initLocalModel : Route -> Model -> Model
-initLocalModel route model =
+initLocalModel : AppState -> Route -> Model -> Model
+initLocalModel appState route model =
     case route of
         CreateRoute selectedDocumentTemplate edit ->
-            { model | createModel = Wizard.DocumentTemplateEditors.Create.Models.initialModel selectedDocumentTemplate edit }
+            { model | createModel = Wizard.DocumentTemplateEditors.Create.Models.initialModel appState selectedDocumentTemplate edit }
 
         IndexRoute paginationQueryString ->
             { model | indexModel = Wizard.DocumentTemplateEditors.Index.Models.initialModel paginationQueryString }
@@ -41,4 +42,4 @@ initLocalModel route model =
                 { model | editorModel = Wizard.DocumentTemplateEditors.Editor.Models.setEditorFromRoute subroute model.editorModel }
 
             else
-                { model | editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel documentTemplateId subroute }
+                { model | editorModel = Wizard.DocumentTemplateEditors.Editor.Models.initialModel appState documentTemplateId subroute }

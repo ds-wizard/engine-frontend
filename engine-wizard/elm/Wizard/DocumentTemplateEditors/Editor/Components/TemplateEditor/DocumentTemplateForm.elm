@@ -25,6 +25,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import String exposing (fromInt)
 import Version
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias DocumentTemplateForm =
@@ -41,13 +42,13 @@ type alias DocumentTemplateForm =
     }
 
 
-initEmpty : Form FormError DocumentTemplateForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError DocumentTemplateForm
+initEmpty appState =
+    Form.initial [] (validation appState)
 
 
-init : DocumentTemplateDraftDetail -> Form FormError DocumentTemplateForm
-init draft =
+init : AppState -> DocumentTemplateDraftDetail -> Form FormError DocumentTemplateForm
+init appState draft =
     let
         initialFields =
             [ ( "name", Field.string draft.name )
@@ -62,11 +63,11 @@ init draft =
             , ( "versionPatch", Field.string (String.fromInt (Version.getPatch draft.version)) )
             ]
     in
-    Form.initial initialFields validation
+    Form.initial initialFields (validation appState)
 
 
-validation : Validation FormError DocumentTemplateForm
-validation =
+validation : AppState -> Validation FormError DocumentTemplateForm
+validation appState =
     V.succeed DocumentTemplateForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.optionalString)
@@ -74,7 +75,7 @@ validation =
         |> V.andMap (V.field "readme" V.optionalString)
         |> V.andMap (V.field "allowedPackages" (V.list AllowedPackage.validation))
         |> V.andMap (V.field "formats" (V.list DocumentTemplateFormatDraft.validation))
-        |> V.andMap (V.field "templateId" V.string)
+        |> V.andMap (V.field "templateId" (V.documentTemplateId appState))
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)
@@ -115,14 +116,14 @@ isFormatEmpty index form =
         ]
 
 
-fillFormat : Int -> DocumentTemplateFormatDraft -> Form FormError DocumentTemplateForm -> Form FormError DocumentTemplateForm
-fillFormat index format form =
+fillFormat : AppState -> Int -> DocumentTemplateFormatDraft -> Form FormError DocumentTemplateForm -> Form FormError DocumentTemplateForm
+fillFormat appState index format form =
     let
         toFormMsg field value =
             Form.Input ("formats." ++ fromInt index ++ "." ++ field) Form.Text (Field.String value)
 
         applyFormMsg formMsg =
-            Form.update validation formMsg
+            Form.update (validation appState) formMsg
 
         formatMsg =
             [ toFormMsg "name" format.name
@@ -135,7 +136,7 @@ fillFormat index format form =
         form_ =
             List.foldl applyFormMsg form (formatMsg ++ appendStepsMsgs)
     in
-    List.indexedMap (fillStep index) format.steps
+    List.indexedMap (fillStep appState index) format.steps
         |> List.foldl (\a f -> a f) form_
 
 
@@ -154,8 +155,8 @@ isStepEmpty formatIndex stepIndex form =
         ]
 
 
-fillStep : Int -> Int -> DocumentTemplateFormatStep -> Form FormError DocumentTemplateForm -> Form FormError DocumentTemplateForm
-fillStep formatIndex stepIndex step form =
+fillStep : AppState -> Int -> Int -> DocumentTemplateFormatStep -> Form FormError DocumentTemplateForm -> Form FormError DocumentTemplateForm
+fillStep appState formatIndex stepIndex step form =
     let
         toFormMsg field value =
             Form.Input ("formats." ++ fromInt formatIndex ++ ".steps." ++ fromInt stepIndex ++ "." ++ field) Form.Text (Field.String value)
@@ -167,7 +168,7 @@ fillStep formatIndex stepIndex step form =
             ]
 
         applyFormMsg formMsg =
-            Form.update validation formMsg
+            Form.update (validation appState) formMsg
 
         formMsgs =
             [ toFormMsg "name" step.name

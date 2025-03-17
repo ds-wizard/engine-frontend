@@ -34,9 +34,9 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { form = SignupForm.init
+initialModel : AppState -> Model
+initialModel appState =
+    { form = SignupForm.init appState
     , signingUp = ActionResult.Unset
     }
 
@@ -57,7 +57,7 @@ update appState msg model =
                     )
 
                 _ ->
-                    ( { model | form = Form.update SignupForm.validation formMsg model.form }
+                    ( { model | form = Form.update (SignupForm.validation appState) formMsg model.form }
                     , Cmd.none
                     )
 

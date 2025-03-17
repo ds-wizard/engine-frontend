@@ -154,7 +154,7 @@ update wrapMsg msg appState model =
                                     appState
                                     { model
                                         | branchModel = Success (EditorBranch.init appState branch model.mbEditorUuid)
-                                        , settingsModel = Settings.setBranchDetail branch model.settingsModel
+                                        , settingsModel = Settings.setBranchDetail appState branch model.settingsModel
                                     }
                         in
                         ( newSeed
