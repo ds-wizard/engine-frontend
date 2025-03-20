@@ -605,11 +605,11 @@ formView appState form =
             if appState.config.questionnaire.questionnaireVisibility.enabled then
                 let
                     visibilitySelect =
-                        if (Form.getFieldAsString "sharingPermission" form).value == Just "edit" then
-                            strong [] [ text (gettext "edit" appState.locale) ]
-
-                        else
-                            FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "visibilityPermission"
+                        let
+                            sharingPermission =
+                                (Form.getFieldAsString "sharingPermission" form).value
+                        in
+                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState sharingPermission) form "visibilityPermission"
 
                     visibilityEnabled =
                         Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
@@ -641,7 +641,7 @@ formView appState form =
                         Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
 
                     sharingSelect =
-                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState) form "sharingPermission"
+                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState Nothing) form "sharingPermission"
 
                     sharingPermissionInput =
                         div
