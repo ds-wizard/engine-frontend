@@ -168,6 +168,68 @@ messageToReadable appState message =
             Just <| gettext "A hash query param has to be provided." appState.locale
 
         -- Wizard
+        "error.database.entity_not_found" ->
+            case List.head message.params of
+                Just "branch" ->
+                    Just <| gettext "Knowledge model editor not found." appState.locale
+
+                Just "document" ->
+                    Just <| gettext "Document not found." appState.locale
+
+                Just "document_template" ->
+                    Just <| gettext "Document template not found." appState.locale
+
+                Just "document_template_draft" ->
+                    Just <| gettext "Document template draft not found." appState.locale
+
+                Just "document_template_asset" ->
+                    Just <| gettext "Document template asset not found." appState.locale
+
+                Just "document_template_file" ->
+                    Just <| gettext "Document template file not found." appState.locale
+
+                Just "knowledge_model_migration" ->
+                    Just <| gettext "Knowledge model migration not found." appState.locale
+
+                Just "locale" ->
+                    Just <| gettext "Locale not found." appState.locale
+
+                Just "package" ->
+                    Just <| gettext "Knowledge model not found." appState.locale
+
+                Just "questionnaire" ->
+                    Just <| gettext "Project not found." appState.locale
+
+                Just "questionnaire_action" ->
+                    Just <| gettext "Project action not found." appState.locale
+
+                Just "questionnaire_comment" ->
+                    Just <| gettext "Comment not found." appState.locale
+
+                Just "questionnaire_comment_thread" ->
+                    Just <| gettext "Comment thread not found." appState.locale
+
+                Just "questionnaire_file" ->
+                    Just <| gettext "Project file not found." appState.locale
+
+                Just "questionnaire_importer" ->
+                    Just <| gettext "Project importer not found." appState.locale
+
+                Just "questionnaire_migration" ->
+                    Just <| gettext "Project migration not found." appState.locale
+
+                Just "questionnaire_version" ->
+                    Just <| gettext "Project version not found." appState.locale
+
+                Just "user_entity" ->
+                    Just <| gettext "User not found." appState.locale
+
+                Just "user_group" ->
+                    Just <| gettext "User group not found." appState.locale
+
+                _ ->
+                    Just <| gettext "Not found." appState.locale
+
         "error.validation.app_id_uniqueness" ->
             Just <| gettext "App ID is already used." appState.locale
 
