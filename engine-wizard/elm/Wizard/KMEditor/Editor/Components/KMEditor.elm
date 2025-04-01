@@ -1814,7 +1814,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
          , idInput
          , FormExtra.mdAfter (gettext "A string that identifies the integration. It has to be unique for each integration." appState.locale)
          , nameInput
-         , FormExtra.mdAfter (gettext "A name visible everywhere else in the KM Editor, such as when choosing the integration for a question." appState.locale)
+         , FormExtra.mdAfter (gettext "A name visible everywhere else in the knowledge model Editor, such as when choosing the integration for a question." appState.locale)
          , logoUrlInput
          , FormExtra.mdAfter (gettext "Logo is displayed next to the link to the selected item in questionnaires. It can be either URL or base64 image." appState.locale)
          , propsInput

@@ -89,7 +89,7 @@ formView appState form =
     in
     div []
         [ formWrap <| FormGroup.toggle form "enabled" (gettext "Enabled" appState.locale)
-        , FormExtra.mdAfter (gettext "If enabled, you can import Knowledge Models and Document Templates directly from [DSW Registry](https://registry.ds-wizard.org)." appState.locale)
+        , FormExtra.mdAfter (gettext "If enabled, you can import knowledge models and document templates directly from [DSW Registry](https://registry.ds-wizard.org)." appState.locale)
         , tokenInput
         ]
 

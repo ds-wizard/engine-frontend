@@ -2,7 +2,6 @@ module Wizard.Tenants.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
-import Gettext exposing (gettext)
 import Shared.Api.Tenants as TenantsApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form exposing (setFormErrors)
@@ -60,7 +59,7 @@ postAppCompleted appState model result =
 
         Err error ->
             ( { model
-                | savingTenant = ApiError.toActionResult appState (gettext "Tenant could not be created." appState.locale) error
+                | savingTenant = ApiError.toActionResult appState "Tenant could not be created." error
                 , form = setFormErrors appState error model.form
               }
             , getResultCmd Wizard.Msgs.logoutMsg result

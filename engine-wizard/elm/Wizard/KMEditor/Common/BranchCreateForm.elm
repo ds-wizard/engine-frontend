@@ -12,6 +12,7 @@ import Json.Encode as E
 import Maybe.Extra as Maybe
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias BranchCreateForm =
@@ -24,8 +25,8 @@ type alias BranchCreateForm =
     }
 
 
-init : Maybe String -> Form FormError BranchCreateForm
-init selectedPackage =
+init : AppState -> Maybe String -> Form FormError BranchCreateForm
+init appState selectedPackage =
     let
         initials =
             case selectedPackage of
@@ -35,14 +36,14 @@ init selectedPackage =
                 _ ->
                     []
     in
-    Form.initial initials validation
+    Form.initial initials (validation appState)
 
 
-validation : Validation FormError BranchCreateForm
-validation =
+validation : AppState -> Validation FormError BranchCreateForm
+validation appState =
     V.succeed BranchCreateForm
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (V.field "kmId" V.kmId)
+        |> V.andMap (V.field "kmId" (V.kmId appState))
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)

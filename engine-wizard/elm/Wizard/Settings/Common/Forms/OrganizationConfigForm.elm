@@ -12,6 +12,7 @@ import Form.Validate as V exposing (Validation)
 import Shared.Data.BootstrapConfig.OrganizationConfig exposing (OrganizationConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias OrganizationConfigForm =
@@ -22,21 +23,21 @@ type alias OrganizationConfigForm =
     }
 
 
-initEmpty : Form FormError OrganizationConfigForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError OrganizationConfigForm
+initEmpty appState =
+    Form.initial [] (validation appState)
 
 
-init : OrganizationConfig -> Form FormError OrganizationConfigForm
-init config =
-    Form.initial (organizationConfigToFormInitials config) validation
+init : AppState -> OrganizationConfig -> Form FormError OrganizationConfigForm
+init appState config =
+    Form.initial (organizationConfigToFormInitials config) (validation appState)
 
 
-validation : Validation FormError OrganizationConfigForm
-validation =
+validation : AppState -> Validation FormError OrganizationConfigForm
+validation appState =
     V.succeed OrganizationConfigForm
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (V.field "organizationId" V.organizationId)
+        |> V.andMap (V.field "organizationId" (V.organizationId appState))
         |> V.andMap (V.field "description" V.string)
         |> V.andMap (V.field "affiliations" V.maybeString)
 

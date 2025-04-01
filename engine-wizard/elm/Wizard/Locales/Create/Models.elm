@@ -9,6 +9,7 @@ import ActionResult exposing (ActionResult)
 import File exposing (File)
 import Form exposing (Form)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Locales.Common.LocaleCreateForm as LocaleCreateFrom exposing (LocaleCreateFrom)
 
 
@@ -20,11 +21,11 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
+initialModel : AppState -> Model
+initialModel appState =
     { dnd = 0
     , file = Nothing
-    , form = LocaleCreateFrom.init
+    , form = LocaleCreateFrom.init appState
     , creatingLocale = ActionResult.Unset
     }
 

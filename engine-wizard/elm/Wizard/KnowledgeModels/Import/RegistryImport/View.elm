@@ -65,7 +65,7 @@ viewRegistryText appState =
         RegistryEnabled url ->
             p []
                 (String.formatHtml
-                    (gettext "You can find Knowledge Models in %s." appState.locale)
+                    (gettext "You can find knowledge models in %s." appState.locale)
                     [ a [ href (url ++ "/knowledge-models"), target "_blank" ]
                         [ text LookAndFeelConfig.defaultRegistryName ]
                     ]
@@ -81,7 +81,7 @@ viewImported appState packageId =
         [ h1 [] [ faSet "_global.success" appState ]
         , p [ class "lead" ]
             (String.formatHtml
-                (gettext "Knowledge Model %s has been imported!" appState.locale)
+                (gettext "Knowledge model %s has been imported!" appState.locale)
                 [ code [] [ text packageId ] ]
             )
         , p [ class "lead" ]

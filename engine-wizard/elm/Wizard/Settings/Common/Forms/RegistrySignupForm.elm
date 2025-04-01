@@ -24,9 +24,9 @@ type alias RegistrySignupForm =
     }
 
 
-initEmpty : Form FormError RegistrySignupForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError RegistrySignupForm
+initEmpty appState =
+    Form.initial [] (validation appState)
 
 
 init : AppState -> OrganizationConfig -> Form FormError RegistrySignupForm
@@ -44,13 +44,13 @@ init appState config =
             , ( "email", Field.string email )
             ]
     in
-    Form.initial initials validation
+    Form.initial initials (validation appState)
 
 
-validation : Validation FormError RegistrySignupForm
-validation =
+validation : AppState -> Validation FormError RegistrySignupForm
+validation appState =
     V.succeed RegistrySignupForm
-        |> V.andMap (V.field "organizationId" V.organizationId)
+        |> V.andMap (V.field "organizationId" (V.organizationId appState))
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.string)
         |> V.andMap (V.field "email" V.email)

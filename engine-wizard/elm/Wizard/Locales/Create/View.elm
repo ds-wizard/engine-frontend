@@ -17,6 +17,7 @@ import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
 import Wizard.Locales.Common.LocaleCreateForm exposing (LocaleCreateFrom)
@@ -48,6 +49,7 @@ view appState model =
                     , FormGroup.input appState model.form "description" <| gettext "Description" appState.locale
                     , FormGroup.input appState model.form "code" <| gettext "Language Code" appState.locale
                     , FormGroup.input appState model.form "localeId" <| gettext "Locale ID" appState.locale
+                    , FormExtra.textAfter <| gettext "Locale ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
                     , versionInputGroup { form = model.form, label = gettext "Locale Version" appState.locale, major = "localeMajor", minor = "localeMinor", patch = "localePatch" }
                     , FormGroup.input appState model.form "license" <| gettext "License" appState.locale
                     , FormGroup.markdownEditor appState model.form "readme" <| gettext "Readme" appState.locale
@@ -69,21 +71,12 @@ view appState model =
 
 fileView : AppState -> Model -> String -> Html Msg
 fileView appState model fileName =
-    let
-        cancelDisabled =
-            case model.creatingLocale of
-                ActionResult.Loading ->
-                    True
-
-                _ ->
-                    False
-    in
     div [ class "file-view rounded-3" ]
         [ div [ class "file" ]
             [ faSet "import.file" appState
             , div [ class "filename" ]
                 [ text fileName
-                , a [ disabled cancelDisabled, class "ms-1 text-danger", onClick CancelFile ]
+                , a [ disabled (ActionResult.isLoading model.creatingLocale), class "ms-1 text-danger", onClick CancelFile ]
                     [ faSet "_global.remove" appState ]
                 ]
             ]

@@ -29,7 +29,7 @@ init flags location key =
             AppState.init flags key
 
         model =
-            initLocalModel <| initialModel appState
+            initLocalModel appState <| initialModel appState
 
         cmd =
             if appState.invalidSession then

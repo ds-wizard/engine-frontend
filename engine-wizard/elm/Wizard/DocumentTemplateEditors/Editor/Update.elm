@@ -134,7 +134,7 @@ update appState wrapMsg msg model =
                     withSeed <|
                         ( { model
                             | documentTemplate = ActionResult.Success documentTemplate
-                            , settingsModel = Settings.setDocumentTemplate documentTemplate model.settingsModel
+                            , settingsModel = Settings.setDocumentTemplate appState documentTemplate model.settingsModel
                             , previewModel =
                                 model.previewModel
                                     |> Preview.setSelectedQuestionnaire documentTemplate.questionnaire
@@ -234,7 +234,7 @@ update appState wrapMsg msg model =
             withSeed
                 ( { model
                     | fileEditorModel = FileEditor.initialModel
-                    , settingsModel = Settings.initialModel
+                    , settingsModel = Settings.initialModel appState
                   }
                 , Cmd.batch
                     [ DocumentTemplateDraftsApi.getDraft model.documentTemplateId appState (wrapMsg << GetTemplateCompleted)

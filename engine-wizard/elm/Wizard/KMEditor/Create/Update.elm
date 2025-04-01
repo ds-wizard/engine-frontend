@@ -50,7 +50,7 @@ update msg wrapMsg appState model =
             handleFormMsg wrapMsg formMsg appState model
 
         FormSetVersion version ->
-            handleFormSetVersion version model
+            handleFormSetVersion appState version model
 
         PostBranchCompleted result ->
             handlePostBranchCompleted appState model result
@@ -64,8 +64,8 @@ update msg wrapMsg appState model =
                     let
                         form =
                             model.form
-                                |> setBranchCreateFormValue "name" package.name
-                                |> setBranchCreateFormValue "kmId" package.kmId
+                                |> setBranchCreateFormValue appState "name" package.name
+                                |> setBranchCreateFormValue appState "kmId" package.kmId
                     in
                     ( { model | package = Success package, form = form }, Cmd.none )
 
@@ -90,7 +90,7 @@ handleFormMsg wrapMsg formMsg appState model =
         _ ->
             let
                 newForm =
-                    Form.update BranchCreateForm.validation formMsg model.form
+                    Form.update (BranchCreateForm.validation appState) formMsg model.form
 
                 kmIdEmpty =
                     Maybe.unwrap True String.isEmpty (Form.getFieldAsString "kmId" model.form).value
@@ -103,7 +103,7 @@ handleFormMsg wrapMsg formMsg appState model =
                                     (Form.getFieldAsString "name" model.form).value
                                         |> Maybe.unwrap "" Normalize.slug
                             in
-                            setBranchCreateFormValue "kmId" suggestedKmId newForm
+                            setBranchCreateFormValue appState "kmId" suggestedKmId newForm
 
                         _ ->
                             newForm
@@ -111,14 +111,14 @@ handleFormMsg wrapMsg formMsg appState model =
             ( { model | form = formWithKmId }, Cmd.none )
 
 
-handleFormSetVersion : Version -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleFormSetVersion version model =
+handleFormSetVersion : AppState -> Version -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleFormSetVersion appState version model =
     let
         form =
             model.form
-                |> setBranchCreateFormValue "versionMajor" (String.fromInt (Version.getMajor version))
-                |> setBranchCreateFormValue "versionMinor" (String.fromInt (Version.getMinor version))
-                |> setBranchCreateFormValue "versionPatch" (String.fromInt (Version.getPatch version))
+                |> setBranchCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor version))
+                |> setBranchCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor version))
+                |> setBranchCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch version))
     in
     ( { model | form = form }, Cmd.none )
 
@@ -134,7 +134,7 @@ handlePostBranchCompleted appState model result =
         Err error ->
             ( { model
                 | form = setFormErrors appState error model.form
-                , savingBranch = ApiError.toActionResult appState (gettext "Knowledge Model could not be created." appState.locale) error
+                , savingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be created." appState.locale) error
               }
             , getResultCmd Wizard.Msgs.logoutMsg result
             )
@@ -161,6 +161,6 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
 
-setBranchCreateFormValue : String -> String -> Form FormError BranchCreateForm -> Form FormError BranchCreateForm
-setBranchCreateFormValue field value =
-    Form.update BranchCreateForm.validation (Form.Input field Form.Text (Field.String value))
+setBranchCreateFormValue : AppState -> String -> String -> Form FormError BranchCreateForm -> Form FormError BranchCreateForm
+setBranchCreateFormValue appState field value =
+    Form.update (BranchCreateForm.validation appState) (Form.Input field Form.Text (Field.String value))

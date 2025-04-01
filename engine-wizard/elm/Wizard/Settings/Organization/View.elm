@@ -48,7 +48,7 @@ formView appState form =
          , FormExtra.textAfter (gettext "Name of the organization running this instance." appState.locale)
          , FormGroup.textarea appState form "description" (gettext "Description" appState.locale)
          , FormGroup.input appState form "organizationId" (gettext "Organization ID" appState.locale)
-         , FormExtra.textAfter (gettext "Organization ID is used to identify Knowledge Models created in this instance. It can contain alphanumeric characters and dots but cannot start or end with a dot." appState.locale)
+         , FormExtra.textAfter (gettext "Organization ID is used to identify knowledge models created in this instance. It can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale)
          ]
             ++ affiliations
         )

@@ -19,7 +19,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { createModel = Wizard.Locales.Create.Models.initialModel
+    { createModel = Wizard.Locales.Create.Models.initialModel appState
     , detailModel = Wizard.Locales.Detail.Models.initialModel ""
     , importModel = Wizard.Locales.Import.Models.initialModel appState Nothing
     , indexModel = Wizard.Locales.Index.Models.initialModel PaginationQueryString.empty
@@ -30,7 +30,7 @@ initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
         CreateRoute ->
-            { model | createModel = Wizard.Locales.Create.Models.initialModel }
+            { model | createModel = Wizard.Locales.Create.Models.initialModel appState }
 
         DetailRoute id ->
             { model | detailModel = Wizard.Locales.Detail.Models.initialModel id }

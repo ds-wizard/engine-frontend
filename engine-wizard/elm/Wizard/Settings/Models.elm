@@ -30,12 +30,12 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { organizationModel = Wizard.Settings.Organization.Models.initialModel
+    { organizationModel = Wizard.Settings.Organization.Models.initialModel appState
     , authenticationModel = Wizard.Settings.Authentication.Models.initialModel
     , privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel
     , dashboardModel = Wizard.Settings.DashboardAndLoginScreen.Models.initialModel
     , lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel
-    , registryModel = Wizard.Settings.Registry.Models.initialModel
+    , registryModel = Wizard.Settings.Registry.Models.initialModel appState
     , questionnairesModel = Wizard.Settings.Projects.Models.initialModel appState
     , documentSubmissionModel = Wizard.Settings.Submission.Models.initialModel
     , knowledgeModelsModel = Wizard.Settings.KnowledgeModels.Models.initialModel
@@ -47,7 +47,7 @@ initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
         OrganizationRoute ->
-            { model | organizationModel = Wizard.Settings.Organization.Models.initialModel }
+            { model | organizationModel = Wizard.Settings.Organization.Models.initialModel appState }
 
         AuthenticationRoute ->
             { model | authenticationModel = Wizard.Settings.Authentication.Models.initialModel }
@@ -62,7 +62,7 @@ initLocalModel appState route model =
             { model | lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel }
 
         RegistryRoute ->
-            { model | registryModel = Wizard.Settings.Registry.Models.initialModel }
+            { model | registryModel = Wizard.Settings.Registry.Models.initialModel appState }
 
         ProjectsRoute ->
             { model | questionnairesModel = Wizard.Settings.Projects.Models.initialModel appState }

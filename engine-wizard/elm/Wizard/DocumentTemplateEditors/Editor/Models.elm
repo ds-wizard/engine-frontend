@@ -10,6 +10,7 @@ import ActionResult exposing (ActionResult)
 import Shared.Data.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
 import Wizard.DocumentTemplateEditors.Editor.Components.PublishModal as PublishModal
@@ -37,13 +38,13 @@ type CurrentEditor
     | PreviewEditor
 
 
-initialModel : String -> DTEditorRoute -> Model
-initialModel documentTemplateId editorRoute =
+initialModel : AppState -> String -> DTEditorRoute -> Model
+initialModel appState documentTemplateId editorRoute =
     setEditorFromRoute editorRoute
         { documentTemplateId = documentTemplateId
         , documentTemplate = ActionResult.Loading
         , currentEditor = TemplateEditor
-        , settingsModel = Settings.initialModel
+        , settingsModel = Settings.initialModel appState
         , fileEditorModel = FileEditor.initialModel
         , previewModel = Preview.initialModel
         , publishModalModel = PublishModal.initialModel

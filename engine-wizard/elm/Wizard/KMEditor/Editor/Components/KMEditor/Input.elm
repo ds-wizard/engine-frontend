@@ -768,7 +768,7 @@ questionValidations appState config =
                         )
                         [ faSet "_global.delete" appState ]
                     , div []
-                        [ label [] [ text (gettext "Validation type" appState.locale) ]
+                        [ label [] [ text (gettext "Validation Type" appState.locale) ]
                         , Html.select
                             [ class "form-control"
                             , name ("validation-" ++ String.fromInt i ++ "-type")

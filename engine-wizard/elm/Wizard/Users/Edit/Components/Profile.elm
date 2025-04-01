@@ -118,8 +118,8 @@ getUserCompleted cfg appState model result =
                     in
                     { model | userForm = userForm, user = ActionResult.Success user }
 
-                Err _ ->
-                    { model | user = ActionResult.Error <| gettext "Unable to get the user." appState.locale }
+                Err error ->
+                    { model | user = ApiError.toActionResult appState (gettext "Unable to get the user." appState.locale) error }
 
         cmd =
             getResultCmd cfg.logoutMsg result

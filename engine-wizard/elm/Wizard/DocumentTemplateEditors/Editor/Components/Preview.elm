@@ -202,7 +202,7 @@ update cfg appState msg model =
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << BranchTypeHintInputMsg
                     , getTypeHints = BranchesApi.getBranchSuggestions PaginationQueryFilters.empty
-                    , getError = gettext "Unable to get KM editors." appState.locale
+                    , getError = gettext "Unable to get knowledge model editors." appState.locale
                     , setReply = cfg.wrapMsg << BranchTypeHintInputSelect << .uuid
                     , clearReply = Nothing
                     , filterResults = Nothing
@@ -405,7 +405,7 @@ viewNotSet appState =
     Page.illustratedMessage
         { image = Undraw.settingsTab
         , heading = gettext "Preview not set" appState.locale
-        , lines = [ gettext "Select project or KM editor and format you want to preview." appState.locale ]
+        , lines = [ gettext "Select a project or knowledge model editor and format you want to preview." appState.locale ]
         , cy = "preview-not-set"
         }
 

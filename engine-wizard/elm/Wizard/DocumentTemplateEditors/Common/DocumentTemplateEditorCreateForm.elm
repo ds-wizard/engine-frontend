@@ -8,6 +8,7 @@ import Maybe.Extra as Maybe
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import String exposing (fromInt)
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias DocumentTemplateEditorCreateForm =
@@ -20,8 +21,8 @@ type alias DocumentTemplateEditorCreateForm =
     }
 
 
-init : Maybe String -> Form FormError DocumentTemplateEditorCreateForm
-init mbBasedOn =
+init : AppState -> Maybe String -> Form FormError DocumentTemplateEditorCreateForm
+init appState mbBasedOn =
     let
         initials =
             case mbBasedOn of
@@ -31,14 +32,14 @@ init mbBasedOn =
                 Nothing ->
                     []
     in
-    Form.initial initials validation
+    Form.initial initials (validation appState)
 
 
-validation : Validation FormError DocumentTemplateEditorCreateForm
-validation =
+validation : AppState -> Validation FormError DocumentTemplateEditorCreateForm
+validation appState =
     V.succeed DocumentTemplateEditorCreateForm
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (V.field "templateId" V.string)
+        |> V.andMap (V.field "templateId" (V.documentTemplateId appState))
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)

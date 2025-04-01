@@ -56,7 +56,7 @@ listingConfig appState =
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = .name
-    , emptyText = gettext "Click \"Create\" button to add a new Knowledge Model Editor." appState.locale
+    , emptyText = gettext "Click \"Create\" button to add a new knowledge model editor." appState.locale
     , updated =
         Just
             { getTime = .updatedAt
@@ -127,22 +127,22 @@ listingTitleBadge appState branch =
                  , onClick (UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId)))
                  , dataCy "km-editor_list_outdated-badge"
                  ]
-                    ++ tooltip (gettext "There is a new version of parent Knowledge Model." appState.locale)
+                    ++ tooltip (gettext "There is a new version of parent knowledge model" appState.locale)
                 )
                 [ text (gettext "update available" appState.locale) ]
 
         BranchState.Migrating ->
             Badge.info
-                (tooltip <| gettext "This Editor is in the process of migration to a new parent Knowledge Model." appState.locale)
+                (tooltip <| gettext "This editor is in the process of migration to a new parent knowledge model" appState.locale)
                 [ text (gettext "migrating" appState.locale) ]
 
         BranchState.Migrated ->
             Badge.success
-                (tooltip <| gettext "This Editor has been migrated to a new parent Knowledge Model, you can publish it now." appState.locale)
+                (tooltip <| gettext "This editor has been migrated to a new parent knowledge model, you can publish it now" appState.locale)
                 [ text (gettext "migrated" appState.locale) ]
 
         BranchState.Edited ->
-            span (tooltip (gettext "This Editor contains unpublished changes." appState.locale))
+            span (tooltip (gettext "This editor contains unpublished changes" appState.locale))
                 [ faSet "kmEditorList.edited" appState ]
 
         _ ->

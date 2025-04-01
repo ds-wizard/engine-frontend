@@ -10,13 +10,13 @@ import Wizard.Settings.Organization.Models exposing (Model)
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update =
-    GenericUpdate.update updateProps
+update wrapMsg msg appState =
+    GenericUpdate.update (updateProps appState) wrapMsg msg appState
 
 
-updateProps : GenericUpdate.UpdateProps OrganizationConfigForm
-updateProps =
-    { initForm = .organization >> OrganizationConfigForm.init
+updateProps : AppState -> GenericUpdate.UpdateProps OrganizationConfigForm
+updateProps appState =
+    { initForm = .organization >> OrganizationConfigForm.init appState
     , formToConfig = OrganizationConfigForm.toOrganizationConfig >> EditableConfig.updateOrganization
-    , formValidation = OrganizationConfigForm.validation
+    , formValidation = OrganizationConfigForm.validation appState
     }

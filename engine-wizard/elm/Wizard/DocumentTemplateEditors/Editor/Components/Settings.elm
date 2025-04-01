@@ -37,6 +37,7 @@ import Uuid
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.DocumentTemplateEditors.Editor.Components.TemplateEditor.DocumentTemplateForm as DocumentTemplateForm exposing (DocumentTemplateForm)
 import Wizard.Routes as Routes
@@ -61,18 +62,18 @@ type CurrentTemplateEditor
     | FormatsTemplateEditor
 
 
-initialModel : Model
-initialModel =
+initialModel : AppState -> Model
+initialModel appState =
     { currentEditor = GeneralTemplateEditor
-    , form = DocumentTemplateForm.initEmpty
+    , form = DocumentTemplateForm.initEmpty appState
     , formListsChanged = False
     , savingForm = ActionResult.Unset
     }
 
 
-setDocumentTemplate : DocumentTemplateDraftDetail -> Model -> Model
-setDocumentTemplate detail model =
-    { model | form = DocumentTemplateForm.init detail }
+setDocumentTemplate : AppState -> DocumentTemplateDraftDetail -> Model -> Model
+setDocumentTemplate appState detail model =
+    { model | form = DocumentTemplateForm.init appState detail }
 
 
 formChanged : Model -> Bool
@@ -128,7 +129,7 @@ update cfg appState msg model =
         FormMsg formMsg ->
             let
                 newForm =
-                    Form.update DocumentTemplateForm.validation formMsg model.form
+                    Form.update (DocumentTemplateForm.validation appState) formMsg model.form
 
                 ( newSeed, newFormWithUuid ) =
                     case ( formMsg, List.last (Form.getListIndexes "formats" newForm) ) of
@@ -141,7 +142,7 @@ update cfg appState msg model =
                                     Form.Input ("formats." ++ String.fromInt index ++ ".uuid") Form.Text (Field.String (Uuid.toString uuid))
                             in
                             ( newSeed1
-                            , Form.update DocumentTemplateForm.validation uuidFormMsg newForm
+                            , Form.update (DocumentTemplateForm.validation appState) uuidFormMsg newForm
                             )
 
                         _ ->
@@ -182,7 +183,7 @@ update cfg appState msg model =
                         )
 
                 Nothing ->
-                    wrap { model | form = Form.update DocumentTemplateForm.validation Form.Submit model.form }
+                    wrap { model | form = Form.update (DocumentTemplateForm.validation appState) Form.Submit model.form }
 
         PutTemplateCompleted result ->
             case result of
@@ -191,7 +192,7 @@ update cfg appState msg model =
                         withSeed
                             ( { model
                                 | savingForm = ActionResult.Success ""
-                                , form = DocumentTemplateForm.init documentTemplate
+                                , form = DocumentTemplateForm.init appState documentTemplate
                                 , formListsChanged = False
                               }
                             , dispatch (cfg.updateDocumentTemplate documentTemplate)
@@ -210,10 +211,10 @@ update cfg appState msg model =
                         )
 
         FillFormat i format ->
-            wrap { model | form = DocumentTemplateForm.fillFormat i format model.form }
+            wrap { model | form = DocumentTemplateForm.fillFormat appState i format model.form }
 
         FillStep formatIndex stepIndex step ->
-            wrap { model | form = DocumentTemplateForm.fillStep formatIndex stepIndex step model.form }
+            wrap { model | form = DocumentTemplateForm.fillStep appState formatIndex stepIndex step model.form }
 
 
 
@@ -281,7 +282,8 @@ formViewGeneral appState model =
     div []
         [ Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
         , Html.map FormMsg <| FormGroup.input appState model.form "description" <| gettext "Description" appState.locale
-        , Html.map FormMsg <| FormGroup.input appState model.form "templateId" <| gettext "Template ID" appState.locale
+        , Html.map FormMsg <| FormGroup.input appState model.form "templateId" <| gettext "Document Template ID" appState.locale
+        , FormExtra.textAfter <| gettext "Document template ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
         , FormGroup.version appState versionInputConfig model.form
         , Html.map FormMsg <| FormGroup.input appState model.form "license" <| gettext "License" appState.locale
         , Html.map FormMsg <| FormGroup.markdownEditor appState model.form "readme" <| gettext "Readme" appState.locale

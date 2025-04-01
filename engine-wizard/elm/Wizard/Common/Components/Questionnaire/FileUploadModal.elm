@@ -196,7 +196,7 @@ view appState isKmEditor model =
 
         submitButtonTooltip =
             if isKmEditor && not invalidFileSelection then
-                tooltip (gettext "File upload is not available in the KM editor." appState.locale)
+                tooltip (gettext "File upload is not available in the knowledge model editor" appState.locale)
 
             else
                 []

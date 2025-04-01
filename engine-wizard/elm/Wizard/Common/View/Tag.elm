@@ -40,7 +40,7 @@ list appState config tags =
                 List.map (tagView appState config) (List.sortBy .name tags)
 
             else
-                [ Flash.info appState <| gettext "There are no question tags configured for the Knowledge Model." appState.locale ]
+                [ Flash.info appState <| gettext "There are no question tags configured for the knowledge model." appState.locale ]
     in
     div [ class "tag-list" ] content
 

@@ -5,7 +5,6 @@ module Shared.Data.TenantState exposing
     , toReadableString
     )
 
-import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Maybe.Extra as Maybe
 
@@ -67,26 +66,26 @@ fromString state =
             Nothing
 
 
-filterOptions : { a | locale : Gettext.Locale } -> List ( String, String )
-filterOptions appState =
+filterOptions : List ( String, String )
+filterOptions =
     let
         toOption state =
-            ( toString state, toReadableString appState state )
+            ( toString state, toReadableString state )
     in
     List.map toOption all
 
 
-toReadableString : { a | locale : Gettext.Locale } -> TenantState -> String
-toReadableString { locale } state =
+toReadableString : TenantState -> String
+toReadableString state =
     case state of
         NotSeeded ->
-            gettext "Not seeded" locale
+            "Not seeded"
 
         PendingHousekeeping ->
-            gettext "Pending housekeeping" locale
+            "Pending housekeeping"
 
         HousekeepingInProgress ->
-            gettext "Housekeeping in progress" locale
+            "Housekeeping in progress"
 
         ReadyForUse ->
-            gettext "Ready for use" locale
+            "Ready for use"

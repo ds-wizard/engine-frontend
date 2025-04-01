@@ -70,7 +70,7 @@ initialModel appState =
     , tenantsModel = Wizard.Tenants.Models.initialModel
     , dashboardModel = Wizard.Dashboard.Models.initialModel appState
     , documentsModel = Wizard.Documents.Models.initialModel
-    , documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initialModel
+    , documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initialModel appState
     , documentTemplatesModel = Wizard.DocumentTemplates.Models.initialModel appState
     , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
@@ -122,8 +122,8 @@ setSeed seed model =
     { model | appState = newState }
 
 
-initLocalModel : Model -> Model
-initLocalModel model =
+initLocalModel : AppState -> Model -> Model
+initLocalModel appState model =
     case model.appState.route of
         Routes.CommentsRoute paginationQueryString mbResolved ->
             { model | commentsModel = Wizard.Comments.Models.initialModel paginationQueryString mbResolved }
@@ -144,7 +144,7 @@ initLocalModel model =
             { model | documentTemplatesModel = Wizard.DocumentTemplates.Models.initLocalModel route model.appState model.documentTemplatesModel }
 
         Routes.DocumentTemplateEditorsRoute route ->
-            { model | documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initLocalModel route model.documentTemplateEditorsModel }
+            { model | documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initLocalModel appState route model.documentTemplateEditorsModel }
 
         Routes.KMEditorRoute route ->
             let

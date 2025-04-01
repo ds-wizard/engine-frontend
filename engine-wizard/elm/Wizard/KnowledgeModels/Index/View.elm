@@ -59,7 +59,7 @@ listingConfig appState =
             , viewActionVisible = True
             }
     , textTitle = .name
-    , emptyText = gettext "Click \"Import\" button to import a new Knowledge Model." appState.locale
+    , emptyText = gettext "Click \"Import\" button to import a new knowledge model." appState.locale
     , updated =
         Just
             { getTime = .createdAt

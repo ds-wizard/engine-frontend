@@ -725,19 +725,14 @@ update wrapMsg msg appState model =
             withSeed ( model, Ports.refresh () )
 
         QuestionnaireVersionViewModalMsg qMsg ->
-            case model.questionnaireModel of
-                Success questionnaireModel ->
-                    let
-                        ( newQuestionnaireVersionViewModalModel, cmd ) =
-                            QuestionnaireVersionViewModal.update qMsg questionnaireModel.questionnaire appState model.questionnaireVersionViewModalModel
-                    in
-                    withSeed
-                        ( { model | questionnaireVersionViewModalModel = newQuestionnaireVersionViewModalModel }
-                        , Cmd.map (wrapMsg << QuestionnaireVersionViewModalMsg) cmd
-                        )
-
-                _ ->
-                    ( appState.seed, model, Cmd.none )
+            let
+                ( newQuestionnaireVersionViewModalModel, cmd ) =
+                    QuestionnaireVersionViewModal.update appState qMsg model.questionnaireVersionViewModalModel
+            in
+            withSeed
+                ( { model | questionnaireVersionViewModalModel = newQuestionnaireVersionViewModalModel }
+                , Cmd.map (wrapMsg << QuestionnaireVersionViewModalMsg) cmd
+                )
 
         OpenVersionPreview questionnaireUuid eventUuid ->
             let

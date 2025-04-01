@@ -80,7 +80,7 @@ handleForm formMsg wrapMsg appState model =
         _ ->
             let
                 newModel =
-                    { model | form = Form.update LocaleCreateForm.validation formMsg model.form }
+                    { model | form = Form.update (LocaleCreateForm.validation appState) formMsg model.form }
             in
             ( newModel, Cmd.none )
 

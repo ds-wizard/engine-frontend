@@ -8,6 +8,7 @@ import Form exposing (Form)
 import Shared.Data.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.DocumentTemplateEditors.Common.DocumentTemplateEditorCreateForm as DocumentTemplateEditorCreateForm exposing (DocumentTemplateEditorCreateForm)
 
@@ -22,10 +23,10 @@ type alias Model =
     }
 
 
-initialModel : Maybe String -> Maybe Bool -> Model
-initialModel selectedDocumentTemplate edit =
+initialModel : AppState -> Maybe String -> Maybe Bool -> Model
+initialModel appState selectedDocumentTemplate edit =
     { savingDocumentTemplate = ActionResult.Unset
-    , form = DocumentTemplateEditorCreateForm.init selectedDocumentTemplate
+    , form = DocumentTemplateEditorCreateForm.init appState selectedDocumentTemplate
     , documentTemplateTypeHintInputModel = TypeHintInput.init "basedOn"
     , documentTemplate = ActionResult.Loading
     , selectedDocumentTemplate = selectedDocumentTemplate

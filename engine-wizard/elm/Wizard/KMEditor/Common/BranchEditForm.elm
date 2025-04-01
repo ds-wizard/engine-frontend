@@ -14,6 +14,7 @@ import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import Version
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias BranchEditForm =
@@ -28,8 +29,8 @@ type alias BranchEditForm =
     }
 
 
-init : BranchDetail -> Form FormError BranchEditForm
-init branch =
+init : AppState -> BranchDetail -> Form FormError BranchEditForm
+init appState branch =
     let
         initials =
             [ ( "name", Field.string branch.name )
@@ -42,20 +43,20 @@ init branch =
             , ( "readme", Field.string branch.readme )
             ]
     in
-    Form.initial initials validation
+    Form.initial initials (validation appState)
 
 
-initEmpty : Form FormError BranchEditForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError BranchEditForm
+initEmpty appState =
+    Form.initial [] (validation appState)
 
 
-validation : Validation FormError BranchEditForm
-validation =
+validation : AppState -> Validation FormError BranchEditForm
+validation appState =
     V.succeed BranchEditForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.string)
-        |> V.andMap (V.field "kmId" V.kmId)
+        |> V.andMap (V.field "kmId" (V.kmId appState))
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)

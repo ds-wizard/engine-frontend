@@ -9,6 +9,7 @@ import Form.Error as Error
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Gettext exposing (gettext)
+import List.Extra as List
 
 
 type QuestionnairePermission
@@ -55,9 +56,19 @@ field =
     toString >> Field.string
 
 
-formOptions : { a | locale : Gettext.Locale } -> List ( String, String )
-formOptions appState =
-    [ ( "view", gettext "view" appState.locale )
-    , ( "comment", gettext "comment" appState.locale )
-    , ( "edit", gettext "edit" appState.locale )
-    ]
+formOptions : { a | locale : Gettext.Locale } -> Maybe String -> List ( String, String )
+formOptions appState mbFilterPerm =
+    let
+        drop ( perm, _ ) =
+            case mbFilterPerm of
+                Just filterPerm ->
+                    perm /= filterPerm
+
+                Nothing ->
+                    False
+    in
+    List.dropWhile drop
+        [ ( "view", gettext "view" appState.locale )
+        , ( "comment", gettext "comment" appState.locale )
+        , ( "edit", gettext "edit" appState.locale )
+        ]
