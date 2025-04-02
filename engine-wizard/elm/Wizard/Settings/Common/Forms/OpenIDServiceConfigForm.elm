@@ -11,6 +11,7 @@ import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDSer
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 
 
 type alias OpenIDServiceConfigForm =
@@ -26,8 +27,8 @@ type alias OpenIDServiceConfigForm =
     }
 
 
-validation : Validation FormError OpenIDServiceConfigForm
-validation =
+validation : AppState -> Validation FormError OpenIDServiceConfigForm
+validation appState =
     let
         validateParameter =
             V.succeed EditableOpenIDServiceConfig.Parameter
@@ -35,7 +36,7 @@ validation =
                 |> V.andMap (V.field "value" V.string)
     in
     V.succeed OpenIDServiceConfigForm
-        |> V.andMap (V.field "id" V.string)
+        |> V.andMap (V.field "id" (V.authenticationServiceId appState))
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "url" V.string)
         |> V.andMap (V.field "clientId" V.string)

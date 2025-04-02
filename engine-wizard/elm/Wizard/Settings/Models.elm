@@ -31,7 +31,7 @@ type alias Model =
 initialModel : AppState -> Model
 initialModel appState =
     { organizationModel = Wizard.Settings.Organization.Models.initialModel appState
-    , authenticationModel = Wizard.Settings.Authentication.Models.initialModel
+    , authenticationModel = Wizard.Settings.Authentication.Models.initialModel appState
     , privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel
     , dashboardModel = Wizard.Settings.DashboardAndLoginScreen.Models.initialModel
     , lookAndFeelModel = Wizard.Settings.LookAndFeel.Models.initialModel
@@ -50,7 +50,7 @@ initLocalModel appState route model =
             { model | organizationModel = Wizard.Settings.Organization.Models.initialModel appState }
 
         AuthenticationRoute ->
-            { model | authenticationModel = Wizard.Settings.Authentication.Models.initialModel }
+            { model | authenticationModel = Wizard.Settings.Authentication.Models.initialModel appState }
 
         PrivacyAndSupportRoute ->
             { model | privacyAndSupportModel = Wizard.Settings.PrivacyAndSupport.Models.initialModel }

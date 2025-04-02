@@ -25,9 +25,9 @@ update wrapMsg msg appState model =
         GenericMsg genericMsg ->
             let
                 updateProps =
-                    { initForm = .authentication >> AuthenticationConfigForm.init
+                    { initForm = AuthenticationConfigForm.init appState << .authentication
                     , formToConfig = AuthenticationConfigForm.toEditableAuthConfig >> EditableConfig.updateAuthentication
-                    , formValidation = AuthenticationConfigForm.validation
+                    , formValidation = AuthenticationConfigForm.validation appState
                     }
 
                 ( genericModel, cmd ) =
@@ -48,6 +48,6 @@ update wrapMsg msg appState model =
                 genericModel =
                     model.genericModel
             in
-            ( { model | genericModel = { genericModel | form = AuthenticationConfigForm.fillOpenIDServiceConfig i openIDServiceConfig genericModel.form } }
+            ( { model | genericModel = { genericModel | form = AuthenticationConfigForm.fillOpenIDServiceConfig appState i openIDServiceConfig genericModel.form } }
             , Cmd.none
             )
