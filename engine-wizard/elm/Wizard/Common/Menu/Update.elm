@@ -55,9 +55,6 @@ update wrapMsg msg appState model =
         ClearRecentlyCopied ->
             ( { model | recentlyCopied = False }, Cmd.none )
 
-        SetLanguagesOpen open ->
-            ( { model | languagesOpen = open }, Cmd.none )
-
         GetBuildInfoCompleted result ->
             case result of
                 Ok buildInfo ->

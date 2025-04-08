@@ -4,6 +4,7 @@ module Wizard.Locales.Routing exposing
     , toUrl
     )
 
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Shared.Locale exposing (lr)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
@@ -15,15 +16,19 @@ import Wizard.Locales.Routes exposing (Route(..))
 
 parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
 parsers appState wrapRoute =
-    let
-        moduleRoot =
-            lr "locales" appState
-    in
-    [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s (lr "locales.create" appState))
-    , map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "locales.import" appState) <?> Query.string (lr "locales.import.localeId" appState))
-    , map (detail wrapRoute) (s moduleRoot </> string)
-    , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
-    ]
+    if Admin.isEnabled appState.config.admin then
+        []
+
+    else
+        let
+            moduleRoot =
+                lr "locales" appState
+        in
+        [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s (lr "locales.create" appState))
+        , map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "locales.import" appState) <?> Query.string (lr "locales.import.localeId" appState))
+        , map (detail wrapRoute) (s moduleRoot </> string)
+        , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
+        ]
 
 
 detail : (Route -> a) -> String -> a

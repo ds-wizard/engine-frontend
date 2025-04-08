@@ -19,6 +19,7 @@ module Wizard.Common.GuideLinks exposing
     , merge
     , profileActiveSessions
     , profileApiKeys
+    , profileLanguage
     , projectImporters
     , projectsCreate
     , projectsDocumentSubmission
@@ -190,6 +191,11 @@ localesImport =
 markdownCheatsheet : GuideLinks -> String
 markdownCheatsheet =
     get "markdownCheatsheet"
+
+
+profileLanguage : GuideLinks -> String
+profileLanguage =
+    get "profileLanguage"
 
 
 profileApiKeys : GuideLinks -> String

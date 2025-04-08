@@ -2,14 +2,12 @@ module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
-import Json.Encode as E
 import Shared.Auth.Session as Session
 import Url
 import Wizard.Auth.Update
 import Wizard.Comments.Update
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Components.AIAssistant as AIAssistant
-import Wizard.Common.LocalStorageData as LocalStorageData
 import Wizard.Common.Menu.Update
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
@@ -272,21 +270,6 @@ update msg model =
                         setSession newSession model
                 in
                 ( newModel, Ports.storeSession <| Session.encode newSession )
-
-            Wizard.Msgs.SetLocale code ->
-                let
-                    data =
-                        LocalStorageData.encode E.string
-                            { key = "locale"
-                            , value = code
-                            }
-                in
-                ( model
-                , Cmd.batch
-                    [ Ports.localStorageSet data
-                    , Ports.refresh ()
-                    ]
-                )
 
             Wizard.Msgs.HideSessionExpiresSoonModal ->
                 let
