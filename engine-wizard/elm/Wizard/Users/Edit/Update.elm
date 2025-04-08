@@ -6,6 +6,7 @@ import Wizard.Msgs
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Users.Edit.Components.AppKeys as AppKeys
+import Wizard.Users.Edit.Components.Language as Language
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
@@ -22,6 +23,9 @@ fetchData appState uuidOrCurrent subroute =
 
         UserEditRoute.Password ->
             Cmd.none
+
+        UserEditRoute.Language ->
+            Cmd.map LanguageMsg (Language.fetchData appState)
 
         UserEditRoute.ApiKeys ->
             Cmd.map ApiKeysMsg (ApiKeys.fetchData appState)
@@ -62,6 +66,18 @@ update msg wrapMsg appState model =
                     Password.update updateConfig appState passwordMsg model.passwordModel
             in
             ( { model | passwordModel = passwordModel }, passwordCmd )
+
+        LanguageMsg languageMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << LanguageMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( languageModel, languageCmd ) =
+                    Language.update updateConfig appState languageMsg model.languageModel
+            in
+            ( { model | languageModel = languageModel }, languageCmd )
 
         ApiKeysMsg apiKeysMsg ->
             let

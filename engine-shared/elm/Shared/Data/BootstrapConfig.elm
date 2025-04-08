@@ -12,7 +12,6 @@ import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (
 import Shared.Data.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Shared.Data.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
-import Shared.Data.BootstrapConfig.LocaleConfig as LocaleConfig exposing (LocaleConfig)
 import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Shared.Data.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Shared.Data.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
@@ -37,7 +36,6 @@ type alias BootstrapConfig =
     , submission : SubmissionConfig
     , cloud : CloudConfig
     , owl : OwlConfig
-    , locales : List LocaleConfig
     , modules : List AppSwitcherItem
     , signalBridge : SignalBridgeConfig
     , user : Maybe UserInfo
@@ -58,7 +56,6 @@ default =
     , submission = SubmissionConfig.default
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
-    , locales = []
     , modules = []
     , signalBridge = SignalBridgeConfig.default
     , user = Nothing
@@ -80,7 +77,6 @@ decoder =
         |> D.required "submission" SubmissionConfig.decoder
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder
-        |> D.required "locales" (D.list LocaleConfig.decoder)
         |> D.required "modules" (D.list AppSwitcherItem.decoder)
         |> D.required "signalBridge" SignalBridgeConfig.decoder
         |> D.required "user" (D.maybe UserInfo.decoder)

@@ -19,7 +19,7 @@ import Wizard.Common.Components.CookieConsent as CookieConsent
 import Wizard.Common.Components.SessionModal as SessionModal
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.Common.Menu.View as Menu exposing (viewAboutModal, viewLanguagesModal, viewReportIssueModal)
+import Wizard.Common.Menu.View as Menu exposing (viewAboutModal, viewReportIssueModal)
 import Wizard.Common.View.Page as Page
 import Wizard.Models exposing (Model, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
@@ -174,7 +174,6 @@ app model content =
                 , rightPanel
                 , viewReportIssueModal model.appState model.menuModel.reportIssueOpen
                 , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.recentlyCopied model.menuModel.apiBuildInfo
-                , viewLanguagesModal model.appState model.menuModel.languagesOpen
                 , SessionModal.expiresSoonModal model.appState
                 , SessionModal.expiredModal model.appState
                 ]

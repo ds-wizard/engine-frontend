@@ -35,10 +35,11 @@ parsers appState wrapRoute =
             else
                 [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
                 , map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "lastName")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteRoleFilterId))
+                , map (wrapRoute << flip EditRoute UserEditRoute.Password) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "password")
+                , map (wrapRoute << flip EditRoute UserEditRoute.Language) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "language")
                 ]
     in
     [ map (wrapRoute << flip EditRoute UserEditRoute.Profile) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser)
-    , map (wrapRoute << flip EditRoute UserEditRoute.Password) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "password")
     , map (wrapRoute << flip EditRoute UserEditRoute.ApiKeys) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "api-keys")
     , map (wrapRoute << flip EditRoute UserEditRoute.AppKeys) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "app-keys")
     , map (wrapRoute << flip EditRoute UserEditRoute.ActiveSessions) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "active-sessions")
@@ -64,6 +65,9 @@ toUrl route =
 
                 UserEditRoute.Password ->
                     editBase ++ [ "password" ]
+
+                UserEditRoute.Language ->
+                    editBase ++ [ "language" ]
 
                 UserEditRoute.ApiKeys ->
                     editBase ++ [ "api-keys" ]
@@ -97,6 +101,9 @@ isAllowed route appState =
 
             else
                 case subroute of
+                    UserEditRoute.Language ->
+                        Feature.userEditLanguage appState uuidOrCurrent
+
                     UserEditRoute.ApiKeys ->
                         Feature.userEditApiKeys appState uuidOrCurrent
 

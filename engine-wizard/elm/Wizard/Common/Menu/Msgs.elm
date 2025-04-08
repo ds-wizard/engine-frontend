@@ -11,7 +11,6 @@ type Msg
     | SetAboutOpen Bool
     | CopyAbout
     | ClearRecentlyCopied
-    | SetLanguagesOpen Bool
     | GetBuildInfoCompleted (Result ApiError BuildInfo)
     | DevMenuDropdownMsg Dropdown.State
     | HelpMenuDropdownMsg Dropdown.State

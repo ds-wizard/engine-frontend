@@ -1,5 +1,6 @@
 module Shared.Api.Users exposing
     ( deleteUser
+    , getCurrentUserLocale
     , getCurrentUserSubmissionProps
     , getUser
     , getUsers
@@ -7,6 +8,7 @@ module Shared.Api.Users exposing
     , getUsersSuggestionsWithOptions
     , postUser
     , postUserPublic
+    , putCurrentUserLocale
     , putCurrentUserSubmissionProps
     , putUser
     , putUserActivation
@@ -24,6 +26,7 @@ import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (Pa
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Data.SubmissionProps as SubmissionProps exposing (SubmissionProps)
 import Shared.Data.User as User exposing (User)
+import Shared.Data.UserLocale as UserLocale exposing (UserLocale)
 import Shared.Data.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
@@ -80,6 +83,20 @@ getUser uuidOrCurrent =
 getCurrentUserSubmissionProps : AbstractAppState a -> ToMsg (List SubmissionProps) msg -> Cmd msg
 getCurrentUserSubmissionProps =
     jwtGet "/users/current/submission-props" (D.list SubmissionProps.decoder)
+
+
+getCurrentUserLocale : AbstractAppState a -> ToMsg UserLocale msg -> Cmd msg
+getCurrentUserLocale =
+    jwtGet "/users/current/locale" UserLocale.decoder
+
+
+putCurrentUserLocale : AbstractAppState a -> UserLocale -> ToMsg () msg -> Cmd msg
+putCurrentUserLocale appState userLocale =
+    let
+        body =
+            UserLocale.encode userLocale
+    in
+    jwtPut "/users/current/locale" body appState
 
 
 postUser : E.Value -> AbstractAppState a -> ToMsg () msg -> Cmd msg

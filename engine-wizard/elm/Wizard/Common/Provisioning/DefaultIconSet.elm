@@ -111,7 +111,6 @@ iconSet =
         , ( "locale.create", "fas fa-plus" )
         , ( "locale.import", "fas fa-upload" )
         , ( "locale.default", "fas fa-check-circle" )
-        , ( "locale.selected", "fas fa-check" )
         , ( "login.externalService", "fab fa-openid" )
         , ( "menu.about", "fas fa-info" )
         , ( "menu.administration", "fas fa-cog" )
