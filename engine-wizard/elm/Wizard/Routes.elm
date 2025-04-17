@@ -806,9 +806,9 @@ publicLogoutSuccessful =
 -- Settings
 
 
-settingsDefault : Route
-settingsDefault =
-    SettingsRoute Wizard.Settings.Routes.defaultRoute
+settingsDefault : Bool -> Route
+settingsDefault adminEnabled =
+    SettingsRoute (Wizard.Settings.Routes.defaultRoute adminEnabled)
 
 
 isSettingsRoute : Route -> Bool

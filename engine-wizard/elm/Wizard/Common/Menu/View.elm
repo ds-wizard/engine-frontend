@@ -205,7 +205,7 @@ menuItems appState =
         { title = gettext "Settings" appState.locale
         , icon = faSetFw "menu.administration" appState
         , id = "settings"
-        , route = Routes.settingsDefault
+        , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin)
         , isActive = Routes.isSettingsRoute
         , isVisible = \a -> Admin.isEnabled a.config.admin && Feature.isAdmin a
         }
@@ -213,13 +213,13 @@ menuItems appState =
         { title = gettext "Administration" appState.locale
         , icon = faSetFw "menu.administration" appState
         , id = "administration"
-        , route = Routes.settingsDefault
+        , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin)
         , isActive = Routes.isSettingsSubroute
         , isVisible = \a -> not (Admin.isEnabled a.config.admin) && Feature.settings a
         , items =
             { title = gettext "Settings" appState.locale
             , id = "system-settings"
-            , route = Routes.settingsDefault
+            , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin)
             , isActive = Routes.isSettingsRoute
             , isVisible = always True
             }

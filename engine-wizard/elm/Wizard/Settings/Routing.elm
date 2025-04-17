@@ -23,7 +23,7 @@ parsers appState wrapRoute =
             not (Admin.isEnabled appState.config.admin)
     in
     []
-        |> listInsertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))) True
+        |> listInsertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s (lr "settings.organization" appState))) adminDisabled
         |> listInsertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s (lr "settings.authentication" appState))) adminDisabled
         |> listInsertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s (lr "settings.privacyAndSupport" appState))) adminDisabled
         |> listInsertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s (lr "settings.dashboard" appState))) True

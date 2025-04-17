@@ -78,8 +78,13 @@ view route appState model =
 navigation : AppState -> Route -> Html Msg
 navigation appState currentRoute =
     let
-        systemTitle =
-            [ strong [] [ text (gettext "System Settings" appState.locale) ] ]
+        systemSettings =
+            if Admin.isEnabled appState.config.admin then
+                []
+
+            else
+                strong [] [ text (gettext "System Settings" appState.locale) ]
+                    :: List.map (navigationLink appState currentRoute) (navigationSystemLinks appState)
 
         userInterfaceTitle =
             [ strong [] [ text (gettext "User Interface Settings" appState.locale) ] ]
@@ -91,8 +96,7 @@ navigation appState currentRoute =
             [ strong [] [ text (gettext "Info" appState.locale) ] ]
     in
     div [ class "nav nav-pills flex-column" ]
-        (systemTitle
-            ++ List.map (navigationLink appState currentRoute) (navigationSystemLinks appState)
+        (systemSettings
             ++ userInterfaceTitle
             ++ List.map (navigationLink appState currentRoute) (navigationUserInterfaceLinks appState)
             ++ contentTitle
@@ -104,19 +108,10 @@ navigation appState currentRoute =
 
 navigationSystemLinks : AppState -> List ( Route, String )
 navigationSystemLinks appState =
-    let
-        items =
-            [ ( OrganizationRoute, gettext "Organization" appState.locale )
-            ]
-    in
-    if Admin.isEnabled appState.config.admin then
-        items
-
-    else
-        items
-            ++ [ ( AuthenticationRoute, gettext "Authentication" appState.locale )
-               , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
-               ]
+    [ ( OrganizationRoute, gettext "Organization" appState.locale )
+    , ( AuthenticationRoute, gettext "Authentication" appState.locale )
+    , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
+    ]
 
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )
