@@ -78,6 +78,7 @@ default =
             , ( "markdownCheatsheet", "https://guide.ds-wizard.org/en/latest/more/miscellaneous/markdown-cheatsheet.html" )
             , ( "profileActiveSessions", "https://guide.ds-wizard.org/en/latest/application/profile/edit/active-sessions.html" )
             , ( "profileApiKeys", "https://guide.ds-wizard.org/en/latest/application/profile/edit/api-keys.html" )
+            , ( "profileLanguage", "https://guide.ds-wizard.org/en/latest/application/profile/edit/language.html " )
             , ( "projectsCreate", "https://guide.ds-wizard.org/en/latest/application/projects/list/create.html" )
             , ( "projectsDocumentSubmission", "https://guide.ds-wizard.org/en/latest/application/projects/list/detail/documents.html#document-submission" )
             , ( "projectsDocuments", "https://guide.ds-wizard.org/en/latest/application/projects/documents.html" )
