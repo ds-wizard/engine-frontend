@@ -28,7 +28,7 @@ view appState model =
                     ( False
                     , Html.map FileImportMsg <|
                         FileImport.view appState
-                            { validate = Just (validateDocumentTemplateFile appState)
+                            { validate = Just (validateLocaleFile appState)
                             , doneRoute = Routes.localesIndex
                             }
                             fileImportModel
@@ -83,8 +83,8 @@ viewNavbar appState registryActive =
         ]
 
 
-validateDocumentTemplateFile : AppState -> File -> Maybe String
-validateDocumentTemplateFile appState file =
+validateLocaleFile : AppState -> File -> Maybe String
+validateLocaleFile appState file =
     let
         ext =
             File.ext file
@@ -92,7 +92,7 @@ validateDocumentTemplateFile appState file =
         mime =
             File.mime file
     in
-    if ext == Just "zip" || mime == "application/json" then
+    if ext == Just "zip" || mime == "application/zip" then
         Nothing
 
     else

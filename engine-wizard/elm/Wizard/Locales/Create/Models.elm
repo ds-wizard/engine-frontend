@@ -10,13 +10,13 @@ import File exposing (File)
 import Form exposing (Form)
 import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
-import Wizard.Locales.Common.LocaleCreateForm as LocaleCreateFrom exposing (LocaleCreateFrom)
+import Wizard.Locales.Common.LocaleCreateForm as LocaleCreateFrom exposing (LocaleCreateForm)
 
 
 type alias Model =
     { dnd : Int
     , file : Maybe File
-    , form : Form FormError LocaleCreateFrom
+    , form : Form FormError LocaleCreateForm
     , creatingLocale : ActionResult String
     }
 

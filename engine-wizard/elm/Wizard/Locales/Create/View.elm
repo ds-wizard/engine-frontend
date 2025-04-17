@@ -20,7 +20,7 @@ import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
-import Wizard.Locales.Common.LocaleCreateForm exposing (LocaleCreateFrom)
+import Wizard.Locales.Common.LocaleCreateForm exposing (LocaleCreateForm)
 import Wizard.Locales.Create.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.Locales.Create.Msgs exposing (Msg(..))
 
@@ -124,7 +124,7 @@ onDragEvent event msg =
 
 
 type alias VersionInputGroupConfig =
-    { form : Form FormError LocaleCreateFrom
+    { form : Form FormError LocaleCreateForm
     , label : String
     , major : String
     , minor : String
