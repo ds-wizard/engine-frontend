@@ -30,6 +30,7 @@ const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 
 
 const sessionKey = 'session/wizard'
+const appSessionKey = 'session/app'
 
 axiosRetry(axios, {
     retries: 3,
@@ -86,7 +87,6 @@ function loadApp(config, locale, provisioning) {
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
         session: JSON.parse(localStorage.getItem(sessionKey)),
-        selectedLocale: JSON.parse(localStorage.locale || null),
         apiUrl: getApiUrl(config),
         clientUrl: appConfig.getClientUrl(),
         webSocketThrottleDelay: appConfig.getWebSocketThrottleDelay(),
@@ -121,7 +121,7 @@ function loadApp(config, locale, provisioning) {
     registerLocalStoragePorts(app)
     registerPageUnloadPorts(app)
     registerRefreshPorts(app)
-    registerSessionPorts(app, sessionKey, ['session/app'])
+    registerSessionPorts(app, sessionKey, [appSessionKey])
     registerThemePorts(app)
     registerWebsocketPorts(app)
     cookies.registerCookiePorts(app)
@@ -139,7 +139,7 @@ function createBootstrapConfigRequest() {
 }
 
 function createLocaleRequest() {
-    const session = JSON.parse(localStorage.getItem(appConfig.isAdminEnabled() ? 'session/app' : sessionKey))
+    const session = JSON.parse(localStorage.getItem(appConfig.isAdminEnabled() ? appSessionKey : sessionKey))
     const token = session?.token?.token
     const requestConfig = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
     const apiUrl = session?.apiUrl
@@ -194,8 +194,11 @@ window.onload = function () {
                     showMessageAndRetry(notSeededHTML)
                 } else {
                     const errorCode = response ? err.response.status : null
-                    if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                    const appSession = localStorage.getItem(appSessionKey)
+
+                    if (Math.floor(errorCode / 100) === 4 && (session !== null || appSession !== null)) {
                         localStorage.removeItem(sessionKey)
+                        localStorage.removeItem(appSessionKey)
                         window.location.reload()
                     } else {
                         document.body.innerHTML = bootstrapErrorHTML(errorCode)
