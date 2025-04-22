@@ -31,7 +31,7 @@ type Msg
     | PreviewMsg Preview.Msg
     | SettingsMsg Settings.Msg
     | PublishModalMsg PublishModal.Msg
-    | EventMsg Bool String (Maybe String) (CommonEventData -> Event)
+    | EventMsg Bool (Maybe String) String (Maybe String) (CommonEventData -> Event)
     | EventDebounceMsg String Debounce.Msg
     | EventAddSavingUuid Uuid String
     | SavePreviewReplies
