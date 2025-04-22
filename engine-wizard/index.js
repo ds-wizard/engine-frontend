@@ -195,8 +195,8 @@ window.onload = function () {
                 } else {
                     const errorCode = response ? err.response.status : null
                     if (Math.floor(errorCode / 100) === 4 && session !== null) {
-                        // localStorage.removeItem(sessionKey)
-                        // window.location.reload()
+                        localStorage.removeItem(sessionKey)
+                        window.location.reload()
                     } else {
                         document.body.innerHTML = bootstrapErrorHTML(errorCode)
                     }
