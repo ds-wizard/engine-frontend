@@ -18,6 +18,7 @@ import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormGroup as FormGroup
+import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.Common.View.Tag as Tag
 import Wizard.Projects.Create.Models exposing (ActiveTab(..), DefaultMode(..), Mode(..), Model, mapMode)
@@ -43,6 +44,7 @@ viewPageContent : AppState -> Model -> List a -> Html Msg
 viewPageContent appState model _ =
     div [ detailClass "Projects__Create" ]
         [ Page.headerWithGuideLink appState (gettext "Create Project" appState.locale) GuideLinks.projectsCreate
+        , FormResult.errorOnlyView appState model.savingQuestionnaire
         , formView appState model
         ]
 
