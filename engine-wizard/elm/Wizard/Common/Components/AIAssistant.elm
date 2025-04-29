@@ -56,6 +56,7 @@ type Msg
     | SubmitSampleMessage String
     | SubmitMessageCompleted (Result ApiError Answer)
     | NewConversation
+    | NewConversationCompleted (Result ApiError Answer)
 
 
 init : Msg
@@ -90,7 +91,7 @@ update cfg msg (State state) =
             in
             ( newSeed
             , State { state | conversation = ActionResult.Success conversation }
-            , Cmd.none
+            , Api.postQuestion conversation.uuid { question = "" } appStateLike NewConversationCompleted
             )
 
         submitMessage message =
@@ -142,7 +143,14 @@ update cfg msg (State state) =
             )
 
         SubmitMessage ->
-            submitMessage state.currentMessage
+            if String.isEmpty state.currentMessage then
+                ( cfg.seed
+                , State state
+                , Cmd.none
+                )
+
+            else
+                submitMessage state.currentMessage
 
         SubmitSampleMessage message ->
             submitMessage message
@@ -174,10 +182,7 @@ update cfg msg (State state) =
 
                         Err _ ->
                             ( cfg.seed
-                            , State
-                                { state
-                                    | answer = ActionResult.Error "Unable to get response"
-                                }
+                            , State { state | answer = ActionResult.Error "Unable to get response" }
                             , Cmd.none
                             )
 
@@ -189,6 +194,20 @@ update cfg msg (State state) =
 
         NewConversation ->
             startNewConversation
+
+        NewConversationCompleted result ->
+            case result of
+                Ok _ ->
+                    ( cfg.seed
+                    , State state
+                    , Cmd.none
+                    )
+
+                Err _ ->
+                    ( cfg.seed
+                    , State { state | answer = ActionResult.Error "Unable to get response" }
+                    , Cmd.none
+                    )
 
 
 type alias ViewConfig msg =
@@ -334,6 +353,7 @@ viewForm cfg state =
             []
         , a
             [ onClick (cfg.wrapMsg SubmitMessage)
+            , disabled (state.answer == ActionResult.Loading || String.isEmpty state.currentMessage)
             , class "link-primary"
             ]
             [ fa "fas fa-paper-plane" ]
