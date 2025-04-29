@@ -3,6 +3,7 @@ module Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing
     , decoder
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Data.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
@@ -25,6 +26,9 @@ type alias SetQuestionnaireData =
     , formatUuid : Maybe Uuid
     , format : Maybe DocumentTemplateFormat
     , permissions : List Permission
+    , labels : Dict String (List String)
+    , unresolvedCommentCounts : Dict String (Dict String Int)
+    , resolvedCommentCounts : Dict String (Dict String Int)
     }
 
 
@@ -42,3 +46,6 @@ decoder =
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
         |> D.required "permissions" (D.list Permission.decoder)
+        |> D.required "labels" (D.dict (D.list D.string))
+        |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))
+        |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
