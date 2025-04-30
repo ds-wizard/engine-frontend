@@ -680,7 +680,7 @@ viewProfileMenu model =
                 li []
                     [ a
                         [ dataCy "menu_languages"
-                        , href "/admin/users/current/language"
+                        , href "/admin/users/edit/current/language"
                         ]
                         [ faSetFw "menu.language" model.appState
                         , text (gettext "Change language" model.appState.locale)
