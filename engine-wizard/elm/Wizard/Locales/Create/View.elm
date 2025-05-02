@@ -1,18 +1,16 @@
 module Wizard.Locales.Create.View exposing (view)
 
-import ActionResult
-import File
 import Form exposing (Form)
 import Form.Field exposing (FieldValue(..))
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Attribute, Html, a, div, input, label, p, text)
-import Html.Attributes exposing (accept, class, disabled, id, name, type_)
-import Html.Events exposing (custom, on, onClick)
-import Json.Decode as Decode
+import Html exposing (Html, div, label, p, text)
+import Html.Attributes exposing (class, id, name)
+import Html.Extra as Html
+import Maybe.Extra as Maybe
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Dropzone as Dropzone
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -21,26 +19,20 @@ import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
 import Wizard.Common.View.Page as Page
 import Wizard.Locales.Common.LocaleCreateForm exposing (LocaleCreateForm)
-import Wizard.Locales.Create.Models exposing (Model, dropzoneId, fileInputId)
+import Wizard.Locales.Create.Models exposing (Model)
 import Wizard.Locales.Create.Msgs exposing (Msg(..))
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
     let
-        content =
-            case model.file of
-                Just file ->
-                    fileView appState model (File.name file)
+        fileWarning file =
+            if Form.isSubmitted model.form && Maybe.isNothing file then
+                p [ class "form-text form-text-after text-danger mt-2" ]
+                    [ text (gettext "File is required." appState.locale) ]
 
-                Nothing ->
-                    dropzone appState model
-
-        fileGroup =
-            div [ class "form-group" ]
-                [ label [] [ text (gettext "PO File" appState.locale) ]
-                , content
-                ]
+            else
+                Html.nothing
 
         formView =
             Html.map FormMsg <|
@@ -64,63 +56,30 @@ view appState model =
     div [ detailClass "" ]
         [ Page.headerWithGuideLink appState (gettext "Create Locale" appState.locale) GuideLinks.localesCreate
         , formView
-        , fileGroup
+        , div [ class "form-group" ]
+            [ label [] [ text (gettext "Wizard Locale" appState.locale) ]
+            , Dropzone.dropzone
+                { wrapMsg = WizardContentFileDropzoneMsg
+                , buttonText = gettext "Select .po file" appState.locale
+                , dropzoneText = gettext "or drop it here" appState.locale
+                , fileIcon = Nothing
+                }
+                model.wizardContentFileDropzone
+            , fileWarning model.wizardContent
+            ]
+        , div [ class "form-group" ]
+            [ label [] [ text (gettext "Mails Locale" appState.locale) ]
+            , Dropzone.dropzone
+                { wrapMsg = MailContentFileDropzoneMsg
+                , buttonText = gettext "Select .po file" appState.locale
+                , dropzoneText = gettext "or drop it here" appState.locale
+                , fileIcon = Nothing
+                }
+                model.mailContentFileDropzone
+            , fileWarning model.mailContent
+            ]
         , formActions
         ]
-
-
-fileView : AppState -> Model -> String -> Html Msg
-fileView appState model fileName =
-    div [ class "file-view rounded-3" ]
-        [ div [ class "file" ]
-            [ faSet "import.file" appState
-            , div [ class "filename" ]
-                [ text fileName
-                , a [ disabled (ActionResult.isLoading model.creatingLocale), class "ms-1 text-danger", onClick CancelFile ]
-                    [ faSet "_global.remove" appState ]
-                ]
-            ]
-        ]
-
-
-dropzone : AppState -> Model -> Html Msg
-dropzone appState model =
-    div (dropzoneAttributes model)
-        [ label [ class "btn btn-secondary btn-file" ]
-            [ text (gettext "Choose a file" appState.locale)
-            , input [ id fileInputId, type_ "file", on "change" (Decode.succeed FileSelected), accept ".po" ] []
-            ]
-        , p [] [ text (gettext "Or just drop it here" appState.locale) ]
-        ]
-
-
-dropzoneAttributes : Model -> List (Attribute Msg)
-dropzoneAttributes model =
-    let
-        cssClass =
-            case model.dnd of
-                0 ->
-                    ""
-
-                _ ->
-                    "active"
-    in
-    [ class ("rounded-3 dropzone " ++ cssClass)
-    , id dropzoneId
-    , onDragEvent "dragenter" DragEnter
-    , onDragEvent "dragover" DragOver
-    , onDragEvent "dragleave" DragLeave
-    ]
-
-
-onDragEvent : String -> Msg -> Attribute Msg
-onDragEvent event msg =
-    custom event <|
-        Decode.succeed
-            { stopPropagation = True
-            , preventDefault = True
-            , message = msg
-            }
 
 
 type alias VersionInputGroupConfig =

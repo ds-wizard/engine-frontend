@@ -1,17 +1,15 @@
 module Wizard.Locales.Create.Msgs exposing (Msg(..))
 
 import Form
-import Json.Encode as E
+import Json.Decode as D
 import Shared.Error.ApiError exposing (ApiError)
+import Wizard.Common.Components.Dropzone as Dropzone
 
 
 type Msg
-    = DragEnter
-    | DragOver
-    | DragLeave
-    | FileSelected
-    | FileRead E.Value
-    | CancelFile
+    = WizardContentFileDropzoneMsg Dropzone.Msg
+    | MailContentFileDropzoneMsg Dropzone.Msg
     | CreateCompleted (Result ApiError ())
     | Cancel
     | FormMsg Form.Msg
+    | LocaleConverted D.Value

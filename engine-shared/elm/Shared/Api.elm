@@ -24,6 +24,7 @@ module Shared.Api exposing
     , jwtPostEmpty
     , jwtPostFile
     , jwtPostFileWithData
+    , jwtPostMultiPart
     , jwtPut
     , jwtPutString
     , wsUrl
@@ -116,6 +117,15 @@ jwtPostFileWithData url data file appState toMsg =
     Jwt.Http.post appState.session.token.token
         { url = appState.apiUrl ++ url
         , body = Http.multipartBody (Http.filePart "file" file :: data)
+        , expect = expectWhatever toMsg
+        }
+
+
+jwtPostMultiPart : String -> List Http.Part -> AbstractAppState b -> ToMsg () msg -> Cmd msg
+jwtPostMultiPart url data appState toMsg =
+    Jwt.Http.post appState.session.token.token
+        { url = appState.apiUrl ++ url
+        , body = Http.multipartBody data
         , expect = expectWhatever toMsg
         }
 

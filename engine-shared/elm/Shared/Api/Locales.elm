@@ -16,7 +16,7 @@ import File exposing (File)
 import Http
 import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile, jwtPostMultiPart, jwtPut)
 import Shared.Data.Locale as Locale exposing (Locale)
 import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Shared.Data.LocaleSuggestion as LocaleSuggestion exposing (LocaleSuggestion)
@@ -70,13 +70,15 @@ setEnabled locale enabled =
     jwtPut ("/locales/" ++ locale.id) withDefault
 
 
-createFromPO : List ( String, String ) -> File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-createFromPO params =
+createFromPO : List ( String, String ) -> File -> File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+createFromPO params wizardContent mailContent =
     let
         httpParams =
-            List.map (\( k, v ) -> Http.stringPart k v) params
+            Http.filePart "wizardContent" wizardContent
+                :: Http.filePart "mailContent" mailContent
+                :: List.map (\( k, v ) -> Http.stringPart k v) params
     in
-    jwtPostFileWithData "/locales" httpParams
+    jwtPostMultiPart "/locales" httpParams
 
 
 deleteLocale : String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg
