@@ -12,7 +12,7 @@ import Shared.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Dropzone as Dropzone
 import Wizard.Common.GuideLinks as GuideLinks
-import Wizard.Common.Html.Attribute exposing (detailClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormActions as FormActions
 import Wizard.Common.View.FormExtra as FormExtra
@@ -56,7 +56,7 @@ view appState model =
     div [ detailClass "" ]
         [ Page.headerWithGuideLink appState (gettext "Create Locale" appState.locale) GuideLinks.localesCreate
         , formView
-        , div [ class "form-group" ]
+        , div [ class "form-group", dataCy "wizard-locale-dropzone" ]
             [ label [] [ text (gettext "Wizard Locale" appState.locale) ]
             , Dropzone.dropzone
                 { wrapMsg = WizardContentFileDropzoneMsg
@@ -67,7 +67,7 @@ view appState model =
                 model.wizardContentFileDropzone
             , fileWarning model.wizardContent
             ]
-        , div [ class "form-group" ]
+        , div [ class "form-group", dataCy "mail-locale-dropzone" ]
             [ label [] [ text (gettext "Mails Locale" appState.locale) ]
             , Dropzone.dropzone
                 { wrapMsg = MailContentFileDropzoneMsg
