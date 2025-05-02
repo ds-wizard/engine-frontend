@@ -510,7 +510,7 @@ type alias LocaleLike a =
 
 isDefaultLanguage : LocaleLike a -> Bool
 isDefaultLanguage locale =
-    locale.organizationId == "wizard" && locale.localeId == "default"
+    String.startsWith "~" locale.organizationId
 
 
 localeView : AppState -> Bool
