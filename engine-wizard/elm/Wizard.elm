@@ -4,7 +4,6 @@ import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
 import Shared.Auth.Session as Session
-import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Utils as Taks exposing (dispatch)
 import Shared.Utils.Theme as Theme
 import Url exposing (Url)
@@ -53,7 +52,7 @@ init flags location key =
                                 Cmd.none
 
                     aiAssistantCmd =
-                        if Admin.isEnabled appState.config.admin && Session.exists appState.session then
+                        if appState.config.aiAssistant.enabled && Session.exists appState.session then
                             Taks.dispatch (Wizard.Msgs.AIAssistantMsg AIAssistant.init)
 
                         else
