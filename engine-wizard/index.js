@@ -77,7 +77,7 @@ function getBootstrapConfigUrl(apiUrl) {
 function getLocaleUrl(apiUrl) {
     apiUrl = apiUrl || appConfig.getDefaultApiUrl()
     if (appConfig.isAdminEnabled()) {
-        apiUrl = apiUrl.replace('/wizard-api', '/admin-api')
+        apiUrl = appConfig.getAdminApiUrl() || apiUrl.replace('/wizard-api', '/admin-api')
         return apiUrl + '/locales/current/content?module=wizard'
     }
     return apiUrl + '/locales/current/content'

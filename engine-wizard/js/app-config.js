@@ -1,4 +1,5 @@
 module.exports = {
+    getAdminApiUrl,
     getClientUrl,
     getDefaultApiUrl,
     getGuideLinks,
@@ -10,6 +11,9 @@ module.exports = {
     isAdminEnabled
 }
 
+function getAdminApiUrl() {
+    return getConfigProp('adminApiUrl', null)
+}
 
 function getClientUrl() {
     return getConfigProp('clientUrl', window.location.origin + '/wizard')
