@@ -5,6 +5,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, header, img, li, main_, section, small, text, ul)
 import Html.Attributes exposing (class, classList, height, href, src)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Registry.Components.FontAwesome exposing (fas)
 import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Routes as Routes
@@ -101,16 +102,17 @@ viewHeader appState cfg appTitle =
                                     , text (gettext "Document Templates" appState.locale)
                                     ]
                                 ]
-                            , li [ class "nav-item" ]
-                                [ a
-                                    [ class "nav-link"
-                                    , classList [ ( "active", appState.route == Routes.Locales ) ]
-                                    , href (Routes.toUrl Routes.locales)
+                            , Html.viewIf appState.config.locale.enabled <|
+                                li [ class "nav-item" ]
+                                    [ a
+                                        [ class "nav-link"
+                                        , classList [ ( "active", appState.route == Routes.Locales ) ]
+                                        , href (Routes.toUrl Routes.locales)
+                                        ]
+                                        [ fas "fa-language"
+                                        , text (gettext "Locales" appState.locale)
+                                        ]
                                     ]
-                                    [ fas "fa-language"
-                                    , text (gettext "Locales" appState.locale)
-                                    ]
-                                ]
                             ]
                         ]
                     ]

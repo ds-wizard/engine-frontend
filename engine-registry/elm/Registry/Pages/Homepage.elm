@@ -3,6 +3,7 @@ module Registry.Pages.Homepage exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h1, p, span, text)
 import Html.Attributes exposing (class, href)
+import Html.Extra as Html
 import Registry.Components.FontAwesome exposing (fas)
 import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Routes as Routes
@@ -20,7 +21,7 @@ view appState =
                     [ text (gettext "Customize your experience with prepared content and translations." appState.locale)
                     ]
                 ]
-            , div [ class "row" ]
+            , div [ class "row justify-content-center" ]
                 [ viewLink
                     { route = Routes.KnowledgeModels
                     , icon = "fa-sitemap"
@@ -33,12 +34,13 @@ view appState =
                     , title = gettext "Document Templates" appState.locale
                     , description = gettext "Compose documents from questionnaires by selecting templates that handle the transformation of replies." appState.locale
                     }
-                , viewLink
-                    { route = Routes.Locales
-                    , icon = "fa-language"
-                    , title = gettext "Locales" appState.locale
-                    , description = gettext "Adapt the user interface to different languages for a more inclusive experience." appState.locale
-                    }
+                , Html.viewIf appState.config.locale.enabled <|
+                    viewLink
+                        { route = Routes.Locales
+                        , icon = "fa-language"
+                        , title = gettext "Locales" appState.locale
+                        , description = gettext "Adapt the user interface to different languages for a more inclusive experience." appState.locale
+                        }
                 ]
             ]
         ]

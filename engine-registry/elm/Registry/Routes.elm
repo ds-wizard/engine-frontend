@@ -65,17 +65,24 @@ parsers config =
             else
                 []
 
+        localeRoutes =
+            if config.locale.enabled then
+                [ Parser.map Locales (Parser.s "locales")
+                , Parser.map LocalesDetail (Parser.s "locales" </> Parser.string)
+                ]
+
+            else
+                []
+
         publicRoutes =
             [ Parser.map Home Parser.top
             , Parser.map KnowledgeModels (Parser.s "knowledge-models")
             , Parser.map KnowledgeModelsDetail (Parser.s "knowledge-models" </> Parser.string)
             , Parser.map DocumentTemplates (Parser.s "document-templates")
             , Parser.map DocumentTemplatesDetail (Parser.s "document-templates" </> Parser.string)
-            , Parser.map Locales (Parser.s "locales")
-            , Parser.map LocalesDetail (Parser.s "locales" </> Parser.string)
             ]
     in
-    Parser.oneOf (publicRoutes ++ authRoutes)
+    Parser.oneOf (publicRoutes ++ localeRoutes ++ authRoutes)
 
 
 toUrl : Route -> String
