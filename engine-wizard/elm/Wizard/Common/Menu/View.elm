@@ -337,8 +337,8 @@ viewLogo model =
                             [ icon
                             ]
                         , span [ class "content" ]
-                            [ span [ class "title" ] [ text item.title ]
-                            , span [ class "description" ] [ text item.description ]
+                            [ span [ class "title" ] [ text (gettext item.title model.appState.locale) ]
+                            , span [ class "description" ] [ text (gettext item.description model.appState.locale) ]
                             ]
                         ]
                     ]
@@ -391,7 +391,7 @@ viewMenu model =
     let
         menuHeading =
             if Admin.isEnabled model.appState.config.admin then
-                li [ class "heading" ] [ text LookAndFeelConfig.defaultMenuTitle ]
+                li [ class "heading" ] [ text (gettext LookAndFeelConfig.defaultMenuTitle model.appState.locale) ]
 
             else
                 emptyNode
