@@ -506,7 +506,7 @@ customMenuItem model index link =
         (a ([ href link.url, dataCy "menu_custom-link" ] ++ targetArg))
         ("custom-menu-item-" ++ String.fromInt index)
         (fa ("fa-fw " ++ link.icon))
-        link.title
+        (gettext link.title model.appState.locale)
         False
 
 
