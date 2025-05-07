@@ -5,6 +5,7 @@ module Shared.Api.Locales exposing
     , exportLocaleUrl
     , getLocale
     , getLocales
+    , getLocalesSuggestions
     , importLocale
     , pullLocale
     , setDefaultLocale
@@ -13,10 +14,12 @@ module Shared.Api.Locales exposing
 
 import File exposing (File)
 import Http
+import Json.Decode as D
 import Shared.AbstractAppState exposing (AbstractAppState)
-import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile, jwtPostFileWithData, jwtPut)
+import Shared.Api exposing (ToMsg, jwtDelete, jwtGet, jwtPostEmpty, jwtPostFile, jwtPostMultiPart, jwtPut)
 import Shared.Data.Locale as Locale exposing (Locale)
 import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
+import Shared.Data.LocaleSuggestion as LocaleSuggestion exposing (LocaleSuggestion)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -32,6 +35,16 @@ getLocales _ qs =
             "/locales" ++ queryString
     in
     jwtGet url (Pagination.decoder "locales" Locale.decoder)
+
+
+getLocalesSuggestions : AbstractAppState a -> ToMsg (List LocaleSuggestion) msg -> Cmd msg
+getLocalesSuggestions =
+    let
+        decoder =
+            D.map .items <|
+                Pagination.decoder "locales" LocaleSuggestion.decoder
+    in
+    jwtGet "/locales/suggestions" decoder
 
 
 getLocale : String -> AbstractAppState a -> ToMsg LocaleDetail msg -> Cmd msg
@@ -57,13 +70,15 @@ setEnabled locale enabled =
     jwtPut ("/locales/" ++ locale.id) withDefault
 
 
-createFromPO : List ( String, String ) -> File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
-createFromPO params =
+createFromPO : List ( String, String ) -> File -> File -> AbstractAppState a -> ToMsg () msg -> Cmd msg
+createFromPO params wizardContent mailContent =
     let
         httpParams =
-            List.map (\( k, v ) -> Http.stringPart k v) params
+            Http.filePart "wizardContent" wizardContent
+                :: Http.filePart "mailContent" mailContent
+                :: List.map (\( k, v ) -> Http.stringPart k v) params
     in
-    jwtPostFileWithData "/locales" httpParams
+    jwtPostMultiPart "/locales" httpParams
 
 
 deleteLocale : String -> String -> AbstractAppState a -> ToMsg () msg -> Cmd msg

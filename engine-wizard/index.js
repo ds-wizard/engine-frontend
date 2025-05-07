@@ -3,12 +3,15 @@
 const axios = require('axios').default
 const axiosRetry = require('axios-retry').default
 
+const appConfig = require('./js/app-config')
+const {bootstrapErrorHTML, housekeepingHTML, notSeededHTML} = require('./js/bootstrap-error')
+
 const program = require('./elm/Wizard.elm')
 
-const charts = require('./js/components/charts')
-const codeEditor = require('./js/components/code-editor')
-const datetimePickers = require('./js/components/datetime-pickers')
-const shortcutElement = require('./js/components/shortcut-element')
+require('./js/components/charts')
+require('./js/components/code-editor')
+require('./js/components/datetime-pickers')
+require('./js/components/shortcut-element')
 
 const cookies = require('./js/ports/cookies')
 const registerBrowserPorts = require('./js/ports/browser')
@@ -18,6 +21,7 @@ const registerDomPorts = require('./js/ports/dom')
 const registerDownloadPorts = require('./js/ports/download')
 const registerImportPorts = require('./js/ports/import')
 const registerIntegrationPorts = require('./js/ports/integrations')
+const registerLocalePorts = require('./js/ports/locale')
 const registerLocalStoragePorts = require('./js/ports/local-storage')
 const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
@@ -27,6 +31,7 @@ const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
 
 
 const sessionKey = 'session/wizard'
+const appSessionKey = 'session/app'
 
 axiosRetry(axios, {
     retries: 3,
@@ -54,115 +59,48 @@ function getPdfSupport() {
     return !!(navigator.mimeTypes['application/pdf'] || hasAcrobatInstalled() || isIos())
 }
 
-
-function defaultApiUrl() {
-    if (window.app && window.app['apiUrl']) return window.app['apiUrl']
-    return window.location.origin + '/wizard-api'
-}
-
-function configUrl(apiUrl) {
-    const clientUrl = (window.app && window.app['clientUrl']) || (window.location.origin + '/wizard')
-    return (apiUrl || defaultApiUrl()) + '/configs/bootstrap?clientUrl=' + encodeURIComponent(clientUrl)
-}
-
-function localeUrl(apiUrl) {
-    const locale = localStorage.locale ? JSON.parse(localStorage.locale) : navigator.language
-    return (apiUrl || defaultApiUrl()) + '/configs/locales/' + locale + '?clientUrl=' + encodeURIComponent(clientUrl())
-}
-
-function provisioningUrl() {
-    if (window.app && window.app['provisioningUrl']) return window.app['provisioningUrl']
-    return false
-}
-
-function localProvisioning() {
-    if (window.app && window.app['provisioning']) return window.app['provisioning']
-    return null
-}
-
-function getWebSocketThrottleDelay() {
-    return window.app && window.app['webSocketThrottleDelay']
-}
-
-function getMaxUploadFileSize() {
-    return window.app && window.app['maxUploadFileSize']
-}
-
-function bootstrapErrorHTML(errorCode) {
-    function getErrorMessage() {
-        if (!errorCode) {
-            return {
-                title: 'Bootstrap Error',
-                message: 'Configuration cannot be loaded due to server unavailable.<br>Please, contact the application provider.'
-            }
-        }
-        if (errorCode === 404) {
-            return {
-                title: 'Application Not Found or Inactive',
-                message: 'We couldn\'t find an active application for this subdomain.<br>Please verify the details or contact support for assistance.'
-            }
-        }
-
-        return {
-            title: 'Bootstrap Error',
-            message: 'Server responded with an error code ' + errorCode + '.<br>Please, contact the application provider.'
-        }
-    }
-
-    const error = getErrorMessage()
-    return messageHTML(error.title, error.message)
-}
-
-function housekeepingHTML() {
-    const title = '<i class="fa fas fa-spinner fa-spin me-2 text-lighter"></i>Housekeeping in progress'
-    const message = 'We are currently upgrading the data to the latest version to enhance your experience. This process will be completed shortly.'
-    return messageHTML(title, message)
-}
-
-function notSeededHTML() {
-    const title = '<i class="fa fas fa-spinner fa-spin me-2 text-lighter"></i>Preparing your application...'
-    const message = 'We\'re setting things up and will be done shortly.'
-    return messageHTML(title, message)
-
-}
-
-function messageHTML(title, message) {
-    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + title + '</h1><p>' + message + '</p></div></div>'
-}
-
-function clientUrl() {
-    return (window.app && window.app['clientUrl']) || (window.location.origin + '/wizard')
-}
-
 function getApiUrl(config) {
     if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
         return config.cloud.serverUrl
     }
-    return defaultApiUrl()
+    return appConfig.getDefaultApiUrl()
 }
 
-function guideLinks() {
-    return (window.app && window.app['guideLinks']) || {}
+function getBootstrapConfigUrl(apiUrl) {
+    if (!apiUrl) {
+        const bootstrapConfigPath = '/configs/bootstrap?clientUrl=' + encodeURIComponent(appConfig.getClientUrl())
+        return appConfig.getDefaultApiUrl() + bootstrapConfigPath
+    }
+    return apiUrl + '/configs/bootstrap'
 }
+
+function getLocaleUrl(apiUrl) {
+    apiUrl = apiUrl || appConfig.getDefaultApiUrl()
+    if (appConfig.isAdminEnabled()) {
+        apiUrl = appConfig.getAdminApiUrl() || apiUrl.replace('/wizard-api', '/admin-api')
+        return apiUrl + '/locales/current/content?module=wizard'
+    }
+    return apiUrl + '/locales/current/content'
+}
+
 
 function loadApp(config, locale, provisioning) {
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
         session: JSON.parse(localStorage.getItem(sessionKey)),
-        selectedLocale: JSON.parse(localStorage.locale || null),
         apiUrl: getApiUrl(config),
-        clientUrl: clientUrl(),
-        webSocketThrottleDelay: getWebSocketThrottleDelay(),
+        clientUrl: appConfig.getClientUrl(),
+        webSocketThrottleDelay: appConfig.getWebSocketThrottleDelay(),
         config: config,
         provisioning: provisioning,
-        localProvisioning: localProvisioning(),
+        localProvisioning: appConfig.getProvisioning(),
         navigator: {
             pdf: getPdfSupport()
         },
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),
-        guideLinks: guideLinks(),
-        maxUploadFileSize: getMaxUploadFileSize(),
+        guideLinks: appConfig.getGuideLinks(),
+        maxUploadFileSize: appConfig.getMaxUploadFileSize(),
     }
 
     if (Object.keys(locale).length > 0) {
@@ -181,10 +119,11 @@ function loadApp(config, locale, provisioning) {
     registerDownloadPorts(app)
     registerImportPorts(app)
     registerIntegrationPorts(app)
+    registerLocalePorts(app)
     registerLocalStoragePorts(app)
     registerPageUnloadPorts(app)
     registerRefreshPorts(app)
-    registerSessionPorts(app, sessionKey, ['session/app'])
+    registerSessionPorts(app, sessionKey, [appSessionKey])
     registerThemePorts(app)
     registerWebsocketPorts(app)
     cookies.registerCookiePorts(app)
@@ -192,11 +131,27 @@ function loadApp(config, locale, provisioning) {
     cookies.init()
 }
 
-window.onload = function () {
+function createBootstrapConfigRequest() {
     const session = JSON.parse(localStorage.getItem(sessionKey))
     const token = session?.token?.token
-    const headers = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
+    const requestConfig = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
     const apiUrl = session?.apiUrl
+
+    return axios.get(getBootstrapConfigUrl(apiUrl), requestConfig)
+}
+
+function createLocaleRequest() {
+    const session = JSON.parse(localStorage.getItem(appConfig.isAdminEnabled() ? appSessionKey : sessionKey))
+    const token = session?.token?.token
+    const requestConfig = token ? {headers: {'Authorization': `Bearer ${token}`}} : {}
+    const apiUrl = session?.apiUrl
+
+    return axios.get(getLocaleUrl(apiUrl), requestConfig)
+}
+
+
+window.onload = function () {
+    const session = JSON.parse(localStorage.getItem(sessionKey))
 
     const defaultRetryTime = 2
     const maxRetryTime = 15
@@ -216,14 +171,12 @@ window.onload = function () {
 
     function load() {
         const promises = [
-            axios.get(configUrl(apiUrl), headers),
-            axios.get(localeUrl(apiUrl)).catch(() => {
-                return {data: {}}
-            })
+            createBootstrapConfigRequest(),
+            createLocaleRequest()
         ]
-        const hasProvisioning = !!provisioningUrl()
+        const hasProvisioning = appConfig.hasProvisioning()
         if (hasProvisioning) {
-            promises.push(axios.get(provisioningUrl()))
+            promises.push(axios.get(appConfig.getProvisioningUrl()))
         }
 
         axios.all(promises)
@@ -243,8 +196,11 @@ window.onload = function () {
                     showMessageAndRetry(notSeededHTML)
                 } else {
                     const errorCode = response ? err.response.status : null
-                    if (Math.floor(errorCode / 100) === 4 && session !== null) {
+                    const appSession = localStorage.getItem(appSessionKey)
+
+                    if (Math.floor(errorCode / 100) === 4 && (session !== null || appSession !== null)) {
                         localStorage.removeItem(sessionKey)
+                        localStorage.removeItem(appSessionKey)
                         window.location.reload()
                     } else {
                         document.body.innerHTML = bootstrapErrorHTML(errorCode)

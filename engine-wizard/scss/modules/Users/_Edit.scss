@@ -35,5 +35,38 @@
                 margin-top: 3rem;
             }
         }
+
+        .language-selection {
+            width: 100%;
+
+            label {
+                @include border-radius($border-radius);
+                @include transition(background-color 0.15s ease-in-out);
+                background: $gray-100;
+                padding: $spacer-2 $spacer-3;
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                cursor: pointer;
+
+                &:not(:last-child) {
+                    margin-bottom: $spacer-1;
+                }
+
+                &:hover, &.selected {
+                    background: $gray-200;
+                }
+
+                input {
+                    margin-right: $spacer-2;
+                }
+
+                .description {
+                    font-size: $font-size-sm;
+                    font-weight: normal;
+                    color: $gray-600;
+                }
+            }
+        }
     }
 }

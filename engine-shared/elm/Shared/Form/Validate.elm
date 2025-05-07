@@ -1,5 +1,6 @@
 module Shared.Form.Validate exposing
-    ( confirmation
+    ( authenticationServiceId
+    , confirmation
     , dict
     , documentTemplateId
     , ifElse
@@ -141,6 +142,11 @@ documentTemplateId appState =
 localeId : { a | locale : Gettext.Locale } -> Validation FormError String
 localeId appState =
     regex RegexPatterns.localeId (gettext "Fill in a valid locale ID." appState.locale)
+
+
+authenticationServiceId : { a | locale : Gettext.Locale } -> Validation FormError String
+authenticationServiceId appState =
+    regex RegexPatterns.authenticationServiceId (gettext "Use only lowercase alphanumeric characters or dash symbols." appState.locale)
 
 
 projectTag : { a | locale : Gettext.Locale } -> Validation FormError String

@@ -13,6 +13,7 @@ import Wizard.Routes as Routes
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Users.Edit.Components.AppKeys as AppKeys
+import Wizard.Users.Edit.Components.Language as Language
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
@@ -33,6 +34,10 @@ view appState subroute model =
                 UserEditRoutes.Password ->
                     Html.map PasswordMsg <|
                         Password.view appState model.passwordModel
+
+                UserEditRoutes.Language ->
+                    Html.map LanguageMsg <|
+                        Language.view appState model.languageModel
 
                 UserEditRoutes.ApiKeys ->
                     Html.map ApiKeysMsg <|
@@ -77,6 +82,16 @@ navigation appState subroute model =
                 , dataCy "user_nav_password"
                 ]
                 [ text (gettext "Password" appState.locale)
+                ]
+            )
+        , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditLanguage appState model.uuidOrCurrent)
+            (linkTo appState
+                (Routes.usersEditLanguage model.uuidOrCurrent)
+                [ class "nav-link"
+                , classList [ ( "active", subroute == UserEditRoutes.Language ) ]
+                , dataCy "user_nav_language"
+                ]
+                [ text (gettext "Language" appState.locale)
                 ]
             )
         , Html.viewIf (Feature.userEditApiKeys appState model.uuidOrCurrent)

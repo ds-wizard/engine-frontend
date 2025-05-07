@@ -17,6 +17,10 @@ type Route
     | UsageRoute
 
 
-defaultRoute : Route
-defaultRoute =
-    OrganizationRoute
+defaultRoute : Bool -> Route
+defaultRoute adminEnabled =
+    if adminEnabled then
+        DashboardAndLoginScreenRoute
+
+    else
+        OrganizationRoute

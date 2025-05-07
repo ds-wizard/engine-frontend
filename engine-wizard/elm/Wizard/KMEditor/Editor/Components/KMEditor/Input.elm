@@ -422,7 +422,7 @@ reorderable appState config =
 
 type alias AnnotationsInputConfig msg =
     { annotations : List Annotation
-    , onEdit : List Annotation -> msg
+    , onEdit : Maybe String -> List Annotation -> msg
     }
 
 
@@ -463,7 +463,7 @@ annotations appState config =
                     [ input
                         [ type_ "text"
                         , value annotation.key
-                        , onInput (config.onEdit << updateKeyAt i)
+                        , onInput (config.onEdit Nothing << updateKeyAt i)
                         , class "form-control"
                         , placeholder (gettext "Key" appState.locale)
                         , dataCy "annotation_key"
@@ -471,7 +471,7 @@ annotations appState config =
                         []
                     , Html.textarea
                         [ value annotation.value
-                        , onInput (config.onEdit << updateValAt i)
+                        , onInput (config.onEdit Nothing << updateValAt i)
                         , class "form-control"
                         , placeholder (gettext "Value" appState.locale)
                         , dataCy "annotation_value"
@@ -483,7 +483,7 @@ annotations appState config =
                 , div []
                     [ a
                         [ class "btn btn-link text-danger"
-                        , onClick (config.onEdit <| removeAt i)
+                        , onClick (config.onEdit Nothing <| removeAt i)
                         , dataCy "annotation_remove-button"
                         ]
                         [ faSet "_global.delete" appState ]
@@ -494,7 +494,7 @@ annotations appState config =
         addAnnotation =
             a
                 [ class "with-icon"
-                , onClick (config.onEdit (config.annotations ++ [ Annotation.new ]))
+                , onClick (config.onEdit (Just ".annotations-editor-item:last-child .annotations-editor-item-inputs input") (config.annotations ++ [ Annotation.new ]))
                 ]
                 [ faSet "_global.add" appState
                 , text (gettext "Add annotation" appState.locale)
@@ -1075,7 +1075,7 @@ colorOptions =
 type alias PropsInputConfig msg =
     { label : String
     , values : List String
-    , onChange : List String -> msg
+    , onChange : Maybe String -> List String -> msg
     }
 
 
@@ -1094,7 +1094,7 @@ props appState config =
                 [ input
                     [ type_ "text"
                     , value prop
-                    , onInput (config.onChange << updateAt i)
+                    , onInput (config.onChange Nothing << updateAt i)
                     , class "form-control mb-2"
                     , dataCy "props-input_input"
                     , name <| "prop." ++ String.fromInt i
@@ -1102,7 +1102,7 @@ props appState config =
                     []
                 , a
                     [ class "btn btn-link text-danger"
-                    , onClick <| config.onChange <| removeAt i
+                    , onClick <| config.onChange Nothing <| removeAt i
                     , attribute "data-cy" "prop-remove"
                     ]
                     [ faSet "_global.delete" appState ]
@@ -1111,7 +1111,7 @@ props appState config =
 
         addProp =
             a
-                [ onClick (config.onChange (config.values ++ [ "" ]))
+                [ onClick (config.onChange (Just "[data-cy=props-input_input-wrapper]:last-child input") (config.values ++ [ "" ]))
                 , dataCy "props-input_add-button"
                 , class "with-icon"
                 ]
@@ -1133,7 +1133,7 @@ props appState config =
 type alias HeadersInputConfig msg =
     { label : String
     , headers : List RequestHeader
-    , onEdit : List RequestHeader -> msg
+    , onEdit : Maybe String -> List RequestHeader -> msg
     }
 
 
@@ -1166,7 +1166,7 @@ headers appState config =
                 [ input
                     [ type_ "text"
                     , value header.key
-                    , onInput (config.onEdit << updateKeyAt i)
+                    , onInput (config.onEdit Nothing << updateKeyAt i)
                     , placeholder (gettext "Header Name" appState.locale)
                     , class "form-control"
                     , dataCy "integration-input_name"
@@ -1175,7 +1175,7 @@ headers appState config =
                 , input
                     [ type_ "text"
                     , value header.value
-                    , onInput (config.onEdit << updateValAt i)
+                    , onInput (config.onEdit Nothing << updateValAt i)
                     , placeholder (gettext "Header Value" appState.locale)
                     , class "form-control"
                     , dataCy "integration-input_value"
@@ -1183,7 +1183,7 @@ headers appState config =
                     []
                 , a
                     [ class "btn btn-link text-danger"
-                    , onClick (config.onEdit <| removeAt i)
+                    , onClick (config.onEdit Nothing <| removeAt i)
                     , attribute "data-cy" "prop-remove"
                     ]
                     [ faSet "_global.delete" appState ]
@@ -1193,7 +1193,7 @@ headers appState config =
         addHeader =
             a
                 [ class "with-icon"
-                , onClick (config.onEdit (config.headers ++ [ RequestHeader.new ]))
+                , onClick (config.onEdit (Just "[data-cy=integration-input_item]:last-child input:first-child") (config.headers ++ [ RequestHeader.new ]))
                 , dataCy "integration-input_add-button"
                 ]
                 [ faSet "_global.add" appState

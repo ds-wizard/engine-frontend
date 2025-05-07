@@ -1,17 +1,19 @@
 module Wizard.Locales.Create.Update exposing (update)
 
 import ActionResult
-import File
+import File exposing (File)
 import Form
 import Gettext exposing (gettext)
-import Json.Decode exposing (decodeValue)
+import Json.Decode as D
+import Json.Encode as E
 import Shared.Api.Locales as LocalesApi
 import Shared.Error.ApiError as ApiError exposing (ApiError)
 import String exposing (fromInt)
 import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Components.Dropzone as Dropzone
 import Wizard.Locales.Common.LocaleCreateForm as LocaleCreateForm
-import Wizard.Locales.Create.Models exposing (Model, dropzoneId, fileInputId)
+import Wizard.Locales.Create.Models exposing (Model, combineContentFiles)
 import Wizard.Locales.Create.Msgs exposing (Msg(..))
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -22,25 +24,23 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 update : AppState -> Msg -> (Msg -> Wizard.Msgs.Msg) -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update appState msg wrapMsg model =
     case msg of
-        DragEnter ->
-            ( { model | dnd = model.dnd + 1 }, Ports.createLocaleDropzone dropzoneId )
+        WizardContentFileDropzoneMsg dropzoneMsg ->
+            updateDropzoneState
+                { dropzoneMsg = dropzoneMsg
+                , dropzoneState = model.wizardContentFileDropzone
+                , createModel = \ds -> { model | wizardContentFileDropzone = ds }
+                , wrapDropzoneMsg = wrapMsg << WizardContentFileDropzoneMsg
+                , dropzoneType = LocaleJed "wizard"
+                }
 
-        DragLeave ->
-            ( { model | dnd = model.dnd - 1 }, Cmd.none )
-
-        FileSelected ->
-            ( model, Ports.localeFileSelected fileInputId )
-
-        FileRead data ->
-            case decodeValue File.decoder data of
-                Ok fileData ->
-                    ( { model | file = Just fileData }, Cmd.none )
-
-                Err _ ->
-                    ( model, Cmd.none )
-
-        CancelFile ->
-            ( { model | file = Nothing, creatingLocale = ActionResult.Unset, dnd = 0 }, Cmd.none )
+        MailContentFileDropzoneMsg dropzoneMsg ->
+            updateDropzoneState
+                { dropzoneMsg = dropzoneMsg
+                , dropzoneState = model.mailContentFileDropzone
+                , createModel = \ds -> { model | mailContentFileDropzone = ds }
+                , wrapDropzoneMsg = wrapMsg << MailContentFileDropzoneMsg
+                , dropzoneType = LocalePO (\file -> \m -> { m | mailContent = file })
+                }
 
         CreateCompleted result ->
             handleCreateCompleted appState model result
@@ -51,14 +51,81 @@ update appState msg wrapMsg model =
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
 
-        _ ->
-            ( model, Cmd.none )
+        LocaleConverted value ->
+            case D.decodeValue File.decoder value of
+                Ok file ->
+                    case File.name file of
+                        "wizard" ->
+                            ( { model | wizardContent = Just file }, Cmd.none )
+
+                        _ ->
+                            ( model, Cmd.none )
+
+                Err _ ->
+                    ( model, Cmd.none )
+
+
+type alias UpdateDropzoneConfig msg =
+    { dropzoneMsg : Dropzone.Msg
+    , dropzoneState : Dropzone.State
+    , createModel : Dropzone.State -> Model
+    , wrapDropzoneMsg : Dropzone.Msg -> msg
+    , dropzoneType : UpdateDropzoneType
+    }
+
+
+type UpdateDropzoneType
+    = LocaleJed String
+    | LocalePO (Maybe File -> Model -> Model)
+
+
+updateDropzoneState : UpdateDropzoneConfig msg -> ( Model, Cmd msg )
+updateDropzoneState cfg =
+    let
+        dropzoneUpdateConfig =
+            { mimes = [ "application/x-po", ".po" ]
+            , readFile = True
+            }
+
+        ( newDropzoneState, dropzoneCmd ) =
+            Dropzone.update dropzoneUpdateConfig cfg.dropzoneMsg cfg.dropzoneState
+                |> Tuple.mapSecond (Cmd.map cfg.wrapDropzoneMsg)
+
+        newModel =
+            cfg.createModel newDropzoneState
+    in
+    case cfg.dropzoneType of
+        LocaleJed fileName ->
+            let
+                localeCmd =
+                    case Dropzone.getFileContent newDropzoneState of
+                        Just fileContent ->
+                            Ports.convertLocaleFile <|
+                                E.object
+                                    [ ( "fileName", E.string fileName )
+                                    , ( "fileContent", E.string fileContent )
+                                    ]
+
+                        Nothing ->
+                            Cmd.none
+            in
+            ( newModel
+            , Cmd.batch
+                [ dropzoneCmd
+                , localeCmd
+                ]
+            )
+
+        LocalePO setFile ->
+            ( setFile (Dropzone.getFile newDropzoneState) newModel
+            , dropzoneCmd
+            )
 
 
 handleForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleForm formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.form, model.file ) of
-        ( Form.Submit, Just form, Just file ) ->
+    case ( formMsg, Form.getOutput model.form, combineContentFiles model ) of
+        ( Form.Submit, Just form, Just contentFiles ) ->
             let
                 data =
                     [ ( "name", form.name )
@@ -73,7 +140,7 @@ handleForm formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        LocalesApi.createFromPO data file appState CreateCompleted
+                        LocalesApi.createFromPO data contentFiles.wizard contentFiles.mail appState CreateCompleted
             in
             ( { model | creatingLocale = ActionResult.Loading }, cmd )
 

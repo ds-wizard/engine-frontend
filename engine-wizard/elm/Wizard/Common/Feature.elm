@@ -74,6 +74,7 @@ module Wizard.Common.Feature exposing
     , userEditActiveSessions
     , userEditApiKeys
     , userEditAppKeys
+    , userEditLanguage
     , userEditSubmissionSettings
     , usersCreate
     , usersView
@@ -468,6 +469,11 @@ userEdit appState uuidOrCurrent =
     UuidOrCurrent.isCurrent uuidOrCurrent || adminOr Perm.userManagement appState
 
 
+userEditLanguage : AppState -> UuidOrCurrent -> Bool
+userEditLanguage appState uuidOrCurrent =
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
+
+
 userEditApiKeys : AppState -> UuidOrCurrent -> Bool
 userEditApiKeys appState uuidOrCurrent =
     UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
@@ -504,7 +510,7 @@ type alias LocaleLike a =
 
 isDefaultLanguage : LocaleLike a -> Bool
 isDefaultLanguage locale =
-    locale.organizationId == "wizard" && locale.localeId == "default"
+    String.startsWith "~" locale.organizationId
 
 
 localeView : AppState -> Bool

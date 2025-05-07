@@ -5,8 +5,10 @@ port module Wizard.Ports exposing
     , clearSessionAndReload
     , clearUnloadMessage
     , consoleError
-    , createDropzone
-    , createLocaleDropzone
+    , convertLocaleFile
+    ,  createDropzone
+       --, createLocaleDropzone
+
     , downloadFile
     , fileContentRead
     , fileSelected
@@ -19,7 +21,9 @@ port module Wizard.Ports exposing
     , localStorageGetAndRemove
     , localStorageRemove
     , localStorageSet
-    , localeFileSelected
+    ,  localeConverted
+       --, localeFileSelected
+
     , refresh
     , scrollIntoView
     , scrollIntoViewCenter
@@ -31,6 +35,7 @@ port module Wizard.Ports exposing
     , subscribeScrollTop
     )
 
+import Json.Decode as D
 import Json.Encode as E
 import Wizard.Common.ElementScrollTop as ElementScrollTop exposing (ElementScrollTop)
 
@@ -72,16 +77,10 @@ port clearSessionAndReload : () -> Cmd msg
 port fileSelected : String -> Cmd msg
 
 
-port localeFileSelected : String -> Cmd msg
-
-
 port fileContentRead : (E.Value -> msg) -> Sub msg
 
 
 port createDropzone : String -> Cmd msg
-
-
-port createLocaleDropzone : String -> Cmd msg
 
 
 
@@ -168,3 +167,13 @@ port localStorageData : (E.Value -> msg) -> Sub msg
 
 
 port localStorageRemove : String -> Cmd msg
+
+
+
+-- Locale
+
+
+port convertLocaleFile : E.Value -> Cmd msg
+
+
+port localeConverted : (D.Value -> msg) -> Sub msg

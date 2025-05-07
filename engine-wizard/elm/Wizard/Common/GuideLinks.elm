@@ -19,6 +19,7 @@ module Wizard.Common.GuideLinks exposing
     , merge
     , profileActiveSessions
     , profileApiKeys
+    , profileLanguage
     , projectImporters
     , projectsCreate
     , projectsDocumentSubmission
@@ -75,8 +76,9 @@ default =
             , ( "localesCreate", "https://guide.ds-wizard.org/en/latest/application/administration/locales/create.html" )
             , ( "localesImport", "https://guide.ds-wizard.org/en/latest/application/administration/locales/import.html" )
             , ( "markdownCheatsheet", "https://guide.ds-wizard.org/en/latest/more/miscellaneous/markdown-cheatsheet.html" )
-            , ( "profileActiveSessions", "https://guide.ds-wizard.org/en/latest/application/profile/edit/active-sessions.html" )
-            , ( "profileApiKeys", "https://guide.ds-wizard.org/en/latest/application/profile/edit/api-keys.html" )
+            , ( "profileActiveSessions", "https://guide.ds-wizard.org/en/latest/application/profile/settings/active-sessions.html" )
+            , ( "profileApiKeys", "https://guide.ds-wizard.org/en/latest/application/profile/settings/api-keys.html" )
+            , ( "profileLanguage", "https://guide.ds-wizard.org/en/latest/application/profile/settings/language.html" )
             , ( "projectsCreate", "https://guide.ds-wizard.org/en/latest/application/projects/list/create.html" )
             , ( "projectsDocumentSubmission", "https://guide.ds-wizard.org/en/latest/application/projects/list/detail/documents.html#document-submission" )
             , ( "projectsDocuments", "https://guide.ds-wizard.org/en/latest/application/projects/documents.html" )
@@ -190,6 +192,11 @@ localesImport =
 markdownCheatsheet : GuideLinks -> String
 markdownCheatsheet =
     get "markdownCheatsheet"
+
+
+profileLanguage : GuideLinks -> String
+profileLanguage =
+    get "profileLanguage"
 
 
 profileApiKeys : GuideLinks -> String

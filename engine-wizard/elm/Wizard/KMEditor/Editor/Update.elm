@@ -9,6 +9,7 @@ import ActionResult exposing (ActionResult(..))
 import Debounce
 import Dict
 import Gettext exposing (gettext)
+import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Branches as BranchesApi
 import Shared.Api.Prefabs as PrefabsApi
@@ -257,7 +258,7 @@ update wrapMsg msg appState model =
             in
             withSeed ( { model | publishModalModel = publishModalModel }, publishModalCmd )
 
-        EventMsg shouldDebounce parentUuid mbEntityUuid createEvent ->
+        EventMsg shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent ->
             let
                 ( kmEventUuid, newSeed1 ) =
                     getUuidString appState.seed
@@ -286,6 +287,9 @@ update wrapMsg msg appState model =
 
                 setUnloadMessageCmd =
                     Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+
+                focusSelectorCmd =
+                    Maybe.unwrap Cmd.none Ports.focus mbFocusSelector
             in
             if shouldDebounce then
                 let
@@ -315,7 +319,7 @@ update wrapMsg msg appState model =
                     , eventsWebsocketDebounce = Dict.insert entityUuid debounce model.eventsWebsocketDebounce
                     , eventsLastEvent = Dict.insert entityUuid squashedEvent model.eventsLastEvent
                   }
-                , Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd ]
+                , Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd, focusSelectorCmd ]
                 )
 
             else
@@ -343,7 +347,7 @@ update wrapMsg msg appState model =
                     | branchModel = newBranchModel
                     , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
                   }
-                , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd ]
+                , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd, focusSelectorCmd ]
                 )
 
         EventDebounceMsg entityUuid debounceMsg ->

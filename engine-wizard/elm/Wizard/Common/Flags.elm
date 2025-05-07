@@ -27,7 +27,6 @@ type alias Flags =
     , gaEnabled : Bool
     , cookieConsent : Bool
     , locale : Gettext.Locale
-    , selectedLocale : Maybe String
     , guideLinks : GuideLinks
     , maxUploadFileSize : Maybe Int
     , success : Bool
@@ -49,7 +48,6 @@ decoder =
         |> D.required "gaEnabled" D.bool
         |> D.required "cookieConsent" D.bool
         |> D.optional "locale" Gettext.localeDecoder Gettext.defaultLocale
-        |> D.required "selectedLocale" (D.nullable D.string)
         |> D.required "guideLinks" GuideLinks.decoder
         |> D.optional "maxUploadFileSize" (D.maybe D.int) Nothing
         |> D.hardcoded True
@@ -69,7 +67,6 @@ default =
     , gaEnabled = False
     , cookieConsent = False
     , locale = Gettext.defaultLocale
-    , selectedLocale = Nothing
     , guideLinks = GuideLinks.default
     , maxUploadFileSize = Nothing
     , success = False

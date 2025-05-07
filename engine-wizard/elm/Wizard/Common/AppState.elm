@@ -55,7 +55,6 @@ type alias AppState =
     , gaEnabled : Bool
     , cookieConsent : Bool
     , locale : Gettext.Locale
-    , selectedLocale : Maybe String
     , sessionExpiresSoonModalHidden : Bool
     , theme : Maybe Theme
     , guideLinks : GuideLinks
@@ -124,7 +123,6 @@ init flagsValue key =
       , gaEnabled = flags.gaEnabled
       , cookieConsent = flags.cookieConsent
       , locale = flags.locale
-      , selectedLocale = flags.selectedLocale
       , sessionExpiresSoonModalHidden = False
       , theme = theme
       , guideLinks = GuideLinks.merge flags.guideLinks GuideLinks.default

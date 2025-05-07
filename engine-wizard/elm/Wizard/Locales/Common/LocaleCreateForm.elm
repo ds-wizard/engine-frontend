@@ -1,5 +1,5 @@
 module Wizard.Locales.Common.LocaleCreateForm exposing
-    ( LocaleCreateFrom
+    ( LocaleCreateForm
     , init
     , validation
     )
@@ -11,7 +11,7 @@ import Shared.Form.Validate as V
 import Wizard.Common.AppState exposing (AppState)
 
 
-type alias LocaleCreateFrom =
+type alias LocaleCreateForm =
     { name : String
     , description : String
     , code : String
@@ -27,14 +27,14 @@ type alias LocaleCreateFrom =
     }
 
 
-init : AppState -> Form FormError LocaleCreateFrom
+init : AppState -> Form FormError LocaleCreateForm
 init appState =
     Form.initial [] (validation appState)
 
 
-validation : AppState -> Validation FormError LocaleCreateFrom
+validation : AppState -> Validation FormError LocaleCreateForm
 validation appState =
-    V.succeed LocaleCreateFrom
+    V.succeed LocaleCreateForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.string)
         |> V.andMap (V.field "code" V.string)

@@ -7,4 +7,4 @@ import Wizard.Ports as Ports
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Ports.fileContentRead FileRead
+    Ports.localeConverted LocaleConverted

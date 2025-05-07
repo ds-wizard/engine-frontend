@@ -246,6 +246,9 @@ updateWithQuestionnaireData data detail =
         , visibility = data.visibility
         , sharing = data.sharing
         , permissions = data.permissions
+        , labels = data.labels
+        , unresolvedCommentCounts = data.unresolvedCommentCounts
+        , resolvedCommentCounts = data.resolvedCommentCounts
     }
 
 

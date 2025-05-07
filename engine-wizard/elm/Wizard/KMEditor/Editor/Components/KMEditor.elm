@@ -285,7 +285,7 @@ subscriptions model =
 
 
 type alias EventMsg msg =
-    Bool -> String -> Maybe String -> (CommonEventData -> Event) -> msg
+    Bool -> Maybe String -> String -> Maybe String -> (CommonEventData -> Event) -> msg
 
 
 view : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> EditorBranch -> Html msg
@@ -303,18 +303,18 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
             , collapseAll = wrapMsg CollapseAll
             , setTreeOpen = compose2 wrapMsg SetTreeOpen
             , createEvents =
-                { createChapter = \kmUuid -> eventMsg False kmUuid Nothing (AddChapterEvent AddChapterEventData.init)
-                , createQuestion = \parentUuid -> eventMsg False parentUuid Nothing (AddQuestionEvent AddQuestionEventData.init)
-                , createAnswer = \questionUuid -> eventMsg False questionUuid Nothing (AddAnswerEvent AddAnswerEventData.init)
-                , createChoice = \questionUuid -> eventMsg False questionUuid Nothing (AddChoiceEvent AddChoiceEventData.init)
-                , createExpert = \questionUuid -> eventMsg False questionUuid Nothing (AddExpertEvent AddExpertEventData.init)
-                , createReference = \questionUuid -> eventMsg False questionUuid Nothing (AddReferenceEvent AddReferenceEventData.init)
-                , createResourceCollection = \questionUuid -> eventMsg False questionUuid Nothing (AddResourceCollectionEvent AddResourceCollectionEventData.init)
-                , createResourcePage = \referenceUuid -> eventMsg False referenceUuid Nothing (AddResourcePageEvent AddResourcePageEventData.init)
-                , createIntegration = \kmUuid -> eventMsg False kmUuid Nothing (AddIntegrationEvent AddIntegrationEventData.init)
-                , createTag = \kmUuid -> eventMsg False kmUuid Nothing (AddTagEvent AddTagEventData.init)
-                , createMetric = \kmUuid -> eventMsg False kmUuid Nothing (AddMetricEvent AddMetricEventData.init)
-                , createPhase = \kmUuid -> eventMsg False kmUuid Nothing (AddPhaseEvent AddPhaseEventData.init)
+                { createChapter = \kmUuid -> eventMsg False Nothing kmUuid Nothing (AddChapterEvent AddChapterEventData.init)
+                , createQuestion = \parentUuid -> eventMsg False Nothing parentUuid Nothing (AddQuestionEvent AddQuestionEventData.init)
+                , createAnswer = \questionUuid -> eventMsg False Nothing questionUuid Nothing (AddAnswerEvent AddAnswerEventData.init)
+                , createChoice = \questionUuid -> eventMsg False Nothing questionUuid Nothing (AddChoiceEvent AddChoiceEventData.init)
+                , createExpert = \questionUuid -> eventMsg False Nothing questionUuid Nothing (AddExpertEvent AddExpertEventData.init)
+                , createReference = \questionUuid -> eventMsg False Nothing questionUuid Nothing (AddReferenceEvent AddReferenceEventData.init)
+                , createResourceCollection = \questionUuid -> eventMsg False Nothing questionUuid Nothing (AddResourceCollectionEvent AddResourceCollectionEventData.init)
+                , createResourcePage = \referenceUuid -> eventMsg False Nothing referenceUuid Nothing (AddResourcePageEvent AddResourcePageEventData.init)
+                , createIntegration = \kmUuid -> eventMsg False Nothing kmUuid Nothing (AddIntegrationEvent AddIntegrationEventData.init)
+                , createTag = \kmUuid -> eventMsg False Nothing kmUuid Nothing (AddTagEvent AddTagEventData.init)
+                , createMetric = \kmUuid -> eventMsg False Nothing kmUuid Nothing (AddMetricEvent AddMetricEventData.init)
+                , createPhase = \kmUuid -> eventMsg False Nothing kmUuid Nothing (AddPhaseEvent AddPhaseEventData.init)
                 }
             }
 
@@ -500,34 +500,37 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditKnowledgeModelEventData.init
                 |> map value
                 |> EditKnowledgeModelEvent
-                |> eventMsg True nilUuid (Just kmUuid)
+                |> eventMsg True selector nilUuid (Just kmUuid)
 
         addChapterEvent =
             AddChapterEvent AddChapterEventData.init
-                |> eventMsg False kmUuid Nothing
+                |> eventMsg False Nothing kmUuid Nothing
 
         addMetricEvent =
             AddMetricEvent AddMetricEventData.init
-                |> eventMsg False kmUuid Nothing
+                |> eventMsg False Nothing kmUuid Nothing
 
         addPhaseEvent =
             AddPhaseEvent AddPhaseEventData.init
-                |> eventMsg False kmUuid Nothing
+                |> eventMsg False Nothing kmUuid Nothing
 
         addTagEvent =
             AddTagEvent AddTagEventData.init
-                |> eventMsg False kmUuid Nothing
+                |> eventMsg False Nothing kmUuid Nothing
 
         addIntegrationEvent =
             AddIntegrationEvent AddIntegrationEventData.init
-                |> eventMsg False kmUuid Nothing
+                |> eventMsg False Nothing kmUuid Nothing
 
         addResourceCollectionEvent =
             AddResourceCollectionEvent AddResourceCollectionEventData.init
-                |> eventMsg False kmUuid Nothing
+                |> eventMsg False Nothing kmUuid Nothing
 
         chaptersInput =
             Input.reorderable appState
@@ -634,7 +637,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
         annotationsInput =
             Input.annotations appState
                 { annotations = km.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("km-" ++ kmUuid)
@@ -656,15 +659,18 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
             EditorBranch.getParentUuid chapter.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditChapterEventData.init
                 |> map value
                 |> EditChapterEvent
-                |> eventMsg True parentUuid (Just chapter.uuid)
+                |> eventMsg True selector parentUuid (Just chapter.uuid)
 
         questionAddEvent =
             AddQuestionEventData.init
                 |> AddQuestionEvent
-                |> eventMsg False chapter.uuid Nothing
+                |> eventMsg False Nothing chapter.uuid Nothing
 
         chapterEditorTitle =
             editorTitle appState
@@ -715,7 +721,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
         annotationsInput =
             Input.annotations appState
                 { annotations = chapter.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("chapter-" ++ chapter.uuid)
@@ -737,7 +743,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             EditorBranch.getParentUuid questionUuid editorBranch
 
         createEditEvent setOptions setList setValue setIntegration setMultiChoice setItemSelect setFile value =
-            eventMsg True parentUuid (Just questionUuid) <|
+            createEditEventWithFocusSelector setOptions setList setValue setIntegration setMultiChoice setItemSelect setFile Nothing value
+
+        createEditEventWithFocusSelector setOptions setList setValue setIntegration setMultiChoice setItemSelect setFile selector value =
+            eventMsg True selector parentUuid (Just questionUuid) <|
                 EditQuestionEvent <|
                     case question of
                         OptionsQuestion _ _ ->
@@ -776,7 +785,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> EditQuestionFileEvent
 
         onTypeChange value =
-            eventMsg False parentUuid (Just questionUuid) <|
+            eventMsg False Nothing parentUuid (Just questionUuid) <|
                 case value of
                     "List" ->
                         EditQuestionListEventData.init
@@ -818,12 +827,12 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         addReferenceEvent =
             AddReferenceEventData.init
                 |> AddReferenceEvent
-                |> eventMsg False questionUuid Nothing
+                |> eventMsg False Nothing questionUuid Nothing
 
         expertAddEvent =
             AddExpertEventData.init
                 |> AddExpertEvent
-                |> eventMsg False questionUuid Nothing
+                |> eventMsg False Nothing questionUuid Nothing
 
         questionTypeOptions =
             [ ( "Options", gettext "Options" appState.locale )
@@ -970,7 +979,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         annotationsInput =
             Input.annotations appState
                 { annotations = Question.getAnnotations question
-                , onEdit = createEditEvent setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations setAnnotations
                 }
 
         questionTypeInputs =
@@ -981,12 +990,12 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionOptionsEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionOptionsEvent)
-                                |> eventMsg False parentUuid (Just questionUuid)
+                                |> eventMsg False Nothing parentUuid (Just questionUuid)
 
                         addAnswerEvent =
                             AddAnswerEventData.init
                                 |> AddAnswerEvent
-                                |> eventMsg False questionUuid Nothing
+                                |> eventMsg False Nothing questionUuid Nothing
 
                         answersInput =
                             Input.reorderable appState
@@ -1013,12 +1022,12 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionListEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionListEvent)
-                                |> eventMsg False parentUuid (Just questionUuid)
+                                |> eventMsg False Nothing parentUuid (Just questionUuid)
 
                         addItemTemplateQuestionEvent =
                             AddQuestionEventData.init
                                 |> AddQuestionEvent
-                                |> eventMsg False questionUuid Nothing
+                                |> eventMsg False Nothing questionUuid Nothing
 
                         itemTemplateQuestionsInput =
                             Input.reorderable appState
@@ -1053,7 +1062,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionValueEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionValueEvent)
-                                |> eventMsg False parentUuid (Just questionUuid)
+                                |> eventMsg False Nothing parentUuid (Just questionUuid)
 
                         questionValueTypeOptions =
                             [ ( "StringQuestionValueType", gettext "String" appState.locale )
@@ -1095,7 +1104,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionIntegrationEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionIntegrationEvent)
-                                |> eventMsg False parentUuid (Just questionUuid)
+                                |> eventMsg False Nothing parentUuid (Just questionUuid)
 
                         integrationUuidOptions =
                             KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel
@@ -1158,12 +1167,12 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionMultiChoiceEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionMultiChoiceEvent)
-                                |> eventMsg False parentUuid (Just questionUuid)
+                                |> eventMsg False Nothing parentUuid (Just questionUuid)
 
                         addChoiceEvent =
                             AddChoiceEventData.init
                                 |> AddChoiceEvent
-                                |> eventMsg False questionUuid Nothing
+                                |> eventMsg False Nothing questionUuid Nothing
 
                         choicesInput =
                             Input.reorderable appState
@@ -1190,7 +1199,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionItemSelectEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionItemSelectEvent)
-                                |> eventMsg False parentUuid (Just questionUuid)
+                                |> eventMsg False Nothing parentUuid (Just questionUuid)
 
                         listQuestionUuidOptions =
                             KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
@@ -1232,7 +1241,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             EditQuestionFileEventData.init
                                 |> map value
                                 |> (EditQuestionEvent << EditQuestionFileEvent)
-                                |> eventMsg True parentUuid (Just questionUuid)
+                                |> eventMsg True Nothing parentUuid (Just questionUuid)
 
                         fileTypesInput =
                             Input.string
@@ -1303,10 +1312,13 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
             EditorBranch.getParentUuid metric.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditMetricEventData.init
                 |> map value
                 |> EditMetricEvent
-                |> eventMsg True parentUuid (Just metric.uuid)
+                |> eventMsg True selector parentUuid (Just metric.uuid)
 
         metricEditorTitle =
             editorTitle appState
@@ -1348,7 +1360,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
         annotationsInput =
             Input.annotations appState
                 { annotations = metric.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("metric-" ++ metric.uuid)
@@ -1367,10 +1379,13 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
             EditorBranch.getParentUuid phase.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditPhaseEventData.init
                 |> map value
                 |> EditPhaseEvent
-                |> eventMsg True parentUuid (Just phase.uuid)
+                |> eventMsg True selector parentUuid (Just phase.uuid)
 
         phaseEditorTitle =
             editorTitle appState
@@ -1401,7 +1416,7 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
         annotationsInput =
             Input.annotations appState
                 { annotations = phase.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("phase-" ++ phase.uuid)
@@ -1419,10 +1434,13 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
             EditorBranch.getParentUuid tag.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditTagEventData.init
                 |> map value
                 |> EditTagEvent
-                |> eventMsg True parentUuid (Just tag.uuid)
+                |> eventMsg True selector parentUuid (Just tag.uuid)
 
         tagEditorTitle =
             editorTitle appState
@@ -1461,7 +1479,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
         annotationsInput =
             Input.annotations appState
                 { annotations = tag.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("tag-" ++ tag.uuid)
@@ -1483,7 +1501,10 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             EditorBranch.getParentUuid integrationUuid editorBranch
 
         createEditEvent setApi setWidget value =
-            eventMsg True parentUuid (Just integrationUuid) <|
+            createEditEventWithFocusSelector setApi setWidget Nothing value
+
+        createEditEventWithFocusSelector setApi setWidget selector value =
+            eventMsg True selector parentUuid (Just integrationUuid) <|
                 EditIntegrationEvent <|
                     case integration of
                         ApiIntegration _ _ ->
@@ -1497,7 +1518,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 |> EditIntegrationWidgetEvent
 
         createEditEventFromPrefab integrationPrefab =
-            eventMsg False parentUuid (Just integrationUuid) <|
+            eventMsg False Nothing parentUuid (Just integrationUuid) <|
                 EditIntegrationEvent <|
                     case integrationPrefab of
                         ApiIntegration commonData apiData ->
@@ -1530,7 +1551,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 }
 
         onTypeChange value =
-            eventMsg False parentUuid (Just integrationUuid) <|
+            eventMsg False Nothing parentUuid (Just integrationUuid) <|
                 case value of
                     "Widget" ->
                         EditIntegrationWidgetEventData.init
@@ -1595,7 +1616,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
             Input.props appState
                 { label = gettext "Props" appState.locale
                 , values = Integration.getProps integration
-                , onChange = createEditEvent setProps setProps
+                , onChange = createEditEventWithFocusSelector setProps setProps
                 }
 
         itemUrl =
@@ -1609,7 +1630,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
         annotationsInput =
             Input.annotations appState
                 { annotations = Integration.getAnnotations integration
-                , onEdit = createEditEvent setAnnotations setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations setAnnotations
                 }
 
         integrationTypeInputs =
@@ -1617,10 +1638,13 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                 ApiIntegration _ data ->
                     let
                         createTypeEditEvent map value =
+                            createTypeEditEventWithFocusSelector map Nothing value
+
+                        createTypeEditEventWithFocusSelector map selector value =
                             EditIntegrationApiEventData.init
                                 |> map value
                                 |> (EditIntegrationEvent << EditIntegrationApiEvent)
-                                |> eventMsg True parentUuid (Just integrationUuid)
+                                |> eventMsg True selector parentUuid (Just integrationUuid)
 
                         requestUrlInput =
                             Input.string
@@ -1644,7 +1668,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             Input.headers appState
                                 { label = gettext "Request HTTP Headers" appState.locale
                                 , headers = data.requestHeaders
-                                , onEdit = createTypeEditEvent setRequestHeaders
+                                , onEdit = createTypeEditEventWithFocusSelector setRequestHeaders
                                 }
 
                         requestBodyInput =
@@ -1725,7 +1749,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                             EditIntegrationWidgetEventData.init
                                 |> map value
                                 |> (EditIntegrationEvent << EditIntegrationWidgetEvent)
-                                |> eventMsg True parentUuid (Just integrationUuid)
+                                |> eventMsg True Nothing parentUuid (Just integrationUuid)
 
                         widgetUrlInput =
                             Input.string
@@ -1834,15 +1858,18 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
             EditorBranch.getParentUuid answer.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditAnswerEventData.init
                 |> map value
                 |> EditAnswerEvent
-                |> eventMsg True parentUuid (Just answer.uuid)
+                |> eventMsg True selector parentUuid (Just answer.uuid)
 
         questionAddEvent =
             AddQuestionEventData.init
                 |> AddQuestionEvent
-                |> eventMsg False answer.uuid Nothing
+                |> eventMsg False Nothing answer.uuid Nothing
 
         answerEditorTitle =
             editorTitle appState
@@ -1908,7 +1935,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
         annotationsInput =
             Input.annotations appState
                 { annotations = answer.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("answer-" ++ answer.uuid)
@@ -1928,10 +1955,13 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
             EditorBranch.getParentUuid choice.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditChoiceEventData.init
                 |> map value
                 |> EditChoiceEvent
-                |> eventMsg True parentUuid (Just choice.uuid)
+                |> eventMsg True selector parentUuid (Just choice.uuid)
 
         choiceEditorTitle =
             editorTitle appState
@@ -1954,7 +1984,7 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
         annotationsInput =
             Input.annotations appState
                 { annotations = choice.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("choice-" ++ choice.uuid)
@@ -1974,7 +2004,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
             EditorBranch.getParentUuid (Reference.getUuid reference) editorBranch
 
         onTypeChange value =
-            eventMsg False parentUuid (Just referenceUuid) <|
+            eventMsg False Nothing parentUuid (Just referenceUuid) <|
                 case value of
                     "ResourcePage" ->
                         EditReferenceResourcePageEventData.init
@@ -2014,10 +2044,13 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                 ResourcePageReference data ->
                     let
                         createTypeEditEvent map value =
+                            createEditEventWithFocusSelector map Nothing value
+
+                        createEditEventWithFocusSelector map selector value =
                             EditReferenceResourcePageEventData.init
                                 |> map value
                                 |> (EditReferenceEvent << EditReferenceResourcePageEvent)
-                                |> eventMsg True parentUuid (Just referenceUuid)
+                                |> eventMsg True selector parentUuid (Just referenceUuid)
 
                         resourcePageOption resourcePageUuid =
                             KnowledgeModel.getResourcePage resourcePageUuid editorBranch.branch.knowledgeModel
@@ -2051,7 +2084,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                         annotationsInput =
                             Input.annotations appState
                                 { annotations = Reference.getAnnotations reference
-                                , onEdit = createTypeEditEvent setAnnotations
+                                , onEdit = createEditEventWithFocusSelector setAnnotations
                                 }
                     in
                     [ resourcePageUuidSelect, annotationsInput ]
@@ -2059,10 +2092,13 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                 URLReference data ->
                     let
                         createTypeEditEvent map value =
+                            createEditEventWithFocusSelector map Nothing value
+
+                        createEditEventWithFocusSelector map selector value =
                             EditReferenceURLEventData.init
                                 |> map value
                                 |> (EditReferenceEvent << EditReferenceURLEvent)
-                                |> eventMsg True parentUuid (Just referenceUuid)
+                                |> eventMsg True selector parentUuid (Just referenceUuid)
 
                         urlInput =
                             Input.string
@@ -2083,7 +2119,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                         annotationsInput =
                             Input.annotations appState
                                 { annotations = Reference.getAnnotations reference
-                                , onEdit = createTypeEditEvent setAnnotations
+                                , onEdit = createEditEventWithFocusSelector setAnnotations
                                 }
                     in
                     [ urlInput
@@ -2109,10 +2145,13 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
             EditorBranch.getParentUuid expert.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditExpertEventData.init
                 |> map value
                 |> EditExpertEvent
-                |> eventMsg True parentUuid (Just expert.uuid)
+                |> eventMsg True selector parentUuid (Just expert.uuid)
 
         expertEditorTitle =
             editorTitle appState
@@ -2143,7 +2182,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
         annotationsInput =
             Input.annotations appState
                 { annotations = expert.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("expert-" ++ expert.uuid)
@@ -2161,15 +2200,18 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
             EditorBranch.getParentUuid resourceCollection.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditResourceCollectionEventData.init
                 |> map value
                 |> EditResourceCollectionEvent
-                |> eventMsg True parentUuid (Just resourceCollection.uuid)
+                |> eventMsg True selector parentUuid (Just resourceCollection.uuid)
 
         resourcePageAddEvent =
             AddResourcePageEventData.init
                 |> AddResourcePageEvent
-                |> eventMsg False resourceCollection.uuid Nothing
+                |> eventMsg False Nothing resourceCollection.uuid Nothing
 
         resourceCollectionEditorTitle =
             editorTitle appState
@@ -2209,7 +2251,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
         annotationsInput =
             Input.annotations appState
                 { annotations = resourceCollection.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
     in
     editor ("resource-collection-" ++ resourceCollection.uuid)
@@ -2227,10 +2269,13 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
             EditorBranch.getParentUuid resourcePage.uuid editorBranch
 
         createEditEvent map value =
+            createEditEventWithFocusSelector map Nothing value
+
+        createEditEventWithFocusSelector map selector value =
             EditResourcePageEventData.init
                 |> map value
                 |> EditResourcePageEvent
-                |> eventMsg True parentUuid (Just resourcePage.uuid)
+                |> eventMsg True selector parentUuid (Just resourcePage.uuid)
 
         resourcePageEditorTitle =
             editorTitle appState
@@ -2264,7 +2309,7 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
         annotationsInput =
             Input.annotations appState
                 { annotations = resourcePage.annotations
-                , onEdit = createEditEvent setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
 
         wrapQuestionsWithIntegration questions =
@@ -2411,7 +2456,7 @@ deleteModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorBranch -> Delete
 deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
     let
         createEvent event uuid =
-            eventMsg False (EditorBranch.getParentUuid uuid editorBranch) (Just uuid) event
+            eventMsg False Nothing (EditorBranch.getParentUuid uuid editorBranch) (Just uuid) event
 
         ( visible, ( content, mbConfirmMsg ) ) =
             case deleteModalState of
@@ -2555,7 +2600,7 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
                             moveModalState.treeInputModel.selected
 
                         createEvent event =
-                            eventMsg False parentUuid (Just moveModalState.movingUuid) (event { targetUuid = selectedUuid })
+                            eventMsg False Nothing parentUuid (Just moveModalState.movingUuid) (event { targetUuid = selectedUuid })
 
                         viewProps =
                             { editorBranch = editorBranch

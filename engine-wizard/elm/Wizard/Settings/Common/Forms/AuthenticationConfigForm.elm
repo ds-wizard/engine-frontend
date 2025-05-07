@@ -16,6 +16,7 @@ import Shared.Data.EditableConfig.EditableAuthenticationConfig exposing (Editabl
 import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Common.Forms.OpenIDServiceConfigForm as OpenIDServiceConfigForm exposing (OpenIDServiceConfigForm)
 
 
@@ -29,21 +30,21 @@ type alias AuthenticationConfigForm =
     }
 
 
-initEmpty : Form FormError AuthenticationConfigForm
-initEmpty =
-    Form.initial [] validation
+initEmpty : AppState -> Form FormError AuthenticationConfigForm
+initEmpty appState =
+    Form.initial [] (validation appState)
 
 
-init : EditableAuthenticationConfig -> Form FormError AuthenticationConfigForm
-init config =
-    Form.initial (configToFormInitials config) validation
+init : AppState -> EditableAuthenticationConfig -> Form FormError AuthenticationConfigForm
+init appState config =
+    Form.initial (configToFormInitials config) (validation appState)
 
 
-validation : Validation FormError AuthenticationConfigForm
-validation =
+validation : AppState -> Validation FormError AuthenticationConfigForm
+validation appState =
     V.succeed AuthenticationConfigForm
         |> V.andMap (V.field "defaultRole" V.string)
-        |> V.andMap (V.field "services" (V.list OpenIDServiceConfigForm.validation))
+        |> V.andMap (V.field "services" (V.list (OpenIDServiceConfigForm.validation appState)))
         |> V.andMap (V.field "registrationEnabled" V.bool)
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool)
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool |> V.ifElse "twoFactorAuthCodeLength" V.int V.optionalInt)
@@ -103,8 +104,8 @@ isOpenIDServiceEmpty index form =
         ]
 
 
-fillOpenIDServiceConfig : Int -> EditableOpenIDServiceConfig -> Form FormError AuthenticationConfigForm -> Form FormError AuthenticationConfigForm
-fillOpenIDServiceConfig index openIDServiceConfig form =
+fillOpenIDServiceConfig : AppState -> Int -> EditableOpenIDServiceConfig -> Form FormError AuthenticationConfigForm -> Form FormError AuthenticationConfigForm
+fillOpenIDServiceConfig appState index openIDServiceConfig form =
     let
         toFormMsg field value =
             Form.Input ("services." ++ String.fromInt index ++ "." ++ field) Form.Text (Field.String value)
@@ -116,7 +117,7 @@ fillOpenIDServiceConfig index openIDServiceConfig form =
             ]
 
         applyFormMsg formMsg =
-            Form.update validation formMsg
+            Form.update (validation appState) formMsg
 
         serviceMsgs =
             [ toFormMsg "id" openIDServiceConfig.id
