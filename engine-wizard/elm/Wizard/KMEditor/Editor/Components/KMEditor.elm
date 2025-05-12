@@ -1147,6 +1147,16 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             else
                                 emptyNode
 
+                        integrationLink integrationUuid =
+                            if Uuid.toString Uuid.nil == integrationUuid then
+                                Nothing
+
+                            else
+                                Just <|
+                                    div [ class "mt-1" ]
+                                        [ linkTo appState (editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
+                                        ]
+
                         integrationUuidInput =
                             Input.select
                                 { name = "integrationUuid"
@@ -1154,7 +1164,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , value = String.fromMaybe <| Question.getIntegrationUuid question
                                 , options = integrationUuidOptions
                                 , onChange = createTypeEditEvent setIntegrationUuid
-                                , extra = Nothing
+                                , extra = Maybe.andThen integrationLink (Question.getIntegrationUuid question)
                                 }
                     in
                     [ integrationUuidInput
