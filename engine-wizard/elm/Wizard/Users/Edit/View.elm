@@ -17,6 +17,7 @@ import Wizard.Users.Edit.Components.Language as Language
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
+import Wizard.Users.Edit.Components.Tours as Tours
 import Wizard.Users.Edit.Models exposing (Model)
 import Wizard.Users.Edit.Msgs exposing (Msg(..))
 import Wizard.Users.Edit.UserEditRoutes as UserEditRoutes exposing (UserEditRoute)
@@ -38,6 +39,10 @@ view appState subroute model =
                 UserEditRoutes.Language ->
                     Html.map LanguageMsg <|
                         Language.view appState model.languageModel
+
+                UserEditRoutes.Tours ->
+                    Html.map ToursMsg <|
+                        Tours.view appState model.toursModel
 
                 UserEditRoutes.ApiKeys ->
                     Html.map ApiKeysMsg <|
@@ -92,6 +97,16 @@ navigation appState subroute model =
                 , dataCy "user_nav_language"
                 ]
                 [ text (gettext "Language" appState.locale)
+                ]
+            )
+        , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditTours appState model.uuidOrCurrent)
+            (linkTo appState
+                (Routes.usersEditTours model.uuidOrCurrent)
+                [ class "nav-link"
+                , classList [ ( "active", subroute == UserEditRoutes.Tours ) ]
+                , dataCy "user_nav_tours"
+                ]
+                [ text (gettext "Tours" appState.locale)
                 ]
             )
         , Html.viewIf (Feature.userEditApiKeys appState model.uuidOrCurrent)

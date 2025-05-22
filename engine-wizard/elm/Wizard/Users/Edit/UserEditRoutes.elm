@@ -5,6 +5,7 @@ type UserEditRoute
     = Profile
     | Password
     | Language
+    | Tours
     | ApiKeys
     | AppKeys
     | ActiveSessions

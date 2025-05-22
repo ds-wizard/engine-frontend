@@ -20,7 +20,10 @@ import Uuid
 import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
+import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.Feature as Feature
+import Wizard.Common.Html.Attribute exposing (selectDataTour)
+import Wizard.Common.TourId as TourId
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
@@ -74,12 +77,20 @@ fetchData appState model =
 
             else
                 Cmd.none
+
+        tourCmd =
+            if anythingPreselected then
+                Cmd.none
+
+            else
+                Driver.init (tour appState createFromTemplate createCustom)
     in
     Cmd.batch
         [ fetchSelectedProjectTemplate
         , fetchSelectedKnowledgeModel
         , loadProjectTemplates
         , loadKnowledgeModels
+        , tourCmd
         ]
 
 
@@ -94,6 +105,46 @@ getProjectTemplates =
                 []
     in
     QuestionnaireApi.getQuestionnaires filters
+
+
+tour : AppState -> Bool -> Bool -> TourConfig
+tour appState createFromTemplate createCustom =
+    let
+        createStep =
+            if createFromTemplate && createCustom then
+                { element = Just ".nav-underline-tabs"
+                , popover =
+                    { title = gettext "Starting Point" appState.locale
+                    , description = gettext "Create a project from a template with preset content, or start from a knowledge model and configure everything yourself." appState.locale
+                    }
+                }
+
+            else if createFromTemplate then
+                { element = selectDataTour "form-group_templateId"
+                , popover =
+                    { title = gettext "Project Template" appState.locale
+                    , description = gettext "Project templates are pre-configured starting points for your project. They include knowledge models, question tags, and document templates to help you get started quickly." appState.locale
+                    }
+                }
+
+            else
+                { element = selectDataTour "form-group_packageId"
+                , popover =
+                    { title = gettext "Knowledge Model" appState.locale
+                    , description = gettext "A knowledge model defines the structure of your questionnaire. You can configure the document template and other settings later." appState.locale
+                    }
+                }
+    in
+    Driver.tourConfig TourId.projectsCreate appState.locale
+        |> Driver.addCompletedTourIds appState.config.tours
+        |> Driver.addStep
+            { element = selectDataTour "form-group_name"
+            , popover =
+                { title = gettext "Project Name" appState.locale
+                , description = gettext "Choose a name for your project. You can change it later." appState.locale
+                }
+            }
+        |> Driver.addStep createStep
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

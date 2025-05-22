@@ -12,6 +12,7 @@ import Wizard.Users.Edit.Components.Language as Language
 import Wizard.Users.Edit.Components.Password as Password
 import Wizard.Users.Edit.Components.Profile as Profile
 import Wizard.Users.Edit.Components.SubmissionSettings as SubmissionSettings
+import Wizard.Users.Edit.Components.Tours as Tours
 
 
 type alias Model =
@@ -19,6 +20,7 @@ type alias Model =
     , profileModel : Profile.Model
     , passwordModel : Password.Model
     , languageModel : Language.Model
+    , toursModel : Tours.Model
     , apiKeysModel : ApiKeys.Model
     , appKeysModel : AppKeys.Model
     , activeSessionsModel : ActiveSessions.Model
@@ -32,6 +34,7 @@ initialModel appState uuidOrEmpty =
     , profileModel = Profile.initialModel uuidOrEmpty
     , passwordModel = Password.initialModel appState uuidOrEmpty
     , languageModel = Language.initialModel
+    , toursModel = Tours.initialModel
     , apiKeysModel = ApiKeys.initialModel uuidOrEmpty
     , appKeysModel = AppKeys.initialModel uuidOrEmpty
     , activeSessionsModel = ActiveSessions.initialModel

@@ -115,6 +115,7 @@ module Wizard.Routes exposing
     , usersEditLanguageCurrent
     , usersEditPassword
     , usersEditSubmissionSettings
+    , usersEditTours
     , usersIndex
     , usersIndexWithFilters
     )
@@ -917,6 +918,11 @@ usersEditPassword =
 usersEditLanguage : UuidOrCurrent -> Route
 usersEditLanguage =
     UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Language
+
+
+usersEditTours : UuidOrCurrent -> Route
+usersEditTours =
+    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Tours
 
 
 usersEditLanguageCurrent : Route
