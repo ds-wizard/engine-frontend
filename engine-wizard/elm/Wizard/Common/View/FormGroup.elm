@@ -55,7 +55,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar
 import Wizard.Common.GuideLinks as GuideLinks
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour, grammarlyAttributes)
 import Wizard.Common.View.FormExtra as FormExtra
 
 
@@ -629,7 +629,7 @@ formGroup inputFn attrs appState form fieldName labelText =
         ( error, errorClass ) =
             getErrors appState field labelText
     in
-    div [ class "form-group" ]
+    div [ class "form-group", dataTour ("form-group_" ++ fieldName) ]
         [ label [ for fieldName ] [ text labelText ]
         , inputFn field (attrs ++ [ class <| "form-control " ++ errorClass, id fieldName, name fieldName ])
         , error
@@ -645,7 +645,7 @@ formGroupCustom customInput appState form fieldName labelText =
         ( error, _ ) =
             getErrors appState field labelText
     in
-    div [ class "form-group" ]
+    div [ class "form-group", dataTour ("form-group_" ++ fieldName) ]
         [ label [ for fieldName ] [ text labelText ]
         , customInput (Maybe.isJust field.liveError)
         , error

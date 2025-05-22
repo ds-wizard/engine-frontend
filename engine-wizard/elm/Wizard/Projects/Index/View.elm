@@ -28,7 +28,7 @@ import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Features
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, listClass)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour, listClass)
 import Wizard.Common.Html.Events exposing (alwaysStopPropagationOn)
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.MemberIcon as MemberIcon
@@ -76,7 +76,10 @@ createButton : AppState -> Html Msg
 createButton appState =
     linkTo appState
         Routes.projectsCreate
-        [ class "btn btn-primary", dataCy "projects_create-button" ]
+        [ class "btn btn-primary"
+        , dataCy "projects_create-button"
+        , dataTour "projects_create-button"
+        ]
         [ text (gettext "Create" appState.locale) ]
 
 

@@ -76,6 +76,7 @@ module Wizard.Common.Feature exposing
     , userEditAppKeys
     , userEditLanguage
     , userEditSubmissionSettings
+    , userEditTours
     , usersCreate
     , usersView
     )
@@ -471,6 +472,11 @@ userEdit appState uuidOrCurrent =
 
 userEditLanguage : AppState -> UuidOrCurrent -> Bool
 userEditLanguage appState uuidOrCurrent =
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
+
+
+userEditTours : AppState -> UuidOrCurrent -> Bool
+userEditTours appState uuidOrCurrent =
     UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 

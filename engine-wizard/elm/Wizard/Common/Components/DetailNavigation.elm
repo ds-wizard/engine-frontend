@@ -15,7 +15,7 @@ import Shared.Html exposing (emptyNode)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour)
 import Wizard.Routes
 
 
@@ -92,4 +92,4 @@ navLink appState cfg =
 navigation : AppState -> List (NavLinkConfig msg) -> Html msg
 navigation appState cfgs =
     row
-        [ ul [ class "nav nav-underline-tabs" ] (List.map (navLink appState) cfgs) ]
+        [ ul [ class "nav nav-underline-tabs", dataTour "navigation" ] (List.map (navLink appState) cfgs) ]

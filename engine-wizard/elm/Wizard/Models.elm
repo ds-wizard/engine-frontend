@@ -1,5 +1,6 @@
 module Wizard.Models exposing
     ( Model
+    , addTour
     , initLocalModel
     , initialModel
     , setRoute
@@ -10,6 +11,7 @@ module Wizard.Models exposing
 
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
+import Shared.Data.BootstrapConfig as BootstrapConfig
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Comments.Models
 import Wizard.Common.AppState exposing (AppState)
@@ -120,6 +122,18 @@ setSeed seed model =
             { appState | seed = seed }
     in
     { model | appState = newState }
+
+
+addTour : String -> Model -> Model
+addTour tourId model =
+    let
+        config =
+            BootstrapConfig.addTour tourId model.appState.config
+
+        appState =
+            model.appState
+    in
+    { model | appState = { appState | config = config } }
 
 
 initLocalModel : AppState -> Model -> Model
