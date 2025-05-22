@@ -2,6 +2,7 @@ module Wizard.Subscriptions exposing (subscriptions)
 
 import Wizard.Auth.Subscriptions
 import Wizard.Comments.Subscriptions
+import Wizard.Common.Driver as Driver
 import Wizard.Common.Menu.Subscriptions
 import Wizard.Dev.Subscriptions
 import Wizard.DocumentTemplateEditors.Subscriptions
@@ -84,10 +85,14 @@ subscriptions model =
 
         historySubscriptions =
             Ports.historyBackCallback HistoryBackCallback
+
+        tourSubscriptions =
+            Driver.onTourDone TourDone
     in
     Sub.batch
         [ currentViewSubscriptions
         , authSubscriptions
         , menuSubscriptions
         , historySubscriptions
+        , tourSubscriptions
         ]

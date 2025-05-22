@@ -23,7 +23,7 @@ import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as De
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Feature as Features
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Modal as Modal
@@ -238,7 +238,7 @@ viewProjectNavigationActions appState model questionnaire =
 
 viewProjectNavigationShareButton : AppState -> Model -> QuestionnaireCommon -> Html Msg
 viewProjectNavigationShareButton appState model questionnaire =
-    div [ class "btn-group" ]
+    div [ class "btn-group", dataTour "project_detail_share" ]
         [ button
             [ class "btn btn-info text-light with-icon"
             , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)

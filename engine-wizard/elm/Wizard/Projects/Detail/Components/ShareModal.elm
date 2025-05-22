@@ -43,9 +43,11 @@ import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintInput
+import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (guideLink)
-import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour, selectDataTour, tooltip)
+import Wizard.Common.TourId as TourId
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormExtra as FormExtra
 import Wizard.Common.View.FormGroup as FormGroup
@@ -125,6 +127,27 @@ openMsg =
     Open
 
 
+tour : AppState -> TourConfig
+tour appState =
+    Driver.tourConfig TourId.projectsDetailShareModal appState.locale
+        |> Driver.addCompletedTourIds appState.config.tours
+        |> Driver.addModalDelay
+        |> Driver.addStep
+            { element = selectDataTour "project-detail_share-modal_users"
+            , popover =
+                { title = gettext "Users" appState.locale
+                , description = gettext "Invite specific people to your project. They need to have an existing account." appState.locale
+                }
+            }
+        |> Driver.addStep
+            { element = selectDataTour "project-detail_share-modal_permissions"
+            , popover =
+                { title = gettext "Permissions" appState.locale
+                , description = gettext "Choose to share your project with all logged-in users or anyone with the link." appState.locale
+                }
+            }
+
+
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , questionnaireUuid : Uuid
@@ -136,9 +159,10 @@ update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Seed, Model, Cmd msg 
 update cfg msg appState model =
     case msg of
         Open questionnaire ->
-            setQuestionnaire questionnaire { model | visible = True }
-                |> withNoCmd
-                |> withSeed appState.seed
+            ( appState.seed
+            , setQuestionnaire questionnaire { model | visible = True }
+            , Driver.init (tour appState)
+            )
 
         Close ->
             { model | visible = False }
@@ -550,7 +574,7 @@ usersView appState model =
             else
                 emptyNode
     in
-    div [ class "ShareModal__Users" ]
+    div [ class "ShareModal__Users", dataTour "project-detail_share-modal_users" ]
         [ div [ class "mt-2" ]
             [ strong [] [ text (gettext "Users" appState.locale) ]
             , userTypeHintInput
@@ -663,5 +687,5 @@ formView appState form =
             else
                 []
     in
-    div []
+    div [ dataTour "project-detail_share-modal_permissions" ]
         (visibilityInputs ++ sharingInputs)

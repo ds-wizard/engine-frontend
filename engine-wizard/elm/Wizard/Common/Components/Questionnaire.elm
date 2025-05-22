@@ -122,7 +122,7 @@ import Wizard.Common.Feature as Feature
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.Html exposing (illustratedMessage, resizableTextarea)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour, grammarlyAttributes, linkToAttributes, tooltip, tooltipLeft, tooltipRight)
 import Wizard.Common.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Common.Integrations as Integrations
 import Wizard.Common.LocalStorageData as LocalStorageData exposing (LocalStorageData)
@@ -1815,7 +1815,7 @@ view appState cfg ctx model =
         , classList [ ( "toolbar-enabled", toolbarEnabled ) ]
         ]
         [ toolbar
-        , div [ class "questionnaire__body" ]
+        , div [ class "questionnaire__body", dataTour "questionnaire_body" ]
             [ SplitPane.view splitPaneConfig
                 (Html.map cfg.wrapMsg <| viewQuestionnaireLeftPanel appState cfg model)
                 (Html.map cfg.wrapMsg <| viewQuestionnaireContent appState cfg ctx model)

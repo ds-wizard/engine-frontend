@@ -2,6 +2,7 @@ module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
+import Shared.Api.Tours as ToursApi
 import Shared.Auth.Session as Session
 import Url
 import Wizard.Auth.Update
@@ -18,7 +19,7 @@ import Wizard.Documents.Update
 import Wizard.KMEditor.Update
 import Wizard.KnowledgeModels.Update
 import Wizard.Locales.Update
-import Wizard.Models exposing (Model, initLocalModel, setRoute, setSeed, setSession)
+import Wizard.Models exposing (Model, addTour, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
 import Wizard.Ports as Ports
 import Wizard.ProjectActions.Update
@@ -412,3 +413,11 @@ update msg model =
                         Wizard.Users.Update.update usersMsg Wizard.Msgs.UsersMsg model.appState model.users
                 in
                 ( setSeed seed { model | users = users }, cmd )
+
+            Wizard.Msgs.TourDone tourId ->
+                ( addTour tourId model
+                , ToursApi.putTour tourId model.appState (always Wizard.Msgs.TourPutCompleted)
+                )
+
+            Wizard.Msgs.TourPutCompleted ->
+                ( model, Cmd.none )

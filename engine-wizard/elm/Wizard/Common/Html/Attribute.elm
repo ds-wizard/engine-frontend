@@ -1,10 +1,12 @@
 module Wizard.Common.Html.Attribute exposing
     ( dataCy
+    , dataTour
     , detailClass
     , grammarlyAttribute
     , grammarlyAttributes
     , linkToAttributes
     , listClass
+    , selectDataTour
     , settingsClass
     , tooltip
     , tooltipCustom
@@ -79,3 +81,13 @@ tooltipRight =
 tooltipCustom : String -> String -> List (Html.Attribute msg)
 tooltipCustom extraClass value =
     [ class "with-tooltip", class extraClass, attribute "data-tooltip" value ]
+
+
+dataTour : String -> Html.Attribute msg
+dataTour =
+    attribute "data-tour"
+
+
+selectDataTour : String -> Maybe String
+selectDataTour tourId =
+    Just ("[data-tour='" ++ tourId ++ "']")
