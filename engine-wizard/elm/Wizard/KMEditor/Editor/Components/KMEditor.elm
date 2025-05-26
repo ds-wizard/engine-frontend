@@ -86,8 +86,8 @@ import String.Extra as String
 import String.Format as String
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.Common.GuideLinks as GuideLinks
-import Wizard.Common.Html exposing (linkTo)
+import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
+import Wizard.Common.Html exposing (guideLink, linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
@@ -497,6 +497,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , copyUuidButton = False
                 , mbDeleteModalState = Nothing
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         createEditEvent map value =
@@ -680,6 +681,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just ChapterState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         titleInput =
@@ -858,6 +860,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , copyUuidButton = True
                 , mbDeleteModalState = Just QuestionState
                 , mbMovingEntity = Just TreeInput.MovingQuestion
+                , mbGuideLink = Nothing
                 }
 
         typeInput =
@@ -1338,6 +1341,7 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just MetricState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         titleInput =
@@ -1405,6 +1409,7 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just PhaseState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         titleInput =
@@ -1460,6 +1465,7 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just TagState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         nameInput =
@@ -1586,6 +1592,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                 , copyUuidButton = True
                 , mbDeleteModalState = Just IntegrationState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Just GuideLinks.kmEditorIntegrationQuestion
                 }
 
         typeInput =
@@ -1726,10 +1733,12 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                         , div [ class "card-body" ]
                             [ Markdown.toHtml [ class "alert alert-info mb-5" ] (gettext "Use this section to configure the search request. The service you want to integrate has to provide a search HTTP API where you send a search string and it returns a JSON with found items." appState.locale)
                             , requestUrlInput
-                            , FormExtra.mdAfter (gettext "A URL of the integrated service API that supports the search. Use `${q}` for the actual string that will be filled when users search for items, such as *ht&#8203;tps://example.com/search?q=${q}*." appState.locale)
+                            , FormExtra.mdAfter (gettext "The full API endpoint used for search. Use `${q}` to insert the user's search term (for example, *https://example.com/search?q=${q}*), and `${propName}` to reference fields defined in props." appState.locale)
                             , requestMethodInput
                             , requestHeadersInput
+                            , FormExtra.mdAfter (gettext "Optional headers to include in the API request. You can use `${q}` for the search term and `${propName}` for values from props." appState.locale)
                             , requestBodyInput
+                            , FormExtra.mdAfter (gettext "Optional request body for POST or PUT methods. Supports the same variables: `${q}` for the search term and `${propName}` for props." appState.locale)
                             , requestEmptySearchInput
                             , FormExtra.mdAfter (gettext "Turn this off if the API cannot handle empty search requests. In that case, the requests will be made only after users type something." appState.locale)
                             ]
@@ -1889,6 +1898,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just AnswerState
                 , mbMovingEntity = Just TreeInput.MovingAnswer
+                , mbGuideLink = Nothing
                 }
 
         labelInput =
@@ -1981,6 +1991,7 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just ChoiceState
                 , mbMovingEntity = Just TreeInput.MovingChoice
+                , mbGuideLink = Nothing
                 }
 
         labelInput =
@@ -2037,6 +2048,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just ReferenceState
                 , mbMovingEntity = Just TreeInput.MovingReference
+                , mbGuideLink = Nothing
                 }
 
         typeInput =
@@ -2171,6 +2183,7 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
                 , copyUuidButton = True
                 , mbDeleteModalState = Just ExpertState
                 , mbMovingEntity = Just TreeInput.MovingExpert
+                , mbGuideLink = Nothing
                 }
 
         nameInput =
@@ -2231,6 +2244,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
                 , copyUuidButton = True
                 , mbDeleteModalState = Just ResourceCollectionState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         titleInput =
@@ -2295,6 +2309,7 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
                 , copyUuidButton = True
                 , mbDeleteModalState = Just ResourcePageState
                 , mbMovingEntity = Nothing
+                , mbGuideLink = Nothing
                 }
 
         titleInput =
@@ -2376,6 +2391,7 @@ type alias EditorTitleConfig msg =
     , copyUuidButton : Bool
     , mbDeleteModalState : Maybe (String -> DeleteModalState)
     , mbMovingEntity : Maybe TreeInput.MovingEntity
+    , mbGuideLink : Maybe (GuideLinks -> String)
     }
 
 
@@ -2426,6 +2442,14 @@ editorTitle appState config =
 
                 Nothing ->
                     emptyNode
+
+        guideLink_ =
+            case config.mbGuideLink of
+                Just getGuideLink ->
+                    guideLink appState getGuideLink
+
+                Nothing ->
+                    emptyNode
     in
     div [ class "editor-title" ]
         [ h3 [] [ text config.title ]
@@ -2433,6 +2457,7 @@ editorTitle appState config =
             [ copyUuidButton
             , moveButton
             , deleteButton
+            , guideLink_
             ]
         ]
 

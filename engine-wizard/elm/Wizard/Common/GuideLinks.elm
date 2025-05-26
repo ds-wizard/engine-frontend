@@ -9,6 +9,7 @@ module Wizard.Common.GuideLinks exposing
     , documentTemplatesUnsupportedMetamodel
     , integrationQuestionSecrets
     , kmEditorCreate
+    , kmEditorIntegrationQuestion
     , kmEditorMigration
     , kmEditorPublish
     , kmEditorSettings
@@ -69,6 +70,7 @@ default =
             , ( "documentTemplatesUnsupportedMetamodel", "https://guide.ds-wizard.org/en/latest/more/self-hosted-dsw/faq-notes.html#document-templates-show-unsupported-metamodel-what-should-i-do" )
             , ( "integrationQuestionSecrets", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties" )
             , ( "kmEditorCreate", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/create.html" )
+            , ( "kmEditorIntegrationQuestion", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/index.html" )
             , ( "kmEditorMigration", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/migration.html" )
             , ( "kmEditorPublish", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/detail/publish.html" )
             , ( "kmEditorSettings", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/detail/settings.html" )
@@ -157,6 +159,11 @@ integrationQuestionSecrets =
 kmEditorCreate : GuideLinks -> String
 kmEditorCreate =
     get "kmEditorCreate"
+
+
+kmEditorIntegrationQuestion : GuideLinks -> String
+kmEditorIntegrationQuestion =
+    get "kmEditorIntegrationQuestion"
 
 
 kmEditorMigration : GuideLinks -> String
