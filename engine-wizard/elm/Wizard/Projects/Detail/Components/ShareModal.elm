@@ -129,8 +129,7 @@ openMsg =
 
 tour : AppState -> TourConfig
 tour appState =
-    Driver.tourConfig TourId.projectsDetailShareModal appState.locale
-        |> Driver.addCompletedTourIds appState.config.tours
+    Driver.tourConfig TourId.projectsDetailShareModal appState
         |> Driver.addModalDelay
         |> Driver.addStep
             { element = selectDataTour "project-detail_share-modal_users"

@@ -42,8 +42,7 @@ fetchData appState =
 
 tour : AppState -> TourConfig
 tour appState =
-    Driver.tourConfig TourId.usersEditTours appState.locale
-        |> Driver.addCompletedTourIds appState.config.tours
+    Driver.tourConfig TourId.usersEditTours appState
         |> Driver.addStep
             { element = Nothing
             , popover =

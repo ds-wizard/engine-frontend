@@ -131,8 +131,7 @@ fetchSubrouteData appState model =
 
 tour : AppState -> TourConfig
 tour appState =
-    Driver.tourConfig TourId.projectsDetail appState.locale
-        |> Driver.addCompletedTourIds appState.config.tours
+    Driver.tourConfig TourId.projectsDetail appState
         |> Driver.addStep
             { element = selectDataTour "questionnaire_body"
             , popover =

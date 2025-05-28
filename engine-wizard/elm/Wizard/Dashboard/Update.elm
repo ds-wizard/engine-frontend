@@ -56,8 +56,7 @@ tour appState =
                 , description = gettext "We'll guide you through creating your data management plan." appState.locale
                 }
     in
-    Driver.tourConfig TourId.dashboard appState.locale
-        |> Driver.addCompletedTourIds appState.config.tours
+    Driver.tourConfig TourId.dashboard appState
         |> Driver.addStep
             { element = Nothing
             , popover = firstStep

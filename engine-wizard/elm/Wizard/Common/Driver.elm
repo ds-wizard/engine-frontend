@@ -2,7 +2,6 @@ port module Wizard.Common.Driver exposing
     ( DriverOptionsStep
     , TourConfig
     , TourId
-    , addCompletedTourIds
     , addModalDelay
     , addStep
     , init
@@ -14,7 +13,9 @@ port module Wizard.Common.Driver exposing
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Shared.Auth.Session as Session
 import String.Format as String
+import Wizard.Common.AppState exposing (AppState)
 
 
 type TourId
@@ -32,6 +33,7 @@ type TourConfig
 
 type alias TourConfigData =
     { tourId : String
+    , loggedIn : Bool
     , completedTourIds : List String
     , locale : Gettext.Locale
     , steps : List DriverOptionsStep
@@ -39,20 +41,16 @@ type alias TourConfigData =
     }
 
 
-tourConfig : TourId -> Gettext.Locale -> TourConfig
-tourConfig (TourId id) locale =
+tourConfig : TourId -> AppState -> TourConfig
+tourConfig (TourId id) appState =
     TourConfig
         { tourId = id
-        , completedTourIds = []
-        , locale = locale
+        , loggedIn = Session.exists appState.session
+        , completedTourIds = appState.config.tours
+        , locale = appState.locale
         , steps = []
         , delay = 0
         }
-
-
-addCompletedTourIds : List String -> TourConfig -> TourConfig
-addCompletedTourIds completedTourIds (TourConfig config) =
-    TourConfig { config | completedTourIds = completedTourIds }
 
 
 addStep : DriverOptionsStep -> TourConfig -> TourConfig
@@ -114,7 +112,7 @@ encodeStep step =
 
 init : TourConfig -> Cmd msg
 init (TourConfig config) =
-    if List.member config.tourId config.completedTourIds then
+    if not config.loggedIn || List.member config.tourId config.completedTourIds then
         Cmd.none
 
     else

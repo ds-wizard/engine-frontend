@@ -135,8 +135,7 @@ tour appState createFromTemplate createCustom =
                     }
                 }
     in
-    Driver.tourConfig TourId.projectsCreate appState.locale
-        |> Driver.addCompletedTourIds appState.config.tours
+    Driver.tourConfig TourId.projectsCreate appState
         |> Driver.addStep
             { element = selectDataTour "form-group_name"
             , popover =
