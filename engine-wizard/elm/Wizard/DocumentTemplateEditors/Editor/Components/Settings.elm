@@ -21,6 +21,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, label, span, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
 import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
@@ -517,11 +518,12 @@ stepOptionFormView appState prefix form i =
 
 prefabsView : AppState -> List (Html msg) -> Html msg
 prefabsView appState prefabButtons =
-    div [ class "row" ]
-        [ div [ class "col" ]
-            [ div [ class "py-2 px-3 bg-gray-200 rounded mb-3" ]
-                [ strong [ class "d-block mb-2" ] [ text (gettext "Quick setup" appState.locale) ]
-                , div [] prefabButtons
+    Html.viewIf (not (List.isEmpty prefabButtons)) <|
+        div [ class "row" ]
+            [ div [ class "col" ]
+                [ div [ class "py-2 px-3 bg-gray-200 rounded mb-3" ]
+                    [ strong [ class "d-block mb-2" ] [ text (gettext "Quick setup" appState.locale) ]
+                    , div [] prefabButtons
+                    ]
                 ]
             ]
-        ]
