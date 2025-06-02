@@ -60,7 +60,7 @@ public model content =
     let
         html =
             div [ class "public" ]
-                [ publicHeader False model
+                [ publicHeader model
                 , div [ class "container-fluid container-max" ] [ content ]
                 ]
     in
@@ -77,7 +77,7 @@ publicApp model content =
                 [ class "public public--app"
                 , classList [ ( "app-fullscreen", AppState.isFullscreen model.appState ) ]
                 ]
-                [ publicHeader True model
+                [ publicHeader model
                 , div [ class "container-fluid d-flex justify-content-center" ] [ content ]
                 ]
     in
@@ -86,8 +86,8 @@ publicApp model content =
     }
 
 
-publicHeader : Bool -> Model -> Html Msg
-publicHeader fluidFull model =
+publicHeader : Model -> Html Msg
+publicHeader model =
     let
         links =
             if userLoggedIn model then
@@ -122,8 +122,10 @@ publicHeader fluidFull model =
                 , signUpLink
                 ]
     in
-    nav [ class "navbar navbar-expand-sm fixed-top px-3 top-navigation" ]
-        [ div [ class "container-fluid", classList [ ( "container-max", not fluidFull ) ] ]
+    nav [ class "navbar navbar-expand-lg fixed-top shadow-sm bg-body top-navigation" ]
+        [ div
+            [ class "container-fluid"
+            ]
             [ div [ class "navbar-header" ]
                 [ linkTo model.appState
                     Routes.publicHome
