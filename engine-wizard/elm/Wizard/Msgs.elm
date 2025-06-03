@@ -63,6 +63,8 @@ type Msg
     | SettingsMsg Wizard.Settings.Msgs.Msg
     | TenantsMsg Wizard.Tenants.Msgs.Msg
     | UsersMsg Wizard.Users.Msgs.Msg
+    | TourDone String
+    | TourPutCompleted
 
 
 logoutMsg : Msg

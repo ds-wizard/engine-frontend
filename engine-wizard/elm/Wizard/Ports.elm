@@ -6,9 +6,7 @@ port module Wizard.Ports exposing
     , clearUnloadMessage
     , consoleError
     , convertLocaleFile
-    ,  createDropzone
-       --, createLocaleDropzone
-
+    , createDropzone
     , downloadFile
     , fileContentRead
     , fileSelected
@@ -21,9 +19,7 @@ port module Wizard.Ports exposing
     , localStorageGetAndRemove
     , localStorageRemove
     , localStorageSet
-    ,  localeConverted
-       --, localeFileSelected
-
+    , localeConverted
     , refresh
     , scrollIntoView
     , scrollIntoViewCenter

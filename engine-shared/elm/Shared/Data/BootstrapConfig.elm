@@ -1,5 +1,6 @@
 module Shared.Data.BootstrapConfig exposing
     ( BootstrapConfig
+    , addTour
     , decoder
     , default
     )
@@ -38,6 +39,7 @@ type alias BootstrapConfig =
     , owl : OwlConfig
     , modules : List AppSwitcherItem
     , signalBridge : SignalBridgeConfig
+    , tours : List String
     , user : Maybe UserInfo
     }
 
@@ -58,6 +60,7 @@ default =
     , owl = OwlConfig.default
     , modules = []
     , signalBridge = SignalBridgeConfig.default
+    , tours = []
     , user = Nothing
     }
 
@@ -79,4 +82,17 @@ decoder =
         |> D.required "owl" OwlConfig.decoder
         |> D.required "modules" (D.list AppSwitcherItem.decoder)
         |> D.required "signalBridge" SignalBridgeConfig.decoder
+        |> D.required "tours" (D.list D.string)
         |> D.required "user" (D.maybe UserInfo.decoder)
+
+
+addTour : String -> BootstrapConfig -> BootstrapConfig
+addTour tour config =
+    { config
+        | tours =
+            if List.member tour config.tours then
+                config.tours
+
+            else
+                tour :: config.tours
+    }

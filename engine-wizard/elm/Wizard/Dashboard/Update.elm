@@ -3,7 +3,11 @@ module Wizard.Dashboard.Update exposing
     , update
     )
 
+import Gettext exposing (gettext)
+import Shared.Data.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Driver as Driver exposing (TourConfig)
+import Wizard.Common.TourId as TourId
 import Wizard.Dashboard.Dashboards.AdminDashboard as AdminDashboard
 import Wizard.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
 import Wizard.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
@@ -14,21 +18,56 @@ import Wizard.Msgs
 
 fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
-    case model.currentDashboard of
-        ResearcherDashboard ->
-            Cmd.map ResearcherDashboardMsg <|
-                ResearcherDashboard.fetchData appState
+    let
+        fetchDashboarData =
+            case model.currentDashboard of
+                ResearcherDashboard ->
+                    Cmd.map ResearcherDashboardMsg <|
+                        ResearcherDashboard.fetchData appState
 
-        DataStewardDashboard ->
-            Cmd.map DataStewardDashboardMsg <|
-                DataStewardDashboard.fetchData appState
+                DataStewardDashboard ->
+                    Cmd.map DataStewardDashboardMsg <|
+                        DataStewardDashboard.fetchData appState
 
-        AdminDashboard ->
-            Cmd.map AdminDashboardMsg <|
-                AdminDashboard.fetchData appState
+                AdminDashboard ->
+                    Cmd.map AdminDashboardMsg <|
+                        AdminDashboard.fetchData appState
 
-        _ ->
-            Cmd.none
+                _ ->
+                    Cmd.none
+    in
+    Cmd.batch
+        [ fetchDashboarData
+        , Driver.init (tour appState)
+        ]
+
+
+tour : AppState -> TourConfig
+tour appState =
+    let
+        firstStep =
+            if Admin.isEnabled appState.config.admin then
+                { title = gettext "Welcome to the Data Management Planner" appState.locale
+                , description = gettext "We'll guide you through creating your data management plan." appState.locale
+                }
+
+            else
+                { title = gettext "Welcome to Data Stewardship Wizard" appState.locale
+                , description = gettext "We'll guide you through creating your data management plan." appState.locale
+                }
+    in
+    Driver.tourConfig TourId.dashboard appState
+        |> Driver.addStep
+            { element = Nothing
+            , popover = firstStep
+            }
+        |> Driver.addStep
+            { element = Just "#menu_projects"
+            , popover =
+                { title = gettext "Projects" appState.locale
+                , description = gettext "Create and manage your data management plans here." appState.locale
+                }
+            }
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

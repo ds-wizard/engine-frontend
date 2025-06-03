@@ -31,6 +31,9 @@ import Wizard.Common.Api exposing (getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
+import Wizard.Common.Driver as Driver exposing (TourConfig)
+import Wizard.Common.Html.Attribute exposing (selectDataTour)
+import Wizard.Common.TourId as TourId
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireShareForm as QuestionnaireShareForm
@@ -53,14 +56,22 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
 fetchData appState uuid model =
+    let
+        tourCmd =
+            Driver.init (tour appState)
+    in
     if ActionResult.unwrap False (.uuid >> (==) uuid) model.questionnaireCommon then
         Cmd.batch
             [ fetchSubrouteData appState model
             , WebSocket.open model.websocket
+            , tourCmd
             ]
 
     else
-        fetchSubrouteData appState model
+        Cmd.batch
+            [ fetchSubrouteData appState model
+            , tourCmd
+            ]
 
 
 fetchSubrouteData : AppState -> Model -> Cmd Msg
@@ -116,6 +127,32 @@ fetchSubrouteData appState model =
 
         _ ->
             Cmd.none
+
+
+tour : AppState -> TourConfig
+tour appState =
+    Driver.tourConfig TourId.projectsDetail appState
+        |> Driver.addStep
+            { element = selectDataTour "questionnaire_body"
+            , popover =
+                { title = gettext "Questionnaire" appState.locale
+                , description = gettext "Fill out the questionnaire to provide key information for your data management plan. Changes are saved automatically." appState.locale
+                }
+            }
+        |> Driver.addStep
+            { element = selectDataTour "project_detail_share"
+            , popover =
+                { title = gettext "Collaboration" appState.locale
+                , description = gettext "Share your project to collaborate with colleagues." appState.locale
+                }
+            }
+        |> Driver.addStep
+            { element = selectDataTour "navigation"
+            , popover =
+                { title = gettext "Navigation" appState.locale
+                , description = gettext "Use the navigation bar to switch between tools and views related to your project." appState.locale
+                }
+            }
 
 
 isGuarded : AppState -> Routes.Route -> Model -> Maybe String

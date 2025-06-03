@@ -23,6 +23,9 @@ import Wizard.Common.Api exposing (applyResult, getResultCmd)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
+import Wizard.Common.Driver as Driver exposing (TourConfig)
+import Wizard.Common.Html.Attribute exposing (selectDataTour)
+import Wizard.Common.TourId as TourId
 import Wizard.Msgs
 import Wizard.Projects.Common.CloneProjectModal.Update as CloneProjectModal
 import Wizard.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
@@ -69,7 +72,27 @@ fetchData appState model =
         , dispatch (PackagesFilterSearch "")
         , selectedUsersCmd
         , selectedPackagesCmd
+        , Driver.init (tour appState)
         ]
+
+
+tour : AppState -> TourConfig
+tour appState =
+    Driver.tourConfig TourId.projectsIndex appState
+        |> Driver.addStep
+            { element = Nothing
+            , popover =
+                { title = gettext "Projects" appState.locale
+                , description = gettext "All your projects will be here, including those shared with you." appState.locale
+                }
+            }
+        |> Driver.addStep
+            { element = selectDataTour "projects_create-button"
+            , popover =
+                { title = gettext "Create Project" appState.locale
+                , description = gettext "Click here to start a new project." appState.locale
+                }
+            }
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

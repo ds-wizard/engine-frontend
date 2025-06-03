@@ -37,6 +37,7 @@ parsers appState wrapRoute =
                 , map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "lastName")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteRoleFilterId))
                 , map (wrapRoute << flip EditRoute UserEditRoute.Password) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "password")
                 , map (wrapRoute << flip EditRoute UserEditRoute.Language) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "language")
+                , map (wrapRoute << flip EditRoute UserEditRoute.Tours) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "tours")
                 ]
     in
     [ map (wrapRoute << flip EditRoute UserEditRoute.Profile) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser)
@@ -68,6 +69,9 @@ toUrl route =
 
                 UserEditRoute.Language ->
                     editBase ++ [ "language" ]
+
+                UserEditRoute.Tours ->
+                    editBase ++ [ "tours" ]
 
                 UserEditRoute.ApiKeys ->
                     editBase ++ [ "api-keys" ]
@@ -103,6 +107,9 @@ isAllowed route appState =
                 case subroute of
                     UserEditRoute.Language ->
                         Feature.userEditLanguage appState uuidOrCurrent
+
+                    UserEditRoute.Tours ->
+                        Feature.userEditTours appState uuidOrCurrent
 
                     UserEditRoute.ApiKeys ->
                         Feature.userEditApiKeys appState uuidOrCurrent
