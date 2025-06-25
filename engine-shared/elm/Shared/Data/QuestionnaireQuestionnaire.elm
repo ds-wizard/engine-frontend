@@ -731,6 +731,7 @@ getItemTitleRecursive itemUuids questionnaire itemPath itemTemplateQuestions =
                                 else
                                     List.map (KnowledgeModel.getChoiceName questionnaire.knowledgeModel) uuids
                                         |> List.filter (not << String.isEmpty)
+                                        |> List.sort
                                         |> String.join ", "
                                         |> Just
                             )
