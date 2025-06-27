@@ -40,16 +40,16 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
-import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
-import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
-import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Wizard.Api.Models.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.GuideLinks as GuideLinks

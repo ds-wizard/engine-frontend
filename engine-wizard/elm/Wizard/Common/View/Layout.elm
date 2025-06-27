@@ -9,10 +9,10 @@ import Browser exposing (Document)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, img, li, nav, text, ul)
 import Html.Attributes exposing (class, classList, src)
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Html exposing (emptyNode)
 import Shared.Undraw as Undraw
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Components.CookieConsent as CookieConsent

@@ -8,9 +8,9 @@ module Wizard.Dev.Common.PersistentCommandActionsDropdown exposing
 
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html)
-import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Shared.Html exposing (fa, faSet)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Routes as Routes

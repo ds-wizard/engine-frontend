@@ -17,7 +17,7 @@ import Registry.Components.FontAwesome exposing (fas)
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 
 

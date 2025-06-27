@@ -4,12 +4,12 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
 import Html.Attributes exposing (class, classList, style, target)
 import Html.Events exposing (onClick)
-import Shared.Data.KnowledgeModel.Question as Question
-import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (boolToInt, flip)
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel.Question as Question
+import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer

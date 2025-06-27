@@ -28,7 +28,7 @@ const registerPageUnloadPorts = require('./js/ports/page-unload')
 const registerRefreshPorts = require('./js/ports/refresh')
 const registerSessionPorts = require('./js/ports/session')
 const registerThemePorts = require('../engine-shared/ports/theme')
-const registerWebsocketPorts = require('../engine-shared/ports/WebSocket')
+const registerWebsocketPorts = require('../shared/common/js/ports/websocket')
 
 
 const sessionKey = 'session/wizard'

@@ -15,17 +15,17 @@ import Html exposing (Html, a, div, img, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
 import Maybe.Extra as Maybe
-import Shared.Api.Users as UsersApi
 import Shared.Auth.Role as Role
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.User as User exposing (User)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.User as User exposing (User)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
@@ -62,7 +62,7 @@ type Msg
 
 fetchData : AppState -> UuidOrCurrent -> Cmd Msg
 fetchData appState uuidOrCurrent =
-    UsersApi.getUser uuidOrCurrent appState GetUserCompleted
+    UsersApi.getUser appState uuidOrCurrent GetUserCompleted
 
 
 type alias UpdateConfig msg =
@@ -94,7 +94,7 @@ handleUserForm cfg appState formMsg model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        UsersApi.putUser model.uuidOrCurrent body appState PutUserCompleted
+                        UsersApi.putUser appState model.uuidOrCurrent body PutUserCompleted
             in
             ( { model | savingUser = ActionResult.Loading }, cmd )
 
@@ -122,7 +122,7 @@ getUserCompleted cfg appState model result =
                     { model | user = ApiError.toActionResult appState (gettext "Unable to get the user." appState.locale) error }
 
         cmd =
-            getResultCmd cfg.logoutMsg result
+            RequestHelpers.getResultCmd cfg.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -152,7 +152,7 @@ putUserCompleted cfg appState model result =
                 , userForm = Form.setFormErrors appState err model.userForm
               }
             , Cmd.batch
-                [ getResultCmd cfg.logoutMsg result
+                [ RequestHelpers.getResultCmd cfg.logoutMsg result
                 , Ports.scrollToTop ".Users__Edit__content"
                 ]
             )

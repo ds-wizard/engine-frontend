@@ -5,8 +5,8 @@ module Wizard.Settings.Generic.Model exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Data.EditableConfig exposing (EditableConfig)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Api.Models.EditableConfig exposing (EditableConfig)
 
 
 type alias Model form =

@@ -52,60 +52,61 @@ import Regex
 import Registry.Components.FontAwesome exposing (fas)
 import Roman
 import Set exposing (Set)
-import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
-import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
-import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.TypeHints as TypeHintsApi
 import Shared.Auth.Session as Session
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeel
-import Shared.Data.Event exposing (Event)
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration(..))
-import Shared.Data.KnowledgeModel.Integration.ApiIntegrationData exposing (ApiIntegrationData)
-import Shared.Data.KnowledgeModel.Integration.CommonIntegrationData exposing (CommonIntegrationData)
-import Shared.Data.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation
-import Shared.Data.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
-import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
-import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
-import Shared.Data.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Data.TypeHint exposing (TypeHint)
-import Shared.Data.User as User
-import Shared.Data.UserInfo as UserInfo
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Data.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
-import Shared.Utils exposing (dispatch, flip, getUuidString, listFilterJust, listInsertIf)
+import Shared.Utils exposing (flip, getUuidString, listFilterJust, listInsertIf)
 import Shared.Utils.ListUtils as ListUtils
 import SplitPane
 import String
 import String.Extra as String
 import String.Format as String
+import Task.Extra as Task
 import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
+import Wizard.Api.Models.Event exposing (Event)
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration(..))
+import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing (ApiIntegrationData)
+import Wizard.Api.Models.KnowledgeModel.Integration.CommonIntegrationData exposing (CommonIntegrationData)
+import Wizard.Api.Models.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
+import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
+import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
+import Wizard.Api.Models.QuestionnaireDetail.Comment as Comment exposing (Comment)
+import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Wizard.Api.Models.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Models.TypeHint exposing (TypeHint)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserInfo as UserInfo
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
+import Wizard.Api.Models.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
+import Wizard.Api.QuestionnaireActions as QuestionnaireActionsApi
+import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
+import Wizard.Api.QuestionnaireImporters as QuestionnaireImportersApi
+import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
@@ -261,7 +262,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
         ( model, scrollCmd ) =
             case ( mbPath, mbCommentThreadUuid ) of
                 ( Just path, Just _ ) ->
-                    ( defaultModel, dispatch (OpenComments True path) )
+                    ( defaultModel, Task.dispatch (OpenComments True path) )
 
                 ( Just path, Nothing ) ->
                     handleScrollToPath defaultModel False path
@@ -727,7 +728,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 )
 
         loadComments path =
-            QuestionnairesApi.getQuestionnaireComments model.uuid path appState (GetCommentThreadsCompleted path)
+            QuestionnairesApi.getQuestionnaireComments appState model.uuid path (GetCommentThreadsCompleted path)
     in
     case msg of
         SetActivePage activePage ->
@@ -792,8 +793,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     case updatedRightPanel of
                         RightPanel.VersionHistory ->
                             Cmd.batch
-                                [ QuestionnairesApi.getQuestionnaireEvents model.uuid appState GetQuestionnaireEventsCompleted
-                                , QuestionnairesApi.getQuestionnaireVersions model.uuid appState GetQuestionnaireVersionsCompleted
+                                [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid GetQuestionnaireEventsCompleted
+                                , QuestionnairesApi.getQuestionnaireVersions appState model.uuid GetQuestionnaireVersionsCompleted
                                 ]
 
                         RightPanel.Comments path ->
@@ -816,7 +817,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         SetFullscreen fullscreen ->
             case mbSetFullscreenMsg of
                 Just setFullscreenMsg ->
-                    ( appState.seed, model, dispatch (setFullscreenMsg fullscreen) )
+                    ( appState.seed, model, Task.dispatch (setFullscreenMsg fullscreen) )
 
                 Nothing ->
                     ( appState.seed, model, Cmd.none )
@@ -900,7 +901,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 reply =
                     createReply appState (FileReply file.uuid)
             in
-            withSeed <| ( modelWithFile, dispatch (SetReply path reply) )
+            withSeed <| ( modelWithFile, Task.dispatch (SetReply path reply) )
 
         ClearReply path ->
             wrap <| clearReply path model
@@ -928,7 +929,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         setReplyMsg =
                             SetReply path replyValue
                     in
-                    withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
+                    withSeed ( { model | removeItem = Nothing }, Task.dispatch setReplyMsg )
 
                 Nothing ->
                     wrap model
@@ -948,7 +949,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 Just ( fileUuid, path ) ->
                     let
                         deleteFileCmd =
-                            QuestionnaireFilesApi.deleteFile model.uuid fileUuid appState (DeleteFileCompleted path)
+                            QuestionnaireFilesApi.deleteFile appState model.uuid fileUuid (DeleteFileCompleted path)
 
                         modelWithDeletingFile =
                             { model | deletingFile = ActionResult.Loading }
@@ -963,7 +964,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 Ok _ ->
                     withSeed
                         ( { model | deleteFile = Nothing }
-                        , dispatch (ClearReply path)
+                        , Task.dispatch (ClearReply path)
                         )
 
                 Err err ->
@@ -973,7 +974,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap <| { model | deleteFile = Nothing }
 
         DownloadFile uuid ->
-            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile appState (QuestionnaireFilesApi.fileUrl model.uuid uuid appState)) )
+            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile appState (QuestionnaireFilesApi.fileUrl appState model.uuid uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.update fileDownloaderMsg) )
@@ -1000,7 +1001,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 setReplyMsg =
                     SetReply path replyValue
             in
-            withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
+            withSeed ( { model | removeItem = Nothing }, Task.dispatch setReplyMsg )
 
         MoveItemDown path itemUuid ->
             let
@@ -1027,7 +1028,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 setReplyMsg =
                     SetReply path replyValue
             in
-            withSeed ( { model | removeItem = Nothing }, dispatch setReplyMsg )
+            withSeed ( { model | removeItem = Nothing }, Task.dispatch setReplyMsg )
 
         OpenIntegrationWidget path requestUrl ->
             withSeed
@@ -1049,7 +1050,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                                     IntegrationReply <|
                                         IntegrationType (Just value.id) value.value
                     in
-                    withSeed ( model, dispatch setReplyMsg )
+                    withSeed ( model, Task.dispatch setReplyMsg )
 
                 Err _ ->
                     wrap model
@@ -1104,8 +1105,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 cfg =
                     { wrapMsg = VersionModalMsg
                     , questionnaireUuid = model.questionnaire.uuid
-                    , addVersionCmd = dispatch << AddQuestionnaireVersion
-                    , renameVersionCmd = dispatch << UpdateQuestionnaireVersion
+                    , addVersionCmd = Task.dispatch << AddQuestionnaireVersion
+                    , renameVersionCmd = Task.dispatch << UpdateQuestionnaireVersion
                     }
 
                 ( versionModalModel, cmd ) =
@@ -1121,7 +1122,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 cfg =
                     { wrapMsg = DeleteVersionModalMsg
                     , questionnaireUuid = model.questionnaire.uuid
-                    , deleteVersionCmd = dispatch << DeleteQuestionnaireVersion
+                    , deleteVersionCmd = Task.dispatch << DeleteQuestionnaireVersion
                     }
 
                 ( deleteVersionModalModel, cmd ) =
@@ -1255,7 +1256,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( questionnaireImporters, cmd ) =
                     if ActionResult.isUnset model.questionnaireImporters then
                         ( Loading
-                        , QuestionnaireImportersApi.getQuestionnaireImportersFor model.uuid appState GetQuestionnaireImportersComplete
+                        , QuestionnaireImportersApi.getQuestionnaireImportersFor appState model.uuid GetQuestionnaireImportersComplete
                         )
 
                     else
@@ -1274,7 +1275,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( questionnaireActions, cmd ) =
                     if ActionResult.isUnset model.questionnaireActions then
                         ( Loading
-                        , QuestionnaireActionsApi.getQuestionnaireActionsFor model.uuid appState GetQuestionnaireActionsComplete
+                        , QuestionnaireActionsApi.getQuestionnaireActionsFor appState model.uuid GetQuestionnaireActionsComplete
                         )
 
                     else
@@ -1357,7 +1358,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     else if key == localStorageRightPanelKey model.uuid then
                         case decodeValue localStorageRightPanelDecoder value of
                             Ok data ->
-                                withSeed ( model, dispatch (SetRightPanel data.value) )
+                                withSeed ( model, Task.dispatch (SetRightPanel data.value) )
 
                             Err _ ->
                                 wrap model
@@ -1627,7 +1628,7 @@ handleTypeHintsInput model path emptySearch reply =
                     )
 
         dispatchCmd =
-            dispatch <|
+            Task.dispatch <|
                 SetReply (pathToString path) reply
     in
     ( { model | typeHintsDebounce = debounce, typeHints = newTypeHints }
@@ -1714,7 +1715,7 @@ handleAddItem appState wrapMsg model path originalItems =
                 |> createReply appState
                 |> SetReply path
                 |> wrapMsg
-                |> dispatch
+                |> Task.dispatch
     in
     ( newSeed, model, Cmd.batch [ dispatchCmd, scrollCmd ] )
 
@@ -1728,12 +1729,11 @@ debounceConfig =
 
 loadTypeHints : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
 loadTypeHints appState ctx model path questionUuid value =
-    TypeHintsApi.fetchTypeHints
+    TypeHintsApi.fetchTypeHints appState
         (Just model.questionnaire.packageId)
         ctx.events
         questionUuid
         value
-        appState
         (TypeHintsLoaded path value)
 
 

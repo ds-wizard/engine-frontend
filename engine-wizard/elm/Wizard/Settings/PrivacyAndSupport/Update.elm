@@ -1,7 +1,7 @@
 module Wizard.Settings.PrivacyAndSupport.Update exposing (update)
 
-import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
-import Shared.Data.EditableConfig as EditableConfig
+import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Wizard.Api.Models.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Generic.Msgs exposing (Msg)

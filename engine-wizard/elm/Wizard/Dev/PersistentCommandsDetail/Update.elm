@@ -4,11 +4,11 @@ module Wizard.Dev.PersistentCommandsDetail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Api.PersistentCommands as PersistentCommandsApi
-import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState
-import Shared.Error.ApiError as ApiError
+import Shared.Data.ApiError as ApiError
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, applyResultTransform)
+import Wizard.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState
+import Wizard.Api.PersistentCommands as PersistentCommandsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.PersistentCommandsDetail.Models exposing (Model)
 import Wizard.Dev.PersistentCommandsDetail.Msgs exposing (Msg(..))
@@ -17,19 +17,20 @@ import Wizard.Msgs
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    PersistentCommandsApi.getPersistentCommand uuid appState GerPersistentCommandComplete
+    PersistentCommandsApi.getPersistentCommand appState uuid GerPersistentCommandComplete
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GerPersistentCommandComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \res m -> { m | persistentCommand = res }
                 , defaultError = "Unable to get persistent command."
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         DropdownMsg state ->
@@ -37,22 +38,23 @@ update msg wrapMsg appState model =
 
         RerunCommand ->
             ( { model | updating = Loading }
-            , PersistentCommandsApi.retry model.uuid appState (wrapMsg << RerunCommandComplete)
+            , PersistentCommandsApi.retry appState model.uuid (wrapMsg << RerunCommandComplete)
             )
 
         RerunCommandComplete result ->
-            applyResultTransform appState
+            RequestHelpers.applyResultTransform
                 { setResult = \res m -> { m | updating = res }
                 , defaultError = "Unable to rerun persistent command."
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always "Persistent command has been scheduled for the rerun."
+                , locale = appState.locale
                 }
 
         SetIgnored ->
             ( { model | updating = Loading }
-            , PersistentCommandsApi.updateState model.uuid PersistentCommandState.Ignore appState (wrapMsg << SetIgnoredComplete)
+            , PersistentCommandsApi.updateState appState model.uuid PersistentCommandState.Ignore (wrapMsg << SetIgnoredComplete)
             )
 
         SetIgnoredComplete result ->

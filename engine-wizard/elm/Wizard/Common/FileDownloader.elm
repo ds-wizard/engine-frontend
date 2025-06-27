@@ -5,10 +5,10 @@ module Wizard.Common.FileDownloader exposing
     )
 
 import Http
-import Shared.Api as Api
-import Shared.Data.UrlResponse as UrlResponse exposing (UrlResponse)
-import Shared.Error.ApiError exposing (ApiError)
-import Wizard.Common.AppState exposing (AppState)
+import Shared.Api.Request as Request
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
+import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Ports as Ports
 
 
@@ -20,10 +20,10 @@ fetchFile : AppState -> String -> Cmd Msg
 fetchFile appState fileUrl =
     Http.request
         { method = "GET"
-        , headers = Api.authorizationHeaders appState
+        , headers = Request.authorizationHeaders (AppState.toServerInfo appState)
         , url = fileUrl
         , body = Http.emptyBody
-        , expect = Api.expectJson GotFileUrl UrlResponse.decoder
+        , expect = Request.expectJson GotFileUrl UrlResponse.decoder
         , timeout = Nothing
         , tracker = Nothing
         }

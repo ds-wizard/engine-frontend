@@ -1,6 +1,6 @@
 module Wizard.Tenants.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.Tenant exposing (Tenant)
+import Wizard.Api.Models.Tenant exposing (Tenant)
 import Wizard.Common.Components.Listing.Msgs as Listing
 
 

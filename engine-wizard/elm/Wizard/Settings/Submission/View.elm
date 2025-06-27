@@ -7,14 +7,14 @@ import Html exposing (Html, a, button, div, label, p, strong, text)
 import Html.Attributes exposing (class, placeholder, type_)
 import Html.Events exposing (onClick)
 import List.Extra as List
-import Shared.Data.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
 import Version
+import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra

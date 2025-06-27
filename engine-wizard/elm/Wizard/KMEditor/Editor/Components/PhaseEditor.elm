@@ -5,24 +5,24 @@ import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (checked, class, classList, type_)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
-import Shared.Data.Event exposing (Event(..))
-import Shared.Data.Event.CommonEventData exposing (CommonEventData)
-import Shared.Data.Event.EditEventSetters exposing (setRequiredPhaseUuid)
-import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
-import Shared.Data.Event.EditQuestionFileEventData as EditQuestionFileEventData
-import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
-import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
-import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
-import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
-import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
-import Shared.Data.Event.EditQuestionValueEventData as EditQuestionValueEventData
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
 import Shared.Html exposing (faSet)
 import String.Extra as String
+import Wizard.Api.Models.Event exposing (Event(..))
+import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
+import Wizard.Api.Models.Event.EditEventSetters exposing (setRequiredPhaseUuid)
+import Wizard.Api.Models.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Wizard.Api.Models.Event.EditQuestionFileEventData as EditQuestionFileEventData
+import Wizard.Api.Models.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
+import Wizard.Api.Models.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
+import Wizard.Api.Models.Event.EditQuestionListEventData as EditQuestionListEventData
+import Wizard.Api.Models.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
+import Wizard.Api.Models.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
+import Wizard.Api.Models.Event.EditQuestionValueEventData as EditQuestionValueEventData
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash

@@ -4,12 +4,12 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
-import Shared.Data.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Version
+import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature

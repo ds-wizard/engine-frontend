@@ -4,15 +4,15 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Data.Locale as Locale
-import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
-import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.Locale as Locale
+import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
+import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature

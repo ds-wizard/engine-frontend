@@ -5,16 +5,16 @@ import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
-import Shared.Data.Package as Package
-import Shared.Data.Package.PackagePhase as PackagePhase
-import Shared.Data.PackageDetail exposing (PackageDetail)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.Package as Package
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature

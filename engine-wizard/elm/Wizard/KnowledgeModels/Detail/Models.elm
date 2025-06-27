@@ -5,7 +5,7 @@ module Wizard.KnowledgeModels.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Shared.Data.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 
 
 type alias Model =

@@ -3,7 +3,7 @@ module Wizard.Settings.Usage.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Data.Usage exposing (Usage)
+import Wizard.Api.Models.Usage exposing (Usage)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.UsageTable as UsageTable
 import Wizard.Common.View.Page as Page

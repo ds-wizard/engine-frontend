@@ -11,16 +11,16 @@ import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
-import Shared.Api.Questionnaires as QuestionnaireApi
-import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
+import Shared.Api.WebSocket as WebSocket exposing (WebSocket)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnairePreview exposing (QuestionnairePreview)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Data.SummaryReport exposing (SummaryReport)
-import Shared.WebSocket as WebSocket exposing (WebSocket)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnairePreview exposing (QuestionnairePreview)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
+import Wizard.Api.Questionnaires as QuestionnaireApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
@@ -70,7 +70,7 @@ init appState uuid mbSelectedPath mbCommentThreadUuid =
     { uuid = uuid
     , mbSelectedPath = mbSelectedPath
     , mbCommentThreadUuid = mbCommentThreadUuid
-    , websocket = WebSocket.init (QuestionnaireApi.websocket uuid appState)
+    , websocket = WebSocket.init (QuestionnaireApi.websocket appState uuid)
     , offline = False
     , error = False
     , forceDisconnect = False

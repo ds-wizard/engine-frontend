@@ -12,10 +12,10 @@ import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.User exposing (User)
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Api.Models.User exposing (User)
 
 
 type alias UserEditForm =

@@ -12,12 +12,12 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, br, p, strong, text)
 import Maybe.Extra as Maybe
-import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
@@ -72,7 +72,7 @@ update cfg appState msg model =
                 Just event ->
                     let
                         cmd =
-                            QuestionnairesApi.postRevert cfg.questionnaireUuid (QuestionnaireEvent.getUuid event) appState PostRevertVersionComplete
+                            QuestionnairesApi.postRevert appState cfg.questionnaireUuid (QuestionnaireEvent.getUuid event) PostRevertVersionComplete
                     in
                     ( { model | revertResult = Loading }
                     , cmd

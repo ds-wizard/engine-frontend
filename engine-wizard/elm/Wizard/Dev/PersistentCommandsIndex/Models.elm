@@ -6,7 +6,7 @@ module Wizard.Dev.PersistentCommandsIndex.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.PersistentCommand exposing (PersistentCommand)
+import Wizard.Api.Models.PersistentCommand exposing (PersistentCommand)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Dev.Routes exposing (persistentCommandIndexRouteStateFilterId)
 

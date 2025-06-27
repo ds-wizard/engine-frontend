@@ -4,11 +4,11 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (href, target)
-import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (flip)
 import String.Format as String
 import Version exposing (Version)
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton

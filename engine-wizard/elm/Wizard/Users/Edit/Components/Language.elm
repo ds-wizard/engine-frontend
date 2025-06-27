@@ -14,13 +14,13 @@ import Html exposing (Html, div, form, input, label, text)
 import Html.Attributes exposing (checked, class, classList, name, type_)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
-import Shared.Api.Locales as LocalesApi
-import Shared.Api.Users as UsersApi
 import Shared.Components.Badge as Badge
-import Shared.Data.LocaleSuggestion exposing (LocaleSuggestion)
-import Shared.Data.UserLocale exposing (UserLocale)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Locales as LocalesApi
+import Wizard.Api.Models.LocaleSuggestion exposing (LocaleSuggestion)
+import Wizard.Api.Models.UserLocale exposing (UserLocale)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.ActionButton as ActionButton
@@ -83,7 +83,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | userLocale = ApiError.toActionResult appState (gettext "Unable to get user language." appState.locale) error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         GetLocalesCompleted result ->
@@ -95,7 +95,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | locales = ApiError.toActionResult appState (gettext "Unable to get languages." appState.locale) error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         SelectLocale localeId ->
@@ -119,7 +119,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | savingLocale = ApiError.toActionResult appState (gettext "Unable to save user language." appState.locale) error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
 

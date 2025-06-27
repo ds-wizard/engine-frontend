@@ -17,22 +17,22 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Api.Documents as DocumentsApi
-import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.Document exposing (Document)
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Shared.Data.SummaryReport exposing (SummaryReport)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Setters exposing (setSelected)
 import String.Format as String
 import Uuid exposing (Uuid)
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Documents as DocumentsApi
+import Wizard.Api.Models.Document exposing (Document)
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.SummaryReport exposing (viewIndications)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -102,13 +102,13 @@ fetchData appState questionnaireUuid mbEventUuid =
         eventCmd =
             case mbEventUuid of
                 Just eventUuid ->
-                    QuestionnairesApi.getQuestionnaireEvent questionnaireUuid eventUuid appState GetQuestionnaireEventComplete
+                    QuestionnairesApi.getQuestionnaireEvent appState questionnaireUuid eventUuid GetQuestionnaireEventComplete
 
                 Nothing ->
                     Cmd.none
 
         summaryReportCmd =
-            QuestionnairesApi.getSummaryReport questionnaireUuid appState GetSummaryReportComplete
+            QuestionnairesApi.getSummaryReport appState questionnaireUuid GetSummaryReportComplete
     in
     Cmd.batch [ eventCmd, summaryReportCmd ]
 
@@ -184,7 +184,7 @@ handleForm cfg formMsg appState model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        DocumentsApi.postDocument body appState PostDocumentCompleted
+                        DocumentsApi.postDocument appState body PostDocumentCompleted
             in
             ( { model | savingDocument = Loading }, cmd )
 
@@ -223,7 +223,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.packageId
             , getError = gettext "Unable to get document templates." appState.locale
             , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
@@ -231,7 +231,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             }
 
         ( templateTypeHintInputModel, cmd ) =
-            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg model.templateTypeHintInputModel
     in
     ( { model | templateTypeHintInputModel = templateTypeHintInputModel }
     , cmd

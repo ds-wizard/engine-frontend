@@ -20,12 +20,12 @@ import Html.Attributes exposing (class, classList, id, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseDown, stopPropagationOn)
 import Json.Decode as D exposing (Decoder)
 import Maybe.Extra as Maybe
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Error.ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Utils exposing (dispatch)
 import Task
+import Task.Extra as Task
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -74,7 +74,7 @@ type Msg a
 
 type alias UpdateCofnig a msg =
     { wrapMsg : Msg a -> msg
-    , getTypeHints : PaginationQueryString -> AppState -> (Result ApiError (Pagination a) -> Msg a) -> Cmd (Msg a)
+    , getTypeHints : PaginationQueryString -> (Result ApiError (Pagination a) -> Msg a) -> Cmd (Msg a)
     , getError : String
     , setReply : a -> msg
     , clearReply : Maybe msg
@@ -82,13 +82,13 @@ type alias UpdateCofnig a msg =
     }
 
 
-update : UpdateCofnig a msg -> Msg a -> AppState -> Model a -> ( Model a, Cmd msg )
-update cfg msg appState model =
+update : UpdateCofnig a msg -> Msg a -> Model a -> ( Model a, Cmd msg )
+update cfg msg model =
     case msg of
         ShowTypeHints ->
             ( { model | typehints = Just Loading }
             , Cmd.batch
-                [ Cmd.map cfg.wrapMsg (loadTypeHints cfg appState model.q)
+                [ Cmd.map cfg.wrapMsg (loadTypeHints cfg model.q)
                 , Task.attempt (always (cfg.wrapMsg NoOp)) (Dom.focus (model.fieldId ++ "-search"))
                 ]
             )
@@ -105,16 +105,16 @@ update cfg msg appState model =
 
         SetReply item ->
             ( { model | selected = Just item, typehints = Nothing, q = "" }
-            , dispatch (cfg.setReply item)
+            , Task.dispatch (cfg.setReply item)
             )
 
         ClearReply ->
-            ( { model | selected = Nothing }, Maybe.unwrap Cmd.none dispatch cfg.clearReply )
+            ( { model | selected = Nothing }, Maybe.unwrap Cmd.none Task.dispatch cfg.clearReply )
 
         DebounceMsg debounceMsg ->
             let
                 load q =
-                    loadTypeHints cfg appState q
+                    loadTypeHints cfg q
 
                 ( debounce, debounceCmd ) =
                     Debounce.update debounceConfig (Debounce.takeLast load) debounceMsg model.debounce
@@ -151,9 +151,9 @@ update cfg msg appState model =
             ( model, Cmd.none )
 
 
-loadTypeHints : UpdateCofnig a msg -> AppState -> String -> Cmd (Msg a)
-loadTypeHints cfg appState q =
-    cfg.getTypeHints (PaginationQueryString.fromQ q) appState (TypeHintsLoaded q)
+loadTypeHints : UpdateCofnig a msg -> String -> Cmd (Msg a)
+loadTypeHints cfg q =
+    cfg.getTypeHints (PaginationQueryString.fromQ q) (TypeHintsLoaded q)
 
 
 debounceConfig : Debounce.Config (Msg a)

@@ -1,14 +1,14 @@
 module Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 
 import Debounce
-import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.Event exposing (Event)
-import Shared.Data.Event.CommonEventData exposing (CommonEventData)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
+import Shared.Api.WebSocket as WebSocket
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Prefab exposing (Prefab)
-import Shared.Error.ApiError exposing (ApiError)
-import Shared.WebSocket as WebSocket
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.Event exposing (Event)
+import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
+import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview

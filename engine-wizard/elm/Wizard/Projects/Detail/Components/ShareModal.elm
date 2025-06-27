@@ -19,20 +19,9 @@ import Html.Events exposing (onClick, onMouseOut)
 import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.UserGroups as UserGroupsApi
-import Shared.Api.Users as UsersApi
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.Member as Member
-import Shared.Data.Permission exposing (Permission)
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.QuestionnairePermission as QuestionnairePermission
-import Shared.Data.User as User
-import Shared.Data.UserGroupSuggestion exposing (UserGroupSuggestion)
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (getUuid, withNoCmd, withSeed)
@@ -40,6 +29,17 @@ import Shortcut
 import String.Format as String
 import Time
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.Member as Member
+import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.QuestionnairePermission as QuestionnairePermission
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserGroupSuggestion exposing (UserGroupSuggestion)
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
+import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.UserGroups as UserGroupsApi
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintInput
@@ -212,7 +212,7 @@ handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
 
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << UserTypeHintInputMsg
-            , getTypeHints = UsersApi.getUsersSuggestions
+            , getTypeHints = UsersApi.getUsersSuggestions appState
             , getError = gettext "Unable to get users." appState.locale
             , setReply = cfg.wrapMsg << AddUser
             , clearReply = Nothing
@@ -220,7 +220,7 @@ handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
             }
 
         ( userTypeHintInputModel, cmd ) =
-            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.userTypeHintInputModel
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg model.userTypeHintInputModel
     in
     ( { model | userTypeHintInputModel = userTypeHintInputModel }, cmd )
 
@@ -236,7 +236,7 @@ handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model =
 
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << UserGroupTypeHintInputMsg
-            , getTypeHints = UserGroupsApi.getUserGroupsSuggestions
+            , getTypeHints = UserGroupsApi.getUserGroupsSuggestions appState
             , getError = gettext "Unable to get user groups." appState.locale
             , setReply = cfg.wrapMsg << AddUserGroup
             , clearReply = Nothing
@@ -244,7 +244,7 @@ handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model =
             }
 
         ( userGroupTypeHintInputModel, cmd ) =
-            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.userGroupTypeHintInputModel
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg model.userGroupTypeHintInputModel
     in
     ( { model | userGroupTypeHintInputModel = userGroupTypeHintInputModel }, cmd )
 
@@ -381,7 +381,7 @@ saveSharing appState cfg model =
                 | savingSharing = Loading
                 , lastSavingSharing = appState.currentTime
               }
-            , QuestionnairesApi.putQuestionnaireShare cfg.questionnaireUuid body appState (cfg.wrapMsg << PutQuestionnaireShareComplete appState.currentTime)
+            , QuestionnairesApi.putQuestionnaireShare appState cfg.questionnaireUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete appState.currentTime)
             )
 
         Nothing ->

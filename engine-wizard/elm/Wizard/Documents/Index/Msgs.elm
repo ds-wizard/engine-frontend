@@ -1,10 +1,10 @@
 module Wizard.Documents.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.Document exposing (Document)
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.Submission exposing (Submission)
-import Shared.Data.SubmissionService exposing (SubmissionService)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.Document exposing (Document)
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.Submission exposing (Submission)
+import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
 import Wizard.Common.Components.Listing.Msgs as Listing
 import Wizard.Common.FileDownloader as FileDownloader
 

@@ -5,8 +5,8 @@ module Wizard.Registry.RegistrySignupConfirmation.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Registry as RegistryApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Wizard.Api.Registry as RegistryApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Registry.RegistrySignupConfirmation.Models exposing (Model)
@@ -15,7 +15,7 @@ import Wizard.Registry.RegistrySignupConfirmation.Msgs exposing (Msg(..))
 
 fetchData : String -> String -> AppState -> Cmd Msg
 fetchData organizationId hash appState =
-    RegistryApi.postConfirmation organizationId hash appState PostConfirmationComplete
+    RegistryApi.postConfirmation appState organizationId hash PostConfirmationComplete
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -13,8 +13,8 @@ import Html.Attributes exposing (class, style)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Shared.Html exposing (fa, faKey, faSet)
+import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 

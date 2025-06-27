@@ -6,10 +6,10 @@ module Wizard.Projects.DocumentDownload.Update exposing
 import ActionResult
 import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
-import Shared.Api.Documents as DocumentsApi
 import Shared.Auth.Session as Session
-import Shared.Error.ApiError as ApiError
+import Shared.Data.ApiError as ApiError
 import Uuid exposing (Uuid)
+import Wizard.Api.Documents as DocumentsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Projects.DocumentDownload.Models exposing (Model)
 import Wizard.Projects.DocumentDownload.Msgs exposing (Msg(..))
@@ -19,7 +19,7 @@ import Wizard.Routing exposing (cmdNavigate, toUrl)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState fileUuid =
-    DocumentsApi.getDocumentUrl fileUuid appState GotDocumentUrlCompleted
+    DocumentsApi.getDocumentUrl appState fileUuid GotDocumentUrlCompleted
 
 
 update : AppState -> Msg -> Model -> ( Model, Cmd Msg )

@@ -3,16 +3,16 @@ module Wizard.Projects.Import.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Random exposing (Seed)
-import Shared.Api.KnowledgeModels as KnowledgeModelsApi
-import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeel
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
-import Shared.Error.ApiError as ApiError
+import Shared.Data.ApiError as ApiError
 import Shared.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
+import Wizard.Api.QuestionnaireImporters as QuestionnaireImportersApi
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.Importer as Importer
@@ -27,8 +27,8 @@ import Wizard.Routing exposing (cmdNavigate)
 fetchData : AppState -> Uuid -> String -> Cmd Msg
 fetchData appState uuid importerId =
     Cmd.batch
-        [ QuestionnairesApi.getQuestionnaireQuestionnaire uuid appState GetQuestionnaireComplete
-        , QuestionnaireImportersApi.getQuestionnaireImporter importerId appState GetQuestionnaireImporterComplete
+        [ QuestionnairesApi.getQuestionnaireQuestionnaire appState uuid GetQuestionnaireComplete
+        , QuestionnaireImportersApi.getQuestionnaireImporter appState importerId GetQuestionnaireImporterComplete
         ]
 
 
@@ -62,18 +62,19 @@ update wrapMsg msg appState model =
                     }
 
                 ( newModel, cmd ) =
-                    applyResult appState
+                    RequestHelpers.applyResult
                         { setResult = setResult
                         , defaultError = gettext "Unable to get the project." appState.locale
                         , model = model
                         , result = result
                         , logoutMsg = Wizard.Msgs.logoutMsg
+                        , locale = appState.locale
                         }
 
                 fetchCmd =
                     case newModel.questionnaire of
                         Success questionnaire ->
-                            KnowledgeModelsApi.fetchAsString questionnaire.packageId questionnaire.selectedQuestionTagUuids appState (wrapMsg << FetchKnowledgeModelStringComplete)
+                            KnowledgeModelsApi.fetchAsString appState questionnaire.packageId questionnaire.selectedQuestionTagUuids (wrapMsg << FetchKnowledgeModelStringComplete)
 
                         _ ->
                             Cmd.none
@@ -96,18 +97,19 @@ update wrapMsg msg appState model =
                 Err error ->
                     withSeed <|
                         ( setQuestionnaireImporter (ApiError.toActionResult appState (gettext "Unable to get importer." appState.locale) error) model
-                        , getResultCmd Wizard.Msgs.logoutMsg result
+                        , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
         FetchKnowledgeModelStringComplete result ->
             let
                 ( newModel, cmd ) =
-                    applyResult appState
+                    RequestHelpers.applyResult
                         { setResult = setKnowledgeModelString
                         , defaultError = gettext "Unable to get the project." appState.locale
                         , model = model
                         , result = result
                         , logoutMsg = Wizard.Msgs.logoutMsg
+                        , locale = appState.locale
                         }
             in
             withSeed ( newModel, Cmd.batch [ cmd, openImporter newModel ] )
@@ -168,7 +170,7 @@ update wrapMsg msg appState model =
                 Just importResult ->
                     withSeed
                         ( { model | importing = Loading }
-                        , Cmd.map wrapMsg <| QuestionnairesApi.putQuestionnaireContent model.uuid importResult.questionnaireEvents appState PutImporterDataComplete
+                        , Cmd.map wrapMsg <| QuestionnairesApi.putQuestionnaireContent appState model.uuid importResult.questionnaireEvents PutImporterDataComplete
                         )
 
                 Nothing ->

@@ -6,11 +6,11 @@ module Wizard.Projects.Detail.Documents.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.Document exposing (Document)
-import Shared.Data.Document.DocumentState exposing (DocumentState(..))
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.Submission exposing (Submission)
-import Shared.Data.SubmissionService exposing (SubmissionService)
+import Wizard.Api.Models.Document exposing (Document)
+import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
+import Wizard.Api.Models.Submission exposing (Submission)
+import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
 import Wizard.Common.Components.Listing.Models as Listing
 
 

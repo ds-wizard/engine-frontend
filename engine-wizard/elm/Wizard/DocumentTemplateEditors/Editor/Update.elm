@@ -7,12 +7,12 @@ module Wizard.DocumentTemplateEditors.Editor.Update exposing
 import ActionResult
 import Gettext exposing (gettext)
 import Random exposing (Seed)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Api.Prefabs as PrefabsApi
-import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail
-import Shared.Error.ApiError as ApiError
-import Shared.Utils exposing (dispatch)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail
+import Wizard.Api.Prefabs as PrefabsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor as FileEditor
 import Wizard.DocumentTemplateEditors.Editor.Components.Preview as Preview
@@ -33,7 +33,7 @@ fetchData appState documentTemplateId subroute model =
 
     else
         Cmd.batch
-            [ DocumentTemplateDraftsApi.getDraft documentTemplateId appState GetTemplateCompleted
+            [ DocumentTemplateDraftsApi.getDraft appState documentTemplateId GetTemplateCompleted
             , PrefabsApi.getDocumentTemplateFormatPrefabs appState GetDocumentTemplateFormatPrefabsCompleted
             , PrefabsApi.getDocumentTemplateFormatStepPrefabs appState GetDocumentTemplateFormatStepPrefabsCompleted
             , Cmd.map FileEditorMsg (FileEditor.fetchData documentTemplateId appState)
@@ -44,7 +44,7 @@ fetchData appState documentTemplateId subroute model =
 loadPreviewCmd : Bool -> Cmd Msg
 loadPreviewCmd isPreview =
     if isPreview then
-        dispatch (PreviewMsg Preview.loadPreviewMsg)
+        Task.dispatch (PreviewMsg Preview.loadPreviewMsg)
 
     else
         Cmd.none
@@ -146,7 +146,7 @@ update appState wrapMsg msg model =
                 Err error ->
                     withSeed <|
                         ( { model | documentTemplate = ApiError.toActionResult appState (gettext "Unable to get document template" appState.locale) error }
-                        , getResultCmd Wizard.Msgs.logoutMsg result
+                        , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
         GetDocumentTemplateFormatPrefabsCompleted result ->
@@ -237,7 +237,7 @@ update appState wrapMsg msg model =
                     , settingsModel = Settings.initialModel appState
                   }
                 , Cmd.batch
-                    [ DocumentTemplateDraftsApi.getDraft model.documentTemplateId appState (wrapMsg << GetTemplateCompleted)
+                    [ DocumentTemplateDraftsApi.getDraft appState model.documentTemplateId (wrapMsg << GetTemplateCompleted)
                     , Cmd.map (wrapMsg << FileEditorMsg) (FileEditor.fetchData model.documentTemplateId appState)
                     , Cmd.map wrapMsg (loadPreviewCmd (model.currentEditor == PreviewEditor))
                     , Ports.clearUnloadMessage ()

@@ -3,7 +3,6 @@ module Shared.Utils exposing
     , boolToString
     , compose2
     , dictFromMaybeList
-    , dispatch
     , flip
     , getContrastColorHex
     , getOrganizationAndItemId
@@ -24,7 +23,6 @@ import Color.Convert exposing (hexToColor)
 import Dict exposing (Dict)
 import List.Extra as List
 import Random exposing (Seed, step)
-import Task
 import Uuid exposing (Uuid)
 
 
@@ -65,11 +63,6 @@ httpMethodOptions =
             [ "GET", "POST", "HEAD", "PUT", "DELETE", "OPTIONS", "PATCH" ]
     in
     ( "", "--" ) :: List.zip httpMethods httpMethods
-
-
-dispatch : a -> Cmd a
-dispatch msg =
-    Task.perform (always msg) (Task.succeed ())
 
 
 boolToInt : Bool -> Int

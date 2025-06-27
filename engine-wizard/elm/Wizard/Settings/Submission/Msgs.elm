@@ -1,7 +1,7 @@
 module Wizard.Settings.Submission.Msgs exposing (Msg(..))
 
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 
 

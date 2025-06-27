@@ -4,13 +4,13 @@ import Html exposing (Html, code, div, h3, pre, span, text)
 import Html.Attributes exposing (class)
 import Json.Print
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.PersistentCommand as PersistentCommand
-import Shared.Data.PersistentCommandDetail exposing (PersistentCommandDetail)
-import Shared.Data.User as User
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode)
 import SyntaxHighlight
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.PersistentCommand as PersistentCommand
+import Wizard.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.View.FormResult as FormResult

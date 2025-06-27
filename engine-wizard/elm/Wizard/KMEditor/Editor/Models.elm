@@ -10,14 +10,14 @@ import ActionResult exposing (ActionResult)
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Random exposing (Seed)
-import Shared.Api.Branches as BranchesApi
-import Shared.Data.Event exposing (Event)
-import Shared.Data.KnowledgeModel.Integration exposing (Integration)
-import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
-import Shared.Data.WebSockets.BranchAction.SetContentBranchAction exposing (SetContentBranchAction)
-import Shared.WebSocket as WebSocket exposing (WebSocket)
+import Shared.Api.WebSocket as WebSocket exposing (WebSocket)
 import String.Extra as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.Event exposing (Event)
+import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
+import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
+import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction exposing (SetContentBranchAction)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
@@ -56,7 +56,7 @@ init : AppState -> Uuid -> Maybe Uuid -> Model
 init appState uuid mbEditorUuid =
     { uuid = uuid
     , mbEditorUuid = mbEditorUuid
-    , websocket = WebSocket.init (BranchesApi.websocket uuid appState)
+    , websocket = WebSocket.init (BranchesApi.websocket appState uuid)
     , offline = False
     , error = False
     , onlineUsers = []

@@ -6,9 +6,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (listInsertIf)
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.Common.GuideLinks as GuideLinks

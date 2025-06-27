@@ -20,24 +20,25 @@ import Html.Events exposing (onClick, onMouseDown, onSubmit)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.Package.PackagePhase as PackagePhase
-import Shared.Data.PackageSuggestion as PackageSuggestion
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Permission exposing (Permission)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Setters exposing (setSelected)
-import Shared.Utils exposing (dispatch, listFilterJust)
+import Shared.Utils exposing (listFilterJust)
+import Task.Extra as Task
 import Uuid exposing (Uuid)
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -150,7 +151,7 @@ handleFormMsg cfg formMsg appState model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.putQuestionnaireSettings cfg.questionnaireUuid body appState PutQuestionnaireComplete
+                        QuestionnairesApi.putQuestionnaireSettings appState cfg.questionnaireUuid body PutQuestionnaireComplete
             in
             ( { model | savingQuestionnaire = Loading }
             , cmd
@@ -160,7 +161,7 @@ handleFormMsg cfg formMsg appState model =
             let
                 searchValue fieldName value =
                     if fieldName == lastProjectTagFieldName model.form then
-                        dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsSearch value)
+                        Task.dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsSearch value)
 
                     else
                         Cmd.none
@@ -228,7 +229,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.packageId
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
@@ -236,7 +237,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             }
 
         ( templateTypeHintInputModel, cmd ) =
-            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg model.templateTypeHintInputModel
     in
     ( { model | templateTypeHintInputModel = templateTypeHintInputModel }, cmd )
 
@@ -258,7 +259,7 @@ handleProjectTagsSearch cfg appState model value =
 
         cmd =
             Cmd.map cfg.wrapMsg <|
-                QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState ProjectTagsSearchComplete
+                QuestionnairesApi.getProjectTagsSuggestions appState queryString selectedTags ProjectTagsSearchComplete
     in
     ( model, cmd )
 

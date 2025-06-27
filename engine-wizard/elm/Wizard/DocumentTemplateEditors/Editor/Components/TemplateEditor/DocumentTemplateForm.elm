@@ -16,15 +16,15 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Maybe.Extra as Maybe
-import Shared.Data.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
-import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Data.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage as AllowedPackage exposing (AllowedPackage)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import String exposing (fromInt)
 import Version
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
+import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage as AllowedPackage exposing (AllowedPackage)
 import Wizard.Common.AppState exposing (AppState)
 
 

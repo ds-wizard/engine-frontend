@@ -4,10 +4,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
-import Shared.Data.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Shared.Html exposing (faSet)
 import String.Format as String
 import Version
+import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)

@@ -14,10 +14,10 @@ import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, classList, disabled, id, style, type_)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode)
 import Shared.Utils exposing (getContrastColorHex)
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltipCustom)
 import Wizard.Common.View.Flash as Flash

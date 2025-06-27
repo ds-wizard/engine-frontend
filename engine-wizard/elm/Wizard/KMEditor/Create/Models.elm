@@ -5,9 +5,9 @@ module Wizard.KMEditor.Create.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)

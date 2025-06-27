@@ -12,13 +12,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Maybe.Extra as Maybe
-import Shared.Api.Feedbacks as FeedbacksApi
-import Shared.Data.Feedback exposing (Feedback)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import String exposing (fromInt)
 import String.Format as String
+import Wizard.Api.Feedbacks as FeedbacksApi
+import Wizard.Api.Models.Feedback exposing (Feedback)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.FeedbackForm as FeedbackForm exposing (FeedbackForm)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -64,7 +64,7 @@ update msg appState model =
                     }
 
                 cmd =
-                    FeedbacksApi.getFeedbacks packageId questionUuid appState GetFeedbacksComplete
+                    FeedbacksApi.getFeedbacks appState packageId questionUuid GetFeedbacksComplete
             in
             ( newModel, cmd )
 
@@ -104,7 +104,7 @@ update msg appState model =
                             FeedbackForm.encode questionUuid packageId feedbackForm
 
                         cmd =
-                            FeedbacksApi.postFeedback body appState PostFeedbackComplete
+                            FeedbacksApi.postFeedback appState body PostFeedbackComplete
                     in
                     ( { model | feedbackResult = Loading }, cmd )
 

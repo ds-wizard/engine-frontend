@@ -2,9 +2,9 @@ module Wizard.KnowledgeModels.ResourcePage.View exposing (view)
 
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Shared.Html exposing (faSet)
 import Shared.Markdown as Markdown
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.KnowledgeModels.ResourcePage.Models exposing (Model)

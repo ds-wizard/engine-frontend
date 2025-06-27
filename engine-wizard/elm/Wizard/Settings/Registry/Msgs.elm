@@ -1,7 +1,7 @@
 module Wizard.Settings.Registry.Msgs exposing (Msg(..))
 
 import Form
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 
 

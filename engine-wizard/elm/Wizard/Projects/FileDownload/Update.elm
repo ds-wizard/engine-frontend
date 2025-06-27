@@ -6,10 +6,10 @@ module Wizard.Projects.FileDownload.Update exposing
 import ActionResult
 import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
-import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Shared.Auth.Session as Session
-import Shared.Error.ApiError as ApiError
+import Shared.Data.ApiError as ApiError
 import Uuid exposing (Uuid)
+import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Projects.FileDownload.Models exposing (Model)
 import Wizard.Projects.FileDownload.Msgs exposing (Msg(..))
@@ -19,7 +19,7 @@ import Wizard.Routing exposing (cmdNavigate, toUrl)
 
 fetchData : AppState -> Uuid -> Uuid -> Cmd Msg
 fetchData appState projectUuid fileUuid =
-    QuestionnaireFilesApi.getFileUrl projectUuid fileUuid appState GotFileUrlCompleted
+    QuestionnaireFilesApi.getFileUrl appState projectUuid fileUuid GotFileUrlCompleted
 
 
 update : AppState -> Msg -> Model -> ( Model, Cmd Msg )

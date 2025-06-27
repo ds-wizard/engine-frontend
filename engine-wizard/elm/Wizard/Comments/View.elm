@@ -4,9 +4,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Shared.Data.User as User
 import Shared.Html exposing (emptyNode)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Models.User as User
 import Wizard.Comments.Models exposing (Model)
 import Wizard.Comments.Msgs exposing (Msg(..))
 import Wizard.Common.AppState exposing (AppState)

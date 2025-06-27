@@ -2,8 +2,8 @@ module Wizard.Projects.Common.DeleteProjectModal.Update exposing (UpdateConfig, 
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Projects.Common.DeleteProjectModal.Models exposing (Model)
@@ -51,7 +51,7 @@ handleDeleteQuestionnaire cfg appState model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.deleteQuestionnaire questionnaire.uuid appState DeleteQuestionnaireCompleted
+                        QuestionnairesApi.deleteQuestionnaire appState questionnaire.uuid DeleteQuestionnaireCompleted
             in
             ( newModel, cmd )
 

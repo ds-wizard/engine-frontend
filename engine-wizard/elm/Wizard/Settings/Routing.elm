@@ -4,10 +4,10 @@ module Wizard.Settings.Routing exposing
     , toUrl
     )
 
-import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Locale exposing (lr)
 import Shared.Utils exposing (listInsertIf)
 import Url.Parser exposing ((</>), Parser, map, s)
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Settings.Routes exposing (Route(..))

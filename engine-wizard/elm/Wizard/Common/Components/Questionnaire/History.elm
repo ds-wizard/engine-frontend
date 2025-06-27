@@ -20,24 +20,24 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Data.User as User
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (flip)
 import String.Format as String
 import Time
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag

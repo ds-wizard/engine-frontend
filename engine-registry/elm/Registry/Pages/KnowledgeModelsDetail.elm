@@ -22,7 +22,7 @@ import Registry.Components.SidebarRow as SidebarRow
 import Registry.Components.VersionList as VersionList
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 
 
 type alias Model =

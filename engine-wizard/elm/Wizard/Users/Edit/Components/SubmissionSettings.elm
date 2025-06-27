@@ -15,14 +15,14 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Api.Users as UsersApi
-import Shared.Data.SubmissionProps exposing (SubmissionProps)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Models.SubmissionProps exposing (SubmissionProps)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
@@ -96,7 +96,7 @@ handleGetSubmissionPropsCompleted cfg appState model result =
                     { model | submissionProps = ActionResult.Error <| gettext "Unable to get the user." appState.locale }
 
         cmd =
-            getResultCmd cfg.logoutMsg result
+            RequestHelpers.getResultCmd cfg.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -111,7 +111,7 @@ handleFormMsg cfg appState formMsg model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        UsersApi.putCurrentUserSubmissionProps body appState PutSubmissionPropsComplete
+                        UsersApi.putCurrentUserSubmissionProps appState body PutSubmissionPropsComplete
             in
             ( { model | savingProps = ActionResult.Loading }, cmd )
 
@@ -137,7 +137,7 @@ handlePutSubmissionPropsComplete cfg appState model result =
                 , form = Form.setFormErrors appState err model.form
               }
             , Cmd.batch
-                [ getResultCmd cfg.logoutMsg result
+                [ RequestHelpers.getResultCmd cfg.logoutMsg result
                 , Ports.scrollToTop ".Users__Edit__content"
                 ]
             )

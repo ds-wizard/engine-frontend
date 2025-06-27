@@ -8,16 +8,16 @@ import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Normalize as Normalize
 import Version exposing (Version)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.DocumentTemplateEditors.Common.DocumentTemplateEditorCreateForm as DocumentTemplateEditorCreateForm exposing (DocumentTemplateEditorCreateForm)
@@ -33,7 +33,7 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     case ( model.selectedDocumentTemplate, model.edit ) of
         ( Just documentTemplateId, True ) ->
-            DocumentTemplatesApi.getTemplate documentTemplateId appState GetDocumentTemplateCompleted
+            DocumentTemplatesApi.getTemplate appState documentTemplateId GetDocumentTemplateCompleted
 
         _ ->
             Cmd.none
@@ -88,7 +88,7 @@ handleFormMsg wrapMsg formMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        DocumentTemplateDraftsApi.postDraft body appState PostDocumentTemplateDraftCompleted
+                        DocumentTemplateDraftsApi.postDraft appState body PostDocumentTemplateDraftCompleted
             in
             ( { model | savingDocumentTemplate = ActionResult.Loading }, cmd )
 
@@ -138,10 +138,10 @@ handlePostDocumentTemplateDraftCompleted appState model result =
 
         Err error ->
             ( { model
-                | form = setFormErrors appState error model.form
+                | form = Form.setFormErrors appState error model.form
                 , savingDocumentTemplate = ApiError.toActionResult appState (gettext "Document template could not be created." appState.locale) error
               }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -153,7 +153,7 @@ handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 
         cfg =
             { wrapMsg = wrapMsg << DocumentTemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesSuggestions (Just False) True
+            , getTypeHints = DocumentTemplatesApi.getTemplatesSuggestions appState (Just False) True
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
@@ -161,7 +161,7 @@ handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             }
 
         ( packageTypeHintInputModel, cmd ) =
-            TypeHintInput.update cfg typeHintInputMsg appState model.documentTemplateTypeHintInputModel
+            TypeHintInput.update cfg typeHintInputMsg model.documentTemplateTypeHintInputModel
     in
     ( { model | documentTemplateTypeHintInputModel = packageTypeHintInputModel }, cmd )
 

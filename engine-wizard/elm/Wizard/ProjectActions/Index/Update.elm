@@ -5,9 +5,9 @@ module Wizard.ProjectActions.Index.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.QuestionnaireActions as QuestionnaireActionsApi
-import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
-import Wizard.Common.Api exposing (applyResultTransformCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
+import Wizard.Api.QuestionnaireActions as QuestionnaireActionsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -31,14 +31,13 @@ update msg wrapMsg appState model =
         ToggleEnabled questionnaireAction ->
             ( { model | togglingEnabled = Loading }
             , Cmd.map wrapMsg <|
-                QuestionnaireActionsApi.putQuestionnaireAction
+                QuestionnaireActionsApi.putQuestionnaireAction appState
                     { questionnaireAction | enabled = not questionnaireAction.enabled }
-                    appState
                     ToggleEnabledComplete
             )
 
         ToggleEnabledComplete result ->
-            applyResultTransformCmd appState
+            RequestHelpers.applyResultTransformCmd
                 { setResult = \r m -> { m | togglingEnabled = r }
                 , defaultError = gettext "Unable to change project action." appState.locale
                 , model = model
@@ -46,6 +45,7 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always (gettext "Project action was changed successfully." appState.locale)
                 , cmd = Cmd.map (wrapMsg << ListingMsg) Listing.fetchData
+                , locale = appState.locale
                 }
 
 
@@ -66,7 +66,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireAction
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnaireActionsApi.getQuestionnaireActions
+    { getRequest = QuestionnaireActionsApi.getQuestionnaireActions appState
     , getError = gettext "Unable to get project actions." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectActionsIndexWithFilters

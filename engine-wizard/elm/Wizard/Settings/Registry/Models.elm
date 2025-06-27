@@ -5,8 +5,8 @@ module Wizard.Settings.Registry.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Api.Models.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm exposing (RegistrySignupForm)
 import Wizard.Settings.Generic.Model as GenericModel

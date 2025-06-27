@@ -1,8 +1,8 @@
 module Wizard.Settings.Generic.Msgs exposing (Msg(..))
 
 import Form
-import Shared.Data.EditableConfig exposing (EditableConfig)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.EditableConfig exposing (EditableConfig)
 
 
 type Msg

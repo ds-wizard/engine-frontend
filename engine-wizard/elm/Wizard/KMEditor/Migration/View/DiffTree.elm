@@ -3,12 +3,12 @@ module Wizard.KMEditor.Migration.View.DiffTree exposing (view)
 import Html exposing (Html, div, li, span, text, ul)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
-import Shared.Data.Event as Event exposing (Event(..))
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Integration as Integration
-import Shared.Data.KnowledgeModel.Question as Question
-import Shared.Data.KnowledgeModel.Reference as Reference
 import Shared.Html exposing (emptyNode, faSet)
+import Wizard.Api.Models.Event as Event exposing (Event(..))
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Integration as Integration
+import Wizard.Api.Models.KnowledgeModel.Question as Question
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 

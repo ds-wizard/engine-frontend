@@ -24,18 +24,19 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa, faSet)
-import Shared.Utils exposing (dispatch, getUuid)
+import Shared.Utils exposing (getUuid)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.FormExtra as FormExtra
@@ -176,10 +177,9 @@ update cfg appState msg model =
                 Just documentTemplateForm ->
                     withSeed
                         ( { model | savingForm = ActionResult.Loading }
-                        , DocumentTemplateDraftsApi.putDraft
+                        , DocumentTemplateDraftsApi.putDraft appState
                             cfg.documentTemplateId
                             (DocumentTemplateForm.encode DocumentTemplatePhase.Draft documentTemplateForm)
-                            appState
                             (cfg.wrapMsg << PutTemplateCompleted)
                         )
 
@@ -196,7 +196,7 @@ update cfg appState msg model =
                                 , form = DocumentTemplateForm.init appState documentTemplate
                                 , formListsChanged = False
                               }
-                            , dispatch (cfg.updateDocumentTemplate documentTemplate)
+                            , Task.dispatch (cfg.updateDocumentTemplate documentTemplate)
                             )
 
                     else
@@ -208,7 +208,7 @@ update cfg appState msg model =
                 Err error ->
                     withSeed
                         ( { model | savingForm = ApiError.toActionResult appState (gettext "Unable to save document template" appState.locale) error }
-                        , getResultCmd cfg.logoutMsg result
+                        , RequestHelpers.getResultCmd cfg.logoutMsg result
                         )
 
         FillFormat i format ->

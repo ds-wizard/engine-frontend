@@ -4,11 +4,11 @@ import Diff
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import List.Extra as List
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer

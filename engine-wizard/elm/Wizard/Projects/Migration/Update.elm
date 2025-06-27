@@ -8,14 +8,14 @@ import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
-import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Utils exposing (getUuid)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Time
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
+import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Msgs
@@ -29,7 +29,7 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    QuestionnairesApi.getQuestionnaireMigration uuid appState GetQuestionnaireMigrationCompleted
+    QuestionnairesApi.getQuestionnaireMigration appState uuid GetQuestionnaireMigrationCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -78,12 +78,13 @@ handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError 
 handleGetQuestionnaireMigrationCompleted appState model result =
     let
         ( modelWithMigration, cmd ) =
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setResult appState
                 , defaultError = gettext "Unable to get the project migration." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         ( newSeed, newModel, scrollCmd ) =
@@ -94,12 +95,13 @@ handleGetQuestionnaireMigrationCompleted appState model result =
 
 handlePutQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePutQuestionnaireMigrationCompleted appState model result =
-    applyResult appState
+    RequestHelpers.applyResult
         { setResult = \_ _ -> model
         , defaultError = gettext "Unable to save migration." appState.locale
         , model = model
         , result = result
         , logoutMsg = Wizard.Msgs.logoutMsg
+        , locale = appState.locale
         }
 
 
@@ -156,9 +158,9 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                                         }
                             in
                             ( newSeed2_
-                            , QuestionnairesApi.putQuestionnaireContent model.questionnaireUuid
+                            , QuestionnairesApi.putQuestionnaireContent appState
+                                model.questionnaireUuid
                                 [ event ]
-                                appState
                                 (always PutQuestionnaireContentCompleted)
                             )
 
@@ -257,7 +259,7 @@ handleFinalizeMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Mod
 handleFinalizeMigration wrapMsg appState model =
     ( model
     , Cmd.map wrapMsg <|
-        QuestionnairesApi.completeQuestionnaireMigration model.questionnaireUuid appState FinalizeMigrationCompleted
+        QuestionnairesApi.completeQuestionnaireMigration appState model.questionnaireUuid FinalizeMigrationCompleted
     )
 
 
@@ -289,10 +291,9 @@ putCurrentResolvedIds wrapMsg appState model =
     let
         createCmd migration =
             Cmd.map wrapMsg <|
-                QuestionnairesApi.putQuestionnaireMigration
+                QuestionnairesApi.putQuestionnaireMigration appState
                     model.questionnaireUuid
                     (QuestionnaireMigration.encode migration)
-                    appState
                     PutQuestionnaireMigrationCompleted
     in
     model.questionnaireMigration

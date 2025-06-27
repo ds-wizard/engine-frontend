@@ -2,7 +2,7 @@ module Wizard.Projects.Detail.Subscriptions exposing (subscriptions)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Shared.WebSocket as WebSocket
+import Shared.Api.WebSocket as WebSocket
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving

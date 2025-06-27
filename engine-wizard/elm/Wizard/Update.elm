@@ -2,9 +2,9 @@ module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
-import Shared.Api.Tours as ToursApi
 import Shared.Auth.Session as Session
 import Url
+import Wizard.Api.Tours as ToursApi
 import Wizard.Auth.Update
 import Wizard.Comments.Update
 import Wizard.Common.AppState as AppState
@@ -231,7 +231,7 @@ update msg model =
             Wizard.Msgs.AIAssistantMsg aiAssistantMsg ->
                 let
                     updateConfig =
-                        { appState = model.appState
+                        { serverInfo = AppState.toAIAssistantServerInfo model.appState
                         , seed = model.appState.seed
                         }
 
@@ -416,7 +416,7 @@ update msg model =
 
             Wizard.Msgs.TourDone tourId ->
                 ( addTour tourId model
-                , ToursApi.putTour tourId model.appState (always Wizard.Msgs.TourPutCompleted)
+                , ToursApi.putTour model.appState tourId (always Wizard.Msgs.TourPutCompleted)
                 )
 
             Wizard.Msgs.TourPutCompleted ->

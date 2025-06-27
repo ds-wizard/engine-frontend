@@ -5,8 +5,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
-import Shared.Data.Package exposing (Package)
 import Shared.Html exposing (emptyNode)
+import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ItemIcon as ItemIcon

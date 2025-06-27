@@ -7,10 +7,10 @@ import Html exposing (Html, a, div, h3, hr, label, strong, text)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
 import Shared.Auth.Role as Role
-import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import String.Extra as String
+import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy)

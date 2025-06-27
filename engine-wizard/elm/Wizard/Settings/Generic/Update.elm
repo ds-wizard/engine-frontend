@@ -8,11 +8,11 @@ import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
 import Form.Validate exposing (Validation)
 import Gettext exposing (gettext)
-import Shared.Api.Tenants as TenantsApi
-import Shared.Data.EditableConfig as EditableConfig exposing (EditableConfig)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConfig)
+import Wizard.Api.Tenants as TenantsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -68,7 +68,7 @@ handleGetConfigCompleted props appState model result =
                     { model | config = ApiError.toActionResult appState (gettext "Unable to load settings." appState.locale) error }
 
         cmd =
-            getResultCmd Wizard.Msgs.logoutMsg result
+            RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -90,7 +90,7 @@ handlePutConfigCompleted _ appState model result =
 
                 Err error ->
                     ( ApiError.toActionResult appState (gettext "Settings could not be saved." appState.locale) error
-                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
     in
     ( { model | savingConfig = newResult }, Cmd.batch [ cmd, Ports.scrollToTop ".Settings__content" ] )
@@ -112,7 +112,7 @@ handleForm props formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        TenantsApi.putCurrentConfig body appState PutConfigCompleted
+                        TenantsApi.putCurrentConfig appState body PutConfigCompleted
             in
             ( { model | savingConfig = Loading }, cmd )
 

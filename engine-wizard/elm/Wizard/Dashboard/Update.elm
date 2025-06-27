@@ -4,7 +4,7 @@ module Wizard.Dashboard.Update exposing
     )
 
 import Gettext exposing (gettext)
-import Shared.Data.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.TourId as TourId

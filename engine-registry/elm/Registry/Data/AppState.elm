@@ -6,6 +6,7 @@ module Registry.Data.AppState exposing
     , init
     , setSession
     , setTimeZone
+    , toServerInfo
     )
 
 import Browser.Navigation as Navigation
@@ -15,6 +16,7 @@ import Registry.Api.Models.BootstrapConfig as BootstrapConfig exposing (Bootstra
 import Registry.Data.Flags as Flags
 import Registry.Data.Session exposing (Session)
 import Registry.Routes as Routes
+import Shared.Api.Request exposing (ServerInfo)
 import Time
 
 
@@ -60,6 +62,13 @@ init flagsValue key =
 
         Err _ ->
             Nothing
+
+
+toServerInfo : AppState -> ServerInfo
+toServerInfo appState =
+    { apiUrl = appState.apiUrl
+    , token = Maybe.map .token appState.session
+    }
 
 
 setTimeZone : Time.Zone -> AppState -> AppState

@@ -2,9 +2,9 @@ module Wizard.Locales.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Locales as LocalesApi
 import Shared.Setters exposing (setPulling)
-import Wizard.Common.Api exposing (applyResult)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Locales as LocalesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Locales.Import.RegistryImport.Models exposing (Model)
 import Wizard.Locales.Import.RegistryImport.Msgs exposing (Msg(..))
@@ -20,17 +20,18 @@ update msg wrapMsg appState model =
         Submit ->
             if String.length model.localeId > 0 then
                 ( { model | pulling = Loading }
-                , LocalesApi.pullLocale model.localeId appState (wrapMsg << PullLocaleCompleted)
+                , LocalesApi.pullLocale appState model.localeId (wrapMsg << PullLocaleCompleted)
                 )
 
             else
                 ( model, Cmd.none )
 
         PullLocaleCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setPulling
                 , defaultError = gettext "Unable to import the locale." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }

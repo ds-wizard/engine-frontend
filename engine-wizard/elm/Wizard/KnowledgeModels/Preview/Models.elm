@@ -4,9 +4,9 @@ module Wizard.KnowledgeModels.Preview.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 
 

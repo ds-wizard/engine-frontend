@@ -1,6 +1,6 @@
 module Wizard.KnowledgeModels.Import.Update exposing (update)
 
-import Shared.Api.Packages as PackagesApi
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model)

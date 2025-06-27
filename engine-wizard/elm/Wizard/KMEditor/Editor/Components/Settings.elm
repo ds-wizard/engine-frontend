@@ -15,17 +15,17 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, button, div, form, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
-import Shared.Api.Branches as BranchesApi
-import Shared.Data.Branch.BranchState as BranchState exposing (BranchState)
-import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.Package exposing (Package)
-import Shared.Data.PackageSuggestion as PackageSuggestion
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.Branch.BranchState as BranchState exposing (BranchState)
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Common.GuideLinks as GuideLinks
@@ -93,7 +93,7 @@ update cfg appState msg model =
 
                         cmd =
                             Cmd.map cfg.wrapMsg <|
-                                BranchesApi.putBranch cfg.branchUuid body appState PutBranchComplete
+                                BranchesApi.putBranch appState cfg.branchUuid body PutBranchComplete
                     in
                     ( { model | savingBranch = ActionResult.Loading }, cmd )
 

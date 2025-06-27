@@ -26,8 +26,8 @@ import Registry.Pages.SignupConfirmation as SignupConfirmation
 import Registry.Ports as Ports
 import Registry.Routes as Routes
 import Shared.Undraw as Undraw
-import Shared.Utils exposing (dispatch)
 import Task
+import Task.Extra as Task
 import Time
 import Url exposing (Url)
 
@@ -90,7 +90,7 @@ init flags url key =
                                     Routes.parse appStateWithoutRoute.config url
                             in
                             ( { appStateWithoutRoute | route = routeIfAllowed appStateWithoutRoute originalRoute }
-                            , dispatch (OnUrlChange url)
+                            , Task.dispatch (OnUrlChange url)
                             )
 
                 Nothing ->

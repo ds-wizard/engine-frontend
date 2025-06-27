@@ -1,7 +1,7 @@
 module Wizard.Settings.Authentication.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult)
-import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
+import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Settings.Common.Forms.AuthenticationConfigForm as AuthenticationConfigForm exposing (AuthenticationConfigForm)
 import Wizard.Settings.Generic.Model as GenericModel

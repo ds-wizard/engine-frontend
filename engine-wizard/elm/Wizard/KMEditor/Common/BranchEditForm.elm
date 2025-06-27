@@ -10,10 +10,10 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import Version
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Common.AppState exposing (AppState)
 
 

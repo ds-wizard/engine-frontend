@@ -4,8 +4,8 @@ import ActionResult
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Shared.Data.PackageDetail exposing (PackageDetail)
 import Version
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.Questionnaire as Questionnaire

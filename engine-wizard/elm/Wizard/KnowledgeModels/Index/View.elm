@@ -4,11 +4,11 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
-import Shared.Data.Package as Package exposing (Package)
-import Shared.Data.Package.PackagePhase as PackagePhase
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Version
+import Wizard.Api.Models.Package as Package exposing (Package)
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature

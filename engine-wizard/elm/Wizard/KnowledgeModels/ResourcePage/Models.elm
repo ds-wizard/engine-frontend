@@ -1,7 +1,7 @@
 module Wizard.KnowledgeModels.ResourcePage.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult)
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 
 
 type alias Model =

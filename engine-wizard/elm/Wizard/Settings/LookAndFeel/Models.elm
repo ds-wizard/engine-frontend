@@ -3,7 +3,7 @@ module Wizard.Settings.LookAndFeel.Models exposing
     , initialModel
     )
 
-import Shared.Data.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
+import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

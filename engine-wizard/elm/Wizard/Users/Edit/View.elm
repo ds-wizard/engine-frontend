@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Extra as Html
-import Shared.Data.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)

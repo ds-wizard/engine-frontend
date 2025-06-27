@@ -11,18 +11,18 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Api.CommentThreads as CommentThreadsApi
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
-import Shared.Data.Package exposing (Package)
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Shared.Error.ApiError exposing (ApiError)
 import Shared.Setters exposing (setCommentThreads, setPackages, setTemplates)
-import Wizard.Common.Api exposing (applyResultTransform)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.CommentThreads as CommentThreadsApi
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
+import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.AssignedComments as AssignedComments
 import Wizard.Dashboard.Widgets.CreateKnowledgeModelWidget as CreateKnowledgeModelWidget
@@ -50,19 +50,19 @@ initialModel =
 
 
 type Msg
-    = GetPackagesComplete (Result ApiError (Pagination Package))
-    | GetTemplatesComplete (Result ApiError (Pagination DocumentTemplate))
-    | GetCommentThreadsComplete (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
+    = GetPackagesCompleted (Result ApiError (Pagination Package))
+    | GetDocumentTemplatesCompleted (Result ApiError (Pagination DocumentTemplate))
+    | GetCommentThreadsCompleted (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
 
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
     let
         packagesCmd =
-            PackagesApi.getOutdatedPackages appState GetPackagesComplete
+            PackagesApi.getOutdatedPackages appState GetPackagesCompleted
 
         templatesCmd =
-            DocumentTemplatesApi.getOutdatedTemplates appState GetTemplatesComplete
+            DocumentTemplatesApi.getOutdatedTemplates appState GetDocumentTemplatesCompleted
     in
     Cmd.batch [ packagesCmd, templatesCmd, fetchCommentThreads appState ]
 
@@ -81,43 +81,46 @@ fetchCommentThreads appState =
                 []
     in
     CommentThreadsApi.getCommentThreads
+        appState
         filters
         pagination
-        appState
-        GetCommentThreadsComplete
+        GetCommentThreadsCompleted
 
 
 update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
 update logoutMsg msg appState model =
     case msg of
-        GetPackagesComplete result ->
-            applyResultTransform appState
+        GetPackagesCompleted result ->
+            RequestHelpers.applyResultTransform
                 { setResult = setPackages
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
-        GetTemplatesComplete result ->
-            applyResultTransform appState
+        GetDocumentTemplatesCompleted result ->
+            RequestHelpers.applyResultTransform
                 { setResult = setTemplates
                 , defaultError = gettext "Unable to get document templates." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
-        GetCommentThreadsComplete result ->
-            applyResultTransform appState
+        GetCommentThreadsCompleted result ->
+            RequestHelpers.applyResultTransform
                 { setResult = setCommentThreads
                 , defaultError = gettext "Unable to get assigned comments." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
 

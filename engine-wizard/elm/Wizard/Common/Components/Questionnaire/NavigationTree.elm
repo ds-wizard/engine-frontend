@@ -17,14 +17,14 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Roman
 import Shared.Components.Badge as Badge
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Uuid
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.AppState exposing (AppState)
 
 

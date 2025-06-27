@@ -7,17 +7,17 @@ import Html exposing (Html, a, button, div, form, h3, hr, strong, table, tbody, 
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
-import Shared.Api.ApiKeys as ApiKeysApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.ApiKey as ApiKey exposing (ApiKey)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
 import Shared.Markdown as Markdown
 import Shared.Setters exposing (setApiKey, setApiKeys)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.ApiKeys as ApiKeysApi
+import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.CopyableCodeBlock as CopyableCodeBlock
 import Wizard.Common.GuideLinks as GuideLinks
@@ -81,12 +81,13 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         GetApiKeysComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setApiKeys
                 , defaultError = gettext "Unable to get API keys." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         FormMsg formMsg ->
@@ -98,7 +99,7 @@ update cfg appState msg model =
 
                         cmd =
                             Cmd.map cfg.wrapMsg <|
-                                ApiKeysApi.fetchApiKey body appState FetchApiKeyComplete
+                                ApiKeysApi.fetchApiKey appState body FetchApiKeyComplete
                     in
                     ( { model | apiKey = ActionResult.Loading }, cmd )
 
@@ -108,12 +109,13 @@ update cfg appState msg model =
                     )
 
         FetchApiKeyComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setApiKey
                 , defaultError = gettext "Unable to create API key." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         CopyableCodeBlockMsg copyableCodeBlockMsg ->
@@ -143,7 +145,7 @@ update cfg appState msg model =
             case model.apiKeyToDelete of
                 Just apiKey ->
                     ( { model | deletingApiKey = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg (ApiKeysApi.deleteApiKey apiKey.uuid appState DeleteApiKeyComplete)
+                    , Cmd.map cfg.wrapMsg (ApiKeysApi.deleteApiKey appState apiKey.uuid DeleteApiKeyComplete)
                     )
 
                 Nothing ->
@@ -164,7 +166,7 @@ update cfg appState msg model =
                     ( { model
                         | deletingApiKey = ApiError.toActionResult appState (gettext "API key could not be deleted." appState.locale) error
                       }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
 

@@ -20,15 +20,15 @@ import Html.Extra as Html
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Data.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (fa, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (dispatch)
 import String.Format as String
+import Task.Extra as Task
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
+import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.FileUtils as FileUtils
@@ -154,7 +154,7 @@ update appState cfg msg model =
                                 |> Maybe.withDefault ""
                     in
                     ( { model | submitting = ActionResult.Loading }
-                    , QuestionnaireFilesApi.postFile model.questionnaireUuid questionUuidString file appState (cfg.wrapMsg << SaveCompleted)
+                    , QuestionnaireFilesApi.postFile appState model.questionnaireUuid questionUuidString file (cfg.wrapMsg << SaveCompleted)
                     )
 
                 Nothing ->
@@ -167,7 +167,7 @@ update appState cfg msg model =
                         | submitting = ActionResult.Success ()
                         , isOpen = False
                       }
-                    , dispatch (cfg.setFileMsg model.questionPath file)
+                    , Task.dispatch (cfg.setFileMsg model.questionPath file)
                     )
 
                 Err error ->

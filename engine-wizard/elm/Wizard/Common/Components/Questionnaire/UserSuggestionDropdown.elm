@@ -17,15 +17,15 @@ import Html exposing (Html, div, input, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
-import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.User as User
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
 import Shared.Setters exposing (setDebouncer)
-import Shared.Utils exposing (dispatch)
+import Task.Extra as Task
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltipLeft)
 import Wizard.Common.Html.Events exposing (alwaysStopPropagationOn)
@@ -73,7 +73,7 @@ update appState msg model =
                     if model.users == ActionResult.Unset then
                         ( ActionResult.Loading
                         , Cmd.batch
-                            [ dispatch (Search "")
+                            [ Task.dispatch (Search "")
                             , Ports.focus ("#user-search-" ++ Uuid.toString model.threadUuid)
                             ]
                         )
@@ -87,12 +87,12 @@ update appState msg model =
 
         SearchInput value ->
             ( { model | searchValue = value }
-            , dispatch (DebouncerMsg (Debouncer.provideInput (Search value)))
+            , Task.dispatch (DebouncerMsg (Debouncer.provideInput (Search value)))
             )
 
         Search value ->
             ( { model | users = ActionResult.Loading }
-            , QuestionnairesApi.getQuestionnaireUserSuggestions model.uuid model.editorNote value appState SearchCompleted
+            , QuestionnairesApi.getQuestionnaireUserSuggestions appState model.uuid model.editorNote value SearchCompleted
             )
 
         SearchCompleted result ->

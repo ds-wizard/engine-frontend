@@ -12,9 +12,9 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class)
-import Shared.Api.Tours as ToursApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Tours as ToursApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.Html.Attribute exposing (dataTour, selectDataTour)
@@ -89,7 +89,7 @@ update cfg appState msg model =
                             ApiError.toActionResult appState (gettext "Tours could not be reset." appState.locale) error
 
                 cmd =
-                    getResultCmd cfg.logoutMsg result
+                    RequestHelpers.getResultCmd cfg.logoutMsg result
             in
             ( { model | resettingTours = resettingResult }, cmd )
 

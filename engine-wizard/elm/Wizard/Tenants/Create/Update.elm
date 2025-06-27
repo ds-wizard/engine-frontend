@@ -2,10 +2,10 @@ module Wizard.Tenants.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Form
-import Shared.Api.Tenants as TenantsApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Tenants as TenantsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -39,7 +39,7 @@ handleForm formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        TenantsApi.postTenant body appState PostAppComplete
+                        TenantsApi.postTenant appState body PostAppComplete
             in
             ( { model | savingTenant = Loading }, cmd )
 
@@ -60,7 +60,7 @@ postAppCompleted appState model result =
         Err error ->
             ( { model
                 | savingTenant = ApiError.toActionResult appState "Tenant could not be created." error
-                , form = setFormErrors appState error model.form
+                , form = Form.setFormErrors appState error model.form
               }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

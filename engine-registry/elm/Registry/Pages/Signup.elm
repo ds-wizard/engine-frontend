@@ -21,7 +21,7 @@ import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.SignupForm as SignupForm exposing (SignupForm)
 import Registry.Routes as Routes
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Undraw as Undraw

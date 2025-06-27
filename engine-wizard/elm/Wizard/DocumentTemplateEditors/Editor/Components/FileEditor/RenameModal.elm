@@ -18,13 +18,13 @@ import Html exposing (Html, form, input, p, text)
 import Html.Attributes exposing (class, classList, id, value)
 import Html.Events exposing (onInput, onSubmit)
 import List.Extra as List
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
-import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 
@@ -132,7 +132,7 @@ update cfg appState msg model =
                                 { file | fileName = fileName }
 
                             cmd =
-                                DocumentTemplateDraftsApi.putFile cfg.documentTemplateId templateFile fileContent appState (cfg.wrapMsg << RenameCompleted fileName)
+                                DocumentTemplateDraftsApi.putFile appState cfg.documentTemplateId templateFile fileContent (cfg.wrapMsg << RenameCompleted fileName)
                         in
                         ( { model | renaming = ActionResult.Loading }
                         , cmd
@@ -147,7 +147,7 @@ update cfg appState msg model =
                                 { asset | fileName = assetName }
 
                             cmd =
-                                DocumentTemplateDraftsApi.putAsset cfg.documentTemplateId templateAsset appState (cfg.wrapMsg << RenameCompleted assetName)
+                                DocumentTemplateDraftsApi.putAsset appState cfg.documentTemplateId templateAsset (cfg.wrapMsg << RenameCompleted assetName)
                         in
                         ( { model | renaming = ActionResult.Loading }
                         , cmd
@@ -168,7 +168,7 @@ update cfg appState msg model =
                                 String.join "/" (newPath ++ [ model.input ])
 
                             cmd =
-                                DocumentTemplateDraftsApi.moveFolder cfg.documentTemplateId currentName newName appState (cfg.wrapMsg << RenameCompleted newName)
+                                DocumentTemplateDraftsApi.moveFolder appState cfg.documentTemplateId currentName newName (cfg.wrapMsg << RenameCompleted newName)
                         in
                         ( { model | renaming = ActionResult.Loading }
                         , cmd
@@ -186,17 +186,17 @@ update cfg appState msg model =
                     case model.state of
                         RenamingFile file ->
                             ( { model | state = Closed }
-                            , dispatch (cfg.onRenameFile file.uuid newName)
+                            , Task.dispatch (cfg.onRenameFile file.uuid newName)
                             )
 
                         RenamingAsset asset ->
                             ( { model | state = Closed }
-                            , dispatch (cfg.onRenameAsset asset.uuid newName)
+                            , Task.dispatch (cfg.onRenameAsset asset.uuid newName)
                             )
 
                         RenamingFolder currentName ->
                             ( { model | state = Closed }
-                            , dispatch (cfg.onRenameFolder currentName newName)
+                            , Task.dispatch (cfg.onRenameFolder currentName newName)
                             )
 
                         _ ->
@@ -204,7 +204,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | renaming = ApiError.toActionResult appState (gettext "Rename failed." appState.locale) error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
 

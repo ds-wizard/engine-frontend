@@ -9,15 +9,15 @@ import Maybe.Extra as Maybe
 import Registry.Components.FontAwesome exposing (fas)
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.TenantDetail exposing (TenantDetail)
-import Shared.Data.TenantState as TenantState
-import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Uuid
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
+import Wizard.Api.Models.TenantState as TenantState
+import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Components.UsageTable as UsageTable

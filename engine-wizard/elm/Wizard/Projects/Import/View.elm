@@ -7,19 +7,19 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (flip)
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailNavigation as DetailNavigation
 import Wizard.Common.Components.Questionnaire as Questionnaire

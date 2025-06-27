@@ -10,14 +10,14 @@ import Debouncer.Extra as Debouncer
 import Dict
 import List.Extra as List
 import Set
-import Shared.Api exposing (ToMsg)
+import Shared.Api.Request exposing (ToMsg)
+import Shared.Data.ApiError as ApiError
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Error.ApiError as ApiError
 import Shared.Setters exposing (setDropdownState)
-import Shared.Utils exposing (dispatch)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Model, setPagination)
 import Wizard.Common.Components.Listing.Msgs exposing (Msg(..))
@@ -27,7 +27,7 @@ import Wizard.Routing as Routing
 
 
 type alias UpdateConfig a =
-    { getRequest : PaginationQueryFilters -> PaginationQueryString -> AppState -> ToMsg (Pagination a) (Msg a) -> Cmd (Msg a)
+    { getRequest : PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination a) (Msg a) -> Cmd (Msg a)
     , getError : String
     , wrapMsg : Msg a -> Wizard.Msgs.Msg
     , toRoute : PaginationQueryFilters -> PaginationQueryString -> Route
@@ -36,7 +36,7 @@ type alias UpdateConfig a =
 
 fetchData : Cmd (Msg a)
 fetchData =
-    dispatch Reload
+    Task.dispatch Reload
 
 
 update : UpdateConfig a -> AppState -> Msg a -> Model a -> ( Model a, Cmd Wizard.Msgs.Msg )
@@ -45,7 +45,7 @@ update cfg appState msg model =
         updatePagination mbFilterId pqf pqs =
             let
                 loadCmd =
-                    Cmd.map cfg.wrapMsg <| cfg.getRequest pqf pqs appState (GetItemsComplete False pqs pqf)
+                    Cmd.map cfg.wrapMsg <| cfg.getRequest pqf pqs (GetItemsComplete False pqs pqf)
 
                 replaceUrlCmd =
                     Navigation.replaceUrl appState.key (Routing.toUrl appState (cfg.toRoute pqf pqs))
@@ -87,12 +87,12 @@ update cfg appState msg model =
 
         Reload ->
             ( { model | pagination = Loading, items = [] }
-            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString appState (GetItemsComplete False model.paginationQueryString model.filters)
+            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString (GetItemsComplete False model.paginationQueryString model.filters)
             )
 
         ReloadBackground ->
             ( model
-            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString appState (GetItemsComplete True model.paginationQueryString model.filters)
+            , Cmd.map cfg.wrapMsg <| cfg.getRequest model.filters model.paginationQueryString (GetItemsComplete True model.paginationQueryString model.filters)
             )
 
         GetItemsComplete useOriginalState paginationQueryString paginationQueryFilters result ->
@@ -106,7 +106,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | pagination = ApiError.toActionResult appState cfg.getError error }
-                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
         UpdatePaginationQueryString pqs ->
@@ -117,7 +117,7 @@ update cfg appState msg model =
 
         QueryInput string ->
             ( { model | qInput = string }
-            , dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| QueryApply string)
+            , Task.dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| QueryApply string)
             )
 
         QueryApply string ->

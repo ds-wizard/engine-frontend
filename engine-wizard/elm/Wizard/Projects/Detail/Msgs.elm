@@ -2,16 +2,16 @@ module Wizard.Projects.Detail.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
 import Debounce
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Shared.Data.QuestionnairePreview exposing (QuestionnairePreview)
-import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Data.SummaryReport exposing (SummaryReport)
-import Shared.Error.ApiError exposing (ApiError)
-import Shared.WebSocket as WebSocket
+import Shared.Api.WebSocket as WebSocket
+import Shared.Data.ApiError exposing (ApiError)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.QuestionnairePreview exposing (QuestionnairePreview)
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Projects.Detail.Components.NewDocument as NewDocument

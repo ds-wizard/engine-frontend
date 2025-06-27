@@ -11,10 +11,10 @@ module Wizard.KMEditor.Common.DeleteModal exposing
 import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
-import Shared.Api.Branches as BranchesApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Branches as BranchesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 
@@ -60,7 +60,7 @@ update cfg appState msg model =
             case model.branch of
                 Just ( uuid, _ ) ->
                     ( { model | deletingBranch = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg <| BranchesApi.deleteBranch uuid appState DeleteComplete
+                    , Cmd.map cfg.wrapMsg <| BranchesApi.deleteBranch appState uuid DeleteComplete
                     )
 
                 Nothing ->

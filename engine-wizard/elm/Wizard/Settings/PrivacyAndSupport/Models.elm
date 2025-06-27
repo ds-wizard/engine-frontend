@@ -3,7 +3,7 @@ module Wizard.Settings.PrivacyAndSupport.Models exposing
     , initialModel
     )
 
-import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
+import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

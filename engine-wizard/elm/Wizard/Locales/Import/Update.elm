@@ -1,6 +1,6 @@
 module Wizard.Locales.Import.Update exposing (update)
 
-import Shared.Api.Locales as LocalesApi
+import Wizard.Api.Locales as LocalesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.Locales.Import.Models exposing (ImportModel(..), Model)

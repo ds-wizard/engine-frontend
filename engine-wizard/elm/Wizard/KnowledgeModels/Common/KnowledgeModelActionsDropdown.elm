@@ -10,8 +10,8 @@ import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Shared.Auth.Session as Session
-import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Shared.Html exposing (faSet)
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature

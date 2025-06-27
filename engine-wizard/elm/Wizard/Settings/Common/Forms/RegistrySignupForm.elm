@@ -10,9 +10,9 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Data.BootstrapConfig.OrganizationConfig exposing (OrganizationConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Api.Models.BootstrapConfig.OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Common.AppState exposing (AppState)
 
 

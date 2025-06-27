@@ -4,12 +4,12 @@ import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.Tenant exposing (Tenant)
-import Shared.Data.TenantState as TenantState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.Tenant exposing (Tenant)
+import Wizard.Api.Models.TenantState as TenantState
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)

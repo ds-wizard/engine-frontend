@@ -1,7 +1,6 @@
 module Wizard.Common.AppState exposing
     ( AppState
     , acceptCookies
-    , getAIAssistantApiUrl
     , getClientUrlRoot
     , getUserRole
     , init
@@ -11,6 +10,8 @@ module Wizard.Common.AppState exposing
     , sessionRemainingTime
     , setCurrentTime
     , setTimeZone
+    , toAIAssistantServerInfo
+    , toServerInfo
     )
 
 import Browser.Navigation as Navigation exposing (Key)
@@ -18,13 +19,15 @@ import Gettext
 import Json.Decode as D exposing (Error(..))
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import Shared.Api.Request exposing (ServerInfo)
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Common.Navigator exposing (Navigator)
-import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Shared.Utils.Theme exposing (Theme)
+import String.Extra as String
 import Time
+import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Common.Flags as Flags
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Common.Provisioning.DefaultIconSet as DefaultIconSet
@@ -130,6 +133,20 @@ init flagsValue key =
       }
     , flagsCmd
     )
+
+
+toServerInfo : AppState -> ServerInfo
+toServerInfo appState =
+    { apiUrl = appState.apiUrl
+    , token = String.toMaybe appState.session.token.token
+    }
+
+
+toAIAssistantServerInfo : AppState -> ServerInfo
+toAIAssistantServerInfo appState =
+    { apiUrl = getAIAssistantApiUrl appState
+    , token = String.toMaybe appState.session.token.token
+    }
 
 
 getUserRole : AppState -> String

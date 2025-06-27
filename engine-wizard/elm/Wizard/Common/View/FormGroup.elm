@@ -43,7 +43,6 @@ import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
-import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, fa, faSet)
@@ -51,6 +50,7 @@ import Shared.Markdown as Markdown
 import String.Format as String
 import Uuid
 import Version exposing (Version)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar

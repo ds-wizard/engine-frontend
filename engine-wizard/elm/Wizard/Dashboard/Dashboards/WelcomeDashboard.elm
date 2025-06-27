@@ -3,9 +3,9 @@ module Wizard.Dashboard.Dashboards.WelcomeDashboard exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Shared.Undraw as Undraw
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 

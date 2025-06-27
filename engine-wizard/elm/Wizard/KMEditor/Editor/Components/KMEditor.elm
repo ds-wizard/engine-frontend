@@ -24,67 +24,68 @@ import Set
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.Badge as Badge
 import Shared.Copy as Copy
-import Shared.Data.Event exposing (Event(..))
-import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
-import Shared.Data.Event.AddChapterEventData as AddChapterEventData
-import Shared.Data.Event.AddChoiceEventData as AddChoiceEventData
-import Shared.Data.Event.AddExpertEventData as AddExpertEventData
-import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData
-import Shared.Data.Event.AddMetricEventData as AddMetricEventData
-import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData
-import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData
-import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData
-import Shared.Data.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
-import Shared.Data.Event.AddResourcePageEventData as AddResourcePageEventData
-import Shared.Data.Event.AddTagEventData as AddTagEventData
-import Shared.Data.Event.CommonEventData exposing (CommonEventData)
-import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
-import Shared.Data.Event.EditChapterEventData as EditChapterEventData
-import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValidations, setValueType, setWidgetUrl)
-import Shared.Data.Event.EditExpertEventData as EditExpertEventData
-import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
-import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
-import Shared.Data.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData
-import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
-import Shared.Data.Event.EditMetricEventData as EditMetricEventData
-import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
-import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
-import Shared.Data.Event.EditQuestionFileEventData as EditQuestionFileEventData
-import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
-import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
-import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
-import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
-import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
-import Shared.Data.Event.EditQuestionValueEventData as EditQuestionValueEventData
-import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
-import Shared.Data.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
-import Shared.Data.Event.EditReferenceURLEventData as EditReferenceURLEventData
-import Shared.Data.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
-import Shared.Data.Event.EditResourcePageEventData as EditResourcePageEventData
-import Shared.Data.Event.EditTagEventData as EditTagEventData
-import Shared.Data.Event.EventField as EventField
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
-import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
-import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
-import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (compose2, dispatch, flip, httpMethodOptions, nilUuid)
+import Shared.Utils exposing (compose2, flip, httpMethodOptions, nilUuid)
 import SplitPane
 import String.Extra as String
 import String.Format as String
+import Task.Extra as Task
 import Uuid
+import Wizard.Api.Models.Event exposing (Event(..))
+import Wizard.Api.Models.Event.AddAnswerEventData as AddAnswerEventData
+import Wizard.Api.Models.Event.AddChapterEventData as AddChapterEventData
+import Wizard.Api.Models.Event.AddChoiceEventData as AddChoiceEventData
+import Wizard.Api.Models.Event.AddExpertEventData as AddExpertEventData
+import Wizard.Api.Models.Event.AddIntegrationEventData as AddIntegrationEventData
+import Wizard.Api.Models.Event.AddMetricEventData as AddMetricEventData
+import Wizard.Api.Models.Event.AddPhaseEventData as AddPhaseEventData
+import Wizard.Api.Models.Event.AddQuestionEventData as AddQuestionEventData
+import Wizard.Api.Models.Event.AddReferenceEventData as AddReferenceEventData
+import Wizard.Api.Models.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
+import Wizard.Api.Models.Event.AddResourcePageEventData as AddResourcePageEventData
+import Wizard.Api.Models.Event.AddTagEventData as AddTagEventData
+import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
+import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
+import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
+import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
+import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValidations, setValueType, setWidgetUrl)
+import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
+import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
+import Wizard.Api.Models.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
+import Wizard.Api.Models.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData
+import Wizard.Api.Models.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
+import Wizard.Api.Models.Event.EditMetricEventData as EditMetricEventData
+import Wizard.Api.Models.Event.EditPhaseEventData as EditPhaseEventData
+import Wizard.Api.Models.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Wizard.Api.Models.Event.EditQuestionFileEventData as EditQuestionFileEventData
+import Wizard.Api.Models.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
+import Wizard.Api.Models.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
+import Wizard.Api.Models.Event.EditQuestionListEventData as EditQuestionListEventData
+import Wizard.Api.Models.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
+import Wizard.Api.Models.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
+import Wizard.Api.Models.Event.EditQuestionValueEventData as EditQuestionValueEventData
+import Wizard.Api.Models.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
+import Wizard.Api.Models.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
+import Wizard.Api.Models.Event.EditReferenceURLEventData as EditReferenceURLEventData
+import Wizard.Api.Models.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
+import Wizard.Api.Models.Event.EditResourcePageEventData as EditResourcePageEventData
+import Wizard.Api.Models.Event.EditTagEventData as EditTagEventData
+import Wizard.Api.Models.Event.EventField as EventField
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
+import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Common.Html exposing (guideLink, linkTo)
@@ -182,7 +183,7 @@ update setFullscreenMsg msg model editorBranch =
             ( editorBranch, { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }, Cmd.none )
 
         SetFullscreen fullscreen ->
-            ( editorBranch, model, dispatch (setFullscreenMsg fullscreen) )
+            ( editorBranch, model, Task.dispatch (setFullscreenMsg fullscreen) )
 
         SetTreeOpen entityUuid open ->
             ( EditorBranch.treeSetNodeOpen entityUuid open editorBranch, model, Cmd.none )

@@ -1,7 +1,7 @@
 module Wizard.DocumentTemplateEditors.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.DocumentTemplateDraft exposing (DocumentTemplateDraft)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Wizard.Common.Components.Listing.Msgs as Listing
 
 

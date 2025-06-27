@@ -2,7 +2,7 @@ module Wizard.Common.View.TenantIcon exposing (view)
 
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 
 
 view : { a | logoUrl : Maybe String, primaryColor : Maybe String } -> Html msg

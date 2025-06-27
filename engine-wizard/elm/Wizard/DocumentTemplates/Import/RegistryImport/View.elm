@@ -5,10 +5,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput, onSubmit)
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)

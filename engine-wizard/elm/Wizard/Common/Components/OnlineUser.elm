@@ -4,9 +4,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
 import List.Extra as List
-import Shared.Data.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, OnlineUserInfo)
-import Shared.Data.User as User
 import Shared.Html exposing (fa, faKeyClass)
+import Wizard.Api.Models.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, OnlineUserInfo)
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltip, tooltipLeft)
 

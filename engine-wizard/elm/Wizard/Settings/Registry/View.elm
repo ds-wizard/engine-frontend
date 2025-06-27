@@ -6,10 +6,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, form, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick, onSubmit)
-import Shared.Data.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
+import Wizard.Api.Models.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (wideDetailClass)

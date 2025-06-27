@@ -5,10 +5,10 @@ import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
-import Shared.Data.PackageSuggestion as PackageSuggestion
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Html exposing (faSet)
 import Version
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem

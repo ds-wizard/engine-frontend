@@ -16,18 +16,18 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra exposing (viewIf)
 import Maybe.Extra as Maybe
-import Shared.Api.Tokens as TokensApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Data.ApiKey exposing (ApiKey)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Markdown as Markdown
 import Shared.Setters exposing (setTokens)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
 import Time
 import UserAgent
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.Models.ApiKey exposing (ApiKey)
+import Wizard.Api.Tokens as TokensApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (tooltip)
@@ -83,12 +83,13 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         GetTokensComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setTokens
                 , defaultError = gettext "Unable to get active sessions." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         SetTokenToRevoke mbApiKey ->
@@ -98,7 +99,7 @@ update cfg appState msg model =
             case model.tokenToRevoke of
                 Just apiKey ->
                     ( { model | revokingToken = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg (TokensApi.deleteToken apiKey.uuid appState DeleteTokenComplete)
+                    , Cmd.map cfg.wrapMsg (TokensApi.deleteToken appState apiKey.uuid DeleteTokenComplete)
                     )
 
                 Nothing ->
@@ -119,7 +120,7 @@ update cfg appState msg model =
                     ( { model
                         | revokingToken = ApiError.toActionResult appState (gettext "Session could not be revoked." appState.locale) error
                       }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         RevokeAllModalOpen value ->
@@ -145,7 +146,7 @@ update cfg appState msg model =
                     ( { model
                         | revokingAll = ApiError.toActionResult appState (gettext "Failed to revoke all active sessions." appState.locale) error
                       }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
 

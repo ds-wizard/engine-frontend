@@ -4,11 +4,11 @@ module Wizard.Settings.Submission.Update exposing
     )
 
 import Gettext exposing (gettext)
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Data.EditableConfig as EditableConfig
-import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Shared.Setters exposing (setTemplates)
-import Wizard.Common.Api exposing (applyResult)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.EditableConfig as EditableConfig
+import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Generic.Update as GenericUpdate
@@ -35,12 +35,13 @@ update wrapMsg msg appState model =
             ( { model | genericModel = genericModel }, cmd )
 
         GetTemplatesCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setTemplates
                 , defaultError = gettext "Unable to get document templates." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
 

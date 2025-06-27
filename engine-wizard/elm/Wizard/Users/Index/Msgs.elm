@@ -1,8 +1,8 @@
 module Wizard.Users.Index.Msgs exposing (Msg(..))
 
 import Result exposing (Result)
-import Shared.Data.User exposing (User)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.User exposing (User)
 import Wizard.Common.Components.Listing.Msgs as Listing
 
 

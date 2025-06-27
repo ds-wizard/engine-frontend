@@ -8,11 +8,11 @@ module Wizard.Projects.Common.QuestionnaireShareFormPermission exposing
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Data.Member as Member
-import Shared.Data.Permission exposing (Permission)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.Member as Member
+import Wizard.Api.Models.Permission exposing (Permission)
 import Wizard.Projects.Common.QuestionnaireShareFormMemberPermType as QuestionnaireEditFormUserPerms exposing (QuestionnaireShareFormMemberPermType)
 import Wizard.Projects.Common.QuestionnaireShareFormMemberType as QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType)
 

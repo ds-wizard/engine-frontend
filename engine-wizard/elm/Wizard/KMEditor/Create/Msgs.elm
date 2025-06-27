@@ -1,11 +1,11 @@
 module Wizard.KMEditor.Create.Msgs exposing (Msg(..))
 
 import Form
-import Shared.Data.Branch exposing (Branch)
-import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
 import Version exposing (Version)
+import Wizard.Api.Models.Branch exposing (Branch)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 
 

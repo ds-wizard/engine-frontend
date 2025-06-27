@@ -6,8 +6,8 @@ import Html.Attributes exposing (class, href, src)
 import Shared.Auth.Role as Role
 import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Components.Badge as Badge
-import Shared.Data.User as User exposing (User)
 import Shared.Html exposing (emptyNode, faSet)
+import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)

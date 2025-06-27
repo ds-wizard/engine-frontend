@@ -4,10 +4,10 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h3, text)
 import Html.Attributes exposing (placeholder)
-import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (compose2)
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra

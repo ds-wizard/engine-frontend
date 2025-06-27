@@ -10,18 +10,18 @@ import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
-import Shared.Data.Member as Member
-import Shared.Data.PackageSuggestion as PackageSuggestion
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
-import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
+import Wizard.Api.Models.Member as Member
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)

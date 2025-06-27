@@ -10,8 +10,8 @@ module Wizard.Common.Components.DetailNavigation exposing
 
 import Html exposing (Html, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
-import Shared.Data.OnlineUserInfo exposing (OnlineUserInfo)
 import Shared.Html exposing (emptyNode)
+import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
 import Wizard.Common.Html exposing (linkTo)

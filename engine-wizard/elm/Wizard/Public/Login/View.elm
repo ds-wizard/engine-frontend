@@ -7,8 +7,8 @@ import Html.Events exposing (onInput, onSubmit)
 import Html.Keyed
 import Maybe.Extra as Maybe
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
-import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Html exposing (emptyNode, fa)
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Announcements as Announcements
 import Wizard.Common.Html exposing (linkTo)

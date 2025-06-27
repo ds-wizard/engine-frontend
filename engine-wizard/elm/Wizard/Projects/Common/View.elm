@@ -8,12 +8,12 @@ module Wizard.Projects.Common.View exposing
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, small, span, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Data.Member as Member
-import Shared.Data.Permission exposing (Permission)
-import Shared.Data.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Shared.Html exposing (faSet)
 import String.Format as String
+import Wizard.Api.Models.Member as Member
+import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
+import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltipCustom)
 

@@ -5,11 +5,11 @@ import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.QuestionnaireFile exposing (QuestionnaireFile)
-import Shared.Data.User as User
 import Shared.Html exposing (fa, faSet)
 import String.Format as String
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)

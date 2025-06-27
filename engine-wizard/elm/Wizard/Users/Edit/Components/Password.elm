@@ -13,11 +13,11 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Api.Users as UsersApi
 import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -74,7 +74,7 @@ handlePasswordForm cfg appState formMsg model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        UsersApi.putUserPassword model.uuidOrCurrent body appState PutUserPasswordCompleted
+                        UsersApi.putUserPassword appState model.uuidOrCurrent body PutUserPasswordCompleted
             in
             ( { model | savingPassword = ActionResult.Loading }, cmd )
 
@@ -98,7 +98,7 @@ putUserPasswordCompleted cfg appState model result =
                     ApiError.toActionResult appState (gettext "Password could not be changed." appState.locale) error
 
         cmd =
-            getResultCmd cfg.logoutMsg result
+            RequestHelpers.getResultCmd cfg.logoutMsg result
     in
     ( { model | savingPassword = passwordResult }
     , Cmd.batch [ cmd, Ports.scrollToTop ".Users__Edit__content" ]

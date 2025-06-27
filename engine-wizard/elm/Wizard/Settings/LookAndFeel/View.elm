@@ -6,14 +6,14 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick, onSubmit)
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
-import Shared.Data.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormActions as FormActions

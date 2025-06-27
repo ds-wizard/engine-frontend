@@ -12,13 +12,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.User as User
-import Shared.Data.UserGroupSuggestion exposing (UserGroupSuggestion)
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
 import Shared.Html exposing (emptyNode)
 import Version
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserGroupSuggestion exposing (UserGroupSuggestion)
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ItemIcon as ItemIcon

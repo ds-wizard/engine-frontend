@@ -1,6 +1,13 @@
-module Wizard.KnowledgeModels.Import.Models exposing (ImportModel(..), Model, initialModel, isFileImportModel, isOwlImportModel, isRegistryImportModel)
+module Wizard.KnowledgeModels.Import.Models exposing
+    ( ImportModel(..)
+    , Model
+    , initialModel
+    , isFileImportModel
+    , isOwlImportModel
+    , isRegistryImportModel
+    )
 
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.KnowledgeModels.Import.OwlImport.Models as OwlImportModels

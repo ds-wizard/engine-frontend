@@ -5,11 +5,11 @@ import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Shared.Components.Badge as Badge
-import Shared.Data.Branch exposing (Branch)
-import Shared.Data.Branch.BranchState as BranchState
 import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (packageIdToComponents)
 import Version
+import Wizard.Api.Models.Branch exposing (Branch)
+import Wizard.Api.Models.Branch.BranchState as BranchState
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)

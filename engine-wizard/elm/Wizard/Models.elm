@@ -11,8 +11,8 @@ module Wizard.Models exposing
 
 import Random exposing (Seed)
 import Shared.Auth.Session as Session exposing (Session)
-import Shared.Data.BootstrapConfig as BootstrapConfig
 import Shared.Data.PaginationQueryString as PaginationQueryString
+import Wizard.Api.Models.BootstrapConfig as BootstrapConfig
 import Wizard.Comments.Models
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.AIAssistant as AIAssistant

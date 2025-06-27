@@ -5,7 +5,7 @@ module Wizard.Projects.Common.AnswerChange exposing
     , getAnswerUuid
     )
 
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
 
 
 type AnswerChange

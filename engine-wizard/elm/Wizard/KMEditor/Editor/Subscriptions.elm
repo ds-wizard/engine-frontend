@@ -1,6 +1,6 @@
 module Wizard.KMEditor.Editor.Subscriptions exposing (subscriptions)
 
-import Shared.WebSocket as WebSocket
+import Shared.Api.WebSocket as WebSocket
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute exposing (KMEditorRoute)

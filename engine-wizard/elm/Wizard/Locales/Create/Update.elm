@@ -6,10 +6,10 @@ import Form
 import Gettext exposing (gettext)
 import Json.Decode as D
 import Json.Encode as E
-import Shared.Api.Locales as LocalesApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String exposing (fromInt)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Locales as LocalesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Dropzone as Dropzone
 import Wizard.Locales.Common.LocaleCreateForm as LocaleCreateForm
@@ -140,7 +140,7 @@ handleForm formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        LocalesApi.createFromPO data contentFiles.wizard contentFiles.mail appState CreateCompleted
+                        LocalesApi.createFromPO appState data contentFiles.wizard contentFiles.mail CreateCompleted
             in
             ( { model | creatingLocale = ActionResult.Loading }, cmd )
 
@@ -160,5 +160,5 @@ handleCreateCompleted appState model result =
 
         Err error ->
             ( { model | creatingLocale = ApiError.toActionResult appState (gettext "Creating of the locale failed." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

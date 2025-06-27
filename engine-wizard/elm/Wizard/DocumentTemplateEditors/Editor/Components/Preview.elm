@@ -21,25 +21,25 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Maybe.Extra as Maybe
 import Process
-import Shared.Api.Branches as BranchesApi
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.BranchSuggestion exposing (BranchSuggestion)
-import Shared.Data.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
-import Shared.Data.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
-import Shared.Data.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
-import Shared.Data.UrlResponse exposing (UrlResponse)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Error.ServerError as ServerError
+import Shared.Data.ServerError as ServerError
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
 import Shared.Undraw as Undraw
-import Shared.Utils exposing (dispatch)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
 import Task
+import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.BranchSuggestion exposing (BranchSuggestion)
+import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
+import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Api.Models.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
+import Wizard.Api.Models.UrlResponse exposing (UrlResponse)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -161,7 +161,7 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     let
         getPreviewCmd =
-            DocumentTemplateDraftsApi.getPreview cfg.documentTemplateId appState (cfg.wrapMsg << GetPreviewCompleted)
+            DocumentTemplateDraftsApi.getPreview appState cfg.documentTemplateId (cfg.wrapMsg << GetPreviewCompleted)
 
         updatePreviewSettings updateFn =
             let
@@ -171,10 +171,9 @@ update cfg appState msg model =
                         DocumentTemplateDraftDetail.getPreviewSettings
                         cfg.documentTemplate
             in
-            DocumentTemplateDraftsApi.putPreviewSettings
+            DocumentTemplateDraftsApi.putPreviewSettings appState
                 cfg.documentTemplateId
                 (updateFn previewSettings)
-                appState
                 (cfg.wrapMsg << PutPreviewSettingsCompleted)
     in
     case msg of
@@ -182,7 +181,7 @@ update cfg appState msg model =
             let
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << QuestionnaireTypeHintInputMsg
-                    , getTypeHints = QuestionnairesApi.getQuestionnaireSuggestions PaginationQueryFilters.empty
+                    , getTypeHints = QuestionnairesApi.getQuestionnaireSuggestions appState PaginationQueryFilters.empty
                     , getError = gettext "Unable to get projects." appState.locale
                     , setReply = cfg.wrapMsg << QuestionnaireTypeHintInputSelect << .uuid
                     , clearReply = Nothing
@@ -190,7 +189,7 @@ update cfg appState msg model =
                     }
 
                 ( typeHintInputModel, typeHintInputCmd ) =
-                    TypeHintInput.update updateCfg typeHintInputMsg appState model.questionnaireHintInputModel
+                    TypeHintInput.update updateCfg typeHintInputMsg model.questionnaireHintInputModel
             in
             ( { model | questionnaireHintInputModel = typeHintInputModel }, typeHintInputCmd )
 
@@ -201,7 +200,7 @@ update cfg appState msg model =
             let
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << BranchTypeHintInputMsg
-                    , getTypeHints = BranchesApi.getBranchSuggestions PaginationQueryFilters.empty
+                    , getTypeHints = BranchesApi.getBranchSuggestions appState PaginationQueryFilters.empty
                     , getError = gettext "Unable to get knowledge model editors." appState.locale
                     , setReply = cfg.wrapMsg << BranchTypeHintInputSelect << .uuid
                     , clearReply = Nothing
@@ -209,7 +208,7 @@ update cfg appState msg model =
                     }
 
                 ( typeHintInputModel, typeHintInputCmd ) =
-                    TypeHintInput.update updateCfg typeHintInputMsg appState model.branchTypeHintInputModal
+                    TypeHintInput.update updateCfg typeHintInputMsg model.branchTypeHintInputModal
             in
             ( { model | branchTypeHintInputModal = typeHintInputModel }, typeHintInputCmd )
 
@@ -233,7 +232,7 @@ update cfg appState msg model =
                 Ok previewSettings ->
                     let
                         dispatchUpdateCmd =
-                            dispatch (cfg.updatePreviewSettings previewSettings)
+                            Task.dispatch (cfg.updatePreviewSettings previewSettings)
                     in
                     if DocumentTemplateDraftPreviewSettings.isPreviewSet previewSettings then
                         ( { model | urlResponse = ActionResult.Loading }
@@ -277,7 +276,7 @@ update cfg appState msg model =
                                         gettext "Unable to get the document preview." appState.locale
                     in
                     ( { model | urlResponse = previewError }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         LoadPreview ->

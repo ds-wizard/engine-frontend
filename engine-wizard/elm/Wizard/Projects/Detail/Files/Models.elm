@@ -5,7 +5,7 @@ module Wizard.Projects.Detail.Files.Models exposing
 
 import ActionResult exposing (ActionResult)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.QuestionnaireFile exposing (QuestionnaireFile)
+import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Common.Components.Listing.Models as Listing
 
 

@@ -22,9 +22,9 @@ import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.LoginForm as LoginForm exposing (LoginForm)
 import Registry.Data.Session as Session exposing (Session)
 import Registry.Routes as Routes
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Utils as Task
+import Task.Extra as Task
 
 
 type alias Model =

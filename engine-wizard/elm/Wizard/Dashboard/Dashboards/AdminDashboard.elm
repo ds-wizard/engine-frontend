@@ -12,24 +12,24 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Maybe.Extra as Maybe
-import Shared.Api.CommentThreads as CommentThreadsApi
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Api.Tenants as TenantsApi
 import Shared.Common.UuidOrCurrent as UuidOrCurrent
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.BootstrapConfig.RegistryConfig as RegistryConfig
-import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
-import Shared.Data.Package exposing (Package)
+import Shared.Data.ApiError as ApiErrorOld exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Shared.Data.Usage exposing (Usage)
-import Shared.Error.ApiError exposing (ApiError)
 import Shared.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
 import Shared.Utils exposing (listInsertIf)
-import Wizard.Common.Api exposing (applyResult, applyResultTransform)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.CommentThreads as CommentThreadsApi
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig
+import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
+import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Models.Usage exposing (Usage)
+import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Tenants as TenantsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.AddOpenIDWidget as AddOpenIDWidget
 import Wizard.Dashboard.Widgets.AssignedComments as AssignedComments
@@ -60,23 +60,23 @@ initialModel =
 
 
 type Msg
-    = GetUsageComplete (Result ApiError Usage)
-    | GetPackagesComplete (Result ApiError (Pagination Package))
-    | GetTemplatesComplete (Result ApiError (Pagination DocumentTemplate))
-    | GetCommentThreadsComplete (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
+    = GetUsageCompleted (Result ApiErrorOld.ApiError Usage)
+    | GetPackagesCompleted (Result ApiError (Pagination Package))
+    | GetTemplatesCompleted (Result ApiError (Pagination DocumentTemplate))
+    | GetCommentThreadsCompleted (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
 
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
     let
         packagesCmd =
-            PackagesApi.getOutdatedPackages appState GetPackagesComplete
+            PackagesApi.getOutdatedPackages appState GetPackagesCompleted
 
         templatesCmd =
-            DocumentTemplatesApi.getOutdatedTemplates appState GetTemplatesComplete
+            DocumentTemplatesApi.getOutdatedTemplates appState GetTemplatesCompleted
 
         usageCmd =
-            TenantsApi.getTenantUsage UuidOrCurrent.current appState GetUsageComplete
+            TenantsApi.getTenantUsage appState UuidOrCurrent.current GetUsageCompleted
     in
     Cmd.batch [ packagesCmd, templatesCmd, usageCmd, fetchCommentThreads appState ]
 
@@ -95,52 +95,56 @@ fetchCommentThreads appState =
                 []
     in
     CommentThreadsApi.getCommentThreads
+        appState
         filters
         pagination
-        appState
-        GetCommentThreadsComplete
+        GetCommentThreadsCompleted
 
 
 update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
 update logoutMsg msg appState model =
     case msg of
-        GetUsageComplete result ->
-            applyResult appState
+        GetUsageCompleted result ->
+            RequestHelpers.applyResult
                 { setResult = setUsage
                 , defaultError = gettext "Unable to get usage." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
+                , locale = appState.locale
                 }
 
-        GetPackagesComplete result ->
-            applyResultTransform appState
+        GetPackagesCompleted result ->
+            RequestHelpers.applyResultTransform
                 { setResult = setPackages
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
-        GetTemplatesComplete result ->
-            applyResultTransform appState
+        GetTemplatesCompleted result ->
+            RequestHelpers.applyResultTransform
                 { setResult = setTemplates
                 , defaultError = gettext "Unable to get document templates." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
-        GetCommentThreadsComplete result ->
-            applyResultTransform appState
+        GetCommentThreadsCompleted result ->
+            RequestHelpers.applyResultTransform
                 { setResult = setCommentThreads
                 , defaultError = gettext "Unable to get assigned comments." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
 

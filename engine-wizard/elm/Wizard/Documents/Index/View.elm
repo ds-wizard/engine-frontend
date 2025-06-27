@@ -9,16 +9,16 @@ import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Data.Document exposing (Document)
-import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.Submission as Submission exposing (Submission)
-import Shared.Data.Submission.SubmissionState as SubmissionState
-import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Time.Distance as TimeDistance
+import Wizard.Api.Models.Document exposing (Document)
+import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.Submission as Submission exposing (Submission)
+import Wizard.Api.Models.Submission.SubmissionState as SubmissionState
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)

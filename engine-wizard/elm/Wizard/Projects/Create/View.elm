@@ -7,8 +7,8 @@ import Html exposing (Html, a, div, li, p, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Data.PackageDetail as PackageDetail
 import Shared.Html exposing (faSet)
+import Wizard.Api.Models.PackageDetail as PackageDetail
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem

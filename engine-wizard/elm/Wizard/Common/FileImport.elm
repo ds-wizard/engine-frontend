@@ -1,4 +1,12 @@
-module Wizard.Common.FileImport exposing (Model, Msg, UpdateConfig, ViewConfig, initialModel, update, view)
+module Wizard.Common.FileImport exposing
+    ( Model
+    , Msg
+    , UpdateConfig
+    , ViewConfig
+    , initialModel
+    , update
+    , view
+    )
 
 import ActionResult exposing (ActionResult)
 import Dict exposing (Dict)
@@ -10,8 +18,8 @@ import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Json.Decode as D
-import Shared.Api exposing (ToMsg)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Api.Request exposing (ToMsg)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -50,7 +58,7 @@ type Msg
 
 type alias UpdateConfig msg =
     { mimes : List String
-    , upload : File -> AppState -> ToMsg () msg -> Cmd msg
+    , upload : AppState -> File -> ToMsg () msg -> Cmd msg
     , wrapMsg : Msg -> msg
     }
 
@@ -98,7 +106,7 @@ update cfg appState msg model =
                                             File.name file
 
                                         cmd =
-                                            cfg.upload file appState (cfg.wrapMsg << SubmitComplete fileName)
+                                            cfg.upload appState file (cfg.wrapMsg << SubmitComplete fileName)
                                     in
                                     ( Dict.insert fileName ActionResult.Loading actionResults
                                     , cmd :: cmds

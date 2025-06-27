@@ -5,11 +5,11 @@ module Wizard.DocumentTemplates.Index.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Data.DocumentTemplate exposing (DocumentTemplate)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -45,22 +45,22 @@ update msg wrapMsg appState model =
                 newDocumentTemplate =
                     { documentTemplate | phase = documentTemplatePhase }
             in
-            ( model, DocumentTemplatesApi.putTemplate newDocumentTemplate appState (wrapMsg << UpdatePhaseCompleted) )
+            ( model, DocumentTemplatesApi.putTemplate appState newDocumentTemplate (wrapMsg << UpdatePhaseCompleted) )
 
         UpdatePhaseCompleted result ->
             case result of
                 Ok _ ->
                     ( model
-                    , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+                    , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     )
 
                 Err error ->
                     ( { model | deletingDocumentTemplate = ApiError.toActionResult appState (gettext "Document template could not be updated." appState.locale) error }
-                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
         ExportDocumentTemplate documentTemplate ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl documentTemplate.id appState)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl appState documentTemplate.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -72,7 +72,7 @@ handleDeleteDocumentTemplate wrapMsg appState model =
         Just template ->
             ( { model | deletingDocumentTemplate = Loading }
             , Cmd.map wrapMsg <|
-                DocumentTemplatesApi.deleteTemplate template.organizationId template.templateId appState DeleteDocumentTemplateCompleted
+                DocumentTemplatesApi.deleteTemplate appState template.organizationId template.templateId DeleteDocumentTemplateCompleted
             )
 
         Nothing ->
@@ -84,12 +84,12 @@ deleteDocumentTemplateCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
             ( { model | documentTemplateToBeDeleted = Nothing }
-            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+            , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
             ( { model | deletingDocumentTemplate = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -110,7 +110,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig DocumentTemplate
 listingUpdateConfig wrapMsg appState =
-    { getRequest = DocumentTemplatesApi.getTemplates
+    { getRequest = DocumentTemplatesApi.getTemplates appState
     , getError = gettext "Unable to get document templates." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.documentTemplatesIndexWithFilters

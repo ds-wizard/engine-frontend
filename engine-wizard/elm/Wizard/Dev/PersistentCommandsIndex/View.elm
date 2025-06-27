@@ -2,9 +2,9 @@ module Wizard.Dev.PersistentCommandsIndex.View exposing (view)
 
 import Html exposing (Html, div, img, span, text)
 import Html.Attributes exposing (class, src)
-import Shared.Data.PersistentCommand as PersistentCommand exposing (PersistentCommand)
-import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, faSet)
+import Wizard.Api.Models.PersistentCommand as PersistentCommand exposing (PersistentCommand)
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)

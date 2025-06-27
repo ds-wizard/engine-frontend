@@ -10,11 +10,11 @@ import Html.Events exposing (onClick)
 import Shared.Auth.Session as Session
 import Shared.Components.Badge as Badge
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (flip)
 import String.Format as String
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.ActionResultView as ActionResultView
 import Wizard.Common.Components.DetailNavigation as DetailNavigation

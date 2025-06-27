@@ -5,20 +5,20 @@ import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Shared.Api.KnowledgeModels as KnowledgeModelsApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setSelected)
 import Shared.Utils exposing (withNoCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
+import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.PackageDetail as PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Msgs
@@ -32,7 +32,7 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireCompleted
+    QuestionnairesApi.getQuestionnaireSettings appState uuid GetQuestionnaireCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -108,12 +108,13 @@ handleGetQuestionnaireCompleted appState wrapMsg model result =
                     { m | questionnaire = ActionResult.map .data q }
     in
     loadCurrentPackage appState wrapMsg <|
-        applyResult appState
+        RequestHelpers.applyResult
             { setResult = setResult
             , defaultError = gettext "Unable to get the project." appState.locale
             , model = model
             , result = result
             , logoutMsg = Wizard.Msgs.logoutMsg
+            , locale = appState.locale
             }
 
 
@@ -124,12 +125,13 @@ handleGetCurrentPackageCompleted appState wrapMsg model result =
             { m | currentPackage = r, selectedPackageDetail = r }
     in
     preselectKnowledgeModel appState wrapMsg <|
-        applyResult appState
+        RequestHelpers.applyResult
             { setResult = setResult
             , defaultError = gettext "Unable to get the knowledge model." appState.locale
             , model = model
             , result = result
             , logoutMsg = Wizard.Msgs.logoutMsg
+            , locale = appState.locale
             }
 
 
@@ -140,12 +142,13 @@ handleGetSelectedPackageCompleted appState wrapMsg model result =
             { m | selectedPackageDetail = r }
     in
     preselectKnowledgeModel appState wrapMsg <|
-        applyResult appState
+        RequestHelpers.applyResult
             { setResult = setResult
             , defaultError = gettext "Unable to get the knowledge model." appState.locale
             , model = model
             , result = result
             , logoutMsg = Wizard.Msgs.logoutMsg
+            , locale = appState.locale
             }
 
 
@@ -166,7 +169,7 @@ handleForm wrapMsg formMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        QuestionnairesApi.fetchQuestionnaireMigration model.questionnaireUuid body appState PostMigrationCompleted
+                        QuestionnairesApi.fetchQuestionnaireMigration appState model.questionnaireUuid body PostMigrationCompleted
             in
             ( { model | savingMigration = Loading }, cmd )
 
@@ -184,7 +187,7 @@ handleForm wrapMsg formMsg appState model =
                             , selectedTags = []
                           }
                         , Cmd.map wrapMsg <|
-                            KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState GetKnowledgeModelPreviewCompleted
+                            KnowledgeModelsApi.fetchPreview appState (Just packageId) [] [] GetKnowledgeModelPreviewCompleted
                         )
 
                     else
@@ -202,7 +205,7 @@ handleSelectPackage wrapMsg appState model package =
 
         getSelectedPackageCmd =
             Cmd.map wrapMsg <|
-                PackagesApi.getPackageWithoutDeprecatedVersions package.id appState GetSelectedPackageCompleted
+                PackagesApi.getPackageWithoutDeprecatedVersions appState package.id GetSelectedPackageCompleted
     in
     ( { model
         | selectedPackage = Just package
@@ -223,7 +226,7 @@ handlePostMigrationCompleted appState model result =
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult appState (gettext "Project migration could not be created." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -239,7 +242,7 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
                     { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the knowledge model." appState.locale) error }
 
         cmd =
-            getResultCmd Wizard.Msgs.logoutMsg result
+            RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -249,7 +252,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         cfg =
             { wrapMsg = wrapMsg << PackageTypeHintInputMsg
-            , getTypeHints = PackagesApi.getPackagesSuggestions Nothing
+            , getTypeHints = PackagesApi.getPackagesSuggestions appState Nothing
             , getError = gettext "Unable to get knowledge models." appState.locale
             , setReply = wrapMsg << SelectPackage
             , clearReply = Nothing
@@ -257,7 +260,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             }
 
         ( packageTypeHintInputModel, cmd ) =
-            TypeHintInput.update cfg typeHintInputMsg appState model.packageTypeHintInputModel
+            TypeHintInput.update cfg typeHintInputMsg model.packageTypeHintInputModel
     in
     ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
@@ -273,7 +276,7 @@ loadCurrentPackage appState wrapMsg ( model, cmd ) =
             let
                 getCurrentPackageCmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.getPackageWithoutDeprecatedVersions questionnaire.package.id appState GetCurrentPackageCompleted
+                        PackagesApi.getPackageWithoutDeprecatedVersions appState questionnaire.package.id GetCurrentPackageCompleted
             in
             ( model, Cmd.batch [ cmd, getCurrentPackageCmd ] )
 
@@ -293,7 +296,7 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
                     case mbLatestPackageId of
                         Just latestPackageId ->
                             ( Cmd.map wrapMsg <|
-                                KnowledgeModelsApi.fetchPreview (Just latestPackageId) [] [] appState GetKnowledgeModelPreviewCompleted
+                                KnowledgeModelsApi.fetchPreview appState (Just latestPackageId) [] [] GetKnowledgeModelPreviewCompleted
                             , Just latestPackageId
                             )
 

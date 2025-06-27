@@ -5,7 +5,7 @@ module Wizard.Projects.Common.ChoiceChange exposing
     , getChoiceUuid
     )
 
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 
 
 type ChoiceChange

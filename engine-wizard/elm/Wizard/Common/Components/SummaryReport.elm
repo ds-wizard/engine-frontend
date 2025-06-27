@@ -13,12 +13,12 @@ import Html.Events exposing (onClick)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Round
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.SummaryReport exposing (ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
-import Shared.Data.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Shared.Markdown as Markdown
 import String exposing (fromFloat, fromInt)
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.SummaryReport exposing (ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
+import Wizard.Api.Models.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Ports as Ports
 

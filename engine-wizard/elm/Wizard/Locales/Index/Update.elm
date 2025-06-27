@@ -2,10 +2,10 @@ module Wizard.Locales.Index.Update exposing (fetchData, update)
 
 import ActionResult
 import Gettext exposing (gettext)
-import Shared.Api.Locales as LocalesApi
-import Shared.Data.Locale exposing (Locale)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Wizard.Common.Api exposing (applyResultTransformCmd, getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Locales as LocalesApi
+import Wizard.Api.Models.Locale exposing (Locale)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -39,16 +39,16 @@ update msg wrapMsg appState model =
 
         SetEnabled enabled locale ->
             ( { model | changingLocale = ActionResult.Loading }
-            , LocalesApi.setEnabled locale enabled appState (wrapMsg << ChangeLocaleCompleted)
+            , LocalesApi.setEnabled appState locale enabled (wrapMsg << ChangeLocaleCompleted)
             )
 
         SetDefault locale ->
             ( { model | changingLocale = ActionResult.Loading }
-            , LocalesApi.setDefaultLocale locale appState (wrapMsg << ChangeLocaleCompleted)
+            , LocalesApi.setDefaultLocale appState locale (wrapMsg << ChangeLocaleCompleted)
             )
 
         ChangeLocaleCompleted result ->
-            applyResultTransformCmd appState
+            RequestHelpers.applyResultTransformCmd
                 { setResult = \r m -> { m | changingLocale = r }
                 , defaultError = gettext "Unable to change locale." appState.locale
                 , model = model
@@ -56,10 +56,11 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always (gettext "Locale was changed successfully." appState.locale)
                 , cmd = Ports.refresh ()
+                , locale = appState.locale
                 }
 
         ExportLocale locale ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (LocalesApi.exportLocaleUrl locale.id appState)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (LocalesApi.exportLocaleUrl appState locale.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -71,7 +72,7 @@ handleDeleteLocale wrapMsg appState model =
         Just locale ->
             ( { model | deletingLocale = ActionResult.Loading }
             , Cmd.map wrapMsg <|
-                LocalesApi.deleteLocale locale.organizationId locale.localeId appState DeleteLocaleCompleted
+                LocalesApi.deleteLocale appState locale.organizationId locale.localeId DeleteLocaleCompleted
             )
 
         Nothing ->
@@ -88,7 +89,7 @@ deleteLocaleCompleted appState model result =
 
         Err error ->
             ( { model | deletingLocale = ApiError.toActionResult appState (gettext "Locale could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -105,7 +106,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Locale
 listingUpdateConfig wrapMsg appState =
-    { getRequest = LocalesApi.getLocales
+    { getRequest = LocalesApi.getLocales appState
     , getError = gettext "Unable to get locales." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.localesIndexWithFilters

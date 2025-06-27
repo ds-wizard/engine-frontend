@@ -6,11 +6,11 @@ import Html exposing (Html, a, div, h3, hr, img, p, strong, text)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (faSet)
 import Shared.Utils exposing (compose2)
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)

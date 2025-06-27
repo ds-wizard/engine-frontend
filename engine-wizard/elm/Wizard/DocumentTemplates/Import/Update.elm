@@ -1,6 +1,6 @@
 module Wizard.DocumentTemplates.Import.Update exposing (update)
 
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.DocumentTemplates.Import.Models exposing (ImportModel(..), Model)

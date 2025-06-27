@@ -20,7 +20,7 @@ module Shared.Auth.Permission exposing
     )
 
 import Maybe.Extra as Maybe
-import Shared.Data.UserInfo exposing (UserInfo)
+import Wizard.Api.Models.UserInfo exposing (UserInfo)
 
 
 hasPerm : Maybe UserInfo -> String -> Bool

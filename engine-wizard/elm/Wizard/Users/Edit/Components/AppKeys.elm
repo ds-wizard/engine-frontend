@@ -14,15 +14,15 @@ import Html exposing (Html, a, div, strong, table, tbody, td, text, th, thead, t
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
-import Shared.Api.AppKeys as AppKeysApi
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.AppKey exposing (AppKey)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (faSet)
 import Shared.Setters exposing (setAppKeys)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
-import Wizard.Common.Api exposing (applyResult)
+import Wizard.Api.AppKeys as AppKeysApi
+import Wizard.Api.Models.AppKey exposing (AppKey)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Flash as Flash
@@ -69,12 +69,13 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         GetAppKeysCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setAppKeys
                 , defaultError = gettext "Unable to get app keys." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         SetAppKeyToDelete appKeyToDelete ->
@@ -86,7 +87,7 @@ update cfg appState msg model =
             case model.appKeyToDelete of
                 Just appKey ->
                     ( { model | deletingAppKey = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg (AppKeysApi.deleteAppKey appKey.uuid appState DeleteAppKeyCompleted)
+                    , Cmd.map cfg.wrapMsg (AppKeysApi.deleteAppKey appState appKey.uuid DeleteAppKeyCompleted)
                     )
 
                 Nothing ->

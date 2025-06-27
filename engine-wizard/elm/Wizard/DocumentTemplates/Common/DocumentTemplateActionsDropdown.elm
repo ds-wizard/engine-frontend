@@ -9,8 +9,8 @@ module Wizard.DocumentTemplates.Common.DocumentTemplateActionsDropdown exposing
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Shared.Html exposing (faSet)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature

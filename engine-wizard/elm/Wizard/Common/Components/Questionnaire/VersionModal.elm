@@ -14,11 +14,11 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Maybe.Extra as Maybe
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.VersionForm as VersionForm exposing (VersionForm)
 import Wizard.Common.View.FormGroup as FormGroup
@@ -98,10 +98,10 @@ update cfg appState msg model =
                         cmd =
                             case model.mbQuestionnaireVersion of
                                 Just version ->
-                                    QuestionnairesApi.putVersion cfg.questionnaireUuid version.uuid body appState PutVersionComplete
+                                    QuestionnairesApi.putVersion appState cfg.questionnaireUuid version.uuid body PutVersionComplete
 
                                 Nothing ->
-                                    QuestionnairesApi.postVersion cfg.questionnaireUuid body appState PostVersionComplete
+                                    QuestionnairesApi.postVersion appState cfg.questionnaireUuid body PostVersionComplete
                     in
                     ( { model
                         | form = Form.update VersionForm.validation formMsg model.form

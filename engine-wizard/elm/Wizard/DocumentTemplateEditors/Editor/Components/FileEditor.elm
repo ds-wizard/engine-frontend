@@ -28,19 +28,20 @@ import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
-import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Setters exposing (setAssets, setFiles)
-import Shared.Utils exposing (compose2, dispatch, flip, listFilterJust)
+import Shared.Utils exposing (compose2, flip, listFilterJust)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import SplitPane
 import String.Format as String
+import Task.Extra as Task
 import Time
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.CodeEditor as CodeEditor
 import Wizard.Common.ContentType as ContentType
@@ -312,8 +313,8 @@ subscriptions wrapMsg onTime model =
 fetchData : String -> AppState -> Cmd Msg
 fetchData documentTemplateId appState =
     Cmd.batch
-        [ DocumentTemplateDraftsApi.getFiles documentTemplateId appState GetTemplateFilesCompleted
-        , DocumentTemplateDraftsApi.getAssets documentTemplateId appState GetTemplateAssetsCompleted
+        [ DocumentTemplateDraftsApi.getFiles appState documentTemplateId GetTemplateFilesCompleted
+        , DocumentTemplateDraftsApi.getAssets appState documentTemplateId GetTemplateAssetsCompleted
         ]
 
 
@@ -398,21 +399,23 @@ update cfg appState msg model =
             ( { model | editorSplitPane = SplitPane.update splitPaneMsg model.editorSplitPane }, Cmd.none )
 
         GetTemplateFilesCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setFiles
                 , defaultError = gettext "Unable to get template files" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         GetTemplateAssetsCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setAssets
                 , defaultError = gettext "Unable to get template assets" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         GetTemplateFileContentCompleted uuid result ->
@@ -420,12 +423,13 @@ update cfg appState msg model =
                 setResult r m =
                     { m | fileContents = Dict.insert (Uuid.toString uuid) r m.fileContents }
             in
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setResult
                 , defaultError = gettext "Unable to get file content" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         GetTemplateAssetDetailCompleted uuid result ->
@@ -438,12 +442,13 @@ update cfg appState msg model =
                 setResult r m =
                     { m | assetCache = Dict.insert (Uuid.toString uuid) (ActionResult.map toAssetCacheItem r) m.assetCache }
             in
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setResult
                 , defaultError = gettext "Unable to get asset" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         OpenFile groupId uuid path ->
@@ -456,7 +461,7 @@ update cfg appState msg model =
 
                             else
                                 ( Dict.insert (Uuid.toString uuid) ActionResult.Loading model.fileContents
-                                , DocumentTemplateDraftsApi.getFileContent cfg.documentTemplateId file.uuid appState (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
+                                , DocumentTemplateDraftsApi.getFileContent appState cfg.documentTemplateId file.uuid (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
                                 )
 
                         editor =
@@ -507,7 +512,7 @@ update cfg appState msg model =
                         ( newModel, getAssetCmd ) =
                             if shouldLoadAsset then
                                 ( { model | assetCache = Dict.insert (Uuid.toString asset.uuid) ActionResult.Loading model.assetCache }
-                                , DocumentTemplateDraftsApi.getAsset cfg.documentTemplateId asset.uuid appState (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
+                                , DocumentTemplateDraftsApi.getAsset appState cfg.documentTemplateId asset.uuid (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
                                 )
 
                             else
@@ -601,10 +606,10 @@ update cfg appState msg model =
                                         Uuid.fromUuidString fileUuidString
                                 in
                                 DocumentTemplateDraftsApi.putFileContent
+                                    appState
                                     cfg.documentTemplateId
                                     fileUuid
                                     fileContent
-                                    appState
                                     (cfg.wrapMsg << FileSaveComplete fileUuid)
 
                             toActionResult ( fileUuidString, _ ) =
@@ -641,13 +646,13 @@ update cfg appState msg model =
                         Ok _ ->
                             ( ActionResult.Success ()
                             , Set.remove (Uuid.toString uuid) model.changedFiles
-                            , dispatch cfg.onFileSavedMsg
+                            , Task.dispatch cfg.onFileSavedMsg
                             )
 
                         Err error ->
                             ( ApiError.toActionResult appState (gettext "Unable to save file" appState.locale) error
                             , model.changedFiles
-                            , getResultCmd cfg.logoutMsg result
+                            , RequestHelpers.getResultCmd cfg.logoutMsg result
                             )
             in
             ( { model
@@ -691,7 +696,7 @@ update cfg appState msg model =
                         }
 
                     cmd =
-                        DocumentTemplateDraftsApi.postFile cfg.documentTemplateId templateFile "" appState (cfg.wrapMsg << AddFileCompleted)
+                        DocumentTemplateDraftsApi.postFile appState cfg.documentTemplateId templateFile "" (cfg.wrapMsg << AddFileCompleted)
                 in
                 ( { model | addingFile = ActionResult.Loading }
                 , cmd
@@ -721,7 +726,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | addingFile = ApiError.toActionResult appState "Unable to create file." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         SetAddFolderModalOpen open ->
@@ -754,7 +759,7 @@ update cfg appState msg model =
                             ( { model
                                 | deleting = ActionResult.Loading
                               }
-                            , DocumentTemplateDraftsApi.deleteFile cfg.documentTemplateId file.uuid appState (cfg.wrapMsg << DeleteSelectedFileCompleted file.uuid)
+                            , DocumentTemplateDraftsApi.deleteFile appState cfg.documentTemplateId file.uuid (cfg.wrapMsg << DeleteSelectedFileCompleted file.uuid)
                             )
 
                         Nothing ->
@@ -766,7 +771,7 @@ update cfg appState msg model =
                             ( { model
                                 | deleting = ActionResult.Loading
                               }
-                            , DocumentTemplateDraftsApi.deleteAsset cfg.documentTemplateId asset.uuid appState (cfg.wrapMsg << DeleteSelectedAssetCompleted asset.uuid)
+                            , DocumentTemplateDraftsApi.deleteAsset appState cfg.documentTemplateId asset.uuid (cfg.wrapMsg << DeleteSelectedAssetCompleted asset.uuid)
                             )
 
                         Nothing ->
@@ -774,7 +779,7 @@ update cfg appState msg model =
 
                 SelectedFolder path ->
                     ( { model | deleting = ActionResult.Loading }
-                    , DocumentTemplateDraftsApi.deleteFolder cfg.documentTemplateId path appState (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
+                    , DocumentTemplateDraftsApi.deleteFolder appState cfg.documentTemplateId path (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
                     )
 
         DeleteSelectedFileCompleted uuid result ->
@@ -816,7 +821,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete file." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         DeleteSelectedAssetCompleted uuid result ->
@@ -858,7 +863,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete asset." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         DeleteSelectedFolderCompleted path result ->
@@ -889,7 +894,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete folder." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         AssetUploadModalMsg assetUploadModalMsg ->
@@ -968,7 +973,7 @@ update cfg appState msg model =
             in
             ( removeEditorByUuid fileUuid
                 { model | files = ActionResult.map (List.map mapFile) model.files }
-            , dispatch (cfg.wrapMsg <| OpenFile model.activeGroup fileUuid newName)
+            , Task.dispatch (cfg.wrapMsg <| OpenFile model.activeGroup fileUuid newName)
             )
 
         RenameAsset assetUuid newName ->
@@ -982,7 +987,7 @@ update cfg appState msg model =
             in
             ( removeEditorByUuid assetUuid
                 { model | assets = ActionResult.map (List.map mapAsset) model.assets }
-            , dispatch (cfg.wrapMsg <| OpenAsset model.activeGroup assetUuid newName)
+            , Task.dispatch (cfg.wrapMsg <| OpenAsset model.activeGroup assetUuid newName)
             )
 
         RenameFolder currentName newName ->

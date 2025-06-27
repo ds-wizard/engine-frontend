@@ -7,7 +7,7 @@ module Wizard.Common.View.MemberIcon exposing
 
 import Html exposing (Html)
 import Html.Attributes exposing (class, title)
-import Shared.Data.Member as Member exposing (Member)
+import Wizard.Api.Models.Member as Member exposing (Member)
 import Wizard.Common.View.ItemIcon as ItemIcon
 
 

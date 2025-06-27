@@ -12,12 +12,12 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Maybe.Extra as Maybe
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Utils exposing (flip)
 import String.Format as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 
@@ -74,7 +74,7 @@ update cfg appState msg model =
                         | deleteResult = Loading
                       }
                     , Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.deleteVersion cfg.questionnaireUuid version.uuid appState DeleteComplete
+                        QuestionnairesApi.deleteVersion appState cfg.questionnaireUuid version.uuid DeleteComplete
                     )
 
                 Nothing ->

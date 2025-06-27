@@ -14,17 +14,17 @@ import Html exposing (Html, a, div, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Http
 import Process
-import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Auth.Session as Session
-import Shared.Data.QuestionnairePreview exposing (QuestionnairePreview)
-import Shared.Data.UrlResponse exposing (UrlResponse)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Error.ServerError as ServerError
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ServerError as ServerError
 import Shared.Html exposing (faSet)
 import Shared.Undraw as Undraw
 import String.Format as String
 import Task
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnairePreview exposing (QuestionnairePreview)
+import Wizard.Api.Models.UrlResponse exposing (UrlResponse)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.ContentType as ContentType
 import Wizard.Common.Html exposing (linkTo)
@@ -69,7 +69,7 @@ type Msg
 fetchData : AppState -> Uuid -> Bool -> Cmd Msg
 fetchData appState questionnaireUuid hasTemplate =
     if hasTemplate then
-        QuestionnairesApi.getDocumentPreview questionnaireUuid appState GetDocumentPreviewComplete
+        QuestionnairesApi.getDocumentPreview appState questionnaireUuid GetDocumentPreviewComplete
 
     else
         Cmd.none

@@ -4,12 +4,12 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, hr)
 import Html.Attributes exposing (class)
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Shared.Form.FormError exposing (FormError)
 import Shared.Html exposing (emptyNode)
 import Shared.Utils exposing (compose2)
+import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
+import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra

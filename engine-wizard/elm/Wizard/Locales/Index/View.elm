@@ -4,10 +4,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Shared.Components.Badge as Badge
-import Shared.Data.Locale as Locale exposing (Locale)
 import Shared.Html exposing (emptyNode, faSet)
 import String.Format as String
 import Version
+import Wizard.Api.Models.Locale as Locale exposing (Locale)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature

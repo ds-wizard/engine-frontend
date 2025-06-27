@@ -2,9 +2,9 @@ module Wizard.Projects.Common.CloneProjectModal.Update exposing (UpdateConfig, u
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Projects.Common.CloneProjectModal.Models exposing (Model)
@@ -52,7 +52,7 @@ handleDeleteQuestionnaire cfg appState model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.cloneQuestionnaire questionnaire.uuid appState CloneQuestionnaireCompleted
+                        QuestionnairesApi.cloneQuestionnaire appState questionnaire.uuid CloneQuestionnaireCompleted
             in
             ( newModel, cmd )
 

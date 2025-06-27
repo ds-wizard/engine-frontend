@@ -10,15 +10,15 @@ import Json.Decode as D
 import Json.Decode.Extra as D
 import Shared.Auth.Role as Role
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
-import Shared.Data.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
-import Shared.Data.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
-import Shared.Data.User as User
 import Shared.Html exposing (emptyNode, fa, faSet, faSetFw)
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
+import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
+import Wizard.Api.Models.User as User
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Feature as Feature

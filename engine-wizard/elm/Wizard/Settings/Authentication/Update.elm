@@ -1,8 +1,8 @@
 module Wizard.Settings.Authentication.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Api.Prefabs as PrefabsApi
-import Shared.Data.EditableConfig as EditableConfig
+import Wizard.Api.Models.EditableConfig as EditableConfig
+import Wizard.Api.Prefabs as PrefabsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Authentication.Models exposing (Model)

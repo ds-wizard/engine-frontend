@@ -5,9 +5,9 @@ module Wizard.Projects.Import.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.Importer exposing (ImporterResult)
 
