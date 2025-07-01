@@ -11,12 +11,6 @@
         padding-top: $public-header-height;
         padding-bottom: 0;
 
-        .navbar {
-            .container-fluid {
-                padding: 0;
-            }
-        }
-
         & > .container-fluid {
             padding: 0;
         }

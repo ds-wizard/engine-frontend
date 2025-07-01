@@ -668,19 +668,108 @@ isCurrentVersion questionnaire eventUuid =
 
 
 getItemTitle : QuestionnaireQuestionnaire -> List String -> List Question -> Maybe String
-getItemTitle questionnaire itemPath itemTemplateQuestions =
-    let
-        firstQuestionUuid =
-            Maybe.unwrap "" Question.getUuid (List.head itemTemplateQuestions)
+getItemTitle =
+    getItemTitleRecursive []
 
-        titleFromMarkdown value =
-            Markdown.toString value
-                |> String.split "\n"
-                |> List.find (not << String.isEmpty)
-    in
-    Dict.get (pathToString (itemPath ++ [ firstQuestionUuid ])) questionnaire.replies
-        |> Maybe.andThen (.value >> ReplyValue.getStringReply >> titleFromMarkdown)
-        |> Maybe.andThen String.toMaybe
+
+getItemTitleRecursive : List String -> QuestionnaireQuestionnaire -> List String -> List Question -> Maybe String
+getItemTitleRecursive itemUuids questionnaire itemPath itemTemplateQuestions =
+    case List.head itemTemplateQuestions of
+        Nothing ->
+            Nothing
+
+        Just itemTemplateQuestion ->
+            let
+                titleFromMarkdown value =
+                    Markdown.toString value
+                        |> String.split "\n"
+                        |> List.find (not << String.isEmpty)
+
+                getReply common =
+                    Dict.get (pathToString (itemPath ++ [ common.uuid ])) questionnaire.replies
+
+                getReplyValueString common =
+                    getReply common
+                        |> Maybe.andThen (titleFromMarkdown << ReplyValue.getStringReply << .value)
+                        |> Maybe.andThen String.toMaybe
+            in
+            case itemTemplateQuestion of
+                OptionsQuestion common _ ->
+                    getReply common
+                        |> Maybe.map (KnowledgeModel.getAnswerName questionnaire.knowledgeModel << ReplyValue.getAnswerUuid << .value)
+                        |> Maybe.andThen String.toMaybe
+
+                ListQuestion common _ ->
+                    getReply common
+                        |> Maybe.andThen (List.head << ReplyValue.getItemUuids << .value)
+                        |> Maybe.andThen
+                            (\firstItemUuid ->
+                                let
+                                    newItemPath =
+                                        itemPath ++ [ common.uuid, firstItemUuid ]
+
+                                    newItemTemplateQuestion =
+                                        KnowledgeModel.getQuestionItemTemplateQuestions common.uuid questionnaire.knowledgeModel
+                                in
+                                getItemTitleRecursive itemUuids questionnaire newItemPath newItemTemplateQuestion
+                            )
+
+                ValueQuestion common _ ->
+                    getReplyValueString common
+
+                IntegrationQuestion common _ ->
+                    getReplyValueString common
+
+                MultiChoiceQuestion common _ ->
+                    getReply common
+                        |> Maybe.map (ReplyValue.getChoiceUuid << .value)
+                        |> Maybe.andThen
+                            (\uuids ->
+                                if List.isEmpty uuids then
+                                    Nothing
+
+                                else
+                                    List.map (KnowledgeModel.getChoiceName questionnaire.knowledgeModel) uuids
+                                        |> List.filter (not << String.isEmpty)
+                                        |> List.sort
+                                        |> String.join ", "
+                                        |> Just
+                            )
+
+                ItemSelectQuestion common itemSelectQuestion ->
+                    getReply common
+                        |> Maybe.map (ReplyValue.getSelectedItemUuid << .value)
+                        |> Maybe.andThen
+                            (\itemUuid ->
+                                let
+                                    findByPathAndItemUuid listQuestionUuid key value =
+                                        String.endsWith listQuestionUuid key
+                                            && List.member itemUuid (ReplyValue.getItemUuids value.value)
+
+                                    createTargetItemPath ( key, _ ) =
+                                        String.split "." key ++ [ itemUuid ]
+
+                                    getTargetItemTitleByPath listQuestionUuid newItemPath =
+                                        if List.member itemUuid itemUuids then
+                                            Nothing
+
+                                        else
+                                            getItemTitleRecursive (itemUuid :: itemUuids) questionnaire newItemPath (KnowledgeModel.getQuestionItemTemplateQuestions listQuestionUuid questionnaire.knowledgeModel)
+
+                                    getTargetItemTitle listQuestionUuid =
+                                        questionnaire.replies
+                                            |> Dict.find (findByPathAndItemUuid listQuestionUuid)
+                                            |> Maybe.map createTargetItemPath
+                                            |> Maybe.andThen (getTargetItemTitleByPath listQuestionUuid)
+                                in
+                                Maybe.andThen getTargetItemTitle itemSelectQuestion.listQuestionUuid
+                            )
+
+                FileQuestion common _ ->
+                    getReply common
+                        |> Maybe.andThen (ReplyValue.getFileUuid << .value)
+                        |> Maybe.andThen (getFile questionnaire)
+                        |> Maybe.map .fileName
 
 
 getFile : QuestionnaireQuestionnaire -> Uuid -> Maybe QuestionnaireFileSimple
