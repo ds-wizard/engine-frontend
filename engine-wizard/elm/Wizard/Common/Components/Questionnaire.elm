@@ -3654,6 +3654,16 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 [ div (class "flex-grow-1 me-3 cursor-pointer" :: collapseAttributes) [ collapseIcon, itemTitle ]
                 , div [] buttons
                 ]
+
+        collapseFooterButton =
+            if isCollapsed then
+                emptyNode
+
+            else
+                a [ onClick (CollapseItem itemPathString), class "item-collapse-footer-link" ]
+                    [ faSet "questionnaire.item.collapse" appState
+                    , span [ class "ms-1" ] [ text (gettext "Collapse" appState.locale) ]
+                    ]
     in
     div
         [ class "item mb-3"
@@ -3662,7 +3672,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
         ]
         [ div [ class "card bg-light" ]
             [ div [ class "card-body" ]
-                (itemHeader :: itemQuestions)
+                (itemHeader :: itemQuestions ++ [ collapseFooterButton ])
             ]
         ]
 

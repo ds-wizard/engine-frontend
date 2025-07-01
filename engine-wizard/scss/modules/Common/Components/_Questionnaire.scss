@@ -707,7 +707,7 @@ $toolbar-height: 40px;
         height: 100%;
 
         .form-group {
-            margin-bottom: 60px;
+            margin-bottom: $spacer-5;
             position: relative;
 
             &.question-default {
@@ -810,10 +810,7 @@ $toolbar-height: 40px;
         .item {
             &-header {
                 background: $gray-200;
-                margin-top: -$card-spacer-y;
-                margin-left: -$card-spacer-x;
-                margin-right: -$card-spacer-x;
-                margin-bottom: $card-spacer-y;
+                margin: (-$card-spacer-y) (-$card-spacer-x) $card-spacer-y;
                 padding: ($card-spacer-y * 0.5) $card-spacer-x;
                 @include border-radius-top($card-border-radius);
             }
@@ -848,6 +845,15 @@ $toolbar-height: 40px;
 
             .questionnaire-file {
                 background: $gray-200;
+            }
+
+            &-collapse-footer-link {
+                @include border-radius-bottom($card-border-radius);
+                display: block;
+                margin: (-$spacer-4) (-$card-spacer-x) (-$card-spacer-y);
+                padding: .25rem 1rem;
+                background: $gray-200;
+                font-size: $font-size-sm;
             }
 
         }
