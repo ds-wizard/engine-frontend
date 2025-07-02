@@ -324,15 +324,23 @@ viewLogo model =
 
                             AppSwitcherItem.FontAwesomeAppSwitcherItemIcon faIcon ->
                                 fa faIcon
+
+                    targetAttribute =
+                        if item.external then
+                            [ target "_blank" ]
+
+                        else
+                            []
                 in
                 li []
                     [ a
-                        [ href item.url
-                        , classList
-                            [ ( "internal", not item.external )
-                            , ( "external", item.external )
-                            ]
-                        ]
+                        (href item.url
+                            :: classList
+                                [ ( "internal", not item.external )
+                                , ( "external", item.external )
+                                ]
+                            :: targetAttribute
+                        )
                         [ span [ class "icon" ]
                             [ icon
                             ]
