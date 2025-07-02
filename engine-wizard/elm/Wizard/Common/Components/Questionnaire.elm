@@ -1570,6 +1570,7 @@ handleScrollToPath model immediate path =
     in
     ( { model
         | activePage = PageChapter chapterUuid
+        , navigationTreeModel = NavigationTree.openChapter chapterUuid model.navigationTreeModel
         , removeItem = Nothing
         , collapsedItems = newCollapsedItems
       }
@@ -3974,7 +3975,7 @@ viewQuestionItemSelect appState cfg model path question =
                 |> Maybe.andThen (\uuid -> KnowledgeModel.getQuestion uuid model.questionnaire.knowledgeModel)
                 |> Maybe.map Question.getUuid
 
-        items =
+        ( items, warning ) =
             case mbItemQuestionUuid of
                 Just itemQuestionUuid ->
                     let
@@ -3990,14 +3991,47 @@ viewQuestionItemSelect appState cfg model path question =
                                             |> Maybe.withDefault (String.format (gettext "Item %s" appState.locale) [ String.fromInt (i + 1) ])
                                         )
                                     )
+
+                        itemOptions =
+                            model.questionnaire.replies
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.toList
+                                |> List.concatMap itemsToOptions
+
+                        noItemsWarning =
+                            if List.isEmpty itemOptions then
+                                let
+                                    mbClosestQuestionParentPath =
+                                        QuestionnaireQuestionnaire.getClosestQuestionParentPath model.questionnaire
+                                            (KnowledgeModel.createParentMap model.questionnaire.knowledgeModel)
+                                            itemQuestionUuid
+
+                                    viewItemQuestionLink itemQuestionPath =
+                                        a
+                                            [ onClick (ScrollToPath itemQuestionPath)
+                                            , class "ms-1"
+                                            ]
+                                            [ text (gettext "Create them now." appState.locale)
+                                            ]
+                                in
+                                Flash.warningHtml appState
+                                    (div []
+                                        [ text (gettext "There are no items to select from yet." appState.locale)
+                                        , Maybe.unwrap emptyNode viewItemQuestionLink mbClosestQuestionParentPath
+                                        ]
+                                    )
+
+                            else
+                                emptyNode
                     in
-                    model.questionnaire.replies
-                        |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
-                        |> Dict.toList
-                        |> List.concatMap itemsToOptions
+                    ( itemOptions
+                    , noItemsWarning
+                    )
 
                 Nothing ->
-                    []
+                    ( []
+                    , Flash.warning appState (gettext "This question does not have any configured list options to select from." appState.locale)
+                    )
 
         itemToOption ( optionValue, optionLabel ) =
             option [ value optionValue, selected (Just optionValue == mbSelectedItem) ]
@@ -4044,6 +4078,7 @@ viewQuestionItemSelect appState cfg model path question =
         , itemLink
         , clearReplyButton
         , missingItemWarning
+        , warning
         ]
 
 

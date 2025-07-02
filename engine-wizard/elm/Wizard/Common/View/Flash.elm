@@ -4,6 +4,7 @@ module Wizard.Common.View.Flash exposing
     , loader
     , success
     , warning
+    , warningHtml
     )
 
 import Gettext exposing (gettext)
@@ -22,6 +23,11 @@ error appState =
 warning : AppState -> String -> Html msg
 warning appState =
     flashView "alert-warning" <| faSet "_global.warning" appState
+
+
+warningHtml : AppState -> Html msg -> Html msg
+warningHtml appState content =
+    flashViewHtml "alert-warning" (faSet "_global.warning" appState) content
 
 
 success : AppState -> String -> Html msg
@@ -54,3 +60,14 @@ flashView className icon msg =
 
     else
         emptyNode
+
+
+flashViewHtml : String -> Html msg -> Html msg -> Html msg
+flashViewHtml className icon msg =
+    div
+        [ class ("d-flex align-items-baseline alert " ++ className)
+        , dataCy ("flash_" ++ className)
+        ]
+        [ icon
+        , msg
+        ]

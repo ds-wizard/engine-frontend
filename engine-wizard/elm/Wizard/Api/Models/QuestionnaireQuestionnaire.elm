@@ -12,6 +12,7 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , createQuestionnaireDetail
     , decoder
     , generateReplies
+    , getClosestQuestionParentPath
     , getComments
     , getFile
     , getItemSelectQuestionValueLabel
@@ -346,6 +347,74 @@ getComments questionnaire =
                 []
     in
     concatMapVisibleQuestions fn questionnaire
+
+
+getClosestQuestionParentPath : QuestionnaireQuestionnaire -> KnowledgeModel.ParentMap -> String -> Maybe String
+getClosestQuestionParentPath questionnaire parentMap questionUuid =
+    let
+        getQuestionReply qUuid =
+            Dict.find (\key _ -> String.endsWith qUuid key) questionnaire.replies
+    in
+    case getQuestionReply questionUuid of
+        Just ( questionReplyPath, _ ) ->
+            Just questionReplyPath
+
+        Nothing ->
+            let
+                parentUuid =
+                    KnowledgeModel.getParent parentMap questionUuid
+
+                getClosestQuestionParentPath_ =
+                    getClosestQuestionParentPath questionnaire parentMap
+            in
+            case
+                ( KnowledgeModel.getChapter parentUuid questionnaire.knowledgeModel
+                , KnowledgeModel.getQuestion parentUuid questionnaire.knowledgeModel
+                , KnowledgeModel.getAnswer parentUuid questionnaire.knowledgeModel
+                )
+            of
+                -- Parent is chapter, path is straightforward
+                ( Just chapter, _, _ ) ->
+                    Just <| chapter.uuid ++ "." ++ questionUuid
+
+                -- Parent is item question
+                ( _, Just question, _ ) ->
+                    case getQuestionReply (Question.getUuid question) of
+                        -- If we have reply, we can try to get the first item to build the path
+                        Just ( questionReplyPath, reply ) ->
+                            case List.head (ReplyValue.getItemUuids reply.value) of
+                                -- If the reply contains item uuids, we can use the first one to build the path
+                                Just itemUuid ->
+                                    Just <| questionReplyPath ++ "." ++ itemUuid ++ "." ++ questionUuid
+
+                                -- Otherwise, best we can do is parent question path
+                                Nothing ->
+                                    Just <| questionReplyPath
+
+                        Nothing ->
+                            getClosestQuestionParentPath_ (Question.getUuid question)
+
+                -- Parent is answer
+                ( _, _, Just answer ) ->
+                    let
+                        answerParentQuestionUuid =
+                            KnowledgeModel.getParent parentMap answer.uuid
+                    in
+                    case getQuestionReply answerParentQuestionUuid of
+                        Just ( parentQuestinReplyPath, reply ) ->
+                            -- If there is a reply for the answer's parent question and it matches the parent answer uuid, we can use it to build path
+                            if ReplyValue.getAnswerUuid reply.value == answer.uuid then
+                                Just <| parentQuestinReplyPath ++ "." ++ answer.uuid ++ "." ++ questionUuid
+                                -- Otherwise, best we can do is parent question path
+
+                            else
+                                Just <| parentQuestinReplyPath
+
+                        Nothing ->
+                            getClosestQuestionParentPath_ answerParentQuestionUuid
+
+                _ ->
+                    Nothing
 
 
 itemSelectQuestionItemMissing : QuestionnaireQuestionnaire -> Maybe String -> String -> Bool
