@@ -1,5 +1,5 @@
-@import '../../variables';
-@import '../../mixins';
+@import '../variables';
+@import '../mixins';
 
 .Markdown {
     img {
@@ -8,7 +8,6 @@
 
     del {
         background: none;
-        color: $body-color;
     }
 
     code {

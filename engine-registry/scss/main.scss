@@ -1,4 +1,5 @@
-@import "~bootstrap/scss/bootstrap";
+@import 'variables';
+@import '~bootstrap/scss/bootstrap';
 
 
 $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
@@ -12,6 +13,7 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 
 @import 'components/item-id-box';
 @import 'components/list-item';
+@import 'components/markdown';
 @import 'components/modal';
 @import 'components/page';
 @import 'components/publish-info';
