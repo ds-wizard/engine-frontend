@@ -209,7 +209,7 @@ update wrapMsg msg appState model =
         setError result error =
             let
                 questionnaireRoute =
-                    Routing.toUrl appState (Routes.projectsDetail model.uuid)
+                    Routing.toUrl (Routes.projectsDetail model.uuid)
 
                 loginRoute =
                     Routes.publicLogin (Just questionnaireRoute)
@@ -744,7 +744,7 @@ update wrapMsg msg appState model =
         ShareDropdownCopyLink ->
             let
                 link =
-                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.projectsDetail model.uuid))
+                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl (Routes.projectsDetail model.uuid))
             in
             withSeed ( model, Ports.copyToClipboard link )
 

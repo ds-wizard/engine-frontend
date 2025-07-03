@@ -14,13 +14,14 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Auth.Role as Role
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Components.FontAwesome exposing (fa, faInfo)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -196,20 +197,20 @@ userFormView appState model user isCurrent =
     let
         roleSelect =
             if isCurrent then
-                emptyNode
+                Html.nothing
 
             else
                 FormGroup.select appState (Role.options appState) model.userForm "role" <| gettext "Role" appState.locale
 
         activeToggle =
             if isCurrent then
-                emptyNode
+                Html.nothing
 
             else
                 FormGroup.toggle model.userForm "active" <| gettext "Active" appState.locale
     in
     Html.form [ onSubmit Form.Submit, class "col-8" ]
-        [ FormResult.view appState model.savingUser
+        [ FormResult.view model.savingUser
         , FormGroup.input appState model.userForm "email" <| gettext "Email" appState.locale
         , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
         , FormGroup.input appState model.userForm "firstName" <| gettext "First name" appState.locale
@@ -218,7 +219,7 @@ userFormView appState model user isCurrent =
         , roleSelect
         , activeToggle
         , div [ class "mt-5" ]
-            [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+            [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
         ]
 
 
@@ -230,7 +231,7 @@ readOnlyView appState user =
 
         readOnlyInfo =
             div [ class "alert alert-info" ]
-                [ faSet "_global.info" appState
+                [ faInfo
                 , text (gettext "Your profile is managed elsewhere." appState.locale)
                 , a
                     [ class "btn btn-primary ms-2"

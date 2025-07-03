@@ -130,7 +130,7 @@
             }
 
             .external-link {
-                .fa {
+                .fas, .far, .fab{
                     margin-left: 0.25rem;
                 }
             }
@@ -194,7 +194,7 @@
                     align-items: center;
                     justify-content: flex-start;
 
-                    & > .fa {
+                    & > .fas, & > .far, & > .fab{
                         margin-left: 0.5rem;
                         color: $gray-500;
                     }
@@ -202,7 +202,7 @@
                     & > .with-tooltip {
                         margin-left: 0.5rem;
 
-                        .fa {
+                        .fas, .far, .fab{
                             color: $gray-500;
                         }
                     }
@@ -218,7 +218,7 @@
             .badge {
                 margin-left: 0.5rem;
 
-                .fa {
+                .fas, .far, .fab{
                     margin-right: 0.25rem;
                 }
             }
@@ -296,12 +296,12 @@
                 color: $gray-700;
             }
 
-            .fa {
+            .fas, .far, .fab{
                 margin-right: 0.3rem;
             }
 
             &-icon-light {
-                .fa {
+                .fas, .far, .fab{
                     color: $gray-500;
                 }
             }
@@ -342,18 +342,18 @@
                 }
             }
 
-            .fa {
+            .fas, .far, .fab{
                 font-size: 80%;
             }
 
             &.icon-left {
-                .fa {
+                .fas, .far, .fab{
                     margin-right: 0.25rem;
                 }
             }
 
             &.icon-right {
-                .fa {
+                .fas, .far, .fab{
                     margin-left: 0.25rem;
                 }
             }

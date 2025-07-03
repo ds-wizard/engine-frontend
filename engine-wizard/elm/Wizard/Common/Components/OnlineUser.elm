@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
 import List.Extra as List
-import Shared.Html exposing (fa, faKeyClass)
+import Shared.Components.FontAwesome exposing (fa)
 import Wizard.Api.Models.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, OnlineUserInfo)
 import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
@@ -48,7 +48,7 @@ viewAnonymous appState avatarNumber colorNumber =
 
         ( avatarIcon, avatarName ) =
             List.getAt (modBy (List.length avatars) avatarNumber) avatars
-                |> Maybe.withDefault ( faKeyClass "avatar.0" appState, gettext "Anonymous Cat" appState.locale )
+                |> Maybe.withDefault ( "fa-cat", gettext "Anonymous Cat" appState.locale )
     in
     ( avatarName
     , "color-" ++ String.fromInt colorNumber
@@ -58,24 +58,24 @@ viewAnonymous appState avatarNumber colorNumber =
 
 getAvatars : AppState -> List ( String, String )
 getAvatars appState =
-    [ ( faKeyClass "avatar.0" appState, gettext "Anonymous Cat" appState.locale )
-    , ( faKeyClass "avatar.1" appState, gettext "Anonymous Crow" appState.locale )
-    , ( faKeyClass "avatar.2" appState, gettext "Anonymous Dog" appState.locale )
-    , ( faKeyClass "avatar.3" appState, gettext "Anonymous Dove" appState.locale )
-    , ( faKeyClass "avatar.4" appState, gettext "Anonymous Dragon" appState.locale )
-    , ( faKeyClass "avatar.5" appState, gettext "Anonymous Fish" appState.locale )
-    , ( faKeyClass "avatar.6" appState, gettext "Anonymous Frog" appState.locale )
-    , ( faKeyClass "avatar.7" appState, gettext "Anonymous Hippo" appState.locale )
-    , ( faKeyClass "avatar.8" appState, gettext "Anonymous Horse" appState.locale )
-    , ( faKeyClass "avatar.9" appState, gettext "Anonymous Kiwi" appState.locale )
-    , ( faKeyClass "avatar.10" appState, gettext "Anonymous Otter" appState.locale )
-    , ( faKeyClass "avatar.11" appState, gettext "Anonymous Spider" appState.locale )
-    , ( faKeyClass "avatar.12" appState, gettext "Anonymous Pig" appState.locale )
-    , ( faKeyClass "avatar.13" appState, gettext "Anonymous Bug" appState.locale )
-    , ( faKeyClass "avatar.14" appState, gettext "Anonymous Wizard" appState.locale )
-    , ( faKeyClass "avatar.15" appState, gettext "Anonymous Ghost" appState.locale )
-    , ( faKeyClass "avatar.16" appState, gettext "Anonymous Robot" appState.locale )
-    , ( faKeyClass "avatar.17" appState, gettext "Anonymous Snowman" appState.locale )
-    , ( faKeyClass "avatar.18" appState, gettext "Anonymous Tree" appState.locale )
-    , ( faKeyClass "avatar.19" appState, gettext "Anonymous Cowboy" appState.locale )
+    [ ( "fa-cat", gettext "Anonymous Cat" appState.locale )
+    , ( "fa-crow", gettext "Anonymous Crow" appState.locale )
+    , ( "fa-dog", gettext "Anonymous Dog" appState.locale )
+    , ( "fa-dove", gettext "Anonymous Dove" appState.locale )
+    , ( "fa-dragon", gettext "Anonymous Dragon" appState.locale )
+    , ( "fa-fish", gettext "Anonymous Fish" appState.locale )
+    , ( "fa-frog", gettext "Anonymous Frog" appState.locale )
+    , ( "fa-hippo", gettext "Anonymous Hippo" appState.locale )
+    , ( "fa-horse", gettext "Anonymous Horse" appState.locale )
+    , ( "fa-kiwi-bird", gettext "Anonymous Kiwi" appState.locale )
+    , ( "fa-otter", gettext "Anonymous Otter" appState.locale )
+    , ( "fa-spider", gettext "Anonymous Spider" appState.locale )
+    , ( "fa-piggy-bank", gettext "Anonymous Pig" appState.locale )
+    , ( "fa-bug", gettext "Anonymous Bug" appState.locale )
+    , ( "fa-hat-wizard", gettext "Anonymous Wizard" appState.locale )
+    , ( "fa-ghost", gettext "Anonymous Ghost" appState.locale )
+    , ( "fa-robot", gettext "Anonymous Robot" appState.locale )
+    , ( "fa-snowman", gettext "Anonymous Snowman" appState.locale )
+    , ( "fa-tree", gettext "Anonymous Tree" appState.locale )
+    , ( "fa-hat-cowboy", gettext "Anonymous Cowboy" appState.locale )
     ]

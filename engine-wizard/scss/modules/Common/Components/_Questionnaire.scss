@@ -156,7 +156,7 @@ $toolbar-height: 40px;
                 background-color: $gray-200;
             }
 
-            .fa {
+            .fas, .far, .fab{
                 color: $gray-500;
                 font-size: 1.5rem;
                 position: absolute;
@@ -169,7 +169,7 @@ $toolbar-height: 40px;
                 padding-right: $spacer-5;
                 padding-left: $spacer-4;
 
-                .fa {
+                .fas, .far, .fab{
                     right: $spacer-4;
                 }
             }
@@ -179,7 +179,7 @@ $toolbar-height: 40px;
                 padding-right: $spacer-4;
                 padding-left: $spacer-5;
 
-                .fa {
+                .fas, .far, .fab{
                     left: $spacer-4;
                 }
             }
@@ -261,7 +261,7 @@ $toolbar-height: 40px;
                         }
 
                         &.open {
-                            .fa {
+                            .fas, .far, .fab{
                                 position: absolute;
                                 left: 8px;
                                 top: 8px;
@@ -269,7 +269,7 @@ $toolbar-height: 40px;
                         }
 
                         &.closed {
-                            .fa {
+                            .fas, .far, .fab{
                                 position: absolute;
                                 left: 9px;
                                 top: 8px;
@@ -316,7 +316,7 @@ $toolbar-height: 40px;
                                 margin-top: 0.5rem;
                                 align-items: flex-start;
 
-                                .fa {
+                                .fas, .far, .fab{
                                     width: 2rem;
                                     margin-top: 0.25rem;
                                     color: $gray-600;
@@ -767,7 +767,7 @@ $toolbar-height: 40px;
                 margin-right: 15px;
                 display: block;
 
-                .fa {
+                .fas, .far, .fab{
                     color: $gray-700;
                     margin-right: 7px;
                 }
@@ -1000,7 +1000,7 @@ $toolbar-height: 40px;
                         }
                     }
 
-                    .fa {
+                    .fas, .far, .fab{
                         margin-right: 0.25rem;
                     }
                 }
@@ -1016,7 +1016,7 @@ $toolbar-height: 40px;
                 text-decoration: none;
             }
 
-            .fa {
+            .fas, .far, .fab{
                 margin-right: $spacer-1;
             }
         }
@@ -1084,7 +1084,7 @@ $toolbar-height: 40px;
 
             }
 
-            div > .fa {
+            div > .fas, div > .far, div > .fab {
                 margin-right: 5px;
             }
 

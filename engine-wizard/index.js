@@ -85,7 +85,7 @@ function getLocaleUrl(apiUrl) {
 }
 
 
-function loadApp(config, locale, provisioning) {
+function loadApp(config, locale) {
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
         session: JSON.parse(localStorage.getItem(sessionKey)),
@@ -93,8 +93,6 @@ function loadApp(config, locale, provisioning) {
         clientUrl: appConfig.getClientUrl(),
         webSocketThrottleDelay: appConfig.getWebSocketThrottleDelay(),
         config: config,
-        provisioning: provisioning,
-        localProvisioning: appConfig.getProvisioning(),
         navigator: {
             pdf: getPdfSupport()
         },
@@ -176,10 +174,6 @@ window.onload = function () {
             createBootstrapConfigRequest(),
             createLocaleRequest()
         ]
-        const hasProvisioning = appConfig.hasProvisioning()
-        if (hasProvisioning) {
-            promises.push(axios.get(appConfig.getProvisioningUrl()))
-        }
 
         axios.all(promises)
             .then(function (results) {
@@ -188,8 +182,7 @@ window.onload = function () {
                 } else {
                     const config = results[0].data
                     const locale = results[1].data
-                    const provisioning = hasProvisioning ? results[2].data : null
-                    loadApp(config, locale, provisioning)
+                    loadApp(config, locale)
                 }
             })
             .catch(function (err) {

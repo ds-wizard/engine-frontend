@@ -21,8 +21,8 @@ import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
+import Shared.Components.FontAwesome exposing (fa, faCancel)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (fa, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Task.Extra as Task
@@ -203,7 +203,7 @@ view appState isKmEditor model =
 
         submitButton =
             span submitButtonTooltip
-                [ ActionButton.buttonWithAttrs appState
+                [ ActionButton.buttonWithAttrs
                     { label = gettext "Upload" appState.locale
                     , result = model.submitting
                     , msg = Save
@@ -236,7 +236,7 @@ view appState isKmEditor model =
             [ div [ class "modal-header" ]
                 [ h5 [ class "modal-title" ] [ text (gettext "Upload a file" appState.locale) ] ]
             , div [ class "modal-body logo-upload" ]
-                [ FormResult.errorOnlyView appState model.submitting
+                [ FormResult.errorOnlyView model.submitting
                 , content
                 ]
             , div [ class "modal-footer" ]
@@ -315,7 +315,7 @@ contentFileView appState model file =
                     , onClick ClearFile
                     , disabled (ActionResult.isLoading model.submitting)
                     ]
-                    [ faSet "_global.cancel" appState ]
+                    [ faCancel ]
             ]
         ]
 

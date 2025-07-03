@@ -12,7 +12,7 @@ import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (checked, class, classList, style, type_)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmItemTemplate, faKmQuestion)
 import Shared.Utils exposing (getContrastColorHex)
 import String.Extra as String
 import Wizard.Api.Models.Event exposing (Event(..))
@@ -114,10 +114,10 @@ view appState wrapMsg eventMsg editorBranch model =
 
         content =
             if List.isEmpty editorBranch.branch.knowledgeModel.tagUuids then
-                Flash.info appState (gettext "There are no question tags, create them first." appState.locale)
+                Flash.info (gettext "There are no question tags, create them first." appState.locale)
 
             else if Dict.isEmpty editorBranch.branch.knowledgeModel.entities.questions then
-                Flash.info appState (gettext "There are no questions, create them first." appState.locale)
+                Flash.info (gettext "There are no questions, create them first." appState.locale)
 
             else
                 let
@@ -271,10 +271,9 @@ trQuestion appState props model indent tags question =
     tr []
         (th []
             [ div [ indentClass indent ]
-                [ linkTo appState
-                    (EditorBranch.editorRoute props.editorBranch (Question.getUuid question))
+                [ linkTo (EditorBranch.editorRoute props.editorBranch (Question.getUuid question))
                     []
-                    [ faSet "km.question" appState
+                    [ faKmQuestion
                     , text questionTitle
                     ]
                 ]
@@ -323,10 +322,9 @@ tdQuestionTagCheckbox props model question tag =
 
 trChapter : AppState -> Props msg -> Chapter -> List Tag -> Html msg
 trChapter appState props chapter =
-    trSeparator appState
-        props
+    trSeparator props
         { title = String.withDefault (gettext "Untitled chapter" appState.locale) chapter.title
-        , icon = faSet "km.chapter" appState
+        , icon = faKmChapter
         , mbExtraClass = Just "separator-chapter"
         , mbEditorUuid = Just chapter.uuid
         }
@@ -335,10 +333,9 @@ trChapter appState props chapter =
 
 trAnswer : AppState -> Props msg -> Answer -> Int -> List Tag -> Html msg
 trAnswer appState props answer =
-    trSeparator appState
-        props
+    trSeparator props
         { title = String.withDefault (gettext "Untitled answer" appState.locale) answer.label
-        , icon = faSet "km.answer" appState
+        , icon = faKmAnswer
         , mbExtraClass = Nothing
         , mbEditorUuid = Just answer.uuid
         }
@@ -346,10 +343,9 @@ trAnswer appState props answer =
 
 trItemTemplate : AppState -> Props msg -> Int -> List Tag -> Html msg
 trItemTemplate appState props =
-    trSeparator appState
-        props
+    trSeparator props
         { title = gettext "Item Template" appState.locale
-        , icon = faSet "km.itemTemplate" appState
+        , icon = faKmItemTemplate
         , mbExtraClass = Nothing
         , mbEditorUuid = Nothing
         }
@@ -363,14 +359,13 @@ type alias SeparatorProps msg =
     }
 
 
-trSeparator : AppState -> Props msg -> SeparatorProps msg -> Int -> List Tag -> Html msg
-trSeparator appState props { title, icon, mbExtraClass, mbEditorUuid } indent tags =
+trSeparator : Props msg -> SeparatorProps msg -> Int -> List Tag -> Html msg
+trSeparator props { title, icon, mbExtraClass, mbEditorUuid } indent tags =
     let
         createLink content =
             case mbEditorUuid of
                 Just editorUuid ->
-                    [ linkTo appState
-                        (EditorBranch.editorRoute props.editorBranch editorUuid)
+                    [ linkTo (EditorBranch.editorRoute props.editorBranch editorUuid)
                         []
                         content
                     ]

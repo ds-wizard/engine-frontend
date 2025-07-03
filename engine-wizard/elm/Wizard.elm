@@ -104,7 +104,7 @@ decideInitialRoute model location route originalRoute =
                 dispatchUrlChange
 
             else
-                cmdNavigate model.appState (Routes.publicLogin <| Just <| toUrl model.appState originalRoute)
+                cmdNavigate model.appState (Routes.publicLogin <| Just <| toUrl originalRoute)
 
 
 main : Program Value Model Msg

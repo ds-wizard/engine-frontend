@@ -17,8 +17,8 @@ import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
+import Shared.Components.FontAwesome exposing (faImportFile)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
 import Task
 import Task.Extra as Task
 import Uuid
@@ -253,7 +253,7 @@ view appState model =
             Maybe.isNothing model.files
 
         submitButton =
-            ActionButton.buttonWithAttrs appState
+            ActionButton.buttonWithAttrs
                 { label = gettext "Upload" appState.locale
                 , result = actionResult
                 , msg = Upload
@@ -268,7 +268,7 @@ view appState model =
         fileContent =
             case model.files of
                 Just files ->
-                    filesView appState files
+                    filesView files
 
                 Nothing ->
                     dropzone appState model
@@ -277,7 +277,7 @@ view appState model =
             [ div [ class "modal-header" ]
                 [ h5 [ class "modal-title" ] [ text (gettext "Upload files" appState.locale) ] ]
             , div [ class "modal-body logo-upload" ]
-                [ FormResult.errorOnlyView appState actionResult
+                [ FormResult.errorOnlyView actionResult
                 , fileContent
                 ]
             , div [ class "modal-footer" ]
@@ -324,12 +324,12 @@ dropDecoder =
     D.at [ "dataTransfer", "files" ] (D.map GotFiles (D.list File.decoder))
 
 
-filesView : AppState -> List File -> Html Msg
-filesView appState files =
+filesView : List File -> Html Msg
+filesView files =
     let
         fileView file =
             div [ class "rounded-3 bg-light mb-1 px-3 py-2 text-truncate" ]
-                [ span [ class "me-2" ] [ faSet "import.file" appState ]
+                [ span [ class "me-2" ] [ faImportFile ]
                 , text (File.name file)
                 ]
     in

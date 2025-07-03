@@ -44,7 +44,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.kmEditorIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.kmEditorIndex) )
 
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model

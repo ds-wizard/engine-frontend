@@ -134,10 +134,10 @@ viewLanguageSelection appState model ( _, locales ) =
         [ Page.headerWithGuideLink appState (gettext "Language" appState.locale) GuideLinks.profileLanguage
         , div [ class "row" ]
             [ form [ class "col-8", onSubmit SaveLocale ]
-                [ FormResult.errorOnlyView appState model.savingLocale
+                [ FormResult.errorOnlyView model.savingLocale
                 , languageFormView appState model locales
                 , div [ class "mt-5" ]
-                    [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingLocale) ]
+                    [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingLocale) ]
                 ]
             ]
         ]

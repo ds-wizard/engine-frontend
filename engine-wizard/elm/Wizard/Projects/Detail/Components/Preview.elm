@@ -15,9 +15,9 @@ import Html.Attributes exposing (class, href, src, target)
 import Http
 import Process
 import Shared.Auth.Session as Session
+import Shared.Components.FontAwesome exposing (faArrowRight, faDownload)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.ServerError as ServerError
-import Shared.Html exposing (faSet)
 import Shared.Undraw as Undraw
 import String.Format as String
 import Task
@@ -165,7 +165,7 @@ viewNotSupported appState documentUrl =
             [ p [] [ text (gettext "The document format cannot be displayed in the web browser. You can still download and view it." appState.locale) ]
             , p []
                 [ a [ class "btn btn-primary btn-lg with-icon", href documentUrl, target "_blank" ]
-                    [ faSet "_global.download" appState
+                    [ faDownload
                     , text (gettext "Download" appState.locale)
                     ]
                 ]
@@ -185,11 +185,10 @@ viewTemplateNotSet appState questionnaire =
             else if QuestionnaireUtils.isOwner appState questionnaire then
                 [ p [] [ text (gettext "Before you can use preview you need to set a default document template and format." appState.locale) ]
                 , p []
-                    [ linkTo appState
-                        (Routes.projectsDetailSettings questionnaire.uuid)
+                    [ linkTo (Routes.projectsDetailSettings questionnaire.uuid)
                         [ class "btn btn-primary btn-lg with-icon-after" ]
                         [ text (gettext "Go to settings" appState.locale)
-                        , faSet "_global.arrowRight" appState
+                        , faArrowRight
                         ]
                     ]
                 ]
@@ -217,11 +216,10 @@ viewTemplateUnsupported appState questionnaire =
             else if QuestionnaireUtils.isOwner appState questionnaire then
                 [ p [] [ text (gettext "Before you can use preview you need to update the default document template." appState.locale) ]
                 , p []
-                    [ linkTo appState
-                        (Routes.projectsDetailSettings questionnaire.uuid)
+                    [ linkTo (Routes.projectsDetailSettings questionnaire.uuid)
                         [ class "btn btn-primary btn-lg with-icon-after" ]
                         [ text (gettext "Go to settings" appState.locale)
-                        , faSet "_global.arrowRight" appState
+                        , faArrowRight
                         ]
                     ]
                 ]

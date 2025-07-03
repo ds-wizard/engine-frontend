@@ -8,7 +8,7 @@ module Wizard.Projects.Common.View exposing
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, small, span, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faProjectSharingInternal, faProjectSharingPrivate, faProjectSharingPublic)
 import String.Format as String
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
@@ -21,19 +21,19 @@ import Wizard.Common.Html.Attribute exposing (tooltipCustom)
 visibilityIcon : AppState -> QuestionnaireLike q -> Html msg
 visibilityIcon appState questionnaire =
     span (tooltipCustom "with-tooltip-wide with-tooltip-right" <| shareTooltipString appState questionnaire)
-        [ shareIcon appState questionnaire ]
+        [ shareIcon questionnaire ]
 
 
-shareIcon : AppState -> QuestionnaireLike q -> Html msg
-shareIcon appState questionnaire =
+shareIcon : QuestionnaireLike q -> Html msg
+shareIcon questionnaire =
     if isPublic questionnaire then
-        faSet "project.sharing.public" appState
+        faProjectSharingPublic
 
     else if isPrivate questionnaire then
-        faSet "project.sharing.private" appState
+        faProjectSharingPrivate
 
     else
-        faSet "project.sharing.internal" appState
+        faProjectSharingInternal
 
 
 shareTooltipHtml : AppState -> QuestionnaireLike q -> List (Html msg)

@@ -18,11 +18,11 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Registry.Components.FontAwesome exposing (fas)
 import Set exposing (Set)
-import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.Package as Package
@@ -318,4 +318,4 @@ tagSelection appState selected knowledgeModel =
             ]
 
     else
-        emptyNode
+        Html.nothing

@@ -14,7 +14,7 @@ view appState editorBranch =
     let
         nodes =
             createBreadCrumbs appState editorBranch maxBreadcrumbsNodeCount editorBranch.activeUuid
-                |> List.map (breadcrumbNode appState editorBranch)
+                |> List.map (breadcrumbNode editorBranch)
     in
     ol [ class "breadcrumb" ] nodes
 
@@ -53,14 +53,13 @@ createBreadCrumbs appState editorBranch depth uuid =
                 ++ [ node ]
 
 
-breadcrumbNode : AppState -> EditorBranch -> ( Maybe String, String ) -> Html msg
-breadcrumbNode appState editorBranch ( maybeUuid, label ) =
+breadcrumbNode : EditorBranch -> ( Maybe String, String ) -> Html msg
+breadcrumbNode editorBranch ( maybeUuid, label ) =
     let
         ( content, withLink ) =
             case maybeUuid of
                 Just uuid ->
-                    ( linkTo appState
-                        (Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid uuid editorBranch))
+                    ( linkTo (Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid uuid editorBranch))
                         []
                         [ text label ]
                     , True

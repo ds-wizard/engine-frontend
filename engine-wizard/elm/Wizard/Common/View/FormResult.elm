@@ -6,39 +6,38 @@ module Wizard.Common.View.FormResult exposing
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html)
-import Shared.Html exposing (emptyNode)
-import Wizard.Common.AppState exposing (AppState)
+import Html.Extra as Html
 import Wizard.Common.View.Flash as Flash
 
 
-view : AppState -> ActionResult String -> Html msg
-view appState result =
+view : ActionResult String -> Html msg
+view result =
     case result of
         Success msg ->
-            Flash.success appState msg
+            Flash.success msg
 
         Error msg ->
-            Flash.error appState msg
+            Flash.error msg
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
-successOnlyView : AppState -> ActionResult String -> Html msg
-successOnlyView appState result =
+successOnlyView : ActionResult String -> Html msg
+successOnlyView result =
     case result of
         Success msg ->
-            Flash.success appState msg
+            Flash.success msg
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
-errorOnlyView : AppState -> ActionResult a -> Html msg
-errorOnlyView appState result =
+errorOnlyView : ActionResult a -> Html msg
+errorOnlyView result =
     case result of
         Error msg ->
-            Flash.error appState msg
+            Flash.error msg
 
         _ ->
-            emptyNode
+            Html.nothing

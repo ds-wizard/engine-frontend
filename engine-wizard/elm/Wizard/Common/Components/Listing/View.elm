@@ -15,15 +15,16 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, input, li, nav, span, text, ul)
 import Html.Attributes exposing (class, classList, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (fa, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faListingFilterSingleNotSelected, faListingFilterSingleSelected, faSortAsc, faSortDesc)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
 import String.Format as String
 import Time
@@ -105,7 +106,7 @@ viewToolbar appState cfg model =
              ]
                 ++ viewToolbarFilters appState cfg model
             )
-        , Maybe.unwrap emptyNode (div [ class "ms-4" ] << List.singleton) cfg.toolbarExtra
+        , Maybe.unwrap Html.nothing (div [ class "ms-4" ] << List.singleton) cfg.toolbarExtra
         ]
 
 
@@ -150,12 +151,12 @@ viewToolbarSort appState cfg model =
         ( sortDirectionButtonMsg, sortDirectionButtonIcon ) =
             if paginationQueryString.sortDirection == SortASC then
                 ( updateMsg { paginationQueryString | sortDirection = SortDESC, page = Just 1 }
-                , faSet "_global.sortAsc" appState
+                , faSortAsc
                 )
 
             else
                 ( updateMsg { paginationQueryString | sortDirection = SortASC, page = Just 1 }
-                , faSet "_global.sortDesc" appState
+                , faSortDesc
                 )
     in
     div [ class "btn-group" ]
@@ -205,10 +206,10 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
 
                 icon =
                     if Maybe.unwrap False ((==) value << Tuple.first) maybeFilterValue then
-                        faSet "listing.filter.single.selected" appState
+                        faListingFilterSingleSelected
 
                     else
-                        faSet "listing.filter.single.notSelected" appState
+                        faListingFilterSingleNotSelected
             in
             Dropdown.buttonItem [ onClick newFiltersMsg, class "dropdown-item-icon" ]
                 [ icon, text visibleName ]
@@ -238,12 +239,12 @@ viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
             let
                 ( icon, newFilterValue ) =
                     if List.member value filterValues then
-                        ( faSet "listing.filter.multi.selected" appState
+                        ( faListingFilterMultiSelected
                         , removeValue value
                         )
 
                     else
-                        ( faSet "listing.filter.multi.notSelected" appState
+                        ( faListingFilterMultiNotSelected
                         , addValue value
                         )
 
@@ -294,7 +295,7 @@ viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
                 Badge.dark [ class "rounded-pill" ] [ text ("+" ++ String.fromInt (filterValuesCount - filterCfg.maxVisibleValues)) ]
 
             else
-                emptyNode
+                Html.nothing
 
         label =
             [ span [ class "filter-text-label" ] [ text filterLabel ], filterBadge ]
@@ -399,14 +400,14 @@ viewPagination appState cfg model page =
                 ( currentPage - 4, dots )
 
             else
-                ( 1, emptyNode )
+                ( 1, Html.nothing )
 
         ( right, rightDots ) =
             if currentPage + 4 < page.totalPages then
                 ( currentPage + 4, dots )
 
             else
-                ( page.totalPages, emptyNode )
+                ( page.totalPages, Html.nothing )
     in
     if page.totalPages > 1 then
         let
@@ -419,7 +420,7 @@ viewPagination appState cfg model page =
                         ]
 
                 else
-                    emptyNode
+                    Html.nothing
 
             nextLink =
                 viewPageLink (currentPage + 1)
@@ -453,7 +454,7 @@ viewPagination appState cfg model page =
                         ]
 
                 else
-                    emptyNode
+                    Html.nothing
 
             links =
                 [ firstLink, prevLink, leftDots ] ++ pageLinks ++ [ rightDots, nextLink, lastLink ]
@@ -461,7 +462,7 @@ viewPagination appState cfg model page =
         nav [] [ ul [ class "pagination" ] links ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewEmpty : AppState -> ViewConfig a msg -> Model a -> Html msg
@@ -493,14 +494,14 @@ viewItem appState config index item =
 
         dropdown =
             if List.length actions > 0 then
-                ListingDropdown.dropdown appState
+                ListingDropdown.dropdown
                     { dropdownState = item.dropdownState
                     , toggleMsg = config.wrapMsg << ItemDropdownMsg index
                     , items = actions
                     }
 
             else
-                emptyNode
+                Html.nothing
 
         icon =
             config.iconView
@@ -508,7 +509,7 @@ viewItem appState config index item =
                 |> Maybe.withDefault (ItemIcon.view { text = config.textTitle item.item, image = Nothing })
 
         additionalData =
-            Maybe.unwrap emptyNode (div [ class "additional-data" ]) (config.itemAdditionalData item.item)
+            Maybe.unwrap Html.nothing (div [ class "additional-data" ]) (config.itemAdditionalData item.item)
     in
     div [ class "list-group-item", dataCy "listing_item" ]
         [ icon
@@ -544,4 +545,4 @@ viewUpdated appState config item =
                 [ text <| String.format (gettext "Updated %s" appState.locale) [ inWordsWithConfig { withAffix = True } (locale appState) time updated.currentTime ] ]
 
         Nothing ->
-            emptyNode
+            Html.nothing

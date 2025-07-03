@@ -15,8 +15,8 @@ import Html.Attributes exposing (class, disabled, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Random exposing (Seed)
 import Shared.Api.Request exposing (ServerInfo)
+import Shared.Components.FontAwesome exposing (fa, faClose)
 import Shared.Data.ApiError exposing (ApiError)
-import Shared.Html exposing (fa, faSet)
 import Shared.Markdown as Markdown
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
@@ -236,7 +236,7 @@ viewConversation cfg state conversation =
         [ div [ class "header fw-bold" ]
             [ div [ class "px-3 py-3 d-flex justify-content-between" ]
                 [ text "AI Assistant"
-                , a [ onClick cfg.closeMsg ] [ faSet "_global.close" cfg.appState ]
+                , a [ onClick cfg.closeMsg ] [ faClose ]
                 ]
             ]
         , content

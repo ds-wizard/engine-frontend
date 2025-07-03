@@ -36,7 +36,7 @@ update appState msg model =
                             case ( Session.exists appState.session, err ) of
                                 ( False, ApiError.BadStatus 403 _ ) ->
                                     Routes.projectsFileDownload model.questionnaireUuid model.fileUuid
-                                        |> toUrl appState
+                                        |> toUrl
                                         |> Just
                                         |> Routes.publicLogin
                                         |> cmdNavigate appState

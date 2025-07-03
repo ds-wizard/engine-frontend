@@ -14,7 +14,6 @@ import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, classList, disabled, id, style, type_)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Html exposing (emptyNode)
 import Shared.Utils exposing (getContrastColorHex)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
@@ -40,7 +39,7 @@ list appState config tags =
                 List.map (tagView appState config) (List.sortBy .name tags)
 
             else
-                [ Flash.info appState <| gettext "There are no question tags configured for the knowledge model." appState.locale ]
+                [ Flash.info <| gettext "There are no question tags configured for the knowledge model." appState.locale ]
     in
     div [ class "tag-list" ] content
 
@@ -111,7 +110,7 @@ selection appState selectionConfig knowledgeModelResult =
     in
     case knowledgeModelResult of
         Unset ->
-            emptyNode
+            Html.nothing
 
         Loading ->
             viewContent <|
@@ -119,7 +118,7 @@ selection appState selectionConfig knowledgeModelResult =
 
         Error err ->
             viewContent <|
-                Flash.error appState err
+                Flash.error err
 
         Success knowledgeModel ->
             let
@@ -154,7 +153,7 @@ selection appState selectionConfig knowledgeModelResult =
 
             else
                 viewContent <|
-                    Flash.info appState <|
+                    Flash.info <|
                         gettext "No need to choose question tags for this knowledge model." appState.locale
 
 
@@ -163,10 +162,10 @@ readOnlyList appState selected tags =
     let
         content =
             if List.isEmpty tags then
-                [ Flash.info appState (gettext "There are no question tags for this knowledge model." appState.locale) ]
+                [ Flash.info (gettext "There are no question tags for this knowledge model." appState.locale) ]
 
             else if List.isEmpty selected then
-                [ Flash.info appState (gettext "All questions are used." appState.locale) ]
+                [ Flash.info (gettext "All questions are used." appState.locale) ]
 
             else
                 List.map (readOnlyTagView selected) (List.sortBy .name tags)
@@ -205,7 +204,7 @@ type alias ViewListConfig =
 viewList : ViewListConfig -> List Tag -> Html msg
 viewList cfg tags =
     if List.isEmpty tags then
-        emptyNode
+        Html.nothing
 
     else
         div [ class "tag-list tag-list-view" ] (List.map (viewListTagView cfg) tags)

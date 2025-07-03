@@ -7,10 +7,11 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Auth.Session as Session
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (fa, faPreview, faProjectDocuments, faProjectFiles, faProjectMetrics, faProjectQuestionnaire, faQuestionnaireCopyLink, faSettings)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (flip)
 import String.Format as String
@@ -99,7 +100,7 @@ viewProject route appState model questionnaire =
                 Just migrationUuid ->
                     let
                         warningLink =
-                            linkTo appState (Wizard.Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
+                            linkTo (Wizard.Routes.projectsMigration migrationUuid) [] [ text (gettext "project migration" appState.locale) ]
 
                         warningContent =
                             gettext "There is an ongoing %s. Finish it before you can continue editing this project." appState.locale
@@ -110,11 +111,11 @@ viewProject route appState model questionnaire =
                     )
 
                 Nothing ->
-                    ( emptyNode, False )
+                    ( Html.nothing, False )
 
         navigation =
             if AppState.isFullscreen appState then
-                emptyNode
+                Html.nothing
 
             else
                 viewProjectNavigation appState route model questionnaire
@@ -203,7 +204,7 @@ templateBadge appState questionnaire =
         Badge.info [] [ text (gettext "Template" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewProjectNavigationProjectSaving : AppState -> Model -> Html Msg
@@ -217,7 +218,7 @@ viewProjectNavigationActions appState model questionnaire =
     if QuestionnaireUtils.isAnonymousProject questionnaire && Session.exists appState.session then
         DetailNavigation.sectionActions
             [ ActionResultView.error model.addingToMyProjects
-            , ActionButton.buttonCustom appState
+            , ActionButton.buttonCustom
                 { content =
                     [ fa "fas fa-plus"
                     , text (gettext "Add to my projects" appState.locale)
@@ -233,7 +234,7 @@ viewProjectNavigationActions appState model questionnaire =
             [ viewProjectNavigationShareButton appState model questionnaire ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewProjectNavigationShareButton : AppState -> Model -> QuestionnaireCommon -> Html Msg
@@ -244,7 +245,7 @@ viewProjectNavigationShareButton appState model questionnaire =
             , onClick (ShareModalMsg <| ShareModal.openMsg questionnaire)
             , dataCy "project_detail_share-button"
             ]
-            [ shareIcon appState questionnaire
+            [ shareIcon questionnaire
             , text (gettext "Share" appState.locale)
             ]
         , Dropdown.dropdown model.shareDropdownState
@@ -256,7 +257,7 @@ viewProjectNavigationShareButton appState model questionnaire =
             , toggleButton = Dropdown.toggle [ Button.info ] []
             , items =
                 [ Dropdown.anchorItem [ onClick ShareDropdownCopyLink ]
-                    [ faSet "questionnaire.copyLink" appState
+                    [ faQuestionnaireCopyLink
                     , text (gettext "Copy link" appState.locale)
                     ]
                 , Dropdown.divider
@@ -307,7 +308,7 @@ viewProjectNavigationNav appState route model questionnaire =
         questionnaireLink =
             { route = projectRoute (ProjectDetailRoute.Questionnaire Nothing Nothing)
             , label = gettext "Questionnaire" appState.locale
-            , icon = faSet "project.questionnaire" appState
+            , icon = faProjectQuestionnaire
             , isActive = isQuestionnaireRoute
             , isVisible = True
             , dataCy = "project_nav_questionnaire"
@@ -316,7 +317,7 @@ viewProjectNavigationNav appState route model questionnaire =
         metricsLink =
             { route = projectRoute ProjectDetailRoute.Metrics
             , label = gettext "Metrics" appState.locale
-            , icon = faSet "project.metrics" appState
+            , icon = faProjectMetrics
             , isActive = route == ProjectDetailRoute.Metrics
             , isVisible = Features.projectMetrics appState
             , dataCy = "project_nav_metrics"
@@ -325,7 +326,7 @@ viewProjectNavigationNav appState route model questionnaire =
         previewLink =
             { route = projectRoute ProjectDetailRoute.Preview
             , label = gettext "Preview" appState.locale
-            , icon = faSet "_global.preview" appState
+            , icon = faPreview
             , isActive = route == ProjectDetailRoute.Preview
             , isVisible = Features.projectPreview appState
             , dataCy = "project_nav_preview"
@@ -334,7 +335,7 @@ viewProjectNavigationNav appState route model questionnaire =
         documentsLink =
             { route = projectRoute (ProjectDetailRoute.Documents PaginationQueryString.empty)
             , label = gettext "Documents" appState.locale
-            , icon = faSet "project.documents" appState
+            , icon = faProjectDocuments
             , isActive = isDocumentRoute
             , isVisible = Features.projectDocumentsView appState
             , dataCy = "project_nav_documents"
@@ -350,7 +351,7 @@ viewProjectNavigationNav appState route model questionnaire =
         filesLink =
             { route = projectRoute (ProjectDetailRoute.Files PaginationQueryString.empty)
             , label = gettext "Files" appState.locale
-            , icon = faSet "project.files" appState
+            , icon = faProjectFiles
             , isActive = isFilesRoute
             , isVisible = filesVisible
             , dataCy = "project_nav_files"
@@ -359,7 +360,7 @@ viewProjectNavigationNav appState route model questionnaire =
         settingsLink =
             { route = projectRoute ProjectDetailRoute.Settings
             , label = gettext "Settings" appState.locale
-            , icon = faSet "_global.settings" appState
+            , icon = faSettings
             , isActive = route == ProjectDetailRoute.Settings
             , isVisible = Features.projectSettings appState questionnaire
             , dataCy = "project_nav_settings"
@@ -374,7 +375,7 @@ viewProjectNavigationNav appState route model questionnaire =
             , settingsLink
             ]
     in
-    DetailNavigation.navigation appState links
+    DetailNavigation.navigation links
 
 
 

@@ -11,10 +11,10 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, text, ul)
 import Html.Attributes exposing (class, href, target)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import String exposing (fromInt)
 import String.Format as String
 import Wizard.Api.Feedbacks as FeedbacksApi
@@ -169,10 +169,10 @@ feedbackModalContent appState model =
                             ]
 
                     else
-                        emptyNode
+                        Html.nothing
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     [ div [ class "alert alert-info" ]
         [ text (gettext "If you found something wrong with the question, you can send us your recommendation on how to improve it." appState.locale) ]

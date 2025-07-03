@@ -3,8 +3,9 @@ module Wizard.Locales.Index.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faLocaleCreate, faLocaleImport)
 import String.Format as String
 import Version
 import Wizard.Api.Models.Locale as Locale exposing (Locale)
@@ -27,7 +28,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "" ]
         [ Page.header (gettext "Locales" appState.locale) []
-        , FormResult.errorOnlyView appState model.changingLocale
+        , FormResult.errorOnlyView model.changingLocale
         , Listing.view appState (listingConfig appState) model.locales
         , deleteModal appState model
         ]
@@ -74,11 +75,11 @@ listingTitle appState locale =
                     [ text (gettext "default" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         disabledBadge =
             if locale.enabled then
-                emptyNode
+                Html.nothing
 
             else
                 Badge.danger []
@@ -90,16 +91,15 @@ listingTitle appState locale =
                     localeId =
                         Maybe.map ((++) (locale.organizationId ++ ":" ++ locale.localeId ++ ":") << Version.toString) locale.remoteLatestVersion
                 in
-                linkTo appState
-                    (Routes.localesImport localeId)
+                linkTo (Routes.localesImport localeId)
                     [ class Badge.warningClass ]
                     [ text (gettext "update available" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
     in
     span []
-        [ linkTo appState (Routes.localesDetail locale.id) [] [ text locale.name ]
+        [ linkTo (Routes.localesDetail locale.id) [] [ text locale.name ]
         , Badge.light (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString locale.version ]
         , Badge.dark []
@@ -123,7 +123,7 @@ listingDescription appState locale =
                                     img [ class "organization-image", src organizationLogo ] []
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     span [ class "fragment", title <| gettext "Published by" appState.locale ]
                         [ logo
@@ -131,7 +131,7 @@ listingDescription appState locale =
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     span []
         [ code [ class "fragment" ] [ text locale.id ]
@@ -144,22 +144,20 @@ buttons : AppState -> Html Msg
 buttons appState =
     if Feature.localeCreate appState then
         div []
-            [ linkTo appState
-                (Routes.localesImport Nothing)
+            [ linkTo (Routes.localesImport Nothing)
                 [ class "btn btn-primary with-icon" ]
-                [ faSet "locale.import" appState
+                [ faLocaleImport
                 , text (gettext "Import" appState.locale)
                 ]
-            , linkTo appState
-                Routes.localesCreate
+            , linkTo Routes.localesCreate
                 [ class "btn btn-primary with-icon ms-2" ]
-                [ faSet "locale.create" appState
+                [ faLocaleCreate
                 , text (gettext "Create" appState.locale)
                 ]
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 deleteModal : AppState -> Model -> Html Msg

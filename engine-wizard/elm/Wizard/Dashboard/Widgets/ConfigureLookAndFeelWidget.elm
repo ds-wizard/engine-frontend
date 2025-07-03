@@ -9,7 +9,7 @@ import Wizard.Routes as Routes
 
 view : AppState -> Html msg
 view appState =
-    WidgetHelpers.ctaWidget appState
+    WidgetHelpers.ctaWidget
         { title = gettext "Configure Look & Feel" appState.locale
         , text = gettext "You can configure the application name, or add additional menu links, for example, to your guidelines or documentation." appState.locale
         , action =

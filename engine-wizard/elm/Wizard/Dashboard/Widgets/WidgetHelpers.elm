@@ -8,9 +8,8 @@ module Wizard.Dashboard.Widgets.WidgetHelpers exposing
 
 import Html exposing (Html, div, h2, span, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faSpinner, faWarning)
 import Shared.Markdown as Markdown
-import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Routes as Routes
 
@@ -31,15 +30,14 @@ type alias CtaWidgetConfig =
     }
 
 
-ctaWidget : AppState -> CtaWidgetConfig -> Html msg
-ctaWidget appState cfg =
+ctaWidget : CtaWidgetConfig -> Html msg
+ctaWidget cfg =
     widget
         [ div [ class "d-flex flex-column h-100" ]
             [ h2 [ class "fs-4 fw-bold mb-4" ] [ text cfg.title ]
             , Markdown.toHtml [ class "mb-4 flex-grow-1" ] cfg.text
             , div []
-                [ linkTo appState
-                    cfg.action.route
+                [ linkTo cfg.action.route
                     [ class "btn btn-primary btn-wide" ]
                     [ text cfg.action.label ]
                 ]
@@ -47,16 +45,16 @@ ctaWidget appState cfg =
         ]
 
 
-widgetLoader : AppState -> Html msg
-widgetLoader appState =
+widgetLoader : Html msg
+widgetLoader =
     div [ class "h-100 fs-1 d-flex justify-content-center align-items-center text-lighter animation-fade-in" ]
-        [ faSet "_global.spinner" appState
+        [ faSpinner
         ]
 
 
-widgetError : AppState -> String -> Html msg
-widgetError appState errorText =
+widgetError : String -> Html msg
+widgetError errorText =
     div [ class "h-100 fs-5 d-flex justify-content-center align-items-center text-lighter" ]
-        [ span [ class "me-2" ] [ faSet "_global.warning" appState ]
+        [ span [ class "me-2" ] [ faWarning ]
         , text errorText
         ]

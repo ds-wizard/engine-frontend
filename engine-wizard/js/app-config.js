@@ -4,10 +4,7 @@ module.exports = {
     getDefaultApiUrl,
     getGuideLinks,
     getMaxUploadFileSize,
-    getProvisioning,
-    getProvisioningUrl,
     getWebSocketThrottleDelay,
-    hasProvisioning,
     isAdminEnabled
 }
 
@@ -31,20 +28,8 @@ function getMaxUploadFileSize() {
     return getConfigProp('maxUploadFileSize')
 }
 
-function getProvisioning() {
-    return getConfigProp('provisioning', null)
-}
-
-function getProvisioningUrl() {
-    return getConfigProp('provisioningUrl')
-}
-
 function getWebSocketThrottleDelay() {
     return getConfigProp('webSocketThrottleDelay')
-}
-
-function hasProvisioning() {
-    return !!getProvisioning()
 }
 
 function isAdminEnabled() {

@@ -15,10 +15,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
+import Html.Extra as Html
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
 import Wizard.Api.Models.SubmissionProps exposing (SubmissionProps)
@@ -153,7 +153,7 @@ submissionPropsView appState model props =
     let
         content =
             if List.isEmpty props then
-                Flash.info appState (gettext "There are no submission services to configure." appState.locale)
+                Flash.info (gettext "There are no submission services to configure." appState.locale)
 
             else
                 Html.map FormMsg <|
@@ -161,7 +161,7 @@ submissionPropsView appState model props =
     in
     div []
         [ Page.header (gettext "Submission Settings" appState.locale) []
-        , FormResult.view appState model.savingProps
+        , FormResult.view model.savingProps
         , content
         ]
 
@@ -219,11 +219,11 @@ formView appState model =
 
         saveButtonRow =
             if noSubmissionFields then
-                emptyNode
+                Html.nothing
 
             else
                 div [ class "mt-5" ]
-                    [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingProps) ]
+                    [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingProps) ]
     in
     Html.form [ onSubmit Form.Submit ]
         (List.map submissionSettingsSection submissionPropsIndexes ++ [ saveButtonRow ])

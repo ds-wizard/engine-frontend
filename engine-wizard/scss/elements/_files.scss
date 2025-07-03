@@ -35,7 +35,7 @@
     text-align: center;
 
     .file {
-        & > .fa {
+        & > .fas, & > .far, & > .fab{
             display: block;
             font-size: 40px;
         }

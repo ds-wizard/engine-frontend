@@ -14,8 +14,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Shared.Components.FontAwesome exposing (faSettings)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Uuid exposing (Uuid)
@@ -110,10 +110,9 @@ view cfg appState model =
         info =
             div [ class "alert alert-info" ]
                 (String.formatHtml (gettext "Check the knowledge model's metadata before publishing. You change them in %s." appState.locale)
-                    [ linkTo appState
-                        (Routes.kmEditorEditorSettings cfg.branch.uuid)
+                    [ linkTo (Routes.kmEditorEditorSettings cfg.branch.uuid)
                         [ onClick (SetOpen False), class "btn-link with-icon" ]
-                        [ faSet "_global.settings" appState
+                        [ faSettings
                         , text (gettext "Settings" appState.locale)
                         ]
                     ]

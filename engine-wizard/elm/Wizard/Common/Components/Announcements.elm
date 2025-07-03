@@ -5,7 +5,7 @@ module Wizard.Common.Components.Announcements exposing
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (emptyNode)
+import Html.Extra as Html
 import Shared.Markdown as Markdown
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement exposing (Announcement)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
@@ -25,7 +25,7 @@ viewLoginScreen =
 view : List Announcement -> Html msg
 view announcements =
     if List.isEmpty announcements then
-        emptyNode
+        Html.nothing
 
     else
         div [] (List.map viewAnnouncement announcements)

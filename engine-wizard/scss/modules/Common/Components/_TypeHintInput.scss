@@ -38,7 +38,7 @@
             margin-top: 0.25rem;
             background: $white;
 
-            .fa {
+            .fas, .far, .fab{
                 position: absolute;
                 left: 1.5rem;
                 top: 1rem;
@@ -79,7 +79,7 @@
             background: $white;
             padding: .5rem .75rem;
 
-            .fa {
+            .fas, .far, .fab{
                 margin-right: 0.25rem;
             }
         }

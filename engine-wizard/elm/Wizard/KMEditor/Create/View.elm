@@ -39,7 +39,7 @@ viewCreate appState model _ =
     div [ detailClass "KMEditor__Create" ]
         [ Page.headerWithGuideLink appState (gettext "Create knowledge model" appState.locale) GuideLinks.kmEditorCreate
         , Html.form [ onSubmit (FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView appState model.savingBranch
+            [ FormResult.errorOnlyView model.savingBranch
             , formView appState model
             , FormActions.viewSubmit appState
                 Cancel

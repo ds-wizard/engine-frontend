@@ -72,7 +72,7 @@ viewHeader appState model package =
                         }
                 in
                 [ ActionResultView.error model.creatingQuestionnaire
-                , ActionButton.button appState cfg
+                , ActionButton.button cfg
                 ]
 
             else

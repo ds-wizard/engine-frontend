@@ -4,8 +4,8 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode)
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -22,10 +22,10 @@ view appState templates =
                 viewWidget appState templateList
 
             else
-                emptyNode
+                Html.nothing
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewWidget : AppState -> List DocumentTemplate -> Html msg
@@ -41,8 +41,7 @@ viewWidget appState templates =
 
 viewTemplate : AppState -> DocumentTemplate -> Html msg
 viewTemplate appState template =
-    linkTo appState
-        (Routes.documentTemplatesDetail template.id)
+    linkTo (Routes.documentTemplatesDetail template.id)
         [ class "p-2 py-2 d-flex rounded-3" ]
         [ ItemIcon.view { text = template.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]

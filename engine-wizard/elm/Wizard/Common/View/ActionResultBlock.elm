@@ -9,7 +9,8 @@ import Bootstrap.Dropdown as Dropdown exposing (DropdownItem)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faError, faSpinner)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Page as Page
@@ -19,7 +20,7 @@ view : AppState -> (a -> Html msg) -> ActionResult a -> Html msg
 view appState viewContent actionResult =
     case actionResult of
         Unset ->
-            emptyNode
+            Html.nothing
 
         Loading ->
             Page.loader appState
@@ -35,13 +36,13 @@ inlineView : AppState -> (a -> Html msg) -> ActionResult a -> Html msg
 inlineView appState viewContent actionResult =
     case actionResult of
         Unset ->
-            emptyNode
+            Html.nothing
 
         Loading ->
             Flash.loader appState
 
         Error err ->
-            Flash.error appState err
+            Flash.error err
 
         Success result ->
             viewContent result
@@ -57,7 +58,7 @@ dropdownView appState viewContent actionResult =
             [ Dropdown.customItem
                 (div [ class "dropdown-item dropdown-item-no-hover" ]
                     [ span [ class "alert-inline-loader" ]
-                        [ faSet "_global.spinner" appState
+                        [ faSpinner
                         , text (gettext "Loading..." appState.locale)
                         ]
                     ]
@@ -68,7 +69,7 @@ dropdownView appState viewContent actionResult =
             [ Dropdown.customItem
                 (div [ class "dropdown-item dropdown-item-no-hover" ]
                     [ span [ class "text-danger" ]
-                        [ faSet "_global.error" appState
+                        [ faError
                         , span [ class "ms-2" ] [ text err ]
                         ]
                     ]

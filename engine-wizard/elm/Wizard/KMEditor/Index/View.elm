@@ -4,8 +4,9 @@ import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faCancel, faDelete, faKmEditorListContinueMigration, faKmEditorListEdit, faKmEditorListEdited, faKmEditorListUpdate, faKmFork)
 import Shared.Utils exposing (packageIdToComponents)
 import Version
 import Wizard.Api.Models.Branch exposing (Branch)
@@ -32,7 +33,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "KMEditor__Index" ]
         [ Page.header (gettext "Knowledge Model Editors" appState.locale) []
-        , FormResult.view appState model.deletingMigration
+        , FormResult.view model.deletingMigration
         , Listing.view appState (listingConfig appState) model.branches
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModal
         , Html.map UpgradeModalMsg <| UpgradeModal.view appState model.upgradeModal
@@ -41,8 +42,7 @@ view appState model =
 
 createButton : AppState -> Html Msg
 createButton appState =
-    linkTo appState
-        (Routes.kmEditorCreate Nothing Nothing)
+    linkTo (Routes.kmEditorCreate Nothing Nothing)
         [ class "btn btn-primary"
         , dataCy "km-editor_create-button"
         ]
@@ -90,20 +90,20 @@ linkToKM appState branch =
     case branch.state of
         BranchState.Migrating ->
             if Feature.knowledgeModelEditorContinueMigration appState branch then
-                linkTo appState (Routes.kmEditorMigration branch.uuid)
+                linkTo (Routes.kmEditorMigration branch.uuid)
 
             else
                 span
 
         BranchState.Migrated ->
             if Feature.knowledgeModelEditorPublish appState branch then
-                linkTo appState (Routes.kmEditorPublish branch.uuid)
+                linkTo (Routes.kmEditorPublish branch.uuid)
 
             else
                 span
 
         _ ->
-            linkTo appState (Routes.kmEditorEditor branch.uuid Nothing)
+            linkTo (Routes.kmEditorEditor branch.uuid Nothing)
 
 
 listingTitleLastPublishedVersionBadge : AppState -> Branch -> Html msg
@@ -115,7 +115,7 @@ listingTitleLastPublishedVersionBadge appState branch =
     in
     BranchUtils.lastVersion appState branch
         |> Maybe.map badge
-        |> Maybe.withDefault emptyNode
+        |> Maybe.withDefault Html.nothing
 
 
 listingTitleBadge : AppState -> Branch -> Html Msg
@@ -143,10 +143,10 @@ listingTitleBadge appState branch =
 
         BranchState.Edited ->
             span (tooltip (gettext "This editor contains unpublished changes" appState.locale))
-                [ faSet "kmEditorList.edited" appState ]
+                [ faKmEditorListEdited ]
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 listingDescription : AppState -> Branch -> Html Msg
@@ -159,18 +159,18 @@ listingDescription appState branch =
                         elem =
                             case packageIdToComponents forkOfPackageId of
                                 Just ( orgId, kmId, version ) ->
-                                    linkTo appState (Routes.knowledgeModelsDetail <| orgId ++ ":" ++ kmId ++ ":" ++ version)
+                                    linkTo (Routes.knowledgeModelsDetail <| orgId ++ ":" ++ kmId ++ ":" ++ version)
 
                                 _ ->
                                     span
                     in
                     elem [ class "fragment", title <| gettext "Parent Knowledge Model" appState.locale ]
-                        [ faSet "km.fork" appState
+                        [ faKmFork
                         , text forkOfPackageId
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     span []
         [ span [ class "fragment" ] [ code [] [ text branch.kmId ] ]
@@ -184,7 +184,7 @@ listingActions appState branch =
         openEditor =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "kmEditorList.edit" appState
+                , icon = faKmEditorListEdit
                 , label = gettext "Open Editor" appState.locale
                 , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid (KMEditorRoute.Edit Nothing))
                 , dataCy = "open-editor"
@@ -193,7 +193,7 @@ listingActions appState branch =
         upgrade =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "kmEditorList.update" appState
+                , icon = faKmEditorListUpdate
                 , label = gettext "Update" appState.locale
                 , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId))
                 , dataCy = "update"
@@ -202,7 +202,7 @@ listingActions appState branch =
         continueMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "kmEditorList.continueMigration" appState
+                , icon = faKmEditorListContinueMigration
                 , label = gettext "Continue migration" appState.locale
                 , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute branch.uuid
                 , dataCy = "continue-migration"
@@ -211,7 +211,7 @@ listingActions appState branch =
         cancelMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.cancel" appState
+                , icon = faCancel
                 , label = gettext "Cancel migration" appState.locale
                 , msg = ListingActionMsg <| DeleteMigration branch.uuid
                 , dataCy = "cancel-migration"
@@ -220,7 +220,7 @@ listingActions appState branch =
         delete =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg <| DeleteModalMsg (DeleteModal.open branch.uuid branch.name)
                 , dataCy = "delete-migration"

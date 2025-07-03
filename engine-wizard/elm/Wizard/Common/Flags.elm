@@ -9,7 +9,6 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Shared.Auth.Session as Session exposing (Session)
 import Shared.Common.Navigator as Navigator exposing (Navigator)
-import Shared.Provisioning as Provisioning exposing (Provisioning)
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 
@@ -21,8 +20,6 @@ type alias Flags =
     , clientUrl : String
     , webSocketThrottleDelay : Maybe Float
     , config : BootstrapConfig
-    , provisioning : Provisioning
-    , localProvisioning : Provisioning
     , navigator : Navigator
     , gaEnabled : Bool
     , cookieConsent : Bool
@@ -42,8 +39,6 @@ decoder =
         |> D.required "clientUrl" D.string
         |> D.optional "webSocketThrottleDelay" (D.maybe D.float) Nothing
         |> D.required "config" BootstrapConfig.decoder
-        |> D.optional "provisioning" Provisioning.decoder Provisioning.default
-        |> D.optional "localProvisioning" Provisioning.decoder Provisioning.default
         |> D.required "navigator" Navigator.decoder
         |> D.required "gaEnabled" D.bool
         |> D.required "cookieConsent" D.bool
@@ -61,8 +56,6 @@ default =
     , clientUrl = ""
     , webSocketThrottleDelay = Nothing
     , config = BootstrapConfig.default
-    , provisioning = Provisioning.default
-    , localProvisioning = Provisioning.default
     , navigator = Navigator.default
     , gaEnabled = False
     , cookieConsent = False

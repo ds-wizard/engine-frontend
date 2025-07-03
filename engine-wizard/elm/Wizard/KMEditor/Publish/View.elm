@@ -33,11 +33,11 @@ contentView appState model branch =
     div [ wideDetailClass "KMEditor__Publish" ]
         [ Page.header (gettext "Publish new version" appState.locale) []
         , div []
-            [ FormResult.view appState model.publishingBranch
+            [ FormResult.view model.publishingBranch
             , formView appState model.form branch
             , FormActions.viewCustomButton appState
                 Cancel
-                (ActionButton.buttonWithAttrs appState
+                (ActionButton.buttonWithAttrs
                     (ActionButton.ButtonWithAttrsConfig (gettext "Publish" appState.locale)
                         model.publishingBranch
                         (FormMsg Form.Submit)

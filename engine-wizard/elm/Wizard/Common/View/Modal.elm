@@ -27,7 +27,6 @@ import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Html exposing (emptyNode)
 import Shortcut
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks exposing (GuideLinks)
@@ -168,7 +167,7 @@ confirm : AppState -> ConfirmConfig msg -> Html msg
 confirm appState (ConfirmConfig data) =
     let
         content =
-            FormResult.view appState data.actionResult :: data.modalContent
+            FormResult.view data.actionResult :: data.modalContent
 
         actionsDisabled =
             not data.visible || ActionResult.isLoading data.actionResult
@@ -185,7 +184,7 @@ confirm appState (ConfirmConfig data) =
                 Just ( actionName, actionMsg ) ->
                     let
                         btn =
-                            ActionButton.buttonWithAttrs appState <|
+                            ActionButton.buttonWithAttrs <|
                                 ActionButton.ButtonWithAttrsConfig actionName data.actionResult actionMsg data.dangerous [ dataCy "modal_action-button" ]
 
                         shortcut =
@@ -194,7 +193,7 @@ confirm appState (ConfirmConfig data) =
                     ( btn, shortcut )
 
                 Nothing ->
-                    ( emptyNode, Nothing )
+                    ( Html.nothing, Nothing )
 
         ( cancelButton, cancelShortcut ) =
             case data.cancelMsg of
@@ -221,10 +220,10 @@ confirm appState (ConfirmConfig data) =
                                 shortcut =
                                     wrapShortcut (Shortcut.simpleShortcut Shortcut.Escape cancelShortcutMsg)
                             in
-                            ( emptyNode, shortcut )
+                            ( Html.nothing, shortcut )
 
                         Nothing ->
-                            ( emptyNode, Nothing )
+                            ( Html.nothing, Nothing )
 
         mbGuideLink =
             case data.guideLink of

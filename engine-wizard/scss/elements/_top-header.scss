@@ -38,7 +38,7 @@
         .top-header-actions {
             white-space: nowrap;
 
-            .fa {
+            .fas, .far, .fab{
                 margin-right: $spacer-1;
             }
         }

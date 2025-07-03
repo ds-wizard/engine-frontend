@@ -5,14 +5,14 @@
         display: flex;
         justify-content: space-between;
 
-        &>div {
+        & > div {
             width: 45%;
             padding: 1rem;
             border: 1px solid $gray-300;
             @include border-radius($border-radius);
         }
 
-        &>.fa {
+        & > .fas, & > .far, & > .fab {
             font-size: 200%;
             margin-top: 3rem;
             color: $gray-400;

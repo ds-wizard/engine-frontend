@@ -11,8 +11,8 @@ module Wizard.Common.Components.TypeHintInput.TypeHintItem exposing
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode)
 import Version
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
@@ -64,7 +64,7 @@ packageSuggestion withVersion pkg =
                 Badge.light [ dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
 
             else
-                emptyNode
+                Html.nothing
     in
     complexItem
         [ div [] [ ItemIcon.view { text = pkg.name, image = Nothing } ]
@@ -100,7 +100,7 @@ userGroupSuggestion appState userGroup =
                 Badge.dark [] [ text (gettext "private" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
     in
     complexItem
         [ div [] [ ItemIcon.view { text = userGroup.name, image = Nothing } ]

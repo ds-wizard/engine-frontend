@@ -18,10 +18,10 @@ view appState usage =
                 []
 
             Loading ->
-                [ WidgetHelpers.widgetLoader appState ]
+                [ WidgetHelpers.widgetLoader ]
 
             Error error ->
-                [ WidgetHelpers.widgetError appState error ]
+                [ WidgetHelpers.widgetError error ]
 
             Success usageData ->
                 [ h2 [ class "fs-4 fw-bold mb-4" ] [ text (gettext "Usage" appState.locale) ]

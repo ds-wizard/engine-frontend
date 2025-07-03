@@ -20,7 +20,7 @@ update : AppState -> Msg -> (Msg -> Wizard.Msgs.Msg) -> Model -> ( Model, Cmd Wi
 update appState msg wrapMsg model =
     case msg of
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.tenantsIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.tenantsIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model

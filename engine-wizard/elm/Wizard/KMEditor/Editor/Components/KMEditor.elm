@@ -16,6 +16,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
 import Html.Attributes exposing (attribute, class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -23,8 +24,8 @@ import Reorderable
 import Set
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (faDelete, faKmEditorCopyUuid, faKmEditorMove, faKmIntegration, faQuestionnaireExpand, faQuestionnaireShrink, faWarning)
 import Shared.Copy as Copy
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (compose2, flip, httpMethodOptions, nilUuid)
 import SplitPane
@@ -293,10 +294,10 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
     let
         ( expandIcon, expandMsg ) =
             if AppState.isFullscreen appState then
-                ( faSet "questionnaire.shrink" appState, wrapMsg <| SetFullscreen False )
+                ( faQuestionnaireShrink, wrapMsg <| SetFullscreen False )
 
             else
-                ( faSet "questionnaire.expand" appState, wrapMsg <| SetFullscreen True )
+                ( faQuestionnaireExpand, wrapMsg <| SetFullscreen True )
 
         treeViewProps =
             { expandAll = wrapMsg ExpandAll
@@ -339,7 +340,7 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         warningsPanel =
             if warningsCount > 0 && model.warningsPanelOpen then
@@ -347,7 +348,7 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                     viewWarningsPanel appState editorBranch
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
@@ -371,11 +372,11 @@ viewWarningsPanel : AppState -> EditorBranch -> Html Msg
 viewWarningsPanel appState editorBranch =
     let
         viewWarning warning =
-            li [] [ linkTo appState (EditorBranch.editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
+            li [] [ linkTo (EditorBranch.editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
 
         warnings =
             if List.isEmpty editorBranch.warnings then
-                Flash.info appState (gettext "There are no more warnings." appState.locale)
+                Flash.info (gettext "There are no more warnings." appState.locale)
 
             else
                 ul [] (List.map viewWarning editorBranch.warnings)
@@ -534,7 +535,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 |> eventMsg False Nothing kmUuid Nothing
 
         chaptersInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "chapters"
                 , label = gettext "Chapters" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.chapterUuids
@@ -551,7 +552,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         metricsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "metrics"
                 , label = gettext "Metrics" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.metricUuids
@@ -568,7 +569,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         phasesInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "phases"
                 , label = gettext "Phases" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.phaseUuids
@@ -585,7 +586,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         tagsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "tags"
                 , label = gettext "Question Tags" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.tagUuids
@@ -602,7 +603,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         integrationsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "integrations"
                 , label = gettext "Integrations" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.integrationUuids
@@ -619,7 +620,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         resourceCollectionsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "resourceCollections"
                 , label = gettext "Resource Collections" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.resourceCollectionUuids
@@ -704,7 +705,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 }
 
         questionsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "questions"
                 , label = gettext "Questions" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch chapter.questionUuids
@@ -877,36 +878,36 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             case question of
                 OptionsQuestion _ _ ->
                     if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question) then
-                        emptyNode
+                        Html.nothing
 
                     else
                         FormExtra.blockAfter
-                            [ faSet "_global.warning" appState
+                            [ faWarning
                             , text (gettext "Changing a question type will remove all answers." appState.locale)
                             ]
 
                 ListQuestion _ _ ->
                     if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question) then
-                        emptyNode
+                        Html.nothing
 
                     else
                         FormExtra.blockAfter
-                            [ faSet "_global.warning" appState
+                            [ faWarning
                             , text (gettext "Changing a question type will remove all item questions." appState.locale)
                             ]
 
                 MultiChoiceQuestion _ _ ->
                     if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question) then
-                        emptyNode
+                        Html.nothing
 
                     else
                         FormExtra.blockAfter
-                            [ faSet "_global.warning" appState
+                            [ faWarning
                             , text (gettext "Changing a question type will remove all choices." appState.locale)
                             ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         titleInput =
             Input.string
@@ -946,7 +947,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 }
 
         referencesInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "references"
                 , label = gettext "References" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch <| Question.getReferenceUuids question
@@ -963,7 +964,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 }
 
         expertsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "experts"
                 , label = gettext "Experts" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch <| Question.getExpertUuids question
@@ -1001,7 +1002,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing questionUuid Nothing
 
                         answersInput =
-                            Input.reorderable appState
+                            Input.reorderable
                                 { name = "answers"
                                 , label = gettext "Answers" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question
@@ -1033,7 +1034,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing questionUuid Nothing
 
                         itemTemplateQuestionsInput =
-                            Input.reorderable appState
+                            Input.reorderable
                                 { name = "questions"
                                 , label = gettext "Questions" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question
@@ -1148,7 +1149,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                     ]
 
                             else
-                                emptyNode
+                                Html.nothing
 
                         integrationLink integrationUuid =
                             if Uuid.toString Uuid.nil == integrationUuid then
@@ -1157,7 +1158,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             else
                                 Just <|
                                     div [ class "mt-1" ]
-                                        [ linkTo appState (EditorBranch.editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
+                                        [ linkTo (EditorBranch.editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
                                         ]
 
                         integrationUuidInput =
@@ -1188,7 +1189,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing questionUuid Nothing
 
                         choicesInput =
-                            Input.reorderable appState
+                            Input.reorderable
                                 { name = "choices"
                                 , label = gettext "Choices" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question
@@ -1238,7 +1239,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                             else
                                                 Just <|
                                                     div [ class "mt-1" ]
-                                                        [ linkTo appState (EditorBranch.editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
+                                                        [ linkTo (EditorBranch.editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
                                                         ]
 
                                         Nothing ->
@@ -1281,7 +1282,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
-                emptyNode
+                Html.nothing
 
             else
                 FormGroup.plainGroup (ul [] questions) (gettext "Item select questions using this list question" appState.locale)
@@ -1298,7 +1299,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         |> wrapQuestionsWithIntegration
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     editor ("question-" ++ questionUuid)
         ([ questionEditorTitle
@@ -1809,7 +1810,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 img [ src logo ] []
 
                             Nothing ->
-                                faSet "km.integration" appState
+                                faKmIntegration
 
                     viewIntegrationButton i =
                         li []
@@ -1845,10 +1846,10 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 ]
 
                         else
-                            emptyNode
+                            Html.nothing
 
                     Nothing ->
-                        emptyNode
+                        Html.nothing
     in
     editor ("integration-" ++ integrationUuid)
         ([ integrationEditorTitle
@@ -1921,7 +1922,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 }
 
         followUpsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "questions"
                 , label = gettext "Follow-Up Questions" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch answer.followUpUuids
@@ -1943,7 +1944,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
 
         metricsInput =
             if List.isEmpty metrics then
-                emptyNode
+                Html.nothing
 
             else
                 Input.metrics appState
@@ -2256,7 +2257,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
                 }
 
         resourcePagesInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "resourcePages"
                 , label = gettext "Resource Pages" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch resourceCollection.resourcePageUuids
@@ -2370,7 +2371,7 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
 viewEmptyEditor : AppState -> Html msg
 viewEmptyEditor appState =
     editor "empty"
-        [ Flash.error appState (gettext "The knowledge model entity you are trying to open does not exist." appState.locale)
+        [ Flash.error (gettext "The knowledge model entity you are trying to open does not exist." appState.locale)
         ]
 
 
@@ -2401,12 +2402,12 @@ editorTitle appState config =
                      ]
                         ++ tooltip (gettext "Click to copy UUID" appState.locale)
                     )
-                    [ faSet "kmEditor.copyUuid" appState
+                    [ faKmEditorCopyUuid
                     , small [] [ text <| String.slice 0 8 config.uuid ]
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         moveButton =
             case config.mbMovingEntity of
@@ -2416,12 +2417,12 @@ editorTitle appState config =
                         , onClick <| config.wrapMsg <| OpenMoveModal movingEntity config.uuid
                         , dataCy "km-editor_move-button"
                         ]
-                        [ faSet "kmEditor.move" appState
+                        [ faKmEditorMove
                         , text (gettext "Move" appState.locale)
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         deleteButton =
             case config.mbDeleteModalState of
@@ -2431,12 +2432,12 @@ editorTitle appState config =
                         , dataCy "km-editor_delete-button"
                         , onClick <| config.wrapMsg <| SetDeleteModalState <| deleteModalState config.uuid
                         ]
-                        [ faSet "_global.delete" appState
+                        [ faDelete
                         , text (gettext "Delete" appState.locale)
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         guideLink_ =
             case config.mbGuideLink of
@@ -2444,7 +2445,7 @@ editorTitle appState config =
                     guideLink appState getGuideLink
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "editor-title" ]
         [ h3 [] [ text config.title ]
@@ -2471,8 +2472,7 @@ viewQuestionLink appState editorBranch question =
                 text questionTitle
     in
     li []
-        [ linkTo appState
-            (EditorBranch.editorRoute editorBranch (Question.getUuid question))
+        [ linkTo (EditorBranch.editorRoute editorBranch (Question.getUuid question))
             []
             [ questionTitleNode ]
         ]
@@ -2575,7 +2575,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                     )
 
                 Closed ->
-                    ( False, ( [ emptyNode ], Nothing ) )
+                    ( False, ( [ Html.nothing ], Nothing ) )
 
         getContent contentText onDelete =
             ( [ div [ class "modal-header" ]

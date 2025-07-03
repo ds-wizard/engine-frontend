@@ -14,12 +14,12 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Html.Extra exposing (viewIf)
+import Html.Extra as Html exposing (viewIf)
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (faActiveSessionRevoke, faUserAgentDesktop, faUserAgentMobile, faUserAgentTdk)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, faSet, faSetFw)
 import Shared.Markdown as Markdown
 import Shared.Setters exposing (setTokens)
 import Shared.Utils.RequestHelpers as RequestHelpers
@@ -167,12 +167,12 @@ viewActiveSessions appState model tokens =
                     [ class "btn btn-outline-danger with-icon"
                     , onClick (RevokeAllModalOpen True)
                     ]
-                    [ faSet "activeSession.revoke" appState
+                    [ faActiveSessionRevoke
                     , text (gettext "Revoke all" appState.locale)
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         [ div [ class "row" ]
@@ -201,13 +201,13 @@ viewActiveSession appState token =
 
         icon =
             if isTDK then
-                faSetFw "userAgent.tdk" appState
+                faUserAgentTdk
 
             else if UserAgent.isMobile (UserAgent.getOS token.userAgent) then
-                faSetFw "userAgent.mobile" appState
+                faUserAgentMobile
 
             else
-                faSetFw "userAgent.desktop" appState
+                faUserAgentDesktop
 
         sessionLabel =
             if isTDK then
@@ -233,7 +233,7 @@ viewActiveSession appState token =
             ]
         , viewIf (not token.currentSession) <|
             a (class "light-danger" :: onClick (SetTokenToRevoke (Just token)) :: tooltip (gettext "Revoke session" appState.locale))
-                [ faSet "activeSession.revoke" appState ]
+                [ faActiveSessionRevoke ]
         ]
 
 

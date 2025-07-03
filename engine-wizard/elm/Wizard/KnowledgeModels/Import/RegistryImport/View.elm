@@ -5,7 +5,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Events exposing (onInput, onSubmit)
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faSuccess)
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
@@ -37,7 +38,7 @@ view appState model =
 viewForm : AppState -> Model -> Html Msg
 viewForm appState model =
     div []
-        [ FormResult.errorOnlyView appState model.pulling
+        [ FormResult.errorOnlyView model.pulling
         , div [ class "px-4 py-5 bg-light rounded-3" ]
             [ Html.form [ onSubmit Submit, class "input-group" ]
                 [ input
@@ -48,7 +49,7 @@ viewForm appState model =
                     , placeholder <| gettext "Knowledge Model ID" appState.locale
                     ]
                     []
-                , ActionButton.submit appState
+                , ActionButton.submit
                     { label = gettext "Import" appState.locale
                     , result = model.pulling
                     }
@@ -72,21 +73,20 @@ viewRegistryText appState =
                 )
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewImported : AppState -> String -> Html Msg
 viewImported appState packageId =
     div [ class "px-4 py-5 bg-light rounded-3" ]
-        [ h1 [] [ faSet "_global.success" appState ]
+        [ h1 [] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
                 (gettext "Knowledge model %s has been imported!" appState.locale)
                 [ code [] [ text packageId ] ]
             )
         , p [ class "lead" ]
-            [ linkTo appState
-                (Routes.knowledgeModelsDetail packageId)
+            [ linkTo (Routes.knowledgeModelsDetail packageId)
                 [ class "btn btn-primary" ]
                 [ text (gettext "View detail" appState.locale) ]
             ]

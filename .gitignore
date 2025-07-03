@@ -19,3 +19,6 @@ engine-wizard/static/wizard/config.js
 
 # guide links
 guide-links.json
+
+# temporary files
+tmp

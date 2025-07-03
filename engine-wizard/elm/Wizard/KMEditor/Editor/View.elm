@@ -5,7 +5,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faKmEditorKnowledgeModel, faKmEditorListPublish, faKmEditorTags, faKmPhase, faPreview, faSettings)
 import Shared.Undraw as Undraw
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
@@ -77,7 +78,7 @@ viewKMEditor route appState model branch =
     let
         navigation =
             if AppState.isFullscreen appState then
-                emptyNode
+                Html.nothing
 
             else
                 viewKMEditorNavigation appState route model branch
@@ -123,7 +124,7 @@ viewKMEditorNavigationTitleRow appState model branch =
                     , onClick (PublishModalMsg PublishModal.openMsg)
                     , dataCy "km-editor_publish-button"
                     ]
-                    [ faSet "kmEditorList.publish" appState
+                    [ faKmEditorListPublish
                     , text (gettext "Publish" appState.locale)
                     ]
                 ]
@@ -165,7 +166,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         editorLink =
             { route = Routes.kmEditorEditor branchUuid editUuid
             , label = gettext "Knowledge Model" appState.locale
-            , icon = faSet "kmEditor.knowledgeModel" appState
+            , icon = faKmEditorKnowledgeModel
             , isActive = isEditorRoute
             , isVisible = True
             , dataCy = "km-editor_nav_km"
@@ -174,7 +175,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         phasesLink =
             { route = Routes.kmEditorEditorPhases branchUuid
             , label = gettext "Phases" appState.locale
-            , icon = faSet "km.phase" appState
+            , icon = faKmPhase
             , isActive = route == KMEditorRoute.Phases
             , isVisible = True
             , dataCy = "km-editor_nav_phases"
@@ -183,7 +184,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         questionTagsLink =
             { route = Routes.kmEditorEditorQuestionTags branchUuid
             , label = gettext "Question Tags" appState.locale
-            , icon = faSet "kmEditor.tags" appState
+            , icon = faKmEditorTags
             , isActive = route == KMEditorRoute.QuestionTags
             , isVisible = True
             , dataCy = "km-editor_nav_tags"
@@ -192,7 +193,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         previewLink =
             { route = Routes.kmEditorEditorPreview branchUuid
             , label = gettext "Preview" appState.locale
-            , icon = faSet "_global.preview" appState
+            , icon = faPreview
             , isActive = route == KMEditorRoute.Preview
             , isVisible = True
             , dataCy = "km-editor_nav_preview"
@@ -201,7 +202,7 @@ viewKMEditorNavigationNav appState route editorBranch =
         settingsLink =
             { route = Routes.kmEditorEditorSettings branchUuid
             , label = gettext "Settings" appState.locale
-            , icon = faSet "_global.settings" appState
+            , icon = faSettings
             , isActive = route == KMEditorRoute.Settings
             , isVisible = True
             , dataCy = "km-editor_nav_settings"
@@ -215,7 +216,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             , settingsLink
             ]
     in
-    DetailNavigation.navigation appState links
+    DetailNavigation.navigation links
 
 
 

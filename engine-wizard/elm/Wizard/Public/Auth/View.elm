@@ -5,8 +5,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, input, label, span, text)
 import Html.Attributes exposing (checked, class, disabled, href, target, type_)
 import Html.Events exposing (onCheck, onSubmit)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Html exposing (emptyNode)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -23,7 +23,7 @@ view appState model =
         viewConsentForm appState model
 
     else
-        Page.actionResultView appState (\_ -> emptyNode) model.authenticating
+        Page.actionResultView appState (\_ -> Html.nothing) model.authenticating
 
 
 viewConsentForm : AppState -> Model -> Html Msg
@@ -63,7 +63,7 @@ viewConsentForm appState model =
         [ div [ class "col-xl-4 col-lg-5 col-md-6 col-sm-8 mx-auto" ]
             [ form [ class "card bg-light", onSubmit SubmitConsent ]
                 [ div [ class "card-body" ]
-                    [ FormResult.view appState model.submittingConsent
+                    [ FormResult.view model.submittingConsent
                     , div [ class "form-group" ]
                         [ div [ class "form-check" ]
                             [ label [ class "form-check-label form-check-toggle fw-normal" ]
@@ -73,7 +73,7 @@ viewConsentForm appState model =
                             ]
                         ]
                     , div [ class "form-group" ]
-                        [ ActionButton.submitWithAttrs appState
+                        [ ActionButton.submitWithAttrs
                             { label = gettext "Continue" appState.locale
                             , result = ActionResult.Unset
                             , attrs = [ class "w-100", disabled (not model.consent) ]

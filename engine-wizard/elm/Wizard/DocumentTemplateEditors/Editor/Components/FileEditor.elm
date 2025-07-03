@@ -20,16 +20,17 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, form, h5, i, iframe, img, input, li, span, strong, text, ul)
+import Html exposing (Html, a, button, div, form, h5, iframe, img, input, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, href, id, src, target, value)
 import Html.Events exposing (onClick, onInput, onSubmit, stopPropagationOn)
+import Html.Extra as Html
 import Html.Keyed
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
+import Shared.Components.FontAwesome exposing (fa, faClose, faDelete, faDownload, faKmEditorTreeClosed, faKmEditorTreeOpened)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Setters exposing (setAssets, setFiles)
 import Shared.Utils exposing (compose2, flip, listFilterJust)
 import Shared.Utils.RequestHelpers as RequestHelpers
@@ -1113,7 +1114,7 @@ viewSidebar appState model fileTree =
                         [ fa "fas fa-pen-to-square" ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         moveAction mbMoveActionMsg =
             case mbMoveActionMsg of
@@ -1127,7 +1128,7 @@ viewSidebar appState model fileTree =
                         [ fa "fas fa-file-import" ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         moveToOppositeGroupAction =
             if List.length model.editorGroup1.tabs + List.length model.editorGroup2.tabs > 1 then
@@ -1139,7 +1140,7 @@ viewSidebar appState model fileTree =
                     [ fa "fas fa-columns" ]
 
             else
-                emptyNode
+                Html.nothing
 
         deleteAction =
             a
@@ -1148,13 +1149,13 @@ viewSidebar appState model fileTree =
                     :: dataCy "dt-editor_file-tree_delete"
                     :: tooltipLeft (gettext "Delete" appState.locale)
                 )
-                [ faSet "_global.delete" appState ]
+                [ faDelete ]
 
         actions =
             case model.selected of
                 SelectedFolder path ->
                     if String.isEmpty path then
-                        emptyNode
+                        Html.nothing
 
                     else
                         span []
@@ -1183,13 +1184,13 @@ viewSidebar appState model fileTree =
         [ div [ class "file-tree-actions bg-light p-2 d-flex justify-content-between align-items-center" ]
             [ addDropdown, actions ]
         , div [ class "file-tree" ]
-            [ ul [] [ viewFiles appState model fileTree ]
+            [ ul [] [ viewFiles model fileTree ]
             ]
         ]
 
 
-viewFiles : AppState -> Model -> FileTree -> Html Msg
-viewFiles appState model fileTree =
+viewFiles : Model -> FileTree -> Html Msg
+viewFiles model fileTree =
     let
         isSelected =
             FileTree.getPath SelectedFolder SelectedFile SelectedAsset fileTree == model.selected
@@ -1230,20 +1231,15 @@ viewFiles appState model fileTree =
 
                 children =
                     if isOpen then
-                        ul [] (List.map (viewFiles appState model) (List.sortWith FileTree.compare folderData.children))
+                        ul [] (List.map (viewFiles model) (List.sortWith FileTree.compare folderData.children))
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             itemLi
                 [ a [ class "caret", onClick (SetOpen (not isOpen) folderData.path) ]
-                    [ i
-                        [ classList
-                            [ ( faKeyClass "kmEditor.treeClosed" appState, not isOpen )
-                            , ( faKeyClass "kmEditor.treeOpened" appState, isOpen )
-                            ]
-                        ]
-                        []
+                    [ Html.viewIf (not isOpen) faKmEditorTreeClosed
+                    , Html.viewIf isOpen faKmEditorTreeOpened
                     ]
                 , a [ onClick (Select (SelectedFolder folderData.path)), dataCy "dt-editor_file-tree_folder" ]
                     [ icon
@@ -1324,7 +1320,7 @@ viewEditorGroup appState model editorGroup =
 
                                 ActionResult.Error error ->
                                     div [ class "m-3" ]
-                                        [ Flash.error appState error ]
+                                        [ Flash.error error ]
 
                                 _ ->
                                     viewEmptyEditor appState
@@ -1355,7 +1351,7 @@ viewEditorGroup appState model editorGroup =
 
                                 ActionResult.Error error ->
                                     div [ class "m-3" ]
-                                        [ Flash.error appState error ]
+                                        [ Flash.error error ]
 
                                 _ ->
                                     viewEmptyEditor appState
@@ -1367,13 +1363,13 @@ viewEditorGroup appState model editorGroup =
                     viewEmptyEditor appState
     in
     div [ class "DocumentTemplateEditor__FileEditor" ]
-        [ viewTabs appState model editorGroup
+        [ viewTabs model editorGroup
         , editorContent
         ]
 
 
-viewTabs : AppState -> Model -> EditorGroup -> Html Msg
-viewTabs appState model editorGroup =
+viewTabs : Model -> EditorGroup -> Html Msg
+viewTabs model editorGroup =
     let
         viewTab openMsg tab file =
             span
@@ -1389,7 +1385,7 @@ viewTabs appState model editorGroup =
                     [ class "ms-2 tab-close"
                     , stopPropagationOn "click" (D.succeed ( CloseTab tab, True ))
                     ]
-                    [ faSet "_global.close" appState ]
+                    [ faClose ]
                 ]
 
         viewTabWrapper tab =
@@ -1401,7 +1397,7 @@ viewTabs appState model editorGroup =
                     viewTab OpenAsset tab asset
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "tabs" ] (List.map viewTabWrapper editorGroup.tabs)
 
@@ -1427,7 +1423,7 @@ viewAssetContent appState asset assetCacheItem =
             , div []
                 [ div [ class "filename" ] [ text fileName ]
                 , a [ class "btn btn-outline-secondary with-icon", href assetCacheItem.url, target "_blank" ]
-                    [ faSet "_global.download" appState
+                    [ faDownload
                     , text (gettext "Download" appState.locale)
                     ]
                 ]

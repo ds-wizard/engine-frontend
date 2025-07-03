@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, code, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faDelete, faEdit)
 import String.Format as String
 import Version
 import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)
@@ -61,7 +61,7 @@ listingConfig appState =
 listingTitle : AppState -> DocumentTemplateDraft -> Html Msg
 listingTitle appState template =
     span []
-        [ linkTo appState (Routes.documentTemplateEditorDetail template.id) [] [ text template.name ]
+        [ linkTo (Routes.documentTemplateEditorDetail template.id) [] [ text template.name ]
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString template.version ]
@@ -82,7 +82,7 @@ listingActions appState template =
         viewAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.edit" appState
+                , icon = faEdit
                 , label = gettext "Open editor" appState.locale
                 , msg = ListingActionLink (Routes.documentTemplateEditorDetail template.id)
                 , dataCy = "view"
@@ -94,7 +94,7 @@ listingActions appState template =
         deleteAction =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg <| ShowHideDeleteDocumentTemplateDraft <| Just template
                 , dataCy = "delete"
@@ -113,8 +113,7 @@ listingActions appState template =
 
 createButton : AppState -> Html Msg
 createButton appState =
-    linkTo appState
-        (Routes.documentTemplateEditorCreate Nothing Nothing)
+    linkTo (Routes.documentTemplateEditorCreate Nothing Nothing)
         [ class "btn btn-primary"
         , dataCy "document-template-editors_create-button"
         ]

@@ -6,8 +6,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
 import Shared.Utils exposing (flip)
 import String.Format as String exposing (format)
 import Wizard.Api.Models.Event as Event exposing (Event(..))
@@ -67,7 +68,6 @@ import Wizard.Api.Models.Migration.MigrationState.MigrationStateType exposing (M
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
@@ -103,9 +103,9 @@ migrationView appState model migration =
 
                         diffTree =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (DiffTree.view appState kmName migration.currentKnowledgeModel)
+                                |> Maybe.map (DiffTree.view kmName migration.currentKnowledgeModel)
                                 |> Maybe.map (List.singleton >> div [ class "col-4" ])
-                                |> Maybe.withDefault emptyNode
+                                |> Maybe.withDefault Html.nothing
                     in
                     div [ class "row" ]
                         [ migrationSummary appState migration, conflictView, diffTree ]
@@ -122,7 +122,7 @@ migrationView appState model migration =
     in
     div [ class "col KMEditor__Migration", dataCy "km-editor_migration" ]
         [ div [] [ Page.header (gettext "Migration" appState.locale) [] ]
-        , FormResult.view appState model.conflict
+        , FormResult.view model.conflict
         , currentView
         ]
 
@@ -150,7 +150,7 @@ getEventView appState model migration event =
     case event of
         AddKnowledgeModelEvent _ _ ->
             -- AddKnowledgeModelEvent should never appear in migrations
-            emptyNode
+            Html.nothing
 
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
@@ -975,7 +975,7 @@ viewAddQuestionDiff appState km event =
                     viewAddedChildren (gettext "Props" appState.locale) props
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         tags =
             KnowledgeModel.getTags km
@@ -1090,7 +1090,7 @@ viewEditQuestionDiff appState km event question =
                     viewAddedAndDeletedChildren (gettext "Props" appState.locale) originalProps newProps
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Tags
         tags =
@@ -1128,7 +1128,7 @@ viewEditQuestionDiff appState km event question =
                         answerNames
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Choices
         choicesDiff =
@@ -1139,7 +1139,7 @@ viewEditQuestionDiff appState km event question =
                             KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Item Template Questions
         itemTemplateQuestionsDiff =
@@ -1161,7 +1161,7 @@ viewEditQuestionDiff appState km event question =
                         itemTemplateQuestionNames
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- References
         references =
@@ -1262,7 +1262,7 @@ viewDeleteQuestionDiff appState km question =
                             KnowledgeModel.getQuestionAnswers questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Choices
         choicesDiff =
@@ -1273,7 +1273,7 @@ viewDeleteQuestionDiff appState km question =
                             KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Item Template Questions
         itemTemplateQuestionsDiff =
@@ -1284,7 +1284,7 @@ viewDeleteQuestionDiff appState km question =
                             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- References
         references =
@@ -1359,7 +1359,7 @@ viewMoveQuestion appState km question =
                             KnowledgeModel.getQuestionAnswers questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Choices
         choicesDiff =
@@ -1370,7 +1370,7 @@ viewMoveQuestion appState km question =
                             KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Item Template Questions
         itemTemplateQuestionsDiff =
@@ -1381,7 +1381,7 @@ viewMoveQuestion appState km question =
                             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- References
         references =
@@ -2304,7 +2304,7 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
                     (\uuid ->
                         Dict.get uuid childrenNames
                             |> Maybe.map (text >> List.singleton >> li [])
-                            |> Maybe.withDefault emptyNode
+                            |> Maybe.withDefault Html.nothing
                     )
                     uuids
                 )
@@ -2378,7 +2378,7 @@ viewAddedAndDeletedChildren fieldName originalChildren newChildren =
                             (List.map (\child -> li [] [ text child ]) originalChildren)
 
                     else
-                        emptyNode
+                        Html.nothing
 
                 new =
                     if List.length newChildren > 0 then
@@ -2386,7 +2386,7 @@ viewAddedAndDeletedChildren fieldName originalChildren newChildren =
                             (List.map (\child -> li [] [ text child ]) newChildren)
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             div [] [ original, new ]
 
@@ -2465,13 +2465,13 @@ formActions : AppState -> Model -> Html Msg
 formActions appState model =
     let
         ( rejectLabel, rejectDisabled ) =
-            actionState appState model RejectButtonClicked (gettext "Reject" appState.locale)
+            actionState model RejectButtonClicked (gettext "Reject" appState.locale)
 
         ( applyLabel, applyDisabled ) =
-            actionState appState model ApplyButtonClicked (gettext "Apply" appState.locale)
+            actionState model ApplyButtonClicked (gettext "Apply" appState.locale)
 
         ( applyAllLabel, applyAllDisabled ) =
-            actionState appState model ApplyAllButtonClicked (gettext "Apply all" appState.locale)
+            actionState model ApplyAllButtonClicked (gettext "Apply all" appState.locale)
     in
     div [ class "form-actions" ]
         [ button [ class "btn btn-warning btn-with-loader", onClick RejectEvent, rejectDisabled, dataCy "km-migration_reject-button" ]
@@ -2485,8 +2485,8 @@ formActions appState model =
         ]
 
 
-actionState : AppState -> Model -> ButtonClicked -> String -> ( Html msg, Html.Attribute msg )
-actionState appState model buttonClicked defaultLabel =
+actionState : Model -> ButtonClicked -> String -> ( Html msg, Html.Attribute msg )
+actionState model buttonClicked defaultLabel =
     let
         disabledAttribute =
             disabled <|
@@ -2499,7 +2499,7 @@ actionState appState model buttonClicked defaultLabel =
 
         labelHtml =
             if ActionResult.isLoading model.conflict && model.buttonClicked == Just buttonClicked then
-                ActionButton.loader appState
+                faSpinner
 
             else
                 text defaultLabel
@@ -2511,19 +2511,18 @@ viewCompletedMigration : AppState -> Model -> Html Msg
 viewCompletedMigration appState model =
     div [ class "col-xs-12" ]
         [ div [ class "p-5 mb-4 bg-light rounded-3 full-page-error", dataCy "km-migration_completed" ]
-            [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
+            [ h1 [ class "display-3" ] [ faSuccess ]
             , p [ class "fs-4" ]
                 [ text (gettext "Migration successfully completed." appState.locale)
                 , br [] []
                 , text (gettext "You can publish the new version now." appState.locale)
                 ]
-            , linkTo appState
-                (Routes.kmEditorPublish model.branchUuid)
+            , linkTo (Routes.kmEditorPublish model.branchUuid)
                 [ class "btn btn-primary btn-lg with-icon-after"
                 , dataCy "km-migration_publish-button"
                 ]
                 [ text (gettext "Publish" appState.locale)
-                , faSet "_global.arrowRight" appState
+                , faArrowRight
                 ]
             ]
         ]

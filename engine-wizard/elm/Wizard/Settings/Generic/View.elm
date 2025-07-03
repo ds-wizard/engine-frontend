@@ -45,7 +45,7 @@ viewForm props appState model _ =
     div []
         [ Page.headerWithGuideLink appState (props.locTitle appState.locale) props.guideLink
         , form [ onSubmit (props.wrapMsg Form.Submit), class "pb-6" ]
-            [ FormResult.errorOnlyView appState model.savingConfig
+            [ FormResult.errorOnlyView model.savingConfig
             , props.formView appState model.form
             , FormActions.viewDynamic formActionsConfig appState
             ]

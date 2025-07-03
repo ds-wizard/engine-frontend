@@ -20,10 +20,10 @@ import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove)
 import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (getUuid, withNoCmd, withSeed)
 import Shortcut
 import String.Format as String
@@ -414,7 +414,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         modalContent =
-            [ FormResult.view appState model.savingSharing
+            [ FormResult.view model.savingSharing
             , Html.viewIf (Admin.isEnabled appState.config.admin) <| userGroupsView appState model
             , usersView appState model
             , formView appState model.questionnaireEditForm
@@ -439,7 +439,7 @@ view appState model =
                     ]
                 , div [ class "modal-body" ] modalContent
                 , div [ class "modal-footer" ]
-                    [ ActionButton.buttonWithAttrs appState
+                    [ ActionButton.buttonWithAttrs
                         { label = gettext "Done" appState.locale
                         , result = model.savingSharing
                         , msg = Close
@@ -464,14 +464,14 @@ copyLinkButton appState model =
                 []
 
         publicLink =
-            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing Nothing))))
+            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing Nothing))))
 
         copyLinkIcon =
             if model.copiedLink then
-                faSet "questionnaire.copyLinkCopied" appState
+                faQuestionnaireCopyLinkCopied
 
             else
-                faSet "questionnaire.copyLink" appState
+                faQuestionnaireCopyLink
     in
     button
         (class "btn btn-outline-primary with-icon"
@@ -530,7 +530,7 @@ userGroupView appState userGroups form i =
                         Badge.dark [ class "ms-2" ] [ text (gettext "private" appState.locale) ]
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             div [ class "user-row" ]
                 [ div []
@@ -545,12 +545,12 @@ userGroupView appState userGroups form i =
                         , onClick (Form.RemoveItem "permissions" i)
                         , title (gettext "Remove" appState.locale)
                         ]
-                        [ faSet "_global.remove" appState ]
+                        [ faRemove ]
                     ]
                 ]
 
         Nothing ->
-            emptyNode
+            Html.nothing
 
 
 usersView : AppState -> Model -> Html Msg
@@ -571,7 +571,7 @@ usersView appState model =
                 hr [] []
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "ShareModal__Users", dataTour "project-detail_share-modal_users" ]
         [ div [ class "mt-2" ]
@@ -613,12 +613,12 @@ userView appState users form i =
                         , onClick (Form.RemoveItem "permissions" i)
                         , title (gettext "Remove" appState.locale)
                         ]
-                        [ faSet "_global.remove" appState ]
+                        [ faRemove ]
                     ]
                 ]
 
         Nothing ->
-            emptyNode
+            Html.nothing
 
 
 formView : AppState -> Form FormError QuestionnaireShareForm -> Html Msg

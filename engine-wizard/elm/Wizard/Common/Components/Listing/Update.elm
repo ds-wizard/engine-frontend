@@ -48,7 +48,7 @@ update cfg appState msg model =
                     Cmd.map cfg.wrapMsg <| cfg.getRequest pqf pqs (GetItemsComplete False pqs pqf)
 
                 replaceUrlCmd =
-                    Navigation.replaceUrl appState.key (Routing.toUrl appState (cfg.toRoute pqf pqs))
+                    Navigation.replaceUrl appState.key (Routing.toUrl (cfg.toRoute pqf pqs))
 
                 filterKeepOpen =
                     case mbFilterId of

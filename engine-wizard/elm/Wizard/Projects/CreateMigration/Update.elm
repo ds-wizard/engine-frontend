@@ -51,7 +51,7 @@ update wrapMsg msg appState model =
             handleGetQuestionnaireCompleted appState wrapMsg model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsIndex appState)) )
+            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model

@@ -24,7 +24,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, 
 update msg wrapMsg appState model =
     case msg of
         Cancel ->
-            ( appState.seed, model, Ports.historyBack (Routing.toUrl appState Routes.usersIndex) )
+            ( appState.seed, model, Ports.historyBack (Routing.toUrl Routes.usersIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState.seed appState model

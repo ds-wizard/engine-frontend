@@ -106,7 +106,7 @@ view appState model =
             Maybe.unwrap "" (QuestionnaireEvent.getCreatedAt >> TimeUtils.toReadableDateTime appState.timeZone) model.mbEvent
 
         content =
-            [ Flash.warning appState (gettext "Heads up! This action cannot be undone." appState.locale)
+            [ Flash.warning (gettext "Heads up! This action cannot be undone." appState.locale)
             , p []
                 (String.formatHtml
                     (gettext "Are you sure you want to revert the projects to its state from %s?" appState.locale)

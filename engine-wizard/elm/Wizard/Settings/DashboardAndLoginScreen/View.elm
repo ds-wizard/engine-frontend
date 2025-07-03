@@ -6,8 +6,8 @@ import Html exposing (Html, a, div, h3, hr, img, p, strong, text)
 import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (faSet)
 import Shared.Utils exposing (compose2)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
@@ -154,7 +154,7 @@ announcementFormView appState form i =
                      ]
                         ++ tooltip (gettext "Remove announcement" appState.locale)
                     )
-                    [ faSet "_global.delete" appState
+                    [ faDelete
                     ]
                 ]
             , FormGroup.alertRadioGroup appState levelOptions form levelField (gettext "Level" appState.locale)

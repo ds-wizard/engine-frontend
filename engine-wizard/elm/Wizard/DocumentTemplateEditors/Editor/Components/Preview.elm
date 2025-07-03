@@ -18,13 +18,14 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, iframe, option, p, pre, select, text)
 import Html.Attributes exposing (class, classList, href, id, name, selected, src, target, value)
 import Html.Events exposing (onClick, onInput)
+import Html.Extra as Html
 import Http
 import Maybe.Extra as Maybe
 import Process
+import Shared.Components.FontAwesome exposing (fa, faDownload)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.ServerError as ServerError
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
 import Shared.Undraw as Undraw
 import Shared.Utils.RequestHelpers as RequestHelpers
@@ -318,13 +319,12 @@ view cfg appState model =
                         projectLink =
                             case model.questionnaireHintInputModel.selected of
                                 Just questionnaireSuggestion ->
-                                    linkTo appState
-                                        (Routes.projectsDetail questionnaireSuggestion.uuid)
+                                    linkTo (Routes.projectsDetail questionnaireSuggestion.uuid)
                                         (class "source-link" :: target "_blank" :: tooltip (gettext "Open project" appState.locale))
                                         [ fa "fa-external-link-alt" ]
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     ( projectTypeHintInput, projectLink )
 
@@ -343,13 +343,12 @@ view cfg appState model =
                         branchLink =
                             case model.branchTypeHintInputModal.selected of
                                 Just branchSuggestion ->
-                                    linkTo appState
-                                        (Routes.kmEditorEditor branchSuggestion.uuid Nothing)
+                                    linkTo (Routes.kmEditorEditor branchSuggestion.uuid Nothing)
                                         (class "source-link" :: target "_blank" :: tooltip (gettext "Open KM editor" appState.locale))
                                         [ fa "fa-external-link-alt" ]
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     ( branchTypeHintInput, branchLink )
 
@@ -432,7 +431,7 @@ viewNotSupported appState documentUrl =
             [ p [] [ text (gettext "The document format cannot be displayed in the web browser. You can still download and view it." appState.locale) ]
             , p []
                 [ a [ class "btn btn-primary btn-lg with-icon", href documentUrl, target "_blank" ]
-                    [ faSet "_global.download" appState
+                    [ faDownload
                     , text (gettext "Download" appState.locale)
                     ]
                 ]

@@ -10,7 +10,7 @@ module Wizard.Common.Components.DetailNavigation exposing
 
 import Html exposing (Html, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
-import Shared.Html exposing (emptyNode)
+import Html.Extra as Html
 import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.OnlineUser as OnlineUser
@@ -42,7 +42,7 @@ sectionActions =
 onlineUsers : AppState -> Bool -> List OnlineUserInfo -> Html msg
 onlineUsers appState isTooltipLeft users =
     if List.isEmpty users then
-        emptyNode
+        Html.nothing
 
     else
         let
@@ -52,7 +52,7 @@ onlineUsers appState isTooltipLeft users =
                         [ text ("+" ++ String.fromInt (List.length users - 10)) ]
 
                 else
-                    emptyNode
+                    Html.nothing
         in
         div
             [ class "DetailNavigation__Row__Section__Online-Users"
@@ -73,12 +73,11 @@ type alias NavLinkConfig msg =
     }
 
 
-navLink : AppState -> NavLinkConfig msg -> Html msg
-navLink appState cfg =
+navLink : NavLinkConfig msg -> Html msg
+navLink cfg =
     if cfg.isVisible then
         li [ class "nav-item" ]
-            [ linkTo appState
-                cfg.route
+            [ linkTo cfg.route
                 [ class "nav-link", classList [ ( "active", cfg.isActive ) ], dataCy cfg.dataCy ]
                 [ cfg.icon
                 , span [ attribute "data-content" cfg.label ] [ text cfg.label ]
@@ -86,10 +85,10 @@ navLink appState cfg =
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
-navigation : AppState -> List (NavLinkConfig msg) -> Html msg
-navigation appState cfgs =
+navigation : List (NavLinkConfig msg) -> Html msg
+navigation cfgs =
     row
-        [ ul [ class "nav nav-underline-tabs", dataTour "navigation" ] (List.map (navLink appState) cfgs) ]
+        [ ul [ class "nav nav-underline-tabs", dataTour "navigation" ] (List.map navLink cfgs) ]

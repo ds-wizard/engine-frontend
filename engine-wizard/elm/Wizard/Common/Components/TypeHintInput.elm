@@ -18,12 +18,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, text, ul)
 import Html.Attributes exposing (class, classList, id, type_, value)
 import Html.Events exposing (onClick, onInput, onMouseDown, stopPropagationOn)
+import Html.Extra as Html
 import Json.Decode as D exposing (Decoder)
 import Maybe.Extra as Maybe
+import Shared.Components.FontAwesome exposing (fa, faError, faRemove, faSpinner)
 import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Task
 import Task.Extra as Task
 import Wizard.Common.AppState exposing (AppState)
@@ -233,10 +234,10 @@ view appState cfg model isInvalid =
                                 a
                                     [ stopPropagationOn "click" (D.succeed ( cfg.wrapMsg ClearReply, True ))
                                     ]
-                                    [ faSet "_global.remove" appState ]
+                                    [ faRemove ]
 
                             else
-                                emptyNode
+                                Html.nothing
                     in
                     [ cfg.viewItem item
                     , clearButton
@@ -279,18 +280,18 @@ viewTypeHints appState cfg model =
 
                     Loading ->
                         div [ class "loading" ]
-                            [ faSet "_global.spinner" appState
+                            [ faSpinner
                             , text (gettext "Loading..." appState.locale)
                             ]
 
                     Error err ->
                         div [ class "error" ]
-                            [ faSet "_global.error" appState
+                            [ faError
                             , text err
                             ]
 
                     Unset ->
-                        emptyNode
+                        Html.nothing
         in
         div [ class "TypeHintInput__TypeHints" ]
             [ div [ class "TypeHintInput__TypeHints__Search" ]
@@ -308,7 +309,7 @@ viewTypeHints appState cfg model =
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewTypeHint : ViewConfig a msg -> a -> Html msg

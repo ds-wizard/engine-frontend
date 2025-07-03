@@ -1,8 +1,9 @@
 module Wizard.KnowledgeModels.ResourcePage.View exposing (view)
 
+import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faKmResourceCollection)
 import Shared.Markdown as Markdown
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Common.AppState exposing (AppState)
@@ -24,7 +25,7 @@ viewResourcePage appState model km =
                 Just resourceCollection ->
                     div [ class "KnowledgeModels__BookReference container-fluid container-max" ]
                         [ div [ class "bg-light rounded px-3 py-3 fs-5 my-3" ]
-                            [ faSet "km.resourceCollection" appState
+                            [ faKmResourceCollection
                             , text resourceCollection.title
                             ]
                         , h1 [] [ text resourcePage.title ]
@@ -32,7 +33,7 @@ viewResourcePage appState model km =
                         ]
 
                 Nothing ->
-                    div [] [ text "Resource page does not exist" ]
+                    div [] [ text (gettext "Resource page does not exist" appState.locale) ]
 
         Nothing ->
-            div [] [ text "Resource page does not exist" ]
+            div [] [ text (gettext "Resource page does not exist" appState.locale) ]

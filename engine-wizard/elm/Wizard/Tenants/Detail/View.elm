@@ -9,7 +9,7 @@ import Maybe.Extra as Maybe
 import Registry.Components.FontAwesome exposing (fas)
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faEdit, faWarning)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
@@ -58,7 +58,7 @@ header appState tenantDetail =
                 let
                     editAction =
                         a [ onClick EditModalOpen, dataCy "tenant-detail_edit" ]
-                            [ faSet "_global.edit" appState
+                            [ faEdit
                             , text "Edit"
                             ]
 
@@ -85,7 +85,7 @@ content appState tenantDetail =
         editWarning =
             Html.viewIf (Admin.isEnabled appState.config.admin) <|
                 div [ class "alert alert-danger d-flex align-items-center" ]
-                    [ faSet "_global.warning" appState
+                    [ faWarning
                     , Markdown.toHtml [] (String.format "Do not edit the tenant here. Go to [Admin Center](%s)." [ "/admin/tenants/" ++ Uuid.toString tenantDetail.uuid ])
                     ]
     in

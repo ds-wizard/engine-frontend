@@ -4,7 +4,7 @@ import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faWarning)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -28,7 +28,7 @@ view appState model =
         editWarning =
             Html.viewIf (Admin.isEnabled appState.config.admin) <|
                 div [ class "alert alert-danger mt-n3 mb-4 d-flex align-items-center" ]
-                    [ faSet "_global.warning" appState
+                    [ faWarning
                     , Markdown.toHtml [] (String.format "Do not edit tenants here. Go to [Admin Center](%s)." [ "/admin/tenants" ])
                     ]
     in
@@ -58,7 +58,7 @@ listingConfig appState =
                 , maxVisibleValues = 1
                 }
     in
-    { title = listingTitle appState
+    { title = listingTitle
     , description = listingDescription
     , itemAdditionalData = always Nothing
     , dropdownItems = always []
@@ -83,22 +83,22 @@ listingConfig appState =
         , stateFilter
         ]
     , toRoute = Routes.tenantsIndexWithFilters
-    , toolbarExtra = Just (createButton appState)
+    , toolbarExtra = Just createButton
     }
 
 
-listingTitle : AppState -> Tenant -> Html Msg
-listingTitle appState app =
+listingTitle : Tenant -> Html Msg
+listingTitle app =
     let
         disabledBadge =
             if not app.enabled then
                 Badge.danger [] [ text "Disabled" ]
 
             else
-                emptyNode
+                Html.nothing
     in
     span []
-        [ linkTo appState (Routes.tenantsDetail app.uuid) [] [ text app.name ]
+        [ linkTo (Routes.tenantsDetail app.uuid) [] [ text app.name ]
         , disabledBadge
         ]
 
@@ -124,10 +124,9 @@ listingDescription tenant =
         ]
 
 
-createButton : AppState -> Html Msg
-createButton appState =
-    linkTo appState
-        Routes.tenantsCreate
+createButton : Html Msg
+createButton =
+    linkTo Routes.tenantsCreate
         [ class "btn btn-primary"
         ]
         [ text "Create" ]

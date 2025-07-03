@@ -15,10 +15,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, button, div, form, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
+import Html.Extra as Html
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Branches as BranchesApi
@@ -184,7 +184,7 @@ view appState branchDetail model =
         [ div [ detailClass "" ]
             ([ Page.headerWithGuideLink appState (gettext "Settings" appState.locale) GuideLinks.kmEditorSettings
              , form [ onSubmit (FormMsg Form.Submit) ]
-                [ FormResult.errorOnlyView appState model.savingBranch
+                [ FormResult.errorOnlyView model.savingBranch
                 , Html.map FormMsg <| FormGroup.input appState model.form "name" (gettext "Name" appState.locale)
                 , Html.map FormMsg <| FormGroup.input appState model.form "description" (gettext "Description" appState.locale)
                 , Html.map FormMsg <| FormGroup.input appState model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
@@ -221,12 +221,11 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
                         ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     div []
         [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
-        , linkTo appState
-            (Routes.knowledgeModelsDetail forkOfPackage.id)
+        , linkTo (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
             [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
         , outdatedWarning

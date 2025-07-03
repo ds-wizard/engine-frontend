@@ -6,14 +6,15 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
 import Html.Attributes exposing (class, classList, placeholder, title, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Html.Extra as Html
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
@@ -63,7 +64,7 @@ view appState model =
         content _ =
             div [ listClass "Questionnaires__Index" ]
                 [ Page.header (gettext "Projects" appState.locale) []
-                , FormResult.view appState model.deletingMigration
+                , FormResult.view model.deletingMigration
                 , Listing.view appState (listingConfig appState model) model.questionnaires
                 , Html.map DeleteQuestionnaireModalMsg <| DeleteProjectModal.view appState model.deleteModalModel
                 , Html.map CloneQuestionnaireModalMsg <| CloneProjectModal.view appState model.cloneModalModel
@@ -74,8 +75,7 @@ view appState model =
 
 createButton : AppState -> Html Msg
 createButton appState =
-    linkTo appState
-        Routes.projectsCreate
+    linkTo Routes.projectsCreate
         [ class "btn btn-primary"
         , dataCy "projects_create-button"
         , dataTour "projects_create-button"
@@ -176,7 +176,7 @@ listingProjectTagsFilter appState model =
                 [ icon, text tag ]
 
         selectedTagItem =
-            viewTagItem removeTagMsg (faSet "listing.filter.multi.selected" appState)
+            viewTagItem removeTagMsg faListingFilterMultiSelected
 
         sortTags =
             List.sortBy String.toUpper
@@ -238,7 +238,7 @@ listingProjectTagsFilter appState model =
             if not (List.isEmpty foundTags) then
                 let
                     addTagItem =
-                        viewTagItem addTagMsg (faSet "listing.filter.multi.notSelected" appState)
+                        viewTagItem addTagMsg faListingFilterMultiNotSelected
                 in
                 List.map addTagItem foundTags
 
@@ -298,7 +298,7 @@ listingKMsFilter appState model =
                 ]
 
         selectedPackageItem =
-            viewPackageItem removePackageMsg (faSet "listing.filter.multi.selected" appState)
+            viewPackageItem removePackageMsg faListingFilterMultiSelected
 
         foundSelectedPackages =
             ActionResult.unwrap [] .items model.packagesFilterSelectedPackages
@@ -348,7 +348,7 @@ listingKMsFilter appState model =
             if not (List.isEmpty foundPackages) then
                 let
                     addPackageItem =
-                        viewPackageItem addPackageMsg (faSet "listing.filter.multi.notSelected" appState)
+                        viewPackageItem addPackageMsg faListingFilterMultiNotSelected
                 in
                 List.map addPackageItem foundPackages
 
@@ -412,7 +412,7 @@ listingUsersFilter appState model =
                 ]
 
         selectedUserItem =
-            viewUserItem removeUserMsg (faSet "listing.filter.multi.selected" appState)
+            viewUserItem removeUserMsg faListingFilterMultiSelected
 
         foundSelectedUsers =
             ActionResult.unwrap [] .items model.userFilterSelectedUsers
@@ -481,7 +481,7 @@ listingUsersFilter appState model =
             if not (List.isEmpty foundUsers) then
                 let
                     addUserItem =
-                        viewUserItem addUserMsg (faSet "listing.filter.multi.notSelected" appState)
+                        viewUserItem addUserMsg faListingFilterMultiNotSelected
                 in
                 List.map addUserItem foundUsers
 
@@ -512,10 +512,10 @@ filterBadge : List a -> Html msg
 filterBadge items =
     case List.length items of
         0 ->
-            emptyNode
+            Html.nothing
 
         1 ->
-            emptyNode
+            Html.nothing
 
         n ->
             Badge.dark [ class "rounded-pill" ] [ text ("+" ++ String.fromInt (n - 1)) ]
@@ -532,7 +532,7 @@ listingTitle appState questionnaire =
                 Routes.projectsDetail
     in
     span []
-        [ linkTo appState (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
+        [ linkTo (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
         , templateBadge appState questionnaire
         , visibilityIcon appState questionnaire
         , stateBadge appState questionnaire
@@ -545,7 +545,7 @@ listingDescription appState questionnaire =
         collaborators =
             case questionnaire.permissions of
                 [] ->
-                    emptyNode
+                    Html.nothing
 
                 perm :: [] ->
                     span [ class "fragment" ]
@@ -567,7 +567,7 @@ listingDescription appState questionnaire =
                                 span [] [ text ("+" ++ String.fromInt (List.length perms - 5)) ]
 
                             else
-                                emptyNode
+                                Html.nothing
                     in
                     span [ class "fragment" ] (users ++ [ extraUsers ])
 
@@ -576,8 +576,7 @@ listingDescription appState questionnaire =
                 Wizard.KnowledgeModels.Routes.DetailRoute questionnaire.package.id
 
         kmLink =
-            linkTo appState
-                kmRoute
+            linkTo kmRoute
                 [ title <| gettext "Knowledge Model" appState.locale, class "fragment" ]
                 [ text questionnaire.package.name
                 , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.package.version ]
@@ -593,7 +592,7 @@ listingActions appState questionnaire =
         openProject =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.open" appState
+                , icon = faOpen
                 , label = gettext "Open project" appState.locale
                 , msg = ListingActionLink (Routes.projectsDetail questionnaire.uuid)
                 , dataCy = "open"
@@ -605,7 +604,7 @@ listingActions appState questionnaire =
         createProjectFromTemplate =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "questionnaireList.createProjectFromTemplate" appState
+                , icon = faQuestionnaireListCreateProjectFromTemplate
                 , label = gettext "Create project from this template" appState.locale
                 , msg = ListingActionLink (Routes.projectsCreateFromProjectTemplate questionnaire.uuid)
                 , dataCy = "create-project-from-template"
@@ -617,7 +616,7 @@ listingActions appState questionnaire =
         clone =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "questionnaireList.clone" appState
+                , icon = faQuestionnaireListClone
                 , label = gettext "Clone" appState.locale
                 , msg =
                     QuestionnaireDescriptor.fromQuestionnaire questionnaire
@@ -634,7 +633,7 @@ listingActions appState questionnaire =
         createMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "questionnaireList.createMigration" appState
+                , icon = faQuestionnaireListCreateMigration
                 , label = gettext "Create migration" appState.locale
                 , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
                 , dataCy = "create-migration"
@@ -646,7 +645,7 @@ listingActions appState questionnaire =
         continueMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "questionnaireList.createMigration" appState
+                , icon = faQuestionnaireListCreateMigration
                 , label = gettext "Continue migration" appState.locale
                 , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute questionnaire.uuid)
                 , dataCy = "continue-migration"
@@ -658,7 +657,7 @@ listingActions appState questionnaire =
         cancelMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.cancel" appState
+                , icon = faCancel
                 , label = gettext "Cancel migration" appState.locale
                 , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
                 , dataCy = "cancel-migration"
@@ -670,7 +669,7 @@ listingActions appState questionnaire =
         delete =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg =
                     QuestionnaireDescriptor.fromQuestionnaire questionnaire
@@ -705,13 +704,12 @@ stateBadge appState questionnaire =
             Badge.info [] [ text (gettext "migrating" appState.locale) ]
 
         Outdated ->
-            linkTo appState
-                (Routes.projectsCreateMigration questionnaire.uuid)
+            linkTo (Routes.projectsCreateMigration questionnaire.uuid)
                 [ class Badge.warningClass, dataCy "badge_project_update-available" ]
                 [ text (gettext "update available" appState.locale) ]
 
         Default ->
-            emptyNode
+            Html.nothing
 
 
 templateBadge : AppState -> Questionnaire -> Html msg
@@ -720,4 +718,4 @@ templateBadge appState questionnaire =
         Badge.info [] [ text (gettext "Template" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing

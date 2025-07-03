@@ -10,40 +10,41 @@ module Wizard.Common.View.Flash exposing
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faError, faInfo, faSpinner, faSuccess, faWarning)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
-error : AppState -> String -> Html msg
-error appState =
-    flashView "alert-danger" <| faSet "_global.error" appState
+error : String -> Html msg
+error =
+    flashView "alert-danger" <| faError
 
 
-warning : AppState -> String -> Html msg
-warning appState =
-    flashView "alert-warning" <| faSet "_global.warning" appState
+warning : String -> Html msg
+warning =
+    flashView "alert-warning" <| faWarning
 
 
-warningHtml : AppState -> Html msg -> Html msg
-warningHtml appState content =
-    flashViewHtml "alert-warning" (faSet "_global.warning" appState) content
+warningHtml : Html msg -> Html msg
+warningHtml content =
+    flashViewHtml "alert-warning" faWarning content
 
 
-success : AppState -> String -> Html msg
-success appState =
-    flashView "alert-success" <| faSet "_global.success" appState
+success : String -> Html msg
+success =
+    flashView "alert-success" <| faSuccess
 
 
-info : AppState -> String -> Html msg
-info appState =
-    flashView "alert-info" <| faSet "_global.info" appState
+info : String -> Html msg
+info =
+    flashView "alert-info" <| faInfo
 
 
 loader : AppState -> Html msg
 loader appState =
     flashView "alert-inline-loader"
-        (faSet "_global.spinner" appState)
+        faSpinner
         (gettext "Loading..." appState.locale)
 
 
@@ -59,7 +60,7 @@ flashView className icon msg =
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 flashViewHtml : String -> Html msg -> Html msg -> Html msg

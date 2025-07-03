@@ -12,11 +12,12 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, button, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.FontAwesome exposing (faClose)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, faSet)
 import Shortcut
 import Triple
 import Uuid exposing (Uuid)
@@ -178,7 +179,7 @@ view cfg appState model =
         versionBadge =
             model.eventUuid
                 |> Maybe.andThen (QuestionnaireVersion.getVersionByEventUuid cfg.versions)
-                |> Maybe.unwrap emptyNode QuestionnaireVersionTag.version
+                |> Maybe.unwrap Html.nothing QuestionnaireVersionTag.version
 
         shortcuts =
             if visible then
@@ -194,7 +195,7 @@ view cfg appState model =
                 [ div [ class "modal-header" ]
                     [ strong [ class "modal-title" ] [ text datetime, versionBadge ]
                     , button [ class "close", onClick Close ]
-                        [ faSet "_global.close" appState ]
+                        [ faClose ]
                     ]
                 , Page.actionResultView appState (viewContent appState) model.questionnaireModel
                 ]

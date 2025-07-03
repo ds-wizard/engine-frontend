@@ -13,10 +13,10 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi
@@ -136,7 +136,7 @@ view appState model =
         modalContent =
             case model.package of
                 Unset ->
-                    [ emptyNode ]
+                    [ Html.nothing ]
 
                 Loading ->
                     [ Page.loader appState ]

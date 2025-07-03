@@ -9,7 +9,7 @@ module Wizard.DocumentTemplates.Common.DocumentTemplateActionsDropdown exposing
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faEdit, faExport, faView)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
@@ -45,7 +45,7 @@ actions appState cfg template =
         viewAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.view" appState
+                , icon = faView
                 , label = gettext "View detail" appState.locale
                 , msg = ListingActionLink (Routes.documentTemplatesDetail template.id)
                 , dataCy = "view"
@@ -57,7 +57,7 @@ actions appState cfg template =
         exportAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.export" appState
+                , icon = faExport
                 , label = gettext "Export" appState.locale
                 , msg = ListingActionMsg (cfg.exportMsg template)
                 , dataCy = "export"
@@ -69,7 +69,7 @@ actions appState cfg template =
         createEditorAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.edit" appState
+                , icon = faEdit
                 , label = gettext "Create editor" appState.locale
                 , msg = ListingActionLink (Routes.documentTemplateEditorCreate (Just template.id) (Just True))
                 , dataCy = "create-editor"
@@ -81,7 +81,7 @@ actions appState cfg template =
         setDeprecatedAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documentTemplate.setDeprecated" appState
+                , icon = faDocumentTemplateSetDeprecated
                 , label = gettext "Set deprecated" appState.locale
                 , msg = ListingActionMsg (cfg.updatePhaseMsg template DocumentTemplatePhase.Deprecated)
                 , dataCy = "set-deprecated"
@@ -93,7 +93,7 @@ actions appState cfg template =
         restoreAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documentTemplate.restore" appState
+                , icon = faDocumentTemplateRestore
                 , label = gettext "Restore" appState.locale
                 , msg = ListingActionMsg (cfg.updatePhaseMsg template DocumentTemplatePhase.Released)
                 , dataCy = "restore"
@@ -105,7 +105,7 @@ actions appState cfg template =
         deleteAction =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (cfg.deleteMsg template)
                 , dataCy = "delete"
@@ -130,7 +130,7 @@ actions appState cfg template =
 
 dropdown : AppState -> DropdownConfig msg -> ActionsConfig a msg -> DocumentTemplateLike a -> Html msg
 dropdown appState dropdownConfig actionsConfig documentTemplate =
-    ListingDropdown.dropdown appState
+    ListingDropdown.dropdown
         { dropdownState = dropdownConfig.dropdownState
         , toggleMsg = dropdownConfig.toggleMsg
         , items = actions appState actionsConfig documentTemplate

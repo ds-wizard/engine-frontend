@@ -46,7 +46,7 @@ update appState msg wrapMsg model =
             handleCreateCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.localesIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.localesIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model

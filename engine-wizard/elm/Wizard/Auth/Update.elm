@@ -25,7 +25,7 @@ update msg model =
                             originalUrl
 
                         Nothing ->
-                            Routing.toUrl model.appState Routes.DashboardRoute
+                            Routing.toUrl Routes.DashboardRoute
             in
             ( newModel
             , Cmd.batch

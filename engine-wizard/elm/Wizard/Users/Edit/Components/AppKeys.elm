@@ -16,8 +16,8 @@ import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
 import Shared.Setters exposing (setAppKeys)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
@@ -144,12 +144,12 @@ viewAppKeysTable appState appKeys =
                 , td [ class "text-nowrap" ] [ text (viewTime appKey.createdAt) ]
                 , td [ class "text-center px-2" ]
                     [ a [ class "text-danger", onClick (SetAppKeyToDelete (Just appKey)) ]
-                        [ faSet "_global.delete" appState ]
+                        [ faDelete ]
                     ]
                 ]
     in
     if List.isEmpty appKeys then
-        Flash.info appState (gettext "You have no app keys." appState.locale)
+        Flash.info (gettext "You have no app keys." appState.locale)
 
     else
         table [ class "table table-hover" ]

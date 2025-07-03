@@ -4,8 +4,8 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode)
 import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -22,10 +22,10 @@ view appState packages =
                 viewWidget appState packageList
 
             else
-                emptyNode
+                Html.nothing
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewWidget : AppState -> List Package -> Html msg
@@ -41,8 +41,7 @@ viewWidget appState packages =
 
 viewPackage : AppState -> Package -> Html msg
 viewPackage appState package =
-    linkTo appState
-        (Routes.knowledgeModelsDetail package.id)
+    linkTo (Routes.knowledgeModelsDetail package.id)
         [ class "p-2 py-2 d-flex rounded-3" ]
         [ ItemIcon.view { text = package.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]

@@ -2,7 +2,7 @@
 
 .KnowledgeModels__BookReference {
     & > div {
-        .fa {
+        .fas, .far, .fab {
             margin-right: $spacer-2;
         }
     }

@@ -6,9 +6,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, label, p, strong, text)
 import Html.Attributes exposing (class, placeholder, type_)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
+import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
 import Uuid
@@ -57,7 +58,7 @@ formView templates appState form =
                 FormGroup.list appState (serviceFormView appState templates) form "services" (gettext "Services" appState.locale) (gettext "Add service" appState.locale)
 
             else
-                emptyNode
+                Html.nothing
     in
     Html.map (GenericMsg << GenericMsgs.FormMsg) <|
         div []
@@ -98,7 +99,7 @@ serviceFormView appState templates form i =
                     [ FormGroup.input appState form idField (gettext "ID" appState.locale) ]
                 , div [ class "col text-end" ]
                     [ a [ class "btn btn-danger with-icon", onClick (Form.RemoveItem "services" i) ]
-                        [ faSet "_global.delete" appState
+                        [ faDelete
                         , text (gettext "Remove" appState.locale)
                         ]
                     ]
@@ -113,7 +114,7 @@ serviceFormView appState templates form i =
             , div [ class "input-table" ]
                 [ label [] [ text (gettext "User Properties" appState.locale) ]
                 , Markdown.toHtml [ class "text-muted text-justify" ] (gettext "You can create properties that can be set by each user in their profile. Then, you can use these properties in the request settings. For example, if you want each user to use their own authorization token, you can create a property called `Token` and use it in request headers as `${Token}`. Users will be able to set the token in their profile settings." appState.locale)
-                , FormGroup.list appState (propFormView appState propsField) form propsField "" (gettext "Add property" appState.locale)
+                , FormGroup.list appState (propFormView propsField) form propsField "" (gettext "Add property" appState.locale)
                 ]
             , requestFormView appState form requestField
             ]
@@ -170,14 +171,14 @@ supportedFormatFormView appState templates prefix form index =
         , Input.selectInput templateVersionOptions templateIdField [ class "form-select", class templateIdErrorClass ]
         , Input.selectInput formatOptions formatUuidField [ class "form-select", class formatUuidErrorClass ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
-            [ faSet "_global.delete" appState ]
+            [ faDelete ]
         , templateIdError
         , formatUuidError
         ]
 
 
-propFormView : AppState -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
-propFormView appState prefix form index =
+propFormView : String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+propFormView prefix form index =
     let
         field =
             Form.getFieldAsString (prefix ++ "." ++ String.fromInt index) form
@@ -185,7 +186,7 @@ propFormView appState prefix form index =
     div [ class "input-group mb-2" ]
         [ Input.textInput field [ class "form-control" ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
-            [ faSet "_global.delete" appState ]
+            [ faDelete ]
         ]
 
 
@@ -221,7 +222,7 @@ requestFormView appState form prefix =
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         [ strong [] [ text (gettext "Request" appState.locale) ]
@@ -258,7 +259,7 @@ headerFormView appState prefix form index =
         [ Input.textInput headerField [ placeholder (gettext "Header" appState.locale), class "form-control", class headerErrorClass ]
         , Input.textInput valueField [ placeholder (gettext "Value" appState.locale), class "form-control", class valueErrorClass ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
-            [ faSet "_global.delete" appState ]
+            [ faDelete ]
         , headerError
         , valueError
         ]

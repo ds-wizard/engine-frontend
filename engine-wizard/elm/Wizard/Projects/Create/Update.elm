@@ -198,7 +198,7 @@ update wrapMsg msg appState model =
                 |> updateModelDefaultMode
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsIndex appState)) )
+            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form ) of

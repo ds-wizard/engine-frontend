@@ -10,8 +10,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onMouseOut)
+import Shared.Components.FontAwesome exposing (faCopy)
 import Shared.Copy as Copy
-import Shared.Html exposing (faSet)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltip)
 
@@ -57,7 +57,7 @@ view appState model value =
                 :: onMouseOut HideTooltip
                 :: buttonTooltip
             )
-            [ faSet "_global.copy" appState
+            [ faCopy
             , text (gettext "Copy" appState.locale)
             ]
         , code [] [ text value ]

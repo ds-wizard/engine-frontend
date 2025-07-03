@@ -12,7 +12,7 @@ import Wizard.Routes as Routes
 
 view : AppState -> Html msg
 view appState =
-    WidgetHelpers.ctaWidget appState
+    WidgetHelpers.ctaWidget
         { title = gettext "Import Document Template" appState.locale
         , text =
             String.format

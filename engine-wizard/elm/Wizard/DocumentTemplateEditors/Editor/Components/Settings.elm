@@ -24,10 +24,10 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
+import Shared.Components.FontAwesome exposing (fa, faDelete)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Utils exposing (getUuid)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
@@ -308,12 +308,12 @@ formViewKnowledgeModel appState model =
     in
     Html.map FormMsg <|
         div []
-            [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) model.form "allowedPackages" (gettext "Allowed Knowledge Models" appState.locale) (gettext "Add knowledge model" appState.locale)
+            [ FormGroup.listWithHeader appState allowedInputHeader allowedPackageFormView model.form "allowedPackages" (gettext "Allowed Knowledge Models" appState.locale) (gettext "Add knowledge model" appState.locale)
             ]
 
 
-allowedPackageFormView : AppState -> Form FormError DocumentTemplateForm -> Int -> Html Form.Msg
-allowedPackageFormView appState form index =
+allowedPackageFormView : Form FormError DocumentTemplateForm -> Int -> Html Form.Msg
+allowedPackageFormView form index =
     let
         fieldName name =
             "allowedPackages." ++ String.fromInt index ++ "." ++ name
@@ -333,7 +333,7 @@ allowedPackageFormView appState form index =
             [ class "btn btn-link text-danger"
             , onClick (Form.RemoveItem "allowedPackages" index)
             ]
-            [ faSet "_global.delete" appState ]
+            [ faDelete ]
         ]
 
 
@@ -366,7 +366,7 @@ formatFormView appState cfg form index =
                     prefabsView appState (List.map viewFormat formats)
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         nameField =
             "formats." ++ String.fromInt index ++ ".name"
@@ -397,7 +397,7 @@ formatFormView appState cfg form index =
                             , onClick (Form.RemoveItem "formats" index)
                             , dataCy "document-template-editor_format_remove-button"
                             ]
-                            [ faSet "_global.delete" appState
+                            [ faDelete
                             , text (gettext "Remove" appState.locale)
                             ]
                         ]
@@ -434,7 +434,7 @@ stepFormView appState cfg prefix formatIndex form index =
                     prefabsView appState (List.map viewStep formats)
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         nameField =
             prefix ++ "." ++ String.fromInt index ++ ".name"
@@ -455,7 +455,7 @@ stepFormView appState cfg prefix formatIndex form index =
                             , onClick (Form.RemoveItem prefix index)
                             , dataCy "document-template-editor_step_remove-button"
                             ]
-                            [ faSet "_global.delete" appState
+                            [ faDelete
                             ]
                         ]
                     ]
@@ -472,7 +472,7 @@ stepFormView appState cfg prefix formatIndex form index =
 serviceParametersHeader : AppState -> String -> Form FormError a -> Html msg
 serviceParametersHeader appState field form =
     if List.isEmpty (Form.getListIndexes field form) then
-        emptyNode
+        Html.nothing
 
     else
         div [ class "row input-table-header" ]
@@ -512,7 +512,7 @@ stepOptionFormView appState prefix form i =
             , valueError
             ]
         , div [ class "col-1 text-end" ]
-            [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faSet "_global.delete" appState ] ]
+            [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faDelete ] ]
         ]
 
 

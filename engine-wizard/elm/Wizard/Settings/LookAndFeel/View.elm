@@ -6,9 +6,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick, onSubmit)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -51,7 +52,7 @@ viewForm appState model _ =
     div [ class "LookAndFeel" ]
         [ Page.headerWithGuideLink appState headerTitle GuideLinks.settingsLookAndFeel
         , form [ onSubmit (GenericMsgs.FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView appState model.savingConfig
+            [ FormResult.errorOnlyView model.savingConfig
             , formView appState model.form
             , FormActions.viewDynamic formActionsConfig appState
             ]
@@ -131,7 +132,7 @@ customMenuLinksHeader appState form =
             List.isEmpty (Form.getListIndexes "customMenuLinks" form)
     in
     if isEmpty then
-        emptyNode
+        Html.nothing
 
     else
         div [ class "row input-table-header" ]
@@ -185,7 +186,7 @@ customMenuLinkItemView appState form i =
             ]
         , div [ class "col-1 text-end" ]
             [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem "customMenuLinks" i), attribute "data-cy" "button-remove" ]
-                [ faSet "_global.delete" appState ]
+                [ faDelete ]
             ]
         , iconError
         , titleError

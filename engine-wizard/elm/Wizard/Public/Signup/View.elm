@@ -7,8 +7,8 @@ import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, text)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
+import Html.Extra as Html
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -28,7 +28,7 @@ view appState model =
         content =
             case model.signingUp of
                 Success _ ->
-                    Page.success appState <| gettext "Sign up was successful. Check your email for the activation link." appState.locale
+                    Page.success <| gettext "Sign up was successful. Check your email for the activation link." appState.locale
 
                 _ ->
                     signupForm appState model
@@ -49,7 +49,7 @@ signupForm appState model =
             , link = Just ( Routes.PublicRoute (LoginRoute Nothing), gettext "I already have an account" appState.locale )
             }
     in
-    publicForm appState formConfig
+    publicForm formConfig
 
 
 formView : AppState -> Form FormError SignupForm -> Html Form.Msg
@@ -129,7 +129,7 @@ formView appState form =
                         )
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         acceptFakeGroup =
             div [ class "form-group form-group-accept2" ]

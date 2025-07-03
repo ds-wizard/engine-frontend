@@ -4,8 +4,8 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, hr)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import Shared.Utils exposing (compose2)
 import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
@@ -65,7 +65,7 @@ formView appState form =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         projectTaggingEnabled =
             Maybe.withDefault False (Form.getFieldAsBool "projectTaggingEnabled" form).value
@@ -78,7 +78,7 @@ formView appState form =
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         ([ FormGroup.toggle form "questionnaireVisibilityEnabled" (gettext "Project Visibility" appState.locale)

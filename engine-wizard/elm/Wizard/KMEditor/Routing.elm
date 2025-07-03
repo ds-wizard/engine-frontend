@@ -5,7 +5,6 @@ module Wizard.KMEditor.Routing exposing
     )
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Locale exposing (lr)
 import Shared.Utils exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extra exposing (uuid)
@@ -18,25 +17,27 @@ import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.KMEditor.Routes exposing (Route(..))
 
 
-parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parsers appState wrapRoute =
-    let
-        moduleRoot =
-            lr "kmEditor" appState
+moduleRoot : String
+moduleRoot =
+    "knowledge-model-editors"
 
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    let
         editorWithEntityRoute editorUuid entityUuid =
             wrapRoute <| EditorRoute editorUuid <| KMEditorRoute.Edit (Just entityUuid)
     in
-    [ map (createRoute wrapRoute) (s moduleRoot </> s (lr "kmEditor.create" appState) <?> Query.string (lr "kmEditor.create.selected" appState) <?> Query.bool (lr "kmEditor.create.edit" appState))
-    , map (wrapRoute << flip EditorRoute (KMEditorRoute.Edit Nothing)) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid)
-    , map editorWithEntityRoute (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "edit" </> uuid)
-    , map (wrapRoute << flip EditorRoute KMEditorRoute.Phases) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "phases")
-    , map (wrapRoute << flip EditorRoute KMEditorRoute.QuestionTags) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "question-tags")
-    , map (wrapRoute << flip EditorRoute KMEditorRoute.Preview) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "preview")
-    , map (wrapRoute << flip EditorRoute KMEditorRoute.Settings) (s moduleRoot </> s (lr "kmEditor.editor" appState) </> uuid </> s "settings")
+    [ map (createRoute wrapRoute) (s moduleRoot </> s "create" <?> Query.string "selected" <?> Query.bool "edit")
+    , map (wrapRoute << flip EditorRoute (KMEditorRoute.Edit Nothing)) (s moduleRoot </> s "editor" </> uuid)
+    , map editorWithEntityRoute (s moduleRoot </> s "editor" </> uuid </> s "edit" </> uuid)
+    , map (wrapRoute << flip EditorRoute KMEditorRoute.Phases) (s moduleRoot </> s "editor" </> uuid </> s "phases")
+    , map (wrapRoute << flip EditorRoute KMEditorRoute.QuestionTags) (s moduleRoot </> s "editor" </> uuid </> s "question-tags")
+    , map (wrapRoute << flip EditorRoute KMEditorRoute.Preview) (s moduleRoot </> s "editor" </> uuid </> s "preview")
+    , map (wrapRoute << flip EditorRoute KMEditorRoute.Settings) (s moduleRoot </> s "editor" </> uuid </> s "settings")
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
-    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s (lr "kmEditor.migration" appState) </> uuid)
-    , map (wrapRoute << PublishRoute) (s moduleRoot </> s (lr "kmEditor.publish" appState) </> uuid)
+    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> uuid)
+    , map (wrapRoute << PublishRoute) (s moduleRoot </> s "publish" </> uuid)
     ]
 
 
@@ -45,12 +46,8 @@ createRoute wrapRoute kmId edit =
     wrapRoute <| CreateRoute kmId edit
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
-    let
-        moduleRoot =
-            lr "kmEditor" appState
-    in
+toUrl : Route -> List String
+toUrl route =
     case route of
         CreateRoute mbSelected mbEdit ->
             case ( mbSelected, mbEdit ) of
@@ -64,23 +61,23 @@ toUrl appState route =
                                 "false"
                     in
                     [ moduleRoot
-                    , lr "kmEditor.create" appState
-                    , "?" ++ lr "kmEditor.create.selected" appState ++ "=" ++ id ++ "&" ++ lr "kmEditor.create.edit" appState ++ "=" ++ editString
+                    , "create"
+                    , "?" ++ "selected" ++ "=" ++ id ++ "&" ++ "edit" ++ "=" ++ editString
                     ]
 
                 ( Just id, Nothing ) ->
                     [ moduleRoot
-                    , lr "kmEditor.create" appState
-                    , "?" ++ lr "kmEditor.create.selected" appState ++ "=" ++ id
+                    , "create"
+                    , "?" ++ "selected" ++ "=" ++ id
                     ]
 
                 _ ->
-                    [ moduleRoot, lr "kmEditor.create" appState ]
+                    [ moduleRoot, "create" ]
 
         EditorRoute uuid subroute ->
             let
                 base =
-                    [ moduleRoot, lr "kmEditor.editor" appState, Uuid.toString uuid ]
+                    [ moduleRoot, "editor", Uuid.toString uuid ]
             in
             case subroute of
                 KMEditorRoute.Edit mbUuid ->
@@ -107,10 +104,10 @@ toUrl appState route =
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
         MigrationRoute uuid ->
-            [ moduleRoot, lr "kmEditor.migration" appState, Uuid.toString uuid ]
+            [ moduleRoot, "migration", Uuid.toString uuid ]
 
         PublishRoute uuid ->
-            [ moduleRoot, lr "kmEditor.publish" appState, Uuid.toString uuid ]
+            [ moduleRoot, "publish", Uuid.toString uuid ]
 
 
 isAllowed : Route -> AppState -> Bool

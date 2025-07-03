@@ -17,10 +17,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Registry.Components.FontAwesome exposing (fas)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
@@ -219,7 +219,7 @@ viewNode appState model fileTree =
             viewFolder appState model folderData
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewFolder : AppState -> Model -> FileTree.FolderData -> Html Msg

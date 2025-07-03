@@ -5,10 +5,11 @@ import Dict.Extra as Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (flip)
 import String.Extra as String
@@ -95,7 +96,7 @@ renderAnswerBadges metrics viewValue answer =
                 span [ class "ms-1" ] [ text (String.fromInt (round (100 * metricMeasure.measure)) ++ "%") ]
 
             else
-                emptyNode
+                Html.nothing
 
         createBadge metricMeasure =
             Badge.badge
@@ -105,7 +106,7 @@ renderAnswerBadges metrics viewValue answer =
                 ]
     in
     if List.isEmpty answer.metricMeasures then
-        emptyNode
+        Html.nothing
 
     else
         div [ class "badges" ]
@@ -121,7 +122,7 @@ renderAnswerAdvice answer =
             Markdown.toHtml [ class "alert alert-info" ] advice
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 renderChoiceLabel : Choice -> Html msg
@@ -176,12 +177,12 @@ viewExtraData appState qvs km resourcePageToRoute phases data =
                 && Maybe.isNothing data.requiredPhaseUuid
     in
     if isEmpty then
-        emptyNode
+        Html.nothing
 
     else
         p [ class "extra-data" ]
             (viewRequiredLevel appState qvs phases data.requiredPhaseUuid
-                :: viewResourcePageReferences appState km resourcePageToRoute data.resourcePageReferences
+                :: viewResourcePageReferences km resourcePageToRoute data.resourcePageReferences
                 ++ [ viewUrlReferences appState data.urlReferences
                    , viewExperts appState data.experts
                    ]
@@ -194,7 +195,7 @@ viewRequiredLevel appState qvs phases questionPhaseUuid =
         ( True, Just level ) ->
             span []
                 [ span [ class "caption" ]
-                    [ faSet "questionnaire.desirable" appState
+                    [ faQuestionnaireDesirable
                     , text (gettext "Desirable" appState.locale)
                     , text ": "
                     , span [] [ text level.title ]
@@ -202,7 +203,7 @@ viewRequiredLevel appState qvs phases questionPhaseUuid =
                 ]
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 type alias ViewExtraItemsConfig a msg =
@@ -215,7 +216,7 @@ type alias ViewExtraItemsConfig a msg =
 viewExtraItems : ViewExtraItemsConfig a msg -> List a -> Html msg
 viewExtraItems cfg list =
     if List.isEmpty list then
-        emptyNode
+        Html.nothing
 
     else
         let
@@ -227,8 +228,8 @@ viewExtraItems cfg list =
             (span [ class "caption" ] [ cfg.icon, text (cfg.label ++ ": ") ] :: items)
 
 
-viewResourcePageReferences : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> List ResourcePageReferenceData -> List (Html msg)
-viewResourcePageReferences appState km resourcePageToRoute resourcePageReferences =
+viewResourcePageReferences : KnowledgeModel -> (String -> Wizard.Routes.Route) -> List ResourcePageReferenceData -> List (Html msg)
+viewResourcePageReferences km resourcePageToRoute resourcePageReferences =
     let
         resources =
             Dict.filterGroupBy
@@ -245,9 +246,9 @@ viewResourcePageReferences appState km resourcePageToRoute resourcePageReference
                     Just <|
                         ( rc.title
                         , viewExtraItems
-                            { icon = faSet "questionnaire.resourcePageReferences" appState
+                            { icon = faQuestionnaireResourcePageReferences
                             , label = rc.title
-                            , viewItem = viewResourcePageReference appState km resourcePageToRoute
+                            , viewItem = viewResourcePageReference km resourcePageToRoute
                             }
                             collectionResourcePageReferences
                         )
@@ -261,23 +262,22 @@ viewResourcePageReferences appState km resourcePageToRoute resourcePageReference
         |> List.map Tuple.second
 
 
-viewResourcePageReference : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> ResourcePageReferenceData -> Html msg
-viewResourcePageReference appState km resourcePageToRoute data =
+viewResourcePageReference : KnowledgeModel -> (String -> Wizard.Routes.Route) -> ResourcePageReferenceData -> Html msg
+viewResourcePageReference km resourcePageToRoute data =
     case Maybe.andThen (flip KnowledgeModel.getResourcePage km) data.resourcePageUuid of
         Just resourcePage ->
-            linkTo appState
-                (resourcePageToRoute resourcePage.uuid)
+            linkTo (resourcePageToRoute resourcePage.uuid)
                 [ target "_blank" ]
                 [ text resourcePage.title ]
 
         Nothing ->
-            emptyNode
+            Html.nothing
 
 
 viewUrlReferences : AppState -> List URLReferenceData -> Html msg
 viewUrlReferences appState =
     viewExtraItems
-        { icon = faSet "questionnaire.urlReferences" appState
+        { icon = faQuestionnaireUrlReferences
         , label = gettext "External links" appState.locale
         , viewItem = viewUrlReference
         }
@@ -296,7 +296,7 @@ viewUrlReference data =
 viewExperts : AppState -> List Expert -> Html msg
 viewExperts appState =
     viewExtraItems
-        { icon = faSet "questionnaire.experts" appState
+        { icon = faQuestionnaireExperts
         , label = gettext "Experts" appState.locale
         , viewItem = viewExpert
         }

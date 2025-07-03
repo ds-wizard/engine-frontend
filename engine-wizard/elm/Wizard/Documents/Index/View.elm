@@ -5,11 +5,12 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faRemove, faSpinner, faSuccess)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Time.Distance as TimeDistance
@@ -59,14 +60,12 @@ viewDocuments appState model mbQuestionnaire =
     let
         questionnaireFilterView questionnaire =
             div [ class "listing-toolbar-extra questionnaire-filter" ]
-                [ linkTo appState
-                    (Routes.projectsDetail questionnaire.uuid)
+                [ linkTo (Routes.projectsDetail questionnaire.uuid)
                     [ class "questionnaire-name" ]
                     [ text questionnaire.name ]
-                , linkTo appState
-                    Routes.documentsIndex
+                , linkTo Routes.documentsIndex
                     [ class "text-danger" ]
-                    [ faSet "_global.remove" appState ]
+                    [ faRemove ]
                 ]
 
         mbQuestionnaireFilterView =
@@ -99,7 +98,7 @@ listingConfig appState model mbQuestionnaireFilterView =
                     ]
     in
     { title = listingTitle appState
-    , description = listingDescription appState
+    , description = listingDescription
     , dropdownItems = listingActions appState
     , itemAdditionalData = itemAdditionalData
     , textTitle = .name
@@ -142,21 +141,20 @@ listingTitle appState document =
         ]
 
 
-listingDescription : AppState -> Document -> Html Msg
-listingDescription appState document =
+listingDescription : Document -> Html Msg
+listingDescription document =
     let
         questionnaireLink =
             case document.questionnaire of
                 Just questionnaire ->
                     span [ class "fragment" ]
-                        [ linkTo appState
-                            (Routes.projectsDetail questionnaire.uuid)
+                        [ linkTo (Routes.projectsDetail questionnaire.uuid)
                             []
                             [ text questionnaire.name ]
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         formatFragment =
             case document.format of
@@ -164,7 +162,7 @@ listingDescription appState document =
                     span [ class "fragment" ] [ fa format.icon, text format.name ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         fileSizeFragment =
             case document.fileSize of
@@ -172,12 +170,11 @@ listingDescription appState document =
                     span [ class "fragment" ] [ text (ByteUnits.toReadable fileSize) ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         documentTemplateLink =
             span [ class "fragment" ]
-                [ linkTo appState
-                    (Routes.documentTemplatesDetail document.documentTemplateId)
+                [ linkTo (Routes.documentTemplatesDetail document.documentTemplateId)
                     []
                     [ text document.documentTemplateName ]
                 ]
@@ -199,7 +196,7 @@ listingActions appState document =
         download =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documents.download" appState
+                , icon = faDocumentsDownload
                 , label = gettext "Download" appState.locale
                 , msg = ListingActionMsg (DownloadDocument document)
                 , dataCy = "download"
@@ -211,7 +208,7 @@ listingActions appState document =
         submit =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documents.submit" appState
+                , icon = faDocumentsSubmit
                 , label = gettext "Submit" appState.locale
                 , msg = ListingActionMsg (ShowHideSubmitDocument <| Just document)
                 , dataCy = "submit"
@@ -223,7 +220,7 @@ listingActions appState document =
         viewError =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documents.viewError" appState
+                , icon = faDocumentsViewError
                 , label = gettext "View error" appState.locale
                 , msg = ListingActionMsg (SetDocumentErrorModal document.workerLog)
                 , dataCy = "view-error"
@@ -235,7 +232,7 @@ listingActions appState document =
         delete =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
@@ -258,18 +255,18 @@ stateBadge appState state =
     case state of
         QueuedDocumentState ->
             Badge.info [ dataCy "documents_state-badge" ]
-                [ faSet "_global.spinner" appState
+                [ faSpinner
                 , text (gettext "Queued" appState.locale)
                 ]
 
         InProgressDocumentState ->
             Badge.info [ dataCy "documents_state-badge" ]
-                [ faSet "_global.spinner" appState
+                [ faSpinner
                 , text (gettext "In Progress" appState.locale)
                 ]
 
         DoneDocumentState ->
-            emptyNode
+            Html.nothing
 
         ErrorDocumentState ->
             Badge.danger [ dataCy "documents_state-badge" ]
@@ -283,7 +280,7 @@ viewSubmission appState submission =
             case submissionState of
                 SubmissionState.InProgress ->
                     Badge.info []
-                        [ faSet "_global.spinner" appState
+                        [ faSpinner
                         , text (gettext "Submitting" appState.locale)
                         ]
 
@@ -304,7 +301,7 @@ viewSubmission appState submission =
                 ( SubmissionState.Done, Just location, _ ) ->
                     a [ href location, class "with-icon-after", target "_blank" ]
                         [ text (gettext "View submission" appState.locale)
-                        , faSet "_global.externalLink" appState
+                        , faExternalLink
                         ]
 
                 ( SubmissionState.Error, _, Just _ ) ->
@@ -312,7 +309,7 @@ viewSubmission appState submission =
                         [ text (gettext "View error" appState.locale) ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     tr []
         [ td [] [ text (Submission.visibleName submission) ]
@@ -374,7 +371,7 @@ submitModal appState model =
                     [ text (gettext "Done" appState.locale) ]
 
             else if ActionResult.isSuccess model.submissionServices && Maybe.isJust model.selectedSubmissionServiceId then
-                ActionButton.button appState
+                ActionButton.button
                     { label = gettext "Submit" appState.locale
                     , result = model.submittingDocument
                     , msg = SubmitDocument
@@ -412,11 +409,11 @@ submitModal appState model =
                     (List.map viewOption submissionServices)
 
             else
-                Flash.info appState <| gettext "There are no submission services configured for this type of document." appState.locale
+                Flash.info <| gettext "There are no submission services configured for this type of document." appState.locale
 
         submissionBody submissionServices =
             div []
-                [ FormResult.errorOnlyView appState model.submittingDocument
+                [ FormResult.errorOnlyView model.submittingDocument
                 , options submissionServices
                 ]
 
@@ -434,22 +431,22 @@ submitModal appState model =
                                         ]
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     div [ class "alert alert-success" ]
-                        [ faSet "_global.success" appState
+                        [ faSuccess
                         , text (gettext "The document was successfully submitted." appState.locale)
                         , link
                         ]
 
                 SubmissionState.Error ->
                     div [ class "alert alert-danger" ]
-                        [ faSet "_global.error" appState
+                        [ faError
                         , text (gettext "The document submission failed." appState.locale)
                         ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         body =
             if ActionResult.isSuccess model.submittingDocument then

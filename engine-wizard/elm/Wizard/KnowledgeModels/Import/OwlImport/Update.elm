@@ -45,7 +45,7 @@ update msg wrapMsg appState model =
             importOwlCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.knowledgeModelsIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.knowledgeModelsIndex) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form, model.file ) of

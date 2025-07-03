@@ -3,8 +3,9 @@ module Wizard.DocumentTemplates.Index.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faKmsUpload)
 import String.Format as String
 import Version
 import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
@@ -36,15 +37,14 @@ view appState model =
 importButton : AppState -> Html Msg
 importButton appState =
     if Feature.documentTemplatesImport appState then
-        linkTo appState
-            (Routes.documentTemplatesImport Nothing)
+        linkTo (Routes.documentTemplatesImport Nothing)
             [ class "btn btn-primary with-icon" ]
-            [ faSet "kms.upload" appState
+            [ faKmsUpload
             , text (gettext "Import" appState.locale)
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingConfig : AppState -> ViewConfig DocumentTemplate Msg
@@ -82,7 +82,7 @@ listingConfig appState =
 listingTitle : AppState -> DocumentTemplate -> Html Msg
 listingTitle appState documentTemplate =
     span []
-        [ linkTo appState (Routes.documentTemplatesDetail documentTemplate.id) [] [ text documentTemplate.name ]
+        [ linkTo (Routes.documentTemplatesDetail documentTemplate.id) [] [ text documentTemplate.name ]
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString documentTemplate.version ]
@@ -102,13 +102,12 @@ listingTitleOutdatedBadge appState documentTemplate =
                     ((++) (documentTemplate.organizationId ++ ":" ++ documentTemplate.templateId ++ ":") << Version.toString)
                     documentTemplate.remoteLatestVersion
         in
-        linkTo appState
-            (Routes.documentTemplatesImport documentTemplateId)
+        linkTo (Routes.documentTemplatesImport documentTemplateId)
             [ class Badge.warningClass ]
             [ text (gettext "update available" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingTitleUnsupportedBadge : AppState -> DocumentTemplate -> Html Msg
@@ -117,7 +116,7 @@ listingTitleUnsupportedBadge appState documentTemplate =
         Badge.danger [] [ text (gettext "unsupported metamodel" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingTitleDeprecatedBadge : AppState -> DocumentTemplate -> Html Msg
@@ -126,7 +125,7 @@ listingTitleDeprecatedBadge appState documentTemplate =
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingTitleNonEditableBadge : AppState -> DocumentTemplate -> Html Msg
@@ -135,7 +134,7 @@ listingTitleNonEditableBadge appState documentTemplate =
         Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingDescription : AppState -> DocumentTemplate -> Html Msg
@@ -151,7 +150,7 @@ listingDescription appState documentTemplate =
                                     img [ class "organization-image", src organizationLogo ] []
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     span [ class "fragment", title <| gettext "Published by" appState.locale ]
                         [ logo
@@ -159,7 +158,7 @@ listingDescription appState documentTemplate =
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     span []
         [ code [ class "fragment" ] [ text documentTemplate.id ]

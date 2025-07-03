@@ -7,7 +7,6 @@ module Wizard.Common.View.ActionButton exposing
     , button
     , buttonCustom
     , buttonWithAttrs
-    , loader
     , submit
     , submitWithAttrs
     )
@@ -16,8 +15,7 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Attribute, Html, text)
 import Html.Attributes exposing (class, disabled, type_)
 import Html.Events exposing (onClick)
-import Shared.Html exposing (faSet)
-import Wizard.Common.AppState exposing (AppState)
+import Shared.Components.FontAwesome exposing (faSpinner)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 
 
@@ -29,9 +27,9 @@ type alias ButtonConfig a msg =
     }
 
 
-button : AppState -> ButtonConfig a msg -> Html msg
-button appState cfg =
-    actionButtonView appState
+button : ButtonConfig a msg -> Html msg
+button cfg =
+    actionButtonView
         [ onClick cfg.msg, class <| "btn btn-with-loader " ++ buttonClass cfg.dangerous ]
         [ text cfg.label ]
         cfg.result
@@ -46,9 +44,9 @@ type alias ButtonWithAttrsConfig a msg =
     }
 
 
-buttonWithAttrs : AppState -> ButtonWithAttrsConfig a msg -> Html msg
-buttonWithAttrs appState cfg =
-    actionButtonView appState
+buttonWithAttrs : ButtonWithAttrsConfig a msg -> Html msg
+buttonWithAttrs cfg =
+    actionButtonView
         ([ onClick cfg.msg, class <| "btn btn-with-loader " ++ buttonClass cfg.dangerous ] ++ cfg.attrs)
         [ text cfg.label ]
         cfg.result
@@ -62,9 +60,9 @@ type alias ButtonCustomConfig a msg =
     }
 
 
-buttonCustom : AppState -> ButtonCustomConfig a msg -> Html msg
-buttonCustom appState cfg =
-    actionButtonView appState
+buttonCustom : ButtonCustomConfig a msg -> Html msg
+buttonCustom cfg =
+    actionButtonView
         [ onClick cfg.msg, class <| "btn btn-with-loader " ++ cfg.btnClass ]
         cfg.content
         cfg.result
@@ -77,9 +75,9 @@ type alias SubmitWithAttrsConfig a msg =
     }
 
 
-submitWithAttrs : AppState -> SubmitWithAttrsConfig a msg -> Html msg
-submitWithAttrs appState { label, result, attrs } =
-    actionButtonView appState
+submitWithAttrs : SubmitWithAttrsConfig a msg -> Html msg
+submitWithAttrs { label, result, attrs } =
+    actionButtonView
         ([ type_ "submit"
          , class "btn btn-primary btn-with-loader"
          , dataCy "form_submit"
@@ -96,9 +94,9 @@ type alias SubmitConfig a =
     }
 
 
-submit : AppState -> SubmitConfig a -> Html msg
-submit appState { label, result } =
-    actionButtonView appState
+submit : SubmitConfig a -> Html msg
+submit { label, result } =
+    actionButtonView
         [ type_ "submit"
         , class "btn btn-primary btn-with-loader"
         , dataCy "form_submit"
@@ -107,13 +105,13 @@ submit appState { label, result } =
         result
 
 
-actionButtonView : AppState -> List (Attribute msg) -> List (Html msg) -> ActionResult a -> Html msg
-actionButtonView appState attributes content result =
+actionButtonView : List (Attribute msg) -> List (Html msg) -> ActionResult a -> Html msg
+actionButtonView attributes content result =
     let
         buttonContent =
             case result of
                 Loading ->
-                    [ loader appState ]
+                    [ faSpinner ]
 
                 _ ->
                     content
@@ -122,11 +120,6 @@ actionButtonView appState attributes content result =
             disabled (result == Loading) :: attributes
     in
     Html.button buttonAttributes buttonContent
-
-
-loader : AppState -> Html msg
-loader appState =
-    faSet "_global.spinner" appState
 
 
 buttonClass : Bool -> String

@@ -23,7 +23,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     Html.form [ onSubmit (FormMsg Form.Submit), detailClass "Users__Create" ]
         [ Page.headerWithGuideLink appState (gettext "Create user" appState.locale) GuideLinks.usersCreate
-        , FormResult.view appState model.savingUser
+        , FormResult.view model.savingUser
         , formView appState model.form |> Html.map FormMsg
         , FormActions.viewSubmit appState
             Cancel

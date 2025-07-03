@@ -6,9 +6,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, hr, label, strong, text)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Auth.Role as Role
+import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
 import String.Extra as String
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)
@@ -66,7 +67,7 @@ formView openIDPrefabs appState form =
                             ]
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             [ h3 [] [ text (gettext "Internal" appState.locale) ]
             , mapFormMsg <| FormGroup.toggle form "registrationEnabled" (gettext "Registration" appState.locale)
@@ -150,7 +151,6 @@ serviceFormView appState openIDPrefabs form i =
                 let
                     viewPrefabButton openID =
                         ExternalLoginButton.render [ onClick (FillOpenIDServiceConfig i openID) ]
-                            appState
                             openID.name
                             openID.style.icon
                             openID.style.color
@@ -162,7 +162,7 @@ serviceFormView appState openIDPrefabs form i =
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "card bg-light mb-4" ]
         [ div [ class "card-body" ]
@@ -177,7 +177,7 @@ serviceFormView appState openIDPrefabs form i =
                             , onClick (Form.RemoveItem "services" i)
                             , dataCy "settings_authentication_service_remove-button"
                             ]
-                            [ faSet "_global.delete" appState
+                            [ faDelete
                             , text (gettext "Remove" appState.locale)
                             ]
                     ]
@@ -199,7 +199,7 @@ serviceFormView appState openIDPrefabs form i =
                 [ div [ class "col-7" ]
                     [ div [ class "row" ]
                         [ div [ class "col" ]
-                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder <| ExternalLoginButton.defaultIcon appState ] appState form styleIconField (gettext "Icon" appState.locale)
+                            [ mapFormMsg <| FormGroup.inputAttrs [ placeholder ExternalLoginButton.defaultIcon ] appState form styleIconField (gettext "Icon" appState.locale)
                             ]
                         , div [ class "col" ]
                             [ mapFormMsg <| FormGroup.input appState form nameField (gettext "Name" appState.locale)
@@ -218,7 +218,7 @@ serviceFormView appState openIDPrefabs form i =
                     [ div [ class "form-group" ]
                         [ label [] [ text (gettext "Button Preview" appState.locale) ]
                         , div [ class "mt-4" ]
-                            [ ExternalLoginButton.render [] appState buttonName buttonIcon buttonColor buttonBackground
+                            [ ExternalLoginButton.render [] buttonName buttonIcon buttonColor buttonBackground
                             ]
                         ]
                     ]
@@ -234,7 +234,7 @@ serviceParametersHeader appState field form =
             List.isEmpty (Form.getListIndexes field form)
     in
     if isEmpty then
-        emptyNode
+        Html.nothing
 
     else
         div [ class "row input-table-header" ]
@@ -274,7 +274,7 @@ serviceParameterView appState prefix form i =
             , valueError
             ]
         , div [ class "col-1 text-end" ]
-            [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faSet "_global.delete" appState ] ]
+            [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix i) ] [ faDelete ] ]
         ]
 
 

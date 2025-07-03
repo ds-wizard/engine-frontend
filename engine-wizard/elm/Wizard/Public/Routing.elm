@@ -3,7 +3,6 @@ module Wizard.Public.Routing exposing
     , toUrl
     )
 
-import Shared.Locale exposing (lr)
 import Url exposing (percentEncode)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string, top)
 import Url.Parser.Query as Query
@@ -16,17 +15,17 @@ parsers appState wrapRoute =
     let
         signUpRoutes =
             if appState.config.authentication.internal.registration.enabled then
-                [ map (wrapRoute <| SignupRoute) (s (lr "public.signup" appState))
-                , map (signupConfirmation wrapRoute) (s (lr "public.signup" appState) </> string </> string)
+                [ map (wrapRoute <| SignupRoute) (s "signup")
+                , map (signupConfirmation wrapRoute) (s "signup" </> string </> string)
                 ]
 
             else
                 []
     in
     [ map (authCallback wrapRoute) (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state")
-    , map (wrapRoute ForgottenPasswordRoute) (s (lr "public.forgottenPassword" appState))
-    , map (forgottenPasswordConfirmation wrapRoute) (s (lr "public.forgottenPassword" appState) </> string </> string)
-    , map (wrapRoute << LoginRoute) (top <?> Query.string (lr "login.originalUrl" appState))
+    , map (wrapRoute ForgottenPasswordRoute) (s "forgotten-password")
+    , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
+    , map (wrapRoute << LoginRoute) (top <?> Query.string "originalUrl")
     , map (wrapRoute LogoutSuccessful) (s "logout-successful")
     ]
         ++ signUpRoutes
@@ -47,8 +46,8 @@ forgottenPasswordConfirmation wrapRoute userId hash =
     ForgottenPasswordConfirmationRoute userId hash |> wrapRoute
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
+toUrl : Route -> List String
+toUrl route =
     case route of
         AuthCallback id error code sessionState ->
             [ "auth"
@@ -58,15 +57,15 @@ toUrl appState route =
             ]
 
         ForgottenPasswordRoute ->
-            [ lr "public.forgottenPassword" appState ]
+            [ "forgotten-password" ]
 
         ForgottenPasswordConfirmationRoute userId hash ->
-            [ lr "public.forgottenPassword" appState, userId, hash ]
+            [ "forgotten-password", userId, hash ]
 
         LoginRoute mbOriginalUrl ->
             case mbOriginalUrl of
                 Just originalUrl ->
-                    [ "/?" ++ lr "login.originalUrl" appState ++ "=" ++ percentEncode originalUrl ]
+                    [ "/?" ++ "originalUrl" ++ "=" ++ percentEncode originalUrl ]
 
                 Nothing ->
                     []
@@ -75,7 +74,7 @@ toUrl appState route =
             [ "logout-successful" ]
 
         SignupRoute ->
-            [ lr "public.signup" appState ]
+            [ "signup" ]
 
         SignupConfirmationRoute userId hash ->
-            [ lr "public.signup" appState, userId, hash ]
+            [ "signup", userId, hash ]

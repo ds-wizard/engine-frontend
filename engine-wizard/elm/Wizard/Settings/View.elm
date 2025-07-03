@@ -84,7 +84,7 @@ navigation appState currentRoute =
 
             else
                 strong [] [ text (gettext "System Settings" appState.locale) ]
-                    :: List.map (navigationLink appState currentRoute) (navigationSystemLinks appState)
+                    :: List.map (navigationLink currentRoute) (navigationSystemLinks appState)
 
         userInterfaceTitle =
             [ strong [] [ text (gettext "User Interface Settings" appState.locale) ] ]
@@ -98,11 +98,11 @@ navigation appState currentRoute =
     div [ class "nav nav-pills flex-column" ]
         (systemSettings
             ++ userInterfaceTitle
-            ++ List.map (navigationLink appState currentRoute) (navigationUserInterfaceLinks appState)
+            ++ List.map (navigationLink currentRoute) (navigationUserInterfaceLinks appState)
             ++ contentTitle
-            ++ List.map (navigationLink appState currentRoute) (navigationContentLinks appState)
+            ++ List.map (navigationLink currentRoute) (navigationContentLinks appState)
             ++ statisticsTitle
-            ++ List.map (navigationLink appState currentRoute) (navigationStatisticsLinks appState)
+            ++ List.map (navigationLink currentRoute) (navigationStatisticsLinks appState)
         )
 
 
@@ -158,9 +158,8 @@ navigationStatisticsLinks appState =
     ]
 
 
-navigationLink : AppState -> Route -> ( Route, String ) -> Html Msg
-navigationLink appState currentRoute ( route, title ) =
-    linkTo appState
-        (Routes.SettingsRoute route)
+navigationLink : Route -> ( Route, String ) -> Html Msg
+navigationLink currentRoute ( route, title ) =
+    linkTo (Routes.SettingsRoute route)
         [ class "nav-link", classList [ ( "active", currentRoute == route ) ] ]
         [ text title ]

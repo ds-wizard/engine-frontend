@@ -17,9 +17,9 @@ import Html exposing (Html, div, input, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Json.Decode as D
+import Shared.Components.FontAwesome exposing (faQuestionnaireCommentsAssign)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
-import Shared.Html exposing (faSet)
 import Shared.Setters exposing (setDebouncer)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
@@ -168,7 +168,7 @@ view cfg appState model =
                 , Button.attrs [ dataCy "comments_comment_assign" ]
                 ]
                 [ span (tooltipLeft (gettext "Assign comment thread" appState.locale))
-                    [ faSet "questionnaire.commentsAssign" appState ]
+                    [ faQuestionnaireCommentsAssign ]
                 ]
         , items =
             [ Dropdown.customItem <|

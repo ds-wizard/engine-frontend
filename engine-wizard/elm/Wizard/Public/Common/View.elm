@@ -7,7 +7,6 @@ import ActionResult exposing (ActionResult)
 import Html exposing (Html, div, form, span, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
@@ -24,13 +23,13 @@ type alias FormConfig msg =
     }
 
 
-publicForm : AppState -> FormConfig msg -> Html msg
-publicForm appState formConfig =
+publicForm : FormConfig msg -> Html msg
+publicForm formConfig =
     let
         link =
             case formConfig.link of
                 Just ( route, linkText ) ->
-                    linkTo appState route [] [ text linkText ]
+                    linkTo route [] [ text linkText ]
 
                 _ ->
                     span [] []
@@ -39,11 +38,11 @@ publicForm appState formConfig =
         [ form [ onSubmit formConfig.submitMsg, class "card bg-light" ]
             [ div [ class "card-header" ] [ text formConfig.title ]
             , div [ class "card-body" ]
-                [ FormResult.view appState formConfig.actionResult
+                [ FormResult.view formConfig.actionResult
                 , formConfig.formContent
                 , div [ class "form-group d-flex align-items-baseline justify-content-between" ]
                     [ link
-                    , ActionButton.submit appState <| ActionButton.SubmitConfig formConfig.submitLabel formConfig.actionResult
+                    , ActionButton.submit <| ActionButton.SubmitConfig formConfig.submitLabel formConfig.actionResult
                     ]
                 ]
             ]

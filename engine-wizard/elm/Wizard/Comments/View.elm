@@ -3,8 +3,8 @@ module Wizard.Comments.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode)
 import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Api.Models.User as User
 import Wizard.Comments.Models exposing (Model)
@@ -70,11 +70,10 @@ listingTitle appState commentThread =
                 Badge.success [] [ text (gettext "Resolved" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
     in
     span []
-        [ linkTo appState
-            (Routes.projectsDetailQuestionnaire commentThread.questionnaireUuid (Just commentThread.path) (Just commentThread.commentThreadUuid))
+        [ linkTo (Routes.projectsDetailQuestionnaire commentThread.questionnaireUuid (Just commentThread.path) (Just commentThread.commentThreadUuid))
             []
             [ text commentThread.text ]
         , resolvedBadge
@@ -96,7 +95,7 @@ listingDescription commentThread =
                         ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     span []
         [ questionnaireNameFragment

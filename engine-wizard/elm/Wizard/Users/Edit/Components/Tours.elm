@@ -104,10 +104,10 @@ view appState model =
             ]
         , div [ class "row" ]
             [ div [ class "col-8" ]
-                [ FormResult.view appState model.resettingTours
+                [ FormResult.view model.resettingTours
                 , p [] [ text (gettext "This resets all page-specific onboarding tours, allowing the guided highlights and instructions to replay on next visit." appState.locale) ]
                 , div []
-                    [ ActionButton.buttonWithAttrs appState
+                    [ ActionButton.buttonWithAttrs
                         { label = gettext "Reset" appState.locale
                         , result = model.resettingTours
                         , msg = ResetTours

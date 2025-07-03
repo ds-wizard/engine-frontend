@@ -6,9 +6,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, form, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick, onSubmit)
+import Html.Extra as Html
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
@@ -45,7 +45,7 @@ viewForm appState model _ =
     div [ wideDetailClass "" ]
         [ Page.headerWithGuideLink appState (gettext "DSW Registry" appState.locale) GuideLinks.settingsRegistry
         , form [ onSubmit (GenericMsg <| GenericMsgs.FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView appState model.genericModel.savingConfig
+            [ FormResult.errorOnlyView model.genericModel.savingConfig
             , formView appState model.genericModel.form
             , FormActions.viewDynamic formActionsConfig appState
             ]
@@ -72,7 +72,7 @@ formView appState form =
 
                     signupButton =
                         if hasToken then
-                            emptyNode
+                            Html.nothing
 
                         else
                             button [ class "btn btn-outline-primary", onClick <| ToggleRegistrySignup True ]
@@ -85,7 +85,7 @@ formView appState form =
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         [ formWrap <| FormGroup.toggle form "enabled" (gettext "Enabled" appState.locale)
@@ -107,7 +107,7 @@ registrySignupModal appState model =
                     [ text (gettext "Sign Up" appState.locale) ]
 
             else
-                ActionButton.button appState
+                ActionButton.button
                     { label = gettext "Sign Up" appState.locale
                     , result = model.registrySigningUp
                     , msg = FormMsg Form.Submit
@@ -123,7 +123,7 @@ registrySignupModal appState model =
                 [ text (gettext "Cancel" appState.locale) ]
 
         resultBody resultText =
-            Flash.success appState resultText
+            Flash.success resultText
 
         body =
             if ActionResult.isSuccess model.registrySigningUp then
@@ -136,7 +136,7 @@ registrySignupModal appState model =
                 in
                 Html.map FormMsg <|
                     div []
-                        [ FormResult.errorOnlyView appState model.registrySigningUp
+                        [ FormResult.errorOnlyView model.registrySigningUp
                         , FormGroup.inputAttrs [ readonly True ] appState form "organizationId" (gettext "Organization ID" appState.locale)
                         , FormGroup.inputAttrs [ readonly True ] appState form "name" (gettext "Organization Name" appState.locale)
                         , FormGroup.textareaAttrs [ readonly True ] appState form "description" (gettext "Organization Description" appState.locale)

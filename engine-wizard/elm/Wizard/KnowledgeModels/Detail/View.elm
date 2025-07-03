@@ -4,8 +4,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
@@ -51,14 +52,14 @@ header appState model package =
                 Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         nonEditableBadge =
             if package.nonEditable then
                 Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         dropdownActions =
             KnowledgeModelActionsDropdown.dropdown appState
@@ -84,12 +85,12 @@ readme appState package =
         nonEditableInfo =
             if package.nonEditable then
                 div [ class "alert alert-info" ]
-                    [ faSet "_global.info" appState
+                    [ faInfo
                     , text (gettext "This is a non-editable knowledge model, i.e., it cannot be edited, forked, or exported." appState.locale)
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         warning =
             if containsNewerVersions then
@@ -117,10 +118,9 @@ newVersionInRegistryWarning appState package =
                             latestPackageId =
                                 package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
                         in
-                        [ linkTo appState
-                            (Routes.knowledgeModelsImport (Just latestPackageId))
+                        [ linkTo (Routes.knowledgeModelsImport (Just latestPackageId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                            [ faSet "kmImport.fromRegistry" appState
+                            [ faKmImportFromRegistry
                             , text (gettext "Import" appState.locale)
                             ]
                         ]
@@ -129,14 +129,14 @@ newVersionInRegistryWarning appState package =
                         []
             in
             div [ class "alert alert-warning" ]
-                (faSet "_global.warning" appState
+                (faWarning
                     :: String.formatHtml (gettext "There is a newer version (%s) available." appState.locale)
                         [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
                     ++ importLink
                 )
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 sidePanel : AppState -> Model -> PackageDetail -> Html Msg
@@ -168,7 +168,7 @@ sidePanelKmInfo appState package =
                 Just parentPackageId ->
                     [ ( gettext "Fork of" appState.locale
                       , "fork-of"
-                      , linkTo appState (Routes.knowledgeModelsDetail parentPackageId) [] [ text parentPackageId ]
+                      , linkTo (Routes.knowledgeModelsDetail parentPackageId) [] [ text parentPackageId ]
                       )
                     ]
 
@@ -183,8 +183,7 @@ sidePanelOtherVersions appState model package =
     let
         versionLink version =
             li []
-                [ linkTo appState
-                    (Routes.knowledgeModelsDetail <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.knowledgeModelsDetail <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -208,13 +207,13 @@ sidePanelOtherVersions appState model package =
         let
             showAllLink =
                 if model.showAllVersions || List.length package.versions <= 10 then
-                    emptyNode
+                    Html.nothing
 
                 else
                     li [ class "show-all-link" ]
                         [ a [ onClick ShowAllVersions ]
                             [ text (gettext "Show all" appState.locale)
-                            , faSet "detail.showAll" appState
+                            , faDetailShowAll
                             ]
                         ]
         in
@@ -242,7 +241,7 @@ sidePanelRegistryLink appState package =
             , ul [ class "fa-ul" ]
                 [ li []
                     [ a [ href registryLink, target "_blank" ]
-                        [ span [ class "fa-li" ] [ faSet "kmDetail.registryLink" appState ]
+                        [ span [ class "fa-li" ] [ faKmDetailRegistryLink ]
                         , span [ class "fa-li-content" ] [ text (gettext "View in registry" appState.locale) ]
                         ]
                     ]

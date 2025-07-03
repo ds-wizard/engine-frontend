@@ -6,12 +6,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
 import Html.Attributes exposing (class, classList, colspan, href, id, src, style, target)
 import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
+import Html.Extra as Html
 import Json.Decode as D
 import Json.Decode.Extra as D
 import Shared.Auth.Role as Role
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faOpen, faWarning)
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
-import Shared.Html exposing (emptyNode, fa, faSet, faSetFw)
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
@@ -73,7 +74,7 @@ menuItems : AppState -> List MenuItem
 menuItems appState =
     [ MenuItem
         { title = gettext "Dashboard" appState.locale
-        , icon = faSetFw "menu.dashboard" appState
+        , icon = faMenuDashboard
         , id = "dashboard"
         , route = Routes.dashboard
         , isActive = Routes.isDashboard
@@ -81,7 +82,7 @@ menuItems appState =
         }
     , MenuItem
         { title = "Tenants"
-        , icon = faSetFw "menu.tenants" appState
+        , icon = faMenuTenants
         , id = "tenants"
         , route = Routes.tenantsIndex
         , isActive = Routes.isTenantIndex
@@ -89,7 +90,7 @@ menuItems appState =
         }
     , MenuGroup
         { title = gettext "Knowledge Models" appState.locale
-        , icon = faSetFw "menu.knowledgeModels" appState
+        , icon = faMenuKnowledgeModels
         , id = "knowledge-models"
         , route = Routes.knowledgeModelsIndex
         , isActive = Routes.isKnowledgeModelsSubroute
@@ -111,7 +112,7 @@ menuItems appState =
         }
     , MenuGroup
         { title = gettext "Document Templates" appState.locale
-        , icon = faSetFw "menu.templates" appState
+        , icon = faMenuTemplates
         , id = "document-templates"
         , route = Routes.documentTemplatesIndex
         , isActive = Routes.isDocumentTemplatesSubroute
@@ -133,7 +134,7 @@ menuItems appState =
         }
     , MenuItem
         { title = gettext "Projects" appState.locale
-        , icon = faSetFw "menu.projects" appState
+        , icon = faMenuProjects
         , id = "projects"
         , route = Routes.projectsIndex appState
         , isActive = Routes.isProjectsIndex
@@ -141,7 +142,7 @@ menuItems appState =
         }
     , MenuGroup
         { title = gettext "Projects" appState.locale
-        , icon = faSetFw "menu.projects" appState
+        , icon = faMenuProjects
         , id = "projects"
         , route = Routes.projectsIndex appState
         , isActive = Routes.isProjectSubroute
@@ -181,7 +182,7 @@ menuItems appState =
         }
     , MenuGroup
         { title = "Dev"
-        , icon = faSetFw "menu.dev" appState
+        , icon = faMenuDev
         , id = "dev"
         , route = Routes.devOperations
         , isActive = Routes.isDevSubroute
@@ -203,7 +204,7 @@ menuItems appState =
         }
     , MenuItem
         { title = gettext "Settings" appState.locale
-        , icon = faSetFw "menu.administration" appState
+        , icon = faMenuAdministration
         , id = "settings"
         , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin)
         , isActive = Routes.isSettingsRoute
@@ -211,7 +212,7 @@ menuItems appState =
         }
     , MenuGroup
         { title = gettext "Administration" appState.locale
-        , icon = faSetFw "menu.administration" appState
+        , icon = faMenuAdministration
         , id = "administration"
         , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin)
         , isActive = Routes.isSettingsSubroute
@@ -262,7 +263,7 @@ view model =
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "side-navigation", classList [ ( "side-navigation-collapsed", model.appState.session.sidebarCollapsed ) ] ]
         [ viewLogo model
@@ -284,8 +285,7 @@ viewLogo model =
                 ]
     in
     if List.isEmpty model.appState.config.modules then
-        linkTo model.appState
-            Routes.appHome
+        linkTo Routes.appHome
             [ class "logo" ]
             [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
             , logoText
@@ -363,7 +363,7 @@ viewLogo model =
 
             switchToHeading =
                 if List.isEmpty internalItems then
-                    emptyNode
+                    Html.nothing
 
                 else
                     li [ class "heading" ] [ text (gettext "Switch to" model.appState.locale) ]
@@ -373,7 +373,7 @@ viewLogo model =
                     li [ class "heading-2" ] [ text (gettext "More" model.appState.locale) ]
 
                 else
-                    emptyNode
+                    Html.nothing
         in
         div [ id itemId, class "logo logo-app-switcher", mouseenter, mouseleave ]
             [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
@@ -402,7 +402,7 @@ viewMenu model =
                 li [ class "heading" ] [ text (gettext LookAndFeelConfig.defaultMenuTitle model.appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         filterMenuItem menuItem =
             case menuItem of
@@ -422,7 +422,7 @@ viewMenu model =
 
         space =
             if List.isEmpty customMenuItems then
-                emptyNode
+                Html.nothing
 
             else
                 li [ class "empty" ] []
@@ -440,8 +440,7 @@ defaultMenuItem model item =
                     if groupItem.isVisible model.appState then
                         Just <|
                             li [ classList [ ( "active", groupItem.isActive model.appState.route ) ] ]
-                                [ linkTo model.appState
-                                    groupItem.route
+                                [ linkTo groupItem.route
                                     []
                                     [ text groupItem.title ]
                                 ]
@@ -478,11 +477,10 @@ defaultMenuItem model item =
                         li [ class "submenu-heading" ] [ text menuGroup.title ]
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             li [ id menuItemId, classList [ ( "active", menuGroup.isActive model.appState.route ) ], mouseenter, mouseleave ]
-                [ linkTo model.appState
-                    menuGroup.route
+                [ linkTo menuGroup.route
                     []
                     [ menuGroup.icon
                     , span [ class "sidebar-link" ] [ text menuGroup.title ]
@@ -493,7 +491,7 @@ defaultMenuItem model item =
 
         MenuItem menuItem ->
             menuLinkSimple model
-                (linkTo model.appState menuItem.route [ dataCy ("menu_" ++ menuItem.id) ])
+                (linkTo menuItem.route [ dataCy ("menu_" ++ menuItem.id) ])
                 menuItem.id
                 menuItem.icon
                 menuItem.title
@@ -569,7 +567,7 @@ viewSessionWarning model =
             (viewSessionWarningContent model)
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewSessionWarningCollapsed : Model -> Html Wizard.Msgs.Msg
@@ -609,19 +607,19 @@ viewSessionWarningCollapsed model =
             , mouseenter
             , mouseleave
             ]
-            [ faSet "_global.warning" model.appState
+            [ faWarning
             , sessionWarningSubmenu
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewSessionWarningContent : Model -> List (Html Wizard.Msgs.Msg)
 viewSessionWarningContent model =
     let
         logoutMsg =
-            Just (Routing.toUrl model.appState model.appState.route)
+            Just (Routing.toUrl model.appState.route)
                 |> Routes.publicLogin
                 |> Wizard.Auth.Msgs.LogoutTo
                 |> Wizard.Msgs.AuthMsg
@@ -681,7 +679,7 @@ viewProfileMenu model =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         languageButton =
             if Admin.isEnabled model.appState.config.admin then
@@ -690,18 +688,17 @@ viewProfileMenu model =
                         [ dataCy "menu_languages"
                         , href "/admin/users/edit/current/language"
                         ]
-                        [ faSetFw "menu.language" model.appState
+                        [ faMenuLanguage
                         , text (gettext "Change language" model.appState.locale)
                         ]
                     ]
 
             else
                 li []
-                    [ linkTo model.appState
-                        Routes.usersEditLanguageCurrent
+                    [ linkTo Routes.usersEditLanguageCurrent
                         [ dataCy "menu_languages"
                         ]
-                        [ faSetFw "menu.language" model.appState
+                        [ faMenuLanguage
                         , text (gettext "Change language" model.appState.locale)
                         ]
                     ]
@@ -716,18 +713,16 @@ viewProfileMenu model =
             [ ul []
                 [ profileInfoInSubmenu
                 , li []
-                    [ linkTo model.appState
-                        Routes.usersEditCurrent
+                    [ linkTo Routes.usersEditCurrent
                         [ dataCy "menu_profile" ]
-                        [ faSetFw "menu.profile" model.appState
+                        [ faMenuProfile
                         , text (gettext "User settings" model.appState.locale)
                         ]
                     ]
                 , li []
-                    [ linkTo model.appState
-                        Routes.commentsIndex
+                    [ linkTo Routes.commentsIndex
                         [ dataCy "menu_assigned-comments" ]
-                        [ faSetFw "menu.assignedComments" model.appState
+                        [ faMenuAssignedComments
                         , text (gettext "Assigned comments" model.appState.locale)
                         ]
                     ]
@@ -737,7 +732,7 @@ viewProfileMenu model =
                         [ onClick (Wizard.Msgs.AuthMsg Wizard.Auth.Msgs.Logout)
                         , dataCy "menu_logout"
                         ]
-                        [ faSetFw "menu.logout" model.appState
+                        [ faMenuLogout
                         , text (gettext "Log out" model.appState.locale)
                         ]
                     ]
@@ -746,7 +741,7 @@ viewProfileMenu model =
                         [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetAboutOpen True)
                         , dataCy "menu_about"
                         ]
-                        [ faSetFw "menu.about" model.appState
+                        [ faMenuAbout
                         , text (gettext "About" model.appState.locale)
                         ]
                     ]
@@ -755,7 +750,7 @@ viewProfileMenu model =
                         [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Common.Menu.Msgs.SetReportIssueOpen True)
                         , dataCy "menu_report-issue"
                         ]
-                        [ faSetFw "menu.reportIssue" model.appState
+                        [ faMenuReportIssue
                         , text (gettext "Report issue" model.appState.locale)
                         ]
                     ]
@@ -768,11 +763,11 @@ viewCollapseLink : Model -> Html Wizard.Msgs.Msg
 viewCollapseLink model =
     if model.appState.session.sidebarCollapsed then
         a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed False), class "collapse-link" ]
-            [ faSet "menu.open" model.appState ]
+            [ faOpen ]
 
     else
         a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed True), class "collapse-link" ]
-            [ faSet "menu.collapse" model.appState
+            [ faMenuCollapse
             , text (gettext "Collapse sidebar" model.appState.locale)
             ]
 
@@ -833,10 +828,10 @@ viewAboutModal appState isOpen recentlyCopied serverBuildInfoActionResult =
                         :: onMouseLeave (Wizard.Msgs.MenuMsg ClearRecentlyCopied)
                         :: copyButtonTooltip
                     )
-                    [ faSet "_global.copy" appState, text (gettext "Copy" appState.locale) ]
+                    [ faCopy, text (gettext "Copy" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         modalTitle =
             if Admin.isEnabled appState.config.admin then

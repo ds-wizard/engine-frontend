@@ -8,10 +8,10 @@ import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (Html, div, label, p, text)
 import Html.Attributes exposing (class, for, id, name)
+import Html.Extra as Html
 import Registry.Data.AppState exposing (AppState)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 
 
 input : AppState -> Form FormError o -> String -> String -> Html Form.Msg
@@ -52,4 +52,4 @@ getErrors appState field labelText =
             ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
 
         Nothing ->
-            ( emptyNode, "" )
+            ( Html.nothing, "" )

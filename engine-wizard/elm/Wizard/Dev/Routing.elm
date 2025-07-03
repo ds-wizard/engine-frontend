@@ -1,4 +1,8 @@
-module Wizard.Dev.Routing exposing (isAllowed, parsers, toUrl)
+module Wizard.Dev.Routing exposing
+    ( isAllowed
+    , parsers
+    , toUrl
+    )
 
 import Dict
 import Shared.Data.PaginationQueryString as PaginationQueryString
@@ -12,12 +16,14 @@ import Wizard.Common.Feature as Feature
 import Wizard.Dev.Routes exposing (Route(..), persistentCommandIndexRouteStateFilterId)
 
 
-parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parsers _ wrapRoute =
-    let
-        moduleRoot =
-            "dev"
+moduleRoot : String
+moduleRoot =
+    "dev"
 
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    let
         wrappedPersistentCommandsIndexRoute pqs mbState =
             wrapRoute <| PersistentCommandsIndex pqs mbState
 
@@ -31,12 +37,8 @@ parsers _ wrapRoute =
     ]
 
 
-toUrl : AppState -> Route -> List String
-toUrl _ route =
-    let
-        moduleRoot =
-            "dev"
-    in
+toUrl : Route -> List String
+toUrl route =
     case route of
         OperationsRoute ->
             [ moduleRoot, "operations" ]

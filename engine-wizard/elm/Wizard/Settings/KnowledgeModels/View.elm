@@ -6,8 +6,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, hr, span, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Utils exposing (compose2)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
@@ -53,11 +54,11 @@ formView appState form =
                             ]
                 in
                 div [ class "nested-group" ]
-                    [ FormGroup.listWithHeader appState allowedInputHeader (allowedPackageFormView appState) form "publicPackages" (gettext "Allowed Packages" appState.locale) (gettext "Add knowledge model" appState.locale)
+                    [ FormGroup.listWithHeader appState allowedInputHeader allowedPackageFormView form "publicPackages" (gettext "Allowed Packages" appState.locale) (gettext "Add knowledge model" appState.locale)
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         [ FormGroup.toggle form "publicEnabled" (gettext "Public Knowledge Models" appState.locale)
@@ -73,8 +74,8 @@ formView appState form =
         ]
 
 
-allowedPackageFormView : AppState -> Form FormError EditableKnowledgeModelConfigForm -> Int -> Html Form.Msg
-allowedPackageFormView appState form index =
+allowedPackageFormView : Form FormError EditableKnowledgeModelConfigForm -> Int -> Html Form.Msg
+allowedPackageFormView form index =
     let
         fieldName name =
             "publicPackages." ++ String.fromInt index ++ "." ++ name
@@ -94,5 +95,5 @@ allowedPackageFormView appState form index =
             [ class "btn btn-link text-danger"
             , onClick (Form.RemoveItem "publicPackages" index)
             ]
-            [ faSet "_global.delete" appState ]
+            [ faDelete ]
         ]

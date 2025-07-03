@@ -547,7 +547,7 @@ body {
                         @include border-radius($border-radius);
                         @include transition($side-navigation-link-transition);
 
-                        .fa {
+                        .fas, .far, .fab {
                             margin-right: $side-navigation-icon-spacing;
                         }
 
@@ -556,7 +556,7 @@ body {
                             color: $side-navigation-link-hover-color;
                             text-decoration: none !important;
 
-                            .fa {
+                            .fas, .far, .fab {
                                 color: $side-navigation-icon-hover-color;
                             }
                         }
@@ -583,7 +583,7 @@ body {
             color: $gray-700 !important;
         }
 
-        .fa {
+        .fas, .far, .fab{
             margin-right: $side-navigation-icon-spacing;
         }
     }
@@ -635,7 +635,7 @@ body {
             padding: 5px;
             text-align: center;
 
-            .fa {
+            .fas, .far, .fab{
                 margin: 0;
             }
 
@@ -688,7 +688,7 @@ body {
         }
 
         .collapse-link {
-            .fa {
+            .fas, .far, .fab{
                 margin: 0;
             }
         }

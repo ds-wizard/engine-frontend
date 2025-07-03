@@ -16,13 +16,11 @@
     "start": "npm run start:wizard",
     "start:registry": "COMPONENT=registry webpack serve",
     "start:wizard": "COMPONENT=wizard webpack serve",
-    "test": "npm run test:elm && npm run test:wizard:icon-set && npm run test:wizard:locale && npm run test:guide-links",
+    "test": "npm run test:elm && npm run test:guide-links",
     "test:elm": "elm-test && elm-review",
     "test:guide-links": "node scripts/test-guide-links.js",
     "test:registry": "npm run test:elm",
-    "test:wizard": "npm run test:elm && npm run test:wizard:icon-set && npm run test:wizard:locale",
-    "test:wizard:icon-set": "COMPONENT=wizard node scripts/test-icon-set.js",
-    "test:wizard:locale": "COMPONENT=wizard node scripts/test-locale.js"
+    "test:wizard": "npm run test:elm"
   },
   "devDependencies": {
     "@lydell/elm": "^0.19.1-14",

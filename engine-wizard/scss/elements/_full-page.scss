@@ -12,7 +12,7 @@
     @include animation-delay(.4s);
     @include animation-fill-mode(forwards);
 
-    .fa {
+    .fas, .far, .fab{
         font-size: 50px;
         margin: 20px;
     }

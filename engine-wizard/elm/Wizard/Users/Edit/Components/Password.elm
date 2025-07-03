@@ -109,10 +109,10 @@ view : AppState -> Model -> Html Msg
 view appState model =
     Html.form [ onSubmit (PasswordFormMsg Form.Submit), detailClass "" ]
         [ Page.header (gettext "Password" appState.locale) []
-        , FormResult.view appState model.savingPassword
+        , FormResult.view model.savingPassword
         , passwordFormView appState model.passwordForm |> Html.map PasswordFormMsg
         , div [ class "mt-5" ]
-            [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingPassword) ]
+            [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingPassword) ]
         ]
 
 

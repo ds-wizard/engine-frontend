@@ -6,7 +6,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, span, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faDocumentTemplateEditorFiles, faDocumentTemplateEditorPublish, faPreview, faSettings)
 import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailNavigation as DetailNavigation
@@ -76,7 +76,7 @@ viewEditorNavigation appState route model =
             if containsChanges model then
                 let
                     saveButton =
-                        ActionResult.buttonWithAttrs appState
+                        ActionResult.buttonWithAttrs
                             { label = gettext "Save" appState.locale
                             , result =
                                 ActionResult.all
@@ -110,7 +110,7 @@ viewEditorNavigation appState route model =
                     , onClick (PublishModalMsg PublishModal.openMsg)
                     , dataCy "dt-editor_publish"
                     ]
-                    [ faSet "documentTemplateEditor.publish" appState
+                    [ faDocumentTemplateEditorPublish
                     , text (gettext "Publish" appState.locale)
                     ]
                 ]
@@ -135,7 +135,7 @@ viewEditorNavigationNav appState route model =
         filesLink =
             { route = Routes.documentTemplateEditorDetailFiles model.documentTemplateId
             , label = gettext "Files" appState.locale
-            , icon = faSet "documentTemplateEditor.files" appState
+            , icon = faDocumentTemplateEditorFiles
             , isActive = route == DTEditorRoute.Files
             , isVisible = True
             , dataCy = "dt-editor_nav_files"
@@ -144,7 +144,7 @@ viewEditorNavigationNav appState route model =
         previewLink =
             { route = Routes.documentTemplateEditorDetailPreview model.documentTemplateId
             , label = gettext "Preview" appState.locale
-            , icon = faSet "_global.preview" appState
+            , icon = faPreview
             , isActive = route == DTEditorRoute.Preview
             , isVisible = True
             , dataCy = "dt-editor_nav_preview"
@@ -153,7 +153,7 @@ viewEditorNavigationNav appState route model =
         settingsLink =
             { route = Routes.documentTemplateEditorDetailSettings model.documentTemplateId
             , label = gettext "Settings" appState.locale
-            , icon = faSet "_global.settings" appState
+            , icon = faSettings
             , isActive = route == DTEditorRoute.Settings
             , isVisible = True
             , dataCy = "dt-editor_nav_settings"
@@ -165,4 +165,4 @@ viewEditorNavigationNav appState route model =
             , settingsLink
             ]
     in
-    DetailNavigation.navigation appState links
+    DetailNavigation.navigation links

@@ -16,11 +16,11 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import Shared.Setters exposing (setSelected)
 import String.Format as String
 import Uuid exposing (Uuid)
@@ -131,7 +131,7 @@ update cfg msg appState model =
             handleGetQuestionnaireEventCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsDetailDocuments cfg.questionnaireUuid)) )
+            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsDetailDocuments cfg.questionnaireUuid)) )
 
         FormMsg formMsg ->
             handleForm cfg formMsg appState model
@@ -284,7 +284,7 @@ viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
         [ div [ detailClass "container" ]
             [ Page.headerWithGuideLink appState (gettext "New Document" appState.locale) GuideLinks.projectsNewDocument
             , div []
-                [ FormResult.view appState model.savingDocument
+                [ FormResult.view model.savingDocument
                 , formView appState questionnaire mbEvent model summaryReport
                 , FormActions.view appState
                     Cancel
@@ -316,7 +316,7 @@ formView appState questionnaire mbEvent model summaryReport =
                     FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" <| gettext "Format" appState.locale
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         extraInfo =
             case mbEvent of
@@ -327,8 +327,7 @@ formView appState questionnaire mbEvent model summaryReport =
                                 |> TimeUtils.toReadableDateTime appState.timeZone
 
                         currentLink =
-                            linkTo appState
-                                (Routes.projectsDetailDocumentsNew questionnaire.uuid Nothing)
+                            linkTo (Routes.projectsDetailDocumentsNew questionnaire.uuid Nothing)
                                 []
                                 [ text (gettext "Create for current version" appState.locale) ]
                     in

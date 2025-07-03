@@ -5,7 +5,7 @@ import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Html exposing (fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faDelete, faDownload)
 import String.Format as String
 import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Api.Models.User as User
@@ -98,8 +98,7 @@ listingDescription appState questionnaireFile =
     span []
         [ span [ class "fragment" ] [ text (ByteUnits.toReadable questionnaireFile.fileSize) ]
         , span [ class "fragment" ]
-            [ linkTo appState
-                (Routes.projectsDetail questionnaireFile.questionnaire.uuid)
+            [ linkTo (Routes.projectsDetail questionnaireFile.questionnaire.uuid)
                 []
                 [ text questionnaireFile.questionnaire.name ]
             ]
@@ -113,7 +112,7 @@ listingActions appState questionnaireFile =
         downloadFile =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.download" appState
+                , icon = faDownload
                 , label = gettext "Download" appState.locale
                 , msg = ListingActionMsg (DownloadFile questionnaireFile)
                 , dataCy = "download"
@@ -122,7 +121,7 @@ listingActions appState questionnaireFile =
         deleteFile =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (ShowHideDeleteFile (Just questionnaireFile))
                 , dataCy = "delete"

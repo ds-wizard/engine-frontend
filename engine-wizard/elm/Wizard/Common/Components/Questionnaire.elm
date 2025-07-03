@@ -56,9 +56,9 @@ import Shared.Auth.Session as Session
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess)
 import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Undraw as Undraw
@@ -1388,7 +1388,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         CopyLinkToQuestion path ->
             let
                 route =
-                    Routing.toUrl appState <|
+                    Routing.toUrl <|
                         Routes.projectsDetailQuestionnaire model.uuid (Just (String.join "." path)) Nothing
             in
             ( appState.seed, { model | recentlyCopied = True }, Copy.copyToClipboard (AppState.getClientUrlRoot appState ++ route) )
@@ -1803,7 +1803,7 @@ view appState cfg ctx model =
                 ( Html.map cfg.wrapMsg <| viewQuestionnaireToolbar appState cfg model, True )
 
             else
-                ( emptyNode, False )
+                ( Html.nothing, False )
 
         splitPaneConfig =
             SplitPane.createViewConfig
@@ -1846,10 +1846,10 @@ viewQuestionnaireToolbar appState cfg model =
 
                 settingsIcon enabled =
                     if enabled then
-                        faSet "_global.success" appState
+                        faSuccess
 
                     else
-                        emptyNode
+                        Html.nothing
 
                 hiddenOptionsTooltip =
                     if QuestionnaireViewSettings.anyHidden viewSettings then
@@ -1919,11 +1919,11 @@ viewQuestionnaireToolbar appState cfg model =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         importerDropdownItem importer =
             Dropdown.anchorItem
-                (class "dropdown-item" :: linkToAttributes appState (Routes.projectsImport model.uuid importer.id))
+                (class "dropdown-item" :: linkToAttributes (Routes.projectsImport model.uuid importer.id))
                 [ text importer.name ]
 
         actionsDropdown =
@@ -1943,7 +1943,7 @@ viewQuestionnaireToolbar appState cfg model =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         actionDropdownItem action =
             Dropdown.anchorItem
@@ -1955,7 +1955,7 @@ viewQuestionnaireToolbar appState cfg model =
                 buttonElement
 
             else
-                emptyNode
+                Html.nothing
 
         ( todosPanel, todosOpen ) =
             case model.rightPanel of
@@ -2000,7 +2000,7 @@ viewQuestionnaireToolbar appState cfg model =
                 Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
 
             else
-                emptyNode
+                Html.nothing
 
         todosButtonVisible =
             Feature.projectTodos appState model.questionnaire
@@ -2021,7 +2021,7 @@ viewQuestionnaireToolbar appState cfg model =
                 Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
 
             else
-                emptyNode
+                Html.nothing
 
         commentsOverviewButtonVisible =
             Feature.projectCommentAdd appState model.questionnaire
@@ -2059,10 +2059,10 @@ viewQuestionnaireToolbar appState cfg model =
 
         ( expandIcon, expandMsg ) =
             if AppState.isFullscreen appState then
-                ( faSet "questionnaire.shrink" appState, SetFullscreen False )
+                ( faQuestionnaireShrink, SetFullscreen False )
 
             else
-                ( faSet "questionnaire.expand" appState, SetFullscreen True )
+                ( faQuestionnaireExpand, SetFullscreen True )
     in
     div [ class "questionnaire__toolbar" ]
         [ div [ class "questionnaire__toolbar__left" ]
@@ -2087,12 +2087,12 @@ viewActionResultModal appState model =
     let
         modalTitle actionResult =
             if actionResult.success then
-                [ span [ class "text-success me-2" ] [ faSet "_global.success" appState ]
+                [ span [ class "text-success me-2" ] [ faSuccess ]
                 , text (gettext "Action succeeded!" appState.locale)
                 ]
 
             else
-                [ span [ class "text-danger me-2" ] [ faSet "_global.error" appState ]
+                [ span [ class "text-danger me-2" ] [ faError ]
                 , text (gettext "Action failed!" appState.locale)
                 ]
 
@@ -2172,7 +2172,7 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewPhaseModal : AppState -> Model -> Html Msg
@@ -2200,7 +2200,7 @@ viewPhaseModal appState model =
                             div [ class "phase-description" ] [ text description ]
 
                         Nothing ->
-                            emptyNode
+                            Html.nothing
 
                 clickAttribute =
                     if index == currentPhaseIndex then
@@ -2231,7 +2231,7 @@ viewPhaseModal appState model =
                     [ class "close"
                     , onClick (PhaseModalUpdate False Nothing)
                     ]
-                    [ faSet "_global.close" appState ]
+                    [ faClose ]
                 ]
             , div [ class "modal-body" ]
                 [ div [] (List.indexedMap viewPhase phases)
@@ -2284,7 +2284,7 @@ viewQuestionnaireRightPanel appState cfg model =
     in
     case model.rightPanel of
         RightPanel.None ->
-            emptyNode
+            Html.nothing
 
         RightPanel.TODOs ->
             Html.viewIf (Feature.projectTodos appState model.questionnaire) <|
@@ -2327,7 +2327,7 @@ viewQuestionnaireRightPanel appState cfg model =
                     [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings model ]
 
             else
-                emptyNode
+                Html.nothing
 
 
 
@@ -2400,7 +2400,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                     List.any (\c -> c.unresolvedComments > 0) group.comments
             in
             if not model.commentsViewResolved && not anyUnresolvedComments then
-                emptyNode
+                Html.nothing
 
             else
                 div []
@@ -2410,7 +2410,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
 
         viewQuestionComments comment =
             if not model.commentsViewResolved && comment.unresolvedComments == 0 then
-                emptyNode
+                Html.nothing
 
             else
                 let
@@ -2422,7 +2422,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                                 ]
 
                         else
-                            emptyNode
+                            Html.nothing
                 in
                 li []
                     [ span [ class "fa-li" ] [ fa "far fa-comment" ]
@@ -2472,7 +2472,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
                 [ div [ class "alert alert-info" ]
                     [ p
                         []
-                        (String.formatHtml (gettext "Click the %s icon to add new comments to a question." appState.locale) [ faSet "questionnaire.comments" appState ])
+                        (String.formatHtml (gettext "Click the %s icon to add new comments to a question." appState.locale) [ faQuestionnaireComments ])
                     ]
                 ]
 
@@ -2585,17 +2585,17 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                             ]
 
                     Nothing ->
-                        emptyNode
+                        Html.nothing
 
             else
-                emptyNode
+                Html.nothing
 
         navigationView =
             if Feature.projectCommentPrivate appState model.questionnaire then
                 viewCommentsNavigation appState model commentThreads
 
             else
-                emptyNode
+                Html.nothing
 
         editorNoteExplanation =
             if model.commentsViewPrivate then
@@ -2605,7 +2605,7 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         viewFilteredCommentThreads condition =
             commentThreads
@@ -2619,7 +2619,7 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 div [] (viewFilteredCommentThreads (\thread -> thread.resolved))
 
             else
-                emptyNode
+                Html.nothing
 
         commentThreadsView =
             div [] (viewFilteredCommentThreads (\thread -> not thread.resolved))
@@ -2667,7 +2667,7 @@ viewCommentsNavigation appState model commentThreads =
 
         toBadge count =
             if count == 0 then
-                emptyNode
+                Html.nothing
 
             else
                 Badge.light [ class "rounded-pill" ] [ text (String.fromInt count) ]
@@ -2680,7 +2680,7 @@ viewCommentsNavigation appState model commentThreads =
                     ]
 
             else
-                emptyNode
+                Html.nothing
     in
     ul [ class "nav nav-underline-tabs" ]
         [ li [ class "nav-item" ]
@@ -2727,11 +2727,11 @@ viewCommentThread appState model path commentThread =
                     }
 
             else
-                emptyNode
+                Html.nothing
 
         replyForm =
             if commentThread.resolved then
-                emptyNode
+                Html.nothing
 
             else
                 viewCommentReplyForm appState
@@ -2768,7 +2768,7 @@ viewCommentThread appState model path commentThread =
                         assignedContent
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         commentViews =
             List.indexedMap (viewComment appState model path commentThread) comments
@@ -2831,7 +2831,7 @@ viewComment appState model path commentThread index comment =
                     }
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "Comment" ]
         [ commentHeader
@@ -2852,10 +2852,10 @@ viewCommentHeader appState model path commentThread index comment =
                      ]
                         ++ tooltipLeft (gettext "Resolve comment thread" appState.locale)
                     )
-                    [ faSet "questionnaire.commentsResolve" appState ]
+                    [ faQuestionnaireCommentsResolve ]
 
             else
-                emptyNode
+                Html.nothing
 
         assignAction =
             if index == 0 && Feature.projectCommentThreadAssign appState model.questionnaire commentThread then
@@ -2872,7 +2872,7 @@ viewCommentHeader appState model path commentThread index comment =
                 UserSuggestionDropdown.view viewConfig appState userSuggestionDropdownModel
 
             else
-                emptyNode
+                Html.nothing
 
         removeAssignedAction =
             Dropdown.anchorItem
@@ -2918,7 +2918,7 @@ viewCommentHeader appState model path commentThread index comment =
 
         dropdown =
             if List.isEmpty actions then
-                emptyNode
+                Html.nothing
 
             else
                 let
@@ -2931,7 +2931,7 @@ viewCommentHeader appState model path commentThread index comment =
                     , toggleMsg = CommentDropdownMsg (Uuid.toString comment.uuid)
                     , toggleButton =
                         Dropdown.toggle [ Button.roleLink ]
-                            [ faSet "listing.actions" appState ]
+                            [ faListingActions ]
                     , items = actions
                     }
 
@@ -2944,7 +2944,7 @@ viewCommentHeader appState model path commentThread index comment =
                     [ text <| " (" ++ gettext "edited" appState.locale ++ ")" ]
 
             else
-                emptyNode
+                Html.nothing
 
         userForIcon =
             case comment.createdBy of
@@ -3008,7 +3008,7 @@ viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThre
 
         newThreadFormSubmit =
             if String.isEmpty commentValue then
-                emptyNode
+                Html.nothing
 
             else
                 div []
@@ -3070,10 +3070,10 @@ viewQuestionnaireContent appState cfg ctx model =
                             viewQuestionnaireContentChapter appState cfg ctx model chapter
 
                         Nothing ->
-                            emptyNode
+                            Html.nothing
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "questionnaire__content" ] [ content ]
 
@@ -3107,7 +3107,7 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
                             gettext "There are no questions matching the selected question tags." appState.locale
                 in
                 div [ class "flex-grow-1" ]
-                    [ Flash.info appState emptyMessage
+                    [ Flash.info emptyMessage
                     ]
 
             else
@@ -3117,7 +3117,7 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
                 in
                 if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
                     div [ class "flex-grow-1" ]
-                        [ Flash.info appState (gettext "There are no questions in this phase." appState.locale)
+                        [ Flash.info (gettext "There are no questions in this phase." appState.locale)
                         ]
 
                 else
@@ -3172,20 +3172,20 @@ viewPrevAndNextChapterLinks appState chapters currentChapter =
         viewPrevChapterLink =
             viewChapterLink "chapter-link-prev"
                 (gettext "Previous chapter" appState.locale)
-                (faSet "_global.chevronLeft" appState)
+                faPrev
 
         viewNextChapterLink =
             viewChapterLink "chapter-link-next"
                 (gettext "Next chapter" appState.locale)
-                (faSet "_global.chevronRight" appState)
+                faNext
 
         prevChapterLink =
             findPrevChapter chapters
-                |> Maybe.unwrap emptyNode viewPrevChapterLink
+                |> Maybe.unwrap Html.nothing viewPrevChapterLink
 
         nextChapterLink =
             findNextChapter chapters
-                |> Maybe.unwrap emptyNode viewNextChapterLink
+                |> Maybe.unwrap Html.nothing viewNextChapterLink
     in
     div [ class "mt-5 pt-3 pb-3 d-flex flex-gap-2" ]
         [ prevChapterLink, nextChapterLink ]
@@ -3224,7 +3224,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             ( viewQuestionIntegrationWidget appState cfg model newPath commonIntegrationData widgetIntegrationData, [] )
 
                         _ ->
-                            ( emptyNode, [] )
+                            ( Html.nothing, [] )
 
                 MultiChoiceQuestion _ _ ->
                     ( viewQuestionMultiChoice appState cfg model newPath question, [] )
@@ -3269,7 +3269,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 Tag.viewList { showDescription = False } tags
 
             else
-                emptyNode
+                Html.nothing
 
         viewDescription =
             cfg.renderer.renderQuestionDescription model.viewSettings question
@@ -3302,7 +3302,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                         (String.formatHtml (gettext "Answered %s by %s." appState.locale) [ time, text userName ])
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         content =
             viewLabel :: viewTags :: viewDescription :: viewInput :: viewAnsweredBy :: viewExtensions
@@ -3379,10 +3379,10 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
             viewQuestionClearButton appState cfg path (Maybe.isJust mbSelectedAnswer)
 
         advice =
-            Maybe.unwrap emptyNode cfg.renderer.renderAnswerAdvice mbSelectedAnswer
+            Maybe.unwrap Html.nothing cfg.renderer.renderAnswerAdvice mbSelectedAnswer
 
         followUps =
-            Maybe.unwrap emptyNode
+            Maybe.unwrap Html.nothing
                 (viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifiers)
                 mbSelectedAnswer
     in
@@ -3397,11 +3397,11 @@ viewQuestionOptions appState cfg ctx model path humanIdentifiers question =
 viewQuestionClearButton : AppState -> Config msg -> List String -> Bool -> Html Msg
 viewQuestionClearButton appState cfg path hasAnswer =
     if cfg.features.readonly || not hasAnswer then
-        emptyNode
+        Html.nothing
 
     else
         a [ class "clear-answer", onClick (ClearReply (pathToString path)) ]
-            [ faSet "questionnaire.clearAnswer" appState
+            [ faQuestionnaireClearAnswer
             , text (gettext "Clear answer" appState.locale)
             ]
 
@@ -3426,7 +3426,7 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
             List.indexedMap (viewQuestion appState cfg ctx model newPath newHumanIdentifier) questions
     in
     if List.isEmpty followUpQuestions then
-        emptyNode
+        Html.nothing
 
     else
         let
@@ -3435,7 +3435,7 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
         in
         if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
             div [ class "followups-group" ]
-                [ Flash.info appState (gettext "There are no follow up questions in this phase." appState.locale)
+                [ Flash.info (gettext "There are no follow up questions in this phase." appState.locale)
                 ]
 
         else
@@ -3450,7 +3450,7 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
 
                     expandButton =
                         a [ onClick (ExpandItem pathString) ]
-                            [ faSet "questionnaire.item.expand" appState
+                            [ faQuestionnaireItemExpand
                             , span [ class "ms-1" ] [ text (gettext "Expand" appState.locale) ]
                             ]
                 in
@@ -3465,7 +3465,7 @@ viewQuestionOptionsFollowUps appState cfg ctx model answers path humanIdentifier
                 let
                     collapseButton =
                         a [ onClick (CollapseItem pathString) ]
-                            [ faSet "questionnaire.item.collapse" appState
+                            [ faQuestionnaireItemCollapse
                             , span [ class "ms-1" ] [ text (gettext "Collapse" appState.locale) ]
                             ]
                 in
@@ -3499,14 +3499,14 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
             in
             div [ class "mb-3" ]
                 [ a [ onClick (ExpandItems allItemsPaths) ]
-                    [ faSet "questionnaire.item.expandAll" appState
+                    [ faQuestionnaireItemExpandAll
                     , span [ class "ms-1" ] [ text (gettext "Expand all" appState.locale) ]
                     ]
                 , a
                     [ onClick (CollapseItems allItemsPaths)
                     , class "ms-3"
                     ]
-                    [ faSet "questionnaire.item.collapseAll" appState
+                    [ faQuestionnaireItemCollapseAll
                     , span [ class "ms-1" ] [ text (gettext "Collapse all" appState.locale) ]
                     ]
                 ]
@@ -3523,7 +3523,7 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
                 i [] [ text (gettext "There are no answers yet." appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         [ Html.viewIf (List.length itemUuids > 1) <| expandAndCollapseButtons
@@ -3537,14 +3537,14 @@ viewQuestionList appState cfg ctx model path humanIdentifiers question =
 viewQuestionListAdd : AppState -> Config msg -> List String -> List String -> Html Msg
 viewQuestionListAdd appState cfg itemUuids path =
     if cfg.features.readonly then
-        emptyNode
+        Html.nothing
 
     else
         button
             [ class "btn btn-outline-secondary with-icon"
             , onClick (AddItem (pathToString path) itemUuids)
             ]
-            [ faSet "_global.add" appState
+            [ faAdd
             , text (gettext "Add" appState.locale)
             ]
 
@@ -3569,7 +3569,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 []
 
             else if List.isEmpty questions then
-                [ Flash.info appState (gettext "This item contains no questions." appState.locale) ]
+                [ Flash.info (gettext "This item contains no questions." appState.locale) ]
 
             else
                 let
@@ -3577,7 +3577,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                         List.filter (isQuestionDesirable model) questions
                 in
                 if not model.viewSettings.nonDesirableQuestions && List.isEmpty desirableQuestions then
-                    [ Flash.info appState (gettext "There are no questions in this phase." appState.locale) ]
+                    [ Flash.info (gettext "There are no questions in this phase." appState.locale) ]
 
                 else
                     let
@@ -3599,11 +3599,11 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                 :: dataCy "item-delete"
                                 :: tooltip (gettext "Delete" appState.locale)
                             )
-                            [ faSet "_global.delete" appState ]
+                            [ faDelete ]
 
                     moveUpButton =
                         if index == 0 then
-                            emptyNode
+                            Html.nothing
 
                         else
                             a
@@ -3612,11 +3612,11 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                     :: dataCy "item-move-up"
                                     :: tooltip (gettext "Move up" appState.locale)
                                 )
-                                [ faSet "questionnaire.item.moveUp" appState ]
+                                [ faQuestionnaireItemMoveUp ]
 
                     moveDownButton =
                         if index == itemCount - 1 then
-                            emptyNode
+                            Html.nothing
 
                         else
                             a
@@ -3625,7 +3625,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                                     :: dataCy "item-move-down"
                                     :: tooltip (gettext "Move down" appState.locale)
                                 )
-                                [ faSet "questionnaire.item.moveDown" appState ]
+                                [ faQuestionnaireItemMoveDown ]
                 in
                 [ moveUpButton, moveDownButton, deleteButton ]
 
@@ -3637,17 +3637,17 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                     (QuestionnaireQuestionnaire.getItemTitle model.questionnaire itemPath questions)
 
             else
-                emptyNode
+                Html.nothing
 
         ( collapseAttributes, collapseIcon ) =
             if isCollapsed then
                 ( [ onClick (ExpandItem itemPathString), dataCy "item-expand" ]
-                , span [ class "text-primary" ] [ faSet "questionnaire.item.expand" appState ]
+                , span [ class "text-primary" ] [ faQuestionnaireItemExpand ]
                 )
 
             else
                 ( [ onClick (CollapseItem itemPathString), dataCy "item-collapse" ]
-                , span [ class "text-primary" ] [ faSet "questionnaire.item.collapse" appState ]
+                , span [ class "text-primary" ] [ faQuestionnaireItemCollapse ]
                 )
 
         itemHeader =
@@ -3658,11 +3658,11 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
 
         collapseFooterButton =
             if isCollapsed then
-                emptyNode
+                Html.nothing
 
             else
                 a [ onClick (CollapseItem itemPathString), class "item-collapse-footer-link" ]
-                    [ faSet "questionnaire.item.collapse" appState
+                    [ faQuestionnaireItemCollapse
                     , span [ class "ms-1" ] [ text (gettext "Collapse" appState.locale) ]
                     ]
     in
@@ -3710,10 +3710,10 @@ viewQuestionValue appState cfg model path question =
 
         warningView regex warning =
             if not (String.isEmpty answer) && not (Regex.contains regex answer) then
-                Flash.warning appState warning
+                Flash.warning warning
 
             else
-                emptyNode
+                Html.nothing
 
         defaultInput =
             [ input (type_ "text" :: defaultAttrs ++ extraAttrs) [] ]
@@ -3763,10 +3763,10 @@ viewQuestionValue appState cfg model path question =
         validationWarning validation =
             case QuestionValidation.validate appState validation answer of
                 Ok _ ->
-                    emptyNode
+                    Html.nothing
 
                 Err error ->
-                    Flash.warning appState error
+                    Flash.warning error
 
         validationWarnings =
             case ( Question.getValidations question, mbAnswer ) of
@@ -3814,7 +3814,7 @@ viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationDat
                 [ text (gettext "Select" appState.locale) ]
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewQuestionIntegrationApi : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiIntegrationData -> Question -> Html Msg
@@ -3865,7 +3865,7 @@ viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiInte
                 viewQuestionIntegrationTypeHints appState cfg model path
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "question-integration-answer" ]
         [ questionInput
@@ -3881,7 +3881,7 @@ viewQuestionIntegrationTypeHints appState cfg model path =
             case Maybe.unwrap Unset .hints model.typeHints of
                 Success [] ->
                     div [ class "info" ]
-                        [ faSet "_global.info" appState
+                        [ faInfo
                         , text (gettext "There are no results for your search." appState.locale)
                         ]
 
@@ -3890,18 +3890,18 @@ viewQuestionIntegrationTypeHints appState cfg model path =
 
                 Loading ->
                     div [ class "loading" ]
-                        [ faSet "_global.spinner" appState
+                        [ faSpinner
                         , text (gettext "Loading..." appState.locale)
                         ]
 
                 Error err ->
                     div [ class "error" ]
-                        [ faSet "_global.error" appState
+                        [ faError
                         , text err
                         ]
 
                 Unset ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "integration-typehints" ] [ content ]
 
@@ -3909,7 +3909,7 @@ viewQuestionIntegrationTypeHints appState cfg model path =
 viewQuestionIntegrationTypeHint : AppState -> Config msg -> List String -> TypeHint -> Html Msg
 viewQuestionIntegrationTypeHint appState cfg path typeHint =
     if cfg.features.readonly then
-        emptyNode
+        Html.nothing
 
     else
         li
@@ -3942,7 +3942,7 @@ viewQuestionIntegrationLink integration mbId =
                             img [ src logoUrl ] []
 
                         Nothing ->
-                            emptyNode
+                            Html.nothing
             in
             div [ class "card-footer" ]
                 [ logo
@@ -3950,7 +3950,7 @@ viewQuestionIntegrationLink integration mbId =
                 ]
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewQuestionItemSelect : AppState -> Config msg -> Model -> List String -> Question -> Html Msg
@@ -4014,15 +4014,15 @@ viewQuestionItemSelect appState cfg model path question =
                                             [ text (gettext "Create them now." appState.locale)
                                             ]
                                 in
-                                Flash.warningHtml appState
+                                Flash.warningHtml
                                     (div []
                                         [ text (gettext "There are no items to select from yet." appState.locale)
-                                        , Maybe.unwrap emptyNode viewItemQuestionLink mbClosestQuestionParentPath
+                                        , Maybe.unwrap Html.nothing viewItemQuestionLink mbClosestQuestionParentPath
                                         ]
                                     )
 
                             else
-                                emptyNode
+                                Html.nothing
                     in
                     ( itemOptions
                     , noItemsWarning
@@ -4030,7 +4030,7 @@ viewQuestionItemSelect appState cfg model path question =
 
                 Nothing ->
                     ( []
-                    , Flash.warning appState (gettext "This question does not have any configured list options to select from." appState.locale)
+                    , Flash.warning (gettext "This question does not have any configured list options to select from." appState.locale)
                     )
 
         itemToOption ( optionValue, optionLabel ) =
@@ -4061,17 +4061,17 @@ viewQuestionItemSelect appState cfg model path question =
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         clearReplyButton =
             viewQuestionClearButton appState cfg path (Maybe.isJust mbSelectedItem)
 
         missingItemWarning =
             if itemMissing then
-                Flash.warning appState (gettext "The selected item was deleted." appState.locale)
+                Flash.warning (gettext "The selected item was deleted." appState.locale)
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "question-item-select" ]
         [ select (class "form-control" :: extraAttrs) optionsWithSelect
@@ -4106,13 +4106,13 @@ viewQuestionFile appState cfg model path question =
                                         :: class "btn-link text-danger ms-2 d-block"
                                         :: tooltip (gettext "Delete" appState.locale)
                                     )
-                                    [ faSet "_global.delete" appState ]
+                                    [ faDelete ]
                                 ]
                         ]
 
                 Nothing ->
                     div []
-                        [ Flash.warning appState (gettext "The file was deleted." appState.locale)
+                        [ Flash.warning (gettext "The file was deleted." appState.locale)
                         , viewQuestionClearButton appState cfg path True
                         ]
 
@@ -4198,14 +4198,11 @@ viewAnswer appState cfg model km path selectedAnswerUuid order answer =
 
         followUpsIndicator =
             if List.isEmpty (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km) then
-                emptyNode
+                Html.nothing
 
             else
                 span (class "ms-3 text-muted" :: tooltipRight (gettext "This option leads to some follow up questions." appState.locale))
-                    [ i
-                        [ class (faKeyClass "questionnaire.followUpsIndication" appState)
-                        ]
-                        []
+                    [ faQuestionnaireFollowUpsIndication
                     ]
 
         isSelected =
@@ -4257,7 +4254,7 @@ viewCommentAction appState cfg model path =
                 , onClick msg
                 , dataCy "questionnaire_question-action_comment"
                 ]
-                [ faSet "questionnaire.comments" appState
+                [ faQuestionnaireComments
                 , text <| String.format (ngettext ( "1 comment", "%s comments" ) commentCount appState.locale) [ String.fromInt commentCount ]
                 ]
 
@@ -4269,10 +4266,10 @@ viewCommentAction appState cfg model path =
                     :: dataCy "questionnaire_question-action_comment"
                     :: tooltip (gettext "Comments" appState.locale)
                 )
-                [ faSet "questionnaire.comments" appState ]
+                [ faQuestionnaireComments ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewTodoAction : AppState -> Config msg -> Model -> List String -> Html Msg
@@ -4294,7 +4291,7 @@ viewTodoAction appState cfg model path =
                 ]
                 [ span [] [ text (gettext "TODO" appState.locale) ]
                 , a (class "text-danger" :: tooltip (gettext "Remove TODO" appState.locale))
-                    [ faSet "_global.remove" appState ]
+                    [ faRemove ]
                 ]
 
         else
@@ -4302,12 +4299,12 @@ viewTodoAction appState cfg model path =
                 [ class "action action-add-todo"
                 , onClick <| SetLabels currentPath [ QuestionnaireQuestionnaire.todoUuid ]
                 ]
-                [ faSet "_global.add" appState
+                [ faAdd
                 , span [] [ span [] [ text (gettext "Add TODO" appState.locale) ] ]
                 ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewFeedbackAction : AppState -> Config msg -> Model -> Question -> Html Msg
@@ -4327,10 +4324,10 @@ viewFeedbackAction appState cfg model question =
                 :: onClick openFeedbackModal
                 :: tooltip (gettext "Feedback" appState.locale)
             )
-            [ faSet "questionnaire.feedback" appState ]
+            [ faQuestionnaireFeedback ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewCopyLinkAction : AppState -> Config msg -> Model -> List String -> Html Msg
@@ -4345,10 +4342,10 @@ viewCopyLinkAction appState cfg model path =
                     gettext "Copy link" appState.locale
         in
         a (class "action" :: onClick (CopyLinkToQuestion path) :: onMouseOut ClearRecentlyCopied :: tooltipLeft copyText)
-            [ faSet "questionnaire.copyLink" appState ]
+            [ faQuestionnaireCopyLink ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewRemoveItemModal : AppState -> Model -> Html Msg
@@ -4380,7 +4377,7 @@ viewRemoveItemModal appState model =
 
         wrapItemLinks links =
             if List.isEmpty links then
-                emptyNode
+                Html.nothing
 
             else
                 p [ class "mt-3" ]
