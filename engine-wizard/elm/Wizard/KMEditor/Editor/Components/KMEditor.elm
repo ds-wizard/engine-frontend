@@ -100,7 +100,6 @@ import Wizard.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.KMEditor.Editor.Components.KMEditor.Tree as Tree
 import Wizard.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
 import Wizard.Ports as Ports
-import Wizard.Routes as Routes
 
 
 
@@ -372,7 +371,7 @@ viewWarningsPanel : AppState -> EditorBranch -> Html Msg
 viewWarningsPanel appState editorBranch =
     let
         viewWarning warning =
-            li [] [ linkTo appState (editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
+            li [] [ linkTo appState (EditorBranch.editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
 
         warnings =
             if List.isEmpty editorBranch.warnings then
@@ -543,7 +542,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setChapterUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getChapterName km
                 , untitledLabel = gettext "Untitled chapter" appState.locale
                 , addChildLabel = gettext "Add chapter" appState.locale
@@ -560,7 +559,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setMetricUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getMetricName km
                 , untitledLabel = gettext "Untitled metric" appState.locale
                 , addChildLabel = gettext "Add metric" appState.locale
@@ -577,7 +576,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setPhaseUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getPhaseName km
                 , untitledLabel = gettext "Untitled phase" appState.locale
                 , addChildLabel = gettext "Add phase" appState.locale
@@ -594,7 +593,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setTagUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getTagName km
                 , untitledLabel = gettext "Untitled tag" appState.locale
                 , addChildLabel = gettext "Add tag" appState.locale
@@ -611,7 +610,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setIntegrationUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getIntegrationName km
                 , untitledLabel = gettext "Untitled integration" appState.locale
                 , addChildLabel = gettext "Add integration" appState.locale
@@ -628,7 +627,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setResourceCollectionUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getResourceCollectionName km
                 , untitledLabel = gettext "Untitled resource collection" appState.locale
                 , addChildLabel = gettext "Add resource collection" appState.locale
@@ -713,7 +712,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setQuestionUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled question" appState.locale
                 , addChildLabel = gettext "Add question" appState.locale
@@ -955,7 +954,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getReferenceName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled reference" appState.locale
                 , addChildLabel = gettext "Add reference" appState.locale
@@ -972,7 +971,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getExpertName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled expert" appState.locale
                 , addChildLabel = gettext "Add expert" appState.locale
@@ -1010,7 +1009,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setAnswerUuids
-                                , getRoute = editorRoute editorBranch
+                                , getRoute = EditorBranch.editorRoute editorBranch
                                 , getName = KnowledgeModel.getAnswerName editorBranch.branch.knowledgeModel
                                 , untitledLabel = gettext "Untitled answer" appState.locale
                                 , addChildLabel = gettext "Add answer" appState.locale
@@ -1042,7 +1041,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setItemTemplateQuestionUuids
-                                , getRoute = editorRoute editorBranch
+                                , getRoute = EditorBranch.editorRoute editorBranch
                                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
                                 , untitledLabel = gettext "Untitled question" appState.locale
                                 , addChildLabel = gettext "Add question" appState.locale
@@ -1158,7 +1157,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             else
                                 Just <|
                                     div [ class "mt-1" ]
-                                        [ linkTo appState (editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
+                                        [ linkTo appState (EditorBranch.editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
                                         ]
 
                         integrationUuidInput =
@@ -1197,7 +1196,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setChoiceUuids
-                                , getRoute = editorRoute editorBranch
+                                , getRoute = EditorBranch.editorRoute editorBranch
                                 , getName = KnowledgeModel.getChoiceName editorBranch.branch.knowledgeModel
                                 , untitledLabel = gettext "Untitled choice" appState.locale
                                 , addChildLabel = gettext "Add choice" appState.locale
@@ -1239,7 +1238,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                             else
                                                 Just <|
                                                     div [ class "mt-1" ]
-                                                        [ linkTo appState (editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
+                                                        [ linkTo appState (EditorBranch.editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
                                                         ]
 
                                         Nothing ->
@@ -1930,7 +1929,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setFollowUpUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled question" appState.locale
                 , addChildLabel = gettext "Add question" appState.locale
@@ -2265,7 +2264,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setResourcePageUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getResourcePageName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled resource page" appState.locale
                 , addChildLabel = gettext "Add resource page" appState.locale
@@ -2380,11 +2379,6 @@ editor editorId =
     div [ id editorId, class "editor-content col-xl-10 col-12" ]
 
 
-editorRoute : EditorBranch -> String -> Routes.Route
-editorRoute editorBranch entityUuidString =
-    Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid entityUuidString editorBranch)
-
-
 type alias EditorTitleConfig msg =
     { title : String
     , uuid : String
@@ -2478,7 +2472,7 @@ viewQuestionLink appState editorBranch question =
     in
     li []
         [ linkTo appState
-            (editorRoute editorBranch (Question.getUuid question))
+            (EditorBranch.editorRoute editorBranch (Question.getUuid question))
             []
             [ questionTitleNode ]
         ]

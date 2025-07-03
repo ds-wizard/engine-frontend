@@ -160,6 +160,10 @@ $highlight-transition: background-color 0.1s ease-in-out;
                             transition: $highlight-transition;
                             padding: 5px;
 
+                            a {
+                                color: $body-color;
+                            }
+
                             .fa {
                                 margin-right: 5px;
                                 margin-left: -20px;

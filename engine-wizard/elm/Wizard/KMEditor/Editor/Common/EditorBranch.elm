@@ -2,6 +2,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     ( EditorBranch
     , EditorBranchWarning
     , applyEvent
+    , editorRoute
     , filterDeleted
     , filterDeletedWith
     , getActiveQuestionUuid
@@ -82,6 +83,7 @@ import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Routes as Routes
 
 
 type alias EditorBranch =
@@ -151,6 +153,11 @@ getEditUuid entityUuidString editorBranch =
 getParentUuid : String -> EditorBranch -> String
 getParentUuid uuid editorBranch =
     Maybe.withDefault "" (Dict.get uuid editorBranch.parentMap)
+
+
+editorRoute : EditorBranch -> String -> Routes.Route
+editorRoute editorBranch entityUuidString =
+    Routes.kmEditorEditor editorBranch.branch.uuid (getEditUuid entityUuidString editorBranch)
 
 
 filterDeleted : EditorBranch -> List String -> List String

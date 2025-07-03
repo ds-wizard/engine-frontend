@@ -24,6 +24,7 @@ import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.Flash as Flash
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
@@ -260,8 +261,12 @@ trQuestion appState props model indent phases question =
     tr []
         (th []
             [ div [ indentClass indent ]
-                [ faSet "km.question" appState
-                , text questionTitle
+                [ linkTo appState
+                    (EditorBranch.editorRoute props.editorBranch (Question.getUuid question))
+                    []
+                    [ faSet "km.question" appState
+                    , text questionTitle
+                    ]
                 ]
             ]
             :: List.map (tdQuestionTagCheckbox props model question) phases
@@ -307,37 +312,69 @@ tdQuestionTagCheckbox props model question phase =
 
 trChapter : AppState -> Props msg -> Chapter -> List Phase -> Html msg
 trChapter appState props chapter =
-    trSeparator props
-        (String.withDefault (gettext "Untitled chapter" appState.locale) chapter.title)
-        (faSet "km.chapter" appState)
-        "separator-chapter"
+    trSeparator appState
+        props
+        { title = String.withDefault (gettext "Untitled chapter" appState.locale) chapter.title
+        , icon = faSet "km.chapter" appState
+        , mbExtraClass = Just "separator-chapter"
+        , mbEditorUuid = Just chapter.uuid
+        }
         0
 
 
 trAnswer : AppState -> Props msg -> Answer -> Int -> List Phase -> Html msg
 trAnswer appState props answer =
-    trSeparator props
-        (String.withDefault (gettext "Untitled answer" appState.locale) answer.label)
-        (faSet "km.answer" appState)
-        ""
+    trSeparator appState
+        props
+        { title = String.withDefault (gettext "Untitled answer" appState.locale) answer.label
+        , icon = faSet "km.answer" appState
+        , mbExtraClass = Nothing
+        , mbEditorUuid = Just answer.uuid
+        }
 
 
 trItemTemplate : AppState -> Props msg -> Int -> List Phase -> Html msg
 trItemTemplate appState props =
-    trSeparator props
-        (gettext "Item Template" appState.locale)
-        (faSet "km.itemTemplate" appState)
-        ""
+    trSeparator appState
+        props
+        { title = gettext "Item Template" appState.locale
+        , icon = faSet "km.itemTemplate" appState
+        , mbExtraClass = Nothing
+        , mbEditorUuid = Nothing
+        }
 
 
-trSeparator : Props msg -> String -> Html msg -> String -> Int -> List Phase -> Html msg
-trSeparator props title icon extraClass indent phases =
-    tr [ class <| "separator " ++ extraClass ]
+type alias SeparatorProps msg =
+    { title : String
+    , icon : Html msg
+    , mbExtraClass : Maybe String
+    , mbEditorUuid : Maybe String
+    }
+
+
+trSeparator : AppState -> Props msg -> SeparatorProps msg -> Int -> List Phase -> Html msg
+trSeparator appState props { title, icon, mbExtraClass, mbEditorUuid } indent phases =
+    let
+        createLink content =
+            case mbEditorUuid of
+                Just editorUuid ->
+                    [ linkTo appState
+                        (EditorBranch.editorRoute props.editorBranch editorUuid)
+                        []
+                        content
+                    ]
+
+                Nothing ->
+                    content
+    in
+    tr [ class <| "separator " ++ Maybe.withDefault "" mbExtraClass ]
         (th []
             [ div [ indentClass indent ]
-                [ icon
-                , text title
-                ]
+                (createLink
+                    [ icon
+                    , text title
+                    ]
+                )
             ]
             :: List.map (tdPhase props) phases
         )
