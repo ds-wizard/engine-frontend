@@ -10,9 +10,12 @@ module.exports = (app) => {
                 disableActiveInteraction: true,
                 showProgress: true,
                 progressText: '{{current}}/{{total}}',
+                nextBtnText: `${config.nextBtnText} →`,
+                prevBtnText: `← ${config.prevBtnText}`,
+                doneBtnText: config.doneBtnText,
                 steps: config.steps,
                 onDestroyStarted: () => {
-                    if (!driverObj.hasNextStep() || window.confirm(config.skipTourStr)) {
+                    if (!driverObj.hasNextStep() || window.confirm(config.skipTourText)) {
                         driverObj.destroy()
                     }
                 },

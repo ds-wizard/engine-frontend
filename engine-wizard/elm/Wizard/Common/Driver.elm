@@ -92,7 +92,10 @@ encodeTour config =
     E.object
         [ ( "tourId", E.string config.tourId )
         , ( "steps", E.list encodeStep config.steps )
-        , ( "skipTourStr", E.string (String.format "%s\n(%s)" [ skipTourStr config.locale, skipTourHint config.locale ]) )
+        , ( "skipTourText", E.string (String.format "%s\n(%s)" [ skipTourStr config.locale, skipTourHint config.locale ]) )
+        , ( "nextBtnText", E.string (gettext "Next" config.locale) )
+        , ( "prevBtnText", E.string (gettext "Previous" config.locale) )
+        , ( "doneBtnText", E.string (gettext "Done" config.locale) )
         , ( "delay", E.int config.delay )
         ]
 
