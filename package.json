@@ -27,7 +27,7 @@
     "copy-webpack-plugin": "^13.0.0",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
-    "elm-review": "^2.13.2",
+    "elm-review": "^2.13.3",
     "elm-test": "^0.19.1-revision15",
     "elm-webpack-loader": "^8.0.0",
     "html-webpack-plugin": "^5.6.3",
