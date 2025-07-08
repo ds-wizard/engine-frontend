@@ -308,21 +308,21 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Answer must be at least %s characters long." [ String.fromInt data.value ]) appState.locale
+                Err <| String.format (gettext "Answer must be at least %s characters long." appState.locale) [ String.fromInt data.value ]
 
         MaxLength data ->
             if String.length value <= data.value then
                 Ok ()
 
             else
-                Err <| gettext (String.format "Answer must be at most %s characters long." [ String.fromInt data.value ]) appState.locale
+                Err <| String.format (gettext "Answer must be at most %s characters long." appState.locale) [ String.fromInt data.value ]
 
         Regex data ->
             if Regex.contains (RegexPatterns.fromString data.value) value then
                 Ok ()
 
             else
-                Err <| gettext (String.format "Answer does not match the required pattern (%s)." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Answer does not match the required pattern (%s)." appState.locale) [ data.value ]
 
         Orcid ->
             if Regex.contains RegexPatterns.orcid value then
@@ -343,14 +343,14 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Answer must be at least %s." [ String.fromFloat data.value ]) appState.locale
+                Err <| String.format (gettext "Answer must be at least %s." appState.locale) [ String.fromFloat data.value ]
 
         MaxNumber data ->
             if Maybe.withDefault 0.0 (String.toFloat value) <= data.value then
                 Ok ()
 
             else
-                Err <| gettext (String.format "Answer must be at most %s." [ String.fromFloat data.value ]) appState.locale
+                Err <| String.format (gettext "Answer must be at most %s." appState.locale) [ String.fromFloat data.value ]
 
         FromDate data ->
             let
@@ -364,7 +364,7 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Date must be at least %s." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Date must be at least %s." appState.locale) [ data.value ]
 
         ToDate data ->
             let
@@ -378,7 +378,7 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Date must be at most %s." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Date must be at most %s." appState.locale) [ data.value ]
 
         FromDateTime data ->
             let
@@ -392,7 +392,7 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Date and time must be at least %s." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Date and time must be at least %s." appState.locale) [ data.value ]
 
         ToDateTime data ->
             let
@@ -406,7 +406,7 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Date and time must be at most %s." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Date and time must be at most %s." appState.locale) [ data.value ]
 
         FromTime data ->
             let
@@ -420,7 +420,7 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Time must be at least %s." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Time must be at least %s." appState.locale) [ data.value ]
 
         ToTime data ->
             let
@@ -434,7 +434,7 @@ validate appState validation value =
                 Ok ()
 
             else
-                Err <| gettext (String.format "Time must be at most %s." [ data.value ]) appState.locale
+                Err <| String.format (gettext "Time must be at most %s." appState.locale) [ data.value ]
 
         Domain data ->
             -- Validate domain only for valid emails
@@ -452,7 +452,7 @@ validate appState validation value =
                     Ok ()
 
                 else
-                    Err <| gettext (String.format "Email domain must be one of the following: %s." [ data.value ]) appState.locale
+                    Err <| String.format (gettext "Email domain must be one of the following: %s." appState.locale) [ data.value ]
 
             else
                 Ok ()
