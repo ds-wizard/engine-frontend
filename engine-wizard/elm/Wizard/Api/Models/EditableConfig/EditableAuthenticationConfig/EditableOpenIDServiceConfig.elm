@@ -44,7 +44,7 @@ decoder =
         |> D.required "url" D.string
         |> D.required "clientId" D.string
         |> D.required "clientSecret" D.string
-        |> D.required "parameteres" (D.list parameterDecoder)
+        |> D.required "parameters" (D.list parameterDecoder)
         |> D.required "style" styleDecoder
 
 
@@ -71,7 +71,7 @@ encode config =
         , ( "url", E.string config.url )
         , ( "clientId", E.string config.clientId )
         , ( "clientSecret", E.string config.clientSecret )
-        , ( "parameteres", E.list encodeParameter config.parameters )
+        , ( "parameters", E.list encodeParameter config.parameters )
         , ( "style", encodeStyle config.style )
         ]
 
