@@ -3,7 +3,7 @@ module Wizard.Settings.KnowledgeModels.View exposing (view)
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, button, div, hr, span, text)
+import Html exposing (Html, a, div, hr, span, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
@@ -91,7 +91,7 @@ allowedPackageFormView form index =
         , viewField "kmId"
         , viewField "minVersion"
         , viewField "maxVersion"
-        , button
+        , a
             [ class "btn btn-link text-danger"
             , onClick (Form.RemoveItem "publicPackages" index)
             ]
