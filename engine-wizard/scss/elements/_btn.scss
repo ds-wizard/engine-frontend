@@ -5,6 +5,10 @@
 .btn {
     @include not-selectable();
 
+    &:hover {
+        color: var(--bs-btn-hover-color) !important;
+    }
+
     &.with-icon {
         .fas, .far, .fab {
             margin-right: $spacer-2;
