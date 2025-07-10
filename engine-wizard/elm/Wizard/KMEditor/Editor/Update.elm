@@ -71,6 +71,7 @@ fetchSubrouteData appState model =
             in
             Cmd.batch
                 [ Ports.scrollToTop "#editor-view"
+                , Ports.scrollTreeItemIntoView ("[data-km-editor-link=\"" ++ activeEditorUuid ++ "\"]")
                 , Ports.focus ("[data-editor-uuid=\"" ++ activeEditorUuid ++ "\"] input")
                 ]
 

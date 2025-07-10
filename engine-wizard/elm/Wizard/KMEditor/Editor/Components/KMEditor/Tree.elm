@@ -6,7 +6,7 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Tree exposing
 
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, text, ul)
-import Html.Attributes exposing (class, classList)
+import Html.Attributes exposing (attribute, class, classList)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (fa, faKmAnswer, faKmChapter, faKmChoice, faKmEditorCollapseAll, faKmEditorExpandAll, faKmEditorTreeClosed, faKmEditorTreeOpened, faKmExpert, faKmIntegration, faKmKnowledgeModel, faKmMetric, faKmPhase, faKmQuestion, faKmReference, faKmResourceCollection, faKmResourcePage, faKmTag)
@@ -495,6 +495,7 @@ treeNode props editorBranch config =
             else
                 linkTo (Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid config.uuid editorBranch))
                     [ dataCy "km-editor_tree_link"
+                    , attribute "data-km-editor-link" config.uuid
                     ]
 
         ( untitled, visibleLabel ) =
