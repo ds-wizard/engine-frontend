@@ -144,6 +144,9 @@ messageToReadable appState message =
         "error.validation.user_email_uniqueness" ->
             Just <| gettext "Email is already used." appState.locale
 
+        "error.validation.qtn_migration_uniqueness" ->
+            Just <| gettext "There is already an ongoing project migration." appState.locale
+
         "error.service.pkg.highest_number_in_new_version" ->
             Just <| gettext "New version has to be higher than the previous one." appState.locale
 
