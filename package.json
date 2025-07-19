@@ -49,7 +49,7 @@
     "@codemirror/language": "^6.11.2",
     "@codemirror/legacy-modes": "^6.5.1",
     "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.38.0",
+    "@codemirror/view": "^6.38.1",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@lezer/lr": "^1.4.2",
     "axios": "1.10.0",
