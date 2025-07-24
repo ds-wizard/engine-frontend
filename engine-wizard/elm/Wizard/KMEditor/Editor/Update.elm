@@ -19,6 +19,7 @@ import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.KnowledgeModelSecrets as KnowledgeModelSecrets
 import Wizard.Api.Models.Branch.BranchState as BranchState
 import Wizard.Api.Models.Event as Event
 import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
@@ -56,6 +57,7 @@ fetchData appState uuid model =
         Cmd.batch
             [ BranchesApi.getBranch appState uuid GetBranchComplete
             , PrefabsApi.getIntegrationPrefabs appState GetIntegrationPrefabsComplete
+            , KnowledgeModelSecrets.getKnowledgeModelSecrets appState GetKnowledgeModelSecretsComplete
             ]
 
 
@@ -185,6 +187,17 @@ update wrapMsg msg appState model =
                 Err _ ->
                     withSeed ( { model | integrationPrefabs = Error "" }, Cmd.none )
 
+        GetKnowledgeModelSecretsComplete result ->
+            case result of
+                Ok secrets ->
+                    withSeed ( { model | kmSecrets = Success secrets }, Cmd.none )
+
+                Err error ->
+                    withSeed <|
+                        ( { model | kmSecrets = ApiError.toActionResult appState (gettext "Unable to get knowledge model secrets." appState.locale) error }
+                        , Cmd.none
+                        )
+
         WebSocketMsg wsMsg ->
             handleWebSocketMsg wsMsg appState model
 
@@ -201,8 +214,14 @@ update wrapMsg msg appState model =
             case model.branchModel of
                 Success branchModel ->
                     let
+                        updateConfig =
+                            { setFullscreenMsg = Wizard.Msgs.SetFullscreen
+                            , wrapMsg = wrapMsg << KMEditorMsg
+                            , eventMsg = \shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent -> wrapMsg <| EventMsg shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent
+                            }
+
                         ( editorBranch, kmEditorModel, cmd ) =
-                            KMEditor.update Wizard.Msgs.SetFullscreen kmEditorMsg model.kmEditorModel branchModel
+                            KMEditor.update appState updateConfig kmEditorMsg ( branchModel, model.kmEditorModel )
                     in
                     withSeed ( { model | kmEditorModel = kmEditorModel, branchModel = Success editorBranch }, cmd )
 

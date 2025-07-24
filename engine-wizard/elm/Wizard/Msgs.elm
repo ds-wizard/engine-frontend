@@ -17,6 +17,7 @@ import Wizard.DocumentTemplateEditors.Msgs
 import Wizard.DocumentTemplates.Msgs
 import Wizard.Documents.Msgs
 import Wizard.KMEditor.Msgs
+import Wizard.KnowledgeModelSecrets.Msgs
 import Wizard.KnowledgeModels.Msgs
 import Wizard.Locales.Msgs
 import Wizard.ProjectActions.Msgs
@@ -53,6 +54,7 @@ type Msg
     | DocumentTemplatesMsg Wizard.DocumentTemplates.Msgs.Msg
     | KMEditorMsg Wizard.KMEditor.Msgs.Msg
     | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
+    | KnowledgeModelSecretsMsg Wizard.KnowledgeModelSecrets.Msgs.Msg
     | LocaleMsg Wizard.Locales.Msgs.Msg
     | ProjectActionsMsg Wizard.ProjectActions.Msgs.Msg
     | ProjectFilesMsg Wizard.ProjectFiles.Msgs.Msg

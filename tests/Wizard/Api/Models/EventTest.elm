@@ -635,7 +635,7 @@ deleteTagEventTest =
 addApiIntegrationEvent : Event
 addApiIntegrationEvent =
     AddIntegrationEvent
-        (AddIntegrationApiEvent
+        (AddIntegrationApiLegacyEvent
             { id = "service"
             , name = "Service"
             , props = [ "kind", "category" ]
@@ -705,7 +705,7 @@ addIntegrationEventTest =
 editApiIntegrationEvent : Event
 editApiIntegrationEvent =
     EditIntegrationEvent
-        (EditIntegrationApiEvent
+        (EditIntegrationApiLegacyEvent
             { id = { changed = True, value = Just "service" }
             , name = { changed = True, value = Just "Service" }
             , props = { changed = True, value = Just [ "kind", "category" ] }

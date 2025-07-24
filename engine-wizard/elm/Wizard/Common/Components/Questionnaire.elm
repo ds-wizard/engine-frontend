@@ -79,7 +79,7 @@ import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration(..))
-import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing (ApiIntegrationData)
+import Wizard.Api.Models.KnowledgeModel.Integration.ApiLegacyIntegrationData exposing (ApiLegacyIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.CommonIntegrationData exposing (CommonIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
@@ -3217,8 +3217,8 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             KnowledgeModel.getIntegration data.integrationUuid model.questionnaire.knowledgeModel
                     in
                     case mbIntegration of
-                        Just (ApiIntegration commonIntegrationData apiIntegrationData) ->
-                            ( viewQuestionIntegrationApi appState cfg model newPath commonIntegrationData apiIntegrationData question, [] )
+                        Just (ApiLegacyIntegration commonIntegrationData apiLegacyIntegrationData) ->
+                            ( viewQuestionIntegrationApiLegacy appState cfg model newPath commonIntegrationData apiLegacyIntegrationData question, [] )
 
                         Just (WidgetIntegration commonIntegrationData widgetIntegrationData) ->
                             ( viewQuestionIntegrationWidget appState cfg model newPath commonIntegrationData widgetIntegrationData, [] )
@@ -3817,8 +3817,8 @@ viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationDat
             Html.nothing
 
 
-viewQuestionIntegrationApi : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiIntegrationData -> Question -> Html Msg
-viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiIntegrationData question =
+viewQuestionIntegrationApiLegacy : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiLegacyIntegrationData -> Question -> Html Msg
+viewQuestionIntegrationApiLegacy appState cfg model path commonIntegrationData apiLegacyIntegrationData question =
     let
         extraArgs =
             if cfg.features.readonly then
@@ -3830,9 +3830,9 @@ viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiInte
                         Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
 
                     onFocusHandler =
-                        [ onFocus (ShowTypeHints path apiIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
+                        [ onFocus (ShowTypeHints path apiLegacyIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
                 in
-                [ onInput (TypeHintInput path apiIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
+                [ onInput (TypeHintInput path apiLegacyIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
                 , onBlur HideTypeHints
                 ]
                     ++ onFocusHandler

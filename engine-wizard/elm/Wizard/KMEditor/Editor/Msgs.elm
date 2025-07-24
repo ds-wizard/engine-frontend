@@ -9,6 +9,7 @@ import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
+import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.KMEditor.Editor.Components.Preview as Preview
@@ -21,6 +22,7 @@ import Wizard.Projects.Detail.Components.ProjectSaving as ProjectSaving
 type Msg
     = GetBranchComplete (Result ApiError BranchDetail)
     | GetIntegrationPrefabsComplete (Result ApiError (List (Prefab Integration)))
+    | GetKnowledgeModelSecretsComplete (Result ApiError (List KnowledgeModelSecret))
     | WebSocketMsg WebSocket.RawMsg
     | WebSocketPing
     | SavingMsg ProjectSaving.Msg

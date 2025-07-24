@@ -12,6 +12,7 @@ module Wizard.Api.Models.Event.EditIntegrationEventData exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData exposing (EditIntegrationApiEventData)
+import Wizard.Api.Models.Event.EditIntegrationApiLegacyEventData as EditIntegrationApiLegacyEventData exposing (EditIntegrationApiLegacyEventData)
 import Wizard.Api.Models.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData exposing (EditIntegrationWidgetEventData)
 import Wizard.Api.Models.Event.EventField as EventField
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
@@ -19,6 +20,7 @@ import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Int
 
 type EditIntegrationEventData
     = EditIntegrationApiEvent EditIntegrationApiEventData
+    | EditIntegrationApiLegacyEvent EditIntegrationApiLegacyEventData
     | EditIntegrationWidgetEvent EditIntegrationWidgetEventData
 
 
@@ -30,6 +32,9 @@ decoder =
                 case integrationType of
                     "ApiIntegration" ->
                         D.map EditIntegrationApiEvent EditIntegrationApiEventData.decoder
+
+                    "ApiLegacyIntegration" ->
+                        D.map EditIntegrationApiLegacyEvent EditIntegrationApiLegacyEventData.decoder
 
                     "WidgetIntegration" ->
                         D.map EditIntegrationWidgetEvent EditIntegrationWidgetEventData.decoder
@@ -45,6 +50,7 @@ encode data =
         eventData =
             map
                 EditIntegrationApiEventData.encode
+                EditIntegrationApiLegacyEventData.encode
                 EditIntegrationWidgetEventData.encode
                 data
     in
@@ -67,6 +73,26 @@ apply event integration =
     case event of
         EditIntegrationApiEvent eventData ->
             ApiIntegration
+                { allowCustomReply = EventField.getValueWithDefault eventData.allowCustomReply (Maybe.withDefault True (Integration.getAllowCustomReply integration))
+                , annotations = EventField.getValueWithDefault eventData.annotations (Integration.getAnnotations integration)
+                , name = EventField.getValueWithDefault eventData.name (Integration.getName integration)
+                , requestAllowEmptySearch = EventField.getValueWithDefault eventData.requestAllowEmptySearch (Maybe.withDefault False (Integration.getRequestAllowEmptySearch integration))
+                , requestBody = EventField.getValueWithDefault eventData.requestBody (Integration.getRequestBody integration)
+                , requestHeaders = EventField.getValueWithDefault eventData.requestHeaders (Maybe.withDefault [] (Integration.getRequestHeaders integration))
+                , requestMethod = EventField.getValueWithDefault eventData.requestMethod (Maybe.withDefault "" (Integration.getRequestMethod integration))
+                , requestUrl = EventField.getValueWithDefault eventData.requestUrl (Maybe.withDefault "" (Integration.getRequestUrl integration))
+                , responseItemTemplate = EventField.getValueWithDefault eventData.responseItemTemplate (Maybe.withDefault "" (Integration.getResponseItemTemplate integration))
+                , responseItemTemplateForSelection = EventField.getValueWithDefault eventData.responseItemTemplateForSelection (Integration.getResponseItemTemplateForSelection integration)
+                , responseListField = EventField.getValueWithDefault eventData.responseListField (Integration.getResponseListField integration)
+                , testQ = EventField.getValueWithDefault eventData.testQ (Maybe.withDefault "" (Integration.getTestQ integration))
+                , testResponse = EventField.getValueWithDefault eventData.testResponse (Integration.getTestResponse integration)
+                , testVariables = EventField.getValueWithDefault eventData.testVariables (Maybe.withDefault [] (Integration.getTestVariables integration))
+                , uuid = Integration.getUuid integration
+                , variables = EventField.getValueWithDefault eventData.variables (Maybe.withDefault [] (Integration.getVariables integration))
+                }
+
+        EditIntegrationApiLegacyEvent eventData ->
+            ApiLegacyIntegration
                 (applyCommonData eventData)
                 { requestMethod = EventField.getValueWithDefault eventData.requestMethod (Maybe.withDefault "" (Integration.getRequestMethod integration))
                 , requestUrl = EventField.getValueWithDefault eventData.requestUrl (Maybe.withDefault "" (Integration.getRequestUrl integration))
@@ -88,24 +114,29 @@ apply event integration =
 getTypeString : EditIntegrationEventData -> String
 getTypeString =
     map
-        (\_ -> "Api")
+        (\_ -> "ApiIntegration")
+        (\_ -> "ApiLegacy")
         (\_ -> "Widget")
 
 
 getEntityVisibleName : EditIntegrationEventData -> Maybe String
 getEntityVisibleName =
-    EventField.getValue << map .name .name
+    EventField.getValue << map .name .name .name
 
 
 map :
     (EditIntegrationApiEventData -> a)
+    -> (EditIntegrationApiLegacyEventData -> a)
     -> (EditIntegrationWidgetEventData -> a)
     -> EditIntegrationEventData
     -> a
-map apiIntegration widgetIntegration integration =
+map apiIntegration apiLegacyIntegration widgetIntegration integration =
     case integration of
         EditIntegrationApiEvent data ->
             apiIntegration data
+
+        EditIntegrationApiLegacyEvent data ->
+            apiLegacyIntegration data
 
         EditIntegrationWidgetEvent data ->
             widgetIntegration data
@@ -116,6 +147,9 @@ squash old new =
     case ( old, new ) of
         ( EditIntegrationApiEvent oldData, EditIntegrationApiEvent newData ) ->
             EditIntegrationApiEvent (EditIntegrationApiEventData.squash oldData newData)
+
+        ( EditIntegrationApiLegacyEvent oldData, EditIntegrationApiLegacyEvent newData ) ->
+            EditIntegrationApiLegacyEvent (EditIntegrationApiLegacyEventData.squash oldData newData)
 
         ( EditIntegrationWidgetEvent oldData, EditIntegrationWidgetEvent newData ) ->
             EditIntegrationWidgetEvent (EditIntegrationWidgetEventData.squash oldData newData)

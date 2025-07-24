@@ -682,15 +682,25 @@ viewAddIntegrationDiff appState event =
                 , gettext "Item URL" appState.locale
                 ]
                 [ AddIntegrationEventData.getTypeString event
-                , AddIntegrationEventData.map .id .id event
-                , AddIntegrationEventData.map .name .name event
-                , String.join ", " <| AddIntegrationEventData.map .props .props event
-                , Maybe.withDefault "" <| AddIntegrationEventData.map .itemUrl .itemUrl event
+
+                -- TODO: Resolve this
+                , AddIntegrationEventData.map (always "") .id .id event
+                , AddIntegrationEventData.map .name .name .name event
+
+                -- TODO: Resolve this
+                , String.join ", " <| AddIntegrationEventData.map (always []) .props .props event
+
+                -- TODO: Resolve this
+                , Maybe.withDefault "" <| AddIntegrationEventData.map (always Nothing) .itemUrl .itemUrl event
                 ]
 
         extraFields =
             case event of
                 AddIntegrationApiEvent data ->
+                    -- TODO: Resolve this
+                    []
+
+                AddIntegrationApiLegacyEvent data ->
                     List.map2 (\a b -> ( a, b ))
                         [ gettext "Request HTTP Method" appState.locale
                         , gettext "Request URL" appState.locale
@@ -720,7 +730,7 @@ viewAddIntegrationDiff appState event =
             viewAdd (fields ++ extraFields)
 
         annotationsDiff =
-            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations event)
+            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations .annotations event)
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -743,15 +753,25 @@ viewEditIntegrationDiff appState event integration =
                 , Maybe.withDefault "" <| Integration.getItemUrl integration
                 ]
                 [ EditIntegrationEventData.getTypeString event
-                , EventField.getValueWithDefault (EditIntegrationEventData.map .id .id event) (Integration.getId integration)
-                , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name event) (Integration.getName integration)
-                , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map .props .props event) (Integration.getProps integration)
-                , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map .itemUrl .itemUrl event) (Integration.getItemUrl integration)
+
+                -- TODO: Resolve this
+                , EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .id .id event) (Integration.getId integration)
+                , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name .name event) (Integration.getName integration)
+
+                -- TODO: Resolve this
+                , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .props .props event) (Integration.getProps integration)
+
+                -- TODO: Resolve this
+                , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .itemUrl .itemUrl event) (Integration.getItemUrl integration)
                 ]
 
         extraFields =
             case event of
+                -- TODO: Resolve this
                 EditIntegrationApiEvent data ->
+                    []
+
+                EditIntegrationApiLegacyEvent data ->
                     List.map3 (\a b c -> ( a, b, c ))
                         [ gettext "Request HTTP Method" appState.locale
                         , gettext "Request URL" appState.locale
@@ -793,7 +813,7 @@ viewEditIntegrationDiff appState event integration =
         annotationsDiff =
             viewAnnotationsDiff appState
                 (Integration.getAnnotations integration)
-                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations event) (Integration.getAnnotations integration))
+                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations .annotations event) (Integration.getAnnotations integration))
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -818,7 +838,11 @@ viewDeleteIntegrationDiff appState integration =
 
         extraFields =
             case integration of
-                ApiIntegration _ data ->
+                -- TODO: Resolve this
+                ApiIntegration data ->
+                    []
+
+                ApiLegacyIntegration _ data ->
                     List.map2 (\a b -> ( a, b ))
                         [ gettext "Request HTTP Method" appState.locale
                         , gettext "Request URL" appState.locale

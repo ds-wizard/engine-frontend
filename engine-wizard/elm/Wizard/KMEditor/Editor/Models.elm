@@ -16,6 +16,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
+import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
 import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction exposing (SetContentBranchAction)
 import Wizard.Common.AppState exposing (AppState)
@@ -46,6 +47,7 @@ type alias Model =
     , previewModel : Preview.Model
     , settingsModel : Settings.Model
     , integrationPrefabs : ActionResult (List Integration)
+    , kmSecrets : ActionResult (List KnowledgeModelSecret)
     , publishModalModel : PublishModal.Model
     , eventsLastEvent : Dict String Event
     , eventsWebsocketDebounce : Dict String (Debounce SetContentBranchAction)
@@ -69,6 +71,7 @@ init appState uuid mbEditorUuid =
     , previewModel = Preview.initialModel appState ""
     , settingsModel = Settings.initialModel appState
     , integrationPrefabs = ActionResult.Loading
+    , kmSecrets = ActionResult.Loading
     , publishModalModel = PublishModal.initialModel
     , eventsLastEvent = Dict.empty
     , eventsWebsocketDebounce = Dict.empty

@@ -34,7 +34,7 @@ integrationDecoderTest =
                         """
 
                     expected =
-                        ApiIntegration
+                        ApiLegacyIntegration
                             { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
                             , id = "service"
                             , name = "Service"

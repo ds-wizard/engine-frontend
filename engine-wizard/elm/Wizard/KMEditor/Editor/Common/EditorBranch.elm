@@ -1193,7 +1193,11 @@ computeIntegrationWarnings appState integration =
 
         typeWarnings =
             case integration of
-                Integration.ApiIntegration _ data ->
+                Integration.ApiIntegration data ->
+                    -- TODO: Add warnings if any
+                    []
+
+                Integration.ApiLegacyIntegration _ data ->
                     let
                         urlError =
                             if String.isEmpty data.requestUrl then

@@ -23,6 +23,7 @@ import Wizard.DocumentTemplateEditors.Models
 import Wizard.DocumentTemplates.Models
 import Wizard.Documents.Models
 import Wizard.KMEditor.Models
+import Wizard.KnowledgeModelSecrets.Models
 import Wizard.KnowledgeModels.Models
 import Wizard.Locales.Models
 import Wizard.ProjectActions.Models
@@ -49,6 +50,7 @@ type alias Model =
     , documentTemplatesModel : Wizard.DocumentTemplates.Models.Model
     , kmEditorModel : Wizard.KMEditor.Models.Model
     , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
+    , kmSecretsModel : Wizard.KnowledgeModelSecrets.Models.Model
     , localeModel : Wizard.Locales.Models.Model
     , projectActionsModel : Wizard.ProjectActions.Models.Model
     , projectFilesModel : Wizard.ProjectFiles.Models.Model
@@ -76,6 +78,7 @@ initialModel appState =
     , documentTemplatesModel = Wizard.DocumentTemplates.Models.initialModel appState
     , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
     , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
+    , kmSecretsModel = Wizard.KnowledgeModelSecrets.Models.initialModel appState
     , localeModel = Wizard.Locales.Models.initialModel appState
     , projectActionsModel = Wizard.ProjectActions.Models.initialModel
     , projectFilesModel = Wizard.ProjectFiles.Models.initialModel
@@ -172,6 +175,9 @@ initLocalModel appState model =
 
         Routes.KnowledgeModelsRoute route ->
             { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
+
+        Routes.KnowledgeModelSecretsRoute ->
+            { model | kmSecretsModel = Wizard.KnowledgeModelSecrets.Models.initialModel appState }
 
         Routes.LocalesRoute route ->
             { model | localeModel = Wizard.Locales.Models.initLocalModel model.appState route model.localeModel }

@@ -17,6 +17,7 @@ import Wizard.DocumentTemplateEditors.Update
 import Wizard.DocumentTemplates.Update
 import Wizard.Documents.Update
 import Wizard.KMEditor.Update
+import Wizard.KnowledgeModelSecrets.Update
 import Wizard.KnowledgeModels.Update
 import Wizard.Locales.Update
 import Wizard.Models exposing (Model, addTour, initLocalModel, setRoute, setSeed, setSession)
@@ -73,6 +74,10 @@ fetchData model =
         Routes.KnowledgeModelsRoute route ->
             Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
                 Wizard.KnowledgeModels.Update.fetchData route model.appState
+
+        Routes.KnowledgeModelSecretsRoute ->
+            Cmd.map Wizard.Msgs.KnowledgeModelSecretsMsg <|
+                Wizard.KnowledgeModelSecrets.Update.fetchData model.appState
 
         Routes.LocalesRoute route ->
             Cmd.map Wizard.Msgs.LocaleMsg <|
@@ -343,6 +348,18 @@ update msg model =
                         Wizard.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
                 in
                 ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
+
+            Wizard.Msgs.KnowledgeModelSecretsMsg secretsMsg ->
+                let
+                    updateConfig =
+                        { wrapMsg = Wizard.Msgs.KnowledgeModelSecretsMsg
+                        , logoutMsg = Wizard.Msgs.logoutMsg
+                        }
+
+                    ( secretsModel, cmd ) =
+                        Wizard.KnowledgeModelSecrets.Update.update updateConfig model.appState secretsMsg model.kmSecretsModel
+                in
+                ( { model | kmSecretsModel = secretsModel }, cmd )
 
             Wizard.Msgs.LocaleMsg localeMsg ->
                 let

@@ -287,7 +287,7 @@ knowledgeModelDecoderTest =
                             , integrations =
                                 Dict.fromList
                                     [ ( "aae37504-aec6-4be8-b703-5bcb3502f3e6"
-                                      , ApiIntegration
+                                      , ApiLegacyIntegration
                                             { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
                                             , id = "service"
                                             , name = "Service"

@@ -5,6 +5,7 @@ module Shared.Form.Validate exposing
     , documentTemplateId
     , ifElse
     , kmId
+    , kmSecret
     , localeId
     , maybeString
     , optionalInt
@@ -132,6 +133,11 @@ organizationId appState =
 kmId : { a | locale : Gettext.Locale } -> Validation FormError String
 kmId appState =
     regex RegexPatterns.kmId (gettext "Fill in a valid knowledge model ID." appState.locale)
+
+
+kmSecret : { a | locale : Gettext.Locale } -> Validation FormError String
+kmSecret appState =
+    regex RegexPatterns.kmSecret (gettext "Fill in a valid knowledge model secret name." appState.locale)
 
 
 documentTemplateId : { a | locale : Gettext.Locale } -> Validation FormError String

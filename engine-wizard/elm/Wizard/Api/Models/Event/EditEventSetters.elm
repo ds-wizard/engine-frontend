@@ -28,6 +28,7 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setProps
     , setQuestionUuids
     , setReferenceUuids
+    , setRequestAllowEmptySearch
     , setRequestBody
     , setRequestEmptySearch
     , setRequestHeaders
@@ -41,11 +42,15 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setResponseItemTemplate
     , setResponseListField
     , setTagUuids
+    , setTestQ
+    , setTestResponse
+    , setTestVariables
     , setText
     , setTitle
     , setUrl
     , setValidations
     , setValueType
+    , setVariables
     , setWidgetUrl
     )
 
@@ -197,6 +202,11 @@ setReferenceUuids value data =
     { data | referenceUuids = EventField.create value True }
 
 
+setRequestAllowEmptySearch : a -> { b | requestAllowEmptySearch : EventField a } -> { b | requestAllowEmptySearch : EventField a }
+setRequestAllowEmptySearch value data =
+    { data | requestAllowEmptySearch = EventField.create value True }
+
+
 setRequestBody : a -> { b | requestBody : EventField a } -> { b | requestBody : EventField a }
 setRequestBody value data =
     { data | requestBody = EventField.create value True }
@@ -262,6 +272,21 @@ setTagUuids value data =
     { data | tagUuids = EventField.create value True }
 
 
+setTestQ : a -> { b | testQ : EventField a } -> { b | testQ : EventField a }
+setTestQ value data =
+    { data | testQ = EventField.create value True }
+
+
+setTestResponse : a -> { b | testResponse : EventField a } -> { b | testResponse : EventField a }
+setTestResponse value data =
+    { data | testResponse = EventField.create value True }
+
+
+setTestVariables : a -> { b | testVariables : EventField a } -> { b | testVariables : EventField a }
+setTestVariables value data =
+    { data | testVariables = EventField.create value True }
+
+
 setText : a -> { b | text : EventField a } -> { b | text : EventField a }
 setText value data =
     { data | text = EventField.create value True }
@@ -285,6 +310,11 @@ setValidations value data =
 setValueType : a -> { b | valueType : EventField a } -> { b | valueType : EventField a }
 setValueType value data =
     { data | valueType = EventField.create value True }
+
+
+setVariables : a -> { b | variables : EventField a } -> { b | variables : EventField a }
+setVariables value data =
+    { data | variables = EventField.create value True }
 
 
 setWidgetUrl : a -> { b | widgetUrl : EventField a } -> { b | widgetUrl : EventField a }

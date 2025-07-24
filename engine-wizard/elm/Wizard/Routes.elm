@@ -29,6 +29,7 @@ module Wizard.Routes exposing
     , isDocumentsIndex
     , isKmEditorEditor
     , isKmEditorIndex
+    , isKnowledgeModelSecrets
     , isKnowledgeModelsIndex
     , isKnowledgeModelsSubroute
     , isLocalesRoute
@@ -54,6 +55,7 @@ module Wizard.Routes exposing
     , kmEditorIndexWithFilters
     , kmEditorMigration
     , kmEditorPublish
+    , knowledgeModelSecrets
     , knowledgeModelsDetail
     , knowledgeModelsImport
     , knowledgeModelsIndex
@@ -158,6 +160,7 @@ type Route
     | DocumentTemplateEditorsRoute Wizard.DocumentTemplateEditors.Routes.Route
     | DocumentTemplatesRoute Wizard.DocumentTemplates.Routes.Route
     | KMEditorRoute Wizard.KMEditor.Routes.Route
+    | KnowledgeModelSecretsRoute
     | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
     | LocalesRoute Wizard.Locales.Routes.Route
     | ProjectsRoute Wizard.Projects.Routes.Route
@@ -549,6 +552,28 @@ isKnowledgeModelsSubroute route =
             True
 
         KMEditorRoute _ ->
+            True
+
+        KnowledgeModelSecretsRoute ->
+            True
+
+        _ ->
+            False
+
+
+
+-- Knowledge Model Secrets
+
+
+knowledgeModelSecrets : Route
+knowledgeModelSecrets =
+    KnowledgeModelSecretsRoute
+
+
+isKnowledgeModelSecrets : Route -> Bool
+isKnowledgeModelSecrets route =
+    case route of
+        KnowledgeModelSecretsRoute ->
             True
 
         _ ->

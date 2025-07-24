@@ -1,4 +1,4 @@
-module Shared.RegexPatterns exposing (authenticationServiceId, color, date, datetime, documentTemplateId, doi, email, fromString, kmId, localeId, orcid, organizationId, projectTag, time, url, uuid)
+module Shared.RegexPatterns exposing (authenticationServiceId, color, date, datetime, documentTemplateId, doi, email, fromString, kmId, kmSecret, localeId, orcid, organizationId, projectTag, time, url, uuid)
 
 import Regex exposing (Regex)
 
@@ -35,6 +35,11 @@ organizationId =
 
 kmId : Regex
 kmId =
+    fromString "^[A-Za-z0-9-_.]+$"
+
+
+kmSecret : Regex
+kmSecret =
     fromString "^[A-Za-z0-9-_.]+$"
 
 

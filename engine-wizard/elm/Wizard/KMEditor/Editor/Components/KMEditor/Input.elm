@@ -11,12 +11,15 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , QuestionValidationsInputConfig
     , ReorderableInputConfig
     , SelectInputConfig
+    , SelectRawConfig
     , SelectWithGroupsInputConfig
+    , StringRawConfig
     , TagsInputConfig
     , annotations
     , checkbox
     , color
     , fileSize
+    , foldableGroup
     , headers
     , markdown
     , metrics
@@ -24,8 +27,10 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     , questionValidations
     , reorderable
     , select
+    , selectRaw
     , selectWithGroups
     , string
+    , stringRaw
     , tags
     , textarea
     )
@@ -41,11 +46,11 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Components.FontAwesome exposing (faAdd, faDelete)
+import Shared.Components.FontAwesome exposing (faAdd, faDelete, fas)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
-import Wizard.Api.Models.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
+import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
@@ -86,6 +91,33 @@ string config =
             ]
             []
         ]
+
+
+type alias StringRawConfig msg =
+    { name : String
+    , value : String
+    , placeholder : Maybe String
+    , onInput : String -> msg
+    }
+
+
+stringRaw : StringRawConfig msg -> Html msg
+stringRaw config =
+    let
+        placeholderAttribute =
+            Maybe.unwrap [] (\p -> [ placeholder p ]) config.placeholder
+    in
+    input
+        ([ type_ "text"
+         , class "form-control"
+         , id config.name
+         , name config.name
+         , value config.value
+         , onInput config.onInput
+         ]
+            ++ placeholderAttribute
+        )
+        []
 
 
 type alias InputFileConfig msg =
@@ -230,6 +262,30 @@ select config =
             (List.map viewOption config.options)
         , Maybe.withDefault Html.nothing config.extra
         ]
+
+
+type alias SelectRawConfig msg =
+    { name : String
+    , value : String
+    , options : List ( String, String )
+    , onChange : String -> msg
+    }
+
+
+selectRaw : SelectRawConfig msg -> Html msg
+selectRaw config =
+    let
+        viewOption ( optionValue, optionLabel ) =
+            option [ value optionValue, selected (optionValue == config.value) ]
+                [ text optionLabel ]
+    in
+    Html.select
+        [ class "form-control"
+        , id config.name
+        , name config.name
+        , onInput config.onChange
+        ]
+        (List.map viewOption config.options)
 
 
 type alias SelectWithGroupsInputConfig msg =
@@ -1133,8 +1189,8 @@ props appState config =
 
 type alias HeadersInputConfig msg =
     { label : String
-    , headers : List RequestHeader
-    , onEdit : Maybe String -> List RequestHeader -> msg
+    , headers : List KeyValuePair
+    , onEdit : Maybe String -> List KeyValuePair -> msg
     }
 
 
@@ -1194,7 +1250,7 @@ headers appState config =
         addHeader =
             a
                 [ class "with-icon"
-                , onClick (config.onEdit (Just "[data-cy=integration-input_item]:last-child input:first-child") (config.headers ++ [ RequestHeader.new ]))
+                , onClick (config.onEdit (Just "[data-cy=integration-input_item]:last-child input:first-child") (config.headers ++ [ KeyValuePair.new ]))
                 , dataCy "integration-input_add-button"
                 ]
                 [ faAdd
@@ -1206,6 +1262,46 @@ headers appState config =
         , Html.Keyed.node "div" [] (List.indexedMap viewHeader config.headers)
         , addHeader
         ]
+
+
+
+-- Foldable Group
+
+
+type alias FoldableGroupConfig msg =
+    { identifier : String
+    , openLabel : String
+    , content : List (Html msg)
+    , markdownPreviews : List String
+    , previewMsg : Bool -> String -> msg
+    , entityUuid : String
+    }
+
+
+foldableGroup : AppState -> FoldableGroupConfig msg -> Html msg
+foldableGroup appState config =
+    let
+        fieldIdentifier =
+            createFieldId config.entityUuid config.identifier
+
+        isOpen =
+            List.member fieldIdentifier config.markdownPreviews
+    in
+    div [ class "foldable-group" ] <|
+        if isOpen then
+            [ a [ class "fw-bold", onClick (config.previewMsg False fieldIdentifier) ]
+                [ fas "fa-chevron-down fa-fw me-1"
+                , text config.openLabel
+                ]
+            , div [ class "border-start border-5 ps-4 pt-2 pb-2 mt-2 foldable-group-content" ] config.content
+            ]
+
+        else
+            [ a [ class "fw-bold", onClick (config.previewMsg True fieldIdentifier) ]
+                [ fas "fa-chevron-right fa-fw me-1"
+                , text config.openLabel
+                ]
+            ]
 
 
 
