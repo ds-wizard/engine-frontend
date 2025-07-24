@@ -8,8 +8,10 @@ import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Shared.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
 import Shared.Utils exposing (flip)
+import String.Extra as String
 import String.Format as String exposing (format)
 import Wizard.Api.Models.Event as Event exposing (Event(..))
 import Wizard.Api.Models.Event.AddAnswerEventData exposing (AddAnswerEventData)
@@ -480,7 +482,7 @@ viewAddMetricDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Abbreviation" appState.locale
                     , gettext "Description" appState.locale
@@ -501,7 +503,7 @@ viewEditMetricDiff appState event metric =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Title" appState.locale
                     , gettext "Abbreviation" appState.locale
                     , gettext "Description" appState.locale
@@ -526,7 +528,7 @@ viewDeleteMetricDiff appState metric =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Abbreviation" appState.locale
                     , gettext "Description" appState.locale
@@ -547,7 +549,7 @@ viewAddPhaseDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Description" appState.locale
                     ]
@@ -566,7 +568,7 @@ viewEditPhaseDiff appState event phase =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Title" appState.locale
                     , gettext "Description" appState.locale
                     ]
@@ -588,7 +590,7 @@ viewDeletePhaseDiff appState phase =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Description" appState.locale
                     ]
@@ -607,7 +609,7 @@ viewAddTagDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Name" appState.locale
                     , gettext "Description" appState.locale
                     , gettext "Color" appState.locale
@@ -629,7 +631,7 @@ viewEditTagDiff appState event tag =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Name" appState.locale
                     , gettext "Description" appState.locale
                     , gettext "Color" appState.locale
@@ -654,7 +656,7 @@ viewDeleteTagDiff appState tag =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Name" appState.locale
                     , gettext "Description" appState.locale
                     , gettext "Color" appState.locale
@@ -674,25 +676,42 @@ viewAddIntegrationDiff : AppState -> AddIntegrationEventData -> Html Msg
 viewAddIntegrationDiff appState event =
     let
         fields =
-            List.map2 (\a b -> ( a, b ))
-                [ gettext "Type" appState.locale
-                , gettext "ID" appState.locale
-                , gettext "Name" appState.locale
-                , gettext "Props" appState.locale
-                , gettext "Item URL" appState.locale
-                ]
-                [ AddIntegrationEventData.getTypeString event
-                , AddIntegrationEventData.map .id .id event
-                , AddIntegrationEventData.map .name .name event
-                , String.join ", " <| AddIntegrationEventData.map .props .props event
-                , Maybe.withDefault "" <| AddIntegrationEventData.map .itemUrl .itemUrl event
-                ]
-
-        extraFields =
             case event of
                 AddIntegrationApiEvent data ->
-                    List.map2 (\a b -> ( a, b ))
-                        [ gettext "Request HTTP Method" appState.locale
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Variables" appState.locale
+                        , gettext "Request HTTP Method" appState.locale
+                        , gettext "Request URL" appState.locale
+                        , gettext "Request HTTP Headers" appState.locale
+                        , gettext "Request HTTP Body" appState.locale
+                        , gettext "Allow Empty Search" appState.locale
+                        , gettext "Response List Field" appState.locale
+                        , gettext "Response Item Template" appState.locale
+                        , gettext "Response Item Template for Selection" appState.locale
+                        ]
+                        [ AddIntegrationEventData.getTypeString event
+                        , data.name
+                        , String.join ", " <| data.variables
+                        , data.requestMethod
+                        , data.requestUrl
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
+                        , Maybe.withDefault "" data.requestBody
+                        , String.fromBool data.requestAllowEmptySearch
+                        , Maybe.withDefault "" <| data.responseListField
+                        , data.responseItemTemplate
+                        , Maybe.withDefault "" <| data.responseItemTemplateForSelection
+                        ]
+
+                AddIntegrationApiLegacyEvent data ->
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "ID" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Props" appState.locale
+                        , gettext "Item URL" appState.locale
+                        , gettext "Request HTTP Method" appState.locale
                         , gettext "Request URL" appState.locale
                         , gettext "Request HTTP Headers" appState.locale
                         , gettext "Request HTTP Body" appState.locale
@@ -700,7 +719,12 @@ viewAddIntegrationDiff appState event =
                         , gettext "Response Item ID" appState.locale
                         , gettext "Response Item Template" appState.locale
                         ]
-                        [ data.requestMethod
+                        [ AddIntegrationEventData.getTypeString event
+                        , AddIntegrationEventData.map (always "") .id .id event
+                        , AddIntegrationEventData.map .name .name .name event
+                        , String.join ", " <| AddIntegrationEventData.map (always []) .variables .variables event
+                        , Maybe.withDefault "" <| AddIntegrationEventData.map (always Nothing) .itemUrl .itemUrl event
+                        , data.requestMethod
                         , data.requestUrl
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
                         , data.requestBody
@@ -710,17 +734,27 @@ viewAddIntegrationDiff appState event =
                         ]
 
                 AddIntegrationWidgetEvent data ->
-                    List.map2 (\a b -> ( a, b ))
-                        [ gettext "Widget URL" appState.locale
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "ID" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Props" appState.locale
+                        , gettext "Item URL" appState.locale
+                        , gettext "Widget URL" appState.locale
                         ]
-                        [ data.widgetUrl
+                        [ AddIntegrationEventData.getTypeString event
+                        , AddIntegrationEventData.map (always "") .id .id event
+                        , AddIntegrationEventData.map .name .name .name event
+                        , String.join ", " <| AddIntegrationEventData.map (always []) .variables .variables event
+                        , Maybe.withDefault "" <| AddIntegrationEventData.map (always Nothing) .itemUrl .itemUrl event
+                        , data.widgetUrl
                         ]
 
         fieldDiff =
-            viewAdd (fields ++ extraFields)
+            viewAdd fields
 
         annotationsDiff =
-            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations event)
+            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations .annotations event)
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -729,31 +763,54 @@ viewEditIntegrationDiff : AppState -> EditIntegrationEventData -> Integration ->
 viewEditIntegrationDiff appState event integration =
     let
         fields =
-            List.map3 (\a b c -> ( a, b, c ))
-                [ gettext "Type" appState.locale
-                , gettext "ID" appState.locale
-                , gettext "Name" appState.locale
-                , gettext "Props" appState.locale
-                , gettext "Item URL" appState.locale
-                ]
-                [ Integration.getTypeString integration
-                , Integration.getId integration
-                , Integration.getName integration
-                , String.join ", " <| Integration.getProps integration
-                , Maybe.withDefault "" <| Integration.getItemUrl integration
-                ]
-                [ EditIntegrationEventData.getTypeString event
-                , EventField.getValueWithDefault (EditIntegrationEventData.map .id .id event) (Integration.getId integration)
-                , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name event) (Integration.getName integration)
-                , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map .props .props event) (Integration.getProps integration)
-                , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map .itemUrl .itemUrl event) (Integration.getItemUrl integration)
-                ]
-
-        extraFields =
             case event of
                 EditIntegrationApiEvent data ->
-                    List.map3 (\a b c -> ( a, b, c ))
-                        [ gettext "Request HTTP Method" appState.locale
+                    List.zip3
+                        [ gettext "Type" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Variables" appState.locale
+                        , gettext "Request HTTP Method" appState.locale
+                        , gettext "Request URL" appState.locale
+                        , gettext "Request HTTP Headers" appState.locale
+                        , gettext "Request HTTP Body" appState.locale
+                        , gettext "Allow Empty Search" appState.locale
+                        , gettext "Response List Field" appState.locale
+                        , gettext "Response Item Template" appState.locale
+                        , gettext "Response Item Template for Selection" appState.locale
+                        ]
+                        [ Integration.getTypeString integration
+                        , Integration.getName integration
+                        , String.join ", " <| Integration.getVariables integration
+                        , Maybe.withDefault "" <| Integration.getRequestMethod integration
+                        , Maybe.withDefault "" <| Integration.getRequestUrl integration
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| Maybe.withDefault [] <| Integration.getRequestHeaders integration
+                        , Maybe.withDefault "" <| Integration.getRequestBody integration
+                        , Maybe.unwrap "" String.fromBool <| Integration.getRequestAllowEmptySearch integration
+                        , Maybe.withDefault "" <| Integration.getResponseListField integration
+                        , Maybe.withDefault "" <| Integration.getResponseItemTemplate integration
+                        , Maybe.withDefault "" <| Integration.getResponseItemTemplateForSelection integration
+                        ]
+                        [ EditIntegrationEventData.getTypeString event
+                        , EventField.getValueWithDefault data.name (Integration.getName integration)
+                        , String.join ", " <| EventField.getValueWithDefault data.variables (Integration.getVariables integration)
+                        , EventField.getValueWithDefault data.requestMethod (Maybe.withDefault "" <| Integration.getRequestMethod integration)
+                        , EventField.getValueWithDefault data.requestUrl (Maybe.withDefault "" <| Integration.getRequestUrl integration)
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault data.requestHeaders (Maybe.withDefault [] <| Integration.getRequestHeaders integration)
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.requestBody (Integration.getRequestBody integration)
+                        , String.fromBool <| EventField.getValueWithDefault data.requestAllowEmptySearch (Maybe.withDefault True (Integration.getRequestAllowEmptySearch integration))
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseListField (Integration.getResponseListField integration)
+                        , EventField.getValueWithDefault data.responseItemTemplate (Maybe.withDefault "" <| Integration.getResponseItemTemplate integration)
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseItemTemplateForSelection (Integration.getResponseItemTemplateForSelection integration)
+                        ]
+
+                EditIntegrationApiLegacyEvent data ->
+                    List.zip3
+                        [ gettext "Type" appState.locale
+                        , gettext "ID" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Props" appState.locale
+                        , gettext "Item URL" appState.locale
+                        , gettext "Request HTTP Method" appState.locale
                         , gettext "Request URL" appState.locale
                         , gettext "Request HTTP Headers" appState.locale
                         , gettext "Request HTTP Body" appState.locale
@@ -761,7 +818,12 @@ viewEditIntegrationDiff appState event integration =
                         , gettext "Response Item ID" appState.locale
                         , gettext "Response Item Template" appState.locale
                         ]
-                        [ Maybe.withDefault "" <| Integration.getRequestMethod integration
+                        [ Integration.getTypeString integration
+                        , Integration.getId integration
+                        , Integration.getName integration
+                        , String.join ", " <| Integration.getVariables integration
+                        , Maybe.withDefault "" <| Integration.getItemUrl integration
+                        , Maybe.withDefault "" <| Integration.getRequestMethod integration
                         , Maybe.withDefault "" <| Integration.getRequestUrl integration
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| Maybe.withDefault [] <| Integration.getRequestHeaders integration
                         , Maybe.withDefault "" <| Integration.getRequestBody integration
@@ -769,7 +831,12 @@ viewEditIntegrationDiff appState event integration =
                         , Maybe.withDefault "" <| Integration.getResponseItemId integration
                         , Maybe.withDefault "" <| Integration.getResponseItemId integration
                         ]
-                        [ EventField.getValueWithDefault data.requestMethod (Maybe.withDefault "" <| Integration.getRequestMethod integration)
+                        [ EditIntegrationEventData.getTypeString event
+                        , EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .id .id event) (Integration.getId integration)
+                        , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name .name event) (Integration.getName integration)
+                        , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .variables .variables event) (Integration.getVariables integration)
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .itemUrl .itemUrl event) (Integration.getItemUrl integration)
+                        , EventField.getValueWithDefault data.requestMethod (Maybe.withDefault "" <| Integration.getRequestMethod integration)
                         , EventField.getValueWithDefault data.requestUrl (Maybe.withDefault "" <| Integration.getRequestUrl integration)
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault data.requestHeaders (Maybe.withDefault [] <| Integration.getRequestHeaders integration)
                         , EventField.getValueWithDefault data.requestBody (Maybe.withDefault "" <| Integration.getRequestBody integration)
@@ -779,21 +846,36 @@ viewEditIntegrationDiff appState event integration =
                         ]
 
                 EditIntegrationWidgetEvent data ->
-                    List.map3 (\a b c -> ( a, b, c ))
-                        [ gettext "Widget URL" appState.locale
+                    List.zip3
+                        [ gettext "Type" appState.locale
+                        , gettext "ID" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Props" appState.locale
+                        , gettext "Item URL" appState.locale
+                        , gettext "Widget URL" appState.locale
                         ]
-                        [ Maybe.withDefault "" <| Integration.getWidgetUrl integration
+                        [ Integration.getTypeString integration
+                        , Integration.getId integration
+                        , Integration.getName integration
+                        , String.join ", " <| Integration.getVariables integration
+                        , Maybe.withDefault "" <| Integration.getItemUrl integration
+                        , Maybe.withDefault "" <| Integration.getWidgetUrl integration
                         ]
-                        [ EventField.getValueWithDefault data.widgetUrl (Maybe.withDefault "" <| Integration.getWidgetUrl integration)
+                        [ EditIntegrationEventData.getTypeString event
+                        , EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .id .id event) (Integration.getId integration)
+                        , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name .name event) (Integration.getName integration)
+                        , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .variables .variables event) (Integration.getVariables integration)
+                        , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .itemUrl .itemUrl event) (Integration.getItemUrl integration)
+                        , EventField.getValueWithDefault data.widgetUrl (Maybe.withDefault "" <| Integration.getWidgetUrl integration)
                         ]
 
         fieldDiff =
-            viewDiff (fields ++ extraFields)
+            viewDiff fields
 
         annotationsDiff =
             viewAnnotationsDiff appState
                 (Integration.getAnnotations integration)
-                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations event) (Integration.getAnnotations integration))
+                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations .annotations event) (Integration.getAnnotations integration))
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -802,25 +884,42 @@ viewDeleteIntegrationDiff : AppState -> Integration -> Html Msg
 viewDeleteIntegrationDiff appState integration =
     let
         fields =
-            List.map2 (\a b -> ( a, b ))
-                [ gettext "Type" appState.locale
-                , gettext "ID" appState.locale
-                , gettext "Name" appState.locale
-                , gettext "Props" appState.locale
-                , gettext "Item URL" appState.locale
-                ]
-                [ Integration.getTypeString integration
-                , Integration.getId integration
-                , Integration.getName integration
-                , String.join ", " <| Integration.getProps integration
-                , Maybe.withDefault "" <| Integration.getItemUrl integration
-                ]
-
-        extraFields =
             case integration of
-                ApiIntegration _ data ->
-                    List.map2 (\a b -> ( a, b ))
-                        [ gettext "Request HTTP Method" appState.locale
+                ApiIntegration data ->
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Variables" appState.locale
+                        , gettext "Request HTTP Method" appState.locale
+                        , gettext "Request URL" appState.locale
+                        , gettext "Request HTTP Headers" appState.locale
+                        , gettext "Request HTTP Body" appState.locale
+                        , gettext "Allow Empty Search" appState.locale
+                        , gettext "Response List Field" appState.locale
+                        , gettext "Response Item Template" appState.locale
+                        , gettext "Response Item Template for Selection" appState.locale
+                        ]
+                        [ Integration.getTypeString integration
+                        , data.name
+                        , String.join ", " <| data.variables
+                        , data.requestMethod
+                        , data.requestUrl
+                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
+                        , Maybe.withDefault "" data.requestBody
+                        , String.fromBool data.requestAllowEmptySearch
+                        , Maybe.withDefault "" <| data.responseListField
+                        , data.responseItemTemplate
+                        , Maybe.withDefault "" <| data.responseItemTemplateForSelection
+                        ]
+
+                ApiLegacyIntegration _ data ->
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "ID" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Props" appState.locale
+                        , gettext "Item URL" appState.locale
+                        , gettext "Request HTTP Method" appState.locale
                         , gettext "Request URL" appState.locale
                         , gettext "Request HTTP Headers" appState.locale
                         , gettext "Request HTTP Body" appState.locale
@@ -828,7 +927,12 @@ viewDeleteIntegrationDiff appState integration =
                         , gettext "Response Item ID" appState.locale
                         , gettext "Response Item Template" appState.locale
                         ]
-                        [ data.requestMethod
+                        [ Integration.getTypeString integration
+                        , Integration.getId integration
+                        , Integration.getName integration
+                        , String.join ", " <| Integration.getVariables integration
+                        , Maybe.withDefault "" <| Integration.getItemUrl integration
+                        , data.requestMethod
                         , data.requestUrl
                         , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
                         , data.requestBody
@@ -838,14 +942,24 @@ viewDeleteIntegrationDiff appState integration =
                         ]
 
                 WidgetIntegration _ data ->
-                    List.map2 (\a b -> ( a, b ))
-                        [ gettext "Widget URL" appState.locale
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "ID" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Props" appState.locale
+                        , gettext "Item URL" appState.locale
+                        , gettext "Widget URL" appState.locale
                         ]
-                        [ data.widgetUrl
+                        [ Integration.getTypeString integration
+                        , Integration.getId integration
+                        , Integration.getName integration
+                        , String.join ", " <| Integration.getVariables integration
+                        , Maybe.withDefault "" <| Integration.getItemUrl integration
+                        , data.widgetUrl
                         ]
 
         fieldDiff =
-            viewDelete (fields ++ extraFields)
+            viewDelete fields
 
         annotationsDiff =
             viewAnnotationsDiff appState (Integration.getAnnotations integration) []
@@ -858,7 +972,7 @@ viewAddChapterDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Text" appState.locale
                     ]
@@ -877,7 +991,7 @@ viewEditChapterDiff appState km event chapter =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Title" appState.locale
                     , gettext "Text" appState.locale
                     ]
@@ -914,7 +1028,7 @@ viewDeleteChapterDiff appState km chapter =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Text" appState.locale
                     ]
@@ -941,7 +1055,7 @@ viewAddQuestionDiff : AppState -> KnowledgeModel -> AddQuestionEventData -> Html
 viewAddQuestionDiff appState km event =
     let
         fields =
-            List.map2 (\a b -> ( a, b ))
+            List.zip
                 [ gettext "Type" appState.locale
                 , gettext "Title" appState.locale
                 , gettext "Text" appState.locale
@@ -969,10 +1083,10 @@ viewAddQuestionDiff appState km event =
             case event of
                 AddQuestionIntegrationEvent data ->
                     let
-                        props =
-                            List.map (\( p, v ) -> p ++ " = " ++ v) <| Dict.toList data.props
+                        variables =
+                            List.map (\( p, v ) -> p ++ " = " ++ v) <| Dict.toList data.variables
                     in
-                    viewAddedChildren (gettext "Props" appState.locale) props
+                    viewAddedChildren (gettext "Props" appState.locale) variables
 
                 _ ->
                     Html.nothing
@@ -1016,7 +1130,7 @@ viewEditQuestionDiff appState km event question =
             EditQuestionEventData.map .text .text .text .text .text .text .text event
 
         fields =
-            List.map3 (\a b c -> ( a, b, c ))
+            List.zip3
                 [ gettext "Type" appState.locale
                 , gettext "Title" appState.locale
                 , gettext "Text" appState.locale
@@ -1078,12 +1192,12 @@ viewEditQuestionDiff appState km event question =
                 EditQuestionIntegrationEvent data ->
                     let
                         originalProps =
-                            Question.getProps question
+                            Question.getVariables question
                                 |> Maybe.map (List.map (\( p, v ) -> p ++ " = " ++ v) << Dict.toList)
                                 |> Maybe.withDefault []
 
                         newProps =
-                            EventField.getValue data.props
+                            EventField.getValue data.variables
                                 |> Maybe.map (List.map (\( p, v ) -> p ++ " = " ++ v) << Dict.toList)
                                 |> Maybe.withDefault originalProps
                     in
@@ -1219,7 +1333,7 @@ viewDeleteQuestionDiff appState km question =
             Question.getUuid question
 
         fields =
-            List.map2 (\a b -> ( a, b ))
+            List.zip
                 [ gettext "Type" appState.locale
                 , gettext "Title" appState.locale
                 , gettext "Text" appState.locale
@@ -1316,7 +1430,7 @@ viewMoveQuestion appState km question =
             Question.getUuid question
 
         fields =
-            List.map2 (\a b -> ( a, b ))
+            List.zip
                 [ gettext "Type" appState.locale
                 , gettext "Title" appState.locale
                 , gettext "Text" appState.locale
@@ -1423,7 +1537,7 @@ viewAddAnswerDiff appState km event =
 
         fieldsDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Label" appState.locale
                     , gettext "Advice" appState.locale
                     ]
@@ -1449,7 +1563,7 @@ viewEditAnswerDiff appState km event answer =
 
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Label" appState.locale
                     , gettext "Advice" appState.locale
                     ]
@@ -1500,7 +1614,7 @@ viewDeleteAnswerDiff appState km answer =
 
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Label" appState.locale
                     , gettext "Advice" appState.locale
                     ]
@@ -1538,7 +1652,7 @@ viewMoveAnswer appState km answer =
 
         fieldDiff =
             viewPlain <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Label" appState.locale
                     , gettext "Advice" appState.locale
                     ]
@@ -1589,7 +1703,7 @@ viewAddChoiceDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Label" appState.locale
                     ]
                     [ event.label
@@ -1606,7 +1720,7 @@ viewEditChoiceDiff appState event choice =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Label" appState.locale
                     ]
                     [ choice.label
@@ -1625,7 +1739,7 @@ viewDeleteChoiceDiff appState choice =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Label" appState.locale
                     ]
                     [ choice.label
@@ -1642,7 +1756,7 @@ viewMoveChoice appState choice =
     let
         fieldDiff =
             viewPlain <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Label" appState.locale
                     ]
                     [ choice.label
@@ -1667,7 +1781,7 @@ viewAddResourcePageReferenceDiff appState data =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Resource Page UUID" appState.locale
                     ]
@@ -1686,7 +1800,7 @@ viewAddURLReferenceDiff appState data =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "URL" appState.locale
                     , gettext "Label" appState.locale
@@ -1707,7 +1821,7 @@ viewAddCrossReferenceDiff appState data =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Target UUID" appState.locale
                     , gettext "Description" appState.locale
@@ -1730,7 +1844,7 @@ viewEditReferenceDiff appState event reference =
             let
                 fieldDiff =
                     viewDiff <|
-                        List.map3 (\a b c -> ( a, b, c ))
+                        List.zip3
                             [ gettext "Reference Type" appState.locale
                             , gettext "Resource Page UUID" appState.locale
                             ]
@@ -1750,7 +1864,7 @@ viewEditReferenceDiff appState event reference =
             let
                 fieldDiff =
                     viewDiff <|
-                        List.map3 (\a b c -> ( a, b, c ))
+                        List.zip3
                             [ gettext "Reference Type" appState.locale
                             , gettext "URL" appState.locale
                             , gettext "Label" appState.locale
@@ -1773,7 +1887,7 @@ viewEditReferenceDiff appState event reference =
             let
                 fieldDiff =
                     viewDiff <|
-                        List.map3 (\a b c -> ( a, b, c ))
+                        List.zip3
                             [ gettext "Reference Type" appState.locale
                             , gettext "Target UUID" appState.locale
                             , gettext "Description" appState.locale
@@ -1812,7 +1926,7 @@ viewEditResourcePageReferenceDiff appState data mbResourcePageReference =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Resource Page UUID" appState.locale
                     ]
@@ -1831,7 +1945,7 @@ viewEditURLReferenceDiff appState data =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "URL" appState.locale
                     , gettext "Label" appState.locale
@@ -1852,7 +1966,7 @@ viewEditCrossReferenceDiff appState data =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Target UUID" appState.locale
                     , gettext "Description" appState.locale
@@ -1881,7 +1995,7 @@ viewDeleteResourcePageReferenceDiff appState data =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Resource Page UUID" appState.locale
                     ]
@@ -1900,7 +2014,7 @@ viewDeleteURLReferenceDiff appState data =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "URL" appState.locale
                     , gettext "Label" appState.locale
@@ -1921,7 +2035,7 @@ viewDeleteCrossReferenceDiff appState data =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Target UUID" appState.locale
                     , gettext "Description" appState.locale
@@ -1950,7 +2064,7 @@ viewMoveResourcePageReference appState data =
     let
         fieldDiff =
             viewPlain <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Resource Page UUID" appState.locale
                     ]
@@ -1969,7 +2083,7 @@ viewMoveURLReference appState data =
     let
         fieldDiff =
             viewPlain <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "URL" appState.locale
                     , gettext "Label" appState.locale
@@ -1990,7 +2104,7 @@ viewMoveCrossReference appState data =
     let
         fieldDiff =
             viewPlain <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Reference Type" appState.locale
                     , gettext "Target UUID" appState.locale
                     , gettext "Description" appState.locale
@@ -2011,7 +2125,7 @@ viewAddExpertDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Name" appState.locale
                     , gettext "Email" appState.locale
                     ]
@@ -2030,7 +2144,7 @@ viewEditExpertDiff appState event expert =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Name" appState.locale
                     , gettext "Email" appState.locale
                     ]
@@ -2052,7 +2166,7 @@ viewDeleteExpertDiff appState expert =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Name" appState.locale
                     , gettext "Email" appState.locale
                     ]
@@ -2071,7 +2185,7 @@ viewMoveExpert appState expert =
     let
         fieldDiff =
             viewPlain <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Name" appState.locale
                     , gettext "Email" appState.locale
                     ]
@@ -2090,7 +2204,7 @@ viewAddResourceCollectionDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     ]
                     [ event.title
@@ -2107,7 +2221,7 @@ viewEditResourceCollectionDiff appState km event resourceCollection =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Title" appState.locale
                     ]
                     [ resourceCollection.title
@@ -2141,7 +2255,7 @@ viewDeleteResourceCollectionDiff appState km resourceCollection =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     ]
                     [ resourceCollection.title
@@ -2167,7 +2281,7 @@ viewAddResourcePageDiff appState event =
     let
         fieldDiff =
             viewAdd <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Content" appState.locale
                     ]
@@ -2186,7 +2300,7 @@ viewEditResourcePageDiff appState event resourcePage =
     let
         fieldDiff =
             viewDiff <|
-                List.map3 (\a b c -> ( a, b, c ))
+                List.zip3
                     [ gettext "Title" appState.locale
                     , gettext "Content" appState.locale
                     ]
@@ -2208,7 +2322,7 @@ viewDeleteResourcePageDiff appState resourcePage =
     let
         fieldDiff =
             viewDelete <|
-                List.map2 (\a b -> ( a, b ))
+                List.zip
                     [ gettext "Title" appState.locale
                     , gettext "Content" appState.locale
                     ]

@@ -121,7 +121,7 @@ apply event question =
             IntegrationQuestion
                 (applyCommonData eventData)
                 { integrationUuid = EventField.getValueWithDefault eventData.integrationUuid (Maybe.withDefault "" (Question.getIntegrationUuid question))
-                , props = EventField.getValueWithDefault eventData.props (Maybe.withDefault Dict.empty (Question.getProps question))
+                , variables = EventField.getValueWithDefault eventData.variables (Maybe.withDefault Dict.empty (Question.getVariables question))
                 }
 
         EditQuestionMultiChoiceEvent eventData ->

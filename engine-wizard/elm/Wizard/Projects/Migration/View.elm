@@ -167,6 +167,7 @@ questionnaireView appState model migration =
                 , isKmEditor = False
                 }
                 { events = []
+                , branchUuid = Nothing
                 }
                 questionnaireModel
 

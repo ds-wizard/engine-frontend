@@ -635,10 +635,10 @@ deleteTagEventTest =
 addApiIntegrationEvent : Event
 addApiIntegrationEvent =
     AddIntegrationEvent
-        (AddIntegrationApiEvent
+        (AddIntegrationApiLegacyEvent
             { id = "service"
             , name = "Service"
-            , props = [ "kind", "category" ]
+            , variables = [ "kind", "category" ]
             , logo = Just "data:image/png;base64,..."
             , itemUrl = Just "http://example.com/${id}"
             , requestMethod = "GET"
@@ -665,7 +665,7 @@ addWidgetIntegrationEvent =
         (AddIntegrationWidgetEvent
             { id = "service"
             , name = "Service"
-            , props = [ "kind", "category" ]
+            , variables = [ "kind", "category" ]
             , logo = Just "data:image/png;base64,..."
             , itemUrl = Just "http://example.com/${id}"
             , widgetUrl = "http://example.com"
@@ -705,10 +705,10 @@ addIntegrationEventTest =
 editApiIntegrationEvent : Event
 editApiIntegrationEvent =
     EditIntegrationEvent
-        (EditIntegrationApiEvent
+        (EditIntegrationApiLegacyEvent
             { id = { changed = True, value = Just "service" }
             , name = { changed = True, value = Just "Service" }
-            , props = { changed = True, value = Just [ "kind", "category" ] }
+            , variables = { changed = True, value = Just [ "kind", "category" ] }
             , logo = { changed = False, value = Nothing }
             , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
             , requestMethod = { changed = True, value = Just "GET" }
@@ -735,7 +735,7 @@ editWidgetIntegrationEvent =
         (EditIntegrationWidgetEvent
             { id = { changed = True, value = Just "service" }
             , name = { changed = True, value = Just "Service" }
-            , props = { changed = True, value = Just [ "kind", "category" ] }
+            , variables = { changed = True, value = Just [ "kind", "category" ] }
             , logo = { changed = False, value = Nothing }
             , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
             , widgetUrl = { changed = False, value = Nothing }
@@ -865,7 +865,7 @@ addIntegrationQuestionEvent =
             , requiredPhaseUuid = Nothing
             , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
             , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
-            , props = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
+            , variables = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
             , annotations = []
             }
         )
@@ -975,7 +975,7 @@ editIntegrationQuestionEvent =
             , referenceUuids = { changed = False, value = Nothing }
             , expertUuids = { changed = False, value = Nothing }
             , integrationUuid = { changed = True, value = Just "1d522339-e93b-44e9-bc2a-1df65fb97dc6" }
-            , props = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
+            , variables = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
             , annotations = { changed = False, value = Nothing }
             }
         )

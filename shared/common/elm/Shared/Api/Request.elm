@@ -144,6 +144,16 @@ postEmpty serverInfo url toMsg =
         }
 
 
+postWhatever : ServerInfo -> String -> E.Value -> ToMsg () msg -> Cmd msg
+postWhatever serverInfo url body toMsg =
+    createRequest "POST"
+        serverInfo
+        { url = url
+        , body = Http.jsonBody body
+        , expect = expectWhatever toMsg
+        }
+
+
 put : ServerInfo -> String -> Decoder a -> E.Value -> ToMsg a msg -> Cmd msg
 put serverInfo url decoder body toMsg =
     createRequest "PUT"
@@ -211,16 +221,6 @@ delete serverInfo url toMsg =
         { url = url
         , expect = expectWhatever toMsg
         , body = Http.emptyBody
-        }
-
-
-postWhatever : ServerInfo -> String -> E.Value -> ToMsg () msg -> Cmd msg
-postWhatever serverInfo url body toMsg =
-    createRequest "POST"
-        serverInfo
-        { url = url
-        , body = Http.jsonBody body
-        , expect = expectWhatever toMsg
         }
 
 

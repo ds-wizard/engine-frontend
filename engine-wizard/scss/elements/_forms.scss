@@ -547,3 +547,12 @@ select {
         margin-top: -1rem;
     }
 }
+
+
+.input-group {
+    &-http-request {
+        select {
+            max-width: 5rem;
+        }
+    }
+}

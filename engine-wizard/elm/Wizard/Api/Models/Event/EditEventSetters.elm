@@ -25,9 +25,9 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setMetricUuids
     , setName
     , setPhaseUuids
-    , setProps
     , setQuestionUuids
     , setReferenceUuids
+    , setRequestAllowEmptySearch
     , setRequestBody
     , setRequestEmptySearch
     , setRequestHeaders
@@ -39,13 +39,18 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setResourcePageUuids
     , setResponseItemId
     , setResponseItemTemplate
+    , setResponseItemTemplateForSelection
     , setResponseListField
     , setTagUuids
+    , setTestQ
+    , setTestResponse
+    , setTestVariables
     , setText
     , setTitle
     , setUrl
     , setValidations
     , setValueType
+    , setVariables
     , setWidgetUrl
     )
 
@@ -182,11 +187,6 @@ setPhaseUuids value data =
     { data | phaseUuids = EventField.create value True }
 
 
-setProps : a -> { b | props : EventField a } -> { b | props : EventField a }
-setProps value data =
-    { data | props = EventField.create value True }
-
-
 setQuestionUuids : a -> { b | questionUuids : EventField a } -> { b | questionUuids : EventField a }
 setQuestionUuids value data =
     { data | questionUuids = EventField.create value True }
@@ -195,6 +195,11 @@ setQuestionUuids value data =
 setReferenceUuids : a -> { b | referenceUuids : EventField a } -> { b | referenceUuids : EventField a }
 setReferenceUuids value data =
     { data | referenceUuids = EventField.create value True }
+
+
+setRequestAllowEmptySearch : a -> { b | requestAllowEmptySearch : EventField a } -> { b | requestAllowEmptySearch : EventField a }
+setRequestAllowEmptySearch value data =
+    { data | requestAllowEmptySearch = EventField.create value True }
 
 
 setRequestBody : a -> { b | requestBody : EventField a } -> { b | requestBody : EventField a }
@@ -252,6 +257,11 @@ setResponseItemTemplate value data =
     { data | responseItemTemplate = EventField.create value True }
 
 
+setResponseItemTemplateForSelection : a -> { b | responseItemTemplateForSelection : EventField a } -> { b | responseItemTemplateForSelection : EventField a }
+setResponseItemTemplateForSelection value data =
+    { data | responseItemTemplateForSelection = EventField.create value True }
+
+
 setResponseListField : a -> { b | responseListField : EventField a } -> { b | responseListField : EventField a }
 setResponseListField value data =
     { data | responseListField = EventField.create value True }
@@ -260,6 +270,21 @@ setResponseListField value data =
 setTagUuids : a -> { b | tagUuids : EventField a } -> { b | tagUuids : EventField a }
 setTagUuids value data =
     { data | tagUuids = EventField.create value True }
+
+
+setTestQ : a -> { b | testQ : EventField a } -> { b | testQ : EventField a }
+setTestQ value data =
+    { data | testQ = EventField.create value True }
+
+
+setTestResponse : a -> { b | testResponse : EventField a } -> { b | testResponse : EventField a }
+setTestResponse value data =
+    { data | testResponse = EventField.create value True }
+
+
+setTestVariables : a -> { b | testVariables : EventField a } -> { b | testVariables : EventField a }
+setTestVariables value data =
+    { data | testVariables = EventField.create value True }
 
 
 setText : a -> { b | text : EventField a } -> { b | text : EventField a }
@@ -285,6 +310,11 @@ setValidations value data =
 setValueType : a -> { b | valueType : EventField a } -> { b | valueType : EventField a }
 setValueType value data =
     { data | valueType = EventField.create value True }
+
+
+setVariables : a -> { b | variables : EventField a } -> { b | variables : EventField a }
+setVariables value data =
+    { data | variables = EventField.create value True }
 
 
 setWidgetUrl : a -> { b | widgetUrl : EventField a } -> { b | widgetUrl : EventField a }

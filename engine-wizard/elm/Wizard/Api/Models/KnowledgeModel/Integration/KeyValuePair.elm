@@ -1,5 +1,5 @@
-module Wizard.Api.Models.KnowledgeModel.Integration.RequestHeader exposing
-    ( RequestHeader
+module Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair exposing
+    ( KeyValuePair
     , decoder
     , encode
     , new
@@ -10,20 +10,20 @@ import Json.Decode.Pipeline as D
 import Json.Encode as E
 
 
-type alias RequestHeader =
+type alias KeyValuePair =
     { key : String
     , value : String
     }
 
 
-decoder : Decoder RequestHeader
+decoder : Decoder KeyValuePair
 decoder =
-    D.succeed RequestHeader
+    D.succeed KeyValuePair
         |> D.required "key" D.string
         |> D.required "value" D.string
 
 
-encode : RequestHeader -> E.Value
+encode : KeyValuePair -> E.Value
 encode annotation =
     E.object
         [ ( "key", E.string annotation.key )
@@ -31,7 +31,7 @@ encode annotation =
         ]
 
 
-new : RequestHeader
+new : KeyValuePair
 new =
     { key = ""
     , value = ""

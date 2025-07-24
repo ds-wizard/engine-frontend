@@ -24,6 +24,7 @@ module Wizard.Common.Feature exposing
     , knowledgeModelEditorsUpgrade
     , knowledgeModelEditorsView
     , knowledgeModelRestore
+    , knowledgeModelSecrets
     , knowledgeModelSetDeprecated
     , knowledgeModelsDelete
     , knowledgeModelsExport
@@ -205,6 +206,15 @@ knowledgeModelRestore : AppState -> { a | phase : PackagePhase } -> Bool
 knowledgeModelRestore appState package =
     adminOr Perm.packageManagementWrite appState
         && (package.phase == PackagePhase.Deprecated)
+
+
+
+-- Knowledge Model Secrets
+
+
+knowledgeModelSecrets : AppState -> Bool
+knowledgeModelSecrets appState =
+    adminOr Perm.knowledgeModel appState
 
 
 

@@ -14,11 +14,11 @@ integrationDecoderTest =
                     raw =
                         """
                         {
-                            "integrationType": "ApiIntegration",
+                            "integrationType": "ApiLegacyIntegration",
                             "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
                             "id": "service",
                             "name": "Service",
-                            "props": ["kind", "category"],
+                            "variables": ["kind", "category"],
                             "logo": "data:image/png;base64,...",
                             "itemUrl": "http://example.com/${id}",
                             "requestMethod": "GET",
@@ -34,11 +34,11 @@ integrationDecoderTest =
                         """
 
                     expected =
-                        ApiIntegration
+                        ApiLegacyIntegration
                             { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
                             , id = "service"
                             , name = "Service"
-                            , props = [ "kind", "category" ]
+                            , variables = [ "kind", "category" ]
                             , logo = Just "data:image/png;base64,..."
                             , itemUrl = Just "http://example.com/${id}"
                             , annotations = []
@@ -64,7 +64,7 @@ integrationDecoderTest =
                           "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
                           "id": "service",
                           "name": "Service",
-                          "props": ["kind", "category"],
+                          "variables": ["kind", "category"],
                           "logo": "data:image/png;base64,...",
                           "itemUrl": "http://example.com/${id}",
                           "widgetUrl": "http://example.com",
@@ -77,7 +77,7 @@ integrationDecoderTest =
                             { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
                             , id = "service"
                             , name = "Service"
-                            , props = [ "kind", "category" ]
+                            , variables = [ "kind", "category" ]
                             , logo = Just "data:image/png;base64,..."
                             , itemUrl = Just "http://example.com/${id}"
                             , annotations = []

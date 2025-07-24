@@ -10,7 +10,7 @@ import Json.Decode.Pipeline as D
 
 type alias IntegrationQuestionData =
     { integrationUuid : String
-    , props : Dict String String
+    , variables : Dict String String
     }
 
 
@@ -18,4 +18,4 @@ decoder : Decoder IntegrationQuestionData
 decoder =
     D.succeed IntegrationQuestionData
         |> D.required "integrationUuid" D.string
-        |> D.required "props" (D.dict D.string)
+        |> D.required "variables" (D.dict D.string)

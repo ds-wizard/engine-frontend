@@ -11,6 +11,7 @@ import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, s)
 import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Common.Feature as Feature
 import Wizard.Dev.Routing
 import Wizard.DocumentTemplateEditors.Routing
 import Wizard.DocumentTemplates.Routing
@@ -54,6 +55,7 @@ matchers appState =
                 ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
                 ++ Wizard.Users.Routing.parsers appState Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s "dashboard")
+                   , map Routes.KnowledgeModelSecretsRoute (s "knowledge-model-secrets")
                    , map (PaginationQueryString.wrapRoute1 commentsIndexRoute (Just "updatedAt,desc")) (PaginationQueryString.parser1 (s "comments") (Query.string commentsRouteResolvedFilterId))
                    ]
 
@@ -98,6 +100,9 @@ isAllowed route appState =
 
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
             Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute appState
+
+        Routes.KnowledgeModelSecretsRoute ->
+            Feature.knowledgeModelSecrets appState
 
         Routes.LocalesRoute localeRoute ->
             Wizard.Locales.Routing.isAllowed localeRoute appState
@@ -169,6 +174,9 @@ toUrl route =
 
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
                     Wizard.KnowledgeModels.Routing.toUrl kmPackagesRoute
+
+                Routes.KnowledgeModelSecretsRoute ->
+                    [ "knowledge-model-secrets" ]
 
                 Routes.LocalesRoute localeRoute ->
                     Wizard.Locales.Routing.toUrl localeRoute

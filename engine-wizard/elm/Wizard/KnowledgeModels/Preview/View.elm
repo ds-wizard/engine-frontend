@@ -49,7 +49,9 @@ viewProject appState model ( package, questionnaireModel ) =
                 , revertQuestionnaireMsg = Nothing
                 , isKmEditor = False
                 }
-                { events = [] }
+                { events = []
+                , branchUuid = Nothing
+                }
                 questionnaireModel
     in
     div [ class "KnowledgeModels__Preview" ]

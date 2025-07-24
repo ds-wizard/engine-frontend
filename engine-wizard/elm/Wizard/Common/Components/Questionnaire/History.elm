@@ -487,7 +487,10 @@ viewEventDetailSetReply appState cfg data question =
                 PlainType reply ->
                     eventView [ ( fa "far fa-edit", reply ) ]
 
-                IntegrationType _ reply ->
+                IntegrationType reply _ ->
+                    eventView [ ( fa "fas fa-link", Markdown.toString reply ) ]
+
+                IntegrationLegacyType _ reply ->
                     eventView [ ( fa "fas fa-link", Markdown.toString reply ) ]
 
         ItemSelectReply itemUuid ->
