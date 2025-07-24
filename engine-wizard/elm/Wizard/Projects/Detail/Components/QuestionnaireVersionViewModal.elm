@@ -138,7 +138,9 @@ update appState msg model =
                             QuestionnaireMsg
                             Nothing
                             appState
-                            { events = [] }
+                            { events = []
+                            , branchUuid = Nothing
+                            }
             in
             ( { model | questionnaireModel = ActionResult.map updateQuestionnaire model.questionnaireModel }
             , Cmd.none
@@ -220,5 +222,7 @@ viewContent appState qm =
         , revertQuestionnaireMsg = Nothing
         , isKmEditor = False
         }
-        { events = [] }
+        { events = []
+        , branchUuid = Nothing
+        }
         qm

@@ -162,7 +162,9 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
             , revertQuestionnaireMsg = Nothing
             , isKmEditor = False
             }
-            { events = [] }
+            { events = []
+            , branchUuid = Nothing
+            }
             questionnaireModel
         ]
 
@@ -274,13 +276,14 @@ viewReply appState questionnaire question data =
                 IntegrationReplyType.PlainType reply ->
                     eventView [ ( fa "far fa-edit", text reply ) ]
 
-                IntegrationReplyType.IntegrationType _ reply ->
+                IntegrationReplyType.IntegrationType reply _ ->
+                    eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
+
+                IntegrationReplyType.IntegrationLegacyType _ reply ->
                     eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
 
         ReplyValue.ItemSelectReply _ ->
-            -- TODO
             eventView [ ( fa "fas fa-plus", text (gettext "Added item" appState.locale) ) ]
 
         ReplyValue.FileReply _ ->
-            -- TODO
             eventView [ ( fa "fas fa-plus", text (gettext "Added file" appState.locale) ) ]

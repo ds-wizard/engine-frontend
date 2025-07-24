@@ -20,7 +20,7 @@ type alias AddQuestionIntegrationEventData =
     , requiredPhaseUuid : Maybe String
     , tagUuids : List String
     , integrationUuid : String
-    , props : Dict String String
+    , variables : Dict String String
     , annotations : List Annotation
     }
 
@@ -33,7 +33,7 @@ decoder =
         |> D.required "requiredPhaseUuid" (D.nullable D.string)
         |> D.required "tagUuids" (D.list D.string)
         |> D.required "integrationUuid" D.string
-        |> D.required "props" (D.dict D.string)
+        |> D.required "variables" (D.dict D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
 
 
@@ -45,7 +45,7 @@ encode data =
     , ( "requiredPhaseUuid", E.maybe E.string data.requiredPhaseUuid )
     , ( "tagUuids", E.list E.string data.tagUuids )
     , ( "integrationUuid", E.string data.integrationUuid )
-    , ( "props", E.dict identity E.string data.props )
+    , ( "variables", E.dict identity E.string data.variables )
     , ( "annotations", E.list Annotation.encode data.annotations )
     ]
 
@@ -63,5 +63,5 @@ toQuestion uuid data =
         , annotations = data.annotations
         }
         { integrationUuid = ""
-        , props = Dict.empty
+        , variables = Dict.empty
         }

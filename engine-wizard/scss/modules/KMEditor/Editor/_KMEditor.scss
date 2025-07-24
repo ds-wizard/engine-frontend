@@ -169,6 +169,19 @@ $breadcrumbs-height: 40px;
         padding-bottom: 40px;
     }
 
+    .foldable-group {
+        &:not(:last-child) {
+            margin-bottom: $spacer-5;
+        }
+
+        .foldable-group-content {
+            .form-group:last-child, .form-text:last-child {
+                padding-bottom: 0;
+                margin-bottom: 0;
+            }
+        }
+    }
+
     .form-text {
         margin-top: -50px;
         margin-bottom: 0;
@@ -186,6 +199,13 @@ $breadcrumbs-height: 40px;
 
     textarea {
         min-height: 150px;
+    }
+
+    .response-code {
+        height: 12rem;
+        overflow-y: auto;
+        resize: vertical;
+        background: $gray-100;
     }
 
     .input-children {

@@ -9,11 +9,13 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Json.Value as JsonValue exposing (JsonValue)
 
 
 type IntegrationReplyType
     = PlainType String
-    | IntegrationType (Maybe String) String
+    | IntegrationType String JsonValue
+    | IntegrationLegacyType (Maybe String) String
 
 
 decoder : Decoder IntegrationReplyType
@@ -21,6 +23,7 @@ decoder =
     D.oneOf
         [ D.when integrationReplyType ((==) "PlainType") decodePlainType
         , D.when integrationReplyType ((==) "IntegrationType") decodeIntegrationType
+        , D.when integrationReplyType ((==) "IntegrationLegacyType") decodeIntegrationLegacyType
         ]
 
 
@@ -38,6 +41,13 @@ decodePlainType =
 decodeIntegrationType : Decoder IntegrationReplyType
 decodeIntegrationType =
     D.succeed IntegrationType
+        |> D.required "value" D.string
+        |> D.required "raw" JsonValue.decoder
+
+
+decodeIntegrationLegacyType : Decoder IntegrationReplyType
+decodeIntegrationLegacyType =
+    D.succeed IntegrationLegacyType
         |> D.required "id" (D.maybe D.string)
         |> D.required "value" D.string
 
@@ -56,12 +66,24 @@ encode replyType =
                   )
                 ]
 
-        IntegrationType id value ->
+        IntegrationType value raw ->
             E.object
                 [ ( "type", E.string "IntegrationReply" )
                 , ( "value"
                   , E.object
                         [ ( "type", E.string "IntegrationType" )
+                        , ( "value", E.string value )
+                        , ( "raw", JsonValue.encode raw )
+                        ]
+                  )
+                ]
+
+        IntegrationLegacyType id value ->
+            E.object
+                [ ( "type", E.string "IntegrationReply" )
+                , ( "value"
+                  , E.object
+                        [ ( "type", E.string "IntegrationLegacyType" )
                         , ( "id", E.maybe E.string id )
                         , ( "value", E.string value )
                         ]

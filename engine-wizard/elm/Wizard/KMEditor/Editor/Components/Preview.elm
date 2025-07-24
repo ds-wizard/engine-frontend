@@ -175,7 +175,9 @@ handleQuestionnaireMsg msg appState editorBranch model =
                 QuestionnaireMsg
                 Nothing
                 appState
-                { events = editorBranch.branch.events }
+                { events = editorBranch.branch.events
+                , branchUuid = Just editorBranch.branch.uuid
+                }
                 model.questionnaireModel
     in
     ( newSeed
@@ -229,6 +231,7 @@ view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
                 , isKmEditor = True
                 }
                 { events = []
+                , branchUuid = Just editorBranch.branch.uuid
                 }
                 { questionnaireModel
                     | questionnaire =

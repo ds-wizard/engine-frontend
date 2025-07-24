@@ -245,7 +245,9 @@ update wrapMsg msg appState model =
                                     (wrapMsg << QuestionnaireMsg)
                                     (Just Wizard.Msgs.SetFullscreen)
                                     appState
-                                    { events = [] }
+                                    { events = []
+                                    , branchUuid = Nothing
+                                    }
                                     questionnaireModel
 
                         _ ->

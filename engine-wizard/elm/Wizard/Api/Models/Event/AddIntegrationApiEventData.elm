@@ -6,108 +6,114 @@ module Wizard.Api.Models.Event.AddIntegrationApiEventData exposing
     , toIntegration
     )
 
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration(..))
-import Wizard.Api.Models.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
+import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
+import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (TypeHintTestResponse)
 
 
 type alias AddIntegrationApiEventData =
-    { id : String
-    , name : String
-    , props : List String
-    , logo : Maybe String
-    , itemUrl : Maybe String
+    { allowCustomReply : Bool
     , annotations : List Annotation
+    , name : String
+    , requestAllowEmptySearch : Bool
+    , requestBody : Maybe String
+    , requestHeaders : List KeyValuePair
     , requestMethod : String
     , requestUrl : String
-    , requestHeaders : List RequestHeader
-    , requestBody : String
-    , requestEmptySearch : Bool
-    , responseListField : Maybe String
-    , responseItemId : Maybe String
     , responseItemTemplate : String
+    , responseItemTemplateForSelection : Maybe String
+    , responseListField : Maybe String
+    , testQ : String
+    , testResponse : Maybe TypeHintTestResponse
+    , testVariables : Dict String String
+    , variables : List String
     }
 
 
 decoder : Decoder AddIntegrationApiEventData
 decoder =
     D.succeed AddIntegrationApiEventData
-        |> D.required "id" D.string
-        |> D.required "name" D.string
-        |> D.required "props" (D.list D.string)
-        |> D.required "logo" (D.maybe D.string)
-        |> D.required "itemUrl" (D.maybe D.string)
+        |> D.required "allowCustomReply" D.bool
         |> D.required "annotations" (D.list Annotation.decoder)
+        |> D.required "name" D.string
+        |> D.required "requestAllowEmptySearch" D.bool
+        |> D.required "requestBody" (D.maybe D.string)
+        |> D.required "requestHeaders" (D.list KeyValuePair.decoder)
         |> D.required "requestMethod" D.string
         |> D.required "requestUrl" D.string
-        |> D.required "requestHeaders" (D.list RequestHeader.decoder)
-        |> D.required "requestBody" D.string
-        |> D.required "requestEmptySearch" D.bool
-        |> D.required "responseListField" (D.maybe D.string)
-        |> D.required "responseItemId" (D.maybe D.string)
         |> D.required "responseItemTemplate" D.string
+        |> D.required "responseItemTemplateForSelection" (D.maybe D.string)
+        |> D.required "responseListField" (D.maybe D.string)
+        |> D.required "testQ" D.string
+        |> D.required "testResponse" (D.maybe TypeHintTestResponse.decoder)
+        |> D.required "testVariables" (D.dict D.string)
+        |> D.required "variables" (D.list D.string)
 
 
 encode : AddIntegrationApiEventData -> List ( String, E.Value )
 encode data =
     [ ( "integrationType", E.string "ApiIntegration" )
-    , ( "id", E.string data.id )
-    , ( "name", E.string data.name )
-    , ( "props", E.list E.string data.props )
-    , ( "logo", E.maybe E.string data.logo )
-    , ( "itemUrl", E.maybe E.string data.itemUrl )
+    , ( "allowCustomReply", E.bool data.allowCustomReply )
     , ( "annotations", E.list Annotation.encode data.annotations )
+    , ( "name", E.string data.name )
+    , ( "requestAllowEmptySearch", E.bool data.requestAllowEmptySearch )
+    , ( "requestBody", E.maybe E.string data.requestBody )
+    , ( "requestHeaders", E.list KeyValuePair.encode data.requestHeaders )
     , ( "requestMethod", E.string data.requestMethod )
     , ( "requestUrl", E.string data.requestUrl )
-    , ( "requestHeaders", E.list RequestHeader.encode data.requestHeaders )
-    , ( "requestBody", E.string data.requestBody )
-    , ( "requestEmptySearch", E.bool data.requestEmptySearch )
-    , ( "responseListField", E.maybe E.string data.responseListField )
-    , ( "responseItemId", E.maybe E.string data.responseItemId )
     , ( "responseItemTemplate", E.string data.responseItemTemplate )
+    , ( "responseItemTemplateForSelection", E.maybe E.string data.responseItemTemplateForSelection )
+    , ( "responseListField", E.maybe E.string data.responseListField )
+    , ( "testQ", E.string data.testQ )
+    , ( "testResponse", E.maybe TypeHintTestResponse.encode data.testResponse )
+    , ( "testVariables", E.dict identity E.string data.testVariables )
+    , ( "variables", E.list E.string data.variables )
     ]
 
 
 init : AddIntegrationApiEventData
 init =
-    { id = ""
-    , name = ""
-    , props = []
-    , logo = Nothing
-    , itemUrl = Nothing
+    { allowCustomReply = True
     , annotations = []
-    , requestMethod = ""
+    , name = ""
+    , requestAllowEmptySearch = True
+    , requestBody = Nothing
+    , requestHeaders = [ { key = "Accept", value = "application/json" } ]
+    , requestMethod = "GET"
     , requestUrl = ""
-    , requestHeaders = []
-    , requestBody = ""
-    , requestEmptySearch = True
-    , responseListField = Nothing
-    , responseItemId = Nothing
     , responseItemTemplate = ""
+    , responseItemTemplateForSelection = Nothing
+    , responseListField = Nothing
+    , testQ = ""
+    , testResponse = Nothing
+    , testVariables = Dict.empty
+    , variables = []
     }
 
 
 toIntegration : String -> AddIntegrationApiEventData -> Integration
 toIntegration uuid data =
     ApiIntegration
-        { uuid = uuid
-        , id = data.id
-        , name = data.name
-        , props = data.props
-        , logo = data.logo
-        , itemUrl = data.itemUrl
+        { allowCustomReply = data.allowCustomReply
         , annotations = data.annotations
-        }
-        { requestMethod = data.requestMethod
-        , requestUrl = data.requestUrl
-        , requestHeaders = data.requestHeaders
+        , name = data.name
+        , requestAllowEmptySearch = data.requestAllowEmptySearch
         , requestBody = data.requestBody
-        , requestEmptySearch = data.requestEmptySearch
-        , responseListField = data.responseListField
-        , responseItemId = data.responseItemId
+        , requestHeaders = data.requestHeaders
+        , requestMethod = data.requestMethod
+        , requestUrl = data.requestUrl
         , responseItemTemplate = data.responseItemTemplate
+        , responseItemTemplateForSelection = data.responseItemTemplateForSelection
+        , responseListField = data.responseListField
+        , testQ = data.testQ
+        , testResponse = data.testResponse
+        , testVariables = data.testVariables
+        , uuid = uuid
+        , variables = data.variables
         }

@@ -16,7 +16,7 @@ import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration(..))
 type alias AddIntegrationWidgetEventData =
     { id : String
     , name : String
-    , props : List String
+    , variables : List String
     , logo : Maybe String
     , itemUrl : Maybe String
     , annotations : List Annotation
@@ -29,7 +29,7 @@ decoder =
     D.succeed AddIntegrationWidgetEventData
         |> D.required "id" D.string
         |> D.required "name" D.string
-        |> D.required "props" (D.list D.string)
+        |> D.required "variables" (D.list D.string)
         |> D.required "logo" (D.maybe D.string)
         |> D.required "itemUrl" (D.maybe D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
@@ -41,7 +41,7 @@ encode data =
     [ ( "integrationType", E.string "WidgetIntegration" )
     , ( "id", E.string data.id )
     , ( "name", E.string data.name )
-    , ( "props", E.list E.string data.props )
+    , ( "variables", E.list E.string data.variables )
     , ( "logo", E.maybe E.string data.logo )
     , ( "itemUrl", E.maybe E.string data.itemUrl )
     , ( "annotations", E.list Annotation.encode data.annotations )
@@ -55,7 +55,7 @@ toIntegration uuid data =
         { uuid = uuid
         , id = data.id
         , name = data.name
-        , props = data.props
+        , variables = data.variables
         , logo = data.logo
         , itemUrl = data.itemUrl
         , annotations = data.annotations

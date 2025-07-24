@@ -82,6 +82,7 @@ import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCol
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
+import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Routes as Routes
 
@@ -1009,11 +1010,35 @@ computeQuestionWarnings appState editorBranch km question =
                             (KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km)
 
                 Question.IntegrationQuestion _ data ->
-                    if data.integrationUuid == Uuid.toString Uuid.nil then
-                        createError (gettext "No integration selected for integration question" appState.locale)
+                    let
+                        integrationUuidWarning =
+                            if data.integrationUuid == Uuid.toString Uuid.nil then
+                                createError (gettext "No integration selected for integration question" appState.locale)
 
-                    else
-                        []
+                            else
+                                []
+
+                        variablesWarning =
+                            if data.integrationUuid /= Uuid.toString Uuid.nil then
+                                case KnowledgeModel.getIntegration data.integrationUuid km of
+                                    Just integration ->
+                                        let
+                                            missingVariables =
+                                                List.any (Maybe.isNothing << flip Dict.get data.variables) (Integration.getVariables integration)
+                                        in
+                                        if missingVariables then
+                                            createError (gettext "Missing variables for integration question" appState.locale)
+
+                                        else
+                                            []
+
+                                    Nothing ->
+                                        []
+
+                            else
+                                []
+                    in
+                    integrationUuidWarning ++ variablesWarning
 
                 Question.MultiChoiceQuestion _ data ->
                     if List.isEmpty data.choiceUuids then
@@ -1183,49 +1208,102 @@ computeIntegrationWarnings appState integration =
               , message = message
               }
             ]
+    in
+    case integration of
+        Integration.ApiIntegration data ->
+            let
+                nameWarning =
+                    if String.isEmpty (Integration.getName integration) then
+                        createError (gettext "Empty name for integration" appState.locale)
 
-        idWarning =
-            if String.isEmpty (Integration.getId integration) then
-                createError (gettext "Empty ID for integration" appState.locale)
+                    else
+                        []
 
-            else
-                []
+                variablesWarning =
+                    if List.any String.isEmpty data.variables then
+                        createError (gettext "Empty variable name for integration" appState.locale)
 
-        typeWarnings =
-            case integration of
-                Integration.ApiIntegration _ data ->
-                    let
-                        urlError =
-                            if String.isEmpty data.requestUrl then
-                                createError (gettext "Empty request URL for integration" appState.locale)
+                    else
+                        []
 
-                            else
-                                []
+                urlWarning =
+                    if String.isEmpty data.requestUrl then
+                        createError (gettext "Empty request URL for integration" appState.locale)
 
-                        requestMethod =
-                            if String.isEmpty data.requestMethod then
-                                createError (gettext "Empty request HTTP method for integration" appState.locale)
+                    else
+                        []
 
-                            else
-                                []
+                ( testDataLoaded, testDataWarning ) =
+                    case data.testResponse of
+                        Nothing ->
+                            ( False, createError (gettext "No test data loaded for integration" appState.locale) )
 
-                        responseItemTemplate =
-                            if String.isEmpty data.responseItemTemplate then
-                                createError (gettext "Empty response item template for integration" appState.locale)
+                        Just testData ->
+                            case testData.response of
+                                TypeHintTestResponse.SuccessTypeHintResponse _ ->
+                                    ( True, [] )
 
-                            else
-                                []
-                    in
-                    urlError ++ requestMethod ++ responseItemTemplate
+                                _ ->
+                                    ( False, createError (gettext "No test data success response for integration" appState.locale) )
 
-                Integration.WidgetIntegration _ data ->
+                itemTemplateWarning =
+                    if testDataLoaded && String.isEmpty data.responseItemTemplate then
+                        createError (gettext "Empty response item template for integration" appState.locale)
+
+                    else
+                        []
+            in
+            nameWarning ++ variablesWarning ++ urlWarning ++ testDataWarning ++ itemTemplateWarning
+
+        Integration.ApiLegacyIntegration _ data ->
+            let
+                idWarning =
+                    if String.isEmpty (Integration.getId integration) then
+                        createError (gettext "Empty ID for integration" appState.locale)
+
+                    else
+                        []
+
+                urlError =
+                    if String.isEmpty data.requestUrl then
+                        createError (gettext "Empty request URL for integration" appState.locale)
+
+                    else
+                        []
+
+                requestMethod =
+                    if String.isEmpty data.requestMethod then
+                        createError (gettext "Empty request HTTP method for integration" appState.locale)
+
+                    else
+                        []
+
+                responseItemTemplate =
+                    if String.isEmpty data.responseItemTemplate then
+                        createError (gettext "Empty response item template for integration" appState.locale)
+
+                    else
+                        []
+            in
+            idWarning ++ urlError ++ requestMethod ++ responseItemTemplate
+
+        Integration.WidgetIntegration _ data ->
+            let
+                idWarning =
+                    if String.isEmpty (Integration.getId integration) then
+                        createError (gettext "Empty ID for integration" appState.locale)
+
+                    else
+                        []
+
+                widgetUrlWarning =
                     if String.isEmpty data.widgetUrl then
                         createError (gettext "Empty widget URL for integration" appState.locale)
 
                     else
                         []
-    in
-    idWarning ++ typeWarnings
+            in
+            idWarning ++ widgetUrlWarning
 
 
 computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorBranchWarning

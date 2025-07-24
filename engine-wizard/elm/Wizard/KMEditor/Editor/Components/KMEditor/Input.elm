@@ -2,34 +2,45 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Input exposing
     ( AnnotationsInputConfig
     , CheckboxInputConfig
     , ColorInputConfig
+    , FoldableGroupConfig
     , HeadersInputConfig
     , InputConfig
     , InputFileConfig
+    , ItemTemplateEditorConfig
     , MarkdownInputConfig
     , MetricsInputConfig
-    , PropsInputConfig
     , QuestionValidationsInputConfig
     , ReorderableInputConfig
     , SelectInputConfig
+    , SelectRawConfig
     , SelectWithGroupsInputConfig
+    , StringRawConfig
     , TagsInputConfig
+    , VariablesInputConfig
     , annotations
     , checkbox
     , color
     , fileSize
+    , foldableGroup
     , headers
+    , itemTemplateEditor
     , markdown
     , metrics
-    , props
     , questionValidations
     , reorderable
     , select
+    , selectRaw
     , selectWithGroups
     , string
+    , stringRaw
     , tags
     , textarea
+    , toJinja
+    , variables
     )
 
+import ActionResult exposing (ActionResult)
+import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
 import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
@@ -39,23 +50,27 @@ import Html.Extra as Html
 import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Regex
 import Reorderable
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Components.FontAwesome exposing (faAdd, faDelete)
+import Shared.Components.FontAwesome exposing (faAdd, faDelete, fas)
 import Shared.Markdown as Markdown
+import Shared.RegexPatterns as RegexPatterns
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
-import Wizard.Api.Models.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
+import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
+import Wizard.Api.Models.TypeHint exposing (TypeHint)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute, tooltipLeft)
+import Wizard.Common.Html.Attribute exposing (dataCy, grammarlyAttribute, tooltip, tooltipLeft)
+import Wizard.Common.View.ActionResultBlock as ActionResultBlock
 import Wizard.Common.View.Tag as Tag
 import Wizard.Routes
 
@@ -86,6 +101,33 @@ string config =
             ]
             []
         ]
+
+
+type alias StringRawConfig msg =
+    { name : String
+    , value : String
+    , placeholder : Maybe String
+    , onInput : String -> msg
+    }
+
+
+stringRaw : StringRawConfig msg -> Html msg
+stringRaw config =
+    let
+        placeholderAttribute =
+            Maybe.unwrap [] (\p -> [ placeholder p ]) config.placeholder
+    in
+    input
+        ([ type_ "text"
+         , class "form-control"
+         , id config.name
+         , name config.name
+         , value config.value
+         , onInput config.onInput
+         ]
+            ++ placeholderAttribute
+        )
+        []
 
 
 type alias InputFileConfig msg =
@@ -232,6 +274,30 @@ select config =
         ]
 
 
+type alias SelectRawConfig msg =
+    { name : String
+    , value : String
+    , options : List ( String, String )
+    , onChange : String -> msg
+    }
+
+
+selectRaw : SelectRawConfig msg -> Html msg
+selectRaw config =
+    let
+        viewOption ( optionValue, optionLabel ) =
+            option [ value optionValue, selected (optionValue == config.value) ]
+                [ text optionLabel ]
+    in
+    Html.select
+        [ class "form-control"
+        , id config.name
+        , name config.name
+        , onInput config.onChange
+        ]
+        (List.map viewOption config.options)
+
+
 type alias SelectWithGroupsInputConfig msg =
     { name : String
     , label : String
@@ -333,6 +399,107 @@ markdown appState config =
                 (String.formatHtml (gettext "You can use %s and see the result in the preview tab." appState.locale)
                     [ a [ href (GuideLinks.markdownCheatsheet appState.guideLinks), target "_blank" ] [ text "Markdown" ] ]
                 )
+            ]
+        ]
+
+
+
+-- Item Template Input
+
+
+type alias ItemTemplateEditorConfig msg =
+    { name : String
+    , label : String
+    , value : String
+    , onInput : Maybe String -> String -> msg
+    , showPreviewMsg : String -> msg
+    , showTemplateMsg : String -> msg
+    , entityUuid : String
+    , markdownPreviews : List String
+    , integrationTestPreviews : Dict String (ActionResult (List TypeHint))
+    , fieldSuggestions : List String
+    , toPreview : TypeHint -> String
+    }
+
+
+itemTemplateEditor : AppState -> ItemTemplateEditorConfig msg -> Html msg
+itemTemplateEditor appState config =
+    let
+        fieldIdentifier =
+            createFieldId config.entityUuid config.name
+
+        previewActive =
+            List.member fieldIdentifier config.markdownPreviews
+
+        content =
+            if previewActive then
+                div []
+                    [ Dict.get fieldIdentifier config.integrationTestPreviews
+                        |> Maybe.withDefault ActionResult.Unset
+                        |> ActionResult.map (Maybe.unwrap "" config.toPreview << List.head)
+                        |> ActionResultBlock.view appState (Markdown.toHtml [])
+                    ]
+
+            else
+                Html.textarea
+                    [ class "form-control"
+                    , id config.name
+                    , name config.name
+                    , onInput (config.onInput Nothing)
+                    , value config.value
+                    , rows <| List.length <| String.lines config.value
+                    , grammarlyAttribute
+                    ]
+                    []
+
+        viewItemTemplateFieldSuggestion suggestion =
+            let
+                newContent =
+                    config.value ++ toJinja "item" suggestion
+            in
+            a
+                [ class "btn btn-outline-primary btn-sm py-0 me-1 fst-normal"
+                , onClick (config.onInput (Just ("#" ++ config.name)) newContent)
+                ]
+                [ text suggestion ]
+
+        fieldSuggestionsFooter =
+            if previewActive || List.isEmpty config.fieldSuggestions then
+                Html.nothing
+
+            else
+                div [ class "card-footer" ]
+                    [ div [] (List.map viewItemTemplateFieldSuggestion config.fieldSuggestions)
+                    ]
+    in
+    div [ class "form-group form-group-markup-editor" ]
+        [ label [ for config.name ]
+            [ text config.label
+            ]
+        , div [ class "card" ]
+            [ div [ class "card-header" ]
+                [ ul [ class "nav nav-tabs card-header-tabs" ]
+                    [ li [ class "nav-item" ]
+                        [ a
+                            [ class "nav-link"
+                            , classList [ ( "active", not previewActive ) ]
+                            , onClick (config.showTemplateMsg fieldIdentifier)
+                            ]
+                            [ text (gettext "Template" appState.locale) ]
+                        ]
+                    , li [ class "nav-item" ]
+                        [ a
+                            [ class "nav-link"
+                            , classList [ ( "active", previewActive ) ]
+                            , onClick (config.showPreviewMsg fieldIdentifier)
+                            ]
+                            [ text (gettext "Preview" appState.locale)
+                            ]
+                        ]
+                    ]
+                ]
+            , div [ class "card-body" ] [ content ]
+            , fieldSuggestionsFooter
             ]
         ]
 
@@ -1070,18 +1237,19 @@ colorOptions =
 
 
 
--- Props Input
+-- Variables Input
 
 
-type alias PropsInputConfig msg =
+type alias VariablesInputConfig msg =
     { label : String
     , values : List String
     , onChange : Maybe String -> List String -> msg
+    , copyableInput : String -> Html msg
     }
 
 
-props : AppState -> PropsInputConfig msg -> Html msg
-props appState config =
+variables : AppState -> VariablesInputConfig msg -> Html msg
+variables appState config =
     let
         updateAt index newValue =
             List.updateAt index (always newValue) config.values
@@ -1089,31 +1257,33 @@ props appState config =
         removeAt index =
             List.removeAt index config.values
 
-        viewProp i prop =
-            ( "prop." ++ String.fromInt i
-            , div [ class "d-flex", dataCy "props-input_input-wrapper" ]
+        viewProp i variable =
+            ( "variables." ++ String.fromInt i
+            , div [ class "d-flex align-items-center variables-input mb-2", dataCy "variables-input_input-wrapper" ]
                 [ input
                     [ type_ "text"
-                    , value prop
+                    , value variable
                     , onInput (config.onChange Nothing << updateAt i)
-                    , class "form-control mb-2"
-                    , dataCy "props-input_input"
-                    , name <| "prop." ++ String.fromInt i
+                    , class "form-control"
+                    , dataCy "variables-input_input"
+                    , name <| "variables." ++ String.fromInt i
                     ]
                     []
+                , config.copyableInput variable
                 , a
-                    [ class "btn btn-link text-danger"
-                    , onClick <| config.onChange Nothing <| removeAt i
-                    , attribute "data-cy" "prop-remove"
-                    ]
+                    (class "btn btn-link text-danger"
+                        :: (onClick <| config.onChange Nothing <| removeAt i)
+                        :: dataCy "variables-input_remove"
+                        :: tooltip (gettext "Delete" appState.locale)
+                    )
                     [ faDelete ]
                 ]
             )
 
-        addProp =
+        addVariable =
             a
-                [ onClick (config.onChange (Just "[data-cy=props-input_input-wrapper]:last-child input") (config.values ++ [ "" ]))
-                , dataCy "props-input_add-button"
+                [ onClick (config.onChange (Just ".variables-input:last-child input") (config.values ++ [ "" ]))
+                , dataCy "variables-input_add-button"
                 , class "with-icon"
                 ]
                 [ faAdd
@@ -1123,7 +1293,7 @@ props appState config =
     div [ class "form-group" ]
         [ label [] [ text config.label ]
         , Html.Keyed.node "div" [] (List.indexedMap viewProp config.values)
-        , addProp
+        , addVariable
         ]
 
 
@@ -1133,8 +1303,8 @@ props appState config =
 
 type alias HeadersInputConfig msg =
     { label : String
-    , headers : List RequestHeader
-    , onEdit : Maybe String -> List RequestHeader -> msg
+    , headers : List KeyValuePair
+    , onEdit : Maybe String -> List KeyValuePair -> msg
     }
 
 
@@ -1162,7 +1332,7 @@ headers appState config =
             ( "header." ++ String.fromInt i
             , div
                 [ class "input-group mb-2"
-                , dataCy "integration-input_item"
+                , dataCy "headers-input_item"
                 ]
                 [ input
                     [ type_ "text"
@@ -1170,7 +1340,7 @@ headers appState config =
                     , onInput (config.onEdit Nothing << updateKeyAt i)
                     , placeholder (gettext "Header Name" appState.locale)
                     , class "form-control"
-                    , dataCy "integration-input_name"
+                    , dataCy "headers-input_name"
                     ]
                     []
                 , input
@@ -1179,13 +1349,13 @@ headers appState config =
                     , onInput (config.onEdit Nothing << updateValAt i)
                     , placeholder (gettext "Header Value" appState.locale)
                     , class "form-control"
-                    , dataCy "integration-input_value"
+                    , dataCy "headers-input_value"
                     ]
                     []
                 , a
                     [ class "btn btn-link text-danger"
                     , onClick (config.onEdit Nothing <| removeAt i)
-                    , attribute "data-cy" "prop-remove"
+                    , dataCy "headers-input_remove"
                     ]
                     [ faDelete ]
                 ]
@@ -1194,8 +1364,8 @@ headers appState config =
         addHeader =
             a
                 [ class "with-icon"
-                , onClick (config.onEdit (Just "[data-cy=integration-input_item]:last-child input:first-child") (config.headers ++ [ RequestHeader.new ]))
-                , dataCy "integration-input_add-button"
+                , onClick (config.onEdit (Just "[data-cy=headers-input_item]:last-child input:first-child") (config.headers ++ [ KeyValuePair.new ]))
+                , dataCy "headers-input_add-button"
                 ]
                 [ faAdd
                 , text (gettext "Add header" appState.locale)
@@ -1209,9 +1379,62 @@ headers appState config =
 
 
 
+-- Foldable Group
+
+
+type alias FoldableGroupConfig msg =
+    { identifier : String
+    , openLabel : String
+    , content : List (Html msg)
+    , markdownPreviews : List String
+    , previewMsg : Bool -> String -> msg
+    , entityUuid : String
+    }
+
+
+foldableGroup : FoldableGroupConfig msg -> Html msg
+foldableGroup config =
+    let
+        fieldIdentifier =
+            createFieldId config.entityUuid config.identifier
+
+        isOpen =
+            List.member fieldIdentifier config.markdownPreviews
+    in
+    div [ class "foldable-group" ] <|
+        if isOpen then
+            [ a [ class "fw-bold", onClick (config.previewMsg False fieldIdentifier) ]
+                [ fas "fa-chevron-down fa-fw me-1"
+                , text config.openLabel
+                ]
+            , div [ class "border-start border-5 ps-4 pt-2 pb-2 mt-2 foldable-group-content" ] config.content
+            ]
+
+        else
+            [ a [ class "fw-bold", onClick (config.previewMsg True fieldIdentifier) ]
+                [ fas "fa-chevron-right fa-fw me-1"
+                , text config.openLabel
+                ]
+            ]
+
+
+
 -- Utils
 
 
 createFieldId : String -> String -> String
 createFieldId entityUuid fieldName =
     entityUuid ++ ":" ++ fieldName
+
+
+toJinja : String -> String -> String
+toJinja object property =
+    let
+        format =
+            if Regex.contains RegexPatterns.jinjaSafe property then
+                "{{ %s.%s }}"
+
+            else
+                "{{ %s[\"%s\"] }}"
+    in
+    String.format format [ object, property ]

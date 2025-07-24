@@ -1,4 +1,4 @@
-module String.Extra exposing (fromMaybe, toMaybe, withDefault)
+module String.Extra exposing (fromBool, fromMaybe, toMaybe, withDefault)
 
 
 toMaybe : String -> Maybe String
@@ -22,3 +22,12 @@ withDefault default string =
 
     else
         string
+
+
+fromBool : Bool -> String
+fromBool bool =
+    if bool then
+        "true"
+
+    else
+        "false"

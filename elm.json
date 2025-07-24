@@ -38,6 +38,7 @@
             "hecrj/html-parser": "2.4.0",
             "jinjor/elm-debounce": "3.0.0",
             "jinjor/elm-diff": "1.0.6",
+            "json-tools/json-value": "1.0.1",
             "justinmimbs/time-extra": "1.2.0",
             "kuon/elm-string-normalize": "1.0.6",
             "leojpod/elm-keyboard-shortcut": "1.0.1",

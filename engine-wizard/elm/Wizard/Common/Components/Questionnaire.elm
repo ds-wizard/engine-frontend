@@ -7,6 +7,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , Msg(..)
     , QuestionnaireRenderer
     , TypeHints
+    , TypeHintsLegacy
     , addComment
     , addEvent
     , addFile
@@ -80,6 +81,7 @@ import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration(..))
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing (ApiIntegrationData)
+import Wizard.Api.Models.KnowledgeModel.Integration.ApiLegacyIntegrationData exposing (ApiLegacyIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.CommonIntegrationData exposing (CommonIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
@@ -98,6 +100,8 @@ import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Wizard.Api.Models.TypeHint exposing (TypeHint)
+import Wizard.Api.Models.TypeHintLegacy exposing (TypeHintLegacy)
+import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
@@ -157,6 +161,8 @@ type alias Model =
     , deletingFile : ActionResult ()
     , typeHints : Maybe TypeHints
     , typeHintsDebounce : Debounce ( List String, String, String )
+    , typeHintsLegacy : Maybe TypeHintsLegacy
+    , typeHintsLegacyDebounce : Debounce ( List String, String, String )
     , feedbackModalModel : FeedbackModal.Model
     , fileUploadModalModel : FileUploadModal.Model
     , viewSettings : QuestionnaireViewSettings
@@ -183,6 +189,13 @@ type alias Model =
     , contentScrollTop : Maybe Int
     , commentThreadsMap : Dict String (ActionResult (List CommentThread))
     , userSuggestionDropdownModels : Dict String UserSuggestionDropdown.Model
+    }
+
+
+type alias TypeHintsLegacy =
+    { path : List String
+    , searchValue : String
+    , hints : ActionResult (List TypeHintLegacy)
     }
 
 
@@ -231,6 +244,8 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , deletingFile = ActionResult.Unset
             , typeHints = Nothing
             , typeHintsDebounce = Debounce.init
+            , typeHintsLegacy = Nothing
+            , typeHintsLegacyDebounce = Debounce.init
             , feedbackModalModel = FeedbackModal.init
             , fileUploadModalModel = FileUploadModal.init questionnaire.uuid
             , viewSettings = QuestionnaireViewSettings.default
@@ -549,6 +564,7 @@ type alias QuestionnaireRenderer msg =
 
 type alias Context =
     { events : List Event
+    , branchUuid : Maybe Uuid
     }
 
 
@@ -642,6 +658,11 @@ type Msg
     | TypeHintInput (List String) Bool Reply
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) String (Result ApiError (List TypeHint))
+    | ShowTypeHintsLegacy (List String) Bool String String
+    | HideTypeHintsLegacy
+    | TypeHintLegacyInput (List String) Bool Reply
+    | TypeHintLegacyDebounceMsg Debounce.Msg
+    | TypeHintsLegacyLoaded (List String) String (Result ApiError (List TypeHintLegacy))
     | FeedbackModalMsg FeedbackModal.Msg
     | FileUploadModalMsg FileUploadModal.Msg
     | PhaseModalUpdate Bool (Maybe Uuid)
@@ -865,13 +886,28 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | typeHints = Nothing }
 
         TypeHintInput path emptySearch value ->
-            withSeed <| handleTypeHintsInput model path emptySearch value
+            withSeed <| handleTypeHintInput model path emptySearch value
 
         TypeHintDebounceMsg debounceMsg ->
             withSeed <| handleTypeHintDebounceMsg appState ctx model debounceMsg
 
         TypeHintsLoaded path value result ->
             wrap <| handleTypeHintsLoaded appState model path value result
+
+        ShowTypeHintsLegacy path emptySearch questionUuid value ->
+            withSeed <| handleShowTypeHintsLegacy appState ctx model path emptySearch questionUuid value
+
+        HideTypeHintsLegacy ->
+            wrap { model | typeHintsLegacy = Nothing }
+
+        TypeHintLegacyInput path emptySearch value ->
+            withSeed <| handleTypeHintsLegacyInput model path emptySearch value
+
+        TypeHintLegacyDebounceMsg debounceMsg ->
+            withSeed <| handleTypeHintLegacyDebounceMsg appState ctx model debounceMsg
+
+        TypeHintsLegacyLoaded path value result ->
+            wrap <| handleTypeHintsLegacyLoaded appState model path value result
 
         FeedbackModalMsg feedbackModalMsg ->
             withSeed <| handleFeedbackModalMsg appState model feedbackModalMsg
@@ -1048,7 +1084,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             SetReply value.path <|
                                 createReply appState <|
                                     IntegrationReply <|
-                                        IntegrationType (Just value.id) value.value
+                                        IntegrationLegacyType (Just value.id) value.value
                     in
                     withSeed ( model, Task.dispatch setReplyMsg )
 
@@ -1601,8 +1637,28 @@ handleShowTypeHints appState ctx model path emptySearch questionUuid value =
         ( { model | typeHints = typeHints }, cmd )
 
 
-handleTypeHintsInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
-handleTypeHintsInput model path emptySearch reply =
+handleShowTypeHintsLegacy : AppState -> Context -> Model -> List String -> Bool -> String -> String -> ( Model, Cmd Msg )
+handleShowTypeHintsLegacy appState ctx model path emptySearch questionUuid value =
+    if not emptySearch && String.isEmpty value then
+        ( model, Cmd.none )
+
+    else
+        let
+            typeHints =
+                Just
+                    { path = path
+                    , searchValue = value
+                    , hints = Loading
+                    }
+
+            cmd =
+                loadTypeHintsLegacy appState ctx model path questionUuid value
+        in
+        ( { model | typeHintsLegacy = typeHints }, cmd )
+
+
+handleTypeHintInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
+handleTypeHintInput model path emptySearch reply =
     let
         ( ( debounce, debounceCmd ), newTypeHints ) =
             case ( emptySearch, reply.value ) of
@@ -1637,6 +1693,42 @@ handleTypeHintsInput model path emptySearch reply =
     )
 
 
+handleTypeHintsLegacyInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
+handleTypeHintsLegacyInput model path emptySearch reply =
+    let
+        ( ( debounce, debounceCmd ), newTypeHints ) =
+            case ( emptySearch, reply.value ) of
+                ( False, IntegrationReply (PlainType "") ) ->
+                    ( ( model.typeHintsLegacyDebounce, Cmd.none ), Nothing )
+
+                _ ->
+                    let
+                        questionUuid =
+                            Maybe.withDefault "" (List.last path)
+
+                        updatedTypeHints =
+                            Just
+                                { path = path
+                                , searchValue = ReplyValue.getStringReply reply.value
+                                , hints = Loading
+                                }
+                    in
+                    ( Debounce.push
+                        debounceConfigLegacy
+                        ( path, questionUuid, ReplyValue.getStringReply reply.value )
+                        model.typeHintsLegacyDebounce
+                    , updatedTypeHints
+                    )
+
+        dispatchCmd =
+            Task.dispatch <|
+                SetReply (pathToString path) reply
+    in
+    ( { model | typeHintsLegacyDebounce = debounce, typeHintsLegacy = newTypeHints }
+    , Cmd.batch [ debounceCmd, dispatchCmd ]
+    )
+
+
 handleTypeHintDebounceMsg : AppState -> Context -> Model -> Debounce.Msg -> ( Model, Cmd Msg )
 handleTypeHintDebounceMsg appState ctx model debounceMsg =
     let
@@ -1653,6 +1745,22 @@ handleTypeHintDebounceMsg appState ctx model debounceMsg =
     ( { model | typeHintsDebounce = typeHintsDebounce }, cmd )
 
 
+handleTypeHintLegacyDebounceMsg : AppState -> Context -> Model -> Debounce.Msg -> ( Model, Cmd Msg )
+handleTypeHintLegacyDebounceMsg appState ctx model debounceMsg =
+    let
+        load ( path, questionUuid, value ) =
+            loadTypeHintsLegacy appState ctx model path questionUuid value
+
+        ( typeHintsDebounce, cmd ) =
+            Debounce.update
+                debounceConfigLegacy
+                (Debounce.takeLast load)
+                debounceMsg
+                model.typeHintsLegacyDebounce
+    in
+    ( { model | typeHintsLegacyDebounce = typeHintsDebounce }, cmd )
+
+
 handleTypeHintsLoaded : AppState -> Model -> List String -> String -> Result ApiError (List TypeHint) -> Model
 handleTypeHintsLoaded appState model path value result =
     case model.typeHints of
@@ -1664,6 +1772,25 @@ handleTypeHintsLoaded appState model path value result =
 
                     Err _ ->
                         { model | typeHints = Just { typeHints | hints = Error <| gettext "Unable to get type hints." appState.locale } }
+
+            else
+                model
+
+        _ ->
+            model
+
+
+handleTypeHintsLegacyLoaded : AppState -> Model -> List String -> String -> Result ApiError (List TypeHintLegacy) -> Model
+handleTypeHintsLegacyLoaded appState model path value result =
+    case model.typeHintsLegacy of
+        Just typeHints ->
+            if typeHints.path == path && typeHints.searchValue == value then
+                case result of
+                    Ok hints ->
+                        { model | typeHintsLegacy = Just { typeHints | hints = Success hints } }
+
+                    Err _ ->
+                        { model | typeHintsLegacy = Just { typeHints | hints = Error <| gettext "Unable to get type hints." appState.locale } }
 
             else
                 model
@@ -1728,14 +1855,38 @@ debounceConfig =
     }
 
 
+debounceConfigLegacy : Debounce.Config Msg
+debounceConfigLegacy =
+    { strategy = Debounce.later 1000
+    , transform = TypeHintLegacyDebounceMsg
+    }
+
+
 loadTypeHints : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
-loadTypeHints appState ctx model path questionUuid value =
-    TypeHintsApi.fetchTypeHints appState
+loadTypeHints appState ctx model path questionUuidStr value =
+    let
+        questionUuid =
+            Uuid.fromUuidString questionUuidStr
+
+        typeHintRequest =
+            case ctx.branchUuid of
+                Just branchUuid ->
+                    TypeHintRequest.fromBranchQuestion branchUuid questionUuid value
+
+                Nothing ->
+                    TypeHintRequest.fromQuestionnaire model.questionnaire.uuid questionUuid value
+    in
+    TypeHintsApi.fetchTypeHints appState typeHintRequest (TypeHintsLoaded path value)
+
+
+loadTypeHintsLegacy : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
+loadTypeHintsLegacy appState ctx model path questionUuid value =
+    TypeHintsApi.fetchTypeHintsLegacy appState
         (Just model.questionnaire.packageId)
         ctx.events
         questionUuid
         value
-        (TypeHintsLoaded path value)
+        (TypeHintsLegacyLoaded path value)
 
 
 
@@ -3217,8 +3368,11 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                             KnowledgeModel.getIntegration data.integrationUuid model.questionnaire.knowledgeModel
                     in
                     case mbIntegration of
-                        Just (ApiIntegration commonIntegrationData apiIntegrationData) ->
-                            ( viewQuestionIntegrationApi appState cfg model newPath commonIntegrationData apiIntegrationData question, [] )
+                        Just (ApiIntegration apiIntegrationData) ->
+                            ( viewQuestionIntegrationApi appState cfg model newPath apiIntegrationData question, [] )
+
+                        Just (ApiLegacyIntegration commonIntegrationData apiLegacyIntegrationData) ->
+                            ( viewQuestionIntegrationApiLegacy appState cfg model newPath commonIntegrationData apiLegacyIntegrationData question, [] )
 
                         Just (WidgetIntegration commonIntegrationData widgetIntegrationData) ->
                             ( viewQuestionIntegrationWidget appState cfg model newPath commonIntegrationData widgetIntegrationData, [] )
@@ -3782,6 +3936,66 @@ viewQuestionValue appState cfg model path question =
     div [] (inputView ++ validationWarnings ++ [ clearReplyButton ])
 
 
+viewQuestionIntegrationApi : AppState -> Config msg -> Model -> List String -> ApiIntegrationData -> Question -> Html Msg
+viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
+    let
+        extraArgs =
+            if cfg.features.readonly then
+                [ disabled True ]
+
+            else
+                let
+                    questionValue =
+                        Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
+
+                    onFocusHandler =
+                        [ onFocus (ShowTypeHints path apiIntegrationData.requestAllowEmptySearch (Question.getUuid question) questionValue) ]
+                in
+                [ onInput (TypeHintInput path apiIntegrationData.requestAllowEmptySearch << createReply appState << IntegrationReply << PlainType)
+                , onBlur HideTypeHints
+                ]
+                    ++ onFocusHandler
+
+        mbReplyValue =
+            Maybe.map .value <|
+                Dict.get (pathToString path) model.questionnaire.replies
+
+        viewInput currentValue =
+            input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
+
+        questionInput =
+            case mbReplyValue of
+                Just (IntegrationReply integrationReply) ->
+                    case integrationReply of
+                        PlainType plainValue ->
+                            viewInput plainValue
+
+                        IntegrationType value _ ->
+                            Markdown.toHtml [ class "form-control" ] value
+
+                        _ ->
+                            Html.nothing
+
+                _ ->
+                    viewInput ""
+
+        typeHintsVisible =
+            Maybe.unwrap False (.path >> (==) path) model.typeHints
+
+        viewTypeHints =
+            if typeHintsVisible then
+                viewQuestionIntegrationTypeHints appState cfg model path
+
+            else
+                Html.nothing
+    in
+    div [ class "question-integration-answer" ]
+        [ questionInput
+        , viewTypeHints
+        , viewQuestionClearButton appState cfg path (Maybe.isJust mbReplyValue)
+        ]
+
+
 viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg
 viewQuestionIntegrationWidget appState cfg model path commonIntegrationData widgetIntegrationData =
     let
@@ -3791,7 +4005,7 @@ viewQuestionIntegrationWidget appState cfg model path commonIntegrationData widg
 
         questionInput =
             case mbReplyValue of
-                Just (IntegrationReply (IntegrationType id integrationValue)) ->
+                Just (IntegrationReply (IntegrationLegacyType id integrationValue)) ->
                     viewQuestionIntegrationIntegrationReply commonIntegrationData id integrationValue
 
                 _ ->
@@ -3817,8 +4031,8 @@ viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationDat
             Html.nothing
 
 
-viewQuestionIntegrationApi : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiIntegrationData -> Question -> Html Msg
-viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiIntegrationData question =
+viewQuestionIntegrationApiLegacy : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiLegacyIntegrationData -> Question -> Html Msg
+viewQuestionIntegrationApiLegacy appState cfg model path commonIntegrationData apiLegacyIntegrationData question =
     let
         extraArgs =
             if cfg.features.readonly then
@@ -3830,10 +4044,10 @@ viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiInte
                         Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
 
                     onFocusHandler =
-                        [ onFocus (ShowTypeHints path apiIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
+                        [ onFocus (ShowTypeHintsLegacy path apiLegacyIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
                 in
-                [ onInput (TypeHintInput path apiIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
-                , onBlur HideTypeHints
+                [ onInput (TypeHintLegacyInput path apiLegacyIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
+                , onBlur HideTypeHintsLegacy
                 ]
                     ++ onFocusHandler
 
@@ -3851,18 +4065,21 @@ viewQuestionIntegrationApi appState cfg model path commonIntegrationData apiInte
                         PlainType plainValue ->
                             viewInput plainValue
 
-                        IntegrationType id integrationValue ->
+                        IntegrationLegacyType id integrationValue ->
                             viewQuestionIntegrationIntegrationReply commonIntegrationData id integrationValue
+
+                        _ ->
+                            Html.nothing
 
                 _ ->
                     viewInput ""
 
         typeHintsVisible =
-            Maybe.unwrap False (.path >> (==) path) model.typeHints
+            Maybe.unwrap False (.path >> (==) path) model.typeHintsLegacy
 
         viewTypeHints =
             if typeHintsVisible then
-                viewQuestionIntegrationTypeHints appState cfg model path
+                viewQuestionIntegrationTypeHintsLegacy appState cfg model path
 
             else
                 Html.nothing
@@ -3906,6 +4123,38 @@ viewQuestionIntegrationTypeHints appState cfg model path =
     div [ class "integration-typehints" ] [ content ]
 
 
+viewQuestionIntegrationTypeHintsLegacy : AppState -> Config msg -> Model -> List String -> Html Msg
+viewQuestionIntegrationTypeHintsLegacy appState cfg model path =
+    let
+        content =
+            case Maybe.unwrap Unset .hints model.typeHintsLegacy of
+                Success [] ->
+                    div [ class "info" ]
+                        [ faInfo
+                        , text (gettext "There are no results for your search." appState.locale)
+                        ]
+
+                Success hints ->
+                    ul [ class "integration-typehints-list" ] (List.map (viewQuestionIntegrationTypeHintLegacy appState cfg path) hints)
+
+                Loading ->
+                    div [ class "loading" ]
+                        [ faSpinner
+                        , text (gettext "Loading..." appState.locale)
+                        ]
+
+                Error err ->
+                    div [ class "error" ]
+                        [ faError
+                        , text err
+                        ]
+
+                Unset ->
+                    Html.nothing
+    in
+    div [ class "integration-typehints" ] [ content ]
+
+
 viewQuestionIntegrationTypeHint : AppState -> Config msg -> List String -> TypeHint -> Html Msg
 viewQuestionIntegrationTypeHint appState cfg path typeHint =
     if cfg.features.readonly then
@@ -3914,7 +4163,21 @@ viewQuestionIntegrationTypeHint appState cfg path typeHint =
     else
         li
             [ class "integration-typehints-list-item"
-            , onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationType typeHint.id typeHint.name
+            , onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationType typeHint.value typeHint.raw
+            ]
+            [ Markdown.toHtml [ class "item-md" ] (Maybe.withDefault typeHint.value typeHint.valueForSelection)
+            ]
+
+
+viewQuestionIntegrationTypeHintLegacy : AppState -> Config msg -> List String -> TypeHintLegacy -> Html Msg
+viewQuestionIntegrationTypeHintLegacy appState cfg path typeHint =
+    if cfg.features.readonly then
+        Html.nothing
+
+    else
+        li
+            [ class "integration-typehints-list-item"
+            , onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationLegacyType typeHint.id typeHint.name
             ]
             [ Markdown.toHtml [ class "item-md" ] typeHint.name
             ]

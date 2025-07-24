@@ -122,8 +122,8 @@ knowledgeModelEntitiesDecoderTest =
                                     "referenceUuids": [],
                                     "expertUuids": [],
                                     "integrationUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
-                                    "props": {
-                                        "prop": "value"
+                                    "variables": {
+                                        "variable": "value"
                                     },
                                     "annotations": []
                                 }
@@ -157,7 +157,7 @@ knowledgeModelEntitiesDecoderTest =
                                         , annotations = []
                                         }
                                         { integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
-                                        , props = Dict.fromList [ ( "prop", "value" ) ]
+                                        , variables = Dict.fromList [ ( "variable", "value" ) ]
                                         }
                                   )
                                 ]
@@ -402,11 +402,11 @@ knowledgeModelEntitiesDecoderTest =
                             "references": {},
                             "integrations": {
                                 "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9": {
-                                    "integrationType": "ApiIntegration",
+                                    "integrationType": "ApiLegacyIntegration",
                                     "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
                                     "id": "service",
                                     "name": "Service",
-                                    "props": ["kind", "category"],
+                                    "variables": ["kind", "category"],
                                     "logo": "data:image/png;base64,...",
                                     "itemUrl": "http://example.com/${id}",
                                     "requestMethod": "GET",
@@ -438,11 +438,11 @@ knowledgeModelEntitiesDecoderTest =
                         , integrations =
                             Dict.fromList
                                 [ ( "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                                  , ApiIntegration
+                                  , ApiLegacyIntegration
                                         { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
                                         , id = "service"
                                         , name = "Service"
-                                        , props = [ "kind", "category" ]
+                                        , variables = [ "kind", "category" ]
                                         , logo = Just "data:image/png;base64,..."
                                         , itemUrl = Just "http://example.com/${id}"
                                         , annotations = []

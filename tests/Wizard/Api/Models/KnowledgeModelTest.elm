@@ -241,11 +241,11 @@ knowledgeModelDecoderTest =
                                 "references": {},
                                 "integrations": {
                                     "aae37504-aec6-4be8-b703-5bcb3502f3e6": {
-                                        "integrationType": "ApiIntegration",
+                                        "integrationType": "ApiLegacyIntegration",
                                         "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
                                         "id": "service",
                                         "name": "Service",
-                                        "props": ["kind", "category"],
+                                        "variables": ["kind", "category"],
                                         "logo": "data:image/png;base64,...",
                                         "itemUrl": "http://example.com/${id}",
                                         "requestMethod": "GET",
@@ -287,11 +287,11 @@ knowledgeModelDecoderTest =
                             , integrations =
                                 Dict.fromList
                                     [ ( "aae37504-aec6-4be8-b703-5bcb3502f3e6"
-                                      , ApiIntegration
+                                      , ApiLegacyIntegration
                                             { uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
                                             , id = "service"
                                             , name = "Service"
-                                            , props = [ "kind", "category" ]
+                                            , variables = [ "kind", "category" ]
                                             , logo = Just "data:image/png;base64,..."
                                             , itemUrl = Just "http://example.com/${id}"
                                             , annotations = []

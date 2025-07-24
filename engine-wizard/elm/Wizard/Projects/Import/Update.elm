@@ -154,7 +154,9 @@ update wrapMsg msg appState model =
                                 (wrapMsg << QuestionnaireMsg)
                                 Nothing
                                 appState
-                                { events = [] }
+                                { events = []
+                                , branchUuid = Nothing
+                                }
                                 questionnaireModel
                     in
                     ( newSeed

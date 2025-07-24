@@ -193,6 +193,7 @@ handleQuestionnaireMsg msg wrapMsg appState model =
                         Nothing
                         appState
                         { events = []
+                        , branchUuid = Nothing
                         }
                         questionnaireModel
             in
