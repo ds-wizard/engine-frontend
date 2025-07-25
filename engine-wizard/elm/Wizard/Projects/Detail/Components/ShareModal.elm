@@ -160,7 +160,7 @@ update cfg msg appState model =
         Open questionnaire ->
             ( appState.seed
             , setQuestionnaire questionnaire { model | visible = True }
-            , Driver.init (tour appState)
+            , Driver.init appState.config (tour appState)
             )
 
         Close ->

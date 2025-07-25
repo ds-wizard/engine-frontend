@@ -70,7 +70,7 @@ fetchData appState model =
         , Task.dispatch (PackagesFilterSearch "")
         , selectedUsersCmd
         , selectedPackagesCmd
-        , Driver.init (tour appState)
+        , Driver.init appState.config (tour appState)
         ]
 
 

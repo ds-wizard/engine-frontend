@@ -139,7 +139,7 @@ app : Model -> Html Msg -> Document Msg
 app model content =
     let
         rightPanelVisible =
-            not model.appState.session.rightPanelCollapsed && model.appState.config.aiAssistant.enabled
+            not model.appState.session.rightPanelCollapsed && model.appState.config.features.aiAssistantEnabled
 
         rightPanel =
             if rightPanelVisible then

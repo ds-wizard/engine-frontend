@@ -11,6 +11,7 @@ import Wizard.Common.Html.Attribute exposing (settingsClass)
 import Wizard.Routes as Routes
 import Wizard.Settings.Authentication.View
 import Wizard.Settings.DashboardAndLoginScreen.View
+import Wizard.Settings.Features.View
 import Wizard.Settings.KnowledgeModels.View
 import Wizard.Settings.LookAndFeel.View
 import Wizard.Settings.Models exposing (Model)
@@ -40,6 +41,10 @@ view route appState model =
                 PrivacyAndSupportRoute ->
                     Html.map PrivacyAndSupportMsg <|
                         Wizard.Settings.PrivacyAndSupport.View.view appState model.privacyAndSupportModel
+
+                FeaturesRoute ->
+                    Html.map FeaturesMsg <|
+                        Wizard.Settings.Features.View.view appState model.featuresModel
 
                 DashboardAndLoginScreenRoute ->
                     Html.map DashboardMsg <|
@@ -111,6 +116,7 @@ navigationSystemLinks appState =
     [ ( OrganizationRoute, gettext "Organization" appState.locale )
     , ( AuthenticationRoute, gettext "Authentication" appState.locale )
     , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
+    , ( FeaturesRoute, gettext "Features" appState.locale )
     ]
 
 

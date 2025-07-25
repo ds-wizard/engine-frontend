@@ -27,6 +27,7 @@ parsers appState wrapRoute =
         |> listInsertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s "organization")) adminDisabled
         |> listInsertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s "authentication")) adminDisabled
         |> listInsertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
+        |> listInsertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
         |> listInsertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s "dashboard")) True
         |> listInsertIf (map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s "look-and-feel")) True
         |> listInsertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s "registry")) (Feature.registry appState)
@@ -47,6 +48,9 @@ toUrl route =
 
         PrivacyAndSupportRoute ->
             [ moduleRoot, "privacy-and-support" ]
+
+        FeaturesRoute ->
+            [ moduleRoot, "features" ]
 
         DashboardAndLoginScreenRoute ->
             [ moduleRoot, "dashboard" ]

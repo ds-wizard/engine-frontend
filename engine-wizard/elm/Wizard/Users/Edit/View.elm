@@ -96,7 +96,7 @@ navigation appState subroute model =
                 [ text (gettext "Language" appState.locale)
                 ]
             )
-        , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditTours appState model.uuidOrCurrent)
+        , Html.viewIf (appState.config.features.toursEnabled && not (Admin.isEnabled appState.config.admin) && Feature.userEditTours appState model.uuidOrCurrent)
             (linkTo (Routes.usersEditTours model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.Tours ) ]

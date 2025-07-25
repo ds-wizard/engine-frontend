@@ -38,7 +38,7 @@ fetchData appState model =
     in
     Cmd.batch
         [ fetchDashboarData
-        , Driver.init (tour appState)
+        , Driver.init appState.config (tour appState)
         ]
 
 

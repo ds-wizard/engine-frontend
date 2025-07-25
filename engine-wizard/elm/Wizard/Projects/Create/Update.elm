@@ -83,7 +83,7 @@ fetchData appState model =
                 Cmd.none
 
             else
-                Driver.init (tour appState createFromTemplate createCustom)
+                Driver.init appState.config (tour appState createFromTemplate createCustom)
     in
     Cmd.batch
         [ fetchSelectedProjectTemplate

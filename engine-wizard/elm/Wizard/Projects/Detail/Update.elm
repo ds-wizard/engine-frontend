@@ -63,7 +63,7 @@ fetchData : AppState -> Uuid -> Model -> Cmd Msg
 fetchData appState uuid model =
     let
         tourCmd =
-            Driver.init (tour appState)
+            Driver.init appState.config (tour appState)
     in
     if ActionResult.unwrap False (.uuid >> (==) uuid) model.questionnaireCommon then
         Cmd.batch

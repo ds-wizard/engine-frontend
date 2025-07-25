@@ -37,7 +37,7 @@ initialModel =
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    Driver.init (tour appState)
+    Driver.init appState.config (tour appState)
 
 
 tour : AppState -> TourConfig

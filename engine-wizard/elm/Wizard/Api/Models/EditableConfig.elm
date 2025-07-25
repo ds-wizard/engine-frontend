@@ -4,6 +4,7 @@ module Wizard.Api.Models.EditableConfig exposing
     , encode
     , updateAuthentication
     , updateDashboardAndLoginScreen
+    , updateFeatures
     , updateKnowledgeModel
     , updateLookAndFeel
     , updateOrganization
@@ -20,6 +21,7 @@ import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig as Dashbo
 import Wizard.Api.Models.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
+import Wizard.Api.Models.EditableConfig.EditableFeaturesConfig as EditableFeaturesConfig exposing (EditableFeaturesConfig)
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig as EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
 import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Api.Models.EditableConfig.EditableQuestionnairesConfig as EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
@@ -31,6 +33,7 @@ type alias EditableConfig =
     { organization : OrganizationConfig
     , authentication : EditableAuthenticationConfig
     , privacyAndSupport : PrivacyAndSupportConfig
+    , features : EditableFeaturesConfig
     , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , lookAndFeel : EditableLookAndFeelConfig
     , registry : EditableRegistryConfig
@@ -53,6 +56,11 @@ updateAuthentication authentication config =
 updatePrivacyAndSupport : PrivacyAndSupportConfig -> EditableConfig -> EditableConfig
 updatePrivacyAndSupport privacyAndSupport config =
     { config | privacyAndSupport = privacyAndSupport }
+
+
+updateFeatures : EditableFeaturesConfig -> EditableConfig -> EditableConfig
+updateFeatures features config =
+    { config | features = features }
 
 
 updateDashboardAndLoginScreen : DashboardAndLoginScreenConfig -> EditableConfig -> EditableConfig
@@ -95,6 +103,7 @@ decoder =
         |> D.required "organization" OrganizationConfig.decoder
         |> D.required "authentication" EditableAuthenticationConfig.decoder
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
+        |> D.required "features" EditableFeaturesConfig.decoder
         |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "lookAndFeel" EditableLookAndFeelConfig.decoder
         |> D.required "registry" EditableRegistryConfig.decoder
@@ -109,6 +118,7 @@ encode config =
         [ ( "organization", OrganizationConfig.encode config.organization )
         , ( "authentication", EditableAuthenticationConfig.encode config.authentication )
         , ( "privacyAndSupport", PrivacyAndSupportConfig.encode config.privacyAndSupport )
+        , ( "features", EditableFeaturesConfig.encode config.features )
         , ( "dashboardAndLoginScreen", DashboardAndLoginScreenConfig.encode config.dashboardAndLoginScreen )
         , ( "lookAndFeel", EditableLookAndFeelConfig.encode config.lookAndFeel )
         , ( "registry", EditableRegistryConfig.encode config.registry )

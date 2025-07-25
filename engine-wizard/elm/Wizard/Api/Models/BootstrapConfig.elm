@@ -7,12 +7,12 @@ module Wizard.Api.Models.BootstrapConfig exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Wizard.Api.Models.BootstrapConfig.AIAssistantConfig as AIAssistantConfig exposing (AIAssistantConfig)
 import Wizard.Api.Models.BootstrapConfig.Admin as AdminConfig exposing (Admin)
 import Wizard.Api.Models.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Wizard.Api.Models.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
+import Wizard.Api.Models.BootstrapConfig.FeaturesConfig as FeaturesConfig exposing (FeaturesConfig)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Wizard.Api.Models.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Api.Models.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
@@ -26,7 +26,7 @@ import Wizard.Api.Models.UserInfo as UserInfo exposing (UserInfo)
 
 type alias BootstrapConfig =
     { admin : Admin
-    , aiAssistant : AIAssistantConfig
+    , features : FeaturesConfig
     , authentication : AuthenticationConfig
     , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , registry : RegistryConfig
@@ -47,7 +47,7 @@ type alias BootstrapConfig =
 default : BootstrapConfig
 default =
     { admin = AdminConfig.default
-    , aiAssistant = AIAssistantConfig.default
+    , features = FeaturesConfig.default
     , authentication = AuthenticationConfig.default
     , dashboardAndLoginScreen = DashboardAndLoginScreenConfig.default
     , registry = RegistryConfig.default
@@ -69,7 +69,7 @@ decoder : Decoder BootstrapConfig
 decoder =
     D.succeed BootstrapConfig
         |> D.required "admin" AdminConfig.decoder
-        |> D.required "aiAssistant" AIAssistantConfig.decoder
+        |> D.required "features" FeaturesConfig.decoder
         |> D.required "authentication" AuthenticationConfig.decoder
         |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "registry" RegistryConfig.decoder
