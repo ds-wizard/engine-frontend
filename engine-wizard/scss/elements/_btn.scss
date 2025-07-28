@@ -5,7 +5,7 @@
 .btn {
     @include not-selectable();
 
-    &:hover {
+    &:not(.btn-link):hover {
         color: var(--bs-btn-hover-color) !important;
     }
 
