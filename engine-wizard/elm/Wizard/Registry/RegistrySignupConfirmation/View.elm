@@ -25,7 +25,7 @@ successView appState _ =
         [ h1 [ class "display-3" ] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
-                (gettext "Your email was successfuly confirmed, you can go back to %s." appState.locale)
+                (gettext "Your email was successfully confirmed, you can go back to %s." appState.locale)
                 [ linkTo Routes.settingsRegistry
                     []
                     [ text (gettext "Settings" appState.locale) ]
