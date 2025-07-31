@@ -11,7 +11,7 @@ import Json.Decode as D
 import Json.Decode.Extra as D
 import Shared.Auth.Role as Role
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faOpen, faWarning)
+import Shared.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -763,7 +763,7 @@ viewCollapseLink : Model -> Html Wizard.Msgs.Msg
 viewCollapseLink model =
     if model.appState.session.sidebarCollapsed then
         a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed False), class "collapse-link" ]
-            [ faOpen ]
+            [ faMenuOpen ]
 
     else
         a [ onLinkClick (Wizard.Msgs.SetSidebarCollapsed True), class "collapse-link" ]
