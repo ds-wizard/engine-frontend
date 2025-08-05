@@ -1,6 +1,6 @@
 module Wizard.Settings.Projects.Update exposing (update)
 
-import Shared.Data.EditableConfig as EditableConfig
+import Wizard.Api.Models.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm as EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)

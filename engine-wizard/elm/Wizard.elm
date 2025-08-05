@@ -4,8 +4,8 @@ import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
 import Shared.Auth.Session as Session
-import Shared.Utils as Taks exposing (dispatch)
 import Shared.Utils.Theme as Theme
+import Task.Extra as Task
 import Url exposing (Url)
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Components.AIAssistant as AIAssistant
@@ -52,8 +52,8 @@ init flags location key =
                                 Cmd.none
 
                     aiAssistantCmd =
-                        if appState.config.aiAssistant.enabled && Session.exists appState.session then
-                            Taks.dispatch (Wizard.Msgs.AIAssistantMsg AIAssistant.init)
+                        if appState.config.features.aiAssistantEnabled && Session.exists appState.session then
+                            Task.dispatch (Wizard.Msgs.AIAssistantMsg AIAssistant.init)
 
                         else
                             Cmd.none
@@ -73,7 +73,7 @@ decideInitialRoute : Model -> Url -> Routes.Route -> Routes.Route -> Cmd Msg
 decideInitialRoute model location route originalRoute =
     let
         dispatchUrlChange =
-            dispatch (Wizard.Msgs.OnUrlChange location)
+            Task.dispatch (Wizard.Msgs.OnUrlChange location)
     in
     case route of
         Routes.PublicRoute subroute ->
@@ -104,7 +104,7 @@ decideInitialRoute model location route originalRoute =
                 dispatchUrlChange
 
             else
-                cmdNavigate model.appState (Routes.publicLogin <| Just <| toUrl model.appState originalRoute)
+                cmdNavigate model.appState (Routes.publicLogin <| Just <| toUrl originalRoute)
 
 
 main : Program Value Model Msg

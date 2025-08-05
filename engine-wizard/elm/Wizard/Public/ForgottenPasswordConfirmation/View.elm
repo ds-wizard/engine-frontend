@@ -5,8 +5,8 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
+import Shared.Components.FontAwesome exposing (faSuccess)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (faSet)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -47,7 +47,7 @@ signupForm appState model =
             , link = Nothing
             }
     in
-    publicForm appState formConfig
+    publicForm formConfig
 
 
 formView : AppState -> Form FormError PasswordForm -> Html Form.Msg
@@ -62,12 +62,11 @@ formView appState form =
 successView : AppState -> Html Msg
 successView appState =
     div [ class "px-4 py-5 bg-light rounded-3", dataCy "message_success" ]
-        [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
+        [ h1 [ class "display-3" ] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
                 (gettext "Your password has been changed. You can now %s." appState.locale)
-                [ linkTo appState
-                    (Routes.publicLogin Nothing)
+                [ linkTo (Routes.publicLogin Nothing)
                     [ dataCy "login-link", class "btn btn-primary ms-1" ]
                     [ text (gettext "log in" appState.locale) ]
                 ]

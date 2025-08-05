@@ -4,14 +4,18 @@ module Wizard.Locales.Routing exposing
     , toUrl
     )
 
-import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Locale exposing (lr)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Locales.Routes exposing (Route(..))
+
+
+moduleRoot : String
+moduleRoot =
+    "locales"
 
 
 parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
@@ -20,12 +24,8 @@ parsers appState wrapRoute =
         []
 
     else
-        let
-            moduleRoot =
-                lr "locales" appState
-        in
-        [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s (lr "locales.create" appState))
-        , map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "locales.import" appState) <?> Query.string (lr "locales.import.localeId" appState))
+        [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
+        , map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "localeId")
         , map (detail wrapRoute) (s moduleRoot </> string)
         , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
         ]
@@ -36,15 +36,11 @@ detail wrapRoute localeId =
     DetailRoute localeId |> wrapRoute
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
-    let
-        moduleRoot =
-            lr "locales" appState
-    in
+toUrl : Route -> List String
+toUrl route =
     case route of
         CreateRoute ->
-            [ moduleRoot, lr "locales.create" appState ]
+            [ moduleRoot, "create" ]
 
         DetailRoute localeId ->
             [ moduleRoot, localeId ]
@@ -52,10 +48,10 @@ toUrl appState route =
         ImportRoute mbLocaleId ->
             case mbLocaleId of
                 Just localeId ->
-                    [ moduleRoot, lr "locales.import" appState, "?" ++ lr "locales.import.localeId" appState ++ "=" ++ localeId ]
+                    [ moduleRoot, "import", "?" ++ "localeId" ++ "=" ++ localeId ]
 
                 Nothing ->
-                    [ moduleRoot, lr "locales.import" appState ]
+                    [ moduleRoot, "import" ]
 
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]

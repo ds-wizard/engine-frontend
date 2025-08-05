@@ -14,7 +14,8 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, br, div, h1, h2, p, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faSpinner, faSuccess)
 import Shared.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks exposing (GuideLinks)
@@ -49,7 +50,7 @@ headerActions actions =
 loader : AppState -> Html msg
 loader appState =
     div [ class "full-page-loader" ]
-        [ faSet "_global.spinner" appState
+        [ faSpinner
         , div [] [ text (gettext "Loading..." appState.locale) ]
         ]
 
@@ -64,9 +65,9 @@ error appState msg =
         }
 
 
-success : AppState -> String -> Html msg
-success appState =
-    message (faSet "_global.success" appState) "success"
+success : String -> Html msg
+success =
+    message faSuccess "success"
 
 
 message : Html msg -> String -> String -> Html msg
@@ -118,7 +119,7 @@ actionResultViewWithError : AppState -> (a -> Html msg) -> (String -> Html msg) 
 actionResultViewWithError appState viewContent viewError actionResult =
     case actionResult of
         Unset ->
-            emptyNode
+            Html.nothing
 
         Loading ->
             loader appState

@@ -5,9 +5,9 @@ module Wizard.ProjectImporters.Index.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.QuestionnaireImporters as QuestionnaireImportersApi
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Wizard.Common.Api exposing (applyResultTransformCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.QuestionnaireImporters as QuestionnaireImportersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -31,14 +31,13 @@ update msg wrapMsg appState model =
         ToggleEnabled questionnaireImporter ->
             ( { model | togglingEnabled = Loading }
             , Cmd.map wrapMsg <|
-                QuestionnaireImportersApi.putQuestionnaireImporter
+                QuestionnaireImportersApi.putQuestionnaireImporter appState
                     { questionnaireImporter | enabled = not questionnaireImporter.enabled }
-                    appState
                     ToggleEnabledComplete
             )
 
         ToggleEnabledComplete result ->
-            applyResultTransformCmd appState
+            RequestHelpers.applyResultTransformCmd
                 { setResult = \r m -> { m | togglingEnabled = r }
                 , defaultError = gettext "Unable to change project importer." appState.locale
                 , model = model
@@ -46,6 +45,7 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always (gettext "Project importer was changed successfully." appState.locale)
                 , cmd = Cmd.map (wrapMsg << ListingMsg) Listing.fetchData
+                , locale = appState.locale
                 }
 
 
@@ -66,7 +66,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireImporter
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnaireImportersApi.getQuestionnaireImporters
+    { getRequest = QuestionnaireImportersApi.getQuestionnaireImporters appState
     , getError = gettext "Unable to get project importers." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectImportersIndexWithFilters

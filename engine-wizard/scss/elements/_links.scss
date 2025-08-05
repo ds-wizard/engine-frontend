@@ -42,13 +42,13 @@ a {
 
 
 .with-icon {
-    .fa {
+    .fas, .far, .fab {
         margin-right: $spacer-1;
     }
 }
 
 .with-icon-after {
-    .fa {
+    .fas, .far, .fab {
         margin-right: 0;
         margin-left: $spacer-2;
     }

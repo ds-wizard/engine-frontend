@@ -3,8 +3,8 @@ module Wizard.Projects.Common.QuestionnaireTodoGroup exposing
     , groupTodos
     )
 
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
 
 
 type alias QuestionnaireTodoGroup =

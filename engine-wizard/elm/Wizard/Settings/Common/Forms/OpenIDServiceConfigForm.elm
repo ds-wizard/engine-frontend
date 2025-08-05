@@ -7,10 +7,10 @@ module Wizard.Settings.Common.Forms.OpenIDServiceConfigForm exposing
 
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
-import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)
 
 

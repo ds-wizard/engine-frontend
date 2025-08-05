@@ -1,7 +1,7 @@
 module Wizard.Projects.Migration.Msgs exposing (Msg(..))
 
-import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Projects.Common.QuestionChange exposing (QuestionChange)
 

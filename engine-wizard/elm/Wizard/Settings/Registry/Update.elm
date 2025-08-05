@@ -6,12 +6,12 @@ module Wizard.Settings.Registry.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form
 import Gettext exposing (gettext)
-import Shared.Api.Registry as RegistryApi
-import Shared.Data.EditableConfig as EditableConfig
-import Shared.Data.EditableConfig.EditableRegistryConfig as EditableRegistryConfig
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.EditableConfig as EditableConfig
+import Wizard.Api.Models.EditableConfig.EditableRegistryConfig as EditableRegistryConfig
+import Wizard.Api.Registry as RegistryApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Common.Forms.RegistrySignupForm as RegistrySignupForm
@@ -84,7 +84,7 @@ handleForm wrapMsg formMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        RegistryApi.postSignup body appState PostSignupComplete
+                        RegistryApi.postSignup appState body PostSignupComplete
             in
             ( { model | registrySigningUp = Loading, registrySignupForm = registrySignupForm }
             , cmd
@@ -107,7 +107,7 @@ handlePostSignupComplete appState model result =
         Err error ->
             ( { model
                 | registrySigningUp = ApiError.toActionResult appState (gettext "Sign up request failed." appState.locale) error
-                , registrySignupForm = setFormErrors appState error model.registrySignupForm
+                , registrySignupForm = Form.setFormErrors appState error model.registrySignupForm
               }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

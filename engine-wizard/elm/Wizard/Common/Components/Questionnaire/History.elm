@@ -16,28 +16,29 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, br, div, em, h5, img, input, label, li, span, strong, text, ul)
 import Html.Attributes exposing (checked, class, src, type_)
 import Html.Events exposing (onCheck, onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Auth.Session as Session
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Data.User as User
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (flip)
 import String.Format as String
 import Time
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
@@ -296,7 +297,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                 Just version ->
                     [ ( ListingDropdown.dropdownAction
                             { extraClass = Nothing
-                            , icon = faSet "_global.edit" appState
+                            , icon = faEdit
                             , label = gettext "Rename this version" appState.locale
                             , msg = ListingActionMsg (cfg.renameVersionMsg version)
                             , dataCy = "rename"
@@ -305,7 +306,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                       )
                     , ( ListingDropdown.dropdownAction
                             { extraClass = Just "text-danger"
-                            , icon = faSet "_global.delete" appState
+                            , icon = faDelete
                             , label = gettext "Delete this version" appState.locale
                             , msg = ListingActionMsg (cfg.deleteVersionMsg version)
                             , dataCy = "delete"
@@ -317,7 +318,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                 Nothing ->
                     [ ( ListingDropdown.dropdownAction
                             { extraClass = Nothing
-                            , icon = faSet "_global.edit" appState
+                            , icon = faEdit
                             , label = gettext "Name this version" appState.locale
                             , msg = ListingActionMsg (cfg.createVersionMsg eventUuid)
                             , dataCy = "view"
@@ -333,7 +334,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                         viewQuestionnaireAction =
                             ListingDropdown.dropdownAction
                                 { extraClass = Nothing
-                                , icon = faSet "_global.questionnaire" appState
+                                , icon = faQuestionnaire
                                 , label = gettext "View questionnaire" appState.locale
                                 , msg = ListingActionMsg (viewMsg eventUuid)
                                 , dataCy = "view-questionnaire"
@@ -342,7 +343,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                         createDocumentAction =
                             ListingDropdown.dropdownAction
                                 { extraClass = Nothing
-                                , icon = faSet "questionnaire.history.createDocument" appState
+                                , icon = faQuestionnaireHistoryCreateDocument
                                 , label = gettext "Create document" appState.locale
                                 , msg = ListingActionLink (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid (Just eventUuid))
                                 , dataCy = "create-document"
@@ -360,7 +361,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                 Just revertMsg ->
                     [ ( ListingDropdown.dropdownAction
                             { extraClass = Just "text-danger"
-                            , icon = faSet "questionnaire.history.revert" appState
+                            , icon = faQuestionnaireHistoryRevert
                             , label = gettext "Revert to this version" appState.locale
                             , msg = ListingActionMsg (revertMsg event)
                             , dataCy = "revert"
@@ -390,14 +391,14 @@ viewEventHeaderDropdown appState cfg model versions events event =
                 Maybe.withDefault Dropdown.initialState <|
                     Dict.get eventUuidString model.dropdownStates
         in
-        ListingDropdown.dropdown appState
+        ListingDropdown.dropdown
             { dropdownState = dropdownState
             , toggleMsg = cfg.wrapMsg << DropdownMsg eventUuidString
             , items = items
             }
 
     else
-        emptyNode
+        Html.nothing
 
 
 viewEventBadges : AppState -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
@@ -411,7 +412,7 @@ viewEventBadges appState versions events event =
                 QuestionnaireVersionTag.current appState
 
             else
-                emptyNode
+                Html.nothing
 
         versionNameBadge =
             case QuestionnaireVersion.getVersionByEventUuid versions eventUuid of
@@ -419,7 +420,7 @@ viewEventBadges appState versions events event =
                     QuestionnaireVersionTag.version version
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "event-badges" ] [ currentVersionBadge, versionNameBadge ]
 
@@ -443,7 +444,7 @@ viewEventDetail appState cfg event =
             viewEventDetailSetLevel appState cfg data
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewEventDetailSetReply : AppState -> ViewConfig msg -> SetReplyData -> Question -> Html msg
@@ -470,14 +471,14 @@ viewEventDetailSetReply appState cfg data question =
                 answerText =
                     Maybe.unwrap "" .label (KnowledgeModel.getAnswer answerUuid cfg.questionnaire.knowledgeModel)
             in
-            eventView [ ( faSet "km.answer" appState, answerText ) ]
+            eventView [ ( faKmAnswer, answerText ) ]
 
         MultiChoiceReply choiceUuids ->
             let
                 choices =
                     KnowledgeModel.getQuestionChoices (Question.getUuid question) cfg.questionnaire.knowledgeModel
                         |> List.filter (.uuid >> flip List.member choiceUuids)
-                        |> List.map (\choice -> ( faSet "km.choice" appState, choice.label ))
+                        |> List.map (\choice -> ( faKmChoice, choice.label ))
             in
             eventView choices
 
@@ -510,7 +511,7 @@ viewEventDetailSetReply appState cfg data question =
                         [ ( fa FileIcon.defaultIcon, gettext "Deleted file" appState.locale ) ]
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewEventDetailClearReply : AppState -> ViewConfig msg -> ClearReplyData -> Question -> Html msg

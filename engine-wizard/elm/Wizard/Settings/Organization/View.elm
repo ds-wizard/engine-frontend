@@ -3,9 +3,9 @@ module Wizard.Settings.Organization.View exposing (view)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
-import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (compose2)
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormExtra as FormExtra

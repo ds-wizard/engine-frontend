@@ -5,11 +5,11 @@ module Wizard.KnowledgeModels.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Packages as PackagesApi
-import Shared.Data.Package.PackagePhase exposing (PackagePhase)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setPackage)
-import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.Package.PackagePhase exposing (PackagePhase)
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.KnowledgeModels.Detail.Models exposing (Model)
@@ -21,19 +21,20 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : String -> AppState -> Cmd Msg
 fetchData packageId appState =
-    PackagesApi.getPackage packageId appState GetPackageCompleted
+    PackagesApi.getPackage appState packageId GetPackageCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetPackageCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setPackage
                 , defaultError = gettext "Unable to get the Knowledge Model." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         DropdownMsg state ->
@@ -54,20 +55,21 @@ update msg wrapMsg appState model =
         UpdatePhaseCompleted phase result ->
             case model.package of
                 Success package ->
-                    applyResultTransform appState
+                    RequestHelpers.applyResultTransform
                         { setResult = setPackage
                         , defaultError = gettext "Unable to update the knowledge model." appState.locale
                         , model = model
                         , result = result
                         , logoutMsg = Wizard.Msgs.logoutMsg
                         , transform = always { package | phase = phase }
+                        , locale = appState.locale
                         }
 
                 _ ->
                     ( model, Cmd.none )
 
         ExportPackage package ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (PackagesApi.exportPackageUrl package.id appState)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (PackagesApi.exportPackageUrl appState package.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -81,7 +83,7 @@ handleDeleteVersion wrapMsg appState model =
     case model.package of
         Success package ->
             ( { model | deletingVersion = Loading }
-            , PackagesApi.deletePackageVersion package.id appState (wrapMsg << DeleteVersionCompleted)
+            , PackagesApi.deletePackageVersion appState package.id (wrapMsg << DeleteVersionCompleted)
             )
 
         _ ->
@@ -96,7 +98,7 @@ deleteVersionCompleted appState model result =
 
         Err error ->
             ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -108,7 +110,7 @@ handleSetUpdatePhase wrapMsg appState model phase =
                 newPackage =
                     { package | phase = phase }
             in
-            ( model, PackagesApi.putPackage newPackage appState (wrapMsg << UpdatePhaseCompleted phase) )
+            ( model, PackagesApi.putPackage appState newPackage (wrapMsg << UpdatePhaseCompleted phase) )
 
         _ ->
             ( model, Cmd.none )

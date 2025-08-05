@@ -5,7 +5,6 @@ module Wizard.DocumentTemplateEditors.Routing exposing
     )
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Locale exposing (lr)
 import Shared.Utils exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
@@ -16,12 +15,13 @@ import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute
 import Wizard.DocumentTemplateEditors.Routes exposing (Route(..))
 
 
-parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parsers appState wrapRoute =
-    let
-        moduleRoot =
-            lr "documentTemplateEditors" appState
-    in
+moduleRoot : String
+moduleRoot =
+    "document-template-editors"
+
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
     [ map (createRoute wrapRoute) (s moduleRoot </> s "create" <?> Query.string "selected" <?> Query.bool "edit")
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "updatedAt,desc")) (PaginationQueryString.parser (s moduleRoot))
     , map (wrapRoute << flip EditorRoute DTEditorRoute.Files) (s moduleRoot </> string)
@@ -35,12 +35,8 @@ createRoute wrapRoute documentTemplateId edit =
     wrapRoute <| CreateRoute documentTemplateId edit
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
-    let
-        moduleRoot =
-            lr "documentTemplateEditors" appState
-    in
+toUrl : Route -> List String
+toUrl route =
     case route of
         CreateRoute mbSelected mbEdit ->
             case ( mbSelected, mbEdit ) of

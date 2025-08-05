@@ -3,11 +3,12 @@ module Wizard.Users.Index.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, href, src)
+import Html.Extra as Html
 import Shared.Auth.Role as Role
 import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Components.Badge as Badge
-import Shared.Data.User as User exposing (User)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faDelete, faEdit)
+import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
@@ -34,8 +35,7 @@ view appState model =
 
 createButton : AppState -> Html msg
 createButton appState =
-    linkTo appState
-        Routes.usersCreate
+    linkTo Routes.usersCreate
         [ class "btn btn-primary"
         , dataCy "users_create-button"
         ]
@@ -75,7 +75,7 @@ listingConfig appState =
 listingTitle : AppState -> User -> Html Msg
 listingTitle appState user =
     span []
-        [ linkTo appState (Routes.usersEdit (UuidOrCurrent.uuid user.uuid)) [] [ text <| User.fullName user ]
+        [ linkTo (Routes.usersEdit (UuidOrCurrent.uuid user.uuid)) [] [ text <| User.fullName user ]
         , listingTitleBadge appState user
         ]
 
@@ -85,7 +85,7 @@ listingTitleBadge appState user =
     let
         activeBadge =
             if user.active then
-                emptyNode
+                Html.nothing
 
             else
                 Badge.danger [] [ text (gettext "inactive" appState.locale) ]
@@ -126,7 +126,7 @@ listingDescription appState user =
                     (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
 
             else
-                emptyNode
+                Html.nothing
     in
     span []
         ([ a [ class "fragment", href <| "mailto:" ++ user.email ]
@@ -143,7 +143,7 @@ listingActions appState user =
         editAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.edit" appState
+                , icon = faEdit
                 , label = gettext "Edit" appState.locale
                 , msg = ListingActionLink (Routes.usersEdit (UuidOrCurrent.uuid user.uuid))
                 , dataCy = "edit"
@@ -152,7 +152,7 @@ listingActions appState user =
         deleteAction =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (ShowHideDeleteUser <| Just user)
                 , dataCy = "delete"
@@ -175,7 +175,7 @@ deleteModal appState model =
                     ( True, userCard appState user )
 
                 Nothing ->
-                    ( False, emptyNode )
+                    ( False, Html.nothing )
 
         modalContent =
             [ p []

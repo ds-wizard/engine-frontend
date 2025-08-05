@@ -14,14 +14,14 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faSettings)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Version
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
@@ -85,9 +85,9 @@ update cfg appState msg model =
             case cfg.documentTemplateForm of
                 Just documentTemplateForm ->
                     ( { model | publishing = ActionResult.Loading }
-                    , DocumentTemplateDraftsApi.putDraft cfg.documentTemplateId
+                    , DocumentTemplateDraftsApi.putDraft appState
+                        cfg.documentTemplateId
                         (DocumentTemplateForm.encode DocumentTemplatePhase.Released documentTemplateForm)
-                        appState
                         (cfg.wrapMsg << PublishCompleted)
                     )
 
@@ -119,10 +119,9 @@ view cfg appState model =
         info =
             div [ class "alert alert-info" ]
                 (String.formatHtml (gettext "Check the document template's metadata before publishing. You change them in %s." appState.locale)
-                    [ linkTo appState
-                        (Routes.documentTemplateEditorDetailSettings cfg.documentTemplate.id)
+                    [ linkTo (Routes.documentTemplateEditorDetailSettings cfg.documentTemplate.id)
                         [ onClick (SetOpen False), class "btn-link with-icon" ]
-                        [ faSet "_global.settings" appState
+                        [ faSettings
                         , text (gettext "Settings" appState.locale)
                         ]
                     ]

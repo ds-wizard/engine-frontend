@@ -1,8 +1,8 @@
 module Wizard.KnowledgeModels.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.Package exposing (Package)
-import Shared.Data.Package.PackagePhase exposing (PackagePhase)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.Package.PackagePhase exposing (PackagePhase)
 import Wizard.Common.Components.Listing.Msgs as Listing
 import Wizard.Common.FileDownloader as FileDownloader
 

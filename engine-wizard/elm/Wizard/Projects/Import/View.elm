@@ -5,21 +5,22 @@ import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, div, h5, li, span, strong, text, ul)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
 import Shared.Markdown as Markdown
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (flip)
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailNavigation as DetailNavigation
 import Wizard.Common.Components.Questionnaire as Questionnaire
@@ -96,7 +97,7 @@ viewNavigation appState model questionnaire importResult =
 
         errorsLink =
             if List.isEmpty importResult.errors then
-                emptyNode
+                Html.nothing
 
             else
                 let
@@ -113,13 +114,12 @@ viewNavigation appState model questionnaire importResult =
                     )
 
         cancelButton =
-            linkTo appState
-                (Routes.projectsDetail model.uuid)
+            linkTo (Routes.projectsDetail model.uuid)
                 [ class "btn btn-secondary btn-with-loader me-2" ]
                 [ text (gettext "Cancel" appState.locale) ]
 
         importButton =
-            ActionButton.button appState
+            ActionButton.button
                 { label = gettext "Import" appState.locale
                 , result = model.importing
                 , msg = PutImportData
@@ -182,7 +182,7 @@ viewImportResults appState model questionnaire importResult =
             case model.sidePanel of
                 ChangesSidePanel ->
                     if List.isEmpty importResult.questionnaireEvents then
-                        Flash.warning appState (gettext "No changes to be imported" appState.locale)
+                        Flash.warning (gettext "No changes to be imported" appState.locale)
 
                     else
                         div [] (List.map (viewEvent appState questionnaire) importResult.questionnaireEvents)
@@ -213,7 +213,7 @@ viewEvent appState questionnaire event =
             viewReply appState questionnaire question data
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewReply : AppState -> QuestionnaireQuestionnaire -> Question -> SetReplyData -> Html Msg
@@ -252,7 +252,7 @@ viewReply appState questionnaire question data =
 
         ReplyValue.AnswerReply answerUuid ->
             eventView
-                [ ( faSet "km.answer" appState
+                [ ( faKmAnswer
                   , text (Maybe.unwrap "" .label (KnowledgeModel.getAnswer answerUuid questionnaire.knowledgeModel))
                   )
                 ]
@@ -262,7 +262,7 @@ viewReply appState questionnaire question data =
                 choices =
                     KnowledgeModel.getQuestionChoices (Question.getUuid question) questionnaire.knowledgeModel
                         |> List.filter (.uuid >> flip List.member choiceUuids)
-                        |> List.map (\choice -> ( faSet "km.choice" appState, text choice.label ))
+                        |> List.map (\choice -> ( faKmChoice, text choice.label ))
             in
             eventView choices
 

@@ -4,9 +4,9 @@ module Wizard.Projects.Common.QuestionnaireDescriptor exposing
     , fromQuestionnaireSettings
     )
 
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 
 
 type alias QuestionnaireDescriptor =

@@ -3,7 +3,7 @@ module Wizard.Users.Index.Models exposing (Model, initialModel)
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.User exposing (User)
+import Wizard.Api.Models.User exposing (User)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Users.Routes exposing (indexRouteRoleFilterId)
 

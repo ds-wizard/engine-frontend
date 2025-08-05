@@ -6,8 +6,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromRegistry)
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.Common.GuideLinks as GuideLinks
@@ -46,7 +47,7 @@ view appState model =
                     viewNavbar appState registryActive
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     div [ detailClass "KnowledgeModels__Import" ]
         [ Page.headerWithGuideLink appState (gettext "Import Locale" appState.locale) GuideLinks.localesImport
@@ -65,7 +66,7 @@ viewNavbar appState registryActive =
                 , classList [ ( "active", registryActive ) ]
                 , dataCy "locale_import_nav_registry"
                 ]
-                [ faSet "kmImport.fromRegistry" appState
+                [ faKmImportFromRegistry
                 , text (gettext "From registry" appState.locale)
                 ]
             ]
@@ -76,7 +77,7 @@ viewNavbar appState registryActive =
                 , classList [ ( "active", not registryActive ) ]
                 , dataCy "locale_import_nav_file"
                 ]
-                [ faSet "kmImport.fromFile" appState
+                [ faKmImportFromFile
                 , text (gettext "From file" appState.locale)
                 ]
             ]

@@ -48,13 +48,18 @@ config =
     , NoSimpleLetBody.rule
     , NoPrematureLetComputation.rule
     , NoUnused.CustomTypeConstructors.rule []
+        --|> Rule.ignoreErrorsForDirectories [ "shared/common/" ]
     , NoUnused.CustomTypeConstructorArgs.rule
+        --|> Rule.ignoreErrorsForDirectories [ "shared/common/" ]
     , NoUnused.Dependencies.rule
     , NoUnused.Exports.rule
+        |> Rule.ignoreErrorsForDirectories [ "shared/common/" ]
     , NoUnused.Modules.rule
+        --|> Rule.ignoreErrorsForDirectories [ "shared/common/" ]
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule
+        |> Rule.ignoreErrorsForDirectories [ "shared/common/" ]
     , Simplify.rule Simplify.defaults
     ]
-        |> List.map (Rule.ignoreErrorsForDirectories [ "vendor/" ])
+        |> List.map (Rule.ignoreErrorsForDirectories [ "shared/vendor/" ])

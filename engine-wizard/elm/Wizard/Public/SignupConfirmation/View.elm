@@ -3,7 +3,7 @@ module Wizard.Public.SignupConfirmation.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faSuccess)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
@@ -23,12 +23,11 @@ view appState model =
 successView : AppState -> String -> Html Msg
 successView appState _ =
     div [ class "px-4 py-5 bg-light rounded-3e", dataCy "message_success" ]
-        [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
+        [ h1 [ class "display-3" ] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
                 (gettext "Your email was successfully confirmed. You can now %s." appState.locale)
-                [ linkTo appState
-                    (Routes.publicLogin Nothing)
+                [ linkTo (Routes.publicLogin Nothing)
                     [ class "btn btn-primary ms-1" ]
                     [ text (gettext "log in" appState.locale) ]
                 ]

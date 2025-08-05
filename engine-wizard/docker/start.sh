@@ -18,16 +18,8 @@ sed -i "s/{defaultIllustrationsColor}/$DEFAULT_ILLUSTRATIONS_COLOR/g" $file
 # create config
 config=/usr/share/nginx/html/wizard/config.js
 echo -n "window.app={apiUrl:'"$API_URL"'" >${config}
-if [[ ! -z "$PROVISIONING_URL" ]]; then
-  echo -n ",provisioningUrl:'"$PROVISIONING_URL"'" >>${config}
-fi
 if [[ ! -z "$GA_ID" ]]; then
   echo -n ",gaID:'"$GA_ID"'" >>${config}
-fi
-provisioning=/configuration/provisioning.json
-if [[ -f "$provisioning" ]]; then
-  echo -n ",provisioning:" >>${config}
-  cat $provisioning >>${config}
 fi
 echo -n "};" >>${config}
 

@@ -6,68 +6,68 @@ import Gettext exposing (gettext)
 import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, disabled)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
-import Shared.Data.Event as Event exposing (Event(..))
-import Shared.Data.Event.AddAnswerEventData exposing (AddAnswerEventData)
-import Shared.Data.Event.AddChapterEventData exposing (AddChapterEventData)
-import Shared.Data.Event.AddChoiceEventData exposing (AddChoiceEventData)
-import Shared.Data.Event.AddExpertEventData exposing (AddExpertEventData)
-import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData exposing (AddIntegrationEventData(..))
-import Shared.Data.Event.AddMetricEventData exposing (AddMetricEventData)
-import Shared.Data.Event.AddPhaseEventData exposing (AddPhaseEventData)
-import Shared.Data.Event.AddQuestionEventData as AddQuestionEventQuestionData exposing (AddQuestionEventData(..))
-import Shared.Data.Event.AddReferenceCrossEventData exposing (AddReferenceCrossEventData)
-import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
-import Shared.Data.Event.AddReferenceResourcePageEventData exposing (AddReferenceResourcePageEventData)
-import Shared.Data.Event.AddReferenceURLEventData exposing (AddReferenceURLEventData)
-import Shared.Data.Event.AddResourceCollectionEventData exposing (AddResourceCollectionEventData)
-import Shared.Data.Event.AddResourcePageEventData exposing (AddResourcePageEventData)
-import Shared.Data.Event.AddTagEventData exposing (AddTagEventData)
-import Shared.Data.Event.EditAnswerEventData exposing (EditAnswerEventData)
-import Shared.Data.Event.EditChapterEventData exposing (EditChapterEventData)
-import Shared.Data.Event.EditChoiceEventData exposing (EditChoiceEventData)
-import Shared.Data.Event.EditExpertEventData exposing (EditExpertEventData)
-import Shared.Data.Event.EditIntegrationEventData as EditIntegrationEventData exposing (EditIntegrationEventData(..))
-import Shared.Data.Event.EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
-import Shared.Data.Event.EditMetricEventData exposing (EditMetricEventData)
-import Shared.Data.Event.EditPhaseEventData exposing (EditPhaseEventData)
-import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData exposing (EditQuestionEventData(..))
-import Shared.Data.Event.EditReferenceCrossEventData exposing (EditReferenceCrossEventData)
-import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData(..))
-import Shared.Data.Event.EditReferenceResourcePageEventData exposing (EditReferenceResourcePageEventData)
-import Shared.Data.Event.EditReferenceURLEventData exposing (EditReferenceURLEventData)
-import Shared.Data.Event.EditResourceCollectionEventData exposing (EditResourceCollectionEventData)
-import Shared.Data.Event.EditResourcePageEventData exposing (EditResourcePageEventData)
-import Shared.Data.Event.EditTagEventData exposing (EditTagEventData)
-import Shared.Data.Event.EventField as EventField
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Annotation exposing (Annotation)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
-import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
-import Shared.Data.KnowledgeModel.Reference.CrossReferenceData exposing (CrossReferenceData)
-import Shared.Data.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
-import Shared.Data.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
-import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
-import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Data.Migration exposing (Migration)
-import Shared.Data.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
 import Shared.Utils exposing (flip)
 import String.Format as String exposing (format)
+import Wizard.Api.Models.Event as Event exposing (Event(..))
+import Wizard.Api.Models.Event.AddAnswerEventData exposing (AddAnswerEventData)
+import Wizard.Api.Models.Event.AddChapterEventData exposing (AddChapterEventData)
+import Wizard.Api.Models.Event.AddChoiceEventData exposing (AddChoiceEventData)
+import Wizard.Api.Models.Event.AddExpertEventData exposing (AddExpertEventData)
+import Wizard.Api.Models.Event.AddIntegrationEventData as AddIntegrationEventData exposing (AddIntegrationEventData(..))
+import Wizard.Api.Models.Event.AddMetricEventData exposing (AddMetricEventData)
+import Wizard.Api.Models.Event.AddPhaseEventData exposing (AddPhaseEventData)
+import Wizard.Api.Models.Event.AddQuestionEventData as AddQuestionEventQuestionData exposing (AddQuestionEventData(..))
+import Wizard.Api.Models.Event.AddReferenceCrossEventData exposing (AddReferenceCrossEventData)
+import Wizard.Api.Models.Event.AddReferenceEventData as AddReferenceEventData exposing (AddReferenceEventData)
+import Wizard.Api.Models.Event.AddReferenceResourcePageEventData exposing (AddReferenceResourcePageEventData)
+import Wizard.Api.Models.Event.AddReferenceURLEventData exposing (AddReferenceURLEventData)
+import Wizard.Api.Models.Event.AddResourceCollectionEventData exposing (AddResourceCollectionEventData)
+import Wizard.Api.Models.Event.AddResourcePageEventData exposing (AddResourcePageEventData)
+import Wizard.Api.Models.Event.AddTagEventData exposing (AddTagEventData)
+import Wizard.Api.Models.Event.EditAnswerEventData exposing (EditAnswerEventData)
+import Wizard.Api.Models.Event.EditChapterEventData exposing (EditChapterEventData)
+import Wizard.Api.Models.Event.EditChoiceEventData exposing (EditChoiceEventData)
+import Wizard.Api.Models.Event.EditExpertEventData exposing (EditExpertEventData)
+import Wizard.Api.Models.Event.EditIntegrationEventData as EditIntegrationEventData exposing (EditIntegrationEventData(..))
+import Wizard.Api.Models.Event.EditKnowledgeModelEventData exposing (EditKnowledgeModelEventData)
+import Wizard.Api.Models.Event.EditMetricEventData exposing (EditMetricEventData)
+import Wizard.Api.Models.Event.EditPhaseEventData exposing (EditPhaseEventData)
+import Wizard.Api.Models.Event.EditQuestionEventData as EditQuestionEventData exposing (EditQuestionEventData(..))
+import Wizard.Api.Models.Event.EditReferenceCrossEventData exposing (EditReferenceCrossEventData)
+import Wizard.Api.Models.Event.EditReferenceEventData as EditReferenceEventData exposing (EditReferenceEventData(..))
+import Wizard.Api.Models.Event.EditReferenceResourcePageEventData exposing (EditReferenceResourcePageEventData)
+import Wizard.Api.Models.Event.EditReferenceURLEventData exposing (EditReferenceURLEventData)
+import Wizard.Api.Models.Event.EditResourceCollectionEventData exposing (EditResourceCollectionEventData)
+import Wizard.Api.Models.Event.EditResourcePageEventData exposing (EditResourcePageEventData)
+import Wizard.Api.Models.Event.EditTagEventData exposing (EditTagEventData)
+import Wizard.Api.Models.Event.EventField as EventField
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
+import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.MetricMeasure exposing (MetricMeasure)
+import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.Reference.CrossReferenceData exposing (CrossReferenceData)
+import Wizard.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
+import Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
+import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
+import Wizard.Api.Models.Migration exposing (Migration)
+import Wizard.Api.Models.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
-import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormResult as FormResult
 import Wizard.Common.View.Page as Page
 import Wizard.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
@@ -103,9 +103,9 @@ migrationView appState model migration =
 
                         diffTree =
                             migration.migrationState.targetEvent
-                                |> Maybe.map (DiffTree.view appState kmName migration.currentKnowledgeModel)
+                                |> Maybe.map (DiffTree.view kmName migration.currentKnowledgeModel)
                                 |> Maybe.map (List.singleton >> div [ class "col-4" ])
-                                |> Maybe.withDefault emptyNode
+                                |> Maybe.withDefault Html.nothing
                     in
                     div [ class "row" ]
                         [ migrationSummary appState migration, conflictView, diffTree ]
@@ -122,7 +122,7 @@ migrationView appState model migration =
     in
     div [ class "col KMEditor__Migration", dataCy "km-editor_migration" ]
         [ div [] [ Page.header (gettext "Migration" appState.locale) [] ]
-        , FormResult.view appState model.conflict
+        , FormResult.view model.conflict
         , currentView
         ]
 
@@ -150,7 +150,7 @@ getEventView appState model migration event =
     case event of
         AddKnowledgeModelEvent _ _ ->
             -- AddKnowledgeModelEvent should never appear in migrations
-            emptyNode
+            Html.nothing
 
         EditKnowledgeModelEvent eventData _ ->
             migration.currentKnowledgeModel
@@ -975,7 +975,7 @@ viewAddQuestionDiff appState km event =
                     viewAddedChildren (gettext "Props" appState.locale) props
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         tags =
             KnowledgeModel.getTags km
@@ -1090,7 +1090,7 @@ viewEditQuestionDiff appState km event question =
                     viewAddedAndDeletedChildren (gettext "Props" appState.locale) originalProps newProps
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Tags
         tags =
@@ -1128,7 +1128,7 @@ viewEditQuestionDiff appState km event question =
                         answerNames
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Choices
         choicesDiff =
@@ -1139,7 +1139,7 @@ viewEditQuestionDiff appState km event question =
                             KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Item Template Questions
         itemTemplateQuestionsDiff =
@@ -1161,7 +1161,7 @@ viewEditQuestionDiff appState km event question =
                         itemTemplateQuestionNames
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- References
         references =
@@ -1262,7 +1262,7 @@ viewDeleteQuestionDiff appState km question =
                             KnowledgeModel.getQuestionAnswers questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Choices
         choicesDiff =
@@ -1273,7 +1273,7 @@ viewDeleteQuestionDiff appState km question =
                             KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Item Template Questions
         itemTemplateQuestionsDiff =
@@ -1284,7 +1284,7 @@ viewDeleteQuestionDiff appState km question =
                             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- References
         references =
@@ -1359,7 +1359,7 @@ viewMoveQuestion appState km question =
                             KnowledgeModel.getQuestionAnswers questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Choices
         choicesDiff =
@@ -1370,7 +1370,7 @@ viewMoveQuestion appState km question =
                             KnowledgeModel.getQuestionChoices questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- Item Template Questions
         itemTemplateQuestionsDiff =
@@ -1381,7 +1381,7 @@ viewMoveQuestion appState km question =
                             KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         -- References
         references =
@@ -2304,7 +2304,7 @@ viewDiffChildren fieldName originalOrder newOrder childrenNames =
                     (\uuid ->
                         Dict.get uuid childrenNames
                             |> Maybe.map (text >> List.singleton >> li [])
-                            |> Maybe.withDefault emptyNode
+                            |> Maybe.withDefault Html.nothing
                     )
                     uuids
                 )
@@ -2378,7 +2378,7 @@ viewAddedAndDeletedChildren fieldName originalChildren newChildren =
                             (List.map (\child -> li [] [ text child ]) originalChildren)
 
                     else
-                        emptyNode
+                        Html.nothing
 
                 new =
                     if List.length newChildren > 0 then
@@ -2386,7 +2386,7 @@ viewAddedAndDeletedChildren fieldName originalChildren newChildren =
                             (List.map (\child -> li [] [ text child ]) newChildren)
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             div [] [ original, new ]
 
@@ -2465,13 +2465,13 @@ formActions : AppState -> Model -> Html Msg
 formActions appState model =
     let
         ( rejectLabel, rejectDisabled ) =
-            actionState appState model RejectButtonClicked (gettext "Reject" appState.locale)
+            actionState model RejectButtonClicked (gettext "Reject" appState.locale)
 
         ( applyLabel, applyDisabled ) =
-            actionState appState model ApplyButtonClicked (gettext "Apply" appState.locale)
+            actionState model ApplyButtonClicked (gettext "Apply" appState.locale)
 
         ( applyAllLabel, applyAllDisabled ) =
-            actionState appState model ApplyAllButtonClicked (gettext "Apply all" appState.locale)
+            actionState model ApplyAllButtonClicked (gettext "Apply all" appState.locale)
     in
     div [ class "form-actions" ]
         [ button [ class "btn btn-warning btn-with-loader", onClick RejectEvent, rejectDisabled, dataCy "km-migration_reject-button" ]
@@ -2485,8 +2485,8 @@ formActions appState model =
         ]
 
 
-actionState : AppState -> Model -> ButtonClicked -> String -> ( Html msg, Html.Attribute msg )
-actionState appState model buttonClicked defaultLabel =
+actionState : Model -> ButtonClicked -> String -> ( Html msg, Html.Attribute msg )
+actionState model buttonClicked defaultLabel =
     let
         disabledAttribute =
             disabled <|
@@ -2499,7 +2499,7 @@ actionState appState model buttonClicked defaultLabel =
 
         labelHtml =
             if ActionResult.isLoading model.conflict && model.buttonClicked == Just buttonClicked then
-                ActionButton.loader appState
+                faSpinner
 
             else
                 text defaultLabel
@@ -2511,19 +2511,18 @@ viewCompletedMigration : AppState -> Model -> Html Msg
 viewCompletedMigration appState model =
     div [ class "col-xs-12" ]
         [ div [ class "p-5 mb-4 bg-light rounded-3 full-page-error", dataCy "km-migration_completed" ]
-            [ h1 [ class "display-3" ] [ faSet "_global.success" appState ]
+            [ h1 [ class "display-3" ] [ faSuccess ]
             , p [ class "fs-4" ]
                 [ text (gettext "Migration successfully completed." appState.locale)
                 , br [] []
                 , text (gettext "You can publish the new version now." appState.locale)
                 ]
-            , linkTo appState
-                (Routes.kmEditorPublish model.branchUuid)
+            , linkTo (Routes.kmEditorPublish model.branchUuid)
                 [ class "btn btn-primary btn-lg with-icon-after"
                 , dataCy "km-migration_publish-button"
                 ]
                 [ text (gettext "Publish" appState.locale)
-                , faSet "_global.arrowRight" appState
+                , faArrowRight
                 ]
             ]
         ]

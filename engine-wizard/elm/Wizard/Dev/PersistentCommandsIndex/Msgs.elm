@@ -1,7 +1,7 @@
 module Wizard.Dev.PersistentCommandsIndex.Msgs exposing (Msg(..))
 
-import Shared.Data.PersistentCommand exposing (PersistentCommand)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.PersistentCommand exposing (PersistentCommand)
 import Wizard.Common.Components.Listing.Msgs as Listing
 
 

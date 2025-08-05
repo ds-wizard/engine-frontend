@@ -8,12 +8,24 @@
 
     del {
         background: none;
+        color: $body-color;
+    }
+
+    code {
+        @include border-radius($border-radius);
+        background: $code-block-bg;
+        padding: $spacer-1;
     }
 
     pre {
         @include border-radius($border-radius);
         background: $code-block-bg;
-        padding: .5rem;
+        padding: $spacer-2 $spacer-3;
+
+        code {
+            background: transparent;
+            padding: 0;
+        }
     }
 
     ul, ol {
@@ -31,8 +43,12 @@
         width: 100%;
 
         tr {
+            th {
+                background: $gray-100;
+            }
+
             td, th {
-                border: 1px solid $gray-400;
+                border: 1px solid $gray-300;
                 padding: .25rem .5rem
             }
         }

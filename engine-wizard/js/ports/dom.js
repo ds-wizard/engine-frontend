@@ -1,10 +1,11 @@
-const {waitForElement} = require('../utils.js');
+const {waitForElement} = require('../utils.js')
 
 module.exports = function (app) {
     app.ports.focus.subscribe(focus)
     app.ports.scrollIntoView.subscribe(scrollIntoView)
     app.ports.scrollIntoViewInstant.subscribe(scrollIntoViewInstant)
     app.ports.scrollIntoViewCenter.subscribe(scrollIntoViewCenter)
+    app.ports.scrollTreeItemIntoView.subscribe(scrollTreeItemIntoView)
     app.ports.scrollToTop.subscribe(scrollToTop)
     app.ports.setScrollTopPort.subscribe(setScrollTopPort)
     app.ports.subscribeScrollTop.subscribe(subscribeScrollTop)
@@ -16,6 +17,7 @@ module.exports = function (app) {
     }
 
     function scrollIntoView(elementSelector) {
+        console.log('scrollIntoView', elementSelector)
         waitForElement(elementSelector, function ($element) {
             $element.scrollIntoView({
                 behavior: 'smooth',
@@ -38,6 +40,29 @@ module.exports = function (app) {
             $element.scrollIntoView({
                 behavior: 'smooth',
                 block: 'center'
+            })
+        })
+    }
+
+    function scrollTreeItemIntoView(elementSelector) {
+        waitForElement(elementSelector, function ($element) {
+            const parent = document.querySelector('.tree-col')
+
+            const originalScrollLeft = parent.scrollLeft
+
+            const parentRect = parent.getBoundingClientRect()
+            const targetRect = $element.getBoundingClientRect()
+
+            const offsetTop = targetRect.top - parentRect.top + parent.scrollTop
+
+            const parentHeight = parent.clientHeight
+            const targetHeight = $element.offsetHeight
+            const centeredOffsetTop = offsetTop - (parentHeight / 2) + (targetHeight / 2)
+
+            parent.scrollTo({
+                top: centeredOffsetTop,
+                left: originalScrollLeft,
+                behavior: "smooth"
             })
         })
     }

@@ -4,11 +4,11 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (href, target)
-import Shared.Data.BranchDetail exposing (BranchDetail)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (flip)
 import String.Format as String
 import Version exposing (Version)
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy, wideDetailClass)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -33,11 +33,11 @@ contentView appState model branch =
     div [ wideDetailClass "KMEditor__Publish" ]
         [ Page.header (gettext "Publish new version" appState.locale) []
         , div []
-            [ FormResult.view appState model.publishingBranch
+            [ FormResult.view model.publishingBranch
             , formView appState model.form branch
             , FormActions.viewCustomButton appState
                 Cancel
-                (ActionButton.buttonWithAttrs appState
+                (ActionButton.buttonWithAttrs
                     (ActionButton.ButtonWithAttrsConfig (gettext "Publish" appState.locale)
                         model.publishingBranch
                         (FormMsg Form.Submit)

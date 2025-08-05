@@ -1,8 +1,8 @@
 module Wizard.Comments.Update exposing (fetchData, update)
 
 import Gettext exposing (gettext)
-import Shared.Api.CommentThreads as CommentThreadsApi
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.CommentThreads as CommentThreadsApi
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Comments.Models exposing (Model)
 import Wizard.Comments.Msgs exposing (Msg(..))
 import Wizard.Common.AppState exposing (AppState)
@@ -31,7 +31,7 @@ update wrapMsg msg appState model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireCommentThreadAssigned
 listingUpdateConfig wrapMsg appState =
-    { getRequest = CommentThreadsApi.getCommentThreads
+    { getRequest = CommentThreadsApi.getCommentThreads appState
     , getError = gettext "Unable to get comments." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.commentsIndexWithFilters

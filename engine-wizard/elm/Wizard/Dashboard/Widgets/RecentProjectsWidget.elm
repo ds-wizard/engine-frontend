@@ -4,10 +4,10 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, br, div, h2, p, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faArrowRight)
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.TimeDistance exposing (locale)
@@ -24,10 +24,10 @@ view appState questionnaires =
                 []
 
             Loading ->
-                [ WidgetHelpers.widgetLoader appState ]
+                [ WidgetHelpers.widgetLoader ]
 
             Error error ->
-                [ WidgetHelpers.widgetError appState error ]
+                [ WidgetHelpers.widgetError error ]
 
             Success questionnaireList ->
                 if List.isEmpty questionnaireList then
@@ -43,7 +43,7 @@ viewRecentProjects appState questionnaires =
         [ h2 [ class "fs-4 fw-bold mb-4" ] [ text (gettext "Recent Projects" appState.locale) ]
         , div [ class "Dashboard__ItemList flex-grow-1" ] (List.map (viewProject appState) questionnaires)
         , div [ class "mt-4" ]
-            [ linkTo appState (Routes.projectsIndex appState) [] [ text (gettext "View all" appState.locale) ] ]
+            [ linkTo (Routes.projectsIndex appState) [] [ text (gettext "View all" appState.locale) ] ]
         ]
     ]
 
@@ -54,8 +54,7 @@ viewProject appState questionnaire =
         updatedText =
             inWordsWithConfig { withAffix = True } (locale appState) questionnaire.updatedAt appState.currentTime
     in
-    linkTo appState
-        (Routes.projectsDetail questionnaire.uuid)
+    linkTo (Routes.projectsDetail questionnaire.uuid)
         [ class "p-2 py-3 d-flex rounded-3" ]
         [ ItemIcon.view { text = questionnaire.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]
@@ -73,7 +72,7 @@ viewRecentProjectsEmpty appState =
         [ p [ class "fs-5 m-0 mt-3 text-center" ]
             [ text (gettext "You have no projects yet, start by creating some." appState.locale)
             , br [] []
-            , faSet "_global.arrowRight" appState
+            , faArrowRight
             ]
         ]
     ]

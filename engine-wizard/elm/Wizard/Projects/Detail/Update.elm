@@ -1,4 +1,9 @@
-module Wizard.Projects.Detail.Update exposing (fetchData, isGuarded, onUnload, update)
+module Wizard.Projects.Detail.Update exposing
+    ( fetchData
+    , isGuarded
+    , onUnload
+    , update
+    )
 
 import ActionResult exposing (ActionResult(..))
 import Debounce
@@ -7,27 +12,27 @@ import Form
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Api.WebSocket as WebSocket
 import Shared.Auth.Session as Session
 import Shared.Copy as Ports
-import Shared.Data.Member as Member
-import Shared.Data.QuestionnaireCommon as QuestionnaireCommon
-import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
-import Shared.Data.QuestionnairePerm as QuestionnairePerm
-import Shared.Data.QuestionnairePreview as QuestionnairePreview
-import Shared.Data.UserInfo as UserInfo
-import Shared.Data.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
-import Shared.Data.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
+import Shared.Data.ApiError as ApiError exposing (ApiError(..))
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
-import Shared.Error.ApiError as ApiError exposing (ApiError(..))
-import Shared.Utils exposing (dispatch)
-import Shared.WebSocket as WebSocket
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Triple
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Models.Member as Member
+import Wizard.Api.Models.QuestionnaireCommon as QuestionnaireCommon
+import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.AddCommentData as AddCommentData
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
+import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
+import Wizard.Api.Models.QuestionnairePreview as QuestionnairePreview
+import Wizard.Api.Models.UserInfo as UserInfo
+import Wizard.Api.Models.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
+import Wizard.Api.Models.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.SummaryReport as SummaryReport
@@ -58,7 +63,7 @@ fetchData : AppState -> Uuid -> Model -> Cmd Msg
 fetchData appState uuid model =
     let
         tourCmd =
-            Driver.init (tour appState)
+            Driver.init appState.config (tour appState)
     in
     if ActionResult.unwrap False (.uuid >> (==) uuid) model.questionnaireCommon then
         Cmd.batch
@@ -81,15 +86,15 @@ fetchSubrouteData appState model =
             case route of
                 ProjectDetailRoute.Questionnaire _ _ ->
                     Cmd.batch
-                        [ dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
-                        , QuestionnairesApi.getQuestionnaireQuestionnaire uuid appState GetQuestionnaireDetailCompleted
+                        [ Task.dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
+                        , QuestionnairesApi.getQuestionnaireQuestionnaire appState uuid GetQuestionnaireDetailCompleted
                         ]
 
                 ProjectDetailRoute.Preview ->
-                    QuestionnairesApi.getQuestionnairePreview uuid appState GetQuestionnairePreviewCompleted
+                    QuestionnairesApi.getQuestionnairePreview appState uuid GetQuestionnairePreviewCompleted
 
                 ProjectDetailRoute.Metrics ->
-                    QuestionnairesApi.getSummaryReport uuid appState GetQuestionnaireSummaryReportCompleted
+                    QuestionnairesApi.getSummaryReport appState uuid GetQuestionnaireSummaryReportCompleted
 
                 ProjectDetailRoute.Documents _ ->
                     let
@@ -98,7 +103,7 @@ fetchSubrouteData appState model =
                                 Cmd.map DocumentsMsg Documents.fetchData
 
                             else
-                                QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCommonCompleted
+                                QuestionnairesApi.getQuestionnaire appState uuid GetQuestionnaireCommonCompleted
                     in
                     Cmd.batch
                         [ commonCmd
@@ -106,7 +111,7 @@ fetchSubrouteData appState model =
                         ]
 
                 ProjectDetailRoute.NewDocument _ ->
-                    QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireSettingsCompleted
+                    QuestionnairesApi.getQuestionnaireSettings appState uuid GetQuestionnaireSettingsCompleted
 
                 ProjectDetailRoute.Files _ ->
                     let
@@ -115,7 +120,7 @@ fetchSubrouteData appState model =
                                 Cmd.map FilesMsg Files.fetchData
 
                             else
-                                QuestionnairesApi.getQuestionnaire uuid appState GetQuestionnaireCommonCompleted
+                                QuestionnairesApi.getQuestionnaire appState uuid GetQuestionnaireCommonCompleted
                     in
                     Cmd.batch
                         [ commonCmd
@@ -123,7 +128,7 @@ fetchSubrouteData appState model =
                         ]
 
                 ProjectDetailRoute.Settings ->
-                    QuestionnairesApi.getQuestionnaireSettings uuid appState GetQuestionnaireSettingsCompleted
+                    QuestionnairesApi.getQuestionnaireSettings appState uuid GetQuestionnaireSettingsCompleted
 
         _ ->
             Cmd.none
@@ -173,7 +178,7 @@ onUnload nextRoute model =
         leaveCmd =
             Cmd.batch
                 [ WebSocket.close model.websocket
-                , dispatch ResetModel
+                , Task.dispatch ResetModel
                 ]
     in
     case nextRoute of
@@ -204,7 +209,7 @@ update wrapMsg msg appState model =
         setError result error =
             let
                 questionnaireRoute =
-                    Routing.toUrl appState (Routes.projectsDetail model.uuid)
+                    Routing.toUrl (Routes.projectsDetail model.uuid)
 
                 loginRoute =
                     Routes.publicLogin (Just questionnaireRoute)
@@ -217,12 +222,12 @@ update wrapMsg msg appState model =
                     withSeed ( model, cmdNavigate appState loginRoute )
 
                 ( BadStatus 401 _, True ) ->
-                    withSeed ( model, dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
+                    withSeed ( model, Task.dispatch (Wizard.Msgs.logoutToMsg loginRoute) )
 
                 _ ->
                     withSeed <|
                         ( { model | questionnaireCommon = ApiError.toActionResult appState (gettext "Unable to get the project." appState.locale) error }
-                        , getResultCmd Wizard.Msgs.logoutMsg result
+                        , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                         )
     in
     case msg of
@@ -518,7 +523,7 @@ update wrapMsg msg appState model =
                     in
                     Cmd.batch
                         [ wsCmd
-                        , dispatch (QuestionnaireAddSavingEvent event)
+                        , Task.dispatch (QuestionnaireAddSavingEvent event)
                         ]
 
                 ( debounce, cmd ) =
@@ -739,7 +744,7 @@ update wrapMsg msg appState model =
         ShareDropdownCopyLink ->
             let
                 link =
-                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl appState (Routes.projectsDetail model.uuid))
+                    appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl (Routes.projectsDetail model.uuid))
             in
             withSeed ( model, Ports.copyToClipboard link )
 
@@ -834,9 +839,9 @@ update wrapMsg msg appState model =
                             case Form.getOutput questionnaireEditForm of
                                 Just form ->
                                     Cmd.map wrapMsg <|
-                                        QuestionnairesApi.putQuestionnaireShare model.uuid
+                                        QuestionnairesApi.putQuestionnaireShare appState
+                                            model.uuid
                                             (QuestionnaireShareForm.encode form)
-                                            appState
                                             PutQuestionnaireComplete
 
                                 _ ->

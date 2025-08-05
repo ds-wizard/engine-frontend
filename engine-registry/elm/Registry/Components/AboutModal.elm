@@ -18,8 +18,8 @@ import Registry.Api.BuildInfo as BuildInfoApi
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Shared.Common.TimeUtils as TimeUtils
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
 
 
 type alias Model =

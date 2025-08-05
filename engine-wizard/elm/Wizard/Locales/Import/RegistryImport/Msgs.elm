@@ -1,6 +1,6 @@
 module Wizard.Locales.Import.RegistryImport.Msgs exposing (Msg(..))
 
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
 
 
 type Msg

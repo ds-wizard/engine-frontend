@@ -5,7 +5,7 @@
 .alert {
     word-break: break-word;
 
-    & > .fa:first-child {
+    & > .fas:first-child, & > .far:first-child, & > .fab:first-child {
         margin-right: $spacer-2;
     }
 
@@ -21,7 +21,7 @@
         @include animation-delay(.4s);
         @include animation-fill-mode(forwards);
 
-        .fa {
+        .fas, .far, .fab{
             margin-right: $spacer-2;
         }
     }

@@ -2,15 +2,15 @@ module Wizard.Dev.PersistentCommandsDetail.View exposing (view)
 
 import Html exposing (Html, code, div, h3, pre, span, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Json.Print
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.PersistentCommand as PersistentCommand
-import Shared.Data.PersistentCommandDetail exposing (PersistentCommandDetail)
-import Shared.Data.User as User
-import Shared.Data.UserSuggestion exposing (UserSuggestion)
-import Shared.Html exposing (emptyNode)
 import SyntaxHighlight
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.PersistentCommand as PersistentCommand
+import Wizard.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
+import Wizard.Api.Models.User as User
+import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.View.FormResult as FormResult
@@ -32,14 +32,14 @@ view appState model =
 viewPersistentCommand : AppState -> Model -> PersistentCommandDetail -> Html Msg
 viewPersistentCommand appState model persistentCommand =
     DetailPage.container
-        [ header appState model persistentCommand
-        , content appState model persistentCommand
+        [ header model persistentCommand
+        , content model persistentCommand
         , sidePanel appState persistentCommand
         ]
 
 
-header : AppState -> Model -> PersistentCommandDetail -> Html Msg
-header appState model persistentCommand =
+header : Model -> PersistentCommandDetail -> Html Msg
+header model persistentCommand =
     let
         title =
             span []
@@ -48,7 +48,7 @@ header appState model persistentCommand =
                 ]
 
         dropdownActions =
-            PersistentCommandActionDropdown.dropdown appState
+            PersistentCommandActionDropdown.dropdown
                 { dropdownState = model.dropdownState
                 , toggleMsg = DropdownMsg
                 }
@@ -61,8 +61,8 @@ header appState model persistentCommand =
     DetailPage.header title [ dropdownActions ]
 
 
-content : AppState -> Model -> PersistentCommandDetail -> Html msg
-content appState model persistentCommand =
+content : Model -> PersistentCommandDetail -> Html msg
+content model persistentCommand =
     let
         defaultContent =
             pre [] [ code [] [ text persistentCommand.body ] ]
@@ -101,7 +101,7 @@ content appState model persistentCommand =
                     []
     in
     DetailPage.content
-        [ FormResult.view appState model.updating
+        [ FormResult.view model.updating
         , div [ DetailPage.contentInnerFullClass ]
             (error ++ body)
         ]
@@ -112,7 +112,7 @@ sidePanel appState persistentCommand =
     let
         sections =
             [ sidePanelPersistentCommandInfo appState persistentCommand
-            , sidePanelAppInfo appState persistentCommand
+            , sidePanelAppInfo persistentCommand
             ]
 
         lastTraceUuidSection =
@@ -147,8 +147,8 @@ sidePanelPersistentCommandInfo appState persistentCommand =
     ( "Persistent Command", "persistent-command", DetailPage.sidePanelList 4 8 info )
 
 
-sidePanelAppInfo : AppState -> PersistentCommandDetail -> ( String, String, Html msg )
-sidePanelAppInfo appState persistentCommand =
+sidePanelAppInfo : PersistentCommandDetail -> ( String, String, Html msg )
+sidePanelAppInfo persistentCommand =
     let
         tenantUrl =
             persistentCommand.tenant.clientUrl
@@ -158,7 +158,7 @@ sidePanelAppInfo appState persistentCommand =
                 |> Maybe.withDefault ""
 
         tenantView =
-            DetailPage.sidePanelItemWithIconWithLink appState
+            DetailPage.sidePanelItemWithIconWithLink
                 (Routes.tenantsDetail persistentCommand.tenant.uuid)
                 persistentCommand.tenant.name
                 (text tenantUrl)
@@ -181,7 +181,7 @@ sidePanelCreatedByInfo createdBy =
     let
         userView =
             DetailPage.sidePanelItemWithIcon (User.fullName createdBy)
-                emptyNode
+                Html.nothing
                 (UserIcon.viewSmall createdBy)
     in
     ( "Created by", "created-by", userView )

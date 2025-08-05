@@ -14,15 +14,15 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Api.Packages as Packages
-import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.Package exposing (Package)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faSettings)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Uuid exposing (Uuid)
 import Version
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Packages as Packages
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (linkTo)
@@ -82,7 +82,7 @@ update cfg appState msg model =
 
         Publish ->
             ( { model | publishing = ActionResult.Loading }
-            , Packages.postFromBranch cfg.branchUuid appState (cfg.wrapMsg << PublishCompleted)
+            , Packages.postFromBranch appState cfg.branchUuid (cfg.wrapMsg << PublishCompleted)
             )
 
         PublishCompleted result ->
@@ -110,10 +110,9 @@ view cfg appState model =
         info =
             div [ class "alert alert-info" ]
                 (String.formatHtml (gettext "Check the knowledge model's metadata before publishing. You change them in %s." appState.locale)
-                    [ linkTo appState
-                        (Routes.kmEditorEditorSettings cfg.branch.uuid)
+                    [ linkTo (Routes.kmEditorEditorSettings cfg.branch.uuid)
                         [ onClick (SetOpen False), class "btn-link with-icon" ]
-                        [ faSet "_global.settings" appState
+                        [ faSettings
                         , text (gettext "Settings" appState.locale)
                         ]
                     ]

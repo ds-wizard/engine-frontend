@@ -6,9 +6,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromOwl, faKmImportFromRegistry)
 import Shared.Utils exposing (listInsertIf)
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.Common.GuideLinks as GuideLinks
@@ -27,7 +28,7 @@ view appState model =
         registryNavItem =
             viewNavbarItem
                 (text (gettext "From registry" appState.locale))
-                (faSet "kmImport.fromRegistry" appState)
+                faKmImportFromRegistry
                 (isRegistryImportModel model)
                 ShowRegistryImport
                 "km_import_nav_registry"
@@ -35,7 +36,7 @@ view appState model =
         fileNavItem =
             viewNavbarItem
                 (text (gettext "From file" appState.locale))
-                (faSet "kmImport.fromFile" appState)
+                faKmImportFromFile
                 (isFileImportModel model)
                 ShowFileImport
                 "km_import_nav_file"
@@ -43,7 +44,7 @@ view appState model =
         owlNavItem =
             viewNavbarItem
                 (text (gettext "From OWL" appState.locale))
-                (faSet "kmImport.fromOwl" appState)
+                faKmImportFromOwl
                 (isOwlImportModel model)
                 ShowOwlImport
                 "km_import_nav_owl"
@@ -85,7 +86,7 @@ view appState model =
                 viewNavbar navItems
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ detailClass "KnowledgeModels__Import" ]
         [ Page.headerWithGuideLink appState (gettext "Import Knowledge Model" appState.locale) GuideLinks.kmImport

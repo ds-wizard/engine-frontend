@@ -2,8 +2,8 @@ module Wizard.Public.SignupConfirmation.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Users as UsersApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.SignupConfirmation.Models exposing (Model)
@@ -12,7 +12,7 @@ import Wizard.Public.SignupConfirmation.Msgs exposing (Msg(..))
 
 fetchData : String -> String -> AppState -> Cmd Msg
 fetchData uuid hash appState =
-    UsersApi.putUserActivation uuid hash appState SendConfirmationCompleted
+    UsersApi.putUserActivation appState uuid hash SendConfirmationCompleted
 
 
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

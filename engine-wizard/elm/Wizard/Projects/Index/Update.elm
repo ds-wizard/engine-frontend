@@ -9,17 +9,17 @@ import Dict
 import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Api.Packages as PackagesApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Api.Users as UsersApi
-import Shared.Data.PackageSuggestion as PackageSuggestion
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setDebouncer)
-import Shared.Utils exposing (dispatch)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -42,11 +42,10 @@ fetchData appState model =
         selectedUsersCmd =
             case Dict.get indexRouteUsersFilterId model.questionnaires.filters.values of
                 Just userUuids ->
-                    UsersApi.getUsersSuggestionsWithOptions
+                    UsersApi.getUsersSuggestionsWithOptions appState
                         PaginationQueryString.empty
                         (String.split "," userUuids)
                         []
-                        appState
                         UsersFilterGetValuesComplete
 
                 Nothing ->
@@ -55,11 +54,10 @@ fetchData appState model =
         selectedPackagesCmd =
             case Dict.get indexRoutePackagesFilterId model.questionnaires.filters.values of
                 Just packageIds ->
-                    PackagesApi.getPackagesSuggestionsWithOptions
+                    PackagesApi.getPackagesSuggestionsWithOptions appState
                         PaginationQueryString.empty
                         (String.split "," packageIds)
                         []
-                        appState
                         PackagesFilterGetValuesComplete
 
                 Nothing ->
@@ -67,12 +65,12 @@ fetchData appState model =
     in
     Cmd.batch
         [ Cmd.map ListingMsg Listing.fetchData
-        , dispatch (ProjectTagsFilterSearch "")
-        , dispatch (UsersFilterSearch "")
-        , dispatch (PackagesFilterSearch "")
+        , Task.dispatch (ProjectTagsFilterSearch "")
+        , Task.dispatch (UsersFilterSearch "")
+        , Task.dispatch (PackagesFilterSearch "")
         , selectedUsersCmd
         , selectedPackagesCmd
-        , Driver.init (tour appState)
+        , Driver.init appState.config (tour appState)
         ]
 
 
@@ -131,7 +129,7 @@ update wrapMsg msg appState model =
             let
                 updateConfig =
                     { wrapMsg = wrapMsg << DeleteQuestionnaireModalMsg
-                    , deleteCompleteCmd = dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+                    , deleteCompleteCmd = Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     }
 
                 ( deleteModalModel, cmd ) =
@@ -158,7 +156,7 @@ update wrapMsg msg appState model =
 
         ProjectTagsFilterInput value ->
             ( { model | projectTagsFilterSearchValue = value }
-            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsFilterSearch value)
+            , Task.dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsFilterSearch value)
             )
 
         ProjectTagsFilterSearch value ->
@@ -174,7 +172,7 @@ update wrapMsg msg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState (ProjectTagsFilterSearchComplete value)
+                        QuestionnairesApi.getProjectTagsSuggestions appState queryString selectedTags (ProjectTagsFilterSearchComplete value)
             in
             ( model, cmd )
 
@@ -203,21 +201,22 @@ update wrapMsg msg appState model =
                                 model
                     in
                     ( { model_ | projectTagsFilterTags = ApiError.toActionResult appState (gettext "Unable to get project tags." appState.locale) err }
-                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
         UsersFilterGetValuesComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \r m -> { m | userFilterSelectedUsers = r }
                 , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         UsersFilterInput value ->
             ( { model | userFilterSearchValue = value }
-            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| UsersFilterSearch value)
+            , Task.dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| UsersFilterSearch value)
             )
 
         UsersFilterSearch value ->
@@ -233,31 +232,33 @@ update wrapMsg msg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        UsersApi.getUsersSuggestionsWithOptions queryString [] selectedUsers appState UsersFilterSearchComplete
+                        UsersApi.getUsersSuggestionsWithOptions appState queryString [] selectedUsers UsersFilterSearchComplete
             in
             ( model, cmd )
 
         UsersFilterSearchComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \r m -> { m | userFilterUsers = r }
                 , defaultError = gettext "Unable to get users." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         PackagesFilterGetValuesComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \r m -> { m | packagesFilterSelectedPackages = r }
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         PackagesFilterInput value ->
             ( { model | packagesFilterSearchValue = value }
-            , dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| PackagesFilterSearch value)
+            , Task.dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| PackagesFilterSearch value)
             )
 
         PackagesFilterSearch value ->
@@ -273,17 +274,18 @@ update wrapMsg msg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.getPackagesSuggestionsWithOptions queryString [] selectedKMs appState PackagesFilterSearchComplete
+                        PackagesApi.getPackagesSuggestionsWithOptions appState queryString [] selectedKMs PackagesFilterSearchComplete
             in
             ( model, cmd )
 
         PackagesFilterSearchComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \r m -> { m | packagesFilterPackages = r }
                 , defaultError = gettext "Unable to get knowledge models." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         DebouncerMsg debounceMsg ->
@@ -303,7 +305,7 @@ update wrapMsg msg appState model =
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
-    , QuestionnairesApi.deleteQuestionnaireMigration uuid appState (wrapMsg << DeleteQuestionnaireMigrationCompleted)
+    , QuestionnairesApi.deleteQuestionnaireMigration appState uuid (wrapMsg << DeleteQuestionnaireMigrationCompleted)
     )
 
 
@@ -324,7 +326,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Project migration could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -345,7 +347,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Questionnaire
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnairesApi.getQuestionnaires
+    { getRequest = QuestionnairesApi.getQuestionnaires appState
     , getError = gettext "Unable to get projects." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectsIndexWithFilters

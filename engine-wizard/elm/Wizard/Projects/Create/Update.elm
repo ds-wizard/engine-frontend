@@ -5,19 +5,19 @@ import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Shared.Api exposing (ToMsg)
-import Shared.Api.KnowledgeModels as KnowledgeModelsApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Api.Questionnaires as QuestionnaireApi
+import Shared.Api.Request exposing (ToMsg)
+import Shared.Data.ApiError as ApiError
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Error.ApiError as ApiError
 import Shared.Utils exposing (boolToString, withNoCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Extra as String
 import Uuid
-import Wizard.Common.Api exposing (applyResult, applyResultTransform, getResultCmd)
+import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Questionnaires as QuestionnaireApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Driver as Driver exposing (TourConfig)
@@ -48,7 +48,7 @@ fetchData appState model =
         fetchSelectedProjectTemplate =
             case ( createFromTemplate, model.selectedProjectTemplateUuid ) of
                 ( True, Just templateUuid ) ->
-                    QuestionnaireApi.getQuestionnaireSettings templateUuid appState GetSelectedProjectTemplateCompleted
+                    QuestionnaireApi.getQuestionnaireSettings appState templateUuid GetSelectedProjectTemplateCompleted
 
                 _ ->
                     Cmd.none
@@ -57,8 +57,8 @@ fetchData appState model =
             case ( createCustom, model.selectedKnowledgeModelId ) of
                 ( True, Just kmId ) ->
                     Cmd.batch
-                        [ PackagesApi.getPackage kmId appState GetSelectedKnowledgeModelCompleted
-                        , KnowledgeModelsApi.fetchPreview (Just kmId) [] [] appState GetKnowledgeModelPreviewCompleted
+                        [ PackagesApi.getPackage appState kmId GetSelectedKnowledgeModelCompleted
+                        , KnowledgeModelsApi.fetchPreview appState (Just kmId) [] [] GetKnowledgeModelPreviewCompleted
                         ]
 
                 _ ->
@@ -66,14 +66,14 @@ fetchData appState model =
 
         loadProjectTemplates =
             if createFromTemplate && not anythingPreselected then
-                getProjectTemplates PaginationQueryString.empty appState GetProjectTemplatesCountCompleted
+                getProjectTemplates appState PaginationQueryString.empty GetProjectTemplatesCountCompleted
 
             else
                 Cmd.none
 
         loadKnowledgeModels =
             if createCustom && not anythingPreselected then
-                PackagesApi.getPackagesSuggestions Nothing PaginationQueryString.empty appState GetKnowledgeModelsCountCompleted
+                PackagesApi.getPackagesSuggestions appState Nothing PaginationQueryString.empty GetKnowledgeModelsCountCompleted
 
             else
                 Cmd.none
@@ -83,7 +83,7 @@ fetchData appState model =
                 Cmd.none
 
             else
-                Driver.init (tour appState createFromTemplate createCustom)
+                Driver.init appState.config (tour appState createFromTemplate createCustom)
     in
     Cmd.batch
         [ fetchSelectedProjectTemplate
@@ -94,8 +94,8 @@ fetchData appState model =
         ]
 
 
-getProjectTemplates : PaginationQueryString -> AppState -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
-getProjectTemplates =
+getProjectTemplates : AppState -> PaginationQueryString -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
+getProjectTemplates appState pqs =
     let
         filters =
             PaginationQueryFilters.create
@@ -104,7 +104,7 @@ getProjectTemplates =
                 ]
                 []
     in
-    QuestionnaireApi.getQuestionnaires filters
+    QuestionnaireApi.getQuestionnaires appState filters pqs
 
 
 tour : AppState -> Bool -> Bool -> TourConfig
@@ -154,47 +154,51 @@ update wrapMsg msg appState model =
     in
     case msg of
         GetSelectedProjectTemplateCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \value record -> { record | selectedProjectTemplate = ActionResult.map .data value }
                 , defaultError = gettext "Unable to get selected project template." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         GetSelectedKnowledgeModelCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \value record -> { record | selectedKnowledgeModel = value }
                 , defaultError = gettext "Unable to get selected knowledge model." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         GetProjectTemplatesCountCompleted result ->
-            applyResultTransform appState
+            RequestHelpers.applyResultTransform
                 { setResult = \value record -> { record | anyProjectTemplates = value }
                 , defaultError = gettext "Unable to get project templates." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = \pagination -> pagination.page.totalElements > 0
+                , locale = appState.locale
                 }
                 |> updateModelDefaultMode
 
         GetKnowledgeModelsCountCompleted result ->
-            applyResultTransform appState
+            RequestHelpers.applyResultTransform
                 { setResult = \value record -> { record | anyKnowledgeModels = value }
                 , defaultError = gettext "Unable to get knowledge models." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = \pagination -> pagination.page.totalElements > 0
+                , locale = appState.locale
                 }
                 |> updateModelDefaultMode
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState (Routes.projectsIndex appState)) )
+            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form ) of
@@ -222,7 +226,7 @@ update wrapMsg msg appState model =
                             mapMode model projectTemplateModeRequest knowledgeModelModeRequest
                     in
                     ( { model | savingQuestionnaire = ActionResult.Loading }
-                    , Cmd.map wrapMsg <| request body appState PostQuestionnaireCompleted
+                    , Cmd.map wrapMsg <| request appState body PostQuestionnaireCompleted
                     )
 
                 _ ->
@@ -247,7 +251,7 @@ update wrapMsg msg appState model =
                                     , selectedTags = []
                                   }
                                 , Cmd.map wrapMsg <|
-                                    KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState GetKnowledgeModelPreviewCompleted
+                                    KnowledgeModelsApi.fetchPreview appState (Just packageId) [] [] GetKnowledgeModelPreviewCompleted
                                 )
 
                             else
@@ -271,7 +275,7 @@ update wrapMsg msg appState model =
 
                 Err error ->
                     ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be created." appState.locale) error }
-                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
         AddTag tagUuid ->
@@ -294,7 +298,7 @@ update wrapMsg msg appState model =
                             { model | knowledgeModelPreview = ApiError.toActionResult appState (gettext "Unable to get question tags for the knowledge model." appState.locale) error }
 
                 cmd =
-                    getResultCmd Wizard.Msgs.logoutMsg result
+                    RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             in
             ( newModel, cmd )
 
@@ -308,7 +312,7 @@ update wrapMsg msg appState model =
 
                 cfg =
                     { wrapMsg = wrapMsg << ProjectTemplateTypeHintInputMsg
-                    , getTypeHints = getProjectTemplates
+                    , getTypeHints = getProjectTemplates appState
                     , getError = gettext "Unable to get project templates." appState.locale
                     , setReply = formMsg << Uuid.toString << .uuid
                     , clearReply = Just <| formMsg ""
@@ -316,7 +320,7 @@ update wrapMsg msg appState model =
                     }
 
                 ( projectTemplateTypeHintInputModel, cmd ) =
-                    TypeHintInput.update cfg typeHintInputMsg appState model.projectTemplateTypeHintInputModel
+                    TypeHintInput.update cfg typeHintInputMsg model.projectTemplateTypeHintInputModel
             in
             ( { model | projectTemplateTypeHintInputModel = projectTemplateTypeHintInputModel }, cmd )
 
@@ -327,7 +331,7 @@ update wrapMsg msg appState model =
 
                 cfg =
                     { wrapMsg = wrapMsg << KnowledgeModelTypeHintInputMsg
-                    , getTypeHints = PackagesApi.getPackagesSuggestions Nothing
+                    , getTypeHints = PackagesApi.getPackagesSuggestions appState Nothing
                     , getError = gettext "Unable to get knowledge models." appState.locale
                     , setReply = formMsg << .id
                     , clearReply = Just <| formMsg ""
@@ -335,6 +339,6 @@ update wrapMsg msg appState model =
                     }
 
                 ( knowledgeModelTypeHintInputModel, cmd ) =
-                    TypeHintInput.update cfg typeHintInputMsg appState model.knowledgeModelTypeHintInputModel
+                    TypeHintInput.update cfg typeHintInputMsg model.knowledgeModelTypeHintInputModel
             in
             ( { model | knowledgeModelTypeHintInputModel = knowledgeModelTypeHintInputModel }, cmd )

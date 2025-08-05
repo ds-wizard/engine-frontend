@@ -5,9 +5,9 @@ import File
 import Form
 import Gettext exposing (gettext)
 import Json.Decode exposing (decodeValue)
-import Shared.Api.Packages as PackagesApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.Common.OwlImportForm as OwlImportForm
 import Wizard.KnowledgeModels.Import.OwlImport.Models exposing (Model, dropzoneId, fileInputId)
@@ -45,7 +45,7 @@ update msg wrapMsg appState model =
             importOwlCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.knowledgeModelsIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.knowledgeModelsIndex) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form, model.file ) of
@@ -68,7 +68,7 @@ update msg wrapMsg appState model =
                                     data
                     in
                     ( { model | importing = Loading }
-                    , Cmd.map wrapMsg <| PackagesApi.importFromOwl dataWithPreviousPackageId file appState ImportOwlCompleted
+                    , Cmd.map wrapMsg <| PackagesApi.importFromOwl appState dataWithPreviousPackageId file ImportOwlCompleted
                     )
 
                 _ ->
@@ -86,5 +86,5 @@ importOwlCompleted appState model result =
 
         Err error ->
             ( { model | importing = ApiError.toActionResult appState (gettext "Importing the package failed." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

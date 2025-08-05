@@ -1,8 +1,8 @@
 module Wizard.Public.Auth.Msgs exposing (Msg(..))
 
 import Json.Encode as E
-import Shared.Data.TokenResponse exposing (TokenResponse)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.TokenResponse exposing (TokenResponse)
 
 
 type Msg

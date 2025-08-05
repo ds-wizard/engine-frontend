@@ -1,10 +1,10 @@
 module Wizard.Projects.Import.Msgs exposing (Msg(..))
 
 import Json.Decode as D
-import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing (ImporterEvent)
 import Wizard.Projects.Import.Models exposing (SidePanel)

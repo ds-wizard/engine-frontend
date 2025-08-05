@@ -5,7 +5,7 @@ module Wizard.ProjectImporters.Index.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Wizard.Common.Components.Listing.Models as Listing
 
 

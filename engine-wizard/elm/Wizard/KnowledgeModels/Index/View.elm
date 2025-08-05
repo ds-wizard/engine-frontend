@@ -3,12 +3,13 @@ module Wizard.KnowledgeModels.Index.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Data.Package as Package exposing (Package)
-import Shared.Data.Package.PackagePhase as PackagePhase
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faKmsUpload)
 import String.Format as String
 import Version
+import Wizard.Api.Models.Package as Package exposing (Package)
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Feature as Feature
@@ -35,15 +36,14 @@ view appState model =
 importButton : AppState -> Html Msg
 importButton appState =
     if Feature.knowledgeModelsImport appState then
-        linkTo appState
-            (Routes.knowledgeModelsImport Nothing)
+        linkTo (Routes.knowledgeModelsImport Nothing)
             [ class "btn btn-primary with-icon" ]
-            [ faSet "kms.upload" appState
+            [ faKmsUpload
             , text (gettext "Import" appState.locale)
             ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingConfig : AppState -> ViewConfig Package Msg
@@ -81,7 +81,7 @@ listingConfig appState =
 listingTitle : AppState -> Package -> Html Msg
 listingTitle appState package =
     span []
-        [ linkTo appState (Routes.knowledgeModelsDetail package.id) [] [ text package.name ]
+        [ linkTo (Routes.knowledgeModelsDetail package.id) [] [ text package.name ]
         , Badge.light
             (tooltip <| gettext "Latest version" appState.locale)
             [ text <| Version.toString package.version ]
@@ -98,13 +98,12 @@ listingTitleOutdatedBadge appState package =
             packageId =
                 Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":") << Version.toString) package.remoteLatestVersion
         in
-        linkTo appState
-            (Routes.knowledgeModelsImport packageId)
+        linkTo (Routes.knowledgeModelsImport packageId)
             [ class Badge.warningClass ]
             [ text (gettext "update available" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingTitleDeprecatedBadge : AppState -> Package -> Html Msg
@@ -113,7 +112,7 @@ listingTitleDeprecatedBadge appState package =
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingTitleNonEditableBadge : AppState -> Package -> Html Msg
@@ -122,7 +121,7 @@ listingTitleNonEditableBadge appState package =
         Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
     else
-        emptyNode
+        Html.nothing
 
 
 listingDescription : AppState -> Package -> Html Msg
@@ -138,7 +137,7 @@ listingDescription appState package =
                                     img [ class "organization-image", src organizationLogo ] []
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     span [ class "fragment", title <| gettext "Published by" appState.locale ]
                         [ logo
@@ -146,7 +145,7 @@ listingDescription appState package =
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     span []
         [ code [ class "fragment" ] [ text package.id ]

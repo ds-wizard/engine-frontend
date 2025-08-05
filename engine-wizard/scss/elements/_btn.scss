@@ -5,14 +5,18 @@
 .btn {
     @include not-selectable();
 
+    &:not(.btn-link):hover {
+        color: var(--bs-btn-hover-color) !important;
+    }
+
     &.with-icon {
-        .fa {
+        .fas, .far, .fab {
             margin-right: $spacer-2;
         }
     }
 
     &-sm.with-icon, &-link.with-icon {
-        .fa {
+        .fas, .far, .fab {
             margin-right: $spacer-1;
         }
     }

@@ -2,7 +2,7 @@ module Wizard.Locales.Create.Msgs exposing (Msg(..))
 
 import Form
 import Json.Decode as D
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
 import Wizard.Common.Components.Dropzone as Dropzone
 
 

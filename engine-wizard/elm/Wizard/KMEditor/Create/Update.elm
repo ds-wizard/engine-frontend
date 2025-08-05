@@ -9,16 +9,16 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Result exposing (Result)
-import Shared.Api.Branches as BranchesApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Data.Branch exposing (Branch)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Normalize as Normalize
 import Version exposing (Version)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.Branch exposing (Branch)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
@@ -34,7 +34,7 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     case ( model.selectedPackage, model.edit ) of
         ( Just packageId, True ) ->
-            PackagesApi.getPackage packageId appState GetPackageCompleted
+            PackagesApi.getPackage appState packageId GetPackageCompleted
 
         _ ->
             Cmd.none
@@ -44,7 +44,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.kmEditorIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.kmEditorIndex) )
 
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model
@@ -83,7 +83,7 @@ handleFormMsg wrapMsg formMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        BranchesApi.postBranch body appState PostBranchCompleted
+                        BranchesApi.postBranch appState body PostBranchCompleted
             in
             ( { model | savingBranch = Loading }, cmd )
 
@@ -133,10 +133,10 @@ handlePostBranchCompleted appState model result =
 
         Err error ->
             ( { model
-                | form = setFormErrors appState error model.form
+                | form = Form.setFormErrors appState error model.form
                 , savingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be created." appState.locale) error
               }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -148,7 +148,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 
         cfg =
             { wrapMsg = wrapMsg << PackageTypeHintInputMsg
-            , getTypeHints = PackagesApi.getPackagesSuggestions (Just False)
+            , getTypeHints = PackagesApi.getPackagesSuggestions appState (Just False)
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
@@ -156,7 +156,7 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             }
 
         ( packageTypeHintInputModel, cmd ) =
-            TypeHintInput.update cfg typeHintInputMsg appState model.packageTypeHintInputModel
+            TypeHintInput.update cfg typeHintInputMsg model.packageTypeHintInputModel
     in
     ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 

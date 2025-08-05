@@ -2,6 +2,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     ( EditorBranch
     , EditorBranchWarning
     , applyEvent
+    , editorRoute
     , filterDeleted
     , filterDeletedWith
     , getActiveQuestionUuid
@@ -34,54 +35,55 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
 import Set exposing (Set)
-import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.Event exposing (Event(..))
-import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
-import Shared.Data.Event.AddChapterEventData as AddChapterEventData
-import Shared.Data.Event.AddChoiceEventData as AddChoiceEventData
-import Shared.Data.Event.AddExpertEventData as AddExpertEventData
-import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData
-import Shared.Data.Event.AddMetricEventData as AddMetricEventData
-import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData
-import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData
-import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData
-import Shared.Data.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
-import Shared.Data.Event.AddResourcePageEventData as AddResourcePageEventData
-import Shared.Data.Event.AddTagEventData as AddTagEventData
-import Shared.Data.Event.CommonEventData exposing (CommonEventData)
-import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
-import Shared.Data.Event.EditChapterEventData as EditChapterEventData
-import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditExpertEventData as EditExpertEventData
-import Shared.Data.Event.EditIntegrationEventData as EditIntegrationEvent
-import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
-import Shared.Data.Event.EditMetricEventData as EditMetricEventData
-import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
-import Shared.Data.Event.EditQuestionEventData as EditQuestionEventData
-import Shared.Data.Event.EditReferenceEventData as EditReferenceEventData
-import Shared.Data.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
-import Shared.Data.Event.EditResourcePageEventData as EditResourcePageEventData
-import Shared.Data.Event.EditTagEventData as EditTagEventData
-import Shared.Data.Event.MoveEventData exposing (MoveEventData)
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Expert as Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
-import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
-import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Data.QuestionnaireDetail.Reply exposing (Reply)
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (flip)
 import String.Extra as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.Event exposing (Event(..))
+import Wizard.Api.Models.Event.AddAnswerEventData as AddAnswerEventData
+import Wizard.Api.Models.Event.AddChapterEventData as AddChapterEventData
+import Wizard.Api.Models.Event.AddChoiceEventData as AddChoiceEventData
+import Wizard.Api.Models.Event.AddExpertEventData as AddExpertEventData
+import Wizard.Api.Models.Event.AddIntegrationEventData as AddIntegrationEventData
+import Wizard.Api.Models.Event.AddMetricEventData as AddMetricEventData
+import Wizard.Api.Models.Event.AddPhaseEventData as AddPhaseEventData
+import Wizard.Api.Models.Event.AddQuestionEventData as AddQuestionEventData
+import Wizard.Api.Models.Event.AddReferenceEventData as AddReferenceEventData
+import Wizard.Api.Models.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
+import Wizard.Api.Models.Event.AddResourcePageEventData as AddResourcePageEventData
+import Wizard.Api.Models.Event.AddTagEventData as AddTagEventData
+import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
+import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
+import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
+import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
+import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
+import Wizard.Api.Models.Event.EditIntegrationEventData as EditIntegrationEvent
+import Wizard.Api.Models.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
+import Wizard.Api.Models.Event.EditMetricEventData as EditMetricEventData
+import Wizard.Api.Models.Event.EditPhaseEventData as EditPhaseEventData
+import Wizard.Api.Models.Event.EditQuestionEventData as EditQuestionEventData
+import Wizard.Api.Models.Event.EditReferenceEventData as EditReferenceEventData
+import Wizard.Api.Models.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
+import Wizard.Api.Models.Event.EditResourcePageEventData as EditResourcePageEventData
+import Wizard.Api.Models.Event.EditTagEventData as EditTagEventData
+import Wizard.Api.Models.Event.MoveEventData exposing (MoveEventData)
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Expert as Expert exposing (Expert)
+import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration)
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference)
+import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
+import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Routes as Routes
 
 
 type alias EditorBranch =
@@ -151,6 +153,11 @@ getEditUuid entityUuidString editorBranch =
 getParentUuid : String -> EditorBranch -> String
 getParentUuid uuid editorBranch =
     Maybe.withDefault "" (Dict.get uuid editorBranch.parentMap)
+
+
+editorRoute : EditorBranch -> String -> Routes.Route
+editorRoute editorBranch entityUuidString =
+    Routes.kmEditorEditor editorBranch.branch.uuid (getEditUuid entityUuidString editorBranch)
 
 
 filterDeleted : EditorBranch -> List String -> List String

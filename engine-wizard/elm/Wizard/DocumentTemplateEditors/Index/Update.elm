@@ -2,11 +2,11 @@ module Wizard.DocumentTemplateEditors.Index.Update exposing (fetchData, update)
 
 import ActionResult
 import Gettext exposing (gettext)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplateDraft exposing (DocumentTemplateDraft)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -43,7 +43,7 @@ handleDeleteTemplate wrapMsg appState model =
         Just template ->
             ( { model | deletingDocumentTemplateDraft = ActionResult.Loading }
             , Cmd.map wrapMsg <|
-                DocumentTemplateDraftsApi.deleteDraft template.id appState DeleteDocumentTemplateDraftCompleted
+                DocumentTemplateDraftsApi.deleteDraft appState template.id DeleteDocumentTemplateDraftCompleted
             )
 
         Nothing ->
@@ -55,12 +55,12 @@ deleteTemplateCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
             ( { model | documentTemplateDraftToBeDeleted = Nothing }
-            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+            , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
             ( { model | deletingDocumentTemplateDraft = ApiError.toActionResult appState (gettext "Document template editor could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -81,7 +81,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig DocumentTemplateDraft
 listingUpdateConfig wrapMsg appState =
-    { getRequest = DocumentTemplateDraftsApi.getDrafts
+    { getRequest = DocumentTemplateDraftsApi.getDrafts appState
     , getError = gettext "Unable to get document templates." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.documentTemplateEditorsIndexWithFilters

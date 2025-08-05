@@ -1,8 +1,8 @@
 module Wizard.Auth.Update exposing (update)
 
 import Browser.Navigation as Navigation
-import Shared.Api.Tokens as TokensApi
 import Shared.Auth.Session as Session
+import Wizard.Api.Tokens as TokensApi
 import Wizard.Auth.Msgs as AuthMsgs
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
@@ -25,7 +25,7 @@ update msg model =
                             originalUrl
 
                         Nothing ->
-                            Routing.toUrl model.appState Routes.DashboardRoute
+                            Routing.toUrl Routes.DashboardRoute
             in
             ( newModel
             , Cmd.batch

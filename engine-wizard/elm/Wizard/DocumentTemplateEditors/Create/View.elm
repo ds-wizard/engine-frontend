@@ -39,7 +39,7 @@ viewCreate appState model _ =
     div [ detailClass "" ]
         [ Page.headerWithGuideLink appState (gettext "Create Document Template" appState.locale) GuideLinks.documentTemplatesCreate
         , Html.form [ onSubmit (FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView appState model.savingDocumentTemplate
+            [ FormResult.errorOnlyView model.savingDocumentTemplate
             , formView appState model
             , FormActions.viewSubmit appState
                 Cancel

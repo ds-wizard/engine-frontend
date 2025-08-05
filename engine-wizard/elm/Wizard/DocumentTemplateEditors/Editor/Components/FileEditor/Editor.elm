@@ -1,7 +1,7 @@
 module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.Editor exposing (Editor(..))
 
-import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
-import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
 
 
 type Editor

@@ -1,6 +1,6 @@
 module Wizard.Settings.Organization.Update exposing (update)
 
-import Shared.Data.EditableConfig as EditableConfig
+import Wizard.Api.Models.EditableConfig as EditableConfig
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Common.Forms.OrganizationConfigForm as OrganizationConfigForm exposing (OrganizationConfigForm)

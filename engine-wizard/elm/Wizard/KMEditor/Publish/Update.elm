@@ -7,15 +7,15 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
-import Shared.Api.Branches as BranchesApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Data.BranchDetail exposing (BranchDetail)
-import Shared.Data.Package exposing (Package)
-import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Common.BranchPublishForm as BranchPublishForm
 import Wizard.KMEditor.Publish.Models exposing (Model)
@@ -28,7 +28,7 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    BranchesApi.getBranch uuid appState GetBranchCompleted
+    BranchesApi.getBranch appState uuid GetBranchCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -41,7 +41,7 @@ update msg wrapMsg appState model =
             handleGetPreviousPackageCompleted model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl appState Routes.knowledgeModelsIndex) )
+            ( model, Ports.historyBack (Routing.toUrl Routes.knowledgeModelsIndex) )
 
         FormMsg formMsg ->
             handleFormMsg formMsg wrapMsg appState model
@@ -66,7 +66,7 @@ handleGetBranchCompleted wrapMsg appState model result =
                     case branch.previousPackageId of
                         Just previousPackageId ->
                             Cmd.map wrapMsg <|
-                                PackagesApi.getPackage previousPackageId appState GetPreviousPackageCompleted
+                                PackagesApi.getPackage appState previousPackageId GetPreviousPackageCompleted
 
                         Nothing ->
                             Cmd.none
@@ -77,7 +77,7 @@ handleGetBranchCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | branch = ApiError.toActionResult appState (gettext "Unable to get the knowledge model details." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -100,7 +100,7 @@ handleGetPreviousPackageCompleted model result =
             )
 
         Err _ ->
-            ( model, getResultCmd Wizard.Msgs.logoutMsg result )
+            ( model, RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result )
 
 
 handleFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -113,7 +113,7 @@ handleFormMsg formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.postFromMigration body appState PutBranchCompleted
+                        PackagesApi.postFromMigration appState body PutBranchCompleted
             in
             ( { model | publishingBranch = Loading }, cmd )
 
@@ -148,5 +148,5 @@ handlePutBranchCompleted appState model result =
 
         Err error ->
             ( { model | publishingBranch = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

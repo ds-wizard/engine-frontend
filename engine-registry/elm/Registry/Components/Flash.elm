@@ -5,7 +5,7 @@ module Registry.Components.Flash exposing
 
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (emptyNode)
+import Html.Extra as Html
 
 
 error : String -> Html msg
@@ -26,4 +26,4 @@ flashView className msg =
             ]
 
     else
-        emptyNode
+        Html.nothing

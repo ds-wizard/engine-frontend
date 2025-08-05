@@ -10,8 +10,8 @@ import Form.Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation, customError)
 import Gettext exposing (gettext)
 import Set
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Error.ServerError as ServerError
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ServerError as ServerError
 import Shared.Form.FormError exposing (FormError(..))
 import String.Format as String
 

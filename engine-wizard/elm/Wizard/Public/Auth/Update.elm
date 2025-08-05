@@ -3,11 +3,11 @@ module Wizard.Public.Auth.Update exposing (fetchData, update)
 import ActionResult
 import Gettext exposing (gettext)
 import Json.Decode as D
-import Shared.Api.Auth as AuthApi
+import Shared.Data.ApiError as ApiError
 import Shared.Data.Token as Token
-import Shared.Data.TokenResponse as TokenResponse
-import Shared.Error.ApiError as ApiError
-import Shared.Utils exposing (dispatch)
+import Task.Extra as Task
+import Wizard.Api.Auth as AuthApi
+import Wizard.Api.Models.TokenResponse as TokenResponse
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.LocalStorageData as LocalStorageData
@@ -18,9 +18,9 @@ import Wizard.Public.Auth.Msgs exposing (Msg(..))
 
 
 fetchData : String -> Maybe String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
-fetchData id error code appState sessionState =
+fetchData id mbError mbCode mbSessionState appState =
     Cmd.batch
-        [ AuthApi.getToken id error code appState sessionState AuthenticationCompleted
+        [ AuthApi.getToken appState id mbError mbCode mbSessionState AuthenticationCompleted
         , Ports.localStorageGetAndRemove "wizard/originalUrl"
         ]
 
@@ -32,7 +32,7 @@ update msg wrapMsg appState model =
             case ActionResult.combine newModel.token newModel.originalUrl of
                 ActionResult.Success ( token, originalUrl ) ->
                     ( newModel
-                    , dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token originalUrl)
+                    , Task.dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken token originalUrl)
                     )
 
                 _ ->
@@ -75,7 +75,7 @@ update msg wrapMsg appState model =
                 Just hash ->
                     let
                         cmd =
-                            Cmd.map wrapMsg (AuthApi.postConsents model.id hash model.sessionState appState SubmitConsentCompleted)
+                            Cmd.map wrapMsg (AuthApi.postConsents appState model.id hash model.sessionState SubmitConsentCompleted)
                     in
                     ( { model | submittingConsent = ActionResult.Loading }
                     , cmd
@@ -89,7 +89,7 @@ update msg wrapMsg appState model =
                 Ok tokenResponse ->
                     case tokenResponse of
                         TokenResponse.Token token expiresAt ->
-                            ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.create token expiresAt) Nothing) )
+                            ( model, Task.dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.create token expiresAt) Nothing) )
 
                         _ ->
                             ( { model | submittingConsent = ActionResult.Error (gettext "Unexpected response from the server." appState.locale) }, Cmd.none )

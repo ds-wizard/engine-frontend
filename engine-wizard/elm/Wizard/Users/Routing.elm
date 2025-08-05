@@ -6,11 +6,11 @@ module Wizard.Users.Routing exposing
 
 import Dict
 import Shared.Common.UuidOrCurrent as UuidOrCurrent
-import Shared.Data.BootstrapConfig.Admin as Admin
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils exposing (dictFromMaybeList, flip)
+import Shared.Utils exposing (dictFromMaybeList, flip, listInsertIf)
 import Url.Parser exposing ((</>), Parser, map, s)
 import Url.Parser.Query as Query
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Users.Edit.UserEditRoutes as UserEditRoute
@@ -37,8 +37,8 @@ parsers appState wrapRoute =
                 , map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "lastName")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteRoleFilterId))
                 , map (wrapRoute << flip EditRoute UserEditRoute.Password) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "password")
                 , map (wrapRoute << flip EditRoute UserEditRoute.Language) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "language")
-                , map (wrapRoute << flip EditRoute UserEditRoute.Tours) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "tours")
                 ]
+                    |> listInsertIf (map (wrapRoute << flip EditRoute UserEditRoute.Tours) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "tours")) appState.config.features.toursEnabled
     in
     [ map (wrapRoute << flip EditRoute UserEditRoute.Profile) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser)
     , map (wrapRoute << flip EditRoute UserEditRoute.ApiKeys) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "api-keys")

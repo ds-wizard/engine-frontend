@@ -4,12 +4,13 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
 import Html.Attributes exposing (class, classList, style, target)
 import Html.Events exposing (onClick)
-import Shared.Data.KnowledgeModel.Question as Question
-import Shared.Data.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, faQuestionnaireMigrationResolveAll, faQuestionnaireMigrationUndo)
 import Shared.Undraw as Undraw
 import Shared.Utils exposing (boolToInt, flip)
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel.Question as Question
+import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer
@@ -36,7 +37,7 @@ contentView appState model migration =
                     [ text (gettext "Finalize migration" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         content =
             if List.isEmpty model.changes.questions then
@@ -84,21 +85,20 @@ migrationInfo appState migration =
         , table []
             [ tr []
                 [ th [] [ text (gettext "Source knowledge model" appState.locale) ]
-                , td [] [ packageInfo appState migration.oldQuestionnaire.packageId ]
+                , td [] [ packageInfo migration.oldQuestionnaire.packageId ]
                 ]
             , tr []
                 [ th [] [ text (gettext "Target knowledge model" appState.locale) ]
-                , td [] [ packageInfo appState migration.newQuestionnaire.packageId ]
+                , td [] [ packageInfo migration.newQuestionnaire.packageId ]
                 ]
             ]
         ]
 
 
-packageInfo : AppState -> String -> Html Msg
-packageInfo appState packageId =
+packageInfo : String -> Html Msg
+packageInfo packageId =
     code []
-        [ linkTo appState
-            (Routes.knowledgeModelsDetail packageId)
+        [ linkTo (Routes.knowledgeModelsDetail packageId)
             [ target "_blank" ]
             [ text packageId ]
         ]
@@ -121,20 +121,20 @@ changeView appState model migration =
                 div []
                     [ text (gettext "Change already resolved" appState.locale)
                     , button [ class "btn btn-outline-secondary with-icon", onClick UndoResolveCurrentChange, dataCy "project-migration_undo" ]
-                        [ faSet "questionnaireMigration.undo" appState, text (gettext "Undo" appState.locale) ]
+                        [ faQuestionnaireMigrationUndo, text (gettext "Undo" appState.locale) ]
                     ]
 
             else
                 button [ class "btn btn-outline-primary with-icon", onClick ResolveCurrentChange, dataCy "project-migration_resolve" ]
-                    [ faSet "questionnaireMigration.resolve" appState, text (gettext "Resolve" appState.locale) ]
+                    [ faQuestionnaireMigrationResolve, text (gettext "Resolve" appState.locale) ]
 
         resolveAllAction =
             if allResolved model migration then
-                emptyNode
+                Html.nothing
 
             else
                 button [ class "btn btn-outline-primary with-icon", onClick ResolveAllChanges, dataCy "project-migration_resolve-all" ]
-                    [ faSet "questionnaireMigration.resolveAll" appState, text (gettext "Resolve all" appState.locale) ]
+                    [ faQuestionnaireMigrationResolveAll, text (gettext "Resolve all" appState.locale) ]
     in
     div [ class "change-view" ]
         [ div [ class "progress-view" ]
@@ -171,7 +171,7 @@ questionnaireView appState model migration =
                 questionnaireModel
 
         Nothing ->
-            emptyNode
+            Html.nothing
 
 
 viewChanges : AppState -> Model -> QuestionnaireMigration -> Html Msg
@@ -199,7 +199,7 @@ viewChange appState model migration change =
                 small [] [ text (gettext "Resolved" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
     in
     div
         [ classList

@@ -40,17 +40,18 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value, wrap)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Common.ByteUnits as ByteUnits
+import Shared.Components.FontAwesome exposing (fa, faAdd, faSecretHide, faSecretShow)
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
-import Shared.Data.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Shared.Form exposing (errorToString)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Uuid
 import Version exposing (Version)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.Components.PasswordBar as PasswordBar
@@ -103,7 +104,7 @@ inputWithTypehints options appState form fieldName labelText =
                                 options
                 in
                 if List.isEmpty filteredOptions then
-                    emptyNode
+                    Html.nothing
 
                 else
                     ul [ class "typehints" ]
@@ -119,7 +120,7 @@ inputWithTypehints options appState form fieldName labelText =
                         )
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "form-group" ]
         [ label [ for fieldName ] [ text labelText ]
@@ -181,11 +182,11 @@ secret appState form fieldName labelText =
                 showHideIcon =
                     if visible then
                         a [ onClick (visibleActiveMsg False) ]
-                            [ faSet "_global.secretHide" appState ]
+                            [ faSecretHide ]
 
                     else
                         a [ onClick (visibleActiveMsg True) ]
-                            [ faSet "_global.secretShow" appState ]
+                            [ faSecretShow ]
             in
             div [ class ("input-secret " ++ errorClass) ]
                 [ inputField
@@ -399,7 +400,7 @@ list appState itemView form fieldName labelText addLabel =
 
         listLabel =
             if String.isEmpty labelText then
-                emptyNode
+                Html.nothing
 
             else
                 label [] [ text labelText ]
@@ -413,7 +414,7 @@ list appState itemView form fieldName labelText addLabel =
             , onClick (Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ faSet "_global.add" appState
+            [ faAdd
             , text addLabel
             ]
         ]
@@ -437,7 +438,7 @@ listWithCustomMsg appState wrapMsg itemView form fieldName labelText addLabel =
             , onClick (wrapMsg <| Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ faSet "_global.add" appState
+            [ faAdd
             , text addLabel
             ]
         ]
@@ -462,7 +463,7 @@ listWithHeader appState header itemView form fieldName labelText addLabel =
             , onClick (Form.Append fieldName)
             , dataCy "form-group_list_add-button"
             ]
-            [ faSet "_global.add" appState
+            [ faAdd
             , text addLabel
             ]
         ]
@@ -558,7 +559,7 @@ markupEditor cfg appState form fieldName labelText =
 
         labelElement =
             if String.isEmpty labelText then
-                emptyNode
+                Html.nothing
 
             else
                 label [ for fieldName ] [ text labelText ]
@@ -697,7 +698,7 @@ getErrors appState field labelText =
             ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
 
         Nothing ->
-            ( emptyNode, "" )
+            ( Html.nothing, "" )
 
 
 type alias VersionFormGroupConfig msg =
@@ -758,7 +759,7 @@ version appState cfg form =
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "form-group" ]
         [ label [ class "control-label" ] [ text cfg.label ]

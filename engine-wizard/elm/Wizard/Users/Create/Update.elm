@@ -4,12 +4,12 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Gettext exposing (gettext)
 import Random exposing (Seed, step)
-import Shared.Api.Users as UsersApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Utils exposing (tuplePrepend)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Ports as Ports
@@ -24,7 +24,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, 
 update msg wrapMsg appState model =
     case msg of
         Cancel ->
-            ( appState.seed, model, Ports.historyBack (Routing.toUrl appState Routes.usersIndex) )
+            ( appState.seed, model, Ports.historyBack (Routing.toUrl Routes.usersIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState.seed appState model
@@ -46,7 +46,7 @@ handleForm formMsg wrapMsg seed appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        UsersApi.postUser body appState PostUserCompleted
+                        UsersApi.postUser appState body PostUserCompleted
             in
             ( newSeed, { model | savingUser = Loading }, cmd )
 
@@ -70,7 +70,7 @@ postUserCompleted appState model result =
                 , form = Form.setFormErrors appState error model.form
               }
             , Cmd.batch
-                [ getResultCmd Wizard.Msgs.logoutMsg result
+                [ RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                 , Ports.scrollToTop "html"
                 ]
             )

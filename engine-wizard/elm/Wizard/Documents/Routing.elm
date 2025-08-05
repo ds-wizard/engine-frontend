@@ -6,7 +6,6 @@ module Wizard.Documents.Routing exposing
 
 import Maybe.Extra as Maybe
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Locale exposing (lr)
 import Url.Parser exposing ((<?>), Parser, map, s)
 import Url.Parser.Query.Extra as Query
 import Uuid exposing (Uuid)
@@ -15,13 +14,14 @@ import Wizard.Common.Feature as Feature
 import Wizard.Documents.Routes exposing (Route(..))
 
 
-parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parsers appState wrapRoute =
-    let
-        moduleRoot =
-            lr "documents" appState
-    in
-    [ map (indexRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot <?> Query.uuid (lr "documents.index.questionnaireUuid" appState)))
+moduleRoot : String
+moduleRoot =
+    "project-documents"
+
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    [ map (indexRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot <?> Query.uuid "questionnaireUuid"))
     ]
 
 
@@ -30,17 +30,14 @@ indexRoute wrapRoute documentUuid =
     PaginationQueryString.wrapRoute (wrapRoute << IndexRoute documentUuid) (Just "createdAt,desc")
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
+toUrl : Route -> List String
+toUrl route =
     case route of
         IndexRoute questionnaireUuid paginationQueryString ->
             let
-                moduleRoot =
-                    lr "documents" appState
-
                 queryString =
                     PaginationQueryString.toUrlWith
-                        [ ( lr "documents.index.questionnaireUuid" appState, Maybe.unwrap "" Uuid.toString questionnaireUuid )
+                        [ ( "questionnaireUuid", Maybe.unwrap "" Uuid.toString questionnaireUuid )
                         ]
                         paginationQueryString
             in

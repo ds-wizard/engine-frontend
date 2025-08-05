@@ -5,13 +5,13 @@ module Wizard.Projects.Detail.Files.Update exposing
 
 import ActionResult
 import Gettext exposing (gettext)
-import Shared.Api.QuestionnaireFiles as QuestionnaireFilesApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.QuestionnaireFile exposing (QuestionnaireFile)
-import Shared.Error.ApiError as ApiError
-import Shared.Utils exposing (dispatch)
+import Shared.Data.ApiError as ApiError
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
+import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -36,7 +36,7 @@ update msg wrapMsg appState questionnaireUuid model =
         DownloadFile file ->
             ( model
             , Cmd.map (wrapMsg << FileDownloaderMsg)
-                (FileDownloader.fetchFile appState (QuestionnaireFilesApi.fileUrl file.questionnaire.uuid file.uuid appState))
+                (FileDownloader.fetchFile appState (QuestionnaireFilesApi.fileUrl appState file.questionnaire.uuid file.uuid))
             )
 
         FileDownloaderMsg fileDownloaderMsg ->
@@ -49,7 +49,7 @@ update msg wrapMsg appState questionnaireUuid model =
             case model.questionnaireFileToBeDeleted of
                 Just file ->
                     ( { model | deletingQuestionnaireFile = ActionResult.Loading }
-                    , QuestionnaireFilesApi.deleteFile file.questionnaire.uuid file.uuid appState (wrapMsg << DeleteFileCompleted)
+                    , QuestionnaireFilesApi.deleteFile appState file.questionnaire.uuid file.uuid (wrapMsg << DeleteFileCompleted)
                     )
 
                 Nothing ->
@@ -59,12 +59,12 @@ update msg wrapMsg appState questionnaireUuid model =
             case result of
                 Ok _ ->
                     ( { model | questionnaireFileToBeDeleted = Nothing, deletingQuestionnaireFile = ActionResult.Unset }
-                    , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+                    , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     )
 
                 Err error ->
                     ( { model | deletingQuestionnaireFile = ApiError.toActionResult appState (gettext "File could not be deleted." appState.locale) error }
-                    , getResultCmd Wizard.Msgs.logoutMsg result
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
 
@@ -81,7 +81,7 @@ handleListingMsg wrapMsg appState listingMsg questionnaireUuid model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Uuid -> Listing.UpdateConfig QuestionnaireFile
 listingUpdateConfig wrapMsg appState questionnaireUuid =
-    { getRequest = QuestionnairesApi.getFiles questionnaireUuid
+    { getRequest = QuestionnairesApi.getFiles appState questionnaireUuid
     , getError = gettext "Unable to get project files." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectsDetailFilesWithFilters questionnaireUuid

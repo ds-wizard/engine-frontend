@@ -12,7 +12,6 @@ module Wizard.Common.Components.DetailPage exposing
 
 import Html exposing (Html, br, dd, div, dl, dt, strong, text)
 import Html.Attributes exposing (class)
-import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Routes exposing (Route)
@@ -78,12 +77,12 @@ sidePanelItemWithIcon title description icon =
         ]
 
 
-sidePanelItemWithIconWithLink : AppState -> Route -> String -> Html msg -> Html msg -> Html msg
-sidePanelItemWithIconWithLink appState route title description icon =
+sidePanelItemWithIconWithLink : Route -> String -> Html msg -> Html msg -> Html msg
+sidePanelItemWithIconWithLink route title description icon =
     div [ class "DetailPage__SidePanel__ItemIcon" ]
         [ icon
         , div [ class "content" ]
-            [ strong [] [ linkTo appState route [] [ text title ] ]
+            [ strong [] [ linkTo route [] [ text title ] ]
             , br [] []
             , description
             ]

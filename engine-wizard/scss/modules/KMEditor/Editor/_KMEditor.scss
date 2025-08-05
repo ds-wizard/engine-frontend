@@ -174,7 +174,7 @@ $breadcrumbs-height: 40px;
         margin-bottom: 0;
         padding-bottom: 40px;
 
-        .fa {
+        .fas, .far, .fab{
             margin-right: 4px;
         }
     }
@@ -371,7 +371,7 @@ $breadcrumbs-height: 40px;
                             background: var(--bs-primary);
                         }
 
-                        .fa {
+                        .fas, .far, .fab{
                             color: var(--bs-primary);
                         }
                     }
@@ -380,7 +380,7 @@ $breadcrumbs-height: 40px;
                         height: 1.5rem;
                     }
 
-                    .fa {
+                    .fas, .far, .fab{
                         @include transition(all 0.2s ease-in-out);
                         color: $gray-600;
                         margin-top: .25rem;

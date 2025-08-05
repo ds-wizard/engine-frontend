@@ -5,14 +5,14 @@ module Wizard.KMEditor.Migration.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Branches as BranchesApi
-import Shared.Data.Event as Event
-import Shared.Data.Migration exposing (Migration)
-import Shared.Data.MigrationResolution as MigrationResolution exposing (MigrationResolution)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setMigration)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.Event as Event
+import Wizard.Api.Models.Migration exposing (Migration)
+import Wizard.Api.Models.MigrationResolution as MigrationResolution exposing (MigrationResolution)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
 import Wizard.KMEditor.Migration.Msgs exposing (Msg(..))
@@ -21,7 +21,7 @@ import Wizard.Msgs
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    BranchesApi.getMigration uuid appState GetMigrationCompleted
+    BranchesApi.getMigration appState uuid GetMigrationCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -49,12 +49,13 @@ update msg wrapMsg appState model =
 
 handleGetMigrationCompleted : AppState -> Model -> Result ApiError Migration -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetMigrationCompleted appState model result =
-    applyResult appState
+    RequestHelpers.applyResult
         { setResult = setMigration
         , defaultError = gettext "Unable to get migration." appState.locale
         , model = model
         , result = result
         , logoutMsg = Wizard.Msgs.logoutMsg
+        , locale = appState.locale
         }
 
 
@@ -63,7 +64,7 @@ handleApplyAll wrapMsg appState model =
     let
         cmd =
             Cmd.map wrapMsg <|
-                BranchesApi.postMigrationConflictApplyAll model.branchUuid appState PostMigrationConflictCompleted
+                BranchesApi.postMigrationConflictApplyAll appState model.branchUuid PostMigrationConflictCompleted
     in
     ( { model | conflict = Loading, buttonClicked = Just ApplyAllButtonClicked }, cmd )
 
@@ -90,7 +91,7 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | conflict = ApiError.toActionResult appState (gettext "Unable to resolve conflict." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -123,4 +124,4 @@ postMigrationConflictCmd wrapMsg uuid appState resolution =
             MigrationResolution.encode resolution
     in
     Cmd.map wrapMsg <|
-        BranchesApi.postMigrationConflict uuid body appState PostMigrationConflictCompleted
+        BranchesApi.postMigrationConflict appState uuid body PostMigrationConflictCompleted

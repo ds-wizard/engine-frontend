@@ -1,8 +1,8 @@
 module Wizard.Public.Login.Msgs exposing (Msg(..))
 
-import Shared.Data.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
-import Shared.Data.TokenResponse exposing (TokenResponse)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
+import Wizard.Api.Models.TokenResponse exposing (TokenResponse)
 
 
 type Msg

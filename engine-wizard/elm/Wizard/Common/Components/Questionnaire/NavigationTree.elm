@@ -13,18 +13,19 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Roman
 import Shared.Components.Badge as Badge
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faKmEditorTreeClosed, faKmEditorTreeOpened, faKmItemTemplate, faKmQuestion, faQuestionnaireAnsweredIndication)
 import String.Format as String
 import Uuid
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -98,7 +99,7 @@ viewChapter appState cfg model order chapter =
 
         questionList =
             if List.isEmpty chapterQuestions || not (isOpen currentPath model) then
-                emptyNode
+                Html.nothing
 
             else
                 ul [] (List.map (viewQuestion appState cfg model currentPath) chapterQuestions)
@@ -113,14 +114,14 @@ viewChapter appState cfg model order chapter =
             ]
             [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
             , span [ class "chapter-name" ] [ text chapter.title ]
-            , viewChapterIndication appState cfg.questionnaire chapter
+            , viewChapterIndication cfg.questionnaire chapter
             ]
         , questionList
         ]
 
 
-viewChapterIndication : AppState -> QuestionnaireQuestionnaire -> Chapter -> Html msg
-viewChapterIndication appState questionnaire chapter =
+viewChapterIndication : QuestionnaireQuestionnaire -> Chapter -> Html msg
+viewChapterIndication questionnaire chapter =
     let
         unanswered =
             QuestionnaireQuestionnaire.calculateUnansweredQuestionsForChapter questionnaire chapter
@@ -129,7 +130,7 @@ viewChapterIndication appState questionnaire chapter =
         Badge.light [ class "rounded-pill" ] [ text <| String.fromInt unanswered ]
 
     else
-        faSet "questionnaire.answeredIndication" appState
+        faQuestionnaireAnsweredIndication
 
 
 viewQuestion : AppState -> ViewConfig msg -> Model -> List String -> Question -> Html msg
@@ -156,7 +157,7 @@ viewQuestion appState cfg model path question =
                     Nothing
 
         caret =
-            viewCaret appState
+            viewCaret
                 { hasItems = Maybe.isJust followUpQuestionsOrItems
                 , isOpen = isQuestionTreeOpen
                 , path = currentPath
@@ -173,10 +174,10 @@ viewQuestion appState cfg model path question =
     li []
         [ caret
         , a [ onClick (cfg.scrollToPath (pathToString currentPath)) ]
-            [ faSet "km.question" appState
+            [ faKmQuestion
             , text (Question.getTitle question)
             ]
-        , Maybe.withDefault emptyNode nestedList
+        , Maybe.withDefault Html.nothing nestedList
         ]
 
 
@@ -239,7 +240,7 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
 
         itemQuestions =
             if List.isEmpty itemTemplateQuestions || not isItemTreeOpen then
-                emptyNode
+                Html.nothing
 
             else
                 ul [] (List.map (viewQuestion appState cfg model (currentPath ++ [ itemUuid ])) itemTemplateQuestions)
@@ -254,7 +255,7 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
             Maybe.unwrap defaultItemTitle text mbItemTitle
 
         itemCaret =
-            viewCaret appState
+            viewCaret
                 { hasItems = not (List.isEmpty itemTemplateQuestions)
                 , isOpen = isItemTreeOpen
                 , path = itemPath
@@ -264,7 +265,7 @@ viewListQuestionItem appState cfg model itemTemplateQuestions currentPath index 
     li []
         [ itemCaret
         , a [ onClick (cfg.scrollToPath (pathToString (currentPath ++ [ itemUuid ]))) ]
-            [ faSet "km.itemTemplate" appState
+            [ faKmItemTemplate
             , itemTitle
             ]
         , itemQuestions
@@ -279,18 +280,18 @@ type alias ViewCaretConfig msg =
     }
 
 
-viewCaret : AppState -> ViewCaretConfig msg -> Html msg
-viewCaret appState cfg =
+viewCaret : ViewCaretConfig msg -> Html msg
+viewCaret cfg =
     if not cfg.hasItems then
-        emptyNode
+        Html.nothing
 
     else if cfg.isOpen then
         a [ class "caret", onClick (cfg.wrapMsg <| ClosePath (pathToString cfg.path)) ]
-            [ faSet "kmEditor.treeOpened" appState ]
+            [ faKmEditorTreeOpened ]
 
     else
         a [ class "caret", onClick (cfg.wrapMsg <| OpenPath (pathToString cfg.path)) ]
-            [ faSet "kmEditor.treeClosed" appState ]
+            [ faKmEditorTreeClosed ]
 
 
 pathToString : List String -> String

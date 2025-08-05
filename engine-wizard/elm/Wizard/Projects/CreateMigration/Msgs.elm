@@ -1,13 +1,13 @@
 module Wizard.Projects.CreateMigration.Msgs exposing (Msg(..))
 
 import Form
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Shared.Data.QuestionnaireMigration exposing (QuestionnaireMigration)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 
 

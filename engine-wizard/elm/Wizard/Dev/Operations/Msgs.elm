@@ -1,12 +1,12 @@
 module Wizard.Dev.Operations.Msgs exposing (Msg(..))
 
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
 import Shared.Data.DevOperationSection exposing (DevOperationSection)
-import Shared.Error.ApiError exposing (ApiError)
 
 
 type Msg
-    = GetAdminOperationsComplete (Result ApiError (List DevOperationSection))
+    = GetDevOperationsComplete (Result ApiError (List DevOperationSection))
     | OpenSection String
     | FieldInput String String
     | ExecuteOperation String String

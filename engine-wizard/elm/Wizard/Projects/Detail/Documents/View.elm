@@ -5,22 +5,23 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
 import Html.Events exposing (onCheck, onClick)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Auth.Session as Session
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
-import Shared.Data.Document exposing (Document)
-import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.Submission as Submission exposing (Submission)
-import Shared.Data.Submission.SubmissionState as SubmissionState
-import Shared.Data.User as User
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faQuestionnaire, faSpinner, faSuccess)
 import Shared.Markdown as Markdown
 import String.Format as String
 import Time.Distance as TimeDistance
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.Document exposing (Document)
+import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.Submission as Submission exposing (Submission)
+import Wizard.Api.Models.Submission.SubmissionState as SubmissionState
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
@@ -55,7 +56,7 @@ view : AppState -> ViewConfig msg -> Model -> Html msg
 view appState cfg model =
     div [ class "Projects__Detail__Content" ]
         [ div [ class "container my-4" ]
-            [ FormResult.successOnlyView appState model.deletingDocument
+            [ FormResult.successOnlyView model.deletingDocument
             , Listing.view appState (listingConfig cfg appState) model.documents
             , deleteModal cfg appState model
             , submitModal cfg appState model
@@ -109,8 +110,7 @@ listingConfig cfg appState =
     , toolbarExtra =
         if cfg.questionnaireEditable && Session.exists appState.session then
             Just <|
-                linkTo appState
-                    (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid Nothing)
+                linkTo (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid Nothing)
                     [ class "btn btn-primary" ]
                     [ text (gettext "New document" appState.locale) ]
 
@@ -153,7 +153,7 @@ listingDescription document =
                     span [ class "fragment" ] [ fa format.icon, text format.name ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         fileSizeFragment =
             case document.fileSize of
@@ -161,10 +161,10 @@ listingDescription document =
                     span [ class "fragment" ] [ text (ByteUnits.toReadable fileSize) ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         versionFragment =
-            Maybe.unwrap emptyNode viewVersion document.questionnaireVersion
+            Maybe.unwrap Html.nothing viewVersion document.questionnaireVersion
     in
     span []
         [ formatFragment
@@ -183,7 +183,7 @@ listingActions appState cfg document =
         download =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documents.download" appState
+                , icon = faDocumentsDownload
                 , label = gettext "Download" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| DownloadDocument document)
                 , dataCy = "download"
@@ -195,7 +195,7 @@ listingActions appState cfg document =
         submit =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documents.submit" appState
+                , icon = faDocumentsSubmit
                 , label = gettext "Submit" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideSubmitDocument <| Just document)
                 , dataCy = "submit"
@@ -206,7 +206,7 @@ listingActions appState cfg document =
                 ( Just questionnaireEventUuid, Just previewQuestionnaireEventMsg ) ->
                     ( ListingDropdown.dropdownAction
                         { extraClass = Nothing
-                        , icon = faSet "_global.questionnaire" appState
+                        , icon = faQuestionnaire
                         , label = gettext "View questionnaire" appState.locale
                         , msg = ListingActionMsg (previewQuestionnaireEventMsg questionnaireEventUuid)
                         , dataCy = "view-questionnaire"
@@ -223,7 +223,7 @@ listingActions appState cfg document =
         viewError =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "documents.viewError" appState
+                , icon = faDocumentsViewError
                 , label = gettext "View error" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| SetDocumentErrorModal document.workerLog)
                 , dataCy = "view-error"
@@ -235,7 +235,7 @@ listingActions appState cfg document =
         delete =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (cfg.wrapMsg <| ShowHideDeleteDocument <| Just document)
                 , dataCy = "delete"
@@ -258,18 +258,18 @@ stateBadge appState state =
     case state of
         QueuedDocumentState ->
             Badge.info [ dataCy "badge_doc_queued" ]
-                [ faSet "_global.spinner" appState
+                [ faSpinner
                 , text (gettext "Queued" appState.locale)
                 ]
 
         InProgressDocumentState ->
             Badge.info [ dataCy "badge_doc_in-progress" ]
-                [ faSet "_global.spinner" appState
+                [ faSpinner
                 , text (gettext "In Progress" appState.locale)
                 ]
 
         DoneDocumentState ->
-            emptyNode
+            Html.nothing
 
         ErrorDocumentState ->
             Badge.danger [ dataCy "badge_doc_error" ] [ text (gettext "Error" appState.locale) ]
@@ -282,7 +282,7 @@ viewSubmission cfg appState submission =
             case submissionState of
                 SubmissionState.InProgress ->
                     Badge.info []
-                        [ faSet "_global.spinner" appState
+                        [ faSpinner
                         , text (gettext "Submitting" appState.locale)
                         ]
 
@@ -303,7 +303,7 @@ viewSubmission cfg appState submission =
                 ( SubmissionState.Done, Just location, _ ) ->
                     a [ href location, class "with-icon-after", target "_blank" ]
                         [ text (gettext "View submission" appState.locale)
-                        , faSet "_global.externalLink" appState
+                        , faExternalLink
                         ]
 
                 ( SubmissionState.Error, _, Just _ ) ->
@@ -311,7 +311,7 @@ viewSubmission cfg appState submission =
                         [ text (gettext "View error" appState.locale) ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     tr []
         [ td [] [ text (Submission.visibleName submission) ]
@@ -376,7 +376,7 @@ submitModal cfg appState model =
                     [ text (gettext "Done" appState.locale) ]
 
             else if ActionResult.isSuccess model.submissionServices && Maybe.isJust model.selectedSubmissionServiceId then
-                ActionButton.button appState
+                ActionButton.button
                     { label = gettext "Submit" appState.locale
                     , result = model.submittingDocument
                     , msg = cfg.wrapMsg <| SubmitDocument
@@ -414,11 +414,11 @@ submitModal cfg appState model =
                     (List.map viewOption submissionServices)
 
             else
-                Flash.info appState <| gettext "There are no submission services configured for this type of document." appState.locale
+                Flash.info <| gettext "There are no submission services configured for this type of document." appState.locale
 
         submissionBody submissionServices =
             div []
-                [ FormResult.errorOnlyView appState model.submittingDocument
+                [ FormResult.errorOnlyView model.submittingDocument
                 , options submissionServices
                 ]
 
@@ -436,22 +436,22 @@ submitModal cfg appState model =
                                         ]
 
                                 Nothing ->
-                                    emptyNode
+                                    Html.nothing
                     in
                     div [ class "alert alert-success" ]
-                        [ faSet "_global.success" appState
+                        [ faSuccess
                         , text (gettext "The document was successfully submitted." appState.locale)
                         , link
                         ]
 
                 SubmissionState.Error ->
                     div [ class "alert alert-danger" ]
-                        [ faSet "_global.error" appState
+                        [ faError
                         , text (gettext "The document submission failed." appState.locale)
                         ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         body =
             if ActionResult.isSuccess model.submittingDocument then

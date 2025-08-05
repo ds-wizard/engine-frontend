@@ -241,7 +241,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                 margin-right: 0.5rem;
             }
 
-            .fa {
+            .fas, .far, .fab{
                 margin-left: 0.5rem;
             }
         }
@@ -251,7 +251,6 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
             margin-right: -1rem;
         }
     }
-
 
 
     .ShareDropdown {
@@ -283,7 +282,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                     }
                 }
 
-                .fa {
+                .fas, .far, .fab {
                     width: 1.5rem;
                     text-align: center;
                     margin-right: $spacer-1;

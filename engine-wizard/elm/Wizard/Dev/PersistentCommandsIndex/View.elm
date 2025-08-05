@@ -2,9 +2,10 @@ module Wizard.Dev.PersistentCommandsIndex.View exposing (view)
 
 import Html exposing (Html, div, img, span, text)
 import Html.Attributes exposing (class, src)
-import Shared.Data.PersistentCommand as PersistentCommand exposing (PersistentCommand)
-import Shared.Data.User as User
-import Shared.Html exposing (emptyNode, faSet)
+import Html.Extra as Html
+import Shared.Components.FontAwesome exposing (faPersistentCommandRetry)
+import Wizard.Api.Models.PersistentCommand as PersistentCommand exposing (PersistentCommand)
+import Wizard.Api.Models.User as User
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Html exposing (linkTo)
@@ -24,7 +25,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "PersistentCommands__Index" ]
         [ Page.header "Persistent Commands" []
-        , FormResult.errorOnlyView appState model.updating
+        , FormResult.errorOnlyView model.updating
         , Listing.view appState (listingConfig appState model) model.persistentCommands
         ]
 
@@ -33,9 +34,9 @@ listingConfig : AppState -> Model -> ViewConfig PersistentCommand Msg
 listingConfig appState model =
     let
         retryFailedButton =
-            ActionButton.buttonCustom appState
+            ActionButton.buttonCustom
                 { content =
-                    [ faSet "persistentCommand.retry" appState
+                    [ faPersistentCommandRetry
                     , text "Retry failed"
                     ]
                 , result = model.updating
@@ -43,11 +44,11 @@ listingConfig appState model =
                 , btnClass = "btn-outline-secondary with-icon"
                 }
     in
-    { title = listingTitle appState
-    , description = listingDescription appState
+    { title = listingTitle
+    , description = listingDescription
     , itemAdditionalData = always Nothing
     , dropdownItems =
-        PersistentCommandActionsDropdown.actions appState
+        PersistentCommandActionsDropdown.actions
             { retryMsg = RerunCommand
             , setIgnoredMsg = SetIgnored
             , viewActionVisible = True
@@ -82,19 +83,18 @@ listingConfig appState model =
     }
 
 
-listingTitle : AppState -> PersistentCommand -> Html Msg
-listingTitle appState persistentCommand =
+listingTitle : PersistentCommand -> Html Msg
+listingTitle persistentCommand =
     span []
-        [ linkTo appState
-            (Routes.persistentCommandsDetail persistentCommand.uuid)
+        [ linkTo (Routes.persistentCommandsDetail persistentCommand.uuid)
             []
             [ text (PersistentCommand.visibleName persistentCommand) ]
         , PersistentCommandBadge.view persistentCommand
         ]
 
 
-listingDescription : AppState -> PersistentCommand -> Html Msg
-listingDescription appState persistentCommand =
+listingDescription : PersistentCommand -> Html Msg
+listingDescription persistentCommand =
     let
         attempts =
             "Attempts: " ++ String.fromInt persistentCommand.attempts ++ "/" ++ String.fromInt persistentCommand.maxAttempts
@@ -108,10 +108,10 @@ listingDescription appState persistentCommand =
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     span []
-        [ linkTo appState (Routes.tenantsDetail persistentCommand.tenant.uuid) [ class "fragment" ] [ text persistentCommand.tenant.name ]
+        [ linkTo (Routes.tenantsDetail persistentCommand.tenant.uuid) [ class "fragment" ] [ text persistentCommand.tenant.name ]
         , createdByFragment
         , span [ class "fragment" ] [ text attempts ]
         ]

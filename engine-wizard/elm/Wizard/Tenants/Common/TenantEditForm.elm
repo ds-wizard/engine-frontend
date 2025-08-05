@@ -4,8 +4,8 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Data.TenantDetail exposing (TenantDetail)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 
 type alias TenantEditForm =

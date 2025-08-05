@@ -13,7 +13,7 @@ module Wizard.Projects.Detail.Components.ProjectSaving exposing
 import Gettext exposing (gettext)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
-import Shared.Html exposing (fa, faKeyClass)
+import Shared.Components.FontAwesome exposing (faQuestionnaireSavingSaved, faQuestionnaireSavingSaving)
 import Time
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltipRight)
@@ -110,22 +110,22 @@ view appState model =
 
 viewSaving : AppState -> Html Msg
 viewSaving appState =
-    viewHelper [] (faKeyClass "questionnaire.saving.saving" appState) (gettext "Saving..." appState.locale)
+    viewHelper [] faQuestionnaireSavingSaving (gettext "Saving..." appState.locale)
 
 
 viewSavedRecently : AppState -> Html Msg
 viewSavedRecently appState =
-    viewHelper [] (faKeyClass "questionnaire.saving.saved" appState) (gettext "Saved" appState.locale)
+    viewHelper [] faQuestionnaireSavingSaved (gettext "Saved" appState.locale)
 
 
 viewSaved : AppState -> Html Msg
 viewSaved appState =
-    viewHelper (tooltipRight (gettext "All changes have been saved" appState.locale)) (faKeyClass "questionnaire.saving.saved" appState) ""
+    viewHelper (tooltipRight (gettext "All changes have been saved" appState.locale)) faQuestionnaireSavingSaved ""
 
 
-viewHelper : List (Html.Attribute Msg) -> String -> String -> Html Msg
+viewHelper : List (Html.Attribute Msg) -> Html Msg -> String -> Html Msg
 viewHelper attrs icon label =
     span (class "questionnaire-header__saving" :: attrs)
-        [ fa icon
+        [ icon
         , text label
         ]

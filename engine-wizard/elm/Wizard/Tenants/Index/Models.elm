@@ -5,7 +5,7 @@ module Wizard.Tenants.Index.Models exposing
 
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.Tenant exposing (Tenant)
+import Wizard.Api.Models.Tenant exposing (Tenant)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Tenants.Routes exposing (indexRouteEnabledFilterId, indexRouteStatesFilterId)
 

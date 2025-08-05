@@ -3,9 +3,9 @@ module Wizard.Projects.Detail.Components.Settings.DeleteModal exposing (Model, M
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 import Wizard.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
@@ -71,7 +71,7 @@ handleDeleteQuestionnaire cfg appState model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.deleteQuestionnaire questionnaire.uuid appState DeleteQuestionnaireCompleted
+                        QuestionnairesApi.deleteQuestionnaire appState questionnaire.uuid DeleteQuestionnaireCompleted
             in
             ( newModel, cmd )
 

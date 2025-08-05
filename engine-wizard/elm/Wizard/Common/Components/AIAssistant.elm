@@ -14,11 +14,12 @@ import Html exposing (Html, a, button, div, form, h5, input, p, text)
 import Html.Attributes exposing (class, disabled, type_, value)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Random exposing (Seed)
-import Shared.Error.ApiError exposing (ApiError)
-import Shared.Html exposing (fa, faSet)
+import Shared.Api.Request exposing (ServerInfo)
+import Shared.Components.FontAwesome exposing (fa, faClose)
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Markdown as Markdown
 import Uuid
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.AIAssistant.Api as Api
 import Wizard.Common.Components.AIAssistant.Models.Answer exposing (Answer)
 import Wizard.Common.Components.AIAssistant.Models.Conversation exposing (Conversation)
@@ -65,7 +66,7 @@ init =
 
 
 type alias UpdateConfig =
-    { appState : AppState
+    { serverInfo : ServerInfo
     , seed : Seed
     }
 
@@ -73,12 +74,6 @@ type alias UpdateConfig =
 update : UpdateConfig -> Msg -> State -> ( Seed, State, Cmd Msg )
 update cfg msg (State state) =
     let
-        appStateLike =
-            { apiUrl = AppState.getAIAssistantApiUrl cfg.appState
-            , session = cfg.appState.session
-            , config = cfg.appState.config
-            }
-
         startNewConversation =
             let
                 ( uuid, newSeed ) =
@@ -91,7 +86,7 @@ update cfg msg (State state) =
             in
             ( newSeed
             , State { state | conversation = ActionResult.Success conversation }
-            , Api.postQuestion conversation.uuid { question = "" } appStateLike NewConversationCompleted
+            , Api.postQuestion cfg.serverInfo conversation.uuid { question = "" } NewConversationCompleted
             )
 
         submitMessage message =
@@ -109,7 +104,7 @@ update cfg msg (State state) =
                             , pendingMessage = Just message
                             , answer = ActionResult.Loading
                         }
-                    , Api.postQuestion conversation.uuid question appStateLike SubmitMessageCompleted
+                    , Api.postQuestion cfg.serverInfo conversation.uuid question SubmitMessageCompleted
                     )
 
                 _ ->
@@ -122,7 +117,7 @@ update cfg msg (State state) =
         Init ->
             ( cfg.seed
             , State { state | conversation = ActionResult.Loading }
-            , Api.getLatestConversation appStateLike GetLatestConversationCompleted
+            , Api.getLatestConversation cfg.serverInfo GetLatestConversationCompleted
             )
 
         GetLatestConversationCompleted result ->
@@ -241,7 +236,7 @@ viewConversation cfg state conversation =
         [ div [ class "header fw-bold" ]
             [ div [ class "px-3 py-3 d-flex justify-content-between" ]
                 [ text "AI Assistant"
-                , a [ onClick cfg.closeMsg ] [ faSet "_global.close" cfg.appState ]
+                , a [ onClick cfg.closeMsg ] [ faClose ]
                 ]
             ]
         , content

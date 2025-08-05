@@ -8,7 +8,7 @@ import Html exposing (Attribute, Html, a, div, input, label, p, text)
 import Html.Attributes exposing (class, disabled, id, type_)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faImportFile, faRemove)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -25,7 +25,7 @@ view appState model =
         content =
             case model.file of
                 Just file ->
-                    fileView appState model (File.name file)
+                    fileView model (File.name file)
 
                 Nothing ->
                     dropzone appState model
@@ -53,15 +53,15 @@ view appState model =
                 (ActionButton.ButtonConfig (gettext "Import" appState.locale) model.importing (FormMsg <| Form.Submit) False)
     in
     div [ id dropzoneId, dataCy "import_file" ]
-        [ FormResult.view appState model.importing
+        [ FormResult.view model.importing
         , formView
         , fileGroup
         , formActions
         ]
 
 
-fileView : AppState -> Model -> String -> Html Msg
-fileView appState model fileName =
+fileView : Model -> String -> Html Msg
+fileView model fileName =
     let
         cancelDisabled =
             case model.importing of
@@ -73,11 +73,11 @@ fileView appState model fileName =
     in
     div [ class "file-view" ]
         [ div [ class "file" ]
-            [ faSet "import.file" appState
+            [ faImportFile
             , div [ class "filename" ]
                 [ text fileName
                 , a [ disabled cancelDisabled, class "ms-1 text-danger", onClick CancelFile ]
-                    [ faSet "_global.remove" appState ]
+                    [ faRemove ]
                 ]
             ]
         ]

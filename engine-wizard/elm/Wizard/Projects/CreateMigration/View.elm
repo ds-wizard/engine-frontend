@@ -5,10 +5,10 @@ import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
-import Shared.Data.PackageSuggestion as PackageSuggestion
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faArrowRight)
 import Version
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -79,8 +79,8 @@ createMigrationView appState model questionnaire =
     in
     div [ listClass "Questionnaires__CreateMigration" ]
         [ Page.headerWithGuideLink appState (gettext "Create Migration" appState.locale) GuideLinks.projectsMigration
-        , Flash.info appState <| gettext "A new project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
-        , FormResult.view appState model.savingMigration
+        , Flash.info <| gettext "A new project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
+        , FormResult.view model.savingMigration
         , FormGroup.textView "project" questionnaire.name <| gettext "Project" appState.locale
         , div [ class "form" ]
             [ div []
@@ -90,7 +90,7 @@ createMigrationView appState model questionnaire =
                 , FormGroup.codeView (Version.toString questionnaire.package.version) (gettext "Original Version" appState.locale)
                 , originalTagList
                 ]
-            , faSet "_global.arrowRight" appState
+            , faArrowRight
             , div []
                 [ div [ class "form-group" ]
                     [ label [] [ text (gettext "New Knowledge Model" appState.locale) ]

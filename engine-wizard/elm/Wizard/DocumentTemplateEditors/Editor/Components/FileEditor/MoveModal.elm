@@ -17,15 +17,15 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Registry.Components.FontAwesome exposing (fas)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
-import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode)
-import Shared.Utils exposing (dispatch)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Task.Extra as Task
 import Uuid exposing (Uuid)
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.FileTree as FileTree exposing (FileTree)
@@ -129,7 +129,7 @@ update cfg appState msg model =
                                     { file | fileName = fileName }
 
                                 cmd =
-                                    DocumentTemplateDraftsApi.putFile cfg.documentTemplateId templateFile fileContent appState (cfg.wrapMsg << MoveCompleted fileName)
+                                    DocumentTemplateDraftsApi.putFile appState cfg.documentTemplateId templateFile fileContent (cfg.wrapMsg << MoveCompleted fileName)
                             in
                             ( { model | moving = ActionResult.Loading }, cmd )
 
@@ -142,7 +142,7 @@ update cfg appState msg model =
                                     { asset | fileName = assetName }
 
                                 cmd =
-                                    DocumentTemplateDraftsApi.putAsset cfg.documentTemplateId templateAsset appState (cfg.wrapMsg << MoveCompleted assetName)
+                                    DocumentTemplateDraftsApi.putAsset appState cfg.documentTemplateId templateAsset (cfg.wrapMsg << MoveCompleted assetName)
                             in
                             ( { model | moving = ActionResult.Loading }, cmd )
 
@@ -152,7 +152,7 @@ update cfg appState msg model =
                                     String.join "/" (parts ++ [ getNameFromPath currentPath ])
 
                                 cmd =
-                                    DocumentTemplateDraftsApi.moveFolder cfg.documentTemplateId currentPath newPath appState (cfg.wrapMsg << MoveCompleted newPath)
+                                    DocumentTemplateDraftsApi.moveFolder appState cfg.documentTemplateId currentPath newPath (cfg.wrapMsg << MoveCompleted newPath)
                             in
                             ( { model | moving = ActionResult.Loading }, cmd )
 
@@ -168,17 +168,17 @@ update cfg appState msg model =
                     case model.state of
                         MovingFile file ->
                             ( { model | state = Closed }
-                            , dispatch (cfg.onRenameFile file.uuid newName)
+                            , Task.dispatch (cfg.onRenameFile file.uuid newName)
                             )
 
                         MovingAsset asset ->
                             ( { model | state = Closed }
-                            , dispatch (cfg.onRenameAsset asset.uuid newName)
+                            , Task.dispatch (cfg.onRenameAsset asset.uuid newName)
                             )
 
                         MovingFolder folderPath ->
                             ( { model | state = Closed }
-                            , dispatch (cfg.onRenameFolder folderPath newName)
+                            , Task.dispatch (cfg.onRenameFolder folderPath newName)
                             )
 
                         _ ->
@@ -219,7 +219,7 @@ viewNode appState model fileTree =
             viewFolder appState model folderData
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 viewFolder : AppState -> Model -> FileTree.FolderData -> Html Msg

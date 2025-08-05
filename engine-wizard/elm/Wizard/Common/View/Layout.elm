@@ -9,10 +9,10 @@ import Browser exposing (Document)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, img, li, nav, text, ul)
 import Html.Attributes exposing (class, classList, src)
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
-import Shared.Html exposing (emptyNode)
+import Html.Extra as Html
 import Shared.Undraw as Undraw
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Components.CookieConsent as CookieConsent
@@ -92,8 +92,7 @@ publicHeader model =
         links =
             if userLoggedIn model then
                 [ li [ class "nav-item" ]
-                    [ linkTo model.appState
-                        Routes.appHome
+                    [ linkTo Routes.appHome
                         [ class "nav-link", dataCy "public_nav_go-to-app" ]
                         [ text (gettext "Go to App" model.appState.locale) ]
                     ]
@@ -104,18 +103,16 @@ publicHeader model =
                     signUpLink =
                         if model.appState.config.authentication.internal.registration.enabled && not (Admin.isEnabled model.appState.config.admin) then
                             li [ class "nav-item" ]
-                                [ linkTo model.appState
-                                    Routes.publicSignup
+                                [ linkTo Routes.publicSignup
                                     [ class "nav-link", dataCy "public_nav_sign-up" ]
                                     [ text (gettext "Sign Up" model.appState.locale) ]
                                 ]
 
                         else
-                            emptyNode
+                            Html.nothing
                 in
                 [ li [ class "nav-item" ]
-                    [ linkTo model.appState
-                        (Routes.publicLogin (Just (Routing.toUrl model.appState model.appState.route)))
+                    [ linkTo (Routes.publicLogin (Just (Routing.toUrl model.appState.route)))
                         [ class "nav-link", dataCy "public_nav_login" ]
                         [ text (gettext "Log In" model.appState.locale) ]
                     ]
@@ -127,8 +124,7 @@ publicHeader model =
             [ class "container-fluid"
             ]
             [ div [ class "navbar-header" ]
-                [ linkTo model.appState
-                    Routes.publicHome
+                [ linkTo Routes.publicHome
                     [ class "navbar-brand", dataCy "nav_app-title" ]
                     [ img [ class "logo-img", src (LookAndFeelConfig.getLogoUrl model.appState.config.lookAndFeel) ] []
                     , text <| LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel
@@ -143,7 +139,7 @@ app : Model -> Html Msg -> Document Msg
 app model content =
     let
         rightPanelVisible =
-            not model.appState.session.rightPanelCollapsed && model.appState.config.aiAssistant.enabled
+            not model.appState.session.rightPanelCollapsed && model.appState.config.features.aiAssistantEnabled
 
         rightPanel =
             if rightPanelVisible then
@@ -159,7 +155,7 @@ app model content =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         html =
             div

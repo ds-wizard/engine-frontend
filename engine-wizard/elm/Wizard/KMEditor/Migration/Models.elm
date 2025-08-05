@@ -5,8 +5,8 @@ module Wizard.KMEditor.Migration.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.Migration exposing (Migration)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.Migration exposing (Migration)
 
 
 type alias Model =

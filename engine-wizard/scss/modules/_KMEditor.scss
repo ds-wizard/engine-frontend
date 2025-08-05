@@ -13,7 +13,7 @@
         font-size: 80%;
         padding: 0.25rem 0.3rem;
 
-        .fa {
+        .fas, .far, .fab {
             margin-right: 0.25rem;
         }
     }
@@ -49,7 +49,7 @@
             padding: 0.25rem 0.3rem;
             white-space: nowrap;
 
-            .fa {
+            .fas, .far, .fab {
                 margin-right: 0.25rem;
             }
         }
@@ -78,7 +78,7 @@
                 z-index: 0;
             }
 
-            .fa {
+            .fas, .far, .fab  {
                 margin-right: 5px;
                 margin-top: 3px;
             }

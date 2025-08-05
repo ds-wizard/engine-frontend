@@ -2,7 +2,7 @@ module Wizard.Comments.Models exposing (Model, initialModel)
 
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Common.Components.Listing.Models as Listing
 import Wizard.Routes exposing (commentsRouteResolvedFilterId)
 

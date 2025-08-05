@@ -14,18 +14,19 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Api.Users as UsersApi
 import Shared.Auth.Role as Role
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.User as User exposing (User)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Components.FontAwesome exposing (fa, faInfo)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, fa, faSet)
 import Shared.Markdown as Markdown
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.User as User exposing (User)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.ExternalLoginButton as ExternalLoginButton
@@ -62,7 +63,7 @@ type Msg
 
 fetchData : AppState -> UuidOrCurrent -> Cmd Msg
 fetchData appState uuidOrCurrent =
-    UsersApi.getUser uuidOrCurrent appState GetUserCompleted
+    UsersApi.getUser appState uuidOrCurrent GetUserCompleted
 
 
 type alias UpdateConfig msg =
@@ -94,7 +95,7 @@ handleUserForm cfg appState formMsg model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        UsersApi.putUser model.uuidOrCurrent body appState PutUserCompleted
+                        UsersApi.putUser appState model.uuidOrCurrent body PutUserCompleted
             in
             ( { model | savingUser = ActionResult.Loading }, cmd )
 
@@ -122,7 +123,7 @@ getUserCompleted cfg appState model result =
                     { model | user = ApiError.toActionResult appState (gettext "Unable to get the user." appState.locale) error }
 
         cmd =
-            getResultCmd cfg.logoutMsg result
+            RequestHelpers.getResultCmd cfg.logoutMsg result
     in
     ( newModel, cmd )
 
@@ -152,7 +153,7 @@ putUserCompleted cfg appState model result =
                 , userForm = Form.setFormErrors appState err model.userForm
               }
             , Cmd.batch
-                [ getResultCmd cfg.logoutMsg result
+                [ RequestHelpers.getResultCmd cfg.logoutMsg result
                 , Ports.scrollToTop ".Users__Edit__content"
                 ]
             )
@@ -196,20 +197,20 @@ userFormView appState model user isCurrent =
     let
         roleSelect =
             if isCurrent then
-                emptyNode
+                Html.nothing
 
             else
                 FormGroup.select appState (Role.options appState) model.userForm "role" <| gettext "Role" appState.locale
 
         activeToggle =
             if isCurrent then
-                emptyNode
+                Html.nothing
 
             else
                 FormGroup.toggle model.userForm "active" <| gettext "Active" appState.locale
     in
     Html.form [ onSubmit Form.Submit, class "col-8" ]
-        [ FormResult.view appState model.savingUser
+        [ FormResult.view model.savingUser
         , FormGroup.input appState model.userForm "email" <| gettext "Email" appState.locale
         , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState) user.sources)
         , FormGroup.input appState model.userForm "firstName" <| gettext "First name" appState.locale
@@ -218,7 +219,7 @@ userFormView appState model user isCurrent =
         , roleSelect
         , activeToggle
         , div [ class "mt-5" ]
-            [ ActionButton.submit appState (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
+            [ ActionButton.submit (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser) ]
         ]
 
 
@@ -230,7 +231,7 @@ readOnlyView appState user =
 
         readOnlyInfo =
             div [ class "alert alert-info" ]
-                [ faSet "_global.info" appState
+                [ faInfo
                 , text (gettext "Your profile is managed elsewhere." appState.locale)
                 , a
                     [ class "btn btn-primary ms-2"

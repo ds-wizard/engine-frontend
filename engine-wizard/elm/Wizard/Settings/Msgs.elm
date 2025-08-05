@@ -11,6 +11,7 @@ type Msg
     = AuthenticationMsg Wizard.Settings.Authentication.Msgs.Msg
     | OrganizationMsg Wizard.Settings.Generic.Msgs.Msg
     | PrivacyAndSupportMsg Wizard.Settings.Generic.Msgs.Msg
+    | FeaturesMsg Wizard.Settings.Generic.Msgs.Msg
     | DashboardMsg Wizard.Settings.Generic.Msgs.Msg
     | LookAndFeelMsg Wizard.Settings.Generic.Msgs.Msg
     | RegistryMsg Wizard.Settings.Registry.Msgs.Msg

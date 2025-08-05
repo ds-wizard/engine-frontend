@@ -7,8 +7,8 @@ import Html exposing (Html, a, div, li, p, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Data.PackageDetail as PackageDetail
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faKnowledgeModel, faQuestionnaire)
+import Wizard.Api.Models.PackageDetail as PackageDetail
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -44,7 +44,7 @@ viewPageContent : AppState -> Model -> List a -> Html Msg
 viewPageContent appState model _ =
     div [ detailClass "Projects__Create" ]
         [ Page.headerWithGuideLink appState (gettext "Create Project" appState.locale) GuideLinks.projectsCreate
-        , FormResult.errorOnlyView appState model.savingQuestionnaire
+        , FormResult.errorOnlyView model.savingQuestionnaire
         , formView appState model
         ]
 
@@ -130,7 +130,7 @@ defaultContentTabs appState model =
                 , onClick (SetActiveTab ProjectTemplateTab)
                 , dataCy "project_create_nav_template"
                 ]
-                [ faSet "_global.questionnaire" appState
+                [ faQuestionnaire
                 , text (gettext "From project template" appState.locale)
                 ]
             ]
@@ -141,7 +141,7 @@ defaultContentTabs appState model =
                 , onClick (SetActiveTab KnowledgeModelTab)
                 , dataCy "project_create_nav_custom"
                 ]
-                [ faSet "_global.knowledgeModel" appState
+                [ faKnowledgeModel
                 , text (gettext "From knowledge model" appState.locale)
                 ]
             ]

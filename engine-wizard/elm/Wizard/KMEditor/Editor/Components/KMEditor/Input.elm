@@ -35,21 +35,22 @@ import Html exposing (Html, a, div, input, label, li, optgroup, option, span, te
 import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Events.Extra exposing (onChange)
+import Html.Extra as Html
 import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Shared.Common.ByteUnits as ByteUnits
-import Shared.Data.KnowledgeModel.Annotation as Annotation exposing (Annotation)
-import Shared.Data.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
-import Shared.Data.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
-import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faAdd, faDelete)
 import Shared.Markdown as Markdown
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
+import Wizard.Api.Models.KnowledgeModel.Integration.RequestHeader as RequestHeader exposing (RequestHeader)
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.MetricMeasure as MetricMeasure exposing (MetricMeasure)
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DatePicker as DatePicker
 import Wizard.Common.GuideLinks as GuideLinks
@@ -125,10 +126,10 @@ fileSize config =
                             ]
 
                     else
-                        emptyNode
+                        Html.nothing
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "form-group" ]
         [ label [ for config.name ] [ text config.label ]
@@ -227,7 +228,7 @@ select config =
             , onInput config.onChange
             ]
             (List.map viewOption config.options)
-        , Maybe.withDefault emptyNode config.extra
+        , Maybe.withDefault Html.nothing config.extra
         ]
 
 
@@ -357,8 +358,8 @@ type alias ReorderableInputConfig msg =
     }
 
 
-reorderable : AppState -> ReorderableInputConfig msg -> Html msg
-reorderable appState config =
+reorderable : ReorderableInputConfig msg -> Html msg
+reorderable config =
     let
         fieldIdentifier =
             createFieldId config.entityUuid config.name
@@ -380,7 +381,7 @@ reorderable appState config =
                         ( False, itemName )
             in
             div [ classList [ ( "untitled", untitled ) ] ]
-                [ ignoreDrag (linkTo appState (config.getRoute item))
+                [ ignoreDrag (linkTo (config.getRoute item))
                     []
                     [ text visibleName ]
                 ]
@@ -394,7 +395,7 @@ reorderable appState config =
                 , class "link-add-child with-icon"
                 , dataCy ("km-editor_input-children_" ++ config.addChildDataCy ++ "_add-button")
                 ]
-                [ faSet "_global.add" appState
+                [ faAdd
                 , text config.addChildLabel
                 ]
     in
@@ -486,7 +487,7 @@ annotations appState config =
                         , onClick (config.onEdit Nothing <| removeAt i)
                         , dataCy "annotation_remove-button"
                         ]
-                        [ faSet "_global.delete" appState ]
+                        [ faDelete ]
                     ]
                 ]
             )
@@ -496,7 +497,7 @@ annotations appState config =
                 [ class "with-icon"
                 , onClick (config.onEdit (Just ".annotations-editor-item:last-child .annotations-editor-item-inputs input") (config.annotations ++ [ Annotation.new ]))
                 ]
-                [ faSet "_global.add" appState
+                [ faAdd
                 , text (gettext "Add annotation" appState.locale)
                 ]
     in
@@ -726,10 +727,10 @@ questionValidations appState config =
                     stringInput i QuestionValidation.Regex data
 
                 QuestionValidation.Orcid ->
-                    emptyNode
+                    Html.nothing
 
                 QuestionValidation.Doi ->
-                    emptyNode
+                    Html.nothing
 
                 QuestionValidation.MinNumber data ->
                     floatInput i QuestionValidation.MinNumber data
@@ -766,7 +767,7 @@ questionValidations appState config =
                             :: onClick (removeValidationMsg i)
                             :: tooltipLeft (gettext "Remove validation" appState.locale)
                         )
-                        [ faSet "_global.delete" appState ]
+                        [ faDelete ]
                     , div []
                         [ label [] [ text (gettext "Validation Type" appState.locale) ]
                         , Html.select
@@ -795,14 +796,14 @@ questionValidations appState config =
                         , class "link-add-child with-icon"
                         , dataCy "km-editor_question-validations_add-button"
                         ]
-                        [ faSet "_global.add" appState
+                        [ faAdd
                         , text (gettext "Add validation" appState.locale)
                         ]
                     ]
                 ]
 
         Nothing ->
-            emptyNode
+            Html.nothing
 
 
 type alias ValidationOption =
@@ -1105,7 +1106,7 @@ props appState config =
                     , onClick <| config.onChange Nothing <| removeAt i
                     , attribute "data-cy" "prop-remove"
                     ]
-                    [ faSet "_global.delete" appState ]
+                    [ faDelete ]
                 ]
             )
 
@@ -1115,7 +1116,7 @@ props appState config =
                 , dataCy "props-input_add-button"
                 , class "with-icon"
                 ]
-                [ faSet "_global.add" appState
+                [ faAdd
                 , text (gettext "Add" appState.locale)
                 ]
     in
@@ -1186,7 +1187,7 @@ headers appState config =
                     , onClick (config.onEdit Nothing <| removeAt i)
                     , attribute "data-cy" "prop-remove"
                     ]
-                    [ faSet "_global.delete" appState ]
+                    [ faDelete ]
                 ]
             )
 
@@ -1196,7 +1197,7 @@ headers appState config =
                 , onClick (config.onEdit (Just "[data-cy=integration-input_item]:last-child input:first-child") (config.headers ++ [ RequestHeader.new ]))
                 , dataCy "integration-input_add-button"
                 ]
-                [ faSet "_global.add" appState
+                [ faAdd
                 , text (gettext "Add header" appState.locale)
                 ]
     in

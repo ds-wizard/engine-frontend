@@ -85,19 +85,19 @@ import Maybe.Extra as Maybe
 import Shared.Auth.Permission as Perm
 import Shared.Auth.Session as Session
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Data.Branch as Branch exposing (Branch)
-import Shared.Data.Branch.BranchState as BranchState
-import Shared.Data.Document as Document exposing (Document)
-import Shared.Data.Document.DocumentState exposing (DocumentState(..))
-import Shared.Data.Package.PackagePhase as PackagePhase exposing (PackagePhase)
-import Shared.Data.Questionnaire as Questionnaire exposing (Questionnaire)
-import Shared.Data.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
-import Shared.Data.Questionnaire.QuestionnaireState as QuestionnaireState
-import Shared.Data.QuestionnaireDetail.Comment as Comment exposing (Comment)
-import Shared.Data.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
-import Shared.Data.UserInfo as UserInfo
 import Uuid
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.Branch as Branch exposing (Branch)
+import Wizard.Api.Models.Branch.BranchState as BranchState
+import Wizard.Api.Models.Document as Document exposing (Document)
+import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
+import Wizard.Api.Models.Questionnaire as Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
+import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState
+import Wizard.Api.Models.QuestionnaireDetail.Comment as Comment exposing (Comment)
+import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
+import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils exposing (QuestionnaireLike)
 

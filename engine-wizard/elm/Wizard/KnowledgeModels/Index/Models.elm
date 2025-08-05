@@ -1,8 +1,8 @@
 module Wizard.KnowledgeModels.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.Package exposing (Package)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Common.Components.Listing.Models as Listing
 
 

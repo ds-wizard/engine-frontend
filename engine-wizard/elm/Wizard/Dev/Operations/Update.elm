@@ -5,9 +5,9 @@ module Wizard.Dev.Operations.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict
-import Shared.Api.DevOperations as DevOperationsApi
 import Shared.Data.DevOperationSection as AdminOperationSection
-import Wizard.Common.Api exposing (applyResult)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.DevOperations as DevOperationsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dev.Operations.Models exposing (Model, fieldPath, getSection, operationPath)
 import Wizard.Dev.Operations.Msgs exposing (Msg(..))
@@ -16,21 +16,22 @@ import Wizard.Msgs
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    DevOperationsApi.getOperations appState GetAdminOperationsComplete
+    DevOperationsApi.getOperations appState GetDevOperationsComplete
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetAdminOperationsComplete result ->
+        GetDevOperationsComplete result ->
             let
                 ( newModel, cmd ) =
-                    applyResult appState
+                    RequestHelpers.applyResult
                         { setResult = \s m -> { m | adminOperationSections = s }
                         , defaultError = "Unable to get dev operations."
                         , model = model
                         , result = result
                         , logoutMsg = Wizard.Msgs.logoutMsg
+                        , locale = appState.locale
                         }
 
                 openedSection =
@@ -66,7 +67,7 @@ update msg wrapMsg appState model =
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                DevOperationsApi.executeOperation execution appState (ExecuteOperationComplete sectionName operationName)
+                                DevOperationsApi.executeOperation appState execution (ExecuteOperationComplete sectionName operationName)
 
                         operationResults =
                             Dict.insert (operationPath sectionName operationName) Loading model.operationResults
@@ -77,10 +78,11 @@ update msg wrapMsg appState model =
                     ( model, Cmd.none )
 
         ExecuteOperationComplete sectionName operationName result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = \r m -> { m | operationResults = Dict.insert (operationPath sectionName operationName) r m.operationResults }
                 , defaultError = "Execution failed."
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }

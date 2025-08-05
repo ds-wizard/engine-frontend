@@ -5,13 +5,13 @@ import Dict
 import Html exposing (Html, a, div, h2, h3, input, label, span, strong, text)
 import Html.Attributes exposing (class, classList, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.DevOperation exposing (DevOperation)
 import Shared.Data.DevOperation.DevOperationParameter exposing (AdminOperationParameter)
 import Shared.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType
 import Shared.Data.DevOperationSection exposing (DevOperationSection)
-import Shared.Html exposing (emptyNode)
 import Shared.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (settingsClass)
@@ -24,16 +24,16 @@ import Wizard.Dev.Operations.Msgs exposing (Msg(..))
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewContent appState model) model.adminOperationSections
+    Page.actionResultView appState (viewContent model) model.adminOperationSections
 
 
-viewContent : AppState -> Model -> List DevOperationSection -> Html Msg
-viewContent appState model adminOperationSections =
+viewContent : Model -> List DevOperationSection -> Html Msg
+viewContent model adminOperationSections =
     let
         section =
             adminOperationSections
                 |> List.find (.name >> Just >> (==) model.openedSection)
-                |> Maybe.unwrap emptyNode (viewSection appState model)
+                |> Maybe.unwrap Html.nothing (viewSection model)
     in
     div [ settingsClass "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation model adminOperationSections ]
@@ -64,14 +64,14 @@ navigationSectionLink model section =
         [ text section.name ]
 
 
-viewSection : AppState -> Model -> DevOperationSection -> Html Msg
-viewSection appState model section =
+viewSection : Model -> DevOperationSection -> Html Msg
+viewSection model section =
     let
         operations =
-            List.map (viewOperation appState model section.name) section.operations
+            List.map (viewOperation model section.name) section.operations
 
         description =
-            Maybe.unwrap emptyNode (Markdown.toHtml []) section.description
+            Maybe.unwrap Html.nothing (Markdown.toHtml []) section.description
     in
     div []
         [ h2 [] [ text section.name ]
@@ -80,11 +80,11 @@ viewSection appState model section =
         ]
 
 
-viewOperation : AppState -> Model -> String -> DevOperation -> Html Msg
-viewOperation appState model sectionName operation =
+viewOperation : Model -> String -> DevOperation -> Html Msg
+viewOperation model sectionName operation =
     let
         description =
-            Maybe.unwrap emptyNode (Markdown.toHtml []) operation.description
+            Maybe.unwrap Html.nothing (Markdown.toHtml []) operation.description
 
         parameters =
             List.map (viewParameter model sectionName operation.name) operation.parameters
@@ -95,13 +95,13 @@ viewOperation appState model sectionName operation =
         resultView =
             case actionResult of
                 Success result ->
-                    Flash.success appState result.output
+                    Flash.success result.output
 
                 Error error ->
-                    Flash.error appState error
+                    Flash.error error
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         buttonConfig =
             { label = "Execute"
@@ -112,7 +112,7 @@ viewOperation appState model sectionName operation =
 
         executeButton =
             div [ class "form-group mb-0" ]
-                [ ActionButton.button appState buttonConfig
+                [ ActionButton.button buttonConfig
                 ]
     in
     div [ class "mt-5" ]

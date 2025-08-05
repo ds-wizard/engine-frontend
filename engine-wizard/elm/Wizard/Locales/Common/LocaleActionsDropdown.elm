@@ -9,7 +9,7 @@ module Wizard.Locales.Common.LocaleActionsDropdown exposing
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faDelete, faDisable, faEnable, faExport, faLocaleDefault, faView)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
@@ -47,7 +47,7 @@ actions appState cfg locale =
         viewAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.view" appState
+                , icon = faView
                 , label = gettext "View detail" appState.locale
                 , msg = ListingActionLink (Routes.localesDetail locale.id)
                 , dataCy = "view"
@@ -59,7 +59,7 @@ actions appState cfg locale =
         exportAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.export" appState
+                , icon = faExport
                 , label = gettext "Export" appState.locale
                 , msg = ListingActionMsg (cfg.exportMsg locale)
                 , dataCy = "export"
@@ -71,7 +71,7 @@ actions appState cfg locale =
         setDefaultAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "locale.default" appState
+                , icon = faLocaleDefault
                 , label = gettext "Set default" appState.locale
                 , msg = ListingActionMsg (cfg.setDefaultMsg locale)
                 , dataCy = "set-default"
@@ -84,7 +84,7 @@ actions appState cfg locale =
             if locale.enabled then
                 ListingDropdown.dropdownAction
                     { extraClass = Nothing
-                    , icon = faSet "_global.disable" appState
+                    , icon = faDisable
                     , label = gettext "Disable" appState.locale
                     , msg = ListingActionMsg (cfg.setEnabledMsg False locale)
                     , dataCy = "disable"
@@ -93,7 +93,7 @@ actions appState cfg locale =
             else
                 ListingDropdown.dropdownAction
                     { extraClass = Nothing
-                    , icon = faSet "_global.enable" appState
+                    , icon = faEnable
                     , label = gettext "Enable" appState.locale
                     , msg = ListingActionMsg (cfg.setEnabledMsg True locale)
                     , dataCy = "enable"
@@ -105,7 +105,7 @@ actions appState cfg locale =
         deleteAction =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
-                , icon = faSet "_global.delete" appState
+                , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg = ListingActionMsg (cfg.deleteMsg locale)
                 , dataCy = "delete"
@@ -130,7 +130,7 @@ actions appState cfg locale =
 
 dropdown : AppState -> DropdownConfig msg -> ActionsConfig a msg -> LocaleLike a -> Html msg
 dropdown appState dropdownConfig actionsConfig locale =
-    ListingDropdown.dropdown appState
+    ListingDropdown.dropdown
         { dropdownState = dropdownConfig.dropdownState
         , toggleMsg = dropdownConfig.toggleMsg
         , items = actions appState actionsConfig locale

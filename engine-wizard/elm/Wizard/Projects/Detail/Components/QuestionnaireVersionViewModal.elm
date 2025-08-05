@@ -12,20 +12,21 @@ import ActionResult exposing (ActionResult(..))
 import Html exposing (Html, button, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.QuestionnaireContent exposing (QuestionnaireContent)
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Data.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Shared.Data.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faClose)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shortcut
 import Triple
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireContent exposing (QuestionnaireContent)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
@@ -63,8 +64,8 @@ init appState questionnaireUuid eventUuid =
       , eventUuid = Just eventUuid
       }
     , Cmd.batch
-        [ QuestionnairesApi.fetchPreview questionnaireUuid eventUuid appState FetchPreviewComplete
-        , QuestionnairesApi.getQuestionnaireQuestionnaire questionnaireUuid appState GetQuestionnaireComplete
+        [ QuestionnairesApi.fetchPreview appState questionnaireUuid eventUuid FetchPreviewComplete
+        , QuestionnairesApi.getQuestionnaireQuestionnaire appState questionnaireUuid GetQuestionnaireComplete
         ]
     )
 
@@ -178,7 +179,7 @@ view cfg appState model =
         versionBadge =
             model.eventUuid
                 |> Maybe.andThen (QuestionnaireVersion.getVersionByEventUuid cfg.versions)
-                |> Maybe.unwrap emptyNode QuestionnaireVersionTag.version
+                |> Maybe.unwrap Html.nothing QuestionnaireVersionTag.version
 
         shortcuts =
             if visible then
@@ -194,7 +195,7 @@ view cfg appState model =
                 [ div [ class "modal-header" ]
                     [ strong [ class "modal-title" ] [ text datetime, versionBadge ]
                     , button [ class "close", onClick Close ]
-                        [ faSet "_global.close" appState ]
+                        [ faClose ]
                     ]
                 , Page.actionResultView appState (viewContent appState) model.questionnaireModel
                 ]

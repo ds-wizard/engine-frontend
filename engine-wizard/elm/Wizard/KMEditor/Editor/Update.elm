@@ -11,19 +11,20 @@ import Dict
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.Branches as BranchesApi
-import Shared.Api.Prefabs as PrefabsApi
-import Shared.Data.Branch.BranchState as BranchState
-import Shared.Data.Event as Event
-import Shared.Data.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
-import Shared.Data.WebSockets.ClientBranchAction as ClientBranchAction
-import Shared.Data.WebSockets.ServerBranchAction as ServerBranchAction
+import Shared.Api.WebSocket as WebSocket
+import Shared.Data.ApiError as ApiError
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
-import Shared.Error.ApiError as ApiError
-import Shared.Utils exposing (dispatch, getUuid, getUuidString)
-import Shared.WebSocket as WebSocket
+import Shared.Utils exposing (getUuid, getUuidString)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.Branch.BranchState as BranchState
+import Wizard.Api.Models.Event as Event
+import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
+import Wizard.Api.Models.WebSockets.ClientBranchAction as ClientBranchAction
+import Wizard.Api.Models.WebSockets.ServerBranchAction as ServerBranchAction
+import Wizard.Api.Prefabs as PrefabsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
 import Wizard.KMEditor.Editor.Components.KMEditor as KMEditor
@@ -53,7 +54,7 @@ fetchData appState uuid model =
 
     else
         Cmd.batch
-            [ BranchesApi.getBranch uuid appState GetBranchComplete
+            [ BranchesApi.getBranch appState uuid GetBranchComplete
             , PrefabsApi.getIntegrationPrefabs appState GetIntegrationPrefabsComplete
             ]
 
@@ -70,6 +71,7 @@ fetchSubrouteData appState model =
             in
             Cmd.batch
                 [ Ports.scrollToTop "#editor-view"
+                , Ports.scrollTreeItemIntoView ("[data-km-editor-link=\"" ++ activeEditorUuid ++ "\"]")
                 , Ports.focus ("[data-editor-uuid=\"" ++ activeEditorUuid ++ "\"] input")
                 ]
 
@@ -120,7 +122,7 @@ onUnload nextRoute model =
         leaveCmd =
             Cmd.batch
                 [ WebSocket.close model.websocket
-                , dispatch ResetModel
+                , Task.dispatch ResetModel
                 ]
     in
     case nextRoute of
@@ -172,7 +174,7 @@ update wrapMsg msg appState model =
                 Err error ->
                     withSeed <|
                         ( { model | branchModel = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
-                        , getResultCmd Wizard.Msgs.logoutMsg result
+                        , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
         GetIntegrationPrefabsComplete result ->
@@ -362,7 +364,7 @@ update wrapMsg msg appState model =
                     in
                     Cmd.batch
                         [ wsCmd
-                        , dispatch (EventAddSavingUuid (SetContentBranchAction.getUuid event) entityUuid)
+                        , Task.dispatch (EventAddSavingUuid (SetContentBranchAction.getUuid event) entityUuid)
                         ]
 
                 ( debounce, cmd ) =

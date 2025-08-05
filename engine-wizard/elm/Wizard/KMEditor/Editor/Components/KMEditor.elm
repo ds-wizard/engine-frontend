@@ -16,6 +16,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h3, h5, i, img, label, li, small, span, strong, text, ul)
 import Html.Attributes exposing (attribute, class, classList, disabled, id, src)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Html.Keyed
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -23,68 +24,69 @@ import Reorderable
 import Set
 import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (faDelete, faKmEditorCopyUuid, faKmEditorMove, faKmIntegration, faQuestionnaireExpand, faQuestionnaireShrink, faWarning)
 import Shared.Copy as Copy
-import Shared.Data.Event exposing (Event(..))
-import Shared.Data.Event.AddAnswerEventData as AddAnswerEventData
-import Shared.Data.Event.AddChapterEventData as AddChapterEventData
-import Shared.Data.Event.AddChoiceEventData as AddChoiceEventData
-import Shared.Data.Event.AddExpertEventData as AddExpertEventData
-import Shared.Data.Event.AddIntegrationEventData as AddIntegrationEventData
-import Shared.Data.Event.AddMetricEventData as AddMetricEventData
-import Shared.Data.Event.AddPhaseEventData as AddPhaseEventData
-import Shared.Data.Event.AddQuestionEventData as AddQuestionEventData
-import Shared.Data.Event.AddReferenceEventData as AddReferenceEventData
-import Shared.Data.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
-import Shared.Data.Event.AddResourcePageEventData as AddResourcePageEventData
-import Shared.Data.Event.AddTagEventData as AddTagEventData
-import Shared.Data.Event.CommonEventData exposing (CommonEventData)
-import Shared.Data.Event.EditAnswerEventData as EditAnswerEventData
-import Shared.Data.Event.EditChapterEventData as EditChapterEventData
-import Shared.Data.Event.EditChoiceEventData as EditChoiceEventData
-import Shared.Data.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValidations, setValueType, setWidgetUrl)
-import Shared.Data.Event.EditExpertEventData as EditExpertEventData
-import Shared.Data.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
-import Shared.Data.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
-import Shared.Data.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData
-import Shared.Data.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
-import Shared.Data.Event.EditMetricEventData as EditMetricEventData
-import Shared.Data.Event.EditPhaseEventData as EditPhaseEventData
-import Shared.Data.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
-import Shared.Data.Event.EditQuestionFileEventData as EditQuestionFileEventData
-import Shared.Data.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
-import Shared.Data.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
-import Shared.Data.Event.EditQuestionListEventData as EditQuestionListEventData
-import Shared.Data.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
-import Shared.Data.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
-import Shared.Data.Event.EditQuestionValueEventData as EditQuestionValueEventData
-import Shared.Data.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
-import Shared.Data.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
-import Shared.Data.Event.EditReferenceURLEventData as EditReferenceURLEventData
-import Shared.Data.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
-import Shared.Data.Event.EditResourcePageEventData as EditResourcePageEventData
-import Shared.Data.Event.EditTagEventData as EditTagEventData
-import Shared.Data.Event.EventField as EventField
-import Shared.Data.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Choice exposing (Choice)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Integration as Integration exposing (Integration(..))
-import Shared.Data.KnowledgeModel.Metric exposing (Metric)
-import Shared.Data.KnowledgeModel.Phase exposing (Phase)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question(..))
-import Shared.Data.KnowledgeModel.Question.QuestionValueType as QuestionValueType
-import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference(..))
-import Shared.Data.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
-import Shared.Data.KnowledgeModel.ResourcePage exposing (ResourcePage)
-import Shared.Data.KnowledgeModel.Tag exposing (Tag)
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Markdown as Markdown
-import Shared.Utils exposing (compose2, dispatch, flip, httpMethodOptions, nilUuid)
+import Shared.Utils exposing (compose2, flip, httpMethodOptions, nilUuid)
 import SplitPane
 import String.Extra as String
 import String.Format as String
+import Task.Extra as Task
 import Uuid
+import Wizard.Api.Models.Event exposing (Event(..))
+import Wizard.Api.Models.Event.AddAnswerEventData as AddAnswerEventData
+import Wizard.Api.Models.Event.AddChapterEventData as AddChapterEventData
+import Wizard.Api.Models.Event.AddChoiceEventData as AddChoiceEventData
+import Wizard.Api.Models.Event.AddExpertEventData as AddExpertEventData
+import Wizard.Api.Models.Event.AddIntegrationEventData as AddIntegrationEventData
+import Wizard.Api.Models.Event.AddMetricEventData as AddMetricEventData
+import Wizard.Api.Models.Event.AddPhaseEventData as AddPhaseEventData
+import Wizard.Api.Models.Event.AddQuestionEventData as AddQuestionEventData
+import Wizard.Api.Models.Event.AddReferenceEventData as AddReferenceEventData
+import Wizard.Api.Models.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
+import Wizard.Api.Models.Event.AddResourcePageEventData as AddResourcePageEventData
+import Wizard.Api.Models.Event.AddTagEventData as AddTagEventData
+import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
+import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
+import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
+import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
+import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setProps, setQuestionUuids, setReferenceUuids, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseListField, setTagUuids, setText, setTitle, setUrl, setValidations, setValueType, setWidgetUrl)
+import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
+import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
+import Wizard.Api.Models.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
+import Wizard.Api.Models.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData
+import Wizard.Api.Models.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
+import Wizard.Api.Models.Event.EditMetricEventData as EditMetricEventData
+import Wizard.Api.Models.Event.EditPhaseEventData as EditPhaseEventData
+import Wizard.Api.Models.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
+import Wizard.Api.Models.Event.EditQuestionFileEventData as EditQuestionFileEventData
+import Wizard.Api.Models.Event.EditQuestionIntegrationEventData as EditQuestionIntegrationEventData
+import Wizard.Api.Models.Event.EditQuestionItemSelectData as EditQuestionItemSelectEventData
+import Wizard.Api.Models.Event.EditQuestionListEventData as EditQuestionListEventData
+import Wizard.Api.Models.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
+import Wizard.Api.Models.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
+import Wizard.Api.Models.Event.EditQuestionValueEventData as EditQuestionValueEventData
+import Wizard.Api.Models.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
+import Wizard.Api.Models.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
+import Wizard.Api.Models.Event.EditReferenceURLEventData as EditReferenceURLEventData
+import Wizard.Api.Models.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
+import Wizard.Api.Models.Event.EditResourcePageEventData as EditResourcePageEventData
+import Wizard.Api.Models.Event.EditTagEventData as EditTagEventData
+import Wizard.Api.Models.Event.EventField as EventField
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
+import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
+import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
+import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
+import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Common.Html exposing (guideLink, linkTo)
@@ -99,7 +101,6 @@ import Wizard.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.KMEditor.Editor.Components.KMEditor.Tree as Tree
 import Wizard.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
 import Wizard.Ports as Ports
-import Wizard.Routes as Routes
 
 
 
@@ -182,7 +183,7 @@ update setFullscreenMsg msg model editorBranch =
             ( editorBranch, { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }, Cmd.none )
 
         SetFullscreen fullscreen ->
-            ( editorBranch, model, dispatch (setFullscreenMsg fullscreen) )
+            ( editorBranch, model, Task.dispatch (setFullscreenMsg fullscreen) )
 
         SetTreeOpen entityUuid open ->
             ( EditorBranch.treeSetNodeOpen entityUuid open editorBranch, model, Cmd.none )
@@ -293,10 +294,10 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
     let
         ( expandIcon, expandMsg ) =
             if AppState.isFullscreen appState then
-                ( faSet "questionnaire.shrink" appState, wrapMsg <| SetFullscreen False )
+                ( faQuestionnaireShrink, wrapMsg <| SetFullscreen False )
 
             else
-                ( faSet "questionnaire.expand" appState, wrapMsg <| SetFullscreen True )
+                ( faQuestionnaireExpand, wrapMsg <| SetFullscreen True )
 
         treeViewProps =
             { expandAll = wrapMsg ExpandAll
@@ -339,7 +340,7 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         warningsPanel =
             if warningsCount > 0 && model.warningsPanelOpen then
@@ -347,7 +348,7 @@ view appState wrapMsg eventMsg model integrationPrefabs editorBranch =
                     viewWarningsPanel appState editorBranch
 
             else
-                emptyNode
+                Html.nothing
     in
     div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
@@ -371,11 +372,11 @@ viewWarningsPanel : AppState -> EditorBranch -> Html Msg
 viewWarningsPanel appState editorBranch =
     let
         viewWarning warning =
-            li [] [ linkTo appState (editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
+            li [] [ linkTo (EditorBranch.editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
 
         warnings =
             if List.isEmpty editorBranch.warnings then
-                Flash.info appState (gettext "There are no more warnings." appState.locale)
+                Flash.info (gettext "There are no more warnings." appState.locale)
 
             else
                 ul [] (List.map viewWarning editorBranch.warnings)
@@ -534,7 +535,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 |> eventMsg False Nothing kmUuid Nothing
 
         chaptersInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "chapters"
                 , label = gettext "Chapters" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.chapterUuids
@@ -542,7 +543,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setChapterUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getChapterName km
                 , untitledLabel = gettext "Untitled chapter" appState.locale
                 , addChildLabel = gettext "Add chapter" appState.locale
@@ -551,7 +552,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         metricsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "metrics"
                 , label = gettext "Metrics" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.metricUuids
@@ -559,7 +560,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setMetricUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getMetricName km
                 , untitledLabel = gettext "Untitled metric" appState.locale
                 , addChildLabel = gettext "Add metric" appState.locale
@@ -568,7 +569,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         phasesInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "phases"
                 , label = gettext "Phases" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.phaseUuids
@@ -576,7 +577,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setPhaseUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getPhaseName km
                 , untitledLabel = gettext "Untitled phase" appState.locale
                 , addChildLabel = gettext "Add phase" appState.locale
@@ -585,7 +586,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         tagsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "tags"
                 , label = gettext "Question Tags" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.tagUuids
@@ -593,7 +594,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setTagUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getTagName km
                 , untitledLabel = gettext "Untitled tag" appState.locale
                 , addChildLabel = gettext "Add tag" appState.locale
@@ -602,7 +603,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         integrationsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "integrations"
                 , label = gettext "Integrations" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.integrationUuids
@@ -610,7 +611,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setIntegrationUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getIntegrationName km
                 , untitledLabel = gettext "Untitled integration" appState.locale
                 , addChildLabel = gettext "Add integration" appState.locale
@@ -619,7 +620,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 }
 
         resourceCollectionsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "resourceCollections"
                 , label = gettext "Resource Collections" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch km.resourceCollectionUuids
@@ -627,7 +628,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setResourceCollectionUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getResourceCollectionName km
                 , untitledLabel = gettext "Untitled resource collection" appState.locale
                 , addChildLabel = gettext "Add resource collection" appState.locale
@@ -704,7 +705,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 }
 
         questionsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "questions"
                 , label = gettext "Questions" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch chapter.questionUuids
@@ -712,7 +713,7 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setQuestionUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled question" appState.locale
                 , addChildLabel = gettext "Add question" appState.locale
@@ -877,36 +878,36 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             case question of
                 OptionsQuestion _ _ ->
                     if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question) then
-                        emptyNode
+                        Html.nothing
 
                     else
                         FormExtra.blockAfter
-                            [ faSet "_global.warning" appState
+                            [ faWarning
                             , text (gettext "Changing a question type will remove all answers." appState.locale)
                             ]
 
                 ListQuestion _ _ ->
                     if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question) then
-                        emptyNode
+                        Html.nothing
 
                     else
                         FormExtra.blockAfter
-                            [ faSet "_global.warning" appState
+                            [ faWarning
                             , text (gettext "Changing a question type will remove all item questions." appState.locale)
                             ]
 
                 MultiChoiceQuestion _ _ ->
                     if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question) then
-                        emptyNode
+                        Html.nothing
 
                     else
                         FormExtra.blockAfter
-                            [ faSet "_global.warning" appState
+                            [ faWarning
                             , text (gettext "Changing a question type will remove all choices." appState.locale)
                             ]
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         titleInput =
             Input.string
@@ -946,7 +947,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 }
 
         referencesInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "references"
                 , label = gettext "References" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch <| Question.getReferenceUuids question
@@ -954,7 +955,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getReferenceName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled reference" appState.locale
                 , addChildLabel = gettext "Add reference" appState.locale
@@ -963,7 +964,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 }
 
         expertsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "experts"
                 , label = gettext "Experts" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch <| Question.getExpertUuids question
@@ -971,7 +972,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getExpertName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled expert" appState.locale
                 , addChildLabel = gettext "Add expert" appState.locale
@@ -1001,7 +1002,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing questionUuid Nothing
 
                         answersInput =
-                            Input.reorderable appState
+                            Input.reorderable
                                 { name = "answers"
                                 , label = gettext "Answers" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question
@@ -1009,7 +1010,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setAnswerUuids
-                                , getRoute = editorRoute editorBranch
+                                , getRoute = EditorBranch.editorRoute editorBranch
                                 , getName = KnowledgeModel.getAnswerName editorBranch.branch.knowledgeModel
                                 , untitledLabel = gettext "Untitled answer" appState.locale
                                 , addChildLabel = gettext "Add answer" appState.locale
@@ -1033,7 +1034,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing questionUuid Nothing
 
                         itemTemplateQuestionsInput =
-                            Input.reorderable appState
+                            Input.reorderable
                                 { name = "questions"
                                 , label = gettext "Questions" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question
@@ -1041,7 +1042,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setItemTemplateQuestionUuids
-                                , getRoute = editorRoute editorBranch
+                                , getRoute = EditorBranch.editorRoute editorBranch
                                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
                                 , untitledLabel = gettext "Untitled question" appState.locale
                                 , addChildLabel = gettext "Add question" appState.locale
@@ -1148,7 +1149,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                     ]
 
                             else
-                                emptyNode
+                                Html.nothing
 
                         integrationLink integrationUuid =
                             if Uuid.toString Uuid.nil == integrationUuid then
@@ -1157,7 +1158,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             else
                                 Just <|
                                     div [ class "mt-1" ]
-                                        [ linkTo appState (editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
+                                        [ linkTo (EditorBranch.editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
                                         ]
 
                         integrationUuidInput =
@@ -1188,7 +1189,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing questionUuid Nothing
 
                         choicesInput =
-                            Input.reorderable appState
+                            Input.reorderable
                                 { name = "choices"
                                 , label = gettext "Choices" appState.locale
                                 , items = EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question
@@ -1196,7 +1197,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setChoiceUuids
-                                , getRoute = editorRoute editorBranch
+                                , getRoute = EditorBranch.editorRoute editorBranch
                                 , getName = KnowledgeModel.getChoiceName editorBranch.branch.knowledgeModel
                                 , untitledLabel = gettext "Untitled choice" appState.locale
                                 , addChildLabel = gettext "Add choice" appState.locale
@@ -1238,7 +1239,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                             else
                                                 Just <|
                                                     div [ class "mt-1" ]
-                                                        [ linkTo appState (editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
+                                                        [ linkTo (EditorBranch.editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
                                                         ]
 
                                         Nothing ->
@@ -1281,7 +1282,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
-                emptyNode
+                Html.nothing
 
             else
                 FormGroup.plainGroup (ul [] questions) (gettext "Item select questions using this list question" appState.locale)
@@ -1298,7 +1299,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                         |> wrapQuestionsWithIntegration
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     editor ("question-" ++ questionUuid)
         ([ questionEditorTitle
@@ -1809,7 +1810,7 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 img [ src logo ] []
 
                             Nothing ->
-                                faSet "km.integration" appState
+                                faKmIntegration
 
                     viewIntegrationButton i =
                         li []
@@ -1845,10 +1846,10 @@ viewIntegrationEditor { appState, wrapMsg, eventMsg, integrationPrefabs, editorB
                                 ]
 
                         else
-                            emptyNode
+                            Html.nothing
 
                     Nothing ->
-                        emptyNode
+                        Html.nothing
     in
     editor ("integration-" ++ integrationUuid)
         ([ integrationEditorTitle
@@ -1921,7 +1922,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 }
 
         followUpsInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "questions"
                 , label = gettext "Follow-Up Questions" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch answer.followUpUuids
@@ -1929,7 +1930,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setFollowUpUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled question" appState.locale
                 , addChildLabel = gettext "Add question" appState.locale
@@ -1943,7 +1944,7 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
 
         metricsInput =
             if List.isEmpty metrics then
-                emptyNode
+                Html.nothing
 
             else
                 Input.metrics appState
@@ -2256,7 +2257,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
                 }
 
         resourcePagesInput =
-            Input.reorderable appState
+            Input.reorderable
                 { name = "resourcePages"
                 , label = gettext "Resource Pages" appState.locale
                 , items = EditorBranch.filterDeleted editorBranch resourceCollection.resourcePageUuids
@@ -2264,7 +2265,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setResourcePageUuids
-                , getRoute = editorRoute editorBranch
+                , getRoute = EditorBranch.editorRoute editorBranch
                 , getName = KnowledgeModel.getResourcePageName editorBranch.branch.knowledgeModel
                 , untitledLabel = gettext "Untitled resource page" appState.locale
                 , addChildLabel = gettext "Add resource page" appState.locale
@@ -2370,18 +2371,13 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
 viewEmptyEditor : AppState -> Html msg
 viewEmptyEditor appState =
     editor "empty"
-        [ Flash.error appState (gettext "The knowledge model entity you are trying to open does not exist." appState.locale)
+        [ Flash.error (gettext "The knowledge model entity you are trying to open does not exist." appState.locale)
         ]
 
 
 editor : String -> List (Html msg) -> Html msg
 editor editorId =
     div [ id editorId, class "editor-content col-xl-10 col-12" ]
-
-
-editorRoute : EditorBranch -> String -> Routes.Route
-editorRoute editorBranch entityUuidString =
-    Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid entityUuidString editorBranch)
 
 
 type alias EditorTitleConfig msg =
@@ -2406,12 +2402,12 @@ editorTitle appState config =
                      ]
                         ++ tooltip (gettext "Click to copy UUID" appState.locale)
                     )
-                    [ faSet "kmEditor.copyUuid" appState
+                    [ faKmEditorCopyUuid
                     , small [] [ text <| String.slice 0 8 config.uuid ]
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         moveButton =
             case config.mbMovingEntity of
@@ -2421,12 +2417,12 @@ editorTitle appState config =
                         , onClick <| config.wrapMsg <| OpenMoveModal movingEntity config.uuid
                         , dataCy "km-editor_move-button"
                         ]
-                        [ faSet "kmEditor.move" appState
+                        [ faKmEditorMove
                         , text (gettext "Move" appState.locale)
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         deleteButton =
             case config.mbDeleteModalState of
@@ -2436,12 +2432,12 @@ editorTitle appState config =
                         , dataCy "km-editor_delete-button"
                         , onClick <| config.wrapMsg <| SetDeleteModalState <| deleteModalState config.uuid
                         ]
-                        [ faSet "_global.delete" appState
+                        [ faDelete
                         , text (gettext "Delete" appState.locale)
                         ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         guideLink_ =
             case config.mbGuideLink of
@@ -2449,7 +2445,7 @@ editorTitle appState config =
                     guideLink appState getGuideLink
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "editor-title" ]
         [ h3 [] [ text config.title ]
@@ -2476,8 +2472,7 @@ viewQuestionLink appState editorBranch question =
                 text questionTitle
     in
     li []
-        [ linkTo appState
-            (editorRoute editorBranch (Question.getUuid question))
+        [ linkTo (EditorBranch.editorRoute editorBranch (Question.getUuid question))
             []
             [ questionTitleNode ]
         ]
@@ -2580,7 +2575,7 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
                     )
 
                 Closed ->
-                    ( False, ( [ emptyNode ], Nothing ) )
+                    ( False, ( [ Html.nothing ], Nothing ) )
 
         getContent contentText onDelete =
             ( [ div [ class "modal-header" ]

@@ -5,7 +5,7 @@ module Wizard.DocumentTemplates.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Shared.Data.DocumentTemplateDetail exposing (DocumentTemplateDetail)
+import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 
 
 type alias Model =

@@ -25,6 +25,7 @@ port module Wizard.Ports exposing
     , scrollIntoViewCenter
     , scrollIntoViewInstant
     , scrollToTop
+    , scrollTreeItemIntoView
     , setScrollTop
     , setUnloadMessage
     , storeSession
@@ -93,6 +94,9 @@ port scrollIntoViewInstant : String -> Cmd msg
 
 
 port scrollIntoViewCenter : String -> Cmd msg
+
+
+port scrollTreeItemIntoView : String -> Cmd msg
 
 
 port scrollToTop : String -> Cmd msg

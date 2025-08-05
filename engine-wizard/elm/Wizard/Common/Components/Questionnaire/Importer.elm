@@ -8,13 +8,13 @@ import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Question exposing (Question(..))
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..), getItemUuids)
-import Shared.Data.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Shared.Data.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Shared.Utils exposing (flip, getUuid)
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Question exposing (Question(..))
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..), getItemUuids)
+import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing (ImporterEvent(..))
 

@@ -1,7 +1,7 @@
 module Wizard.Settings.Usage.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.Usage exposing (Usage)
+import Wizard.Api.Models.Usage exposing (Usage)
 
 
 type alias Model =

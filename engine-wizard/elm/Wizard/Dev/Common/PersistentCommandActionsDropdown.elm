@@ -8,10 +8,9 @@ module Wizard.Dev.Common.PersistentCommandActionsDropdown exposing
 
 import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html)
-import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
-import Shared.Html exposing (fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faOpen, faPersistentCommandRetry)
 import Uuid exposing (Uuid)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Routes as Routes
 
@@ -36,13 +35,13 @@ type alias ActionsConfig a msg =
     }
 
 
-actions : AppState -> ActionsConfig a msg -> PersistentCommandLike a -> List (ListingDropdownItem msg)
-actions appState cfg command =
+actions : ActionsConfig a msg -> PersistentCommandLike a -> List (ListingDropdownItem msg)
+actions cfg command =
     let
         viewAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "_global.open" appState
+                , icon = faOpen
                 , label = "Open"
                 , msg = ListingActionLink (Routes.persistentCommandsDetail command.uuid)
                 , dataCy = "view"
@@ -54,7 +53,7 @@ actions appState cfg command =
         retryAction =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
-                , icon = faSet "persistentCommand.retry" appState
+                , icon = faPersistentCommandRetry
                 , label = "Rerun"
                 , msg = ListingActionMsg (cfg.retryMsg command)
                 , dataCy = "retry"
@@ -86,10 +85,10 @@ actions appState cfg command =
     ListingDropdown.itemsFromGroups groups
 
 
-dropdown : AppState -> DropdownConfig msg -> ActionsConfig a msg -> PersistentCommandLike a -> Html msg
-dropdown appState dropdownConfig actionsConfig command =
-    ListingDropdown.dropdown appState
+dropdown : DropdownConfig msg -> ActionsConfig a msg -> PersistentCommandLike a -> Html msg
+dropdown dropdownConfig actionsConfig command =
+    ListingDropdown.dropdown
         { dropdownState = dropdownConfig.dropdownState
         , toggleMsg = dropdownConfig.toggleMsg
-        , items = actions appState actionsConfig command
+        , items = actions actionsConfig command
         }

@@ -3,16 +3,17 @@ module Wizard.Locales.Detail.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Data.Locale as Locale
-import Shared.Data.LocaleDetail as LocaleDetail exposing (LocaleDetail)
-import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
-import Shared.Html exposing (emptyNode, faSet)
+import Shared.Components.FontAwesome exposing (faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.Locale as Locale
+import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
+import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature
@@ -49,7 +50,7 @@ header appState model locale =
                 Badge.info [] [ text (gettext "default" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         headerText =
             span []
@@ -82,7 +83,7 @@ readme appState locale =
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
-                    [ faSet "_global.warning" appState
+                    [ faWarning
                     , text (gettext "This is not the latest available version of this locale." appState.locale)
                     ]
 
@@ -106,17 +107,16 @@ newVersionInRegistryWarning appState locale =
                             localeId =
                                 locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString remoteLatestVersion
                         in
-                        [ linkTo appState
-                            (Routes.localesImport (Just localeId))
+                        [ linkTo (Routes.localesImport (Just localeId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                            [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
+                            [ faKmImportFromRegistry, text (gettext "Import" appState.locale) ]
                         ]
 
                     else
                         []
             in
             div [ class "alert alert-warning" ]
-                (faSet "_global.warning" appState
+                (faWarning
                     :: String.formatHtml
                         (gettext "There is a newer version (%s) available." appState.locale)
                         [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
@@ -124,7 +124,7 @@ newVersionInRegistryWarning appState locale =
                 )
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 sidePanel : AppState -> LocaleDetail -> Html msg
@@ -176,8 +176,7 @@ sidePanelOtherVersions appState locale =
     let
         versionLink version =
             li []
-                [ linkTo appState
-                    (Routes.localesDetail <| locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.localesDetail <| locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -217,7 +216,7 @@ sidePanelRegistryLink appState locale =
             , ul [ class "fa-ul" ]
                 [ li []
                     [ a [ href registryLink, target "_blank" ]
-                        [ span [ class "fa-li" ] [ faSet "kmDetail.registryLink" appState ]
+                        [ span [ class "fa-li" ] [ faKmDetailRegistryLink ]
                         , span [ class "fa-li-content" ] [ text (gettext "View in registry" appState.locale) ]
                         ]
                     ]

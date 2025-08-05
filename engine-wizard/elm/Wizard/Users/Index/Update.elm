@@ -2,12 +2,12 @@ module Wizard.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Users as UsersApi
-import Shared.Data.User exposing (User)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Models.User exposing (User)
+import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -44,7 +44,7 @@ handleDeleteUser wrapMsg appState model =
         Just user ->
             ( { model | deletingUser = Loading }
             , Cmd.map wrapMsg <|
-                UsersApi.deleteUser (Uuid.toString user.uuid) appState DeleteUserCompleted
+                UsersApi.deleteUser appState (Uuid.toString user.uuid) DeleteUserCompleted
             )
 
         _ ->
@@ -56,12 +56,12 @@ deleteUserCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
             ( { model | userToBeDeleted = Nothing }
-            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+            , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
             ( { model | deletingUser = ApiError.toActionResult appState (gettext "User could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -78,7 +78,7 @@ handleListingMsg wrapMsg appState listingMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig User
 listingUpdateConfig wrapMsg appState =
-    { getRequest = UsersApi.getUsers
+    { getRequest = UsersApi.getUsers appState
     , getError = gettext "Unable to get users." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.usersIndexWithFilters

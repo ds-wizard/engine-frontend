@@ -17,14 +17,14 @@ import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Json.Decode as D
 import Maybe.Extra as Maybe
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
-import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
-import Shared.Utils exposing (dispatch)
+import Shared.Components.FontAwesome exposing (faImportFile)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Task
+import Task.Extra as Task
 import Uuid
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.ContentType as ContentType
 import Wizard.Common.Html.Attribute exposing (dataCy)
@@ -169,7 +169,7 @@ handleSubmitComplete dispatchMsg appState model fileName result =
                     List.all ActionResult.isSuccess (Dict.values submitting)
             in
             ( { model | open = not allSubmitted, submitting = submitting }
-            , dispatch (dispatchMsg documentTemplateFile)
+            , Task.dispatch (dispatchMsg documentTemplateFile)
             )
 
         Err error ->
@@ -212,10 +212,10 @@ uploadFilesAndAssets cfg appState model files =
 
 uploadAsset : UpdateConfig msg -> AppState -> File -> Cmd msg
 uploadAsset cfg appState file =
-    DocumentTemplateDraftsApi.uploadAsset cfg.documentTemplateId
+    DocumentTemplateDraftsApi.uploadAsset appState
+        cfg.documentTemplateId
         (getFileName cfg.path file)
         file
-        appState
         (cfg.wrapMsg << SubmitAssetComplete (File.name file))
 
 
@@ -227,10 +227,10 @@ uploadFile cfg appState file content =
             , fileName = getFileName cfg.path file
             }
     in
-    DocumentTemplateDraftsApi.postFile cfg.documentTemplateId
+    DocumentTemplateDraftsApi.postFile appState
+        cfg.documentTemplateId
         documentTemplateFile
         content
-        appState
         (cfg.wrapMsg << SubmitFileComplete (File.name file))
 
 
@@ -253,7 +253,7 @@ view appState model =
             Maybe.isNothing model.files
 
         submitButton =
-            ActionButton.buttonWithAttrs appState
+            ActionButton.buttonWithAttrs
                 { label = gettext "Upload" appState.locale
                 , result = actionResult
                 , msg = Upload
@@ -268,7 +268,7 @@ view appState model =
         fileContent =
             case model.files of
                 Just files ->
-                    filesView appState files
+                    filesView files
 
                 Nothing ->
                     dropzone appState model
@@ -277,7 +277,7 @@ view appState model =
             [ div [ class "modal-header" ]
                 [ h5 [ class "modal-title" ] [ text (gettext "Upload files" appState.locale) ] ]
             , div [ class "modal-body logo-upload" ]
-                [ FormResult.errorOnlyView appState actionResult
+                [ FormResult.errorOnlyView actionResult
                 , fileContent
                 ]
             , div [ class "modal-footer" ]
@@ -324,12 +324,12 @@ dropDecoder =
     D.at [ "dataTransfer", "files" ] (D.map GotFiles (D.list File.decoder))
 
 
-filesView : AppState -> List File -> Html Msg
-filesView appState files =
+filesView : List File -> Html Msg
+filesView files =
     let
         fileView file =
             div [ class "rounded-3 bg-light mb-1 px-3 py-2 text-truncate" ]
-                [ span [ class "me-2" ] [ faSet "import.file" appState ]
+                [ span [ class "me-2" ] [ faImportFile ]
                 , text (File.name file)
                 ]
     in

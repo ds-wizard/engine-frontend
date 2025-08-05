@@ -20,7 +20,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     form [ onSubmit (FormMsg Form.Submit), detailClass "Tenants__Create" ]
         [ Page.header "Create Tenant" []
-        , FormResult.view appState model.savingTenant
+        , FormResult.view model.savingTenant
         , Html.map FormMsg <| formView appState model.form
         , FormActions.viewSubmit appState
             Cancel

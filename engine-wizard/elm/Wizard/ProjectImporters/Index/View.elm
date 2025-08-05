@@ -4,8 +4,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import Shared.Components.Badge as Badge
-import Shared.Data.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faDisable, faEnable)
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
@@ -24,7 +24,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     div [ listClass "ProjectImporters__Index" ]
         [ Page.headerWithGuideLink appState (gettext "Project Importers" appState.locale) GuideLinks.projectImporters
-        , FormResult.view appState model.togglingEnabled
+        , FormResult.view model.togglingEnabled
         , Listing.view appState (listingConfig appState) model.questionnaireImporters
         ]
 
@@ -79,12 +79,12 @@ listingActions appState questionnaireImporter =
     let
         ( actionIcon, actionLabel ) =
             if questionnaireImporter.enabled then
-                ( faSet "_global.disable" appState
+                ( faDisable
                 , gettext "Disable" appState.locale
                 )
 
             else
-                ( faSet "_global.enable" appState
+                ( faEnable
                 , gettext "Enable" appState.locale
                 )
 

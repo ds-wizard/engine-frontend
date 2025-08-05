@@ -1,8 +1,8 @@
 module Wizard.Settings.Authentication.Msgs exposing (Msg(..))
 
-import Shared.Data.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Prefab exposing (Prefab)
-import Shared.Error.ApiError exposing (ApiError)
+import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Settings.Generic.Msgs as GenericMsgs
 
 

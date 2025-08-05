@@ -7,4 +7,4 @@ scripts
 src
 !src/scss
 tests
-vendor
+shared/vendor

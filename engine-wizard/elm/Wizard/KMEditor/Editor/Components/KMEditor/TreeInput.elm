@@ -9,18 +9,19 @@ module Wizard.KMEditor.Editor.Components.KMEditor.TreeInput exposing
     )
 
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, i, li, span, text, ul)
+import Html exposing (Html, a, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Set exposing (Set)
-import Shared.Data.KnowledgeModel as KnowledgeModel
-import Shared.Data.KnowledgeModel.Answer exposing (Answer)
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Expert exposing (Expert)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
-import Shared.Data.KnowledgeModel.Reference as Reference exposing (Reference)
-import Shared.Html exposing (emptyNode, faKeyClass, faSet)
+import Shared.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmEditorCollapseAll, faKmEditorExpandAll, faKmEditorTreeClosed, faKmEditorTreeOpened, faKmExpert, faKmKnowledgeModel, faKmQuestion, faKmReference)
 import Uuid
+import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
+import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
@@ -97,14 +98,14 @@ view appState props model =
     div []
         [ div [ class "diff-tree-input-actions" ]
             [ a [ onClick ExpandAll ]
-                [ faSet "kmEditor.expandAll" appState
+                [ faKmEditorExpandAll
                 , text (gettext "Expand all" appState.locale)
                 ]
             , a
                 [ onClick CollapseAll
                 , dataCy "km-editor_move-modal_collapse-all"
                 ]
-                [ faSet "kmEditor.collapseAll" appState
+                [ faKmEditorCollapseAll
                 , text (gettext "Collapse all" appState.locale)
                 ]
             ]
@@ -129,7 +130,7 @@ treeNodeKM appState props model =
 
         config =
             { uuid = uuid
-            , icon = faSet "km.knowledgeModel" appState
+            , icon = faKmKnowledgeModel
             , label = props.editorBranch.branch.name
             , children = chapters
             , untitledLabel = ""
@@ -139,7 +140,7 @@ treeNodeKM appState props model =
             , current = False
             }
     in
-    treeNode appState config
+    treeNode config
 
 
 treeNodeChapter : AppState -> ViewProps -> Model -> Chapter -> Html Msg
@@ -158,7 +159,7 @@ treeNodeChapter appState props model chapter =
 
         config =
             { uuid = chapter.uuid
-            , icon = faSet "km.chapter" appState
+            , icon = faKmChapter
             , label = chapter.title
             , children = questions
             , untitledLabel = gettext "Untitled chapter" appState.locale
@@ -168,7 +169,7 @@ treeNodeChapter appState props model chapter =
             , current = chapter.uuid == props.movingUuid
             }
     in
-    treeNode appState config
+    treeNode config
 
 
 treeNodeQuestion : AppState -> ViewProps -> Model -> Bool -> Question -> Html Msg
@@ -216,7 +217,7 @@ treeNodeQuestion appState props model isChild question =
 
         config =
             { uuid = uuid
-            , icon = faSet "km.question" appState
+            , icon = faKmQuestion
             , label = Question.getTitle question
             , children = answers ++ itemTemplateQuestions ++ experts ++ references
             , untitledLabel = gettext "Untitled question" appState.locale
@@ -226,7 +227,7 @@ treeNodeQuestion appState props model isChild question =
             , current = isSelf
             }
     in
-    treeNode appState config
+    treeNode config
 
 
 treeNodeAnswer : AppState -> ViewProps -> Model -> Bool -> Answer -> Html Msg
@@ -248,7 +249,7 @@ treeNodeAnswer appState props model isChild answer =
 
         config =
             { uuid = answer.uuid
-            , icon = faSet "km.answer" appState
+            , icon = faKmAnswer
             , label = answer.label
             , children = followupQuestions
             , untitledLabel = gettext "Untitled answer" appState.locale
@@ -258,7 +259,7 @@ treeNodeAnswer appState props model isChild answer =
             , current = isSelf
             }
     in
-    treeNode appState config
+    treeNode config
 
 
 treeNodeExpert : AppState -> ViewProps -> Expert -> Html Msg
@@ -269,7 +270,7 @@ treeNodeExpert appState props expert =
 
         config =
             { uuid = expert.uuid
-            , icon = faSet "km.expert" appState
+            , icon = faKmExpert
             , label = expert.name
             , children = []
             , untitledLabel = gettext "Untitled expert" appState.locale
@@ -279,7 +280,7 @@ treeNodeExpert appState props expert =
             , current = isSelf
             }
     in
-    treeNode appState config
+    treeNode config
 
 
 treeNodeReference : AppState -> ViewProps -> Reference -> Html Msg
@@ -290,7 +291,7 @@ treeNodeReference appState props reference =
 
         config =
             { uuid = Reference.getUuid reference
-            , icon = faSet "km.reference" appState
+            , icon = faKmReference
             , label = Reference.getVisibleName (KnowledgeModel.getAllResourcePages props.editorBranch.branch.knowledgeModel) reference
             , children = []
             , untitledLabel = gettext "Untitled reference" appState.locale
@@ -300,7 +301,7 @@ treeNodeReference appState props reference =
             , current = isSelf
             }
     in
-    treeNode appState config
+    treeNode config
 
 
 type alias TreeNodeConfig msg =
@@ -316,22 +317,22 @@ type alias TreeNodeConfig msg =
     }
 
 
-treeNode : AppState -> TreeNodeConfig Msg -> Html Msg
-treeNode appState config =
+treeNode : TreeNodeConfig Msg -> Html Msg
+treeNode config =
     let
         caret =
             if List.isEmpty config.children then
-                emptyNode
+                Html.nothing
 
             else
-                treeNodeCaret appState (ToggleTreeOpen config.uuid) config.open
+                treeNodeCaret (ToggleTreeOpen config.uuid) config.open
 
         children =
             if config.open then
                 ul [] config.children
 
             else
-                emptyNode
+                Html.nothing
 
         link =
             if config.allowed then
@@ -373,14 +374,9 @@ treeNode appState config =
         ]
 
 
-treeNodeCaret : AppState -> Msg -> Bool -> Html Msg
-treeNodeCaret appState msg isOpen =
+treeNodeCaret : Msg -> Bool -> Html Msg
+treeNodeCaret msg isOpen =
     a [ class "caret", onClick msg, dataCy "km-editor_move-modal_item_caret" ]
-        [ i
-            [ classList
-                [ ( faKeyClass "kmEditor.treeClosed" appState, not isOpen )
-                , ( faKeyClass "kmEditor.treeOpened" appState, isOpen )
-                ]
-            ]
-            []
+        [ Html.viewIf (not isOpen) faKmEditorTreeClosed
+        , Html.viewIf isOpen faKmEditorTreeOpened
         ]

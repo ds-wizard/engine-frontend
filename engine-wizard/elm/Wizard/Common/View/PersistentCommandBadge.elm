@@ -2,7 +2,7 @@ module Wizard.Common.View.PersistentCommandBadge exposing (view)
 
 import Html exposing (Html, text)
 import Shared.Components.Badge as Badge
-import Shared.Data.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
+import Wizard.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 
 
 view : { a | state : PersistentCommandState } -> Html msg

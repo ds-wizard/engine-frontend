@@ -1,7 +1,7 @@
 module Wizard.Settings.LookAndFeel.Update exposing (update)
 
-import Shared.Data.EditableConfig as EditableConfig
-import Shared.Data.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
+import Wizard.Api.Models.EditableConfig as EditableConfig
+import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Generic.Msgs exposing (Msg)

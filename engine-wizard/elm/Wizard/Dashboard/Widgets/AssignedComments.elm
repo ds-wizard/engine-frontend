@@ -4,10 +4,10 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h2, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Shared.Html exposing (emptyNode)
+import Html.Extra as Html
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.TimeDistance exposing (locale)
@@ -20,17 +20,17 @@ view : AppState -> ActionResult (List QuestionnaireCommentThreadAssigned) -> Htm
 view appState commentThreads =
     case commentThreads of
         Unset ->
-            emptyNode
+            Html.nothing
 
         Loading ->
-            emptyNode
+            Html.nothing
 
         Error error ->
-            WidgetHelpers.widget <| [ WidgetHelpers.widgetError appState error ]
+            WidgetHelpers.widget <| [ WidgetHelpers.widgetError error ]
 
         Success commentThreadList ->
             if List.isEmpty commentThreadList then
-                emptyNode
+                Html.nothing
 
             else
                 WidgetHelpers.widget <| viewCommentThreads appState commentThreadList
@@ -42,8 +42,7 @@ viewCommentThreads appState commentThread =
         [ h2 [ class "fs-4 fw-bold mb-4" ] [ text (gettext "Unresolved Assigned Comments" appState.locale) ]
         , div [ class "Dashboard__ItemList flex-grow-1" ] (List.map (viewCommentThread appState) commentThread)
         , div [ class "mt-4" ]
-            [ linkTo appState
-                Routes.commentsIndex
+            [ linkTo Routes.commentsIndex
                 []
                 [ text (gettext "View all" appState.locale) ]
             ]
@@ -57,8 +56,7 @@ viewCommentThread appState commentThread =
         updatedText =
             inWordsWithConfig { withAffix = True } (locale appState) commentThread.updatedAt appState.currentTime
     in
-    linkTo appState
-        (Routes.projectsDetailQuestionnaire commentThread.questionnaireUuid (Just commentThread.path) (Just commentThread.commentThreadUuid))
+    linkTo (Routes.projectsDetailQuestionnaire commentThread.questionnaireUuid (Just commentThread.path) (Just commentThread.commentThreadUuid))
         [ class "p-2 py-3 d-flex rounded-3" ]
         [ ItemIcon.view { text = commentThread.questionnaireName, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]

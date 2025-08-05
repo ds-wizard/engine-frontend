@@ -123,11 +123,11 @@ module Wizard.Routes exposing
 import Shared.Auth.Role as Role
 import Shared.Auth.Session exposing (Session)
 import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Data.BootstrapConfig exposing (BootstrapConfig)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Dev.Routes
 import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute
 import Wizard.DocumentTemplateEditors.Routes

@@ -3,9 +3,9 @@ module Wizard.Public.ForgottenPassword.Update exposing (update)
 import ActionResult exposing (ActionResult(..))
 import Form
 import Gettext exposing (gettext)
-import Shared.Api.ActionKeys as ActionKeysApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
+import Wizard.Api.ActionKeys as ActionKeysApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Public.Common.ForgottenPasswordForm as ForgottenPasswordForm
@@ -33,7 +33,7 @@ handleForm formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        ActionKeysApi.postActionKey body appState PostForgottenPasswordCompleted
+                        ActionKeysApi.postActionKey appState body PostForgottenPasswordCompleted
             in
             ( { model | submitting = Loading }, cmd )
 
@@ -54,7 +54,7 @@ handlePostPasswordActionKeyCompleted appState result model =
         Err error ->
             let
                 form =
-                    setFormErrors appState error model.form
+                    Form.setFormErrors appState error model.form
 
                 errorMessage =
                     ApiError.toActionResult appState (gettext "Forgotten password recovery failed." appState.locale) error

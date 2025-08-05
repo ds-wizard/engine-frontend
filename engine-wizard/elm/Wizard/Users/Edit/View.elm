@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Extra as Html
-import Shared.Data.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Common.Html exposing (linkTo)
@@ -71,8 +71,7 @@ navigation : AppState -> UserEditRoute -> Model -> Html Msg
 navigation appState subroute model =
     div [ class "nav nav-pills flex-column" ]
         [ strong [] [ text (gettext "User Settings" appState.locale) ]
-        , linkTo appState
-            (Routes.usersEdit model.uuidOrCurrent)
+        , linkTo (Routes.usersEdit model.uuidOrCurrent)
             [ class "nav-link"
             , classList [ ( "active", subroute == UserEditRoutes.Profile ) ]
             , dataCy "user_nav_profile"
@@ -80,8 +79,7 @@ navigation appState subroute model =
             [ text (gettext "Profile" appState.locale)
             ]
         , Html.viewIf (not (Admin.isEnabled appState.config.admin))
-            (linkTo appState
-                (Routes.usersEditPassword model.uuidOrCurrent)
+            (linkTo (Routes.usersEditPassword model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.Password ) ]
                 , dataCy "user_nav_password"
@@ -90,8 +88,7 @@ navigation appState subroute model =
                 ]
             )
         , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditLanguage appState model.uuidOrCurrent)
-            (linkTo appState
-                (Routes.usersEditLanguage model.uuidOrCurrent)
+            (linkTo (Routes.usersEditLanguage model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.Language ) ]
                 , dataCy "user_nav_language"
@@ -99,9 +96,8 @@ navigation appState subroute model =
                 [ text (gettext "Language" appState.locale)
                 ]
             )
-        , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditTours appState model.uuidOrCurrent)
-            (linkTo appState
-                (Routes.usersEditTours model.uuidOrCurrent)
+        , Html.viewIf (appState.config.features.toursEnabled && not (Admin.isEnabled appState.config.admin) && Feature.userEditTours appState model.uuidOrCurrent)
+            (linkTo (Routes.usersEditTours model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.Tours ) ]
                 , dataCy "user_nav_tours"
@@ -110,8 +106,7 @@ navigation appState subroute model =
                 ]
             )
         , Html.viewIf (Feature.userEditApiKeys appState model.uuidOrCurrent)
-            (linkTo appState
-                (Routes.usersEditApiKeys model.uuidOrCurrent)
+            (linkTo (Routes.usersEditApiKeys model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ApiKeys ) ]
                 , dataCy "user_nav_api-keys"
@@ -120,8 +115,7 @@ navigation appState subroute model =
                 ]
             )
         , Html.viewIf (Feature.userEditAppKeys appState model.uuidOrCurrent)
-            (linkTo appState
-                (Routes.usersEditAppKeys model.uuidOrCurrent)
+            (linkTo (Routes.usersEditAppKeys model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.AppKeys ) ]
                 , dataCy "user_nav_app-keys"
@@ -130,8 +124,7 @@ navigation appState subroute model =
                 ]
             )
         , Html.viewIf (Feature.userEditActiveSessions appState model.uuidOrCurrent)
-            (linkTo appState
-                (Routes.usersEditActiveSessions model.uuidOrCurrent)
+            (linkTo (Routes.usersEditActiveSessions model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ActiveSessions ) ]
                 , dataCy "user_nav_active-sessions"
@@ -140,8 +133,7 @@ navigation appState subroute model =
                 ]
             )
         , Html.viewIf (Feature.userEditSubmissionSettings appState model.uuidOrCurrent)
-            (linkTo appState
-                (Routes.usersEditSubmissionSettings model.uuidOrCurrent)
+            (linkTo (Routes.usersEditSubmissionSettings model.uuidOrCurrent)
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.SubmissionSettings ) ]
                 , dataCy "user_nav_submission-settings"

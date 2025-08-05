@@ -5,12 +5,12 @@ module Wizard.Tenants.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form
-import Shared.Api.Tenants as TenantsApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Form exposing (setFormErrors)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Form as Form
 import Shared.Setters exposing (setTenant)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.Tenants as TenantsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Routes as Routes
@@ -23,19 +23,20 @@ import Wizard.Tenants.Detail.Msgs exposing (Msg(..))
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    TenantsApi.getTenant uuid appState GetTenantComplete
+    TenantsApi.getTenant appState uuid GetTenantComplete
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetTenantComplete result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setTenant
                 , defaultError = "Unable to get tenant."
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         EditModalOpen ->
@@ -75,7 +76,7 @@ handleEditFormMsg formMsg wrapMsg appState model =
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                TenantsApi.putTenant model.uuid body appState PutTenantComplete
+                                TenantsApi.putTenant appState model.uuid body PutTenantComplete
                     in
                     ( { model | savingTenant = Loading }, cmd )
 
@@ -99,9 +100,9 @@ handlePutAppComplete appState model result =
         Err error ->
             ( { model
                 | savingTenant = ApiError.toActionResult appState "Tenant could not be saved." error
-                , editForm = Maybe.map (setFormErrors appState error) model.editForm
+                , editForm = Maybe.map (Form.setFormErrors appState error) model.editForm
               }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -117,7 +118,7 @@ handleEditLimitsFormMsg formMsg wrapMsg appState model =
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                TenantsApi.putTenantLimits model.uuid body appState PutTenantLimitsComplete
+                                TenantsApi.putTenantLimits appState model.uuid body PutTenantLimitsComplete
                     in
                     ( { model | savingTenant = Loading }, cmd )
 
@@ -141,7 +142,7 @@ handlePutAppLimitsComplete appState model result =
         Err error ->
             ( { model
                 | savingTenant = ApiError.toActionResult appState "Tenant limits could not be saved." error
-                , limitsForm = Maybe.map (setFormErrors appState error) model.limitsForm
+                , limitsForm = Maybe.map (Form.setFormErrors appState error) model.limitsForm
               }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

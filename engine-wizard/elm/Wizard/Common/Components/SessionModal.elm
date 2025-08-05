@@ -19,7 +19,7 @@ expiresSoonModal : AppState -> Html Wizard.Msgs.Msg
 expiresSoonModal appState =
     let
         logoutMsg =
-            Just (Routing.toUrl appState appState.route)
+            Just (Routing.toUrl appState.route)
                 |> Routes.publicLogin
                 |> Wizard.Auth.Msgs.LogoutTo
                 |> Wizard.Msgs.AuthMsg
@@ -52,7 +52,7 @@ expiredModal : AppState -> Html Wizard.Msgs.Msg
 expiredModal appState =
     let
         logoutMsg =
-            Just (Routing.toUrl appState appState.route)
+            Just (Routing.toUrl appState.route)
                 |> Routes.publicLogin
                 |> Wizard.Auth.Msgs.LogoutTo
                 |> Wizard.Msgs.AuthMsg

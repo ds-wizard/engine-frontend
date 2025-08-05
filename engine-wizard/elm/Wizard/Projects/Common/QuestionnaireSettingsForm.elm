@@ -12,10 +12,10 @@ import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
 import Uuid
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Common.AppState exposing (AppState)
 
 

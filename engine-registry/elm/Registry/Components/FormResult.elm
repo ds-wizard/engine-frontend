@@ -5,8 +5,8 @@ module Registry.Components.FormResult exposing
 
 import ActionResult exposing (ActionResult(..))
 import Html exposing (Html)
+import Html.Extra as Html
 import Registry.Components.Flash as Flash
-import Shared.Html exposing (emptyNode)
 
 
 view : ActionResult String -> Html msg
@@ -19,7 +19,7 @@ view result =
             Flash.error msg
 
         _ ->
-            emptyNode
+            Html.nothing
 
 
 errorOnlyView : ActionResult a -> Html msg
@@ -29,4 +29,4 @@ errorOnlyView result =
             Flash.error msg
 
         _ ->
-            emptyNode
+            Html.nothing

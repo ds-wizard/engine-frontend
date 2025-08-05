@@ -12,9 +12,9 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class)
-import Shared.Api.Tours as ToursApi
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Wizard.Common.Api exposing (getResultCmd)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.Tours as ToursApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.Html.Attribute exposing (dataTour, selectDataTour)
@@ -37,7 +37,7 @@ initialModel =
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    Driver.init (tour appState)
+    Driver.init appState.config (tour appState)
 
 
 tour : AppState -> TourConfig
@@ -89,7 +89,7 @@ update cfg appState msg model =
                             ApiError.toActionResult appState (gettext "Tours could not be reset." appState.locale) error
 
                 cmd =
-                    getResultCmd cfg.logoutMsg result
+                    RequestHelpers.getResultCmd cfg.logoutMsg result
             in
             ( { model | resettingTours = resettingResult }, cmd )
 
@@ -104,10 +104,10 @@ view appState model =
             ]
         , div [ class "row" ]
             [ div [ class "col-8" ]
-                [ FormResult.view appState model.resettingTours
+                [ FormResult.view model.resettingTours
                 , p [] [ text (gettext "This resets all page-specific onboarding tours, allowing the guided highlights and instructions to replay on next visit." appState.locale) ]
                 , div []
-                    [ ActionButton.buttonWithAttrs appState
+                    [ ActionButton.buttonWithAttrs
                         { label = gettext "Reset" appState.locale
                         , result = model.resettingTours
                         , msg = ResetTours

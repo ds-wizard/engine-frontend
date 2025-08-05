@@ -4,19 +4,20 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Shared.Components.Badge as Badge
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
-import Shared.Data.DocumentTemplate as DocumentTemplate
-import Shared.Data.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
-import Shared.Data.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
-import Shared.Data.OrganizationInfo exposing (OrganizationInfo)
-import Shared.Html exposing (emptyNode, fa, faSet)
+import Shared.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (listFilterJust)
 import String.Format as String
 import Version
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.DocumentTemplate as DocumentTemplate
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePackage as DocumentTemplatePackage
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
+import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
+import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.DetailPage as DetailPage
 import Wizard.Common.Feature as Feature
@@ -55,14 +56,14 @@ header appState model template =
                 Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         nonEditableBadge =
             if template.nonEditable then
                 Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
             else
-                emptyNode
+                Html.nothing
 
         dropdownActions =
             DocumentTemplateActionsDropdown.dropdown appState
@@ -88,17 +89,17 @@ readme appState template =
         nonEditableInfo =
             if template.nonEditable then
                 div [ class "alert alert-info" ]
-                    [ faSet "_global.info" appState
+                    [ faInfo
                     , text (gettext "This is a non-editable document template, i.e., it cannot be edited, or exported." appState.locale)
                     ]
 
             else
-                emptyNode
+                Html.nothing
 
         warning =
             if containsNewerVersions then
                 div [ class "alert alert-warning" ]
-                    [ faSet "_global.warning" appState
+                    [ faWarning
                     , text (gettext "This is not the latest available version of this document template." appState.locale)
                     ]
 
@@ -125,17 +126,16 @@ newVersionInRegistryWarning appState template =
                                 latestPackageId =
                                     template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
                             in
-                            [ linkTo appState
-                                (Routes.documentTemplatesImport (Just latestPackageId))
+                            [ linkTo (Routes.documentTemplatesImport (Just latestPackageId))
                                 [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                                [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
+                                [ faKmImportFromRegistry, text (gettext "Import" appState.locale) ]
                             ]
 
                         else
                             []
                 in
                 div [ class "alert alert-warning" ]
-                    (faSet "_global.warning" appState
+                    (faWarning
                         :: String.formatHtml
                             (gettext "There is a newer version (%s) available." appState.locale)
                             [ strong [] [ text (Version.toString remoteLatestVersion) ] ]
@@ -143,10 +143,10 @@ newVersionInRegistryWarning appState template =
                     )
 
             _ ->
-                emptyNode
+                Html.nothing
 
     else
-        emptyNode
+        Html.nothing
 
 
 unsupportedMetamodelVersionWarning : AppState -> DocumentTemplateDetail -> Html msg
@@ -164,10 +164,9 @@ unsupportedMetamodelVersionWarning appState template =
                                             latestPackageId =
                                                 template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString remoteLatestVersion
                                         in
-                                        [ linkTo appState
-                                            (Routes.documentTemplatesImport (Just latestPackageId))
+                                        [ linkTo (Routes.documentTemplatesImport (Just latestPackageId))
                                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
-                                            [ faSet "kmImport.fromRegistry" appState, text (gettext "Import" appState.locale) ]
+                                            [ faKmImportFromRegistry, text (gettext "Import" appState.locale) ]
                                         ]
 
                                     else
@@ -195,14 +194,14 @@ unsupportedMetamodelVersionWarning appState template =
                         []
         in
         div [ class "alert alert-danger" ]
-            ([ faSet "_global.warning" appState
+            ([ faWarning
              , text (gettext "This document template is not supported in the current version." appState.locale)
              ]
                 ++ link
             )
 
     else
-        emptyNode
+        Html.nothing
 
 
 sidePanel : AppState -> Model -> DocumentTemplateDetail -> Html Msg
@@ -260,8 +259,7 @@ sidePanelOtherVersions appState template =
     let
         versionLink version =
             li []
-                [ linkTo appState
-                    (Routes.documentTemplatesDetail <| template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.documentTemplatesDetail <| template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -294,7 +292,7 @@ sidePanelRegistryLink appState template =
             , ul [ class "fa-ul" ]
                 [ li []
                     [ a [ href registryLink, target "_blank" ]
-                        [ span [ class "fa-li" ] [ faSet "kmDetail.registryLink" appState ]
+                        [ span [ class "fa-li" ] [ faKmDetailRegistryLink ]
                         , span [ class "fa-li-content" ] [ text (gettext "View in registry" appState.locale) ]
                         ]
                     ]
@@ -309,8 +307,7 @@ sidePanelUsableWith appState model template =
     let
         packageLink package =
             li []
-                [ linkTo appState
-                    (Routes.knowledgeModelsDetail package.id)
+                [ linkTo (Routes.knowledgeModelsDetail package.id)
                     [ dataCy "template_km-link" ]
                     [ text package.id ]
                 ]
@@ -332,13 +329,13 @@ sidePanelUsableWith appState model template =
         let
             showAllLink =
                 if model.showAllKms || List.length template.usablePackages <= 10 then
-                    emptyNode
+                    Html.nothing
 
                 else
                     li [ class "show-all-link" ]
                         [ a [ onClick ShowAllKms ]
                             [ text (gettext "Show all" appState.locale)
-                            , faSet "detail.showAll" appState
+                            , faDetailShowAll
                             ]
                         ]
         in

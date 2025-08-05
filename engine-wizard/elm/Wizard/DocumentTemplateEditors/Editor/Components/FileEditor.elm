@@ -20,27 +20,29 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, div, form, h5, i, iframe, img, input, li, span, strong, text, ul)
+import Html exposing (Html, a, button, div, form, h5, iframe, img, input, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, href, id, src, target, value)
 import Html.Events exposing (onClick, onInput, onSubmit, stopPropagationOn)
+import Html.Extra as Html
 import Html.Keyed
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
-import Shared.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Shared.Data.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
-import Shared.Data.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (emptyNode, fa, faKeyClass, faSet)
+import Shared.Components.FontAwesome exposing (fa, faClose, faDelete, faDownload, faKmEditorTreeClosed, faKmEditorTreeOpened)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setAssets, setFiles)
-import Shared.Utils exposing (compose2, dispatch, flip, listFilterJust)
+import Shared.Utils exposing (compose2, flip, listFilterJust)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import SplitPane
 import String.Format as String
+import Task.Extra as Task
 import Time
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.CodeEditor as CodeEditor
 import Wizard.Common.ContentType as ContentType
@@ -312,8 +314,8 @@ subscriptions wrapMsg onTime model =
 fetchData : String -> AppState -> Cmd Msg
 fetchData documentTemplateId appState =
     Cmd.batch
-        [ DocumentTemplateDraftsApi.getFiles documentTemplateId appState GetTemplateFilesCompleted
-        , DocumentTemplateDraftsApi.getAssets documentTemplateId appState GetTemplateAssetsCompleted
+        [ DocumentTemplateDraftsApi.getFiles appState documentTemplateId GetTemplateFilesCompleted
+        , DocumentTemplateDraftsApi.getAssets appState documentTemplateId GetTemplateAssetsCompleted
         ]
 
 
@@ -398,21 +400,23 @@ update cfg appState msg model =
             ( { model | editorSplitPane = SplitPane.update splitPaneMsg model.editorSplitPane }, Cmd.none )
 
         GetTemplateFilesCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setFiles
                 , defaultError = gettext "Unable to get template files" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         GetTemplateAssetsCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setAssets
                 , defaultError = gettext "Unable to get template assets" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         GetTemplateFileContentCompleted uuid result ->
@@ -420,12 +424,13 @@ update cfg appState msg model =
                 setResult r m =
                     { m | fileContents = Dict.insert (Uuid.toString uuid) r m.fileContents }
             in
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setResult
                 , defaultError = gettext "Unable to get file content" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         GetTemplateAssetDetailCompleted uuid result ->
@@ -438,12 +443,13 @@ update cfg appState msg model =
                 setResult r m =
                     { m | assetCache = Dict.insert (Uuid.toString uuid) (ActionResult.map toAssetCacheItem r) m.assetCache }
             in
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setResult
                 , defaultError = gettext "Unable to get asset" appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = cfg.logoutMsg
+                , locale = appState.locale
                 }
 
         OpenFile groupId uuid path ->
@@ -456,7 +462,7 @@ update cfg appState msg model =
 
                             else
                                 ( Dict.insert (Uuid.toString uuid) ActionResult.Loading model.fileContents
-                                , DocumentTemplateDraftsApi.getFileContent cfg.documentTemplateId file.uuid appState (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
+                                , DocumentTemplateDraftsApi.getFileContent appState cfg.documentTemplateId file.uuid (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
                                 )
 
                         editor =
@@ -507,7 +513,7 @@ update cfg appState msg model =
                         ( newModel, getAssetCmd ) =
                             if shouldLoadAsset then
                                 ( { model | assetCache = Dict.insert (Uuid.toString asset.uuid) ActionResult.Loading model.assetCache }
-                                , DocumentTemplateDraftsApi.getAsset cfg.documentTemplateId asset.uuid appState (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
+                                , DocumentTemplateDraftsApi.getAsset appState cfg.documentTemplateId asset.uuid (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
                                 )
 
                             else
@@ -601,10 +607,10 @@ update cfg appState msg model =
                                         Uuid.fromUuidString fileUuidString
                                 in
                                 DocumentTemplateDraftsApi.putFileContent
+                                    appState
                                     cfg.documentTemplateId
                                     fileUuid
                                     fileContent
-                                    appState
                                     (cfg.wrapMsg << FileSaveComplete fileUuid)
 
                             toActionResult ( fileUuidString, _ ) =
@@ -641,13 +647,13 @@ update cfg appState msg model =
                         Ok _ ->
                             ( ActionResult.Success ()
                             , Set.remove (Uuid.toString uuid) model.changedFiles
-                            , dispatch cfg.onFileSavedMsg
+                            , Task.dispatch cfg.onFileSavedMsg
                             )
 
                         Err error ->
                             ( ApiError.toActionResult appState (gettext "Unable to save file" appState.locale) error
                             , model.changedFiles
-                            , getResultCmd cfg.logoutMsg result
+                            , RequestHelpers.getResultCmd cfg.logoutMsg result
                             )
             in
             ( { model
@@ -691,7 +697,7 @@ update cfg appState msg model =
                         }
 
                     cmd =
-                        DocumentTemplateDraftsApi.postFile cfg.documentTemplateId templateFile "" appState (cfg.wrapMsg << AddFileCompleted)
+                        DocumentTemplateDraftsApi.postFile appState cfg.documentTemplateId templateFile "" (cfg.wrapMsg << AddFileCompleted)
                 in
                 ( { model | addingFile = ActionResult.Loading }
                 , cmd
@@ -721,7 +727,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | addingFile = ApiError.toActionResult appState "Unable to create file." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         SetAddFolderModalOpen open ->
@@ -754,7 +760,7 @@ update cfg appState msg model =
                             ( { model
                                 | deleting = ActionResult.Loading
                               }
-                            , DocumentTemplateDraftsApi.deleteFile cfg.documentTemplateId file.uuid appState (cfg.wrapMsg << DeleteSelectedFileCompleted file.uuid)
+                            , DocumentTemplateDraftsApi.deleteFile appState cfg.documentTemplateId file.uuid (cfg.wrapMsg << DeleteSelectedFileCompleted file.uuid)
                             )
 
                         Nothing ->
@@ -766,7 +772,7 @@ update cfg appState msg model =
                             ( { model
                                 | deleting = ActionResult.Loading
                               }
-                            , DocumentTemplateDraftsApi.deleteAsset cfg.documentTemplateId asset.uuid appState (cfg.wrapMsg << DeleteSelectedAssetCompleted asset.uuid)
+                            , DocumentTemplateDraftsApi.deleteAsset appState cfg.documentTemplateId asset.uuid (cfg.wrapMsg << DeleteSelectedAssetCompleted asset.uuid)
                             )
 
                         Nothing ->
@@ -774,7 +780,7 @@ update cfg appState msg model =
 
                 SelectedFolder path ->
                     ( { model | deleting = ActionResult.Loading }
-                    , DocumentTemplateDraftsApi.deleteFolder cfg.documentTemplateId path appState (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
+                    , DocumentTemplateDraftsApi.deleteFolder appState cfg.documentTemplateId path (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
                     )
 
         DeleteSelectedFileCompleted uuid result ->
@@ -816,7 +822,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete file." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         DeleteSelectedAssetCompleted uuid result ->
@@ -858,7 +864,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete asset." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         DeleteSelectedFolderCompleted path result ->
@@ -889,7 +895,7 @@ update cfg appState msg model =
 
                 Err error ->
                     ( { model | deleting = ApiError.toActionResult appState "Unable to delete folder." error }
-                    , getResultCmd cfg.logoutMsg result
+                    , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
         AssetUploadModalMsg assetUploadModalMsg ->
@@ -968,7 +974,7 @@ update cfg appState msg model =
             in
             ( removeEditorByUuid fileUuid
                 { model | files = ActionResult.map (List.map mapFile) model.files }
-            , dispatch (cfg.wrapMsg <| OpenFile model.activeGroup fileUuid newName)
+            , Task.dispatch (cfg.wrapMsg <| OpenFile model.activeGroup fileUuid newName)
             )
 
         RenameAsset assetUuid newName ->
@@ -982,7 +988,7 @@ update cfg appState msg model =
             in
             ( removeEditorByUuid assetUuid
                 { model | assets = ActionResult.map (List.map mapAsset) model.assets }
-            , dispatch (cfg.wrapMsg <| OpenAsset model.activeGroup assetUuid newName)
+            , Task.dispatch (cfg.wrapMsg <| OpenAsset model.activeGroup assetUuid newName)
             )
 
         RenameFolder currentName newName ->
@@ -1108,7 +1114,7 @@ viewSidebar appState model fileTree =
                         [ fa "fas fa-pen-to-square" ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         moveAction mbMoveActionMsg =
             case mbMoveActionMsg of
@@ -1122,7 +1128,7 @@ viewSidebar appState model fileTree =
                         [ fa "fas fa-file-import" ]
 
                 Nothing ->
-                    emptyNode
+                    Html.nothing
 
         moveToOppositeGroupAction =
             if List.length model.editorGroup1.tabs + List.length model.editorGroup2.tabs > 1 then
@@ -1134,7 +1140,7 @@ viewSidebar appState model fileTree =
                     [ fa "fas fa-columns" ]
 
             else
-                emptyNode
+                Html.nothing
 
         deleteAction =
             a
@@ -1143,13 +1149,13 @@ viewSidebar appState model fileTree =
                     :: dataCy "dt-editor_file-tree_delete"
                     :: tooltipLeft (gettext "Delete" appState.locale)
                 )
-                [ faSet "_global.delete" appState ]
+                [ faDelete ]
 
         actions =
             case model.selected of
                 SelectedFolder path ->
                     if String.isEmpty path then
-                        emptyNode
+                        Html.nothing
 
                     else
                         span []
@@ -1178,13 +1184,13 @@ viewSidebar appState model fileTree =
         [ div [ class "file-tree-actions bg-light p-2 d-flex justify-content-between align-items-center" ]
             [ addDropdown, actions ]
         , div [ class "file-tree" ]
-            [ ul [] [ viewFiles appState model fileTree ]
+            [ ul [] [ viewFiles model fileTree ]
             ]
         ]
 
 
-viewFiles : AppState -> Model -> FileTree -> Html Msg
-viewFiles appState model fileTree =
+viewFiles : Model -> FileTree -> Html Msg
+viewFiles model fileTree =
     let
         isSelected =
             FileTree.getPath SelectedFolder SelectedFile SelectedAsset fileTree == model.selected
@@ -1225,20 +1231,15 @@ viewFiles appState model fileTree =
 
                 children =
                     if isOpen then
-                        ul [] (List.map (viewFiles appState model) (List.sortWith FileTree.compare folderData.children))
+                        ul [] (List.map (viewFiles model) (List.sortWith FileTree.compare folderData.children))
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             itemLi
                 [ a [ class "caret", onClick (SetOpen (not isOpen) folderData.path) ]
-                    [ i
-                        [ classList
-                            [ ( faKeyClass "kmEditor.treeClosed" appState, not isOpen )
-                            , ( faKeyClass "kmEditor.treeOpened" appState, isOpen )
-                            ]
-                        ]
-                        []
+                    [ Html.viewIf (not isOpen) faKmEditorTreeClosed
+                    , Html.viewIf isOpen faKmEditorTreeOpened
                     ]
                 , a [ onClick (Select (SelectedFolder folderData.path)), dataCy "dt-editor_file-tree_folder" ]
                     [ icon
@@ -1319,7 +1320,7 @@ viewEditorGroup appState model editorGroup =
 
                                 ActionResult.Error error ->
                                     div [ class "m-3" ]
-                                        [ Flash.error appState error ]
+                                        [ Flash.error error ]
 
                                 _ ->
                                     viewEmptyEditor appState
@@ -1350,7 +1351,7 @@ viewEditorGroup appState model editorGroup =
 
                                 ActionResult.Error error ->
                                     div [ class "m-3" ]
-                                        [ Flash.error appState error ]
+                                        [ Flash.error error ]
 
                                 _ ->
                                     viewEmptyEditor appState
@@ -1362,13 +1363,13 @@ viewEditorGroup appState model editorGroup =
                     viewEmptyEditor appState
     in
     div [ class "DocumentTemplateEditor__FileEditor" ]
-        [ viewTabs appState model editorGroup
+        [ viewTabs model editorGroup
         , editorContent
         ]
 
 
-viewTabs : AppState -> Model -> EditorGroup -> Html Msg
-viewTabs appState model editorGroup =
+viewTabs : Model -> EditorGroup -> Html Msg
+viewTabs model editorGroup =
     let
         viewTab openMsg tab file =
             span
@@ -1384,7 +1385,7 @@ viewTabs appState model editorGroup =
                     [ class "ms-2 tab-close"
                     , stopPropagationOn "click" (D.succeed ( CloseTab tab, True ))
                     ]
-                    [ faSet "_global.close" appState ]
+                    [ faClose ]
                 ]
 
         viewTabWrapper tab =
@@ -1396,7 +1397,7 @@ viewTabs appState model editorGroup =
                     viewTab OpenAsset tab asset
 
                 _ ->
-                    emptyNode
+                    Html.nothing
     in
     div [ class "tabs" ] (List.map viewTabWrapper editorGroup.tabs)
 
@@ -1422,7 +1423,7 @@ viewAssetContent appState asset assetCacheItem =
             , div []
                 [ div [ class "filename" ] [ text fileName ]
                 , a [ class "btn btn-outline-secondary with-icon", href assetCacheItem.url, target "_blank" ]
-                    [ faSet "_global.download" appState
+                    [ faDownload
                     , text (gettext "Download" appState.locale)
                     ]
                 ]

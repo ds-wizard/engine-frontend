@@ -5,7 +5,6 @@ module Wizard.KnowledgeModels.Routing exposing
     )
 
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Locale exposing (lr)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
 import Wizard.Common.AppState exposing (AppState)
@@ -13,19 +12,21 @@ import Wizard.Common.Feature as Feature
 import Wizard.KnowledgeModels.Routes exposing (Route(..))
 
 
-parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parsers appState wrapRoute =
-    let
-        moduleRoot =
-            lr "knowledgeModels" appState
+moduleRoot : String
+moduleRoot =
+    "knowledge-models"
 
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    let
         wrapResourcePageRoute kmId resourcePageUuid =
             wrapRoute <| ResourcePageRoute kmId resourcePageUuid
     in
-    [ map (wrapRoute << ImportRoute) (s moduleRoot </> s (lr "knowledgeModels.import" appState) <?> Query.string (lr "knowledgeModels.import.packageId" appState))
+    [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "packageId")
     , map (detail wrapRoute) (s moduleRoot </> string)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
-    , map (project wrapRoute) (s moduleRoot </> string </> s (lr "knowledgeModels.preview" appState) <?> Query.string (lr "knowledgeModels.preview.questionUuid" appState))
+    , map (project wrapRoute) (s moduleRoot </> string </> s "preview" <?> Query.string "questionUuid")
     , map wrapResourcePageRoute (s moduleRoot </> string </> s "resource-pages" </> string)
     ]
 
@@ -40,12 +41,8 @@ project wrapRoute packageId mbQuestionUuid =
     wrapRoute <| PreviewRoute packageId mbQuestionUuid
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
-    let
-        moduleRoot =
-            lr "knowledgeModels" appState
-    in
+toUrl : Route -> List String
+toUrl route =
     case route of
         DetailRoute packageId ->
             [ moduleRoot, packageId ]
@@ -53,10 +50,10 @@ toUrl appState route =
         ImportRoute packageId ->
             case packageId of
                 Just id ->
-                    [ moduleRoot, lr "knowledgeModels.import" appState, "?" ++ lr "knowledgeModels.import.packageId" appState ++ "=" ++ id ]
+                    [ moduleRoot, "import", "?" ++ "packageId" ++ "=" ++ id ]
 
                 Nothing ->
-                    [ moduleRoot, lr "knowledgeModels.import" appState ]
+                    [ moduleRoot, "import" ]
 
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
@@ -64,10 +61,10 @@ toUrl appState route =
         PreviewRoute packageId mbQuestionUuid ->
             case mbQuestionUuid of
                 Just uuid ->
-                    [ moduleRoot, packageId, lr "knowledgeModels.preview" appState, "?" ++ lr "knowledgeModels.preview.questionUuid" appState ++ "=" ++ uuid ]
+                    [ moduleRoot, packageId, "preview", "?" ++ "questionUuid" ++ "=" ++ uuid ]
 
                 Nothing ->
-                    [ moduleRoot, packageId, lr "knowledgeModels.preview" appState ]
+                    [ moduleRoot, packageId, "preview" ]
 
         ResourcePageRoute kmId resourcePageUuid ->
             [ moduleRoot, kmId, "resource-pages", resourcePageUuid ]

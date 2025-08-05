@@ -11,7 +11,7 @@
             cursor: default;
         }
 
-        .fa {
+        .fas, .far, .fab{
             margin-right: $spacer-2;
         }
     }
@@ -75,7 +75,7 @@
             white-space: nowrap;
             @include transition(border-bottom-color 120ms ease-in-out);
 
-            & > .fa {
+            & > .fas, & > .far, & > .fab{
                 margin-right: 0.3rem;
                 color: $gray-600;
             }
@@ -93,7 +93,7 @@
                 font-weight: 500;
                 border-bottom-color: var(--bs-primary);
 
-                & > .fa {
+                & > .fas, & > .far, & > .fab{
                     color: $body-color;
                 }
             }
@@ -116,7 +116,7 @@
         position: relative;
         padding: $nav-link-padding-y 2rem;
 
-        .fa {
+        .fas, .far, .fab{
             position: absolute;
             left: 0.75rem;
             top: 50%;

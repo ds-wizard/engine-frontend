@@ -1,7 +1,7 @@
 module Wizard.ProjectFiles.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.QuestionnaireFile exposing (QuestionnaireFile)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Common.Components.Listing.Msgs as Listing
 import Wizard.Common.FileDownloader as FileDownloader
 

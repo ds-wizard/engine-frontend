@@ -4,11 +4,12 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, form, input, p, span, text)
 import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeholder, type_)
 import Html.Events exposing (onInput, onSubmit)
+import Html.Extra as Html
 import Html.Keyed
 import Maybe.Extra as Maybe
+import Shared.Components.FontAwesome exposing (fa)
 import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
-import Shared.Data.BootstrapConfig.Admin as Admin
-import Shared.Html exposing (emptyNode, fa)
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Announcements as Announcements
 import Wizard.Common.Html exposing (linkTo)
@@ -24,7 +25,7 @@ import Wizard.Routes as Routes
 view : AppState -> Model -> Html Msg
 view appState model =
     if Admin.isEnabled appState.config.admin then
-        emptyNode
+        Html.nothing
 
     else
         let
@@ -37,7 +38,7 @@ view appState model =
 
             loginInfoSidebar =
                 ( "login-info-sidebar"
-                , Maybe.unwrap emptyNode (MarkdownOrHtml.view [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
+                , Maybe.unwrap Html.nothing (MarkdownOrHtml.view [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
                 )
 
             content =
@@ -88,8 +89,8 @@ loginFormView appState model =
                 , input [ onInput Password, id "password", type_ "password", class "form-control", placeholder <| gettext "Password" appState.locale ] []
                 ]
             , div [ class "form-group d-flex align-items-baseline justify-content-between" ]
-                [ linkTo appState Routes.publicForgottenPassword [] [ text (gettext "Forgot your password?" appState.locale) ]
-                , ActionButton.submit appState <| ActionButton.SubmitConfig (gettext "Log In" appState.locale) model.loggingIn
+                [ linkTo Routes.publicForgottenPassword [] [ text (gettext "Forgot your password?" appState.locale) ]
+                , ActionButton.submit <| ActionButton.SubmitConfig (gettext "Log In" appState.locale) model.loggingIn
                 ]
             ]
 
@@ -97,7 +98,7 @@ loginFormView appState model =
             if List.length appState.config.authentication.external.services > 0 then
                 let
                     viewExternalLoginButton service =
-                        ExternalLoginButton.view appState
+                        ExternalLoginButton.view
                             { onClick = ExternalLoginOpenId service
                             , service = service
                             }
@@ -113,7 +114,7 @@ loginFormView appState model =
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]
-                (FormResult.view appState model.loggingIn
+                (FormResult.view model.loggingIn
                     :: loginForm
                     ++ externalLogin
                 )
@@ -127,7 +128,7 @@ codeFormView appState model =
         [ form [ onSubmit DoLogin, class "card bg-light" ]
             [ div [ class "card-header" ] [ text (gettext "Log In" appState.locale) ]
             , div [ class "card-body" ]
-                [ FormResult.view appState model.loggingIn
+                [ FormResult.view model.loggingIn
                 , p [] [ text (gettext "Please enter the authentication code from your email to verify your identity." appState.locale) ]
                 , div [ class "form-group" ]
                     [ span [ class "input-icon" ] [ fa "fas fa-unlock-alt" ]
@@ -143,7 +144,7 @@ codeFormView appState model =
                         []
                     ]
                 , div [ class "form-group mt-0" ]
-                    [ ActionButton.submitWithAttrs appState
+                    [ ActionButton.submitWithAttrs
                         { label = gettext "Verify" appState.locale
                         , result = model.loggingIn
                         , attrs = [ class "w-100", disabled (Maybe.isNothing (String.toInt model.code)) ]

@@ -11,12 +11,12 @@ module Wizard.Settings.Common.Forms.DashboardAndLoginScreenConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
-import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement as Announcement exposing (Announcement)
-import Shared.Data.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
 import Shared.Form.Field as Field
 import Shared.Form.FormError exposing (FormError)
 import Shared.Form.Validate as V
+import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
+import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement as Announcement exposing (Announcement)
+import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
 
 
 type alias DashboardAndLoginScreenConfigForm =

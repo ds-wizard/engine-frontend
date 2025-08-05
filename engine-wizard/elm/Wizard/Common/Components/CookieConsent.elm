@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, br, button, div, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
-import Shared.Html exposing (emptyNode)
+import Html.Extra as Html
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs exposing (Msg(..))
 
@@ -34,4 +34,4 @@ view appState =
             ]
 
     else
-        emptyNode
+        Html.nothing

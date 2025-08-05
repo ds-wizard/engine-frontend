@@ -17,27 +17,29 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, br, button, div, form, h2, hr, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, disabled, id, name, style, type_)
 import Html.Events exposing (onClick, onMouseDown, onSubmit)
+import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
-import Shared.Data.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.Package.PackagePhase as PackagePhase
-import Shared.Data.PackageSuggestion as PackageSuggestion
+import Shared.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuestions, faQuestionnaireSettingsKmFiltered, faRemove)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Permission exposing (Permission)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
 import Shared.Form as Form
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode, faSet)
 import Shared.Setters exposing (setSelected)
-import Shared.Utils exposing (dispatch, listFilterJust)
+import Shared.Utils exposing (listFilterJust)
+import Task.Extra as Task
 import Uuid exposing (Uuid)
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.Package.PackagePhase as PackagePhase
+import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintItem
@@ -150,7 +152,7 @@ handleFormMsg cfg formMsg appState model =
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.putQuestionnaireSettings cfg.questionnaireUuid body appState PutQuestionnaireComplete
+                        QuestionnairesApi.putQuestionnaireSettings appState cfg.questionnaireUuid body PutQuestionnaireComplete
             in
             ( { model | savingQuestionnaire = Loading }
             , cmd
@@ -160,7 +162,7 @@ handleFormMsg cfg formMsg appState model =
             let
                 searchValue fieldName value =
                     if fieldName == lastProjectTagFieldName model.form then
-                        dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsSearch value)
+                        Task.dispatch (cfg.wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| ProjectTagsSearch value)
 
                     else
                         Cmd.none
@@ -228,7 +230,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesFor cfg.packageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.packageId
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
@@ -236,7 +238,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             }
 
         ( templateTypeHintInputModel, cmd ) =
-            TypeHintInput.update typeHintInputCfg typeHintInputMsg appState model.templateTypeHintInputModel
+            TypeHintInput.update typeHintInputCfg typeHintInputMsg model.templateTypeHintInputModel
     in
     ( { model | templateTypeHintInputModel = templateTypeHintInputModel }, cmd )
 
@@ -258,7 +260,7 @@ handleProjectTagsSearch cfg appState model value =
 
         cmd =
             Cmd.map cfg.wrapMsg <|
-                QuestionnairesApi.getProjectTagsSuggestions queryString selectedTags appState ProjectTagsSearchComplete
+                QuestionnairesApi.getProjectTagsSuggestions appState queryString selectedTags ProjectTagsSearchComplete
     in
     ( model, cmd )
 
@@ -343,16 +345,16 @@ formView appState questionnaire model =
                     if selectedTemplateId == questionnaireTemplateId then
                         case ( questionnaire.documentTemplateState, questionnaire.documentTemplatePhase ) of
                             ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
-                                Flash.error appState (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
+                                Flash.error (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
 
                             ( _, Just DocumentTemplatePhase.Deprecated ) ->
-                                Flash.warning appState (gettext "This document template is now deprecated." appState.locale)
+                                Flash.warning (gettext "This document template is now deprecated." appState.locale)
 
                             _ ->
-                                emptyNode
+                                Html.nothing
 
                     else
-                        emptyNode
+                        Html.nothing
             in
             div []
                 [ templateFlash
@@ -365,7 +367,7 @@ formView appState questionnaire model =
                     FormGroup.formatRadioGroup appState selectedTemplate.formats model.form "formatUuid" (gettext "Default document format" appState.locale)
 
                 _ ->
-                    emptyNode
+                    Html.nothing
 
         isTemplateInput =
             if Feature.projectTemplatesCreate appState then
@@ -382,7 +384,7 @@ formView appState questionnaire model =
                 projectTagsFormGroup appState model
 
             else
-                emptyNode
+                Html.nothing
 
         originalTagCount =
             List.length questionnaire.projectTags
@@ -404,7 +406,7 @@ formView appState questionnaire model =
             }
     in
     form [ onSubmit (FormMsg Form.Submit) ]
-        ([ FormResult.errorOnlyView appState model.savingQuestionnaire
+        ([ FormResult.errorOnlyView model.savingQuestionnaire
          , Html.map FormMsg <| FormGroup.input appState model.form "name" <| gettext "Name" appState.locale
          , Html.map FormMsg <| FormGroup.input appState model.form "description" <| gettext "Description" appState.locale
          , Html.map FormMsg <| projectTagsInput
@@ -429,12 +431,12 @@ projectTagsFormGroup appState model =
     div [ class "form-group form-group-project-tags" ]
         [ label [] [ text (gettext "Project Tags" appState.locale) ]
         , div []
-            (List.map (projectTagView appState model.form) tags ++ projectTagInput appState model)
+            (List.map (projectTagView model.form) tags ++ projectTagInput appState model)
         ]
 
 
-projectTagView : AppState -> Form FormError QuestionnaireSettingsForm -> Int -> Html Form.Msg
-projectTagView appState form i =
+projectTagView : Form FormError QuestionnaireSettingsForm -> Int -> Html Form.Msg
+projectTagView form i =
     let
         value =
             Maybe.withDefault "" <| (Form.getFieldAsString ("projectTags." ++ String.fromInt i) form).value
@@ -446,7 +448,7 @@ projectTagView appState form i =
             , onClick (Form.RemoveItem "projectTags" i)
             , dataCy "project_settings_tag-remove"
             ]
-            [ faSet "_global.remove" appState ]
+            [ faRemove ]
         ]
 
 
@@ -468,7 +470,7 @@ projectTagInput appState model =
                     )
 
                 Nothing ->
-                    ( False, emptyNode )
+                    ( False, Html.nothing )
 
         typehints =
             ActionResult.unwrap [] .items model.projectTagsSuggestions
@@ -482,7 +484,7 @@ projectTagInput appState model =
 
         typehintsView hasFocus =
             if List.isEmpty typehints || not hasFocus || hasError then
-                emptyNode
+                Html.nothing
 
             else
                 ul [ class "typehints" ]
@@ -515,14 +517,14 @@ knowledgeModel appState questionnaire =
         tagList =
             if List.isEmpty questionnaire.selectedQuestionTagUuids then
                 div [ class "rounded bg-light px-3 py-2 fw-bold" ]
-                    [ faSet "questionnaire.settings.kmAllQuestions" appState
+                    [ faQuestionnaireSettingsKmAllQuestions
                     , span [ class "ms-2" ] [ text (gettext "All questions are used" appState.locale) ]
                     ]
 
             else
                 div []
                     [ div [ class "rounded bg-light px-3 py-2 fw-bold mb-2" ]
-                        [ faSet "questionnaire.settings.kmFiltered" appState
+                        [ faQuestionnaireSettingsKmFiltered
                         , span [ class "ms-2" ] [ text (gettext "Filtered by question tags" appState.locale) ]
                         ]
                     , Tag.viewList { showDescription = True } questionnaire.knowledgeModelTags
@@ -530,22 +532,20 @@ knowledgeModel appState questionnaire =
 
         deprecatedWarning =
             if questionnaire.package.phase == PackagePhase.Deprecated then
-                Flash.warning appState (gettext "This knowledge model is now deprecated." appState.locale)
+                Flash.warning (gettext "This knowledge model is now deprecated." appState.locale)
 
             else
-                emptyNode
+                Html.nothing
     in
     div []
         [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
         , deprecatedWarning
-        , linkTo appState
-            (Routes.knowledgeModelsDetail questionnaire.package.id)
+        , linkTo (Routes.knowledgeModelsDetail questionnaire.package.id)
             [ class "package-link mb-2" ]
             [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage questionnaire.package) ]
         , tagList
         , div [ class "mt-3" ]
-            [ linkTo appState
-                (Routes.projectsCreateMigration questionnaire.uuid)
+            [ linkTo (Routes.projectsCreateMigration questionnaire.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]
                 [ text (gettext "Create migration" appState.locale) ]
             ]

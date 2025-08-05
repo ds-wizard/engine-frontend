@@ -1,8 +1,8 @@
 module Wizard.Tenants.Detail.Msgs exposing (Msg(..))
 
 import Form
-import Shared.Data.TenantDetail exposing (TenantDetail)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 
 type Msg

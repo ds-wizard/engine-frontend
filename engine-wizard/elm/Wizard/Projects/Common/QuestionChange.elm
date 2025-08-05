@@ -7,8 +7,8 @@ module Wizard.Projects.Common.QuestionChange exposing
     , getQuestionUuid
     )
 
-import Shared.Data.KnowledgeModel.Chapter exposing (Chapter)
-import Shared.Data.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 
 
 type QuestionChange

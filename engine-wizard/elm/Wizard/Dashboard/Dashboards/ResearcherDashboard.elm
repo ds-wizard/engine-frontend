@@ -11,18 +11,18 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Api.CommentThreads as CommentThreadsApi
-import Shared.Api.Questionnaires as QuestionnairesApi
+import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.Questionnaire exposing (Questionnaire)
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Shared.Error.ApiError exposing (ApiError)
 import Shared.Setters exposing (setCommentThreads, setQuestionnaires)
 import Shared.Utils exposing (boolToString)
+import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid
-import Wizard.Common.Api exposing (applyResultTransform)
+import Wizard.Api.CommentThreads as CommentThreadsApi
+import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Dashboard.Widgets.AssignedComments as AssignedComments
 import Wizard.Dashboard.Widgets.CreateProjectWidget as CreateProjectWidget
@@ -71,10 +71,9 @@ fetchQuestionnaires appState =
                 ]
                 []
     in
-    QuestionnairesApi.getQuestionnaires
+    QuestionnairesApi.getQuestionnaires appState
         filters
         pagination
-        appState
         GetQuestionnairesComplete
 
 
@@ -92,9 +91,9 @@ fetchCommentThreads appState =
                 []
     in
     CommentThreadsApi.getCommentThreads
+        appState
         filters
         pagination
-        appState
         GetCommentThreadsComplete
 
 
@@ -102,23 +101,25 @@ update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
 update logoutMsg msg appState model =
     case msg of
         GetQuestionnairesComplete result ->
-            applyResultTransform appState
+            RequestHelpers.applyResultTransform
                 { setResult = setQuestionnaires
                 , defaultError = gettext "Unable to get projects." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
         GetCommentThreadsComplete result ->
-            applyResultTransform appState
+            RequestHelpers.applyResultTransform
                 { setResult = setCommentThreads
                 , defaultError = gettext "Unable to get assigned comments." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = logoutMsg
                 , transform = .items
+                , locale = appState.locale
                 }
 
 

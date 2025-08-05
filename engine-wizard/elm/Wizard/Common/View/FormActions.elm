@@ -11,7 +11,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class, classList, disabled, type_)
 import Html.Events exposing (onClick)
-import Shared.Html exposing (faSet)
+import Shared.Components.FontAwesome exposing (faSpinner, faSuccess)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.View.ActionButton as ActionButton
@@ -21,7 +21,7 @@ view : AppState -> msg -> ActionButton.ButtonConfig a msg -> Html msg
 view appState cancelMsg actionButtonConfig =
     div [ class "form-actions" ]
         [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
-        , ActionButton.button appState actionButtonConfig
+        , ActionButton.button actionButtonConfig
         ]
 
 
@@ -37,7 +37,7 @@ viewSubmit : AppState -> msg -> ActionButton.SubmitConfig a -> Html msg
 viewSubmit appState cancelMsg submitConfig =
     div [ class "form-actions" ]
         [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
-        , ActionButton.submit appState submitConfig
+        , ActionButton.submit submitConfig
         ]
 
 
@@ -66,10 +66,10 @@ viewDynamic cfg appState =
         content =
             case cfg.actionResult of
                 ActionResult.Loading ->
-                    faSet "_global.spinner" appState
+                    faSpinner
 
                 ActionResult.Success _ ->
-                    faSet "_global.success" appState
+                    faSuccess
 
                 _ ->
                     text (gettext "Save" appState.locale)

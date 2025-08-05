@@ -1,6 +1,6 @@
 module Wizard.Comments.Msgs exposing (Msg(..))
 
-import Shared.Data.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Common.Components.Listing.Msgs as Listing
 
 

@@ -4,8 +4,8 @@ module Wizard.Settings.Submission.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Data.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Settings.Generic.Model as GenericModel
 
 

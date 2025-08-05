@@ -1,4 +1,12 @@
-module Wizard.Common.FileImport exposing (Model, Msg, UpdateConfig, ViewConfig, initialModel, update, view)
+module Wizard.Common.FileImport exposing
+    ( Model
+    , Msg
+    , UpdateConfig
+    , ViewConfig
+    , initialModel
+    , update
+    , view
+    )
 
 import ActionResult exposing (ActionResult)
 import Dict exposing (Dict)
@@ -10,9 +18,9 @@ import Html.Attributes exposing (class, classList, disabled)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Json.Decode as D
-import Shared.Api exposing (ToMsg)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Html exposing (faSet)
+import Shared.Api.Request exposing (ToMsg)
+import Shared.Components.FontAwesome exposing (faError, faImportFile, faSpinner, faSuccess, faWarning)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy, tooltipLeft)
@@ -50,7 +58,7 @@ type Msg
 
 type alias UpdateConfig msg =
     { mimes : List String
-    , upload : File -> AppState -> ToMsg () msg -> Cmd msg
+    , upload : AppState -> File -> ToMsg () msg -> Cmd msg
     , wrapMsg : Msg -> msg
     }
 
@@ -98,7 +106,7 @@ update cfg appState msg model =
                                             File.name file
 
                                         cmd =
-                                            cfg.upload file appState (cfg.wrapMsg << SubmitComplete fileName)
+                                            cfg.upload appState file (cfg.wrapMsg << SubmitComplete fileName)
                                     in
                                     ( Dict.insert fileName ActionResult.Loading actionResults
                                     , cmd :: cmds
@@ -181,13 +189,13 @@ filesView cfg appState model files =
         fileIcon file =
             case Dict.get (File.name file) model.submitting of
                 Just ActionResult.Loading ->
-                    span [ class "text-muted" ] [ faSet "_global.spinner" appState ]
+                    span [ class "text-muted" ] [ faSpinner ]
 
                 Just (ActionResult.Success _) ->
-                    span [ class "text-success" ] [ faSet "_global.success" appState ]
+                    span [ class "text-success" ] [ faSuccess ]
 
                 Just (ActionResult.Error error) ->
-                    span (class "text-danger" :: tooltipLeft error) [ faSet "_global.error" appState ]
+                    span (class "text-danger" :: tooltipLeft error) [ faError ]
 
                 _ ->
                     case cfg.validate of
@@ -195,7 +203,7 @@ filesView cfg appState model files =
                             case validate file of
                                 Just validationError ->
                                     span (class "text-warning" :: tooltipLeft validationError)
-                                        [ faSet "_global.warning" appState ]
+                                        [ faWarning ]
 
                                 Nothing ->
                                     Html.nothing
@@ -205,7 +213,7 @@ filesView cfg appState model files =
 
         fileView file =
             div [ class "rounded-3 bg-light d-flex mb-1 px-3 py-2", dataCy "file-import_file" ]
-                [ span [ class "me-2" ] [ faSet "import.file" appState ]
+                [ span [ class "me-2" ] [ faImportFile ]
                 , span [ class "flex-grow-1 text-truncate" ] [ text (File.name file) ]
                 , span [ class "ms-2" ] [ fileIcon file ]
                 ]
@@ -216,10 +224,10 @@ filesView cfg appState model files =
         globalResult =
             case combinedResult of
                 ActionResult.Success _ ->
-                    Flash.success appState (gettext "All files were uploaded successfully." appState.locale)
+                    Flash.success (gettext "All files were uploaded successfully." appState.locale)
 
                 ActionResult.Error _ ->
-                    Flash.error appState (gettext "Unable to upload some files." appState.locale)
+                    Flash.error (gettext "Unable to upload some files." appState.locale)
 
                 _ ->
                     Html.nothing
@@ -227,8 +235,7 @@ filesView cfg appState model files =
         controls =
             if ActionResult.isSuccess combinedResult then
                 div [ class "mt-4" ]
-                    [ linkTo appState
-                        cfg.doneRoute
+                    [ linkTo cfg.doneRoute
                         [ class "btn btn-primary btn-wide"
                         , dataCy "file-import_done"
                         ]
@@ -243,7 +250,7 @@ filesView cfg appState model files =
                 div [ class "form-actions" ]
                     [ button [ disabled anySubmitting, onClick Cancel, class "btn btn-secondary" ]
                         [ text (gettext "Cancel" appState.locale) ]
-                    , ActionButton.button appState <| ActionButton.ButtonConfig (gettext "Import" appState.locale) combinedResult Upload False
+                    , ActionButton.button <| ActionButton.ButtonConfig (gettext "Import" appState.locale) combinedResult Upload False
                     ]
     in
     div [ class "rounded-3" ]

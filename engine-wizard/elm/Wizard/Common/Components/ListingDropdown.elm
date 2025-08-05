@@ -13,8 +13,7 @@ import Bootstrap.Dropdown as Dropdown
 import Html exposing (Html, text)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
-import Shared.Html exposing (faSet)
-import Wizard.Common.AppState exposing (AppState)
+import Shared.Components.FontAwesome exposing (faListingActions)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
@@ -50,14 +49,12 @@ dropdownSeparator =
 
 
 dropdown :
-    AppState
-    ->
-        { dropdownState : Dropdown.State
-        , toggleMsg : Dropdown.State -> msg
-        , items : List (ListingDropdownItem msg)
-        }
+    { dropdownState : Dropdown.State
+    , toggleMsg : Dropdown.State -> msg
+    , items : List (ListingDropdownItem msg)
+    }
     -> Html msg
-dropdown appState { dropdownState, toggleMsg, items } =
+dropdown { dropdownState, toggleMsg, items } =
     Dropdown.dropdown dropdownState
         { options =
             [ Dropdown.attrs [ class "ListingDropdown" ]
@@ -66,20 +63,20 @@ dropdown appState { dropdownState, toggleMsg, items } =
         , toggleMsg = toggleMsg
         , toggleButton =
             Dropdown.toggle [ Button.roleLink ]
-                [ faSet "listing.actions" appState ]
-        , items = List.map (viewAction appState) items
+                [ faListingActions ]
+        , items = List.map viewAction items
         }
 
 
-viewAction : AppState -> ListingDropdownItem msg -> Dropdown.DropdownItem msg
-viewAction appState dropdownItem =
+viewAction : ListingDropdownItem msg -> Dropdown.DropdownItem msg
+viewAction dropdownItem =
     case dropdownItem of
         ListingDropdownAction action ->
             let
                 attrs =
                     case action.msg of
                         ListingActionLink route ->
-                            [ href <| Routing.toUrl appState route ]
+                            [ href <| Routing.toUrl route ]
 
                         ListingActionMsg msg ->
                             [ onClick msg ]

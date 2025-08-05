@@ -6,7 +6,7 @@ module Wizard.Common.View.UserIcon exposing
 
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
-import Shared.Data.User as User exposing (User)
+import Wizard.Api.Models.User as User exposing (User)
 
 
 view : { a | gravatarHash : String, imageUrl : Maybe String } -> Html msg

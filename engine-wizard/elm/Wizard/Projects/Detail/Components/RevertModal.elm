@@ -12,12 +12,12 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, br, p, strong, text)
 import Maybe.Extra as Maybe
-import Shared.Api.Questionnaires as QuestionnairesApi
 import Shared.Common.TimeUtils as TimeUtils
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
@@ -72,7 +72,7 @@ update cfg appState msg model =
                 Just event ->
                     let
                         cmd =
-                            QuestionnairesApi.postRevert cfg.questionnaireUuid (QuestionnaireEvent.getUuid event) appState PostRevertVersionComplete
+                            QuestionnairesApi.postRevert appState cfg.questionnaireUuid (QuestionnaireEvent.getUuid event) PostRevertVersionComplete
                     in
                     ( { model | revertResult = Loading }
                     , cmd
@@ -106,7 +106,7 @@ view appState model =
             Maybe.unwrap "" (QuestionnaireEvent.getCreatedAt >> TimeUtils.toReadableDateTime appState.timeZone) model.mbEvent
 
         content =
-            [ Flash.warning appState (gettext "Heads up! This action cannot be undone." appState.locale)
+            [ Flash.warning (gettext "Heads up! This action cannot be undone." appState.locale)
             , p []
                 (String.formatHtml
                     (gettext "Are you sure you want to revert the projects to its state from %s?" appState.locale)

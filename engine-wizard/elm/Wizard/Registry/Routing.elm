@@ -4,20 +4,20 @@ module Wizard.Registry.Routing exposing
     , toUrl
     )
 
-import Shared.Locale exposing (lr)
 import Url.Parser exposing ((</>), Parser, map, s, string)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Feature as Feature
 import Wizard.Registry.Routes exposing (Route(..))
 
 
-parsers : AppState -> (Route -> a) -> List (Parser (a -> c) c)
-parsers appState wrapRoute =
-    let
-        moduleRoot =
-            lr "registry" appState
-    in
-    [ map (registrySignupConfirmation wrapRoute) (s moduleRoot </> s (lr "registry.signupConfirmation" appState) </> string </> string)
+moduleRoot : String
+moduleRoot =
+    "registry"
+
+
+parsers : (Route -> a) -> List (Parser (a -> c) c)
+parsers wrapRoute =
+    [ map (registrySignupConfirmation wrapRoute) (s moduleRoot </> s "signup" </> string </> string)
     ]
 
 
@@ -26,15 +26,11 @@ registrySignupConfirmation wrapRoute organizationId hash =
     wrapRoute <| RegistrySignupConfirmationRoute organizationId hash
 
 
-toUrl : AppState -> Route -> List String
-toUrl appState route =
+toUrl : Route -> List String
+toUrl route =
     case route of
         RegistrySignupConfirmationRoute organizationId hash ->
-            let
-                moduleRoot =
-                    lr "registry" appState
-            in
-            [ moduleRoot, lr "registry.signupConfirmation" appState, organizationId, hash ]
+            [ moduleRoot, "signup", organizationId, hash ]
 
 
 isAllowed : Route -> AppState -> Bool

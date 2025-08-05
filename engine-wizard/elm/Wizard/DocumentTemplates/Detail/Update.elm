@@ -5,11 +5,11 @@ module Wizard.DocumentTemplates.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.DocumentTemplates as DocumentTemplatesApi
-import Shared.Data.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setTemplate)
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileDownloader as FileDownloader
 import Wizard.DocumentTemplates.Detail.Models exposing (Model)
@@ -21,19 +21,20 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : String -> AppState -> Cmd Msg
 fetchData templateId appState =
-    DocumentTemplatesApi.getTemplate templateId appState GetTemplateCompleted
+    DocumentTemplatesApi.getTemplate appState templateId GetTemplateCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
         GetTemplateCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setTemplate
                 , defaultError = gettext "Unable to get the document template." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         DropdownMsg state ->
@@ -52,16 +53,17 @@ update msg wrapMsg appState model =
             handleSetUpdatePhase wrapMsg appState model phase
 
         UpdatePhaseCompleted result ->
-            applyResult appState
+            RequestHelpers.applyResult
                 { setResult = setTemplate
                 , defaultError = gettext "Unable to update the document template." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
                 }
 
         ExportTemplate template ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl template.id appState)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentTemplatesApi.exportTemplateUrl appState template.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -75,7 +77,7 @@ handleDeleteVersion wrapMsg appState model =
     case model.template of
         Success template ->
             ( { model | deletingVersion = Loading }
-            , Cmd.map wrapMsg <| DocumentTemplatesApi.deleteTemplateVersion template.id appState DeleteVersionCompleted
+            , Cmd.map wrapMsg <| DocumentTemplatesApi.deleteTemplateVersion appState template.id DeleteVersionCompleted
             )
 
         _ ->
@@ -90,7 +92,7 @@ handleDeleteVersionCompleted appState model result =
 
         Err error ->
             ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Document template could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -102,7 +104,7 @@ handleSetUpdatePhase wrapMsg appState model phase =
                 newDocumentTemplate =
                     { documentTemplate | phase = phase }
             in
-            ( model, DocumentTemplatesApi.putTemplate newDocumentTemplate appState (wrapMsg << UpdatePhaseCompleted) )
+            ( model, DocumentTemplatesApi.putTemplate appState newDocumentTemplate (wrapMsg << UpdatePhaseCompleted) )
 
         _ ->
             ( model, Cmd.none )

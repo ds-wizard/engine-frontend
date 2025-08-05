@@ -1,11 +1,11 @@
 module Wizard.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
 
 import Form
-import Shared.Data.DocumentTemplateDetail exposing (DocumentTemplateDetail)
-import Shared.Data.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Shared.Data.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
 import Version exposing (Version)
+import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
+import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 
 

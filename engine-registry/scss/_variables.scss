@@ -1,0 +1,18 @@
+@import '~bootstrap/scss/functions';
+
+$min-contrast-ratio: 3 !default;
+
+@import '~bootstrap/scss/variables';
+@import '~bootstrap/scss/variables-dark';
+
+$code-block-bg-scale: -95% !default;
+$code-block-bg: shift-color($code-color, $code-block-bg-scale);
+
+// spacer helpers
+$spacer-0: map-get($spacers, 0); // 0
+$spacer-1: map-get($spacers, 1); // 0.25rem
+$spacer-2: map-get($spacers, 2); // 0.5rem
+$spacer-3: map-get($spacers, 3); // 1rem
+$spacer-4: map-get($spacers, 4); // 1.5rem
+$spacer-5: map-get($spacers, 5); // 3rem
+$spacer-6: 5rem;

@@ -5,12 +5,12 @@ module Wizard.Projects.CreateMigration.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Data.KnowledgeModel exposing (KnowledgeModel)
-import Shared.Data.PackageDetail exposing (PackageDetail)
-import Shared.Data.PackageSuggestion exposing (PackageSuggestion)
-import Shared.Data.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Shared.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm exposing (QuestionnaireMigrationCreateForm)
 

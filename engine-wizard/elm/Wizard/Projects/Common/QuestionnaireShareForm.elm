@@ -11,12 +11,12 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Data.Member as Member
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
 import Shared.Form.FormError exposing (FormError)
+import Wizard.Api.Models.Member as Member
+import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.QuestionnairePermission as QuestionnairePermission exposing (QuestionnairePermission)
 import Wizard.Projects.Common.QuestionnaireShareFormPermission as QuestionnaireShareFormPermission exposing (QuestionnaireShareFormPermission)
 
 

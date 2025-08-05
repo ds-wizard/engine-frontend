@@ -1,7 +1,7 @@
 module Wizard.ProjectActions.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.QuestionnaireAction exposing (QuestionnaireAction)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
 import Wizard.Common.Components.Listing.Msgs as Listing
 
 

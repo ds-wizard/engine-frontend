@@ -2,12 +2,12 @@ module Wizard.KMEditor.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Branches as BranchesApi
-import Shared.Data.Branch exposing (Branch)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Common.Api exposing (getResultCmd)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.Branch exposing (Branch)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -51,7 +51,7 @@ update msg wrapMsg appState model =
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
-    , Cmd.map wrapMsg <| BranchesApi.deleteMigration uuid appState DeleteMigrationCompleted
+    , Cmd.map wrapMsg <| BranchesApi.deleteMigration appState uuid DeleteMigrationCompleted
     )
 
 
@@ -72,7 +72,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
 
         Err error ->
             ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Migration could not be cancelled." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -91,7 +91,7 @@ handleDeleteModalMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> DeleteModal.Msg -
 handleDeleteModalMsg wrapMsg appState deleteModalMsg model =
     let
         updateConfig =
-            { cmdDeleted = dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+            { cmdDeleted = Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             , wrapMsg = wrapMsg << DeleteModalMsg
             }
 
@@ -121,7 +121,7 @@ handleUpgradeModalMsg wrapMsg appState upgradeModalMsg model =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Branch
 listingUpdateConfig wrapMsg appState =
-    { getRequest = BranchesApi.getBranches
+    { getRequest = BranchesApi.getBranches appState
     , getError = gettext "Unable to get knowledge model editors." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.kmEditorIndexWithFilters

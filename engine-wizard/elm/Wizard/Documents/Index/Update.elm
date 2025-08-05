@@ -5,17 +5,17 @@ module Wizard.Documents.Index.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Api.Documents as DocumentsApi
-import Shared.Api.Questionnaires as QuestionnaireApi
-import Shared.Data.Document exposing (Document)
-import Shared.Data.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Shared.Data.Submission exposing (Submission)
-import Shared.Data.SubmissionService exposing (SubmissionService)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Setters exposing (setQuestionnaire)
-import Shared.Utils exposing (dispatch)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Task.Extra as Task
 import Uuid
-import Wizard.Common.Api exposing (applyResult, getResultCmd)
+import Wizard.Api.Documents as DocumentsApi
+import Wizard.Api.Models.Document exposing (Document)
+import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.Submission exposing (Submission)
+import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
+import Wizard.Api.Questionnaires as QuestionnaireApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Msgs as ListingMsgs
 import Wizard.Common.Components.Listing.Update as Listing
@@ -32,7 +32,7 @@ fetchData appState model =
         questionnaireCmd =
             case model.questionnaireUuid of
                 Just questionnaireUuid ->
-                    QuestionnaireApi.getQuestionnaire questionnaireUuid appState GetQuestionnaireCompleted
+                    QuestionnaireApi.getQuestionnaire appState questionnaireUuid GetQuestionnaireCompleted
 
                 Nothing ->
                     Cmd.none
@@ -83,7 +83,7 @@ update wrapMsg msg appState model =
             ( { model | submissionErrorModal = mbError }, Cmd.none )
 
         DownloadDocument document ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentsApi.downloadDocumentUrl document.uuid appState)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile appState (DocumentsApi.downloadDocumentUrl appState document.uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -91,12 +91,13 @@ update wrapMsg msg appState model =
 
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireCommon -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState model result =
-    applyResult appState
+    RequestHelpers.applyResult
         { setResult = setQuestionnaire << Just
         , defaultError = gettext "Unable to get documents." appState.locale
         , model = model
         , result = result
         , logoutMsg = Wizard.Msgs.logoutMsg
+        , locale = appState.locale
         }
 
 
@@ -117,7 +118,7 @@ handleDeleteDocument wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        DocumentsApi.deleteDocument (Uuid.toString questionnaire.uuid) appState DeleteDocumentCompleted
+                        DocumentsApi.deleteDocument appState (Uuid.toString questionnaire.uuid) DeleteDocumentCompleted
             in
             ( newModel, cmd )
 
@@ -130,12 +131,12 @@ handleDeleteDocumentCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
             ( { model | documentToBeDeleted = Nothing }
-            , dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+            , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
             ( { model | deletingDocument = ApiError.toActionResult appState (gettext "Document could not be deleted." appState.locale) error }
-            , getResultCmd Wizard.Msgs.logoutMsg result
+            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
@@ -157,7 +158,7 @@ handleShowHideSubmitDocument wrapMsg appState model mbDocument =
             case mbDocument of
                 Just document ->
                     Cmd.map wrapMsg <|
-                        DocumentsApi.getSubmissionServices (Uuid.toString document.uuid) appState GetSubmissionServicesCompleted
+                        DocumentsApi.getSubmissionServices appState (Uuid.toString document.uuid) GetSubmissionServicesCompleted
 
                 Nothing ->
                     Cmd.none
@@ -187,12 +188,13 @@ handleGetSubmissionServicesCompleted appState model result =
                 , selectedSubmissionServiceId = selectedSubmissionServiceId
             }
     in
-    applyResult appState
+    RequestHelpers.applyResult
         { setResult = setResult
         , defaultError = gettext "Unable to get submission services for the document." appState.locale
         , model = model
         , result = result
         , logoutMsg = Wizard.Msgs.logoutMsg
+        , locale = appState.locale
         }
 
 
@@ -207,7 +209,7 @@ handleSubmitDocument wrapMsg appState model =
         ( Just document, Just serviceId ) ->
             ( { model | submittingDocument = Loading }
             , Cmd.map wrapMsg <|
-                DocumentsApi.postSubmission serviceId (Uuid.toString document.uuid) appState SubmitDocumentCompleted
+                DocumentsApi.postSubmission appState serviceId (Uuid.toString document.uuid) SubmitDocumentCompleted
             )
 
         _ ->
@@ -225,12 +227,13 @@ handleSubmitDocumentCompleted appState model result =
                 _ ->
                     m
     in
-    applyResult appState
+    RequestHelpers.applyResult
         { setResult = \value record -> updateSubmissions { record | submittingDocument = value }
         , defaultError = gettext "Unable to submit the document." appState.locale
         , model = model
         , result = result
         , logoutMsg = Wizard.Msgs.logoutMsg
+        , locale = appState.locale
         }
 
 
@@ -240,7 +243,7 @@ handleSubmitDocumentCompleted appState model result =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig Document
 listingUpdateConfig wrapMsg appState model =
-    { getRequest = DocumentsApi.getDocuments model.questionnaireUuid
+    { getRequest = DocumentsApi.getDocuments appState model.questionnaireUuid
     , getError = gettext "Unable to get documents." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.documentsIndexWithFilters model.questionnaireUuid

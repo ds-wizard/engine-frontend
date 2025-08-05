@@ -13,15 +13,15 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Html.Attributes exposing (class)
+import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Api.Branches as BranchesApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Data.PackageDetail as PackageDetail exposing (PackageDetail)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
-import Shared.Html exposing (emptyNode)
 import String.Format as String
 import Uuid exposing (Uuid)
+import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.Models.PackageDetail as PackageDetail exposing (PackageDetail)
+import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.View.FormGroup as FormGroup
@@ -75,7 +75,7 @@ update cfg appState msg model =
                 , creatingMigration = ActionResult.Unset
                 , package = ActionResult.Loading
               }
-            , Cmd.map cfg.wrapMsg <| PackagesApi.getPackage forkOfPackageId appState GetPackageComplete
+            , Cmd.map cfg.wrapMsg <| PackagesApi.getPackage appState forkOfPackageId GetPackageComplete
             )
 
         FormMsg formMsg ->
@@ -86,7 +86,7 @@ update cfg appState msg model =
                             BranchUpgradeForm.encode branchUpgradeForm
                     in
                     ( { model | creatingMigration = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg <| BranchesApi.postMigration uuid body appState UpgradeComplete
+                    , Cmd.map cfg.wrapMsg <| BranchesApi.postMigration appState uuid body UpgradeComplete
                     )
 
                 _ ->
@@ -136,7 +136,7 @@ view appState model =
         modalContent =
             case model.package of
                 Unset ->
-                    [ emptyNode ]
+                    [ Html.nothing ]
 
                 Loading ->
                     [ Page.loader appState ]

@@ -4,8 +4,8 @@ module Wizard.DocumentTemplateEditors.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Shared.Data.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Wizard.Common.Components.Listing.Models as Listing
 
 

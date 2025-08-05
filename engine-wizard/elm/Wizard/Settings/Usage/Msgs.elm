@@ -1,7 +1,7 @@
 module Wizard.Settings.Usage.Msgs exposing (Msg(..))
 
-import Shared.Data.Usage exposing (Usage)
-import Shared.Error.ApiError exposing (ApiError)
+import Shared.Data.ApiError exposing (ApiError)
+import Wizard.Api.Models.Usage exposing (Usage)
 
 
 type Msg

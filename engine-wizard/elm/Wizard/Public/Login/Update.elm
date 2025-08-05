@@ -5,15 +5,15 @@ import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Api.Auth as AuthApi
-import Shared.Api.Tokens as TokensApi
 import Shared.Auth.Session as Session
-import Shared.Data.BootstrapConfig.Admin as Admin
+import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Token as Token
-import Shared.Data.TokenResponse as TokenResponse exposing (TokenResponse)
-import Shared.Error.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (dispatch)
 import String.Extra as String
+import Task.Extra as Task
+import Wizard.Api.Auth as AuthApi
+import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
+import Wizard.Api.Tokens as TokensApi
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.LocalStorageData as LocalStorageData
@@ -34,7 +34,7 @@ fetchData appState mbOriginalUrl =
         case List.head appState.config.authentication.external.services of
             Just service ->
                 Cmd.batch
-                    [ Navigation.load (AuthApi.authRedirectUrl service appState)
+                    [ Navigation.load (AuthApi.authRedirectUrl appState service)
                     , saveOriginalUrlCmd mbOriginalUrl
                     ]
 
@@ -67,7 +67,7 @@ update msg wrapMsg appState model =
                         ]
             in
             ( { model | loggingIn = Loading }
-            , Cmd.map wrapMsg <| TokensApi.fetchToken body appState LoginCompleted
+            , Cmd.map wrapMsg <| TokensApi.fetchToken appState body LoginCompleted
             )
 
         LoginCompleted result ->
@@ -76,7 +76,7 @@ update msg wrapMsg appState model =
         ExternalLoginOpenId openIdServiceConfig ->
             ( model
             , Cmd.batch
-                [ Navigation.load (AuthApi.authRedirectUrl openIdServiceConfig appState)
+                [ Navigation.load (AuthApi.authRedirectUrl appState openIdServiceConfig)
                 , saveOriginalUrlCmd model.originalUrl
                 ]
             )
@@ -88,7 +88,7 @@ loginCompleted appState model result =
         Ok tokenResponse ->
             case tokenResponse of
                 TokenResponse.Token token expiresAt ->
-                    ( model, dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.create token expiresAt) model.originalUrl) )
+                    ( model, Task.dispatch (Wizard.Msgs.AuthMsg <| Wizard.Auth.Msgs.GotToken (Token.create token expiresAt) model.originalUrl) )
 
                 TokenResponse.CodeRequired ->
                     ( { model | codeRequired = True, loggingIn = Unset }, Cmd.none )

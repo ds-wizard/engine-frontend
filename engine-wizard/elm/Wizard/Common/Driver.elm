@@ -15,6 +15,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Shared.Auth.Session as Session
 import String.Format as String
+import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Common.AppState exposing (AppState)
 
 
@@ -92,7 +93,10 @@ encodeTour config =
     E.object
         [ ( "tourId", E.string config.tourId )
         , ( "steps", E.list encodeStep config.steps )
-        , ( "skipTourStr", E.string (String.format "%s\n(%s)" [ skipTourStr config.locale, skipTourHint config.locale ]) )
+        , ( "skipTourText", E.string (String.format "%s\n(%s)" [ skipTourStr config.locale, skipTourHint config.locale ]) )
+        , ( "nextBtnText", E.string (gettext "Next" config.locale) )
+        , ( "prevBtnText", E.string (gettext "Previous" config.locale) )
+        , ( "doneBtnText", E.string (gettext "Done" config.locale) )
         , ( "delay", E.int config.delay )
         ]
 
@@ -110,13 +114,13 @@ encodeStep step =
         ]
 
 
-init : TourConfig -> Cmd msg
-init (TourConfig config) =
-    if not config.loggedIn || List.member config.tourId config.completedTourIds then
+init : BootstrapConfig -> TourConfig -> Cmd msg
+init config (TourConfig tourConfigData) =
+    if not config.features.toursEnabled || List.member tourConfigData.tourId tourConfigData.completedTourIds then
         Cmd.none
 
     else
-        drive (encodeTour config)
+        drive (encodeTour tourConfigData)
 
 
 port drive : E.Value -> Cmd msg

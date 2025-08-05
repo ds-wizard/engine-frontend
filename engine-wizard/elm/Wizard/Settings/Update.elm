@@ -7,6 +7,7 @@ import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Settings.Authentication.Update
 import Wizard.Settings.DashboardAndLoginScreen.Update
+import Wizard.Settings.Features.Update
 import Wizard.Settings.Generic.Update
 import Wizard.Settings.KnowledgeModels.Update
 import Wizard.Settings.LookAndFeel.Update
@@ -38,6 +39,9 @@ fetchData route appState _ =
 
         PrivacyAndSupportRoute ->
             genericFetch PrivacyAndSupportMsg
+
+        FeaturesRoute ->
+            genericFetch FeaturesMsg
 
         DashboardAndLoginScreenRoute ->
             genericFetch DashboardMsg
@@ -87,6 +91,13 @@ update wrapMsg msg appState model =
                     Wizard.Settings.PrivacyAndSupport.Update.update (wrapMsg << PrivacyAndSupportMsg) privacyAndSupportMsg appState model.privacyAndSupportModel
             in
             ( { model | privacyAndSupportModel = privacyAndSupportModel }, cmd )
+
+        FeaturesMsg featuresMsg ->
+            let
+                ( featuresModel, cmd ) =
+                    Wizard.Settings.Features.Update.update (wrapMsg << FeaturesMsg) featuresMsg appState model.featuresModel
+            in
+            ( { model | featuresModel = featuresModel }, cmd )
 
         DashboardMsg dashboardMsg ->
             let

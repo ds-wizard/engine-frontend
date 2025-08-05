@@ -4,11 +4,11 @@ import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
 import Dict
 import Gettext exposing (gettext)
-import Shared.Api.BuildInfo as BuildInfoApi
 import Shared.Copy as Copy
+import Shared.Data.ApiError as ApiError
 import Shared.Data.BuildInfo as BuildInfo
-import Shared.Error.ApiError as ApiError
 import Task
+import Wizard.Api.BuildInfo as BuildInfoApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Menu.Models exposing (Model)
 import Wizard.Common.Menu.Msgs exposing (Msg(..))

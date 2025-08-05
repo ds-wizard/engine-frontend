@@ -5,7 +5,7 @@ module Wizard.Locales.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Shared.Data.LocaleDetail exposing (LocaleDetail)
+import Wizard.Api.Models.LocaleDetail exposing (LocaleDetail)
 
 
 type alias Model =

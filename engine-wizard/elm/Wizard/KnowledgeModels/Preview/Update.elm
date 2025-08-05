@@ -9,18 +9,18 @@ import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
-import Shared.Api.KnowledgeModels as KnowledgeModelsApi
-import Shared.Api.Packages as PackagesApi
-import Shared.Api.Questionnaires as QuestionnairesApi
-import Shared.Data.PackageDetail as PackageDetail
-import Shared.Data.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Shared.Data.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
-import Shared.Data.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
-import Shared.Data.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire
-import Shared.Error.ApiError as ApiError
+import Shared.Data.ApiError as ApiError
 import Shared.Setters exposing (setKnowledgeModel, setPackage)
 import Shared.Utils exposing (getUuid)
-import Wizard.Common.Api exposing (applyResult)
+import Shared.Utils.RequestHelpers as RequestHelpers
+import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
+import Wizard.Api.Models.PackageDetail as PackageDetail
+import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
+import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire
+import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Questionnaire as Questionnaire
 import Wizard.KnowledgeModels.Preview.Models exposing (Model)
@@ -34,8 +34,8 @@ import Wizard.Routing exposing (cmdNavigate)
 fetchData : AppState -> String -> Cmd Msg
 fetchData appState packageId =
     Cmd.batch
-        [ KnowledgeModelsApi.fetchPreview (Just packageId) [] [] appState FetchPreviewComplete
-        , PackagesApi.getPackage packageId appState GetPackageComplete
+        [ KnowledgeModelsApi.fetchPreview appState (Just packageId) [] [] FetchPreviewComplete
+        , PackagesApi.getPackage appState packageId GetPackageComplete
         ]
 
 
@@ -44,22 +44,24 @@ update msg wrapMsg appState model =
     case msg of
         FetchPreviewComplete result ->
             initQuestionnaireModel appState <|
-                applyResult appState
+                RequestHelpers.applyResult
                     { setResult = setKnowledgeModel
                     , defaultError = gettext "Unable to get the knowledge model." appState.locale
                     , model = model
                     , result = result
                     , logoutMsg = Wizard.Msgs.logoutMsg
+                    , locale = appState.locale
                     }
 
         GetPackageComplete result ->
             initQuestionnaireModel appState <|
-                applyResult appState
+                RequestHelpers.applyResult
                     { setResult = setPackage
                     , defaultError = gettext "Unable to get knowledge models." appState.locale
                     , model = model
                     , result = result
                     , logoutMsg = Wizard.Msgs.logoutMsg
+                    , locale = appState.locale
                     }
 
         QuestionnaireMsg qtnMsg ->
@@ -81,7 +83,7 @@ update msg wrapMsg appState model =
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                QuestionnairesApi.postQuestionnaire body appState PostQuestionnaireCompleted
+                                QuestionnairesApi.postQuestionnaire appState body PostQuestionnaireCompleted
                     in
                     ( appState.seed, { model | creatingQuestionnaire = Loading }, cmd )
 
@@ -117,7 +119,7 @@ update msg wrapMsg appState model =
 
                                 cmd =
                                     Cmd.map wrapMsg <|
-                                        QuestionnairesApi.putQuestionnaireContent questionnaire.uuid events appState (PutQuestionnaireContentComplete questionnaire.uuid)
+                                        QuestionnairesApi.putQuestionnaireContent appState questionnaire.uuid events (PutQuestionnaireContentComplete questionnaire.uuid)
                             in
                             ( newSeed, model, cmd )
 

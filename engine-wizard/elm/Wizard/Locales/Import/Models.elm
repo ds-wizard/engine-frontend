@@ -1,6 +1,6 @@
 module Wizard.Locales.Import.Models exposing (ImportModel(..), Model, initialModel)
 
-import Shared.Data.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
 import Wizard.Locales.Import.RegistryImport.Models as RegistryImportModels
