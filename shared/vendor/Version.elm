@@ -13,10 +13,12 @@ module Version exposing
     , nextMinor
     , nextPatch
     , toString
+    , toStringMinor
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import Maybe.Extra as Maybe
 
 
 type Version
@@ -63,26 +65,13 @@ decoder =
     D.string
         |> D.andThen
             (\str ->
-                let
-                    parts =
-                        String.split "." str
-                            |> List.map String.toInt
-                in
-                case parts of
-                    (Just major) :: (Just minor) :: (Just patch) :: [] ->
-                        D.succeed <| create major minor patch
-
-                    _ ->
-                        D.fail <| "Invalid version " ++ str
+                Maybe.unwrap (D.fail ("Invalid version " ++ str)) D.succeed (fromString str)
             )
 
 
 encode : Version -> E.Value
-encode (Version major minor patch) =
-    [ major, minor, patch ]
-        |> List.map String.fromInt
-        |> String.join "."
-        |> E.string
+encode =
+    E.string << toString
 
 
 toString : Version -> String
@@ -90,11 +79,22 @@ toString (Version major minor patch) =
     String.fromInt major ++ "." ++ String.fromInt minor ++ "." ++ String.fromInt patch
 
 
+toStringMinor : Version -> String
+toStringMinor (Version major minor _) =
+    String.fromInt major ++ "." ++ String.fromInt minor
+
+
 fromString : String -> Maybe Version
 fromString versionString =
     case List.map String.toInt <| String.split "." versionString of
         (Just major) :: (Just minor) :: (Just patch) :: [] ->
             Just <| create major minor patch
+
+        (Just major) :: (Just minor) :: [] ->
+            Just <| create major minor 0
+
+        (Just major) :: [] ->
+            Just <| create major 0 0
 
         _ ->
             Nothing

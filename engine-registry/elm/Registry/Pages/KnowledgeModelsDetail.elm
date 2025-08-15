@@ -123,7 +123,7 @@ viewKnowledgeModel appState model knowledgeModel =
                 , wrapMsg = VersionListMsg
                 , versionListState = model.versionListState
                 }
-            , SidebarRow.viewMetamodelVersion appState knowledgeModel.metamodelVersion
+            , SidebarRow.viewMetamodelVersion appState (String.fromInt knowledgeModel.metamodelVersion)
             , Maybe.unwrap Html.nothing viewForkOfRow knowledgeModel.forkOfPackageId
             , SidebarRow.viewPublishedOn appState knowledgeModel.createdAt
             , SidebarRow.viewOrganization appState knowledgeModel.organization

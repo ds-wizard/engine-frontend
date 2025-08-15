@@ -20,6 +20,7 @@ import Registry.Components.VersionList as VersionList
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
 import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Version
 
 
 type alias Model =
@@ -110,7 +111,7 @@ viewKnowledgeModel appState model documentTemplate =
                 , wrapMsg = VersionListMsg
                 , versionListState = model.versionListState
                 }
-            , SidebarRow.viewMetamodelVersion appState documentTemplate.metamodelVersion
+            , SidebarRow.viewMetamodelVersion appState (Version.toStringMinor documentTemplate.metamodelVersion)
             , SidebarRow.viewPublishedOn appState documentTemplate.createdAt
             , SidebarRow.viewOrganization appState documentTemplate.organization
             ]
