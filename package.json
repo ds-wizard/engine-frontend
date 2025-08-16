@@ -24,7 +24,7 @@
   },
   "devDependencies": {
     "@lydell/elm": "^0.19.1-14",
-    "copy-webpack-plugin": "^13.0.0",
+    "copy-webpack-plugin": "^13.0.1",
     "css-loader": "^7.1.2",
     "css-minimizer-webpack-plugin": "^7.0.2",
     "elm-review": "^2.13.3",
