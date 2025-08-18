@@ -116,7 +116,7 @@ encodeStep step =
 
 init : BootstrapConfig -> TourConfig -> Cmd msg
 init config (TourConfig tourConfigData) =
-    if not config.features.toursEnabled || List.member tourConfigData.tourId tourConfigData.completedTourIds then
+    if not config.features.toursEnabled || not tourConfigData.loggedIn || List.member tourConfigData.tourId tourConfigData.completedTourIds then
         Cmd.none
 
     else
