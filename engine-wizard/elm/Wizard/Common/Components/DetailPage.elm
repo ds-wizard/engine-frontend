@@ -5,6 +5,7 @@ module Wizard.Common.Components.DetailPage exposing
     , contentInnerFullClass
     , header
     , sidePanel
+    , sidePanelHtmlItemWithIcon
     , sidePanelItemWithIcon
     , sidePanelItemWithIconWithLink
     , sidePanelList
@@ -63,6 +64,14 @@ sidePanelList colLabel colValue rows =
             ]
     in
     dl [ class "row" ] (List.concatMap viewRow rows)
+
+
+sidePanelHtmlItemWithIcon : List (Html msg) -> Html msg -> Html msg
+sidePanelHtmlItemWithIcon itemContent icon =
+    div [ class "DetailPage__SidePanel__ItemIcon" ]
+        [ icon
+        , div [ class "content" ] itemContent
+        ]
 
 
 sidePanelItemWithIcon : String -> Html msg -> Html msg -> Html msg
