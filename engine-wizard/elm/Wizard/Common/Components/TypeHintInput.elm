@@ -233,6 +233,7 @@ view appState cfg model isInvalid =
                             if cfg.clearEnabled then
                                 a
                                     [ stopPropagationOn "click" (D.succeed ( cfg.wrapMsg ClearReply, True ))
+                                    , class "ms-2"
                                     ]
                                     [ faRemove ]
 
