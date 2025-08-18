@@ -82,11 +82,19 @@ viewNavigation appState model questionnaire importResult =
                 , errorsLink
                 ]
 
-        changesCount =
-            List.length importResult.questionnaireEvents
-
         changesLink =
-            a [ onClick (ChangeSidePanel ChangesSidePanel), class "ms-3" ]
+            let
+                changesElement =
+                    if List.isEmpty importResult.errors then
+                        span [ class "ms-3" ]
+
+                    else
+                        a [ onClick (ChangeSidePanel ChangesSidePanel), class "ms-3" ]
+
+                changesCount =
+                    List.length importResult.questionnaireEvents
+            in
+            changesElement
                 (String.formatHtml
                     (ngettext ( "%s questionnaire change will be imported", "%s questionnaire changes will be imported" ) changesCount appState.locale)
                     [ strong []
