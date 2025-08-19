@@ -184,6 +184,9 @@ messageToReadable appState message =
         -- Wizard
         "error.database.entity_not_found" ->
             case List.head message.params of
+                Just "action_key" ->
+                    Just <| gettext "Activation link is no longer valid." appState.locale
+
                 Just "branch" ->
                     Just <| gettext "Knowledge model editor not found." appState.locale
 
