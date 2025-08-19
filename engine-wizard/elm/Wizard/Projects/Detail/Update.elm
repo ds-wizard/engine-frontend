@@ -733,12 +733,16 @@ update wrapMsg msg appState model =
                     { wrapMsg = wrapMsg << ShareModalMsg
                     , questionnaireUuid = model.uuid
                     , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
+                    , onCloseMsg = wrapMsg ShareModalCloseMsg
                     }
 
                 ( newSeed, shareModalModel, cmd ) =
                     ShareModal.update updateConfig shareModalMsg appState model.shareModalModel
             in
             ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
+
+        ShareModalCloseMsg ->
+            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire.resetUserSugggestionDropdownModels model.questionnaireModel }, Cmd.none )
 
         ShareDropdownMsg dropdownState ->
             withSeed ( { model | shareDropdownState = dropdownState }, Cmd.none )

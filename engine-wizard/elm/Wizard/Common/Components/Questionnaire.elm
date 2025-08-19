@@ -19,6 +19,7 @@ module Wizard.Common.Components.Questionnaire exposing
     , init
     , initSimple
     , reopenCommentThread
+    , resetUserSugggestionDropdownModels
     , resolveCommentThread
     , setActiveChapterUuid
     , setLabels
@@ -513,6 +514,11 @@ wrapMapCommentThread threadUuid mapCommentThread commentThread =
 
     else
         commentThread
+
+
+resetUserSugggestionDropdownModels : Model -> Model
+resetUserSugggestionDropdownModels model =
+    { model | userSuggestionDropdownModels = Dict.empty }
 
 
 updateQuestionnaire : (QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire) -> Model -> Model

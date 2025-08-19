@@ -27,6 +27,7 @@ import Shared.Form.FormError exposing (FormError)
 import Shared.Utils exposing (getUuid, withNoCmd, withSeed)
 import Shortcut
 import String.Format as String
+import Task.Extra as Task
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -151,6 +152,7 @@ type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , questionnaireUuid : Uuid
     , permissions : List Permission
+    , onCloseMsg : msg
     }
 
 
@@ -164,8 +166,9 @@ update cfg msg appState model =
             )
 
         Close ->
-            { model | visible = False }
-                |> withNoCmd
+            ( { model | visible = False }
+            , Task.dispatch cfg.onCloseMsg
+            )
                 |> withSeed appState.seed
 
         UserTypeHintInputMsg typeHintInputMsg ->
