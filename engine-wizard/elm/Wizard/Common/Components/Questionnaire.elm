@@ -661,7 +661,7 @@ type Msg
     | GotContentScroll E.Value
     | ShowTypeHints (List String) Bool String String
     | HideTypeHints
-    | TypeHintInput (List String) Bool Reply
+    | TypeHintInput (List String) Bool Bool Reply
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded (List String) String (Result ApiError (List TypeHint))
     | ShowTypeHintsLegacy (List String) Bool String String
@@ -891,8 +891,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         HideTypeHints ->
             wrap { model | typeHints = Nothing }
 
-        TypeHintInput path emptySearch value ->
-            withSeed <| handleTypeHintInput model path emptySearch value
+        TypeHintInput path allowCustomReply emptySearch value ->
+            withSeed <| handleTypeHintInput model path allowCustomReply emptySearch value
 
         TypeHintDebounceMsg debounceMsg ->
             withSeed <| handleTypeHintDebounceMsg appState ctx model debounceMsg
@@ -1663,8 +1663,8 @@ handleShowTypeHintsLegacy appState ctx model path emptySearch questionUuid value
         ( { model | typeHintsLegacy = typeHints }, cmd )
 
 
-handleTypeHintInput : Model -> List String -> Bool -> Reply -> ( Model, Cmd Msg )
-handleTypeHintInput model path emptySearch reply =
+handleTypeHintInput : Model -> List String -> Bool -> Bool -> Reply -> ( Model, Cmd Msg )
+handleTypeHintInput model path allowCustomReply emptySearch reply =
     let
         ( ( debounce, debounceCmd ), newTypeHints ) =
             case ( emptySearch, reply.value ) of
@@ -1691,8 +1691,11 @@ handleTypeHintInput model path emptySearch reply =
                     )
 
         dispatchCmd =
-            Task.dispatch <|
-                SetReply (pathToString path) reply
+            if allowCustomReply then
+                Task.dispatch <| SetReply (pathToString path) reply
+
+            else
+                Cmd.none
     in
     ( { model | typeHintsDebounce = debounce, typeHints = newTypeHints }
     , Cmd.batch [ debounceCmd, dispatchCmd ]
@@ -3957,7 +3960,7 @@ viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
                     onFocusHandler =
                         [ onFocus (ShowTypeHints path apiIntegrationData.requestAllowEmptySearch (Question.getUuid question) questionValue) ]
                 in
-                [ onInput (TypeHintInput path apiIntegrationData.requestAllowEmptySearch << createReply appState << IntegrationReply << PlainType)
+                [ onInput (TypeHintInput path apiIntegrationData.allowCustomReply apiIntegrationData.requestAllowEmptySearch << createReply appState << IntegrationReply << PlainType)
                 , onBlur HideTypeHints
                 ]
                     ++ onFocusHandler
@@ -3967,7 +3970,15 @@ viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
                 Dict.get (pathToString path) model.questionnaire.replies
 
         viewInput currentValue =
-            input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
+            if apiIntegrationData.allowCustomReply then
+                input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
+
+            else
+                div [ class "input-group" ]
+                    [ span [ class "input-group-text" ]
+                        [ fas "fa-magnifying-glass" ]
+                    , input ([ class "form-control", type_ "text" ] ++ extraArgs) []
+                    ]
 
         questionInput =
             case mbReplyValue of

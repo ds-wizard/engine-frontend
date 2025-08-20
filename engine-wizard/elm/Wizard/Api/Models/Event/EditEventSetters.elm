@@ -1,6 +1,7 @@
 module Wizard.Api.Models.Event.EditEventSetters exposing
     ( setAbbreviation
     , setAdvice
+    , setAllowCustomReply
     , setAnnotations
     , setAnswerUuids
     , setChapterUuids
@@ -65,6 +66,11 @@ setAbbreviation value data =
 setAdvice : a -> { b | advice : EventField a } -> { b | advice : EventField a }
 setAdvice value data =
     { data | advice = EventField.create value True }
+
+
+setAllowCustomReply : a -> { b | allowCustomReply : EventField a } -> { b | allowCustomReply : EventField a }
+setAllowCustomReply value data =
+    { data | allowCustomReply = EventField.create value True }
 
 
 setAnnotations : a -> { b | annotations : EventField a } -> { b | annotations : EventField a }

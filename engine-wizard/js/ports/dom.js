@@ -17,7 +17,6 @@ module.exports = function (app) {
     }
 
     function scrollIntoView(elementSelector) {
-        console.log('scrollIntoView', elementSelector)
         waitForElement(elementSelector, function ($element) {
             $element.scrollIntoView({
                 behavior: 'smooth',

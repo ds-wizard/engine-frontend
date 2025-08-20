@@ -57,7 +57,7 @@ import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
 import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
 import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
-import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables, setWidgetUrl)
+import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables, setWidgetUrl)
 import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
 import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Wizard.Api.Models.Event.EditIntegrationApiLegacyEventData as EditIntegrationApiLegacyEventData
@@ -1918,6 +1918,16 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                 |> (EditIntegrationEvent << EditIntegrationApiEvent)
                 |> eventMsg True selector parentUuid (Just integrationUuid)
 
+        allowCustomReplyGroup =
+            [ Input.checkbox
+                { name = "allowCustomReply"
+                , label = gettext "Allow Custom Reply" appState.locale
+                , value = data.allowCustomReply
+                , onInput = createTypeEditEvent setAllowCustomReply
+                }
+            , FormExtra.mdAfter (gettext "If enabled, users can type their own custom reply. If disabled, they must select a reply from the integration." appState.locale)
+            ]
+
         variablesGroup =
             [ Input.variables appState
                 { label = gettext "Variables" appState.locale
@@ -1954,7 +1964,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                     [ text (gettext "Configure secrets" appState.locale)
                     , fas "fa-external-link-alt ms-2"
                     ]
-                , Markdown.toHtml [ class "text-muted mt-1" ] (gettext "Secrets can store sensitive information used for API calls, such as tokens, that you don't want to share with the knowledge models. You can use them as `{{ secret.secret_name }}` anywhere in the request configuration." appState.locale)
+                , Markdown.toHtml [ class "text-muted mt-1" ] (gettext "Secrets can store sensitive information used for API calls, such as tokens, that you don't want to share with the knowledge models. You can use them as `{{ secrets.secret_name }}` anywhere in the request configuration." appState.locale)
                 ]
             ]
 
@@ -1962,7 +1972,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
             Input.foldableGroup
                 { identifier = "advancedConfiguration"
                 , openLabel = gettext "Advanced Integration Configuration" appState.locale
-                , content = variablesGroup ++ secretsGroup
+                , content = allowCustomReplyGroup ++ variablesGroup ++ secretsGroup
                 , markdownPreviews = model.markdownPreviews
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = integrationUuid
