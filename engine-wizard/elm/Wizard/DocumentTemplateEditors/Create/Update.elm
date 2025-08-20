@@ -16,7 +16,7 @@ import String.Normalize as Normalize
 import Version exposing (Version)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
-import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Api.Models.CreatedEntityWithId exposing (CreatedEntityWithId)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.TypeHintInput as TypeHintInput
@@ -128,7 +128,7 @@ handleFormSetVersion appState version model =
     ( { model | form = form }, Cmd.none )
 
 
-handlePostDocumentTemplateDraftCompleted : AppState -> Model -> Result ApiError DocumentTemplateDraftDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostDocumentTemplateDraftCompleted : AppState -> Model -> Result ApiError CreatedEntityWithId -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePostDocumentTemplateDraftCompleted appState model result =
     case result of
         Ok documentTemplate ->
