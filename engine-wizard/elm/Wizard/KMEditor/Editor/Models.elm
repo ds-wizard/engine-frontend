@@ -1,6 +1,7 @@
 module Wizard.KMEditor.Editor.Models exposing
     ( Model
     , addSavingActionUuid
+    , getSecrets
     , init
     , initPageModel
     , removeSavingActionUuid
@@ -156,3 +157,8 @@ removeSavingActionUuid uuid model =
     ( { model | savingActionUuids = newSavingActionUuids, savingModel = newSavingModel }
     , List.length model.savingActionUuids /= List.length newSavingActionUuids
     )
+
+
+getSecrets : Model -> List String
+getSecrets model =
+    ActionResult.unwrap [] (List.map .name) model.kmSecrets

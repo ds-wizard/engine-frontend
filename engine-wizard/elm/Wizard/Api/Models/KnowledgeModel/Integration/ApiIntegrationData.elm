@@ -2,11 +2,14 @@ module Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing
     ( ApiIntegrationData
     , decoder
     , getTestVariableValue
+    , getUnknownVariables
     )
 
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Utils exposing (flip)
+import Shared.Utils.JinjaUtils exposing (JinjaParseResult)
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (TypeHintTestResponse)
@@ -56,3 +59,36 @@ decoder =
 getTestVariableValue : String -> ApiIntegrationData -> Maybe String
 getTestVariableValue variableName data =
     Dict.get variableName data.testVariables
+
+
+getUnknownVariables :
+    JinjaParseResult
+    -> List String
+    -> ApiIntegrationData
+    ->
+        { properties : List String
+        , variables : List String
+        , secrets : List String
+        }
+getUnknownVariables result secrets data =
+    let
+        filterUnknown var =
+            not
+                ((var == "q")
+                    || String.startsWith "variables." var
+                    || String.startsWith "secrets." var
+                )
+
+        unknownProperties =
+            List.filter filterUnknown result.properties
+
+        unknownVariables =
+            List.filter (not << flip List.member data.variables) result.variablesNested
+
+        unknownSecrets =
+            List.filter (not << flip List.member secrets) result.secretsNested
+    in
+    { properties = unknownProperties
+    , variables = unknownVariables
+    , secrets = unknownSecrets
+    }

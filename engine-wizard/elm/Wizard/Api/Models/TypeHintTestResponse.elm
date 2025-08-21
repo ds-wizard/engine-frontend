@@ -1,9 +1,11 @@
 module Wizard.Api.Models.TypeHintTestResponse exposing
-    ( ErrorData
+    ( CheckListFieldResult(..)
+    , ErrorData
     , Request
     , Response(..)
     , ResponseData
     , TypeHintTestResponse
+    , checkListField
     , decoder
     , encode
     , getSuggestedItemProperties
@@ -139,6 +141,38 @@ encodeResponseData { status, contentType, body } =
 supportedContentType : ResponseData -> Bool
 supportedContentType { contentType } =
     String.contains "application/json" contentType || String.contains "+json" contentType
+
+
+type CheckListFieldResult
+    = CheckListFieldResultOk
+    | CheckListFieldResultNotFound
+    | CheckListFieldResultNoList
+
+
+checkListField : String -> ResponseData -> CheckListFieldResult
+checkListField itemListField { bodyJson } =
+    case bodyJson of
+        Just jsonValue ->
+            let
+                path =
+                    if String.isEmpty itemListField then
+                        []
+
+                    else
+                        String.split "." itemListField
+            in
+            case JsonValue.getIn path jsonValue of
+                Ok (JsonValue.ArrayValue _) ->
+                    CheckListFieldResultOk
+
+                Ok _ ->
+                    CheckListFieldResultNoList
+
+                _ ->
+                    CheckListFieldResultNotFound
+
+        Nothing ->
+            CheckListFieldResultNotFound
 
 
 getSuggestedListFieldProperties : ResponseData -> List String
