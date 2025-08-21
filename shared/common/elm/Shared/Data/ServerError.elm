@@ -259,7 +259,7 @@ messageToReadable appState message =
         "error.validation.openid_profile_info_absence" ->
             Just <| gettext "Profile Information from OpenID service is missing." appState.locale
 
-        "error.validation.tml_deletation" ->
+        "error.validation.tml_deletion" ->
             Just <| gettext "Document template cannot be deleted because it is used in some projects or documents." appState.locale
 
         "error.validation.tml_unsupported_metamodel_version" ->
