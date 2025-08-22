@@ -508,7 +508,7 @@ userEditActiveSessions appState uuidOrCurrent =
 
 userEditSubmissionSettings : AppState -> UuidOrCurrent -> Bool
 userEditSubmissionSettings appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
+    appState.config.submission.enabled && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
 
 
 
