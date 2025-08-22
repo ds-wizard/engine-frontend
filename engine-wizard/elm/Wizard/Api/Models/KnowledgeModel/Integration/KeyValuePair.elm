@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair exposing
     ( KeyValuePair
     , decoder
     , encode
+    , fromTuple
     , new
     )
 
@@ -35,4 +36,11 @@ new : KeyValuePair
 new =
     { key = ""
     , value = ""
+    }
+
+
+fromTuple : ( String, String ) -> KeyValuePair
+fromTuple ( key, value ) =
+    { key = key
+    , value = value
     }

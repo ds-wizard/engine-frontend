@@ -1,5 +1,6 @@
 module Wizard.KMEditor.Editor.Components.KMEditor exposing
-    ( DeleteModalState
+    ( CurlImportModalState
+    , DeleteModalState
     , EventMsg
     , Model
     , MoveModalState
@@ -15,9 +16,9 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
 import ActionResult exposing (ActionResult)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, code, div, h3, h5, hr, i, img, label, li, pre, small, span, strong, text, ul)
-import Html.Attributes exposing (attribute, class, classList, disabled, id, src, target)
-import Html.Events exposing (onClick, onMouseLeave)
+import Html exposing (Html, a, button, code, div, h3, h5, hr, i, img, label, li, pre, small, span, strong, text, textarea, ul)
+import Html.Attributes exposing (attribute, class, classList, disabled, id, placeholder, src, target, value)
+import Html.Events exposing (onClick, onInput, onMouseLeave)
 import Html.Extra as Html
 import Html.Keyed
 import Json.Print
@@ -33,6 +34,7 @@ import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Markdown as Markdown
 import Shared.Utils exposing (compose2, flip, httpMethodOptions, nilUuid)
+import Shared.Utils.CurlUtils as CurlUtils
 import Shared.Utils.HttpStatus as HttpStatus
 import SplitPane
 import String.Extra as String
@@ -89,6 +91,7 @@ import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData as ApiIntegrationData exposing (ApiIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiLegacyIntegrationData exposing (ApiLegacyIntegrationData)
+import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair
 import Wizard.Api.Models.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
@@ -106,7 +109,7 @@ import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Common.Html exposing (guideLink, linkTo)
-import Wizard.Common.Html.Attribute exposing (dataCy, tooltip)
+import Wizard.Common.Html.Attribute exposing (dataCy, tooltip, tooltipLeft)
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.FormExtra as FormExtra
@@ -135,6 +138,7 @@ type alias Model =
     , integrationTestResults : Dict String (ActionResult TypeHintTestResponse)
     , integrationTestPreviews : Dict String (ActionResult (List TypeHint))
     , lastCopiedString : Maybe String
+    , curlImportModalState : CurlImportModalState
     }
 
 
@@ -161,6 +165,12 @@ type alias MoveModalState =
     }
 
 
+type alias CurlImportModalState =
+    { integrationUuid : Maybe String
+    , curlString : String
+    }
+
+
 initialModel : Model
 initialModel =
     { splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
@@ -172,6 +182,7 @@ initialModel =
     , integrationTestResults = Dict.empty
     , integrationTestPreviews = Dict.empty
     , lastCopiedString = Nothing
+    , curlImportModalState = { integrationUuid = Nothing, curlString = "" }
     }
 
 
@@ -210,6 +221,9 @@ type Msg
     | TestIntegrationRequestCompleted String (Result ApiError TypeHintTestResponse)
     | TestIntegrationPreview String String
     | TestIntegrationPreviewCompleted String (Result ApiError (List TypeHint))
+    | CurlImportModalSetIntegration (Maybe String)
+    | CurlImportModalUpdateString String
+    | CurlImportModalConfirm
 
 
 type alias EventMsg msg =
@@ -402,6 +416,53 @@ update appState cfg msg ( editorBranch, model ) =
                     in
                     ( editorBranch, newModel, Cmd.none )
 
+        CurlImportModalSetIntegration integrationUuid ->
+            ( editorBranch
+            , { model | curlImportModalState = { integrationUuid = integrationUuid, curlString = "" } }
+            , Cmd.none
+            )
+
+        CurlImportModalUpdateString curlString ->
+            let
+                curlImportModalState =
+                    model.curlImportModalState
+            in
+            ( editorBranch, { model | curlImportModalState = { curlImportModalState | curlString = curlString } }, Cmd.none )
+
+        CurlImportModalConfirm ->
+            case model.curlImportModalState.integrationUuid of
+                Just integrationUuid ->
+                    let
+                        curlRequest =
+                            CurlUtils.parseCurl model.curlImportModalState.curlString
+
+                        setIfNotEmpty setter value =
+                            if String.isEmpty value then
+                                identity
+
+                            else
+                                setter (Just value)
+
+                        setRequestBodyMsg =
+                            EditIntegrationApiEventData.init
+                                |> setRequestMethod curlRequest.method
+                                |> setRequestUrl curlRequest.url
+                                |> setRequestHeaders (List.map KeyValuePair.fromTuple curlRequest.headers)
+                                |> setIfNotEmpty setRequestBody curlRequest.body
+                                |> (EditIntegrationEvent << EditIntegrationApiEvent)
+                                |> cfg.eventMsg False Nothing (EditorBranch.getParentUuid integrationUuid editorBranch) (Just integrationUuid)
+
+                        newModel =
+                            { model
+                                | curlImportModalState = { integrationUuid = Nothing, curlString = "" }
+                                , markdownPreviews = (integrationUuid ++ ":requestAdvancedConfiguration") :: model.markdownPreviews
+                            }
+                    in
+                    ( editorBranch, newModel, Task.dispatch setRequestBodyMsg )
+
+                Nothing ->
+                    ( editorBranch, model, Cmd.none )
+
 
 
 -- SUBSCRIPTIONS
@@ -507,6 +568,7 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
             ]
         , deleteModal appState wrapMsg eventMsg editorBranch model.deleteModalState
         , moveModal appState wrapMsg eventMsg editorBranch model.moveModalState
+        , curlImportModal appState wrapMsg model.curlImportModalState
         ]
 
 
@@ -2014,7 +2076,13 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                         }
             in
             div [ class "card card-border-light mb-5" ]
-                [ div [ class "card-header" ] [ text (gettext "Request" appState.locale) ]
+                [ div [ class "card-header d-flex justify-content-between" ]
+                    [ text (gettext "Request" appState.locale)
+                    , a (onClick (wrapMsg (CurlImportModalSetIntegration (Just data.uuid))) :: tooltipLeft (gettext "Import from cURL string" appState.locale))
+                        [ fas "fa-download me-1"
+                        , text (gettext "Import" appState.locale)
+                        ]
+                    ]
                 , div [ class "card-body" ]
                     [ div [ class "form-group" ]
                         [ div [ class "input-group input-group-http-request" ]
@@ -3394,3 +3462,30 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
             }
     in
     Modal.simple modalConfig
+
+
+
+-- cURL Import Modal
+
+
+curlImportModal : AppState -> (Msg -> msg) -> CurlImportModalState -> Html msg
+curlImportModal appState wrapMsg curlImportModalState =
+    let
+        content =
+            [ textarea
+                [ class "form-control"
+                , placeholder (gettext "Paste your cURL command here..." appState.locale)
+                , value curlImportModalState.curlString
+                , onInput (wrapMsg << CurlImportModalUpdateString)
+                ]
+                []
+            ]
+
+        curlImportModalConfig =
+            Modal.confirmConfig (gettext "Import from cURL" appState.locale)
+                |> Modal.confirmConfigVisible (Maybe.isJust curlImportModalState.integrationUuid)
+                |> Modal.confirmConfigAction (gettext "Import" appState.locale) (wrapMsg CurlImportModalConfirm)
+                |> Modal.confirmConfigCancelMsg (wrapMsg (CurlImportModalSetIntegration Nothing))
+                |> Modal.confirmConfigContent content
+    in
+    Modal.confirm appState curlImportModalConfig
