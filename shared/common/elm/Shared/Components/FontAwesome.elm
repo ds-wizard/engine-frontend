@@ -23,6 +23,7 @@ module Shared.Components.FontAwesome exposing
     , faExport
     , faExternalLink
     , faFw
+    , faFwRemove
     , faGuideLink
     , faImportFile
     , faInfo
@@ -304,6 +305,11 @@ faQuestionnaire =
 faRemove : Html msg
 faRemove =
     fas "fa-times"
+
+
+faFwRemove : Html msg
+faFwRemove =
+    fas "fa-fw fa-times"
 
 
 faSecretShow : Html msg

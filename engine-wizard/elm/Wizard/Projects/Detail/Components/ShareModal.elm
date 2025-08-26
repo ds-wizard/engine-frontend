@@ -20,7 +20,7 @@ import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
 import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove)
+import Shared.Components.FontAwesome exposing (faFwRemove, faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, fas)
 import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Form.FormError exposing (FormError)
@@ -47,7 +47,7 @@ import Wizard.Common.Components.TypeHintInput.TypeHintItem as TypeHintInput
 import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html exposing (guideLink)
-import Wizard.Common.Html.Attribute exposing (dataCy, dataTour, selectDataTour, tooltip)
+import Wizard.Common.Html.Attribute exposing (dataCy, dataTour, selectDataTour, tooltip, tooltipLeft)
 import Wizard.Common.TourId as TourId
 import Wizard.Common.View.ActionButton as ActionButton
 import Wizard.Common.View.FormExtra as FormExtra
@@ -526,7 +526,7 @@ userGroupView appState userGroups form i =
                     QuestionnaireEditFormMemberPerms.formOptions appState
 
                 roleSelect =
-                    FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms")
+                    FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms") False
 
                 privateBadge =
                     if userGroup.private then
@@ -598,11 +598,42 @@ userView appState users form i =
     case mbUser of
         Just user ->
             let
+                isLastOwner =
+                    let
+                        owners =
+                            List.filter
+                                (\index ->
+                                    (Form.getFieldAsString ("permissions." ++ String.fromInt index ++ ".perms") form).value
+                                        == Just (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Owner)
+                                )
+                                (Form.getListIndexes "permissions" form)
+                    in
+                    List.length owners == 1 && List.head owners == Just i
+
                 roleOptions =
                     QuestionnaireEditFormMemberPerms.formOptions appState
 
+                roleSelectWrapper =
+                    if isLastOwner then
+                        span (tooltipLeft (gettext "Last owner cannot be removed." appState.locale)) << List.singleton
+
+                    else
+                        identity
+
                 roleSelect =
-                    FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms")
+                    roleSelectWrapper <| FormExtra.inlineSelect roleOptions form ("permissions." ++ String.fromInt i ++ ".perms") isLastOwner
+
+                removeButton =
+                    if isLastOwner then
+                        fas "fa-fw"
+
+                    else
+                        a
+                            [ class "text-danger"
+                            , onClick (Form.RemoveItem "permissions" i)
+                            , title (gettext "Remove" appState.locale)
+                            ]
+                            [ faFwRemove ]
             in
             div [ class "user-row" ]
                 [ div []
@@ -611,12 +642,7 @@ userView appState users form i =
                     ]
                 , div []
                     [ roleSelect
-                    , a
-                        [ class "text-danger"
-                        , onClick (Form.RemoveItem "permissions" i)
-                        , title (gettext "Remove" appState.locale)
-                        ]
-                        [ faRemove ]
+                    , removeButton
                     ]
                 ]
 
@@ -635,7 +661,7 @@ formView appState form =
                             sharingPermission =
                                 (Form.getFieldAsString "sharingPermission" form).value
                         in
-                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState sharingPermission) form "visibilityPermission"
+                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState sharingPermission) form "visibilityPermission" False
 
                     visibilityEnabled =
                         Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
@@ -667,7 +693,7 @@ formView appState form =
                         Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
 
                     sharingSelect =
-                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState Nothing) form "sharingPermission"
+                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState Nothing) form "sharingPermission" False
 
                     sharingPermissionInput =
                         div

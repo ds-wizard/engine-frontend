@@ -9,7 +9,7 @@ module Wizard.Common.View.FormExtra exposing
 import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (Html, p)
-import Html.Attributes exposing (class, id)
+import Html.Attributes exposing (class, disabled, id)
 import Shared.Form.FormError exposing (FormError)
 import Shared.Markdown as Markdown
 
@@ -34,9 +34,9 @@ blockAfter =
     p [ class "form-text form-text-after text-muted" ]
 
 
-inlineSelect : List ( String, String ) -> Form FormError o -> String -> Html Form.Msg
-inlineSelect options form fieldName =
+inlineSelect : List ( String, String ) -> Form FormError o -> String -> Bool -> Html Form.Msg
+inlineSelect options form fieldName isDisabled =
     Input.selectInput
         options
         (Form.getFieldAsString fieldName form)
-        [ class "form-select form-control-inline", id fieldName ]
+        [ class "form-select form-control-inline", id fieldName, disabled isDisabled ]
