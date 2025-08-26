@@ -1433,19 +1433,32 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> (EditQuestionEvent << EditQuestionItemSelectEvent)
                                 |> eventMsg False Nothing parentUuid (Just questionUuid)
 
+                        listQuestionUuidOptgroup ( chapter, questions ) =
+                            let
+                                filteredQuestions =
+                                    questions
+                                        |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                        |> List.filter Question.isList
+                                        |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
+                            in
+                            if List.isEmpty filteredQuestions then
+                                Nothing
+
+                            else
+                                Just
+                                    ( chapter.title, filteredQuestions )
+
                         listQuestionUuidOptions =
-                            KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                                |> List.filter (not << flip EditorBranch.isQuestionDeletedInHierarchy editorBranch << Question.getUuid)
-                                |> List.filter Question.isList
-                                |> List.sortBy Question.getTitle
-                                |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
-                                |> (::) ( "", gettext "- select list question -" appState.locale )
+                            KnowledgeModel.getAllNestedQuestionsByChapter editorBranch.branch.knowledgeModel
+                                |> List.filter (not << flip EditorBranch.isDeleted editorBranch << .uuid << Tuple.first)
+                                |> List.filterMap listQuestionUuidOptgroup
 
                         listQuestionUuidInput =
-                            Input.select
+                            Input.selectWithGroups
                                 { name = "listQuestionUuid"
                                 , label = gettext "List Question" appState.locale
                                 , value = String.fromMaybe <| Question.getListQuestionUuid question
+                                , defaultOption = ( "", gettext "- select list question -" appState.locale )
                                 , options = listQuestionUuidOptions
                                 , onChange = createTypeEditEvent setListQuestionUuid << String.toMaybe
                                 , extra =
@@ -2854,6 +2867,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 , defaultOption = ( "", gettext "- select resource page -" appState.locale )
                                 , options = resourcePageUuidOptions
                                 , onChange = createTypeEditEvent setResourcePageUuid << String.toMaybe
+                                , extra = Nothing
                                 }
 
                         annotationsInput =

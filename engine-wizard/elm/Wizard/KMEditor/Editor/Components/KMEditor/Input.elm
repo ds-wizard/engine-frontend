@@ -305,6 +305,7 @@ type alias SelectWithGroupsInputConfig msg =
     , defaultOption : ( String, String )
     , options : List ( String, List ( String, String ) )
     , onChange : String -> msg
+    , extra : Maybe (Html msg)
     }
 
 
@@ -328,6 +329,7 @@ selectWithGroups config =
             , onInput config.onChange
             ]
             (viewOption config.defaultOption :: List.map viewGroup config.options)
+        , Maybe.withDefault Html.nothing config.extra
         ]
 
 

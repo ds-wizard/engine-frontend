@@ -5,6 +5,7 @@ module Wizard.Api.Models.KnowledgeModel exposing
     , decoder
     , empty
     , filterWithTags
+    , getAllNestedQuestionsByChapter
     , getAllQuestions
     , getAllResourcePages
     , getAnswer
@@ -84,7 +85,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Utils exposing (nilUuid)
+import Shared.Utils exposing (flip, nilUuid)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
@@ -563,6 +564,40 @@ getEntities getParents getChildUuids getChildren uuid km =
 resolveEntities : Dict String a -> List String -> List a
 resolveEntities entities =
     Maybe.values << List.map (\uuid -> Dict.get uuid entities)
+
+
+getAllNestedQuestionsByChapter : KnowledgeModel -> List ( Chapter, List Question )
+getAllNestedQuestionsByChapter km =
+    let
+        getNestedQuestions question =
+            let
+                questionUuid =
+                    Question.getUuid question
+
+                followupQuestions =
+                    List.concatMap
+                        (flip getAnswerFollowupQuestions km << .uuid)
+                        (getQuestionAnswers questionUuid km)
+
+                itemTemplateQuestions =
+                    getQuestionItemTemplateQuestions questionUuid km
+            in
+            followupQuestions ++ itemTemplateQuestions
+
+        collectQuestions question =
+            question :: List.concatMap collectQuestions (getNestedQuestions question)
+
+        getChapterQuestions_ chapter =
+            let
+                topLevelQuestions =
+                    getChapterQuestions chapter.uuid km
+            in
+            List.concatMap collectQuestions topLevelQuestions
+
+        chapters =
+            getChapters km
+    in
+    List.map (\chapter -> ( chapter, getChapterQuestions_ chapter )) chapters
 
 
 
