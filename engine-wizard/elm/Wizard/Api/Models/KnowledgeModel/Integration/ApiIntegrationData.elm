@@ -6,9 +6,9 @@ module Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing
     )
 
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Utils exposing (flip)
 import Shared.Utils.JinjaUtils exposing (JinjaParseResult)
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)

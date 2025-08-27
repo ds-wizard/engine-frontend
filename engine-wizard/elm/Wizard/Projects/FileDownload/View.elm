@@ -2,7 +2,7 @@ module Wizard.Projects.FileDownload.View exposing (view)
 
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page
 import Wizard.Projects.FileDownload.Models exposing (Model)

@@ -10,6 +10,7 @@ module Wizard.Projects.Detail.Components.ShareModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Cmd.Extra exposing (withNoCmd)
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
@@ -21,15 +22,16 @@ import List.Extra as List
 import Random exposing (Seed)
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faFwRemove, faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, fas)
-import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Utils exposing (getUuid, withNoCmd, withSeed)
+import Shared.Ports.Copy as Copy
+import Shared.Utils.Form.FormError exposing (FormError)
 import Shortcut
 import String.Format as String
 import Task.Extra as Task
 import Time
+import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
+import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
@@ -169,15 +171,15 @@ update cfg msg appState model =
             ( { model | visible = False }
             , Task.dispatch cfg.onCloseMsg
             )
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
         UserTypeHintInputMsg typeHintInputMsg ->
             handleUserTypeHintInputMsg cfg typeHintInputMsg appState model
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
         UserGroupTypeHintInputMsg typeHintInputMsg ->
             handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
         AddUser user ->
             handleAddUser appState cfg model user
@@ -187,21 +189,21 @@ update cfg msg appState model =
 
         FormMsg formMsg ->
             handleFormMsg cfg formMsg appState model
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
         PutQuestionnaireShareComplete time result ->
             handlePutQuestionnaireComplete appState model time result
                 |> withNoCmd
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
         CopyLink link ->
             ( { model | copiedLink = True }, Copy.copyToClipboard link )
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
         ClearCopiedLink ->
             { model | copiedLink = False }
                 |> withNoCmd
-                |> withSeed appState.seed
+                |> Tuple.prepend appState.seed
 
 
 handleUserTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserSuggestion -> AppState -> Model -> ( Model, Cmd msg )
@@ -268,7 +270,7 @@ handleAddUser appState cfg model user =
             Form.Input field Form.Text (Field.String value)
 
         ( newUuid, newSeed ) =
-            getUuid appState.seed
+            Uuid.step appState.seed
 
         msgs =
             [ Form.Append "permissions"
@@ -290,7 +292,7 @@ handleAddUser appState cfg model user =
     in
     newModel
         |> saveSharing appState cfg
-        |> withSeed newSeed
+        |> Tuple.prepend newSeed
 
 
 handleAddUserGroup : AppState -> UpdateConfig msg -> Model -> UserGroupSuggestion -> ( Seed, Model, Cmd msg )
@@ -309,7 +311,7 @@ handleAddUserGroup appState cfg model userGroup =
             Form.Input field Form.Text (Field.String value)
 
         ( newUuid, newSeed ) =
-            getUuid appState.seed
+            Uuid.step appState.seed
 
         msgs =
             [ Form.Append "permissions"
@@ -331,7 +333,7 @@ handleAddUserGroup appState cfg model userGroup =
     in
     newModel
         |> saveSharing appState cfg
-        |> withSeed newSeed
+        |> Tuple.prepend newSeed
 
 
 handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )

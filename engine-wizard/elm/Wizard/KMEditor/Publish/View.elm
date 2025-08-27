@@ -1,11 +1,11 @@
 module Wizard.KMEditor.Publish.View exposing (view)
 
+import Flip exposing (flip)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (href, target)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Utils exposing (flip)
+import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Version exposing (Version)
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)

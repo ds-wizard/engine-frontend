@@ -7,7 +7,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (faKmEditorKnowledgeModel, faKmEditorListPublish, faKmEditorTags, faKmPhase, faPreview, faSettings)
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 import Uuid
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.Components.DetailNavigation as DetailNavigation

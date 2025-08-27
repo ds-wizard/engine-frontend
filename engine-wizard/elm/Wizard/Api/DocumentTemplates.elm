@@ -13,6 +13,7 @@ module Wizard.Api.DocumentTemplates exposing
     , putTemplate
     )
 
+import Bool.Extra as Bool
 import File exposing (File)
 import Json.Decode as D
 import Maybe.Extra as Maybe
@@ -20,7 +21,6 @@ import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils exposing (boolToString)
 import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
@@ -93,7 +93,7 @@ getTemplatesSuggestions appState nonEditable includeUnsupportedMetamodelVersion 
         params =
             [ ( "phase", DocumentTemplatePhase.toString DocumentTemplatePhase.Released )
             , ( "includeUnsupportedMetamodelVersion", includeUnsupportedMetamodelVersionValue )
-            , ( "nonEditable", Maybe.unwrap "" boolToString nonEditable )
+            , ( "nonEditable", Maybe.unwrap "" Bool.toString nonEditable )
             ]
 
         queryString =

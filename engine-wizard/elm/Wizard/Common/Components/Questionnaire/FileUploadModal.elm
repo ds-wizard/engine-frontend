@@ -20,10 +20,10 @@ import Html.Extra as Html
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.FontAwesome exposing (fa, faCancel)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Markdown as Markdown
+import Shared.Utils.ByteUnits as ByteUnits
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Task.Extra as Task
 import Uuid exposing (Uuid)

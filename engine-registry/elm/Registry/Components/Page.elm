@@ -6,7 +6,7 @@ import Html exposing (Html, div, h1, i, p, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Registry.Data.AppState exposing (AppState)
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 
 
 view : AppState -> (a -> Html msg) -> ActionResult a -> Html msg

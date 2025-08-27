@@ -16,13 +16,13 @@ import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Auth.Role as Role
-import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Components.FontAwesome exposing (fa, faInfo)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
-import Shared.Markdown as Markdown
+import Shared.Data.Role as Role
+import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Markdown as Markdown
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.User as User exposing (User)

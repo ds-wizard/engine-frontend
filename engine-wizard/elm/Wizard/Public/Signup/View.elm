@@ -8,7 +8,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, text)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Html.Extra as Html
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (dataCy)

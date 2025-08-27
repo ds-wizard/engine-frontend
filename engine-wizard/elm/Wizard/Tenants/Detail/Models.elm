@@ -5,7 +5,7 @@ module Wizard.Tenants.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 import Wizard.Tenants.Common.TenantEditForm exposing (TenantEditForm)

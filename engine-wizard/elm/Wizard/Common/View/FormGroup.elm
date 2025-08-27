@@ -42,12 +42,12 @@ import Html.Attributes exposing (autocomplete, checked, class, classList, for, h
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.FontAwesome exposing (fa, faAdd, faSecretHide, faSecretShow)
-import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
-import Shared.Form exposing (errorToString)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Markdown as Markdown
+import Shared.Utils.ByteUnits as ByteUnits
+import Shared.Utils.Form exposing (errorToString)
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.MarkdownOrHtml as MarkdownOrHtml
 import String.Format as String
 import Uuid
 import Version exposing (Version)

@@ -37,8 +37,10 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , warningsLength
     )
 
+import Bool.Extra as Bool
 import Dict exposing (Dict)
 import Dict.Extra as Dict
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -47,14 +49,14 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
 import Result.Extra as Result
-import Shared.Markdown as Markdown
-import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils exposing (boolToInt, flip, getUuidString)
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Extra as String
 import String.Format as String
 import Time
 import Tuple.Extra as Tuple
 import Uuid exposing (Uuid)
+import Uuid.Extra as Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
@@ -924,8 +926,8 @@ evaluateQuestion questionnaire path question =
                     questionData.answerUuids
                         |> List.find ((==) (ReplyValue.getAnswerUuid value))
                         |> Maybe.map (evaluateFollowups questionnaire currentPath)
-                        |> Maybe.map (Tuple.sum ( 0, boolToInt requiredNow ))
-                        |> Maybe.withDefault ( boolToInt requiredNow, boolToInt requiredNow )
+                        |> Maybe.map (Tuple.sum ( 0, Bool.toInt requiredNow ))
+                        |> Maybe.withDefault ( Bool.toInt requiredNow, Bool.toInt requiredNow )
 
                 ListQuestion commonData _ ->
                     let
@@ -935,20 +937,20 @@ evaluateQuestion questionnaire path question =
                     if not (List.isEmpty itemUuids) then
                         itemUuids
                             |> List.map (evaluateAnswerItem questionnaire currentPath (KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid questionnaire.knowledgeModel))
-                            |> List.foldl Tuple.sum ( 0, boolToInt requiredNow )
+                            |> List.foldl Tuple.sum ( 0, Bool.toInt requiredNow )
 
                     else
-                        ( boolToInt requiredNow, boolToInt requiredNow )
+                        ( Bool.toInt requiredNow, Bool.toInt requiredNow )
 
                 _ ->
                     if ReplyValue.isEmpty value then
-                        ( boolToInt requiredNow, boolToInt requiredNow )
+                        ( Bool.toInt requiredNow, Bool.toInt requiredNow )
 
                     else
-                        ( 0, boolToInt requiredNow )
+                        ( 0, Bool.toInt requiredNow )
 
         Nothing ->
-            ( boolToInt requiredNow, boolToInt requiredNow )
+            ( Bool.toInt requiredNow, Bool.toInt requiredNow )
 
 
 evaluateFollowups : QuestionnaireQuestionnaire -> List String -> String -> ( Int, Int )
@@ -1089,7 +1091,7 @@ foldReplies currentTime km parentMap seed questionUuid replies =
             -- add item to question, get parent question and continue
             let
                 ( itemUuid, newSeed ) =
-                    getUuidString seed
+                    Uuid.stepString seed
 
                 reply =
                     { value = ReplyValue.ItemListReply [ itemUuid ]

@@ -4,8 +4,8 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Shared.Data.ApiError as ApiError
-import Shared.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel

@@ -7,11 +7,10 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Registry.Components.FontAwesome exposing (fas)
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faEdit, faWarning)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust)
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -108,7 +107,7 @@ sidePanel appState tenantDetail =
             ]
     in
     DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 <| listFilterJust sections ]
+        [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
 sidePanelInfo : AppState -> TenantDetail -> Maybe ( String, String, Html msg )

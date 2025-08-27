@@ -9,10 +9,10 @@ import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Html.Extra as Html
 import Json.Decode as D
 import Json.Decode.Extra as D
-import Shared.Auth.Role as Role
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
+import Shared.Data.Role as Role
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)

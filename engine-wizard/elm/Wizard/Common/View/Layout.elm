@@ -10,7 +10,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, img, li, nav, text, ul)
 import Html.Attributes exposing (class, classList, src)
 import Html.Extra as Html
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Common.AppState as AppState exposing (AppState)

@@ -7,10 +7,9 @@ module Wizard.Common.QuestionnaireUtils exposing
     , isOwner
     )
 
+import Flip exposing (flip)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Auth.Session as Session
-import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
@@ -19,6 +18,7 @@ import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility exposing (Questio
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
 import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Session as Session
 
 
 type alias QuestionnaireLike q =

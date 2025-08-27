@@ -8,7 +8,7 @@ import Html.Extra as Html
 import Html.Keyed
 import Maybe.Extra as Maybe
 import Shared.Components.FontAwesome exposing (fa)
-import Shared.Components.MarkdownOrHtml as MarkdownOrHtml
+import Shared.Utils.MarkdownOrHtml as MarkdownOrHtml
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Announcements as Announcements

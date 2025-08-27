@@ -7,9 +7,9 @@ import Html exposing (Html, a, div, h3, hr, label, strong, text)
 import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Auth.Role as Role
 import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Data.Role as Role
+import Shared.Utils.Form.FormError exposing (FormError)
 import String.Extra as String
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)

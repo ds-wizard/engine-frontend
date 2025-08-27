@@ -1,9 +1,9 @@
 module Wizard.Auth.Update exposing (update)
 
 import Browser.Navigation as Navigation
-import Shared.Auth.Session as Session
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Auth.Msgs as AuthMsgs
+import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Ports as Ports

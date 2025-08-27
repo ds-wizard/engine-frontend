@@ -10,9 +10,9 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
 import Shared.Data.ApiError as ApiError
-import Shared.Setters exposing (setKnowledgeModel, setPackage)
-import Shared.Utils exposing (getUuid)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setKnowledgeModel, setPackage)
+import Uuid.Extra as Uuid
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.PackageDetail as PackageDetail
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
@@ -99,7 +99,7 @@ update msg wrapMsg appState model =
                                 toEvent ( path, reply ) ( seed, list ) =
                                     let
                                         ( uuid, nextSeed ) =
-                                            getUuid seed
+                                            Uuid.step seed
 
                                         event =
                                             SetReply

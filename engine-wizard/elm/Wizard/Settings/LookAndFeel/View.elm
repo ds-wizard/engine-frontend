@@ -8,9 +8,9 @@ import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
-import Shared.Markdown as Markdown
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig

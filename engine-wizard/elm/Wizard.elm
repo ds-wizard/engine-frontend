@@ -3,13 +3,13 @@ module Wizard exposing (main)
 import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
-import Shared.Auth.Session as Session
 import Shared.Utils.Theme as Theme
 import Task.Extra as Task
 import Url exposing (Url)
 import Wizard.Common.AppState as AppState
 import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Time as Time
+import Wizard.Data.Session as Session
 import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
 import Wizard.Msgs exposing (Msg)

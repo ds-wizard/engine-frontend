@@ -8,8 +8,8 @@ import Gettext
 import Html exposing (Html, div, form)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks exposing (GuideLinks)
 import Wizard.Common.View.FormActions as FormActions

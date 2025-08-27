@@ -7,8 +7,8 @@ import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
+import List.Utils as List
 import Shared.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromOwl, faKmImportFromRegistry)
-import Shared.Utils exposing (listInsertIf)
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileImport as FileImport
@@ -59,9 +59,9 @@ view appState model =
 
         navItems =
             []
-                |> listInsertIf registryNavItem registryEnabled
-                |> listInsertIf fileNavItem True
-                |> listInsertIf owlNavItem appState.config.owl.enabled
+                |> List.insertIf registryNavItem registryEnabled
+                |> List.insertIf fileNavItem True
+                |> List.insertIf owlNavItem appState.config.owl.enabled
 
         content =
             case model.importModel of

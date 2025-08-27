@@ -12,6 +12,7 @@ module Wizard.Common.Components.Questionnaire.History exposing
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, br, div, em, h5, img, input, label, li, span, strong, text, ul)
 import Html.Attributes exposing (checked, class, src, type_)
@@ -19,11 +20,9 @@ import Html.Events exposing (onCheck, onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Auth.Session as Session
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (flip)
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Uuid exposing (Uuid)
@@ -45,6 +44,7 @@ import Wizard.Common.Components.QuestionnaireVersionTag as QuestionnaireVersionT
 import Wizard.Common.FileIcon as FileIcon
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.Page as Page
+import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 
 

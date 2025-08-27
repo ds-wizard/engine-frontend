@@ -2,6 +2,7 @@ module Wizard.KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, br, button, code, dd, del, div, dl, dt, h1, h3, ins, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, disabled)
@@ -10,7 +11,6 @@ import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
-import Shared.Utils exposing (flip)
 import String.Extra as String
 import String.Format as String exposing (format)
 import Wizard.Api.Models.Event as Event exposing (Event(..))

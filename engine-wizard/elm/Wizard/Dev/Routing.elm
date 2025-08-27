@@ -4,9 +4,7 @@ module Wizard.Dev.Routing exposing
     , toUrl
     )
 
-import Dict
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils exposing (dictFromMaybeList)
 import Url.Parser exposing ((</>), Parser, map, s)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query
@@ -49,9 +47,7 @@ toUrl route =
         PersistentCommandsIndex paginationQueryString mbState ->
             let
                 params =
-                    Dict.toList <|
-                        dictFromMaybeList
-                            [ ( persistentCommandIndexRouteStateFilterId, mbState ) ]
+                    PaginationQueryString.filterParams [ ( persistentCommandIndexRouteStateFilterId, mbState ) ]
             in
             [ moduleRoot, "persistent-commands" ++ PaginationQueryString.toUrlWith params paginationQueryString ]
 

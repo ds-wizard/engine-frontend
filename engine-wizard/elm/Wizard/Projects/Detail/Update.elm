@@ -13,10 +13,9 @@ import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.WebSocket as WebSocket
-import Shared.Auth.Session as Session
-import Shared.Copy as Ports
 import Shared.Data.ApiError as ApiError exposing (ApiError(..))
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
+import Shared.Ports.Copy as Ports
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Triple
@@ -39,6 +38,7 @@ import Wizard.Common.Components.SummaryReport as SummaryReport
 import Wizard.Common.Driver as Driver exposing (TourConfig)
 import Wizard.Common.Html.Attribute exposing (selectDataTour)
 import Wizard.Common.TourId as TourId
+import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireShareForm as QuestionnaireShareForm

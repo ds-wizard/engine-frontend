@@ -12,7 +12,7 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility

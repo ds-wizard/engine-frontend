@@ -9,7 +9,7 @@ import Form exposing (Form)
 import Form.Validate exposing (Validation)
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConfig)
 import Wizard.Api.Tenants as TenantsApi

@@ -6,8 +6,7 @@ import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust)
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Version
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
@@ -138,7 +137,7 @@ sidePanel appState locale =
             ]
     in
     DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 <| listFilterJust sections ]
+        [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
 sidePanelLocaleInfo : AppState -> LocaleDetail -> Maybe ( String, String, Html msg )

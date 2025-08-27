@@ -13,7 +13,7 @@ import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text
 import Html.Attributes exposing (checked, class, classList, style, type_)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
 import Shared.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmItemTemplate, faKmQuestion)
-import Shared.Utils exposing (getContrastColorHex)
+import Shared.Utils.ColorUtils as ColorUtils
 import String.Extra as String
 import Wizard.Api.Models.Event exposing (Event(..))
 import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
@@ -165,7 +165,7 @@ thTag appState model tag =
     let
         attributes =
             [ style "background" tag.color
-            , style "color" <| getContrastColorHex tag.color
+            , style "color" <| ColorUtils.getContrastColorHex tag.color
             , class "tag"
             , classList [ ( "untitled", untitled ) ]
             , dataCy "km-editor_tag-editor_tag"

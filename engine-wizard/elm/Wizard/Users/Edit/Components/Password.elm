@@ -13,9 +13,9 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)

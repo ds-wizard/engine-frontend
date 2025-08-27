@@ -2,6 +2,7 @@ module Wizard.Common.Components.Questionnaire.DefaultQuestionnaireRenderer expos
 
 import Dict
 import Dict.Extra as Dict
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
@@ -10,8 +11,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (flip)
+import Shared.Utils.Markdown as Markdown
 import String.Extra as String
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)

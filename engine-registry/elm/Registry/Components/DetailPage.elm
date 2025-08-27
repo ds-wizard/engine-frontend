@@ -7,8 +7,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, hr, i, span, strong, text)
 import Html.Attributes exposing (class)
 import Registry.Data.AppState exposing (AppState)
-import Shared.Common.TimeUtils as TimeUtils
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Version exposing (Version)

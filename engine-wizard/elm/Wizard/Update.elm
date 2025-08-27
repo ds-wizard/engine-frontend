@@ -2,7 +2,6 @@ module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
-import Shared.Auth.Session as Session
 import Url
 import Wizard.Api.Tours as ToursApi
 import Wizard.Auth.Update
@@ -12,6 +11,7 @@ import Wizard.Common.Components.AIAssistant as AIAssistant
 import Wizard.Common.Menu.Update
 import Wizard.Common.Time as Time
 import Wizard.Dashboard.Update
+import Wizard.Data.Session as Session
 import Wizard.Dev.Update
 import Wizard.DocumentTemplateEditors.Update
 import Wizard.DocumentTemplates.Update

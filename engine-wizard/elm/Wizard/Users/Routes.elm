@@ -1,7 +1,7 @@
 module Wizard.Users.Routes exposing (Route(..), indexRouteRoleFilterId)
 
-import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Wizard.Users.Edit.UserEditRoutes exposing (UserEditRoute)
 
 

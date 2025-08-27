@@ -4,8 +4,8 @@ module Wizard.KnowledgeModels.ResourcePage.Update exposing
     )
 
 import Gettext exposing (gettext)
-import Shared.Setters exposing (setKnowledgeModel)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setKnowledgeModel)
 import Wizard.Api.KnowledgeModels as KnowlegeModelsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModels.ResourcePage.Models exposing (Model)

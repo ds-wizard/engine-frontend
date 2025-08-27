@@ -25,7 +25,7 @@ import Registry.Pages.Signup as Signup
 import Registry.Pages.SignupConfirmation as SignupConfirmation
 import Registry.Ports as Ports
 import Registry.Routes as Routes
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 import Task
 import Task.Extra as Task
 import Time

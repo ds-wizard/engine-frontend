@@ -4,7 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
+import Shared.Utils.Form as Form
 import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs

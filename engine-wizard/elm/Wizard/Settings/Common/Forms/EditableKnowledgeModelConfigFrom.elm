@@ -9,8 +9,8 @@ module Wizard.Settings.Common.Forms.EditableKnowledgeModelConfigFrom exposing
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage as AllowedPackage exposing (AllowedPackage)
 

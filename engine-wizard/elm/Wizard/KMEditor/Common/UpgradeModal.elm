@@ -16,7 +16,7 @@ import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi

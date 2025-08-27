@@ -5,7 +5,7 @@ import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faWarning)
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.Tenant exposing (Tenant)

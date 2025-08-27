@@ -4,10 +4,10 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Extra as Html
-import Shared.Auth.Role as Role
-import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faDelete, faEdit)
+import Shared.Data.Role as Role
+import Shared.Data.UuidOrCurrent as UuidOrCurrent
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.View as Listing exposing (ViewConfig)

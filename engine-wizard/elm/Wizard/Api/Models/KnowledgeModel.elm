@@ -81,11 +81,11 @@ module Wizard.Api.Models.KnowledgeModel exposing
     )
 
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Utils exposing (flip, nilUuid)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
@@ -681,7 +681,7 @@ createParentMap km =
 
 getParent : ParentMap -> String -> String
 getParent parentMap uuid =
-    Maybe.withDefault nilUuid <| Dict.get uuid parentMap
+    Maybe.withDefault (Uuid.toString Uuid.nil) <| Dict.get uuid parentMap
 
 
 filterWithTags : List String -> KnowledgeModel -> KnowledgeModel

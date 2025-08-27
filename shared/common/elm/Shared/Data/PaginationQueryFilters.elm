@@ -12,8 +12,9 @@ module Shared.Data.PaginationQueryFilters exposing
     )
 
 import Dict exposing (Dict)
+import Dict.Utils as Dict
+import Flip exposing (flip)
 import Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
-import Shared.Utils exposing (dictFromMaybeList, flip)
 
 
 
@@ -35,8 +36,8 @@ empty =
 
 create : List ( String, Maybe String ) -> List ( String, Maybe FilterOperator ) -> PaginationQueryFilters
 create mbFilters mbOperators =
-    { values = dictFromMaybeList mbFilters
-    , operators = dictFromMaybeList mbOperators
+    { values = Dict.fromMaybeList mbFilters
+    , operators = Dict.fromMaybeList mbOperators
     }
 
 

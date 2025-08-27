@@ -10,10 +10,10 @@ module Wizard.Api.Models.Event.EventField exposing
     , squash
     )
 
+import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Utils exposing (flip)
 
 
 type alias EventField a =

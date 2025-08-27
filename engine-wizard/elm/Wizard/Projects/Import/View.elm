@@ -1,6 +1,7 @@
 module Wizard.Projects.Import.View exposing (view)
 
 import ActionResult
+import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, div, h5, li, span, strong, text, ul)
 import Html.Attributes exposing (class)
@@ -9,9 +10,8 @@ import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
-import Shared.Markdown as Markdown
-import Shared.Undraw as Undraw
-import Shared.Utils exposing (flip)
+import Shared.Components.Undraw as Undraw
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)

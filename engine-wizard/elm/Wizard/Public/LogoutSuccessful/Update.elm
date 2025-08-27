@@ -1,7 +1,7 @@
 module Wizard.Public.LogoutSuccessful.Update exposing (fetchData)
 
-import Shared.Auth.Session as Session
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 

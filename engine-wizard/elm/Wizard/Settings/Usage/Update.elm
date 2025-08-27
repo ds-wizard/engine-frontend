@@ -1,9 +1,9 @@
 module Wizard.Settings.Usage.Update exposing (fetchData, update)
 
 import Gettext exposing (gettext)
-import Shared.Common.UuidOrCurrent as UuidOrCurrent
-import Shared.Setters exposing (setUsage)
+import Shared.Data.UuidOrCurrent as UuidOrCurrent
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setUsage)
 import Wizard.Api.Tenants as TenantsApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs

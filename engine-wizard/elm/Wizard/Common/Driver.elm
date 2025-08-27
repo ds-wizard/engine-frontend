@@ -13,10 +13,10 @@ port module Wizard.Common.Driver exposing
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Auth.Session as Session
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Session as Session
 
 
 type TourId

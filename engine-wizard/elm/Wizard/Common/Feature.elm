@@ -83,9 +83,7 @@ module Wizard.Common.Feature exposing
     )
 
 import Maybe.Extra as Maybe
-import Shared.Auth.Permission as Perm
-import Shared.Auth.Session as Session
-import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.Branch as Branch exposing (Branch)
@@ -101,6 +99,8 @@ import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread expo
 import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils exposing (QuestionnaireLike)
+import Wizard.Data.Perm as Perm
+import Wizard.Data.Session as Session
 
 
 

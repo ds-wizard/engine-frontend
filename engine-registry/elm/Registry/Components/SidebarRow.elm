@@ -8,7 +8,7 @@ import Registry.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Registry.Components.ItemIdBox as ItemIdBox
 import Registry.Components.VersionList as VersionList
 import Registry.Data.AppState exposing (AppState)
-import Shared.Common.TimeUtils as TimeUtils
+import Shared.Utils.TimeUtils as TimeUtils
 import Time
 import Version exposing (Version)
 

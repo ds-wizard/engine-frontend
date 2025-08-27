@@ -4,11 +4,12 @@ module Wizard.Common.Components.Questionnaire.Importer exposing
     )
 
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Utils exposing (flip, getUuid)
+import Uuid.Extra as Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question exposing (Question(..))
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
@@ -65,7 +66,7 @@ createEvent :
 createEvent appState questionnaire importerEvent ( seed, items, importerResult ) =
     let
         ( eventUuid, seed2 ) =
-            getUuid seed
+            Uuid.step seed
 
         getQuestionFromPath path =
             String.split "." path

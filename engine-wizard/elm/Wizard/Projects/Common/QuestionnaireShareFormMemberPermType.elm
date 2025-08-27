@@ -12,7 +12,7 @@ import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Gettext exposing (gettext)
 import Json.Encode as E
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
 import Wizard.Common.AppState exposing (AppState)
 

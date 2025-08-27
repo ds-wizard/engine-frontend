@@ -23,7 +23,7 @@ import Registry.Data.Forms.LoginForm as LoginForm exposing (LoginForm)
 import Registry.Data.Session as Session exposing (Session)
 import Registry.Routes as Routes
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Task.Extra as Task
 
 

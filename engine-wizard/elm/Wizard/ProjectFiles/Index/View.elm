@@ -4,8 +4,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.FontAwesome exposing (fa, faDelete, faDownload)
+import Shared.Utils.ByteUnits as ByteUnits
 import String.Format as String
 import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Api.Models.User as User

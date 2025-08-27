@@ -5,7 +5,7 @@ module Shared.Utils.CurlUtils exposing
 
 import Maybe.Extra as Maybe
 import Regex exposing (Regex)
-import Shared.RegexPatterns as RegexPatterns
+import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Extra as String
 
 

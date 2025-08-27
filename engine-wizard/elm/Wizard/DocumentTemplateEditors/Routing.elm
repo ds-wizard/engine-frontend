@@ -4,8 +4,8 @@ module Wizard.DocumentTemplateEditors.Routing exposing
     , toUrl
     )
 
+import Flip exposing (flip)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
 import Url.Parser.Query.Extra as Query

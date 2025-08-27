@@ -10,8 +10,8 @@ import Html exposing (Html, div, label, p, text)
 import Html.Attributes exposing (class, for, id, name)
 import Html.Extra as Html
 import Registry.Data.AppState exposing (AppState)
-import Shared.Form exposing (errorToString)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form exposing (errorToString)
+import Shared.Utils.Form.FormError exposing (FormError)
 
 
 input : AppState -> Form FormError o -> String -> String -> Html Form.Msg

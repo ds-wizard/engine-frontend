@@ -4,7 +4,7 @@ import Html exposing (Html, code, div, h3, pre, span, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Json.Print
-import Shared.Common.TimeUtils as TimeUtils
+import Shared.Utils.TimeUtils as TimeUtils
 import SyntaxHighlight
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PersistentCommand as PersistentCommand

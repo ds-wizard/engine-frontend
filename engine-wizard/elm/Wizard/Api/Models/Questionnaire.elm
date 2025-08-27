@@ -5,12 +5,11 @@ module Wizard.Api.Models.Questionnaire exposing
     , isOwner
     )
 
+import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import List.Extra as List
-import Shared.Auth.Session as Session
-import Shared.Utils exposing (flip)
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Member as Member
@@ -22,6 +21,7 @@ import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireV
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
 import Wizard.Api.Models.UserInfo as UserInfo exposing (UserInfo)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Session as Session
 
 
 type alias Questionnaire =

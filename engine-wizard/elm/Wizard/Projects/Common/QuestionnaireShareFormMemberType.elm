@@ -8,7 +8,7 @@ module Wizard.Projects.Common.QuestionnaireShareFormMemberType exposing
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type QuestionnaireShareFormMemberType

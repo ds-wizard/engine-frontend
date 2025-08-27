@@ -3,7 +3,7 @@ module Wizard.Users.Edit.Models exposing
     , initialModel
     )
 
-import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Users.Edit.Components.ApiKeys as ApiKeys

@@ -6,7 +6,7 @@ module Wizard.Common.Components.Announcements exposing
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement exposing (Announcement)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Wizard.Common.Html.Attribute exposing (dataCy)

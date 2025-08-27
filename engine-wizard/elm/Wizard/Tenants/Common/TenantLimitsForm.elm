@@ -8,8 +8,8 @@ module Wizard.Tenants.Common.TenantLimitsForm exposing
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Form.Field as Field
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Field as Field
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 

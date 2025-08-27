@@ -9,12 +9,12 @@ module Wizard.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposing
 import Bootstrap.Dropdown as Dropdown
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Auth.Session as Session
 import Shared.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faOpen, faPreview)
 import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Common.Feature as Feature
+import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 
 

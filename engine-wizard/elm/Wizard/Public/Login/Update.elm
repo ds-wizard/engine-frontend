@@ -5,7 +5,6 @@ import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Auth.Session as Session
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Token as Token
 import String.Extra as String
@@ -17,6 +16,7 @@ import Wizard.Api.Tokens as TokensApi
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.LocalStorageData as LocalStorageData
+import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Ports as Ports
 import Wizard.Public.Login.Models exposing (Model)

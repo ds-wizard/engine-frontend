@@ -8,8 +8,8 @@ module Wizard.KMEditor.Common.BranchPublishForm exposing
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as Validate
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as Validate
 import String exposing (fromInt)
 import Uuid exposing (Uuid)
 

@@ -2,7 +2,7 @@ module Wizard.KnowledgeModelSecrets.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.KnowledgeModelSecrets.Forms.KnowledgeModelSecretForm as KnowledgeModelSecretForm exposing (KnowledgeModelSecretForm)

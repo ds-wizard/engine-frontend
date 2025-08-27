@@ -6,8 +6,8 @@ module Wizard.Locales.Detail.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setLocale)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setLocale)
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.FileDownloader as FileDownloader

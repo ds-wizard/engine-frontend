@@ -16,13 +16,13 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra as Html exposing (viewIf)
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faActiveSessionRevoke, faUserAgentDesktop, faUserAgentMobile, faUserAgentTdk)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Markdown as Markdown
-import Shared.Setters exposing (setTokens)
+import Shared.Utils.Markdown as Markdown
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setTokens)
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import UserAgent

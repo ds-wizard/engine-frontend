@@ -1,9 +1,9 @@
 module Registry.Components.VersionList exposing (Msg, State, ViewProps, initialState, update, view)
 
+import Flip exposing (flip)
 import Html exposing (Html, a, div, i, li, text, ul)
 import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
-import Shared.Utils exposing (flip)
 import Version exposing (Version)
 
 

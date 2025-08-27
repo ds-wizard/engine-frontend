@@ -1,6 +1,8 @@
 module Wizard.Projects.Create.Update exposing (fetchData, update)
 
 import ActionResult
+import Bool.Extra as Bool
+import Cmd.Extra exposing (withNoCmd)
 import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
@@ -10,7 +12,6 @@ import Shared.Data.ApiError as ApiError
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils exposing (boolToString, withNoCmd)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Extra as String
 import Uuid
@@ -99,8 +100,8 @@ getProjectTemplates appState pqs =
     let
         filters =
             PaginationQueryFilters.create
-                [ ( "isTemplate", Just (boolToString True) )
-                , ( "isMigrating", Just (boolToString False) )
+                [ ( "isTemplate", Just (Bool.toString True) )
+                , ( "isMigrating", Just (Bool.toString False) )
                 ]
                 []
     in

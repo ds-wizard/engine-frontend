@@ -12,7 +12,7 @@ import Shared.Data.DevOperation exposing (DevOperation)
 import Shared.Data.DevOperation.DevOperationParameter exposing (AdminOperationParameter)
 import Shared.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType
 import Shared.Data.DevOperationSection exposing (DevOperationSection)
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (settingsClass)
 import Wizard.Common.View.ActionButton as ActionButton

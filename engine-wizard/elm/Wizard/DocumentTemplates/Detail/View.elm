@@ -7,8 +7,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (listFilterJust)
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Version
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
@@ -217,7 +216,7 @@ sidePanel appState model template =
             ]
     in
     DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 <| listFilterJust sections ]
+        [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
 sidePanelKmInfo : AppState -> DocumentTemplateDetail -> Maybe ( String, String, Html msg )
