@@ -17,6 +17,7 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , getFile
     , getItemSelectQuestionValueLabel
     , getItemTitle
+    , getItemUsageInItemSelectQuestions
     , getTodos
     , getUnresolvedCommentCount
     , getWarnings
@@ -48,7 +49,7 @@ import Regex
 import Result.Extra as Result
 import Shared.Markdown as Markdown
 import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils exposing (boolToInt, getUuidString)
+import Shared.Utils exposing (boolToInt, flip, getUuidString)
 import String.Extra as String
 import String.Format as String
 import Time
@@ -849,6 +850,28 @@ getFile questionnaire fileUuid =
 addFile : QuestionnaireFileSimple -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
 addFile file questionnaire =
     { questionnaire | files = file :: questionnaire.files }
+
+
+getItemUsageInItemSelectQuestions : QuestionnaireQuestionnaire -> String -> List ( String, String )
+getItemUsageInItemSelectQuestions questionnaire itemUuid =
+    let
+        mapItem ( path, reply ) =
+            case String.toMaybe (ReplyValue.getSelectedItemUuid reply.value) of
+                Just selectedItemUuid ->
+                    if selectedItemUuid == itemUuid then
+                        String.split "." path
+                            |> List.last
+                            |> Maybe.andThen (flip KnowledgeModel.getQuestion questionnaire.knowledgeModel)
+                            |> Maybe.map (\q -> ( path, Question.getTitle q ))
+
+                    else
+                        Nothing
+
+                Nothing ->
+                    Nothing
+    in
+    Dict.toList questionnaire.replies
+        |> List.filterMap mapItem
 
 
 

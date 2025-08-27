@@ -813,6 +813,39 @@ $toolbar-height: 40px;
                 margin: (-$card-spacer-y) (-$card-spacer-x) $card-spacer-y;
                 padding: ($card-spacer-y * 0.5) $card-spacer-x;
                 @include border-radius-top($card-border-radius);
+
+                .linked-items-dropdown {
+                    @include border-radius($border-radius);
+                    background: var(--bs-primary);
+                    color: var(--bs-white) !important;
+                    text-decoration: none;
+                    padding: 0 $spacer-2;
+                    outline: none;
+                    border: none;
+
+                    small {
+                        margin-left: $spacer-1;
+                        font-weight: bold;
+                    }
+
+                    .fas {
+                        color: var(--bs-white) !important;
+                    }
+
+                    &::after {
+                        display: none;
+                    }
+                }
+
+                .dropdown-menu {
+                    margin-top: 25px;
+                    width: max-content;
+                    max-width: 400px;
+
+                    .dropdown-item {
+                        white-space: normal;
+                    }
+                }
             }
 
             &-collapsed {
