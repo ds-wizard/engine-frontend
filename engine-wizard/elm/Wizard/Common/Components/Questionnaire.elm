@@ -39,7 +39,7 @@ import CharIdentifier
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Gettext exposing (gettext, ngettext)
-import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, span, strong, text, ul)
+import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, small, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
@@ -190,6 +190,7 @@ type alias Model =
     , contentScrollTop : Maybe Int
     , commentThreadsMap : Dict String (ActionResult (List CommentThread))
     , userSuggestionDropdownModels : Dict String UserSuggestionDropdown.Model
+    , linkedItemsDropdownStates : Dict String Dropdown.State
     }
 
 
@@ -273,6 +274,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , contentScrollTop = Nothing
             , commentThreadsMap = Dict.empty
             , userSuggestionDropdownModels = Dict.empty
+            , linkedItemsDropdownStates = Dict.empty
             }
 
         ( model, scrollCmd ) =
@@ -737,6 +739,7 @@ type Msg
     | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
     | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
+    | LinkedItemsDropdownMsg String Dropdown.State
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -1513,6 +1516,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 , Cmd.map (UserSuggestionDropdownMsg uuid threadUuid editorNote) userSuggestionCmd
                 )
 
+        LinkedItemsDropdownMsg itemUuid state ->
+            wrap { model | linkedItemsDropdownStates = Dict.insert itemUuid state model.linkedItemsDropdownStates }
+
         _ ->
             wrap model
 
@@ -1933,6 +1939,10 @@ subscriptions model =
         userSuggestionDropdownSubs =
             Dict.toList model.userSuggestionDropdownModels
                 |> List.map (\( uuid, userSuggestionModalModel ) -> Sub.map (UserSuggestionDropdownMsg uuid userSuggestionModalModel.threadUuid userSuggestionModalModel.editorNote) (UserSuggestionDropdown.subscriptions userSuggestionModalModel))
+
+        linkedItemsDropdownSubs =
+            Dict.toList model.linkedItemsDropdownStates
+                |> List.map (\( itemUuid, state ) -> Dropdown.subscriptions state (LinkedItemsDropdownMsg itemUuid))
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
@@ -1948,6 +1958,7 @@ subscriptions model =
          ]
             ++ commentDropdownSubs
             ++ userSuggestionDropdownSubs
+            ++ linkedItemsDropdownSubs
         )
 
 
@@ -3792,6 +3803,31 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 in
                 [ moveUpButton, moveDownButton, deleteButton ]
 
+        linkedItems =
+            QuestionnaireQuestionnaire.getItemUsageInItemSelectQuestions model.questionnaire uuid
+
+        linkedItemsButton =
+            if List.isEmpty linkedItems then
+                Html.nothing
+
+            else
+                let
+                    viewLink ( itemSelectPath, itemSelectLabel ) =
+                        Dropdown.buttonItem [ onClick (ScrollToPath itemSelectPath) ] [ text itemSelectLabel ]
+                in
+                Dropdown.dropdown (Maybe.withDefault Dropdown.initialState (Dict.get uuid model.linkedItemsDropdownStates))
+                    { options = [ Dropdown.alignMenuRight, Dropdown.attrs [ class "me-3" ] ]
+                    , toggleMsg = LinkedItemsDropdownMsg uuid
+                    , toggleButton =
+                        Dropdown.toggle [ Button.attrs [ class "linked-items-dropdown" ] ]
+                            [ fas "fa-arrow-right-arrow-left"
+                            , small [ class "" ] [ text (String.fromInt (List.length linkedItems)) ]
+                            ]
+                    , items =
+                        Dropdown.header [ text (gettext "Used in item select questions:" appState.locale) ]
+                            :: List.map viewLink linkedItems
+                    }
+
         itemTitle =
             if isCollapsed then
                 Maybe.unwrap
@@ -3814,9 +3850,9 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 )
 
         itemHeader =
-            div [ class "item-header d-flex justify-content-between" ]
+            div [ class "item-header d-flex justify-content-between align-items-center" ]
                 [ div (class "flex-grow-1 me-3 cursor-pointer" :: collapseAttributes) [ collapseIcon, itemTitle ]
-                , div [] buttons
+                , div [] (linkedItemsButton :: buttons)
                 ]
 
         collapseFooterButton =
@@ -4631,24 +4667,6 @@ viewCopyLinkAction appState cfg model path =
 viewRemoveItemModal : AppState -> Model -> Html Msg
 viewRemoveItemModal appState model =
     let
-        removeItemUuid =
-            Maybe.map Tuple.second model.removeItem
-
-        mapItem ( path, reply ) =
-            case String.toMaybe (ReplyValue.getSelectedItemUuid reply.value) of
-                Just selectedItemUuid ->
-                    if Just selectedItemUuid == removeItemUuid then
-                        String.split "." path
-                            |> List.last
-                            |> Maybe.andThen (flip KnowledgeModel.getQuestion model.questionnaire.knowledgeModel)
-                            |> Maybe.map (\q -> ( path, Question.getTitle q ))
-
-                    else
-                        Nothing
-
-                Nothing ->
-                    Nothing
-
         viewLink ( path, label ) =
             li []
                 [ a [ onClick (ScrollToPath path) ]
@@ -4666,8 +4684,8 @@ viewRemoveItemModal appState model =
                     ]
 
         items =
-            Dict.toList model.questionnaire.replies
-                |> List.filterMap mapItem
+            Maybe.map Tuple.second model.removeItem
+                |> Maybe.unwrap [] (QuestionnaireQuestionnaire.getItemUsageInItemSelectQuestions model.questionnaire)
                 |> List.map viewLink
                 |> wrapItemLinks
 
