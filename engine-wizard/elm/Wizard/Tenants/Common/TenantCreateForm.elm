@@ -8,7 +8,7 @@ module Wizard.Tenants.Common.TenantCreateForm exposing
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias TenantCreateForm =

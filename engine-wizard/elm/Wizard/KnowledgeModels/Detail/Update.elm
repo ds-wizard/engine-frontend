@@ -6,8 +6,8 @@ module Wizard.KnowledgeModels.Detail.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setPackage)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setPackage)
 import Wizard.Api.Models.Package.PackagePhase exposing (PackagePhase)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Common.AppState exposing (AppState)

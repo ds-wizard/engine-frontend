@@ -2,7 +2,6 @@
     "type": "application",
     "source-directories": [
         "engine-registry/elm",
-        "engine-shared/elm",
         "engine-wizard/elm",
         "shared/common/elm",
         "shared/vendor"
@@ -45,6 +44,7 @@
             "myrho/elm-round": "1.0.5",
             "noahzgordon/elm-color-extra": "1.0.2",
             "pablohirafuji/elm-syntax-highlight": "3.7.1",
+            "pilatch/flip": "1.0.0",
             "rtfeldman/elm-iso8601-date-strings": "1.1.4",
             "rundis/elm-bootstrap": "5.2.0",
             "truqu/elm-md5": "1.1.0"

@@ -4,9 +4,9 @@ import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
 import Dict
 import Gettext exposing (gettext)
-import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError
 import Shared.Data.BuildInfo as BuildInfo
+import Shared.Ports.Copy as Copy
 import Task
 import Wizard.Api.BuildInfo as BuildInfoApi
 import Wizard.Common.AppState exposing (AppState)

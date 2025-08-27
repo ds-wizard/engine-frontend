@@ -27,8 +27,8 @@ import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
 import Regex
-import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils.DateTimeString as DateTimeString
+import Shared.Data.DateTimeString as DateTimeString
+import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Format as String
 
 

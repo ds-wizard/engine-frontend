@@ -18,7 +18,9 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Compose exposing (compose2)
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, form, h5, iframe, img, input, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, href, id, src, target, value)
@@ -31,9 +33,8 @@ import Maybe.Extra as Maybe
 import Set exposing (Set)
 import Shared.Components.FontAwesome exposing (fa, faClose, faDelete, faDownload, faKmEditorTreeClosed, faKmEditorTreeOpened)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setAssets, setFiles)
-import Shared.Utils exposing (compose2, flip, listFilterJust)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setAssets, setFiles)
 import SplitPane
 import String.Format as String
 import Task.Extra as Task
@@ -626,8 +627,7 @@ update cfg appState msg model =
 
                             files =
                                 Set.toList model.changedFiles
-                                    |> List.map fileWithContent
-                                    |> listFilterJust
+                                    |> List.filterMap fileWithContent
                         in
                         ( Dict.fromList <| List.map toActionResult files
                         , List.map toCmd files

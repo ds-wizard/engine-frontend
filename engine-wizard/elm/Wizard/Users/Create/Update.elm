@@ -5,9 +5,9 @@ import Form
 import Gettext exposing (gettext)
 import Random exposing (Seed, step)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Utils exposing (tuplePrepend)
+import Shared.Utils.Form as Form
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Tuple.Extra as Tuple
 import Uuid
 import Wizard.Api.Users as UsersApi
 import Wizard.Common.AppState exposing (AppState)
@@ -30,7 +30,7 @@ update msg wrapMsg appState model =
             handleForm formMsg wrapMsg appState.seed appState model
 
         PostUserCompleted result ->
-            postUserCompleted appState model result |> tuplePrepend appState.seed
+            postUserCompleted appState model result |> Tuple.prepend appState.seed
 
 
 handleForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> Seed -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

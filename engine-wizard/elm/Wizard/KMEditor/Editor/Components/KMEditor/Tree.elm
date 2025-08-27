@@ -4,13 +4,13 @@ module Wizard.KMEditor.Editor.Components.KMEditor.Tree exposing
     , view
     )
 
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (fa, faKmAnswer, faKmChapter, faKmChoice, faKmEditorCollapseAll, faKmEditorExpandAll, faKmEditorTreeClosed, faKmEditorTreeOpened, faKmExpert, faKmIntegration, faKmKnowledgeModel, faKmMetric, faKmPhase, faKmQuestion, faKmReference, faKmResourceCollection, faKmResourcePage, faKmTag)
-import Shared.Utils exposing (flip)
 import Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)

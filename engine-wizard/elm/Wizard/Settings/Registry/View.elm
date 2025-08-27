@@ -7,8 +7,8 @@ import Html exposing (Html, button, div, form, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks

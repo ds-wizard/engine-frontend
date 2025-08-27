@@ -7,14 +7,14 @@ import Html exposing (Html, a, button, div, form, h3, hr, strong, table, tbody, 
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
-import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Markdown as Markdown
-import Shared.Setters exposing (setApiKey, setApiKeys)
+import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Markdown as Markdown
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setApiKey, setApiKeys)
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Wizard.Api.ApiKeys as ApiKeysApi
 import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)

@@ -16,8 +16,8 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Maybe.Extra as Maybe
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 import String exposing (fromInt)
 import Version
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)

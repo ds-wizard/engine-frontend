@@ -17,8 +17,8 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
 import Wizard.Api.Models.SubmissionProps exposing (SubmissionProps)

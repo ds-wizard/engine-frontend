@@ -8,6 +8,7 @@ module Wizard.Dashboard.Dashboards.ResearcherDashboard exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Bool.Extra as Bool
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
@@ -15,9 +16,8 @@ import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Setters exposing (setCommentThreads, setQuestionnaires)
-import Shared.Utils exposing (boolToString)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setCommentThreads, setQuestionnaires)
 import Uuid
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
@@ -66,7 +66,7 @@ fetchQuestionnaires appState =
 
         filters =
             PaginationQueryFilters.create
-                [ ( "isTemplate", Just (boolToString False) )
+                [ ( "isTemplate", Just (Bool.toString False) )
                 , ( "userUuids", mbUserUuid )
                 ]
                 []

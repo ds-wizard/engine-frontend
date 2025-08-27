@@ -2,8 +2,8 @@ module Wizard.DocumentTemplates.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
-import Shared.Setters exposing (setPulling)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setPulling)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.DocumentTemplates.Import.RegistryImport.Models exposing (Model)

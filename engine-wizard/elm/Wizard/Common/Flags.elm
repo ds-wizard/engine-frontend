@@ -7,10 +7,10 @@ module Wizard.Common.Flags exposing
 import Gettext
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Auth.Session as Session exposing (Session)
-import Shared.Common.Navigator as Navigator exposing (Navigator)
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Common.GuideLinks as GuideLinks exposing (GuideLinks)
+import Wizard.Data.Navigator as Navigator exposing (Navigator)
+import Wizard.Data.Session as Session exposing (Session)
 
 
 type alias Flags =

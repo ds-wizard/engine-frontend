@@ -4,7 +4,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Shared.Components.FontAwesome exposing (faKmResourceCollection)
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Page as Page

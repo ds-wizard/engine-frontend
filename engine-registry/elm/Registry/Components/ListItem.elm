@@ -7,7 +7,7 @@ import Html.Extra as Html
 import Registry.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Common.TimeUtils as TimeUtils
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Version exposing (Version)

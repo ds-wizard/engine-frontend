@@ -7,7 +7,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faCancel, faDelete, faKmEditorListContinueMigration, faKmEditorListEdit, faKmEditorListEdited, faKmEditorListUpdate, faKmFork)
-import Shared.Utils exposing (packageIdToComponents)
+import Shared.Utils.IdentifierUtils as IdentifierUtils
 import Version
 import Wizard.Api.Models.Branch exposing (Branch)
 import Wizard.Api.Models.Branch.BranchState as BranchState
@@ -157,7 +157,7 @@ listingDescription appState branch =
                 Just forkOfPackageId ->
                     let
                         elem =
-                            case packageIdToComponents forkOfPackageId of
+                            case IdentifierUtils.getComponents forkOfPackageId of
                                 Just ( orgId, kmId, version ) ->
                                     linkTo (Routes.knowledgeModelsDetail <| orgId ++ ":" ++ kmId ++ ":" ++ version)
 

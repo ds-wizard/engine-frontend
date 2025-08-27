@@ -4,8 +4,8 @@ module Wizard.Settings.Submission.Update exposing
     )
 
 import Gettext exposing (gettext)
-import Shared.Setters exposing (setTemplates)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setTemplates)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.EditableConfig as EditableConfig
 import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)

@@ -14,11 +14,10 @@ import Html exposing (Html, a, div, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Http
 import Process
-import Shared.Auth.Session as Session
 import Shared.Components.FontAwesome exposing (faArrowRight, faDownload)
+import Shared.Components.Undraw as Undraw
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.ServerError as ServerError
-import Shared.Undraw as Undraw
 import String.Format as String
 import Task
 import Uuid exposing (Uuid)
@@ -31,6 +30,7 @@ import Wizard.Common.Html exposing (linkTo)
 import Wizard.Common.Html.Attribute exposing (dataCy)
 import Wizard.Common.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Common.View.Page as Page
+import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
 
 

@@ -9,9 +9,10 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (getOrganizationAndItemId, httpMethodOptions)
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.HttpMethod as HttpMethod
+import Shared.Utils.IdentifierUtils as IdentifierUtils
+import Shared.Utils.Markdown as Markdown
 import Uuid
 import Version
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
@@ -150,7 +151,7 @@ supportedFormatFormView appState templates prefix form index =
 
         templateToTemplateVersionOptions template =
             templates
-                |> List.filter (.id >> getOrganizationAndItemId >> (==) template)
+                |> List.filter (.id >> IdentifierUtils.getOrganizationAndItemId >> (==) template)
                 |> List.sortWith (\a b -> Version.compare b.version a.version)
                 |> List.map (\t -> ( t.id, Version.toString t.version ))
                 |> (::) defaultOption
@@ -227,7 +228,7 @@ requestFormView appState form prefix =
     div []
         [ strong [] [ text (gettext "Request" appState.locale) ]
         , div [ class "nested-group mt-2" ]
-            [ FormGroup.select appState httpMethodOptions form methodField (gettext "Method" appState.locale)
+            [ FormGroup.select appState HttpMethod.options form methodField (gettext "Method" appState.locale)
             , FormGroup.input appState form urlField (gettext "URL" appState.locale)
             , FormGroup.list appState (headerFormView appState headersField) form headersField (gettext "Headers" appState.locale) (gettext "Add header" appState.locale)
             , FormGroup.toggle form multipartEnabledField (gettext "Multipart" appState.locale)

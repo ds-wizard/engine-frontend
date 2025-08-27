@@ -6,9 +6,9 @@ module Wizard.Tenants.Detail.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Form
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Setters exposing (setTenant)
+import Shared.Utils.Form as Form
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setTenant)
 import Uuid exposing (Uuid)
 import Wizard.Api.Tenants as TenantsApi
 import Wizard.Common.AppState exposing (AppState)

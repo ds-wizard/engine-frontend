@@ -35,6 +35,7 @@ module Wizard.Api.Questionnaires exposing
     , websocket
     )
 
+import Bool.Extra as Bool
 import Dict exposing (Dict)
 import Http
 import Json.Decode as D
@@ -45,7 +46,6 @@ import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Questionnaire as Questionnaire exposing (Questionnaire)
@@ -152,7 +152,7 @@ getQuestionnaireUserSuggestions appState questionnaireUuid editor query =
         queryString =
             PaginationQueryString.fromQ query
                 |> PaginationQueryString.withSize (Just 10)
-                |> PaginationQueryString.toApiUrlWith [ ( "editor", boolToString editor ) ]
+                |> PaginationQueryString.toApiUrlWith [ ( "editor", Bool.toString editor ) ]
 
         url =
             "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/users/suggestions" ++ queryString

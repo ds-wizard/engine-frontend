@@ -14,9 +14,9 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Form.Field as Field
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.Field as Field
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig.CustomMenuLink as CustomMenuLink exposing (CustomMenuLink)
 
 

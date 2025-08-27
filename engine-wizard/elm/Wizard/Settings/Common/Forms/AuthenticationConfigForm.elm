@@ -12,8 +12,8 @@ import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Maybe.Extra as Maybe
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Common.AppState exposing (AppState)

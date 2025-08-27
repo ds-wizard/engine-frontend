@@ -6,9 +6,9 @@ import Html exposing (Html, button, code, div, em, p, table, tbody, td, text, th
 import Html.Attributes exposing (attribute, class, colspan)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.FontAwesome exposing (faDelete, faEdit, fas)
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)

@@ -6,11 +6,11 @@ module Wizard.Projects.FileDownload.Update exposing
 import ActionResult
 import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
-import Shared.Auth.Session as Session
 import Shared.Data.ApiError as ApiError
 import Uuid exposing (Uuid)
 import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Session as Session
 import Wizard.Projects.FileDownload.Models exposing (Model)
 import Wizard.Projects.FileDownload.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes

@@ -5,7 +5,7 @@ module Wizard.Public.ForgottenPassword.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Public.Common.ForgottenPasswordForm as ForgottenPasswordForm exposing (ForgottenPasswordForm)
 
 

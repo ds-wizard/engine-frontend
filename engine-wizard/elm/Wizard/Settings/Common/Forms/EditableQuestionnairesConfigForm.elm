@@ -9,8 +9,8 @@ module Wizard.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Wizard.Api.Models.EditableConfig.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
 import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation exposing (QuestionnaireCreation)

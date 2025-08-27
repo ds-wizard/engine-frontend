@@ -15,7 +15,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html)
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Wizard.Api.Questionnaires as QuestionnairesApi

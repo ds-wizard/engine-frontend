@@ -16,6 +16,7 @@ module Wizard.Api.Packages exposing
     , putPackage
     )
 
+import Bool.Extra as Bool
 import File exposing (File)
 import Http
 import Json.Encode as E
@@ -24,7 +25,6 @@ import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils exposing (boolToString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Package as Package exposing (Package)
 import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
@@ -65,7 +65,7 @@ getPackagesSuggestions appState nonEditable qs =
         queryString =
             PaginationQueryString.toApiUrlWith
                 [ ( "phase", PackagePhase.toString PackagePhase.Released )
-                , ( "nonEditable", Maybe.unwrap "" boolToString nonEditable )
+                , ( "nonEditable", Maybe.unwrap "" Bool.toString nonEditable )
                 ]
                 qs
 

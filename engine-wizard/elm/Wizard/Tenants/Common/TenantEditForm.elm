@@ -4,7 +4,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 

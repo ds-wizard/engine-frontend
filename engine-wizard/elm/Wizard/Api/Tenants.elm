@@ -11,10 +11,10 @@ module Wizard.Api.Tenants exposing
 
 import Json.Encode as E
 import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConfig)
 import Wizard.Api.Models.Tenant as Tenant exposing (Tenant)

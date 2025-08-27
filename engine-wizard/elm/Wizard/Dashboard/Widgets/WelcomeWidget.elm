@@ -3,8 +3,8 @@ module Wizard.Dashboard.Widgets.WelcomeWidget exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
-import Shared.Auth.Role as Role
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
+import Shared.Data.Role as Role
 import String.Format as String
 import Wizard.Common.AppState as AppState exposing (AppState)
 

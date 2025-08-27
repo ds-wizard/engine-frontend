@@ -11,15 +11,15 @@ import ActionResult exposing (ActionResult)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import List.Utils as List
 import Maybe.Extra as Maybe
-import Shared.Common.UuidOrCurrent as UuidOrCurrent
 import Shared.Data.ApiError as ApiErrorOld exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
-import Shared.Utils exposing (listInsertIf)
+import Shared.Data.UuidOrCurrent as UuidOrCurrent
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -166,10 +166,10 @@ view appState model =
 
         ctaWidgets =
             []
-                |> listInsertIf (ConfigureOrganizationWidget.view appState) organizationWidgetVisible
-                |> listInsertIf (ConfigureLookAndFeel.view appState) lookAndFeelWidgetVisible
-                |> listInsertIf (ConnectRegistryWidget.view appState) registryWidgetVisible
-                |> listInsertIf (AddOpenIDWidget.view appState) openIDWidgetVisible
+                |> List.insertIf (ConfigureOrganizationWidget.view appState) organizationWidgetVisible
+                |> List.insertIf (ConfigureLookAndFeel.view appState) lookAndFeelWidgetVisible
+                |> List.insertIf (ConnectRegistryWidget.view appState) registryWidgetVisible
+                |> List.insertIf (AddOpenIDWidget.view appState) openIDWidgetVisible
     in
     div []
         [ div [ class "row gx-3" ]

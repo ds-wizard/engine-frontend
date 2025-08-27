@@ -17,8 +17,8 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Branches as BranchesApi

@@ -14,7 +14,7 @@ import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, classList, disabled, id, style, type_)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Utils exposing (getContrastColorHex)
+import Shared.Utils.ColorUtils as ColorUtils
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Common.AppState exposing (AppState)
@@ -76,7 +76,7 @@ tagView appState config tag =
         [ label
             [ class "tag-label"
             , style "background" tag.color
-            , style "color" <| getContrastColorHex tag.color
+            , style "color" <| ColorUtils.getContrastColorHex tag.color
             , dataCy "tag"
             , classList [ ( "untitled", untitled ) ]
             ]
@@ -183,7 +183,7 @@ readOnlyTagView selected tag =
         [ label
             [ class "tag-label"
             , style "background" tag.color
-            , style "color" <| getContrastColorHex tag.color
+            , style "color" <| ColorUtils.getContrastColorHex tag.color
             ]
             [ input
                 [ type_ "checkbox"
@@ -225,7 +225,7 @@ viewListTagView cfg tag =
         [ label
             [ class "tag-label"
             , style "background" tag.color
-            , style "color" <| getContrastColorHex tag.color
+            , style "color" <| ColorUtils.getContrastColorHex tag.color
             ]
             [ text tag.name
             ]

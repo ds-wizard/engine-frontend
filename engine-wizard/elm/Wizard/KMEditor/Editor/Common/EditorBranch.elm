@@ -31,14 +31,14 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     )
 
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
 import Set exposing (Set)
-import Shared.RegexPatterns as RegexPatterns
-import Shared.Utils exposing (flip)
 import Shared.Utils.JinjaUtils as JinjaUtils
+import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Extra as String
 import String.Format as String
 import Uuid exposing (Uuid)

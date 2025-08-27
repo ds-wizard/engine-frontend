@@ -6,8 +6,8 @@ import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Registry.Data.AppState exposing (AppState)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 
 
 type alias SignupForm =

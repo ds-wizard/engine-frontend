@@ -7,7 +7,7 @@ module Wizard.Api.Models.DocumentTemplateSuggestion exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
-import Shared.Utils exposing (getOrganizationAndItemId)
+import Shared.Utils.IdentifierUtils as IdentifierUtils
 import Version exposing (Version)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatSimple as DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 
@@ -34,7 +34,7 @@ decoder =
 createOptions : List DocumentTemplateSuggestion -> List ( String, String )
 createOptions templates =
     templates
-        |> List.map (.id >> getOrganizationAndItemId)
+        |> List.map (IdentifierUtils.getOrganizationAndItemId << .id)
         |> List.unique
         |> List.sort
         |> List.map (\t -> ( t, t ))

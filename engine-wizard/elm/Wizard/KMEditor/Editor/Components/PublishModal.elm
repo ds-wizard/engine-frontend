@@ -16,7 +16,7 @@ import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Shared.Components.FontAwesome exposing (faSettings)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Uuid exposing (Uuid)
 import Version

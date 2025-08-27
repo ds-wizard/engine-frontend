@@ -1,13 +1,14 @@
 module Wizard.Projects.Migration.View exposing (view)
 
+import Bool.Extra as Bool
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
 import Html.Attributes exposing (class, classList, style, target)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, faQuestionnaireMigrationResolveAll, faQuestionnaireMigrationUndo)
-import Shared.Undraw as Undraw
-import Shared.Utils exposing (boolToInt, flip)
+import Shared.Components.Undraw as Undraw
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Question as Question
 import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
@@ -178,7 +179,7 @@ questionnaireView appState model migration =
 viewChanges : AppState -> Model -> QuestionnaireMigration -> Html Msg
 viewChanges appState model migration =
     div [ class "list-group" ]
-        (List.map (viewChange appState model migration) <| List.sortBy (boolToInt << isQuestionChangeResolved migration) model.changes.questions)
+        (List.map (viewChange appState model migration) <| List.sortBy (Bool.toInt << isQuestionChangeResolved migration) model.changes.questions)
 
 
 viewChange : AppState -> Model -> QuestionnaireMigration -> QuestionChange -> Html Msg

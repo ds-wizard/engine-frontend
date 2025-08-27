@@ -10,8 +10,8 @@ import Form exposing (Form)
 import Form.Input as Input
 import Html exposing (Html, p)
 import Html.Attributes exposing (class, disabled, id)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Markdown as Markdown
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Markdown as Markdown
 
 
 text : String -> Html msg

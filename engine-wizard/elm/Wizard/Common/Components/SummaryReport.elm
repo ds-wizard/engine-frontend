@@ -13,7 +13,7 @@ import Html.Events exposing (onClick)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Round
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import String exposing (fromFloat, fromInt)
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)

@@ -4,10 +4,9 @@ module Wizard.Projects.Routing exposing
     , toUrl
     )
 
-import Shared.Auth.Permission as Perm
+import Flip exposing (flip)
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils exposing (flip)
 import Shared.Utils.UrlUtils exposing (queryParamsToString)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Extra exposing (uuid)
@@ -15,6 +14,7 @@ import Url.Parser.Query as Query
 import Url.Parser.Query.Extra as Query
 import Uuid exposing (Uuid)
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Perm as Perm
 import Wizard.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 

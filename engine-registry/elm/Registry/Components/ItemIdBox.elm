@@ -12,7 +12,7 @@ import Html exposing (Html, a, code, div, i, text)
 import Html.Attributes exposing (attribute, class)
 import Html.Events exposing (onClick, onMouseOut)
 import Registry.Data.AppState exposing (AppState)
-import Shared.Copy as Copy
+import Shared.Ports.Copy as Copy
 
 
 type State

@@ -15,8 +15,8 @@ import Shared.Data.ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Setters exposing (setCommentThreads, setPackages, setTemplates)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates)
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)

@@ -2,6 +2,7 @@ module Wizard.Projects.Index.View exposing (view)
 
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
 import Html.Attributes exposing (class, classList, placeholder, title, type_, value)
@@ -9,13 +10,13 @@ import Html.Events exposing (onClick, onInput)
 import Html.Extra as Html
 import Json.Decode as D
 import List.Extra as List
+import List.Utils as List
 import Maybe.Extra as Maybe
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
 import Shared.Data.Pagination as Pagination
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
 import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
-import Shared.Utils exposing (flip, listFilterJust, listInsertIf)
 import Uuid
 import Version
 import Wizard.Api.Models.Member as Member
@@ -110,10 +111,10 @@ listingConfig appState model =
 
         listingFilters =
             []
-                |> listInsertIf templateFilter (Features.projectTemplatesCreate appState)
-                |> listInsertIf tagsFilter (Features.projectTagging appState && tagsFilterVisible)
-                |> listInsertIf kmsFilter True
-                |> listInsertIf usersFilter True
+                |> List.insertIf templateFilter (Features.projectTemplatesCreate appState)
+                |> List.insertIf tagsFilter (Features.projectTagging appState && tagsFilterVisible)
+                |> List.insertIf kmsFilter True
+                |> List.insertIf usersFilter True
     in
     { title = listingTitle appState
     , description = listingDescription appState
@@ -311,8 +312,7 @@ listingKMsFilter appState model =
 
         selectedPackages =
             selectedPackageIds
-                |> List.map (\a -> List.find (PackageSuggestion.isSamePackage a << .id) foundSelectedPackages)
-                |> listFilterJust
+                |> List.filterMap (\a -> List.find (PackageSuggestion.isSamePackage a << .id) foundSelectedPackages)
                 |> List.sortBy .name
 
         filterPackages =
@@ -425,8 +425,7 @@ listingUsersFilter appState model =
 
         selectedUsers =
             selectedUserUuids
-                |> List.map (\a -> List.find (\u -> Uuid.toString u.uuid == a) foundSelectedUsers)
-                |> listFilterJust
+                |> List.filterMap (\a -> List.find (\u -> Uuid.toString u.uuid == a) foundSelectedUsers)
                 |> List.sortWith User.compare
 
         filterUsers =

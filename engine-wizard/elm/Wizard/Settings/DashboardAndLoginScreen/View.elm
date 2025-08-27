@@ -1,5 +1,6 @@
 module Wizard.Settings.DashboardAndLoginScreen.View exposing (view)
 
+import Compose exposing (compose2)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, hr, img, p, strong, text)
@@ -7,8 +8,7 @@ import Html.Attributes exposing (class, src)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Utils exposing (compose2)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Wizard.Common.AppState exposing (AppState)

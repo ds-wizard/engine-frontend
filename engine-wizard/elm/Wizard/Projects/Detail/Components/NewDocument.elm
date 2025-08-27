@@ -18,10 +18,10 @@ import Html exposing (Html, br, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Setters exposing (setSelected)
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Setters exposing (setSelected)
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi

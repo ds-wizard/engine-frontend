@@ -8,7 +8,7 @@ import Html exposing (Html, div, label, p, text)
 import Html.Attributes exposing (class, id, name)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Dropzone as Dropzone
 import Wizard.Common.GuideLinks as GuideLinks

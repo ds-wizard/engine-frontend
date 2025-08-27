@@ -11,8 +11,8 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Setters exposing (setDebouncer)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setDebouncer)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion

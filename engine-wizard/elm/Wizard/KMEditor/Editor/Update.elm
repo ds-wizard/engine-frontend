@@ -14,10 +14,10 @@ import Random exposing (Seed)
 import Shared.Api.WebSocket as WebSocket
 import Shared.Data.ApiError as ApiError
 import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
-import Shared.Utils exposing (getUuid, getUuidString)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid exposing (Uuid)
+import Uuid.Extra as Uuid
 import Wizard.Api.Branches as BranchesApi
 import Wizard.Api.KnowledgeModelSecrets as KnowledgeModelSecrets
 import Wizard.Api.Models.Branch.BranchState as BranchState
@@ -288,10 +288,10 @@ update wrapMsg msg appState model =
         EventMsg shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent ->
             let
                 ( kmEventUuid, newSeed1 ) =
-                    getUuidString appState.seed
+                    Uuid.stepString appState.seed
 
                 ( wsEventUuid, newSeed2 ) =
-                    getUuid newSeed1
+                    Uuid.step newSeed1
 
                 ( entityUuid, newSeed3 ) =
                     case mbEntityUuid of
@@ -299,7 +299,7 @@ update wrapMsg msg appState model =
                             ( eUuid, newSeed2 )
 
                         Nothing ->
-                            getUuidString newSeed2
+                            Uuid.stepString newSeed2
 
                 event =
                     createEvent
@@ -407,7 +407,7 @@ update wrapMsg msg appState model =
         SavePreviewReplies ->
             let
                 ( eventUuid, newSeed ) =
-                    getUuid appState.seed
+                    Uuid.step appState.seed
 
                 event =
                     { uuid = eventUuid

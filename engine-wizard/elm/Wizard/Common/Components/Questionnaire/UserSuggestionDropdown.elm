@@ -20,7 +20,7 @@ import Json.Decode as D
 import Shared.Components.FontAwesome exposing (faQuestionnaireCommentsAssign)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
-import Shared.Setters exposing (setDebouncer)
+import Shared.Utils.Setters exposing (setDebouncer)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User

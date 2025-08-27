@@ -7,7 +7,7 @@ import ActionResult exposing (ActionResult(..))
 import Form
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
+import Shared.Utils.Form as Form
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.EditableConfig as EditableConfig
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig as EditableRegistryConfig

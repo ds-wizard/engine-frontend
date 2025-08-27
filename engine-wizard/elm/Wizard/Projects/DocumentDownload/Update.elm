@@ -6,11 +6,11 @@ module Wizard.Projects.DocumentDownload.Update exposing
 import ActionResult
 import Browser.Navigation as Navigation
 import Gettext exposing (gettext)
-import Shared.Auth.Session as Session
 import Shared.Data.ApiError as ApiError
 import Uuid exposing (Uuid)
 import Wizard.Api.Documents as DocumentsApi
 import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.Session as Session
 import Wizard.Projects.DocumentDownload.Models exposing (Model)
 import Wizard.Projects.DocumentDownload.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes

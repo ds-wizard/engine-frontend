@@ -1,6 +1,6 @@
 module Wizard.Users.Edit.Update exposing (fetchData, update)
 
-import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
+import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Users.Edit.Components.ActiveSessions as ActiveSessions

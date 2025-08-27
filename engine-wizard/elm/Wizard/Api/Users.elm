@@ -19,10 +19,10 @@ module Wizard.Api.Users exposing
 import Json.Decode as D
 import Json.Encode as E
 import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Common.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Wizard.Api.Models.SubmissionProps as SubmissionProps exposing (SubmissionProps)
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Models.UserLocale as UserLocale exposing (UserLocale)

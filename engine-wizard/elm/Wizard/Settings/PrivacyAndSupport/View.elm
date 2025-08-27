@@ -1,11 +1,11 @@
 module Wizard.Settings.PrivacyAndSupport.View exposing (view)
 
+import Compose exposing (compose2)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h3, text)
 import Html.Attributes exposing (placeholder)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Utils exposing (compose2)
+import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Common.AppState exposing (AppState)

@@ -9,11 +9,11 @@ module Wizard.Common.Components.Questionnaire.DeleteVersionModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils exposing (flip)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)

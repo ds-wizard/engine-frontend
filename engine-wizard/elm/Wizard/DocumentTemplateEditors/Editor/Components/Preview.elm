@@ -23,12 +23,12 @@ import Http
 import Maybe.Extra as Maybe
 import Process
 import Shared.Components.FontAwesome exposing (fa, faDownload)
+import Shared.Components.Undraw as Undraw
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
 import Shared.Data.ServerError as ServerError
-import Shared.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
-import Shared.Undraw as Undraw
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
 import String.Format as String
 import Task
 import Task.Extra as Task

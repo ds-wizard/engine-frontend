@@ -11,7 +11,7 @@ import Html exposing (Html, a, code, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onMouseOut)
 import Shared.Components.FontAwesome exposing (faCopy)
-import Shared.Copy as Copy
+import Shared.Ports.Copy as Copy
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (tooltip)
 

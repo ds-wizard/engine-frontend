@@ -6,8 +6,8 @@ module Wizard.DocumentTemplates.Detail.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setTemplate)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setTemplate)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Common.AppState exposing (AppState)

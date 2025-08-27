@@ -5,11 +5,11 @@ module Wizard.Common.Components.SessionModal exposing
 
 import Gettext exposing (gettext)
 import Html exposing (Html, text)
-import Shared.Auth.Session as Session
 import String.Format as String
 import Wizard.Auth.Msgs
 import Wizard.Common.AppState as AppState exposing (AppState)
 import Wizard.Common.View.Modal as Modal
+import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing

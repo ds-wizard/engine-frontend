@@ -14,12 +14,12 @@ import Html exposing (Html, a, div, strong, table, tbody, td, text, th, thead, t
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
-import Shared.Common.UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Components.FontAwesome exposing (faDelete)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setAppKeys)
+import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setAppKeys)
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Wizard.Api.AppKeys as AppKeysApi
 import Wizard.Api.Models.AppKey exposing (AppKey)

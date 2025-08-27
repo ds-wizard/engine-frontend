@@ -4,7 +4,7 @@ module Wizard.Settings.Routing exposing
     , toUrl
     )
 
-import Shared.Utils exposing (listInsertIf)
+import List.Utils as List
 import Url.Parser exposing ((</>), Parser, map, s)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
@@ -24,17 +24,17 @@ parsers appState wrapRoute =
             not (Admin.isEnabled appState.config.admin)
     in
     []
-        |> listInsertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s "organization")) adminDisabled
-        |> listInsertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s "authentication")) adminDisabled
-        |> listInsertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
-        |> listInsertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
-        |> listInsertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s "dashboard")) True
-        |> listInsertIf (map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s "look-and-feel")) True
-        |> listInsertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s "registry")) (Feature.registry appState)
-        |> listInsertIf (map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s "projects")) True
-        |> listInsertIf (map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s "submission")) True
-        |> listInsertIf (map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s "knowledge-models")) True
-        |> listInsertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s "usage")) True
+        |> List.insertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s "organization")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s "authentication")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s "dashboard")) True
+        |> List.insertIf (map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s "look-and-feel")) True
+        |> List.insertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s "registry")) (Feature.registry appState)
+        |> List.insertIf (map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s "projects")) True
+        |> List.insertIf (map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s "submission")) True
+        |> List.insertIf (map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s "knowledge-models")) True
+        |> List.insertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s "usage")) True
 
 
 toUrl : Route -> List String

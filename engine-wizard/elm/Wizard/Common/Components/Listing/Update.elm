@@ -15,8 +15,8 @@ import Shared.Data.ApiError as ApiError
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Setters exposing (setDropdownState)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setDropdownState)
 import Task.Extra as Task
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.Listing.Models exposing (Model, setPagination)

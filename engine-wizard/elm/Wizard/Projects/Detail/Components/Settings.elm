@@ -25,10 +25,9 @@ import Shared.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuest
 import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
-import Shared.Setters exposing (setSelected)
-import Shared.Utils exposing (listFilterJust)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Setters exposing (setSelected)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
@@ -254,8 +253,7 @@ handleProjectTagsSearch cfg appState model value =
             Form.getListIndexes "projectTags" model.form
                 |> List.unconsLast
                 |> Maybe.unwrap [] Tuple.second
-                |> List.map (\i -> (Form.getFieldAsString ("projectTags." ++ String.fromInt i) model.form).value)
-                |> listFilterJust
+                |> List.filterMap (\i -> (Form.getFieldAsString ("projectTags." ++ String.fromInt i) model.form).value)
                 |> List.filter (not << String.isEmpty)
 
         cmd =

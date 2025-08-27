@@ -7,11 +7,11 @@ import Html.Attributes exposing (checked, class, classList, disabled, for, href,
 import Html.Events exposing (onCheck, onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Common.ByteUnits as ByteUnits
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faRemove, faSpinner, faSuccess)
-import Shared.Markdown as Markdown
+import Shared.Utils.ByteUnits as ByteUnits
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time.Distance as TimeDistance
 import Wizard.Api.Models.Document exposing (Document)

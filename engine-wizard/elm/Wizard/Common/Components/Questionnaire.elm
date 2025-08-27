@@ -38,6 +38,7 @@ import Browser.Events
 import CharIdentifier
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, small, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
@@ -48,24 +49,22 @@ import Json.Decode as D exposing (Decoder, decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
 import List.Extra as List
+import List.Utils as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
 import Registry.Components.FontAwesome exposing (fas)
 import Roman
 import Set exposing (Set)
-import Shared.Auth.Session as Session
-import Shared.Common.ByteUnits as ByteUnits
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess)
-import Shared.Copy as Copy
+import Shared.Components.Undraw as Undraw
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Markdown as Markdown
-import Shared.RegexPatterns as RegexPatterns
-import Shared.Undraw as Undraw
-import Shared.Utils exposing (flip, getUuidString, listFilterJust, listInsertIf)
-import Shared.Utils.ListUtils as ListUtils
+import Shared.Ports.Copy as Copy
+import Shared.Utils.ByteUnits as ByteUnits
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.RegexPatterns as RegexPatterns
+import Shared.Utils.TimeUtils as TimeUtils
 import SplitPane
 import String
 import String.Extra as String
@@ -74,6 +73,7 @@ import Task.Extra as Task
 import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
+import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -138,6 +138,7 @@ import Wizard.Common.View.Flash as Flash
 import Wizard.Common.View.Modal as Modal
 import Wizard.Common.View.Tag as Tag
 import Wizard.Common.View.UserIcon as UserIcon
+import Wizard.Data.Session as Session
 import Wizard.Ports as Ports
 import Wizard.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
 import Wizard.Routes as Routes
@@ -1845,7 +1846,7 @@ handleAddItem : AppState -> (Msg -> msg) -> Model -> String -> List String -> ( 
 handleAddItem appState wrapMsg model path originalItems =
     let
         ( uuid, newSeed ) =
-            getUuidString appState.seed
+            Uuid.stepString appState.seed
 
         itemPath =
             path ++ "." ++ uuid
@@ -2708,11 +2709,11 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                         let
                             previousCommentsPath =
                                 Maybe.withDefault "" <|
-                                    ListUtils.findPreviousInfinite path comments
+                                    List.findPreviousInfinite path comments
 
                             nextCommentsPath =
                                 Maybe.withDefault "" <|
-                                    ListUtils.findNextInfinite path comments
+                                    List.findNextInfinite path comments
 
                             commentCountTooltip =
                                 if model.commentsViewResolved then
@@ -3082,10 +3083,10 @@ viewCommentHeader appState model path commentThread index comment =
 
         actions =
             []
-                |> listInsertIf removeAssignedAction removeAssignedActionVisible
-                |> listInsertIf reopenAction reopenActionVisible
-                |> listInsertIf editAction editActionVisible
-                |> listInsertIf deleteAction deleteActionVisible
+                |> List.insertIf removeAssignedAction removeAssignedActionVisible
+                |> List.insertIf reopenAction reopenActionVisible
+                |> List.insertIf editAction editActionVisible
+                |> List.insertIf deleteAction deleteActionVisible
 
         dropdown =
             if List.isEmpty actions then
@@ -3436,8 +3437,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                 let
                     tags =
                         Question.getTagUuids question
-                            |> List.map (flip KnowledgeModel.getTag model.questionnaire.knowledgeModel)
-                            |> listFilterJust
+                            |> List.filterMap (flip KnowledgeModel.getTag model.questionnaire.knowledgeModel)
                             |> List.sortBy .name
                 in
                 Tag.viewList { showDescription = False } tags

@@ -15,9 +15,9 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.FontAwesome exposing (faClose)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.TimeUtils as TimeUtils
 import Shortcut
 import Triple
 import Uuid exposing (Uuid)

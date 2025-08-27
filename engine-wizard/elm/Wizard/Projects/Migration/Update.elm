@@ -9,10 +9,10 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Data.ApiError exposing (ApiError)
-import Shared.Utils exposing (getUuid)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Time
 import Uuid exposing (Uuid)
+import Uuid.Extra as Uuid
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
 import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Api.Questionnaires as QuestionnairesApi
@@ -148,7 +148,7 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                         Questionnaire.SetLabels path value ->
                             let
                                 ( uuid, newSeed2_ ) =
-                                    getUuid newSeed
+                                    Uuid.step newSeed
 
                                 event =
                                     QuestionnaireEvent.SetLabels

@@ -14,7 +14,9 @@ module Wizard.KMEditor.Editor.Components.KMEditor exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Compose exposing (compose2)
 import Dict exposing (Dict)
+import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, h3, h5, hr, i, img, label, li, pre, small, span, strong, text, textarea, ul)
 import Html.Attributes exposing (attribute, class, classList, disabled, id, placeholder, src, target, value)
@@ -27,15 +29,15 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
-import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (faCopy, faDelete, faKmEditorCopyUuid, faKmEditorMove, faKmIntegration, faQuestionnaireExpand, faQuestionnaireShrink, faWarning, fas)
-import Shared.Copy as Copy
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Markdown as Markdown
-import Shared.Utils exposing (compose2, flip, httpMethodOptions, nilUuid)
+import Shared.Ports.Copy as Copy
+import Shared.Utils.ByteUnits as ByteUnits
 import Shared.Utils.CurlUtils as CurlUtils
+import Shared.Utils.HttpMethod as HttpMethod
 import Shared.Utils.HttpStatus as HttpStatus
+import Shared.Utils.Markdown as Markdown
 import SplitPane
 import String.Extra as String
 import String.Format as String
@@ -718,7 +720,7 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             EditKnowledgeModelEventData.init
                 |> map value
                 |> EditKnowledgeModelEvent
-                |> eventMsg True selector nilUuid (Just kmUuid)
+                |> eventMsg True selector (Uuid.toString Uuid.nil) (Just kmUuid)
 
         addChapterEvent =
             AddChapterEvent AddChapterEventData.init
@@ -2445,7 +2447,7 @@ viewIntegrationEditorApiLegacy { appState, eventMsg } parentUuid integrationUuid
                 { name = "requestMethod"
                 , label = gettext "Request HTTP Method" appState.locale
                 , value = data.requestMethod
-                , options = httpMethodOptions
+                , options = HttpMethod.options
                 , onChange = createTypeEditEvent setRequestMethod
                 , extra = Nothing
                 }

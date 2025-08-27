@@ -4,8 +4,8 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Events exposing (onSubmit)
-import Shared.Auth.Role as Role
-import Shared.Form.FormError exposing (FormError)
+import Shared.Data.Role as Role
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks
 import Wizard.Common.Html.Attribute exposing (detailClass)

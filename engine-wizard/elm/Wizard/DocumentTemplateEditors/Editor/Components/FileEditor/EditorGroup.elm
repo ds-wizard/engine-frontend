@@ -9,8 +9,8 @@ module Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.EditorGroup e
     , removeEditorByUuid
     )
 
+import Flip exposing (flip)
 import List.Extra as List
-import Shared.Utils exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.DocumentTemplateEditors.Editor.Components.FileEditor.Editor as Editor exposing (Editor)
 

@@ -9,8 +9,8 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Normalize as Normalize
 import Version exposing (Version)

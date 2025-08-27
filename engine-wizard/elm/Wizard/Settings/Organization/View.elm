@@ -1,10 +1,10 @@
 module Wizard.Settings.Organization.View exposing (view)
 
+import Compose exposing (compose2)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Utils exposing (compose2)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks as GuideLinks

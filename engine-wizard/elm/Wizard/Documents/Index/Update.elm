@@ -6,8 +6,8 @@ module Wizard.Documents.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Setters exposing (setQuestionnaire)
 import Shared.Utils.RequestHelpers as RequestHelpers
+import Shared.Utils.Setters exposing (setQuestionnaire)
 import Task.Extra as Task
 import Uuid
 import Wizard.Api.Documents as DocumentsApi

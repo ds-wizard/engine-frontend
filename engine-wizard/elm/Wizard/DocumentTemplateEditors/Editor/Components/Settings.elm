@@ -26,12 +26,12 @@ import List.Extra as List
 import Random exposing (Seed)
 import Shared.Components.FontAwesome exposing (fa, faDelete)
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
-import Shared.Utils exposing (getUuid)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid
+import Uuid.Extra as Uuid
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
@@ -138,7 +138,7 @@ update cfg appState msg model =
                         ( Form.Append "formats", Just index ) ->
                             let
                                 ( uuid, newSeed1 ) =
-                                    getUuid appState.seed
+                                    Uuid.step appState.seed
 
                                 uuidFormMsg =
                                     Form.Input ("formats." ++ String.fromInt index ++ ".uuid") Form.Text (Field.String (Uuid.toString uuid))

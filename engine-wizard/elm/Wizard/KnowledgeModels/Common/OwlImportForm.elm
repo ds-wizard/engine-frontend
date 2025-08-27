@@ -6,9 +6,9 @@ module Wizard.KnowledgeModels.Common.OwlImportForm exposing
 
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
-import Shared.Form.Field as Field
-import Shared.Form.FormError exposing (FormError)
-import Shared.Form.Validate as V
+import Shared.Utils.Form.Field as Field
+import Shared.Utils.Form.FormError exposing (FormError)
+import Shared.Utils.Form.Validate as V
 import Wizard.Common.AppState exposing (AppState)
 
 

@@ -5,7 +5,7 @@ module Wizard.DocumentTemplateEditors.Create.Models exposing
 
 import ActionResult exposing (ActionResult)
 import Form exposing (Form)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Common.AppState exposing (AppState)

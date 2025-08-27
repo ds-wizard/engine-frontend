@@ -9,9 +9,9 @@ module Wizard.Projects.Migration.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Dict
+import Flip exposing (flip)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Utils exposing (flip, listFilterJust)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
@@ -224,8 +224,7 @@ getAnswerChanges context newQuestion =
                     Just <| AnswerAdd <| AnswerAddData answer
     in
     KnowledgeModel.getQuestionAnswers (Question.getUuid newQuestion) context.newKM
-        |> List.map createAnswerChange
-        |> listFilterJust
+        |> List.filterMap createAnswerChange
 
 
 getChoiceChanges : ChangeListContext -> Question -> List ChoiceChange
@@ -244,8 +243,7 @@ getChoiceChanges context newQuestion =
                     Just <| ChoiceAdd <| ChoiceAddData choice
     in
     KnowledgeModel.getQuestionChoices (Question.getUuid newQuestion) context.newKM
-        |> List.map createChoiceChange
-        |> listFilterJust
+        |> List.filterMap createChoiceChange
 
 
 getUuidFromPath : String -> String

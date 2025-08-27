@@ -18,14 +18,14 @@ import Html.Events exposing (onClick, onInput)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Components.Badge as Badge
 import Shared.Components.FontAwesome exposing (fa, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faListingFilterSingleNotSelected, faListingFilterSingleSelected, faSortAsc, faSortDesc)
+import Shared.Components.Undraw as Undraw
 import Shared.Data.Pagination exposing (Pagination)
 import Shared.Data.Pagination.Page exposing (Page)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
-import Shared.Undraw as Undraw
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Time.Distance exposing (inWordsWithConfig)

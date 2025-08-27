@@ -3,7 +3,7 @@ module Wizard.View exposing (view)
 import Browser exposing (Document)
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 import Wizard.Comments.View
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.Layout as Layout

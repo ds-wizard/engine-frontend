@@ -3,7 +3,7 @@ module Wizard.Tenants.Create.View exposing (view)
 import Form exposing (Form)
 import Html exposing (Html, div, form)
 import Html.Events exposing (onSubmit)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Html.Attribute exposing (detailClass)
 import Wizard.Common.View.ActionButton as ActionButton

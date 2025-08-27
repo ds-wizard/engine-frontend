@@ -9,7 +9,7 @@ module Wizard.Api.Models.UserInfo exposing
 import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Auth.Role as Role
+import Shared.Data.Role as Role
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 

@@ -8,7 +8,7 @@ module Wizard.Public.Common.ForgottenPasswordForm exposing
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias ForgottenPasswordForm =

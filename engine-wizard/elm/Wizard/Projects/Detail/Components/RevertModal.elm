@@ -12,8 +12,8 @@ import ActionResult exposing (ActionResult(..))
 import Gettext exposing (gettext)
 import Html exposing (Html, br, p, strong, text)
 import Maybe.Extra as Maybe
-import Shared.Common.TimeUtils as TimeUtils
 import Shared.Data.ApiError as ApiError exposing (ApiError)
+import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)

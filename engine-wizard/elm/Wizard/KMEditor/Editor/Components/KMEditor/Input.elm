@@ -52,10 +52,10 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
 import Reorderable
-import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.FontAwesome exposing (faAdd, faDelete, fas)
-import Shared.Markdown as Markdown
-import Shared.RegexPatterns as RegexPatterns
+import Shared.Utils.ByteUnits as ByteUnits
+import Shared.Utils.Markdown as Markdown
+import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)

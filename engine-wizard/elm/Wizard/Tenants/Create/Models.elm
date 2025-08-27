@@ -5,7 +5,7 @@ module Wizard.Tenants.Create.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Form exposing (Form)
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Tenants.Common.TenantCreateForm as AppCreateForm exposing (TenantCreateForm)
 
 

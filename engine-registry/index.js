@@ -3,7 +3,7 @@ const axiosRetry = require('axios-retry').default
 
 const program = require('./elm/Registry.elm')
 
-const registerCopyPorts = require('../engine-shared/ports/copy')
+const registerCopyPorts = require('../shared/common/js/ports/copy')
 const registerSessionPorts = require('./js/ports/session')
 
 axiosRetry(axios, {

@@ -5,8 +5,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, form)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Form as Form
-import Shared.Form.FormError exposing (FormError)
+import Shared.Utils.Form as Form
+import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.EditableConfig.EditableFeaturesConfig exposing (EditableFeaturesConfig)
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.View.FormActions as FormActions

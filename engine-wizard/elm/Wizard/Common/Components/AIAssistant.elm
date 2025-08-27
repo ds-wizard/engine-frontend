@@ -17,7 +17,7 @@ import Random exposing (Seed)
 import Shared.Api.Request exposing (ServerInfo)
 import Shared.Components.FontAwesome exposing (fa, faClose)
 import Shared.Data.ApiError exposing (ApiError)
-import Shared.Markdown as Markdown
+import Shared.Utils.Markdown as Markdown
 import Uuid
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.Components.AIAssistant.Api as Api

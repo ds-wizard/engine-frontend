@@ -13,9 +13,9 @@ import Registry.Components.FormWrapper as FormWrapper
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.ForgottenTokenForm as ForgottenTokenForm exposing (ForgottenTokenForm)
+import Shared.Components.Undraw as Undraw
 import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Form.FormError exposing (FormError)
-import Shared.Undraw as Undraw
+import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias Model =

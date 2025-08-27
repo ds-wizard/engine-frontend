@@ -4,8 +4,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, style)
 import Registry.Components.FontAwesome exposing (fas)
-import Shared.Common.ByteUnits as ByteUnits
 import Shared.Components.Badge as Badge
+import Shared.Utils.ByteUnits as ByteUnits
 import Wizard.Api.Models.Usage exposing (Usage, UsageValue)
 import Wizard.Common.AppState exposing (AppState)
 

@@ -16,7 +16,7 @@ import Html exposing (Html, br, div, h1, h2, p, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Shared.Components.FontAwesome exposing (faSpinner, faSuccess)
-import Shared.Undraw as Undraw
+import Shared.Components.Undraw as Undraw
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Common.GuideLinks exposing (GuideLinks)
 import Wizard.Common.Html exposing (guideLink)
