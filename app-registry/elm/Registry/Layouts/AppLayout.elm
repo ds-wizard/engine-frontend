@@ -50,7 +50,7 @@ viewHeader appState cfg appTitle =
                         , href (Routes.toUrl Routes.home)
                         ]
                         [ div [ class "d-flex" ]
-                            [ img [ src "/img/logo.svg", height 30, class "me-1" ] []
+                            [ img [ src "/assets/logo.svg", height 30, class "me-1" ] []
                             , text appTitle
                             ]
                         ]

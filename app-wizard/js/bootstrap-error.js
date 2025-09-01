@@ -39,5 +39,5 @@ function notSeededHTML() {
 }
 
 function messageHTML(error) {
-    return '<div class="full-page-illustrated-message"><img src="/wizard/img/illustrations/undraw_bug_fixing.svg"><div><h1>' + error.title + '</h1><p>' + error.message + '</p></div></div>'
+    return '<div class="full-page-illustrated-message"><img src="/wizard/assets/illustrations/undraw_bug_fixing.svg"><div><h1>' + error.title + '</h1><p>' + error.message + '</p></div></div>'
 }

@@ -133,7 +133,7 @@ module.exports = {
         }),
         new CopyWebpackPlugin({
             patterns: [
-                {from: `${component}/img`, to: 'img'},
+                {from: `${component}/assets`, to: 'assets'},
                 {from: `${component}/robots.txt`, to: 'robots.txt', noErrorOnMissing: true}
             ]
         }),

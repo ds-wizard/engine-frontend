@@ -53,14 +53,14 @@ formView appState form =
               , div []
                     [ strong [] [ text (gettext "Welcome" appState.locale) ]
                     , p [ class "text-muted" ] [ text (gettext "Standard welcome screen." appState.locale) ]
-                    , img [ class "settings-img", src "/wizard/img/settings/dashboard-welcome.png" ] []
+                    , img [ class "settings-img", src "/wizard/assets/settings/dashboard-welcome.png" ] []
                     ]
               )
             , ( DashboardAndLoginScreenConfigForm.dashboardRoleBased
               , div []
                     [ strong [] [ text (gettext "Role-Based" appState.locale) ]
                     , p [ class "text-muted" ] [ text (gettext "Relevant content based on user's role." appState.locale) ]
-                    , img [ class "settings-img", src "/wizard/img/settings/dashboard-rolebased.png" ] []
+                    , img [ class "settings-img", src "/wizard/assets/settings/dashboard-rolebased.png" ] []
                     ]
               )
             ]
@@ -77,7 +77,7 @@ formView appState form =
                         , FormExtra.mdAfter (gettext "Additional information displayed on the login screen next to the login form." appState.locale)
                         ]
                     , div [ class "col-4" ]
-                        [ img [ class "settings-img", src "/wizard/img/settings/login-info-text.png" ] []
+                        [ img [ class "settings-img", src "/wizard/assets/settings/login-info-text.png" ] []
                         ]
                     ]
                 , div [ class "row mt-5" ]
@@ -86,7 +86,7 @@ formView appState form =
                         , FormExtra.mdAfter (gettext "Additional information displayed on the login screen underneath the login form." appState.locale)
                         ]
                     , div [ class "col-4" ]
-                        [ img [ class "settings-img", src "/wizard/img/settings/login-info-sidebar-text.png" ] []
+                        [ img [ class "settings-img", src "/wizard/assets/settings/login-info-sidebar-text.png" ] []
                         ]
                     ]
                 ]
@@ -108,7 +108,7 @@ formView appState form =
                             (gettext "Add announcement" appState.locale)
                         ]
                     , div [ class "col-4" ]
-                        [ img [ class "settings-img", src "/wizard/img/settings/announcements.png" ] []
+                        [ img [ class "settings-img", src "/wizard/assets/settings/announcements.png" ] []
                         ]
                     ]
                 ]

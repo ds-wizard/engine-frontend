@@ -78,7 +78,7 @@ defaultIllustrationsColor =
 
 defaultLogoUrl : String
 defaultLogoUrl =
-    "/wizard/img/logo.svg"
+    "/wizard/assets/logo.svg"
 
 
 getAppTitle : LookAndFeelConfig -> String
