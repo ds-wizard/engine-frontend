@@ -17,9 +17,9 @@ module Wizard.Common.AppState exposing
 import Browser.Navigation as Navigation exposing (Key)
 import Gettext
 import Json.Decode as D exposing (Error(..))
-import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Shared.Api.Request exposing (ServerInfo)
+import Shared.Data.Role exposing (Role)
 import Shared.Utils.Theme exposing (Theme)
 import String.Extra as String
 import Time
@@ -132,9 +132,9 @@ toAIAssistantServerInfo appState =
     }
 
 
-getUserRole : AppState -> String
+getUserRole : AppState -> Maybe Role
 getUserRole =
-    Maybe.unwrap "" .role << .user << .config
+    Maybe.map .role << .user << .config
 
 
 getClientUrlRoot : AppState -> String

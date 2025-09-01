@@ -36,11 +36,15 @@ initialModel appState =
                     WelcomeDashboard
 
                 DashboardType.RoleBased ->
-                    Role.switch (AppState.getUserRole appState)
-                        AdminDashboard
-                        DataStewardDashboard
-                        ResearcherDashboard
-                        ResearcherDashboard
+                    case AppState.getUserRole appState of
+                        Just role ->
+                            Role.switch role
+                                AdminDashboard
+                                DataStewardDashboard
+                                ResearcherDashboard
+
+                        Nothing ->
+                            ResearcherDashboard
     in
     { currentDashboard = currentDashboard
     , researcherDashboardModel = ResearcherDashboard.initialModel
