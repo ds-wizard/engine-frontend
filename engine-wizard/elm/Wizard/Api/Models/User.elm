@@ -11,6 +11,7 @@ module Wizard.Api.Models.User exposing
 import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Shared.Data.Role as Role exposing (Role)
 import Uuid exposing (Uuid)
 
 
@@ -21,7 +22,7 @@ type alias User =
     , lastName : String
     , imageUrl : Maybe String
     , affiliation : Maybe String
-    , role : String
+    , role : Role
     , permissions : List String
     , active : Bool
     , sources : List String
@@ -37,7 +38,7 @@ decoder =
         |> D.required "lastName" D.string
         |> D.required "imageUrl" (D.maybe D.string)
         |> D.required "affiliation" (D.maybe D.string)
-        |> D.required "role" D.string
+        |> D.required "role" Role.decoder
         |> D.required "permissions" (D.list D.string)
         |> D.required "active" D.bool
         |> D.required "sources" (D.list D.string)

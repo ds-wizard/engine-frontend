@@ -21,11 +21,15 @@ view appState =
                     gettext "Welcome!" appState.locale
 
         roleText =
-            Role.switch (AppState.getUserRole appState)
-                (gettext "As an admin, you configure the instance and manage user accounts." appState.locale)
-                (gettext "As a data steward, you prepare knowledge models, document templates, and project templates for researchers." appState.locale)
-                (gettext "As a researcher, you create and collaborate on data management plans." appState.locale)
-                ""
+            case AppState.getUserRole appState of
+                Just role ->
+                    Role.switch role
+                        (gettext "As an admin, you configure the instance and manage user accounts." appState.locale)
+                        (gettext "As a data steward, you prepare knowledge models, document templates, and project templates for researchers." appState.locale)
+                        (gettext "As a researcher, you create and collaborate on data management plans." appState.locale)
+
+                Nothing ->
+                    ""
     in
     div [ class "col-12" ]
         [ div [ class "WelcomeRoleWidget px-4 py-5 bg-light rounded-3 position-relative overflow-hidden mb-3" ]

@@ -100,7 +100,7 @@ roleBadge : AppState -> User -> Html msg
 roleBadge appState user =
     let
         badge =
-            if user.role == Role.admin then
+            if Role.isAdmin user.role then
                 Badge.dark
 
             else

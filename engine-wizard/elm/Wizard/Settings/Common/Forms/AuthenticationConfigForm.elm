@@ -12,6 +12,7 @@ import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Maybe.Extra as Maybe
+import Shared.Data.Role as Role exposing (Role)
 import Shared.Utils.Form.FormError exposing (FormError)
 import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
@@ -21,7 +22,7 @@ import Wizard.Settings.Common.Forms.OpenIDServiceConfigForm as OpenIDServiceConf
 
 
 type alias AuthenticationConfigForm =
-    { defaultRole : String
+    { defaultRole : Role
     , services : List OpenIDServiceConfigForm
     , registrationEnabled : Bool
     , twoFactorAuthEnabled : Bool
@@ -43,7 +44,7 @@ init appState config =
 validation : AppState -> Validation FormError AuthenticationConfigForm
 validation appState =
     V.succeed AuthenticationConfigForm
-        |> V.andMap (V.field "defaultRole" V.string)
+        |> V.andMap (V.field "defaultRole" Role.validation)
         |> V.andMap (V.field "services" (V.list (OpenIDServiceConfigForm.validation appState)))
         |> V.andMap (V.field "registrationEnabled" V.bool)
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool)
@@ -58,7 +59,7 @@ configToFormInitials config =
             config.external.services
                 |> List.map (Field.group << OpenIDServiceConfigForm.configToFormInitials)
     in
-    [ ( "defaultRole", Field.string config.defaultRole )
+    [ ( "defaultRole", Field.string (Role.toString config.defaultRole) )
     , ( "services", Field.list services )
     , ( "registrationEnabled", Field.bool config.internal.registration.enabled )
     , ( "twoFactorAuthEnabled", Field.bool config.internal.twoFactorAuth.enabled )
