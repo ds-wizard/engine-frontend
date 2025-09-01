@@ -4,7 +4,7 @@ module Wizard.Api.Tours exposing
     )
 
 import Shared.Api.Request as Request exposing (ToMsg)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 putTour : AppState -> String -> ToMsg () msg -> Cmd msg

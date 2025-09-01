@@ -2,38 +2,38 @@ module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
+import Shared.Components.AIAssistant as AIAssistant
+import Shared.Utils.TimeUtils as TimeUtils
 import Url
 import Wizard.Api.Tours as ToursApi
-import Wizard.Auth.Update
-import Wizard.Comments.Update
-import Wizard.Common.AppState as AppState
-import Wizard.Common.Components.AIAssistant as AIAssistant
-import Wizard.Common.Menu.Update
-import Wizard.Common.Time as Time
-import Wizard.Dashboard.Update
+import Wizard.Components.Menu.Update
+import Wizard.Data.AppState as AppState
 import Wizard.Data.Session as Session
-import Wizard.Dev.Update
-import Wizard.DocumentTemplateEditors.Update
-import Wizard.DocumentTemplates.Update
-import Wizard.Documents.Update
-import Wizard.KMEditor.Update
-import Wizard.KnowledgeModelSecrets.Update
-import Wizard.KnowledgeModels.Update
-import Wizard.Locales.Update
 import Wizard.Models exposing (Model, addTour, initLocalModel, setRoute, setSeed, setSession)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.Pages.Auth.Update
+import Wizard.Pages.Comments.Update
+import Wizard.Pages.Dashboard.Update
+import Wizard.Pages.Dev.Update
+import Wizard.Pages.DocumentTemplateEditors.Update
+import Wizard.Pages.DocumentTemplates.Update
+import Wizard.Pages.Documents.Update
+import Wizard.Pages.KMEditor.Update
+import Wizard.Pages.KnowledgeModelSecrets.Update
+import Wizard.Pages.KnowledgeModels.Update
+import Wizard.Pages.Locales.Update
+import Wizard.Pages.ProjectActions.Update
+import Wizard.Pages.ProjectFiles.Update
+import Wizard.Pages.ProjectImporters.Update
+import Wizard.Pages.Projects.Update
+import Wizard.Pages.Public.Update
+import Wizard.Pages.Registry.Update
+import Wizard.Pages.Settings.Update
+import Wizard.Pages.Tenants.Update
+import Wizard.Pages.Users.Update
 import Wizard.Ports as Ports
-import Wizard.ProjectActions.Update
-import Wizard.ProjectFiles.Update
-import Wizard.ProjectImporters.Update
-import Wizard.Projects.Update
-import Wizard.Public.Update
-import Wizard.Registry.Update
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation, routeIfAllowed)
-import Wizard.Settings.Update
-import Wizard.Tenants.Update
-import Wizard.Users.Update
 
 
 fetchData : Model -> Cmd Msg
@@ -41,79 +41,79 @@ fetchData model =
     case model.appState.route of
         Routes.DevRoute route ->
             Cmd.map AdminMsg <|
-                Wizard.Dev.Update.fetchData route model.appState
+                Wizard.Pages.Dev.Update.fetchData route model.appState
 
         Routes.TenantsRoute route ->
             Cmd.map TenantsMsg <|
-                Wizard.Tenants.Update.fetchData route model.appState
+                Wizard.Pages.Tenants.Update.fetchData route model.appState
 
         Routes.CommentsRoute _ _ ->
             Cmd.map Wizard.Msgs.CommentsMsg <|
-                Wizard.Comments.Update.fetchData
+                Wizard.Pages.Comments.Update.fetchData
 
         Routes.DashboardRoute ->
             Cmd.map DashboardMsg <|
-                Wizard.Dashboard.Update.fetchData model.appState model.dashboardModel
+                Wizard.Pages.Dashboard.Update.fetchData model.appState model.dashboardModel
 
         Routes.DocumentsRoute _ ->
             Cmd.map DocumentsMsg <|
-                Wizard.Documents.Update.fetchData model.appState model.documentsModel
+                Wizard.Pages.Documents.Update.fetchData model.appState model.documentsModel
 
         Routes.DocumentTemplateEditorsRoute route ->
             Cmd.map Wizard.Msgs.DocumentTemplateEditorsMsg <|
-                Wizard.DocumentTemplateEditors.Update.fetchData route model.appState model.documentTemplateEditorsModel
+                Wizard.Pages.DocumentTemplateEditors.Update.fetchData route model.appState model.documentTemplateEditorsModel
 
         Routes.DocumentTemplatesRoute route ->
             Cmd.map Wizard.Msgs.DocumentTemplatesMsg <|
-                Wizard.DocumentTemplates.Update.fetchData route model.appState
+                Wizard.Pages.DocumentTemplates.Update.fetchData route model.appState
 
         Routes.KMEditorRoute route ->
             Cmd.map Wizard.Msgs.KMEditorMsg <|
-                Wizard.KMEditor.Update.fetchData route model.kmEditorModel model.appState
+                Wizard.Pages.KMEditor.Update.fetchData route model.kmEditorModel model.appState
 
         Routes.KnowledgeModelsRoute route ->
             Cmd.map Wizard.Msgs.KnowledgeModelsMsg <|
-                Wizard.KnowledgeModels.Update.fetchData route model.appState
+                Wizard.Pages.KnowledgeModels.Update.fetchData route model.appState
 
         Routes.KnowledgeModelSecretsRoute ->
             Cmd.map Wizard.Msgs.KnowledgeModelSecretsMsg <|
-                Wizard.KnowledgeModelSecrets.Update.fetchData model.appState
+                Wizard.Pages.KnowledgeModelSecrets.Update.fetchData model.appState
 
         Routes.LocalesRoute route ->
             Cmd.map Wizard.Msgs.LocaleMsg <|
-                Wizard.Locales.Update.fetchData route model.appState
+                Wizard.Pages.Locales.Update.fetchData route model.appState
 
         Routes.ProjectActionsRoute _ ->
             Cmd.map Wizard.Msgs.ProjectActionsMsg <|
-                Wizard.ProjectActions.Update.fetchData
+                Wizard.Pages.ProjectActions.Update.fetchData
 
         Routes.ProjectFilesRoute _ ->
             Cmd.map Wizard.Msgs.ProjectFilesMsg <|
-                Wizard.ProjectFiles.Update.fetchData
+                Wizard.Pages.ProjectFiles.Update.fetchData
 
         Routes.ProjectImportersRoute _ ->
             Cmd.map Wizard.Msgs.ProjectImportersMsg <|
-                Wizard.ProjectImporters.Update.fetchData
+                Wizard.Pages.ProjectImporters.Update.fetchData
 
         Routes.ProjectsRoute route ->
             Cmd.map Wizard.Msgs.ProjectsMsg <|
-                Wizard.Projects.Update.fetchData route model.appState model.projectsModel
+                Wizard.Pages.Projects.Update.fetchData route model.appState model.projectsModel
 
         Routes.PublicRoute route ->
             Cmd.map Wizard.Msgs.PublicMsg <|
-                Wizard.Public.Update.fetchData route model.appState
+                Wizard.Pages.Public.Update.fetchData route model.appState
 
         Routes.RegistryRoute route ->
             Cmd.map Wizard.Msgs.RegistryMsg <|
-                Wizard.Registry.Update.fetchData route model.appState
+                Wizard.Pages.Registry.Update.fetchData route model.appState
 
         Routes.SettingsRoute route ->
             Cmd.map Wizard.Msgs.SettingsMsg <|
-                Wizard.Settings.Update.fetchData route model.appState model.settingsModel
+                Wizard.Pages.Settings.Update.fetchData route model.appState model.settingsModel
 
         Routes.UsersRoute route ->
             Cmd.map Wizard.Msgs.UsersMsg <|
-                Wizard.Users.Update.fetchData route model.appState
+                Wizard.Pages.Users.Update.fetchData route model.appState
 
         _ ->
             Cmd.none
@@ -123,13 +123,13 @@ isGuarded : Routes.Route -> Model -> Maybe String
 isGuarded nextRoute model =
     case model.appState.route of
         Routes.DocumentTemplateEditorsRoute route ->
-            Wizard.DocumentTemplateEditors.Update.isGuarded route model.appState nextRoute model.documentTemplateEditorsModel
+            Wizard.Pages.DocumentTemplateEditors.Update.isGuarded route model.appState nextRoute model.documentTemplateEditorsModel
 
         Routes.KMEditorRoute route ->
-            Wizard.KMEditor.Update.isGuarded route model.appState nextRoute model.kmEditorModel
+            Wizard.Pages.KMEditor.Update.isGuarded route model.appState nextRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
-            Wizard.Projects.Update.isGuarded route model.appState nextRoute model.projectsModel
+            Wizard.Pages.Projects.Update.isGuarded route model.appState nextRoute model.projectsModel
 
         _ ->
             Nothing
@@ -140,11 +140,11 @@ onUnload nextRoute model =
     case model.appState.route of
         Routes.KMEditorRoute route ->
             Cmd.map KMEditorMsg <|
-                Wizard.KMEditor.Update.onUnload route nextRoute model.kmEditorModel
+                Wizard.Pages.KMEditor.Update.onUnload route nextRoute model.kmEditorModel
 
         Routes.ProjectsRoute route ->
             Cmd.map ProjectsMsg <|
-                Wizard.Projects.Update.onUnload route nextRoute model.projectsModel
+                Wizard.Pages.Projects.Update.onUnload route nextRoute model.projectsModel
 
         _ ->
             Cmd.none
@@ -159,7 +159,7 @@ update msg model =
                     ( m, cmd )
 
                 _ ->
-                    ( m, Cmd.batch [ Time.getTime, cmd ] )
+                    ( m, Cmd.batch [ TimeUtils.getTime OnTime, cmd ] )
     in
     wrapGetTime <|
         case msg of
@@ -231,7 +231,7 @@ update msg model =
                 ( { model | appState = AppState.acceptCookies model.appState }, Ports.acceptCookies () )
 
             Wizard.Msgs.AuthMsg authMsg ->
-                Wizard.Auth.Update.update authMsg model
+                Wizard.Pages.Auth.Update.update authMsg model
 
             Wizard.Msgs.AIAssistantMsg aiAssistantMsg ->
                 let
@@ -289,63 +289,63 @@ update msg model =
             Wizard.Msgs.MenuMsg menuMsg ->
                 let
                     ( menuModel, cmd ) =
-                        Wizard.Common.Menu.Update.update Wizard.Msgs.MenuMsg menuMsg model.appState model.menuModel
+                        Wizard.Components.Menu.Update.update Wizard.Msgs.MenuMsg menuMsg model.appState model.menuModel
                 in
                 ( { model | menuModel = menuModel }, cmd )
 
             Wizard.Msgs.AdminMsg adminMsg ->
                 let
                     ( adminModel, cmd ) =
-                        Wizard.Dev.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
+                        Wizard.Pages.Dev.Update.update adminMsg Wizard.Msgs.AdminMsg model.appState model.adminModel
                 in
                 ( { model | adminModel = adminModel }, cmd )
 
             Wizard.Msgs.CommentsMsg commentsMsg ->
                 let
                     ( commentsModel, cmd ) =
-                        Wizard.Comments.Update.update Wizard.Msgs.CommentsMsg commentsMsg model.appState model.commentsModel
+                        Wizard.Pages.Comments.Update.update Wizard.Msgs.CommentsMsg commentsMsg model.appState model.commentsModel
                 in
                 ( { model | commentsModel = commentsModel }, cmd )
 
             Wizard.Msgs.DashboardMsg dashboardMsg ->
                 let
                     ( dashboardModel, cmd ) =
-                        Wizard.Dashboard.Update.update dashboardMsg model.appState model.dashboardModel
+                        Wizard.Pages.Dashboard.Update.update dashboardMsg model.appState model.dashboardModel
                 in
                 ( { model | dashboardModel = dashboardModel }, cmd )
 
             Wizard.Msgs.DocumentsMsg documentsMsg ->
                 let
                     ( documentsModel, cmd ) =
-                        Wizard.Documents.Update.update Wizard.Msgs.DocumentsMsg documentsMsg model.appState model.documentsModel
+                        Wizard.Pages.Documents.Update.update Wizard.Msgs.DocumentsMsg documentsMsg model.appState model.documentsModel
                 in
                 ( { model | documentsModel = documentsModel }, cmd )
 
             Wizard.Msgs.DocumentTemplateEditorsMsg templatesMsg ->
                 let
                     ( seed, templatesModel, cmd ) =
-                        Wizard.DocumentTemplateEditors.Update.update templatesMsg Wizard.Msgs.DocumentTemplateEditorsMsg model.appState model.documentTemplateEditorsModel
+                        Wizard.Pages.DocumentTemplateEditors.Update.update templatesMsg Wizard.Msgs.DocumentTemplateEditorsMsg model.appState model.documentTemplateEditorsModel
                 in
                 ( setSeed seed { model | documentTemplateEditorsModel = templatesModel }, cmd )
 
             Wizard.Msgs.DocumentTemplatesMsg templatesMsg ->
                 let
                     ( seed, templatesModel, cmd ) =
-                        Wizard.DocumentTemplates.Update.update templatesMsg Wizard.Msgs.DocumentTemplatesMsg model.appState model.documentTemplatesModel
+                        Wizard.Pages.DocumentTemplates.Update.update templatesMsg Wizard.Msgs.DocumentTemplatesMsg model.appState model.documentTemplatesModel
                 in
                 ( setSeed seed { model | documentTemplatesModel = templatesModel }, cmd )
 
             Wizard.Msgs.KMEditorMsg kmEditorMsg ->
                 let
                     ( seed, kmEditorModel, cmd ) =
-                        Wizard.KMEditor.Update.update kmEditorMsg Wizard.Msgs.KMEditorMsg model.appState model.kmEditorModel
+                        Wizard.Pages.KMEditor.Update.update kmEditorMsg Wizard.Msgs.KMEditorMsg model.appState model.kmEditorModel
                 in
                 ( setSeed seed { model | kmEditorModel = kmEditorModel }, cmd )
 
             Wizard.Msgs.KnowledgeModelsMsg kmPackagesMsg ->
                 let
                     ( seed, kmPackagesModel, cmd ) =
-                        Wizard.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
+                        Wizard.Pages.KnowledgeModels.Update.update kmPackagesMsg Wizard.Msgs.KnowledgeModelsMsg model.appState model.kmPackagesModel
                 in
                 ( setSeed seed { model | kmPackagesModel = kmPackagesModel }, cmd )
 
@@ -357,77 +357,77 @@ update msg model =
                         }
 
                     ( secretsModel, cmd ) =
-                        Wizard.KnowledgeModelSecrets.Update.update updateConfig model.appState secretsMsg model.kmSecretsModel
+                        Wizard.Pages.KnowledgeModelSecrets.Update.update updateConfig model.appState secretsMsg model.kmSecretsModel
                 in
                 ( { model | kmSecretsModel = secretsModel }, cmd )
 
             Wizard.Msgs.LocaleMsg localeMsg ->
                 let
                     ( localeModel, cmd ) =
-                        Wizard.Locales.Update.update localeMsg Wizard.Msgs.LocaleMsg model.appState model.localeModel
+                        Wizard.Pages.Locales.Update.update localeMsg Wizard.Msgs.LocaleMsg model.appState model.localeModel
                 in
                 ( { model | localeModel = localeModel }, cmd )
 
             Wizard.Msgs.ProjectActionsMsg projectActionsMsg ->
                 let
                     ( projectActionsModel, cmd ) =
-                        Wizard.ProjectActions.Update.update projectActionsMsg Wizard.Msgs.ProjectActionsMsg model.appState model.projectActionsModel
+                        Wizard.Pages.ProjectActions.Update.update projectActionsMsg Wizard.Msgs.ProjectActionsMsg model.appState model.projectActionsModel
                 in
                 ( { model | projectActionsModel = projectActionsModel }, cmd )
 
             Wizard.Msgs.ProjectFilesMsg projectFilesMsg ->
                 let
                     ( projectFilesModel, cmd ) =
-                        Wizard.ProjectFiles.Update.update projectFilesMsg Wizard.Msgs.ProjectFilesMsg model.appState model.projectFilesModel
+                        Wizard.Pages.ProjectFiles.Update.update projectFilesMsg Wizard.Msgs.ProjectFilesMsg model.appState model.projectFilesModel
                 in
                 ( { model | projectFilesModel = projectFilesModel }, cmd )
 
             Wizard.Msgs.ProjectImportersMsg projectImporterMsg ->
                 let
                     ( projectImportersModel, cmd ) =
-                        Wizard.ProjectImporters.Update.update projectImporterMsg Wizard.Msgs.ProjectImportersMsg model.appState model.projectImportersModel
+                        Wizard.Pages.ProjectImporters.Update.update projectImporterMsg Wizard.Msgs.ProjectImportersMsg model.appState model.projectImportersModel
                 in
                 ( { model | projectImportersModel = projectImportersModel }, cmd )
 
             Wizard.Msgs.ProjectsMsg plansMsg ->
                 let
                     ( seed, plansModel, cmd ) =
-                        Wizard.Projects.Update.update Wizard.Msgs.ProjectsMsg plansMsg model.appState model.projectsModel
+                        Wizard.Pages.Projects.Update.update Wizard.Msgs.ProjectsMsg plansMsg model.appState model.projectsModel
                 in
                 ( setSeed seed { model | projectsModel = plansModel }, cmd )
 
             Wizard.Msgs.PublicMsg publicMsg ->
                 let
                     ( publicModel, cmd ) =
-                        Wizard.Public.Update.update publicMsg Wizard.Msgs.PublicMsg model.appState model.publicModel
+                        Wizard.Pages.Public.Update.update publicMsg Wizard.Msgs.PublicMsg model.appState model.publicModel
                 in
                 ( { model | publicModel = publicModel }, cmd )
 
             Wizard.Msgs.RegistryMsg registryMsg ->
                 let
                     ( registryModel, cmd ) =
-                        Wizard.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
+                        Wizard.Pages.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
                 in
                 ( { model | registryModel = registryModel }, cmd )
 
             Wizard.Msgs.SettingsMsg settingsMsg ->
                 let
                     ( settingsModel, cmd ) =
-                        Wizard.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
+                        Wizard.Pages.Settings.Update.update Wizard.Msgs.SettingsMsg settingsMsg model.appState model.settingsModel
                 in
                 ( { model | settingsModel = settingsModel }, cmd )
 
             Wizard.Msgs.TenantsMsg tenantsMsg ->
                 let
                     ( tenantsModel, cmd ) =
-                        Wizard.Tenants.Update.update tenantsMsg Wizard.Msgs.TenantsMsg model.appState model.tenantsModel
+                        Wizard.Pages.Tenants.Update.update tenantsMsg Wizard.Msgs.TenantsMsg model.appState model.tenantsModel
                 in
                 ( { model | tenantsModel = tenantsModel }, cmd )
 
             Wizard.Msgs.UsersMsg usersMsg ->
                 let
                     ( seed, users, cmd ) =
-                        Wizard.Users.Update.update usersMsg Wizard.Msgs.UsersMsg model.appState model.users
+                        Wizard.Pages.Users.Update.update usersMsg Wizard.Msgs.UsersMsg model.appState model.users
                 in
                 ( setSeed seed { model | users = users }, cmd )
 

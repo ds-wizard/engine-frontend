@@ -4,7 +4,7 @@ import Json.Decode as D
 import Json.Encode exposing (Value)
 import Shared.Api.Request as Request exposing (ToMsg)
 import Wizard.Api.Models.Feedback as Feedback exposing (Feedback)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getFeedbacks : AppState -> String -> String -> ToMsg (List Feedback) msg -> Cmd msg

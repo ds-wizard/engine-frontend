@@ -8,6 +8,7 @@ module Wizard.Api.QuestionnaireFiles exposing
 
 import File exposing (File)
 import Http
+import Shared.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -15,8 +16,7 @@ import Shared.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireFile as QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Api.Models.QuestionnaireFileSimple as QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
-import Wizard.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getQuestionnaireFiles : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination QuestionnaireFile) msg -> Cmd msg

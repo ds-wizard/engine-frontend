@@ -73,7 +73,7 @@ import Wizard.Api.Models.QuestionnaireDetail.Reply as Reply exposing (Reply)
 import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Wizard.Api.Models.QuestionnaireFileSimple as QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
 import Wizard.Api.Models.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.AppState exposing (AppState)
 
 
 type alias QuestionnaireQuestionnaire =

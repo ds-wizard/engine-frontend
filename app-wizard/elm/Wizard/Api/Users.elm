@@ -27,7 +27,7 @@ import Wizard.Api.Models.SubmissionProps as SubmissionProps exposing (Submission
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Models.UserLocale as UserLocale exposing (UserLocale)
 import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getUsers : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination User) msg -> Cmd msg

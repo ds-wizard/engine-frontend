@@ -8,7 +8,7 @@ import Json.Encode.Extra as E
 import Shared.Api.Request as Request exposing (ToMsg)
 import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 fetchPreview : AppState -> Maybe String -> List Event -> List String -> ToMsg KnowledgeModel msg -> Cmd msg

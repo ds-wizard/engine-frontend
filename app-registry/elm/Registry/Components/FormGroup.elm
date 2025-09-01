@@ -49,7 +49,7 @@ getErrors : AppState -> Form.FieldState FormError String -> String -> ( Html msg
 getErrors appState field labelText =
     case field.liveError of
         Just error ->
-            ( p [ class "invalid-feedback" ] [ text (errorToString appState labelText error) ], "is-invalid" )
+            ( p [ class "invalid-feedback" ] [ text (errorToString appState.locale labelText error) ], "is-invalid" )
 
         Nothing ->
             ( Html.nothing, "" )

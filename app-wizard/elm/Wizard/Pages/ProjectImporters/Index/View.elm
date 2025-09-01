@@ -1,0 +1,106 @@
+module Wizard.Pages.ProjectImporters.Index.View exposing (view)
+
+import Gettext exposing (gettext)
+import Html exposing (Html, div, span, text)
+import Html.Attributes exposing (class)
+import Shared.Components.Badge as Badge
+import Shared.Components.FontAwesome exposing (faDisable, faEnable)
+import Shared.Components.FormResult as FormResult
+import Shared.Components.Page as Page
+import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
+import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Data.AppState as AppState exposing (AppState)
+import Wizard.Pages.ProjectImporters.Index.Models exposing (Model)
+import Wizard.Pages.ProjectImporters.Index.Msgs exposing (Msg(..))
+import Wizard.Pages.ProjectImporters.Routes exposing (Route(..))
+import Wizard.Routes as Routes
+import Wizard.Utils.Feature as Feature
+import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
+import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
+
+
+view : AppState -> Model -> Html Msg
+view appState model =
+    div [ listClass "ProjectImporters__Index" ]
+        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectImporters) (gettext "Project Importers" appState.locale)
+        , FormResult.view model.togglingEnabled
+        , Listing.view appState (listingConfig appState) model.questionnaireImporters
+        ]
+
+
+listingConfig : AppState -> ViewConfig QuestionnaireImporter Msg
+listingConfig appState =
+    { title = listingTitle appState
+    , description = listingDescription
+    , itemAdditionalData = always Nothing
+    , dropdownItems = listingActions appState
+    , textTitle = .name
+    , emptyText = gettext "There are no project importers available." appState.locale
+    , updated = Nothing
+    , wrapMsg = ListingMsg
+    , iconView = Nothing
+    , searchPlaceholderText = Just (gettext "Search importers..." appState.locale)
+    , sortOptions =
+        [ ( "name", gettext "Name" appState.locale )
+        ]
+    , filters = []
+    , toRoute = \_ -> Routes.ProjectImportersRoute << IndexRoute
+    , toolbarExtra = Nothing
+    }
+
+
+listingTitle : AppState -> QuestionnaireImporter -> Html Msg
+listingTitle appState questionnaireImporter =
+    span []
+        [ text questionnaireImporter.name
+        , listingTitleBadge appState questionnaireImporter
+        ]
+
+
+listingTitleBadge : AppState -> QuestionnaireImporter -> Html Msg
+listingTitleBadge appState questionnaireImporter =
+    if questionnaireImporter.enabled then
+        Badge.success [] [ text (gettext "enabled" appState.locale) ]
+
+    else
+        Badge.danger [] [ text (gettext "disabled" appState.locale) ]
+
+
+listingDescription : QuestionnaireImporter -> Html Msg
+listingDescription questionnaireImporter =
+    span []
+        [ span [ class "fragment" ] [ text questionnaireImporter.description ]
+        ]
+
+
+listingActions : AppState -> QuestionnaireImporter -> List (ListingDropdownItem Msg)
+listingActions appState questionnaireImporter =
+    let
+        ( actionIcon, actionLabel ) =
+            if questionnaireImporter.enabled then
+                ( faDisable
+                , gettext "Disable" appState.locale
+                )
+
+            else
+                ( faEnable
+                , gettext "Enable" appState.locale
+                )
+
+        toggleEnabledAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = actionIcon
+                , label = actionLabel
+                , msg = ListingActionMsg (ToggleEnabled questionnaireImporter)
+                , dataCy = "toggle-enabled"
+                }
+
+        toggleEnabledVisible =
+            Feature.projectImporters appState
+
+        groups =
+            [ [ ( toggleEnabledAction, toggleEnabledVisible ) ] ]
+    in
+    ListingDropdown.itemsFromGroups groups

@@ -1,27 +1,27 @@
 module Wizard.Subscriptions exposing (subscriptions)
 
-import Wizard.Auth.Subscriptions
-import Wizard.Comments.Subscriptions
-import Wizard.Common.Driver as Driver
-import Wizard.Common.Menu.Subscriptions
-import Wizard.Dev.Subscriptions
-import Wizard.DocumentTemplateEditors.Subscriptions
-import Wizard.DocumentTemplates.Subscriptions
-import Wizard.Documents.Subscriptions
-import Wizard.KMEditor.Subscriptions
-import Wizard.KnowledgeModels.Subscriptions
-import Wizard.Locales.Subscriptions
+import Shared.Utils.Driver as Driver
+import Wizard.Components.Menu.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))
+import Wizard.Pages.Auth.Subscriptions
+import Wizard.Pages.Comments.Subscriptions
+import Wizard.Pages.Dev.Subscriptions
+import Wizard.Pages.DocumentTemplateEditors.Subscriptions
+import Wizard.Pages.DocumentTemplates.Subscriptions
+import Wizard.Pages.Documents.Subscriptions
+import Wizard.Pages.KMEditor.Subscriptions
+import Wizard.Pages.KnowledgeModels.Subscriptions
+import Wizard.Pages.Locales.Subscriptions
+import Wizard.Pages.ProjectActions.Subscriptions
+import Wizard.Pages.ProjectFiles.Subscriptions
+import Wizard.Pages.ProjectImporters.Subscriptions
+import Wizard.Pages.Projects.Subscriptions
+import Wizard.Pages.Public.Subscriptions
+import Wizard.Pages.Tenants.Subscriptions
+import Wizard.Pages.Users.Subscriptions
 import Wizard.Ports as Ports
-import Wizard.ProjectActions.Subscriptions
-import Wizard.ProjectFiles.Subscriptions
-import Wizard.ProjectImporters.Subscriptions
-import Wizard.Projects.Subscriptions
-import Wizard.Public.Subscriptions
 import Wizard.Routes as Routes
-import Wizard.Tenants.Subscriptions
-import Wizard.Users.Subscriptions
 
 
 subscriptions : Model -> Sub Msg
@@ -30,58 +30,58 @@ subscriptions model =
         currentViewSubscriptions =
             case model.appState.route of
                 Routes.TenantsRoute route ->
-                    Sub.map TenantsMsg <| Wizard.Tenants.Subscriptions.subscriptions route model.tenantsModel
+                    Sub.map TenantsMsg <| Wizard.Pages.Tenants.Subscriptions.subscriptions route model.tenantsModel
 
                 Routes.DevRoute route ->
-                    Sub.map AdminMsg <| Wizard.Dev.Subscriptions.subscriptions route model.adminModel
+                    Sub.map AdminMsg <| Wizard.Pages.Dev.Subscriptions.subscriptions route model.adminModel
 
                 Routes.CommentsRoute _ _ ->
-                    Sub.map CommentsMsg <| Wizard.Comments.Subscriptions.subscriptions model.commentsModel
+                    Sub.map CommentsMsg <| Wizard.Pages.Comments.Subscriptions.subscriptions model.commentsModel
 
                 Routes.DocumentsRoute _ ->
-                    Sub.map DocumentsMsg <| Wizard.Documents.Subscriptions.subscriptions model.documentsModel
+                    Sub.map DocumentsMsg <| Wizard.Pages.Documents.Subscriptions.subscriptions model.documentsModel
 
                 Routes.DocumentTemplateEditorsRoute route ->
-                    Wizard.DocumentTemplateEditors.Subscriptions.subscriptions DocumentTemplateEditorsMsg OnTime route model.documentTemplateEditorsModel
+                    Wizard.Pages.DocumentTemplateEditors.Subscriptions.subscriptions DocumentTemplateEditorsMsg OnTime route model.documentTemplateEditorsModel
 
                 Routes.DocumentTemplatesRoute route ->
-                    Sub.map DocumentTemplatesMsg <| Wizard.DocumentTemplates.Subscriptions.subscriptions route model.documentTemplatesModel
+                    Sub.map DocumentTemplatesMsg <| Wizard.Pages.DocumentTemplates.Subscriptions.subscriptions route model.documentTemplatesModel
 
                 Routes.KMEditorRoute route ->
-                    Wizard.KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
+                    Wizard.Pages.KMEditor.Subscriptions.subscriptions KMEditorMsg route model.kmEditorModel
 
                 Routes.KnowledgeModelsRoute route ->
-                    Sub.map KnowledgeModelsMsg <| Wizard.KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
+                    Sub.map KnowledgeModelsMsg <| Wizard.Pages.KnowledgeModels.Subscriptions.subscriptions route model.kmPackagesModel
 
                 Routes.LocalesRoute route ->
-                    Sub.map LocaleMsg <| Wizard.Locales.Subscriptions.subscriptions route model.localeModel
+                    Sub.map LocaleMsg <| Wizard.Pages.Locales.Subscriptions.subscriptions route model.localeModel
 
                 Routes.ProjectActionsRoute _ ->
-                    Sub.map ProjectActionsMsg <| Wizard.ProjectActions.Subscriptions.subscriptions model.projectActionsModel
+                    Sub.map ProjectActionsMsg <| Wizard.Pages.ProjectActions.Subscriptions.subscriptions model.projectActionsModel
 
                 Routes.ProjectFilesRoute _ ->
-                    Sub.map ProjectFilesMsg <| Wizard.ProjectFiles.Subscriptions.subscriptions model.projectFilesModel
+                    Sub.map ProjectFilesMsg <| Wizard.Pages.ProjectFiles.Subscriptions.subscriptions model.projectFilesModel
 
                 Routes.ProjectImportersRoute _ ->
-                    Sub.map ProjectImportersMsg <| Wizard.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel
+                    Sub.map ProjectImportersMsg <| Wizard.Pages.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel
 
                 Routes.ProjectsRoute route ->
-                    Sub.map ProjectsMsg <| Wizard.Projects.Subscriptions.subscriptions route model.projectsModel
+                    Sub.map ProjectsMsg <| Wizard.Pages.Projects.Subscriptions.subscriptions route model.projectsModel
 
                 Routes.PublicRoute route ->
-                    Sub.map PublicMsg <| Wizard.Public.Subscriptions.subscriptions route
+                    Sub.map PublicMsg <| Wizard.Pages.Public.Subscriptions.subscriptions route
 
                 Routes.UsersRoute route ->
-                    Sub.map UsersMsg <| Wizard.Users.Subscriptions.subscriptions route model.users
+                    Sub.map UsersMsg <| Wizard.Pages.Users.Subscriptions.subscriptions route model.users
 
                 _ ->
                     Sub.none
 
         authSubscriptions =
-            Wizard.Auth.Subscriptions.subscriptions model
+            Wizard.Pages.Auth.Subscriptions.subscriptions model
 
         menuSubscriptions =
-            Wizard.Common.Menu.Subscriptions.subscriptions model.menuModel
+            Wizard.Components.Menu.Subscriptions.subscriptions model.menuModel
 
         historySubscriptions =
             Ports.historyBackCallback HistoryBackCallback

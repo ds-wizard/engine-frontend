@@ -12,7 +12,7 @@ import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireImporter as QuestionnaireImporter exposing (QuestionnaireImporter)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getQuestionnaireImporters : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination QuestionnaireImporter) msg -> Cmd msg

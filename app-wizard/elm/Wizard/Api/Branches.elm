@@ -24,7 +24,7 @@ import Wizard.Api.Models.Branch as Branch exposing (Branch)
 import Wizard.Api.Models.BranchDetail as BranchDetail exposing (BranchDetail)
 import Wizard.Api.Models.BranchSuggestion as BranchSuggestion exposing (BranchSuggestion)
 import Wizard.Api.Models.Migration as Migration exposing (Migration)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getBranches : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Branch) msg -> Cmd msg

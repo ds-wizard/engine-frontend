@@ -12,7 +12,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep as Document
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getIntegrationPrefabs : AppState -> ToMsg (List (Prefab Integration)) msg -> Cmd msg

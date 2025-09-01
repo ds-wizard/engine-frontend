@@ -16,34 +16,34 @@ import Shared.Utils.Form.FormError exposing (FormError(..))
 import String.Format as String
 
 
-errorToString : { a | locale : Gettext.Locale } -> String -> ErrorValue FormError -> String
-errorToString appState labelText error =
+errorToString : Gettext.Locale -> String -> ErrorValue FormError -> String
+errorToString locale labelText error =
     case error of
         Empty ->
-            String.format (gettext "%s cannot be empty." appState.locale) [ labelText ]
+            String.format (gettext "%s cannot be empty." locale) [ labelText ]
 
         InvalidString ->
-            String.format (gettext "%s cannot be empty." appState.locale) [ labelText ]
+            String.format (gettext "%s cannot be empty." locale) [ labelText ]
 
         InvalidEmail ->
-            gettext "This is not a valid email." appState.locale
+            gettext "This is not a valid email." locale
 
         InvalidFloat ->
-            gettext "This is not a valid number." appState.locale
+            gettext "This is not a valid number." locale
 
         SmallerFloatThan n ->
-            String.format (gettext "This should not be less than %s." appState.locale) [ String.fromFloat n ]
+            String.format (gettext "This should not be less than %s." locale) [ String.fromFloat n ]
 
         GreaterFloatThan n ->
-            String.format (gettext "This should not be more than %s." appState.locale) [ String.fromFloat n ]
+            String.format (gettext "This should not be more than %s." locale) [ String.fromFloat n ]
 
         CustomError err ->
             case err of
                 ConfirmationError ->
-                    gettext "Passwords do not match!" appState.locale
+                    gettext "Passwords do not match!" locale
 
                 InvalidUuid ->
-                    gettext "This is not a valid UUID." appState.locale
+                    gettext "This is not a valid UUID." locale
 
                 ServerValidationError msg ->
                     msg
@@ -52,7 +52,7 @@ errorToString appState labelText error =
                     msg
 
         _ ->
-            gettext "Invalid value." appState.locale
+            gettext "Invalid value." locale
 
 
 setFormErrors : { b | locale : Gettext.Locale } -> ApiError -> Form FormError a -> Form FormError a

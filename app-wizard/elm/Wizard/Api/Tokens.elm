@@ -12,7 +12,7 @@ import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 fetchToken : AppState -> E.Value -> ToMsg TokenResponse msg -> Cmd msg

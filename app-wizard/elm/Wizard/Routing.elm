@@ -10,25 +10,25 @@ import Shared.Data.PaginationQueryString as PaginationQueryString
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, s)
 import Url.Parser.Query as Query
-import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Feature as Feature
-import Wizard.Dev.Routing
-import Wizard.DocumentTemplateEditors.Routing
-import Wizard.DocumentTemplates.Routing
-import Wizard.Documents.Routing
-import Wizard.KMEditor.Routing
-import Wizard.KnowledgeModels.Routing
-import Wizard.Locales.Routing
-import Wizard.ProjectActions.Routing
-import Wizard.ProjectFiles.Routing
-import Wizard.ProjectImporters.Routing
-import Wizard.Projects.Routing
-import Wizard.Public.Routing
-import Wizard.Registry.Routing
+import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.Dev.Routing
+import Wizard.Pages.DocumentTemplateEditors.Routing
+import Wizard.Pages.DocumentTemplates.Routing
+import Wizard.Pages.Documents.Routing
+import Wizard.Pages.KMEditor.Routing
+import Wizard.Pages.KnowledgeModels.Routing
+import Wizard.Pages.Locales.Routing
+import Wizard.Pages.ProjectActions.Routing
+import Wizard.Pages.ProjectFiles.Routing
+import Wizard.Pages.ProjectImporters.Routing
+import Wizard.Pages.Projects.Routing
+import Wizard.Pages.Public.Routing
+import Wizard.Pages.Registry.Routing
+import Wizard.Pages.Settings.Routing
+import Wizard.Pages.Tenants.Routing
+import Wizard.Pages.Users.Routing
 import Wizard.Routes as Routes exposing (commentsRouteResolvedFilterId)
-import Wizard.Settings.Routing
-import Wizard.Tenants.Routing
-import Wizard.Users.Routing
+import Wizard.Utils.Feature as Feature
 
 
 matchers : AppState -> Parser (Routes.Route -> b) b
@@ -38,22 +38,22 @@ matchers appState =
             Routes.CommentsRoute pqs mbResolved
 
         parsers =
-            Wizard.Dev.Routing.parsers Routes.DevRoute
-                ++ Wizard.Tenants.Routing.parsers Routes.TenantsRoute
-                ++ Wizard.Documents.Routing.parsers Routes.DocumentsRoute
-                ++ Wizard.DocumentTemplateEditors.Routing.parsers Routes.DocumentTemplateEditorsRoute
-                ++ Wizard.DocumentTemplates.Routing.parsers Routes.DocumentTemplatesRoute
-                ++ Wizard.KMEditor.Routing.parsers Routes.KMEditorRoute
-                ++ Wizard.KnowledgeModels.Routing.parsers Routes.KnowledgeModelsRoute
-                ++ Wizard.Locales.Routing.parsers appState Routes.LocalesRoute
-                ++ Wizard.ProjectActions.Routing.parsers Routes.ProjectActionsRoute
-                ++ Wizard.ProjectFiles.Routing.parsers Routes.ProjectFilesRoute
-                ++ Wizard.ProjectImporters.Routing.parsers Routes.ProjectImportersRoute
-                ++ Wizard.Projects.Routing.parsers Routes.ProjectsRoute
-                ++ Wizard.Public.Routing.parsers appState Routes.PublicRoute
-                ++ Wizard.Registry.Routing.parsers Routes.RegistryRoute
-                ++ Wizard.Settings.Routing.parsers appState Routes.SettingsRoute
-                ++ Wizard.Users.Routing.parsers appState Routes.UsersRoute
+            Wizard.Pages.Dev.Routing.parsers Routes.DevRoute
+                ++ Wizard.Pages.Tenants.Routing.parsers Routes.TenantsRoute
+                ++ Wizard.Pages.Documents.Routing.parsers Routes.DocumentsRoute
+                ++ Wizard.Pages.DocumentTemplateEditors.Routing.parsers Routes.DocumentTemplateEditorsRoute
+                ++ Wizard.Pages.DocumentTemplates.Routing.parsers Routes.DocumentTemplatesRoute
+                ++ Wizard.Pages.KMEditor.Routing.parsers Routes.KMEditorRoute
+                ++ Wizard.Pages.KnowledgeModels.Routing.parsers Routes.KnowledgeModelsRoute
+                ++ Wizard.Pages.Locales.Routing.parsers appState Routes.LocalesRoute
+                ++ Wizard.Pages.ProjectActions.Routing.parsers Routes.ProjectActionsRoute
+                ++ Wizard.Pages.ProjectFiles.Routing.parsers Routes.ProjectFilesRoute
+                ++ Wizard.Pages.ProjectImporters.Routing.parsers Routes.ProjectImportersRoute
+                ++ Wizard.Pages.Projects.Routing.parsers Routes.ProjectsRoute
+                ++ Wizard.Pages.Public.Routing.parsers appState Routes.PublicRoute
+                ++ Wizard.Pages.Registry.Routing.parsers Routes.RegistryRoute
+                ++ Wizard.Pages.Settings.Routing.parsers appState Routes.SettingsRoute
+                ++ Wizard.Pages.Users.Routing.parsers appState Routes.UsersRoute
                 ++ [ map Routes.DashboardRoute (s "dashboard")
                    , map Routes.KnowledgeModelSecretsRoute (s "knowledge-model-secrets")
                    , map (PaginationQueryString.wrapRoute1 commentsIndexRoute (Just "updatedAt,desc")) (PaginationQueryString.parser1 (s "comments") (Query.string commentsRouteResolvedFilterId))
@@ -81,58 +81,58 @@ isAllowed route appState =
             True
 
         Routes.DevRoute adminRoute ->
-            Wizard.Dev.Routing.isAllowed adminRoute appState
+            Wizard.Pages.Dev.Routing.isAllowed adminRoute appState
 
         Routes.DashboardRoute ->
             True
 
         Routes.DocumentsRoute documentsRoute ->
-            Wizard.Documents.Routing.isAllowed documentsRoute appState
+            Wizard.Pages.Documents.Routing.isAllowed documentsRoute appState
 
         Routes.DocumentTemplateEditorsRoute _ ->
-            Wizard.DocumentTemplateEditors.Routing.isAllowed appState
+            Wizard.Pages.DocumentTemplateEditors.Routing.isAllowed appState
 
         Routes.DocumentTemplatesRoute templatesRoute ->
-            Wizard.DocumentTemplates.Routing.isAllowed templatesRoute appState
+            Wizard.Pages.DocumentTemplates.Routing.isAllowed templatesRoute appState
 
         Routes.KMEditorRoute kmEditorRoute ->
-            Wizard.KMEditor.Routing.isAllowed kmEditorRoute appState
+            Wizard.Pages.KMEditor.Routing.isAllowed kmEditorRoute appState
 
         Routes.KnowledgeModelsRoute kmPackagesRoute ->
-            Wizard.KnowledgeModels.Routing.isAllowed kmPackagesRoute appState
+            Wizard.Pages.KnowledgeModels.Routing.isAllowed kmPackagesRoute appState
 
         Routes.KnowledgeModelSecretsRoute ->
             Feature.knowledgeModelSecrets appState
 
         Routes.LocalesRoute localeRoute ->
-            Wizard.Locales.Routing.isAllowed localeRoute appState
+            Wizard.Pages.Locales.Routing.isAllowed localeRoute appState
 
         Routes.ProjectActionsRoute _ ->
-            Wizard.ProjectActions.Routing.isAllowed appState
+            Wizard.Pages.ProjectActions.Routing.isAllowed appState
 
         Routes.ProjectFilesRoute _ ->
-            Wizard.ProjectFiles.Routing.isAllowed appState
+            Wizard.Pages.ProjectFiles.Routing.isAllowed appState
 
         Routes.ProjectImportersRoute _ ->
-            Wizard.ProjectImporters.Routing.isAllowed appState
+            Wizard.Pages.ProjectImporters.Routing.isAllowed appState
 
         Routes.ProjectsRoute projectsRoute ->
-            Wizard.Projects.Routing.isAllowed projectsRoute appState
+            Wizard.Pages.Projects.Routing.isAllowed projectsRoute appState
 
         Routes.PublicRoute _ ->
             True
 
         Routes.RegistryRoute registryRoute ->
-            Wizard.Registry.Routing.isAllowed registryRoute appState
+            Wizard.Pages.Registry.Routing.isAllowed registryRoute appState
 
         Routes.SettingsRoute settingsRoute ->
-            Wizard.Settings.Routing.isAllowed settingsRoute appState
+            Wizard.Pages.Settings.Routing.isAllowed settingsRoute appState
 
         Routes.TenantsRoute tenantsRoute ->
-            Wizard.Tenants.Routing.isAllowed tenantsRoute appState
+            Wizard.Pages.Tenants.Routing.isAllowed tenantsRoute appState
 
         Routes.UsersRoute usersRoute ->
-            Wizard.Users.Routing.isAllowed usersRoute appState
+            Wizard.Pages.Users.Routing.isAllowed usersRoute appState
 
         Routes.NotFoundRoute ->
             True
@@ -155,58 +155,58 @@ toUrl route =
                     [ "comments", PaginationQueryString.toUrlWith params pqs ]
 
                 Routes.DevRoute adminRoute ->
-                    Wizard.Dev.Routing.toUrl adminRoute
+                    Wizard.Pages.Dev.Routing.toUrl adminRoute
 
                 Routes.DashboardRoute ->
                     [ "dashboard" ]
 
                 Routes.DocumentsRoute documentsRoute ->
-                    Wizard.Documents.Routing.toUrl documentsRoute
+                    Wizard.Pages.Documents.Routing.toUrl documentsRoute
 
                 Routes.DocumentTemplateEditorsRoute templatesRoute ->
-                    Wizard.DocumentTemplateEditors.Routing.toUrl templatesRoute
+                    Wizard.Pages.DocumentTemplateEditors.Routing.toUrl templatesRoute
 
                 Routes.DocumentTemplatesRoute templatesRoute ->
-                    Wizard.DocumentTemplates.Routing.toUrl templatesRoute
+                    Wizard.Pages.DocumentTemplates.Routing.toUrl templatesRoute
 
                 Routes.KMEditorRoute kmEditorRoute ->
-                    Wizard.KMEditor.Routing.toUrl kmEditorRoute
+                    Wizard.Pages.KMEditor.Routing.toUrl kmEditorRoute
 
                 Routes.KnowledgeModelsRoute kmPackagesRoute ->
-                    Wizard.KnowledgeModels.Routing.toUrl kmPackagesRoute
+                    Wizard.Pages.KnowledgeModels.Routing.toUrl kmPackagesRoute
 
                 Routes.KnowledgeModelSecretsRoute ->
                     [ "knowledge-model-secrets" ]
 
                 Routes.LocalesRoute localeRoute ->
-                    Wizard.Locales.Routing.toUrl localeRoute
+                    Wizard.Pages.Locales.Routing.toUrl localeRoute
 
                 Routes.ProjectActionsRoute projectActionsRoute ->
-                    Wizard.ProjectActions.Routing.toUrl projectActionsRoute
+                    Wizard.Pages.ProjectActions.Routing.toUrl projectActionsRoute
 
                 Routes.ProjectFilesRoute projectFilesRoute ->
-                    Wizard.ProjectFiles.Routing.toUrl projectFilesRoute
+                    Wizard.Pages.ProjectFiles.Routing.toUrl projectFilesRoute
 
                 Routes.ProjectImportersRoute projectImportersRoute ->
-                    Wizard.ProjectImporters.Routing.toUrl projectImportersRoute
+                    Wizard.Pages.ProjectImporters.Routing.toUrl projectImportersRoute
 
                 Routes.ProjectsRoute projectsRoute ->
-                    Wizard.Projects.Routing.toUrl projectsRoute
+                    Wizard.Pages.Projects.Routing.toUrl projectsRoute
 
                 Routes.PublicRoute publicRoute ->
-                    Wizard.Public.Routing.toUrl publicRoute
+                    Wizard.Pages.Public.Routing.toUrl publicRoute
 
                 Routes.RegistryRoute registryRoute ->
-                    Wizard.Registry.Routing.toUrl registryRoute
+                    Wizard.Pages.Registry.Routing.toUrl registryRoute
 
                 Routes.SettingsRoute settingsRoute ->
-                    Wizard.Settings.Routing.toUrl settingsRoute
+                    Wizard.Pages.Settings.Routing.toUrl settingsRoute
 
                 Routes.TenantsRoute tenantsRoute ->
-                    Wizard.Tenants.Routing.toUrl tenantsRoute
+                    Wizard.Pages.Tenants.Routing.toUrl tenantsRoute
 
                 Routes.UsersRoute usersRoute ->
-                    Wizard.Users.Routing.toUrl usersRoute
+                    Wizard.Pages.Users.Routing.toUrl usersRoute
 
                 _ ->
                     []

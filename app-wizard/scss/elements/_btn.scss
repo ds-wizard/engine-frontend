@@ -9,6 +9,11 @@
         color: var(--bs-btn-hover-color) !important;
     }
 
+    &-wide {
+        min-width: 100px;
+        text-align: center;
+    }
+
     &.with-icon {
         .fas, .far, .fab {
             margin-right: $spacer-2;
@@ -42,11 +47,6 @@
         }
     }
 
-    &-with-loader {
-        min-width: 100px;
-        text-align: center;
-    }
-
     &-file {
         position: relative;
         overflow: hidden;
@@ -65,16 +65,6 @@
             background: white;
             cursor: inherit;
             display: block;
-        }
-    }
-
-    &-wide {
-        padding-left: $spacer-4;
-        padding-right: $spacer-4;
-
-        &.btn-lg {
-            padding-left: $spacer-5;
-            padding-right: $spacer-5;
         }
     }
 

@@ -30,7 +30,7 @@ import Wizard.Api.Models.Package as Package exposing (Package)
 import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Wizard.Api.Models.PackageDetail as PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion exposing (PackageSuggestion)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getPackages : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Package) msg -> Cmd msg

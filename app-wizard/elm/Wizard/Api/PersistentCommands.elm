@@ -11,11 +11,11 @@ import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Shared.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PersistentCommand as PersistentCommand exposing (PersistentCommand)
-import Wizard.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Wizard.Api.Models.PersistentCommandDetail as PersistentCommandDetail exposing (PersistentCommandDetail)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getPersistentCommands : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination PersistentCommand) msg -> Cmd msg

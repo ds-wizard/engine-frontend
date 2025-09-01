@@ -5,7 +5,7 @@ import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.QuestionnaireCommentThreadAssigned as QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getCommentThreads : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination QuestionnaireCommentThreadAssigned) msg -> Cmd msg

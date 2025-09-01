@@ -3,18 +3,18 @@ module Wizard exposing (main)
 import Browser
 import Browser.Navigation exposing (Key)
 import Json.Decode exposing (Value)
+import Shared.Components.AIAssistant as AIAssistant
 import Shared.Utils.Theme as Theme
+import Shared.Utils.TimeUtils as TimeUtils
 import Task.Extra as Task
 import Url exposing (Url)
-import Wizard.Common.AppState as AppState
-import Wizard.Common.Components.AIAssistant as AIAssistant
-import Wizard.Common.Time as Time
+import Wizard.Data.AppState as AppState
 import Wizard.Data.Session as Session
-import Wizard.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn)
 import Wizard.Msgs exposing (Msg)
+import Wizard.Pages.KnowledgeModels.Routes as KnowledgeModelsRoute
+import Wizard.Pages.Projects.Routes as ProjectsRoutes
 import Wizard.Ports as Ports
-import Wizard.Projects.Routes as ProjectsRoutes
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -62,8 +62,8 @@ init flags location key =
                     [ decideInitialRoute model location route originalRoute
                     , setThemeCmd
                     , aiAssistantCmd
-                    , Time.getTime
-                    , Time.getTimeZone
+                    , TimeUtils.getTime Wizard.Msgs.OnTime
+                    , TimeUtils.getTimeZone Wizard.Msgs.OnTimeZone
                     ]
     in
     ( model, Cmd.batch [ cmd, appStateCmd ] )

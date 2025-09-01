@@ -13,7 +13,7 @@ import Wizard.Api.Models.Document.DocumentState as DocumentState exposing (Docum
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
 import Wizard.Api.Models.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.AppState exposing (AppState)
 
 
 type alias Document =

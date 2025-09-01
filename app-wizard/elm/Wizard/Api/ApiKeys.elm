@@ -9,7 +9,7 @@ import Json.Encode as E
 import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getApiKeys : AppState -> ToMsg (List ApiKey) msg -> Cmd msg

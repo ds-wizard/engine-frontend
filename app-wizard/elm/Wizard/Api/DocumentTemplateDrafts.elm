@@ -25,6 +25,7 @@ import File exposing (File)
 import Http
 import Json.Decode as D
 import Json.Encode as E
+import Shared.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -36,8 +37,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile as DocumentTempla
 import Wizard.Api.Models.DocumentTemplateDraft as DocumentTemplateDraft exposing (DocumentTemplateDraft)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
-import Wizard.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getDrafts : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination DocumentTemplateDraft) msg -> Cmd msg

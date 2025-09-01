@@ -5,7 +5,7 @@ module Wizard.Api.Registry exposing
 
 import Json.Encode as E
 import Shared.Api.Request as Request exposing (ToMsg)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 postSignup : AppState -> E.Value -> ToMsg () msg -> Cmd msg

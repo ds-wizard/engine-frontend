@@ -130,48 +130,48 @@ import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Data.Session exposing (Session)
-import Wizard.Dev.Routes
-import Wizard.DocumentTemplateEditors.Editor.DTEditorRoute
-import Wizard.DocumentTemplateEditors.Routes
-import Wizard.DocumentTemplates.Routes
-import Wizard.Documents.Routes
-import Wizard.KMEditor.Editor.KMEditorRoute
-import Wizard.KMEditor.Routes
-import Wizard.KnowledgeModels.Routes
-import Wizard.Locales.Routes
-import Wizard.ProjectActions.Routes
-import Wizard.ProjectFiles.Routes
-import Wizard.ProjectImporters.Routes
-import Wizard.Projects.Detail.ProjectDetailRoute
-import Wizard.Projects.Routes
-import Wizard.Public.Routes
-import Wizard.Registry.Routes
-import Wizard.Settings.Routes
-import Wizard.Tenants.Routes
-import Wizard.Users.Edit.UserEditRoutes as UserEditRoute
-import Wizard.Users.Routes
+import Wizard.Pages.Dev.Routes
+import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute
+import Wizard.Pages.DocumentTemplateEditors.Routes
+import Wizard.Pages.DocumentTemplates.Routes
+import Wizard.Pages.Documents.Routes
+import Wizard.Pages.KMEditor.Editor.KMEditorRoute
+import Wizard.Pages.KMEditor.Routes
+import Wizard.Pages.KnowledgeModels.Routes
+import Wizard.Pages.Locales.Routes
+import Wizard.Pages.ProjectActions.Routes
+import Wizard.Pages.ProjectFiles.Routes
+import Wizard.Pages.ProjectImporters.Routes
+import Wizard.Pages.Projects.Detail.ProjectDetailRoute
+import Wizard.Pages.Projects.Routes
+import Wizard.Pages.Public.Routes
+import Wizard.Pages.Registry.Routes
+import Wizard.Pages.Settings.Routes
+import Wizard.Pages.Tenants.Routes
+import Wizard.Pages.Users.Edit.UserEditRoutes as UserEditRoute
+import Wizard.Pages.Users.Routes
 
 
 type Route
     = DashboardRoute
-    | DevRoute Wizard.Dev.Routes.Route
+    | DevRoute Wizard.Pages.Dev.Routes.Route
     | CommentsRoute PaginationQueryString (Maybe String)
-    | DocumentsRoute Wizard.Documents.Routes.Route
-    | DocumentTemplateEditorsRoute Wizard.DocumentTemplateEditors.Routes.Route
-    | DocumentTemplatesRoute Wizard.DocumentTemplates.Routes.Route
-    | KMEditorRoute Wizard.KMEditor.Routes.Route
+    | DocumentsRoute Wizard.Pages.Documents.Routes.Route
+    | DocumentTemplateEditorsRoute Wizard.Pages.DocumentTemplateEditors.Routes.Route
+    | DocumentTemplatesRoute Wizard.Pages.DocumentTemplates.Routes.Route
+    | KMEditorRoute Wizard.Pages.KMEditor.Routes.Route
     | KnowledgeModelSecretsRoute
-    | KnowledgeModelsRoute Wizard.KnowledgeModels.Routes.Route
-    | LocalesRoute Wizard.Locales.Routes.Route
-    | ProjectsRoute Wizard.Projects.Routes.Route
-    | ProjectActionsRoute Wizard.ProjectActions.Routes.Route
-    | ProjectFilesRoute Wizard.ProjectFiles.Routes.Route
-    | ProjectImportersRoute Wizard.ProjectImporters.Routes.Route
-    | PublicRoute Wizard.Public.Routes.Route
-    | RegistryRoute Wizard.Registry.Routes.Route
-    | SettingsRoute Wizard.Settings.Routes.Route
-    | TenantsRoute Wizard.Tenants.Routes.Route
-    | UsersRoute Wizard.Users.Routes.Route
+    | KnowledgeModelsRoute Wizard.Pages.KnowledgeModels.Routes.Route
+    | LocalesRoute Wizard.Pages.Locales.Routes.Route
+    | ProjectsRoute Wizard.Pages.Projects.Routes.Route
+    | ProjectActionsRoute Wizard.Pages.ProjectActions.Routes.Route
+    | ProjectFilesRoute Wizard.Pages.ProjectFiles.Routes.Route
+    | ProjectImportersRoute Wizard.Pages.ProjectImporters.Routes.Route
+    | PublicRoute Wizard.Pages.Public.Routes.Route
+    | RegistryRoute Wizard.Pages.Registry.Routes.Route
+    | SettingsRoute Wizard.Pages.Settings.Routes.Route
+    | TenantsRoute Wizard.Pages.Tenants.Routes.Route
+    | UsersRoute Wizard.Pages.Users.Routes.Route
     | NotAllowedRoute
     | NotFoundRoute
 
@@ -183,7 +183,7 @@ commentsRouteResolvedFilterId =
 
 publicHome : Route
 publicHome =
-    PublicRoute <| Wizard.Public.Routes.LoginRoute Nothing
+    PublicRoute <| Wizard.Pages.Public.Routes.LoginRoute Nothing
 
 
 appHome : Route
@@ -251,23 +251,23 @@ commentsIndexWithFilters filters pagination =
 
 devOperations : Route
 devOperations =
-    DevRoute Wizard.Dev.Routes.OperationsRoute
+    DevRoute Wizard.Pages.Dev.Routes.OperationsRoute
 
 
 isDevOperations : Route -> Bool
 isDevOperations =
-    (==) (DevRoute Wizard.Dev.Routes.OperationsRoute)
+    (==) (DevRoute Wizard.Pages.Dev.Routes.OperationsRoute)
 
 
 persistentCommandsIndex : Route
 persistentCommandsIndex =
-    DevRoute (Wizard.Dev.Routes.PersistentCommandsIndex PaginationQueryString.empty Nothing)
+    DevRoute (Wizard.Pages.Dev.Routes.PersistentCommandsIndex PaginationQueryString.empty Nothing)
 
 
 isPersistentCommandsIndex : Route -> Bool
 isPersistentCommandsIndex route =
     case route of
-        DevRoute (Wizard.Dev.Routes.PersistentCommandsIndex _ _) ->
+        DevRoute (Wizard.Pages.Dev.Routes.PersistentCommandsIndex _ _) ->
             True
 
         _ ->
@@ -277,14 +277,14 @@ isPersistentCommandsIndex route =
 persistentCommandsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 persistentCommandsIndexWithFilters filters pagination =
     DevRoute
-        (Wizard.Dev.Routes.PersistentCommandsIndex pagination
-            (PaginationQueryFilters.getValue Wizard.Dev.Routes.persistentCommandIndexRouteStateFilterId filters)
+        (Wizard.Pages.Dev.Routes.PersistentCommandsIndex pagination
+            (PaginationQueryFilters.getValue Wizard.Pages.Dev.Routes.persistentCommandIndexRouteStateFilterId filters)
         )
 
 
 persistentCommandsDetail : Uuid -> Route
 persistentCommandsDetail =
-    DevRoute << Wizard.Dev.Routes.PersistentCommandsDetail
+    DevRoute << Wizard.Pages.Dev.Routes.PersistentCommandsDetail
 
 
 isDevSubroute : Route -> Bool
@@ -303,18 +303,18 @@ isDevSubroute route =
 
 documentsIndex : Route
 documentsIndex =
-    DocumentsRoute (Wizard.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
+    DocumentsRoute (Wizard.Pages.Documents.Routes.IndexRoute Nothing PaginationQueryString.empty)
 
 
 documentsIndexWithFilters : Maybe Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
 documentsIndexWithFilters mbQuestionnaireUuid _ pagination =
-    DocumentsRoute (Wizard.Documents.Routes.IndexRoute mbQuestionnaireUuid pagination)
+    DocumentsRoute (Wizard.Pages.Documents.Routes.IndexRoute mbQuestionnaireUuid pagination)
 
 
 isDocumentsIndex : Route -> Bool
 isDocumentsIndex route =
     case route of
-        DocumentsRoute (Wizard.Documents.Routes.IndexRoute _ _) ->
+        DocumentsRoute (Wizard.Pages.Documents.Routes.IndexRoute _ _) ->
             True
 
         _ ->
@@ -327,28 +327,28 @@ isDocumentsIndex route =
 
 documentTemplatesDetail : String -> Route
 documentTemplatesDetail =
-    DocumentTemplatesRoute << Wizard.DocumentTemplates.Routes.DetailRoute
+    DocumentTemplatesRoute << Wizard.Pages.DocumentTemplates.Routes.DetailRoute
 
 
 documentTemplatesImport : Maybe String -> Route
 documentTemplatesImport =
-    DocumentTemplatesRoute << Wizard.DocumentTemplates.Routes.ImportRoute
+    DocumentTemplatesRoute << Wizard.Pages.DocumentTemplates.Routes.ImportRoute
 
 
 documentTemplatesIndex : Route
 documentTemplatesIndex =
-    DocumentTemplatesRoute (Wizard.DocumentTemplates.Routes.IndexRoute PaginationQueryString.empty)
+    DocumentTemplatesRoute (Wizard.Pages.DocumentTemplates.Routes.IndexRoute PaginationQueryString.empty)
 
 
 documentTemplatesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 documentTemplatesIndexWithFilters _ pagination =
-    DocumentTemplatesRoute (Wizard.DocumentTemplates.Routes.IndexRoute pagination)
+    DocumentTemplatesRoute (Wizard.Pages.DocumentTemplates.Routes.IndexRoute pagination)
 
 
 isDocumentTemplatesIndex : Route -> Bool
 isDocumentTemplatesIndex route =
     case route of
-        DocumentTemplatesRoute (Wizard.DocumentTemplates.Routes.IndexRoute _) ->
+        DocumentTemplatesRoute (Wizard.Pages.DocumentTemplates.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -374,7 +374,7 @@ isDocumentTemplatesSubroute route =
 
 documentTemplateEditorCreate : Maybe String -> Maybe Bool -> Route
 documentTemplateEditorCreate mbBasedOn mbEdit =
-    DocumentTemplateEditorsRoute <| Wizard.DocumentTemplateEditors.Routes.CreateRoute mbBasedOn mbEdit
+    DocumentTemplateEditorsRoute <| Wizard.Pages.DocumentTemplateEditors.Routes.CreateRoute mbBasedOn mbEdit
 
 
 documentTemplateEditorDetail : String -> Route
@@ -384,33 +384,33 @@ documentTemplateEditorDetail =
 
 documentTemplateEditorDetailFiles : String -> Route
 documentTemplateEditorDetailFiles =
-    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Files
+    DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Files
 
 
 documentTemplateEditorDetailPreview : String -> Route
 documentTemplateEditorDetailPreview =
-    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
+    DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
 
 
 documentTemplateEditorDetailSettings : String -> Route
 documentTemplateEditorDetailSettings =
-    DocumentTemplateEditorsRoute << flip Wizard.DocumentTemplateEditors.Routes.EditorRoute Wizard.DocumentTemplateEditors.Editor.DTEditorRoute.Settings
+    DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Settings
 
 
 documentTemplateEditorsIndex : Route
 documentTemplateEditorsIndex =
-    DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute PaginationQueryString.empty)
+    DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.IndexRoute PaginationQueryString.empty)
 
 
 documentTemplateEditorsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 documentTemplateEditorsIndexWithFilters _ pagination =
-    DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute pagination)
+    DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.IndexRoute pagination)
 
 
 isDocumentTemplateEditorsIndex : Route -> Bool
 isDocumentTemplateEditorsIndex route =
     case route of
-        DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.IndexRoute _) ->
+        DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -420,7 +420,7 @@ isDocumentTemplateEditorsIndex route =
 isDocumentTemplateEditor : String -> Route -> Bool
 isDocumentTemplateEditor id route =
     case route of
-        DocumentTemplateEditorsRoute (Wizard.DocumentTemplateEditors.Routes.EditorRoute documentTemplateId _) ->
+        DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute documentTemplateId _) ->
             id == documentTemplateId
 
         _ ->
@@ -433,18 +433,18 @@ isDocumentTemplateEditor id route =
 
 kmEditorCreate : Maybe String -> Maybe Bool -> Route
 kmEditorCreate mbKmId mbEdit =
-    KMEditorRoute <| Wizard.KMEditor.Routes.CreateRoute mbKmId mbEdit
+    KMEditorRoute <| Wizard.Pages.KMEditor.Routes.CreateRoute mbKmId mbEdit
 
 
 kmEditorEditor : Uuid -> Maybe Uuid -> Route
 kmEditorEditor branchUuid mbEntityUuid =
-    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid (Wizard.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid (Wizard.Pages.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
 
 
 isKmEditorEditor : Uuid -> Route -> Bool
 isKmEditorEditor uuid route =
     case route of
-        KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute editorUuid _) ->
+        KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute editorUuid _) ->
             uuid == editorUuid
 
         _ ->
@@ -453,38 +453,38 @@ isKmEditorEditor uuid route =
 
 kmEditorEditorPhases : Uuid -> Route
 kmEditorEditorPhases branchUuid =
-    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.Phases)
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Phases)
 
 
 kmEditorEditorQuestionTags : Uuid -> Route
 kmEditorEditorQuestionTags branchUuid =
-    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.QuestionTags)
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.QuestionTags)
 
 
 kmEditorEditorPreview : Uuid -> Route
 kmEditorEditorPreview branchUuid =
-    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.Preview)
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Preview)
 
 
 kmEditorEditorSettings : Uuid -> Route
 kmEditorEditorSettings branchUuid =
-    KMEditorRoute (Wizard.KMEditor.Routes.EditorRoute branchUuid Wizard.KMEditor.Editor.KMEditorRoute.Settings)
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Settings)
 
 
 kmEditorIndex : Route
 kmEditorIndex =
-    KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute PaginationQueryString.empty)
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.IndexRoute PaginationQueryString.empty)
 
 
 kmEditorIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 kmEditorIndexWithFilters _ pagination =
-    KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute pagination)
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.IndexRoute pagination)
 
 
 isKmEditorIndex : Route -> Bool
 isKmEditorIndex route =
     case route of
-        KMEditorRoute (Wizard.KMEditor.Routes.IndexRoute _) ->
+        KMEditorRoute (Wizard.Pages.KMEditor.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -493,12 +493,12 @@ isKmEditorIndex route =
 
 kmEditorMigration : Uuid -> Route
 kmEditorMigration =
-    KMEditorRoute << Wizard.KMEditor.Routes.MigrationRoute
+    KMEditorRoute << Wizard.Pages.KMEditor.Routes.MigrationRoute
 
 
 kmEditorPublish : Uuid -> Route
 kmEditorPublish =
-    KMEditorRoute << Wizard.KMEditor.Routes.PublishRoute
+    KMEditorRoute << Wizard.Pages.KMEditor.Routes.PublishRoute
 
 
 
@@ -507,28 +507,28 @@ kmEditorPublish =
 
 knowledgeModelsDetail : String -> Route
 knowledgeModelsDetail =
-    KnowledgeModelsRoute << Wizard.KnowledgeModels.Routes.DetailRoute
+    KnowledgeModelsRoute << Wizard.Pages.KnowledgeModels.Routes.DetailRoute
 
 
 knowledgeModelsImport : Maybe String -> Route
 knowledgeModelsImport =
-    KnowledgeModelsRoute << Wizard.KnowledgeModels.Routes.ImportRoute
+    KnowledgeModelsRoute << Wizard.Pages.KnowledgeModels.Routes.ImportRoute
 
 
 knowledgeModelsIndex : Route
 knowledgeModelsIndex =
-    KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute PaginationQueryString.empty)
+    KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.IndexRoute PaginationQueryString.empty)
 
 
 knowledgeModelsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 knowledgeModelsIndexWithFilters _ pagination =
-    KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute pagination)
+    KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.IndexRoute pagination)
 
 
 isKnowledgeModelsIndex : Route -> Bool
 isKnowledgeModelsIndex route =
     case route of
-        KnowledgeModelsRoute (Wizard.KnowledgeModels.Routes.IndexRoute _) ->
+        KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -537,12 +537,12 @@ isKnowledgeModelsIndex route =
 
 knowledgeModelsPreview : String -> Maybe String -> Route
 knowledgeModelsPreview packageId mbQuestionUuid =
-    KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.PreviewRoute packageId mbQuestionUuid
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute packageId mbQuestionUuid
 
 
 knowledgeModelsResourcePage : String -> String -> Route
 knowledgeModelsResourcePage kmId resourcePageUuid =
-    KnowledgeModelsRoute <| Wizard.KnowledgeModels.Routes.ResourcePageRoute kmId resourcePageUuid
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.ResourcePageRoute kmId resourcePageUuid
 
 
 isKnowledgeModelsSubroute : Route -> Bool
@@ -586,18 +586,18 @@ isKnowledgeModelSecrets route =
 
 projectActionsIndex : Route
 projectActionsIndex =
-    ProjectActionsRoute (Wizard.ProjectActions.Routes.IndexRoute PaginationQueryString.empty)
+    ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute PaginationQueryString.empty)
 
 
 projectActionsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 projectActionsIndexWithFilters _ pagination =
-    ProjectActionsRoute (Wizard.ProjectActions.Routes.IndexRoute pagination)
+    ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute pagination)
 
 
 isProjectActionsIndex : Route -> Bool
 isProjectActionsIndex route =
     case route of
-        ProjectActionsRoute (Wizard.ProjectActions.Routes.IndexRoute _) ->
+        ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -610,18 +610,18 @@ isProjectActionsIndex route =
 
 projectFilesIndex : Route
 projectFilesIndex =
-    ProjectFilesRoute (Wizard.ProjectFiles.Routes.IndexRoute PaginationQueryString.empty)
+    ProjectFilesRoute (Wizard.Pages.ProjectFiles.Routes.IndexRoute PaginationQueryString.empty)
 
 
 projectFilesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 projectFilesIndexWithFilters _ pagination =
-    ProjectFilesRoute (Wizard.ProjectFiles.Routes.IndexRoute pagination)
+    ProjectFilesRoute (Wizard.Pages.ProjectFiles.Routes.IndexRoute pagination)
 
 
 isProjectFilesIndex : Route -> Bool
 isProjectFilesIndex route =
     case route of
-        ProjectFilesRoute (Wizard.ProjectFiles.Routes.IndexRoute _) ->
+        ProjectFilesRoute (Wizard.Pages.ProjectFiles.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -634,18 +634,18 @@ isProjectFilesIndex route =
 
 projectImportersIndex : Route
 projectImportersIndex =
-    ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute PaginationQueryString.empty)
+    ProjectImportersRoute (Wizard.Pages.ProjectImporters.Routes.IndexRoute PaginationQueryString.empty)
 
 
 projectImportersIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 projectImportersIndexWithFilters _ pagination =
-    ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute pagination)
+    ProjectImportersRoute (Wizard.Pages.ProjectImporters.Routes.IndexRoute pagination)
 
 
 isProjectImportersIndex : Route -> Bool
 isProjectImportersIndex route =
     case route of
-        ProjectImportersRoute (Wizard.ProjectImporters.Routes.IndexRoute _) ->
+        ProjectImportersRoute (Wizard.Pages.ProjectImporters.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -658,63 +658,63 @@ isProjectImportersIndex route =
 
 projectsCreate : Route
 projectsCreate =
-    ProjectsRoute <| Wizard.Projects.Routes.CreateRoute Nothing Nothing
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute Nothing Nothing
 
 
 projectsCreateFromKnowledgeModel : String -> Route
 projectsCreateFromKnowledgeModel selectedKnowledgeModel =
-    ProjectsRoute <| Wizard.Projects.Routes.CreateRoute Nothing (Just selectedKnowledgeModel)
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute Nothing (Just selectedKnowledgeModel)
 
 
 projectsCreateFromProjectTemplate : Uuid -> Route
 projectsCreateFromProjectTemplate selectedProjectTemplate =
-    ProjectsRoute <| Wizard.Projects.Routes.CreateRoute (Just selectedProjectTemplate) Nothing
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute (Just selectedProjectTemplate) Nothing
 
 
 projectsCreateMigration : Uuid -> Route
 projectsCreateMigration =
-    ProjectsRoute << Wizard.Projects.Routes.CreateMigrationRoute
+    ProjectsRoute << Wizard.Pages.Projects.Routes.CreateMigrationRoute
 
 
 projectsDetail : Uuid -> Route
 projectsDetail uuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire Nothing Nothing
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.Questionnaire Nothing Nothing
 
 
 projectsDetailQuestionnaire : Uuid -> Maybe String -> Maybe Uuid -> Route
 projectsDetailQuestionnaire uuid mbQuestionPath mbCommentThreadUuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid
 
 
 projectsDetailDocuments : Uuid -> Route
 projectsDetailDocuments uuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Documents PaginationQueryString.empty
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.Documents PaginationQueryString.empty
 
 
 projectsDetailDocumentsWithFilters : Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
 projectsDetailDocumentsWithFilters uuid _ pagination =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Documents pagination
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.Documents pagination
 
 
 projectsDetailDocumentsNew : Uuid -> Maybe Uuid -> Route
 projectsDetailDocumentsNew uuid mbEventUuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.NewDocument mbEventUuid
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.NewDocument mbEventUuid
 
 
 projectsDetailFilesWithFilters : Uuid -> PaginationQueryFilters -> PaginationQueryString -> Route
 projectsDetailFilesWithFilters uuid _ pagination =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Files pagination
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.Files pagination
 
 
 projectsDetailSettings : Uuid -> Route
 projectsDetailSettings uuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DetailRoute uuid <| Wizard.Projects.Detail.ProjectDetailRoute.Settings
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DetailRoute uuid <| Wizard.Pages.Projects.Detail.ProjectDetailRoute.Settings
 
 
 isProjectsDetail : Uuid -> Route -> Bool
 isProjectsDetail uuid route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.DetailRoute projectUuid _) ->
+        ProjectsRoute (Wizard.Pages.Projects.Routes.DetailRoute projectUuid _) ->
             uuid == projectUuid
 
         _ ->
@@ -736,27 +736,27 @@ projectsIndex appState =
                 Nothing ->
                     Nothing
     in
-    ProjectsRoute (Wizard.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
+    ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
 
 
 projectsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 projectsIndexWithFilters filters pagination =
     ProjectsRoute
-        (Wizard.Projects.Routes.IndexRoute pagination
-            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteIsTemplateFilterId filters)
-            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteUsersFilterId filters)
-            (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRouteUsersFilterId filters)
-            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
-            (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRouteProjectTagsFilterId filters)
-            (PaginationQueryFilters.getValue Wizard.Projects.Routes.indexRoutePackagesFilterId filters)
-            (PaginationQueryFilters.getOp Wizard.Projects.Routes.indexRoutePackagesFilterId filters)
+        (Wizard.Pages.Projects.Routes.IndexRoute pagination
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteIsTemplateFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRoutePackagesFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRoutePackagesFilterId filters)
         )
 
 
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _) ->
+        ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _) ->
             True
 
         _ ->
@@ -765,12 +765,12 @@ isProjectsIndex route =
 
 projectsMigration : Uuid -> Route
 projectsMigration =
-    ProjectsRoute << Wizard.Projects.Routes.MigrationRoute
+    ProjectsRoute << Wizard.Pages.Projects.Routes.MigrationRoute
 
 
 projectsImport : Uuid -> String -> Route
 projectsImport uuid importerId =
-    ProjectsRoute <| Wizard.Projects.Routes.ImportRoute uuid importerId
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.ImportRoute uuid importerId
 
 
 isProjectSubroute : Route -> Bool
@@ -796,12 +796,12 @@ isProjectSubroute route =
 
 projectsFileDownload : Uuid -> Uuid -> Route
 projectsFileDownload projectUuid documentUuid =
-    ProjectsRoute <| Wizard.Projects.Routes.FileDownloadRoute projectUuid documentUuid
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.FileDownloadRoute projectUuid documentUuid
 
 
 projectDocumentDownload : Uuid -> Uuid -> Route
 projectDocumentDownload projectUuid documentUuid =
-    ProjectsRoute <| Wizard.Projects.Routes.DocumentDownloadRoute projectUuid documentUuid
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.DocumentDownloadRoute projectUuid documentUuid
 
 
 
@@ -810,22 +810,22 @@ projectDocumentDownload projectUuid documentUuid =
 
 publicForgottenPassword : Route
 publicForgottenPassword =
-    PublicRoute Wizard.Public.Routes.ForgottenPasswordRoute
+    PublicRoute Wizard.Pages.Public.Routes.ForgottenPasswordRoute
 
 
 publicLogin : Maybe String -> Route
 publicLogin originalUrl =
-    PublicRoute <| Wizard.Public.Routes.LoginRoute originalUrl
+    PublicRoute <| Wizard.Pages.Public.Routes.LoginRoute originalUrl
 
 
 publicSignup : Route
 publicSignup =
-    PublicRoute Wizard.Public.Routes.SignupRoute
+    PublicRoute Wizard.Pages.Public.Routes.SignupRoute
 
 
 publicLogoutSuccessful : Route
 publicLogoutSuccessful =
-    PublicRoute Wizard.Public.Routes.LogoutSuccessful
+    PublicRoute Wizard.Pages.Public.Routes.LogoutSuccessful
 
 
 
@@ -834,7 +834,7 @@ publicLogoutSuccessful =
 
 settingsDefault : Bool -> Route
 settingsDefault adminEnabled =
-    SettingsRoute (Wizard.Settings.Routes.defaultRoute adminEnabled)
+    SettingsRoute (Wizard.Pages.Settings.Routes.defaultRoute adminEnabled)
 
 
 isSettingsRoute : Route -> Bool
@@ -865,22 +865,22 @@ isSettingsSubroute route =
 
 settingsAuthentication : Route
 settingsAuthentication =
-    SettingsRoute Wizard.Settings.Routes.AuthenticationRoute
+    SettingsRoute Wizard.Pages.Settings.Routes.AuthenticationRoute
 
 
 settingsLookAndFeel : Route
 settingsLookAndFeel =
-    SettingsRoute Wizard.Settings.Routes.LookAndFeelRoute
+    SettingsRoute Wizard.Pages.Settings.Routes.LookAndFeelRoute
 
 
 settingsOrganization : Route
 settingsOrganization =
-    SettingsRoute Wizard.Settings.Routes.OrganizationRoute
+    SettingsRoute Wizard.Pages.Settings.Routes.OrganizationRoute
 
 
 settingsRegistry : Route
 settingsRegistry =
-    SettingsRoute Wizard.Settings.Routes.RegistryRoute
+    SettingsRoute Wizard.Pages.Settings.Routes.RegistryRoute
 
 
 
@@ -889,32 +889,32 @@ settingsRegistry =
 
 tenantsCreate : Route
 tenantsCreate =
-    TenantsRoute Wizard.Tenants.Routes.CreateRoute
+    TenantsRoute Wizard.Pages.Tenants.Routes.CreateRoute
 
 
 tenantsDetail : Uuid -> Route
 tenantsDetail =
-    TenantsRoute << Wizard.Tenants.Routes.DetailRoute
+    TenantsRoute << Wizard.Pages.Tenants.Routes.DetailRoute
 
 
 tenantsIndex : Route
 tenantsIndex =
-    TenantsRoute (Wizard.Tenants.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing)
+    TenantsRoute (Wizard.Pages.Tenants.Routes.IndexRoute PaginationQueryString.empty Nothing Nothing)
 
 
 tenantsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 tenantsIndexWithFilters filters pagination =
     TenantsRoute
-        (Wizard.Tenants.Routes.IndexRoute pagination
-            (PaginationQueryFilters.getValue Wizard.Tenants.Routes.indexRouteEnabledFilterId filters)
-            (PaginationQueryFilters.getValue Wizard.Tenants.Routes.indexRouteStatesFilterId filters)
+        (Wizard.Pages.Tenants.Routes.IndexRoute pagination
+            (PaginationQueryFilters.getValue Wizard.Pages.Tenants.Routes.indexRouteEnabledFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Tenants.Routes.indexRouteStatesFilterId filters)
         )
 
 
 isTenantIndex : Route -> Bool
 isTenantIndex route =
     case route of
-        TenantsRoute (Wizard.Tenants.Routes.IndexRoute _ _ _) ->
+        TenantsRoute (Wizard.Pages.Tenants.Routes.IndexRoute _ _ _) ->
             True
 
         _ ->
@@ -927,27 +927,27 @@ isTenantIndex route =
 
 usersCreate : Route
 usersCreate =
-    UsersRoute Wizard.Users.Routes.CreateRoute
+    UsersRoute Wizard.Pages.Users.Routes.CreateRoute
 
 
 usersEdit : UuidOrCurrent -> Route
 usersEdit =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Profile
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.Profile
 
 
 usersEditPassword : UuidOrCurrent -> Route
 usersEditPassword =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Password
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.Password
 
 
 usersEditLanguage : UuidOrCurrent -> Route
 usersEditLanguage =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Language
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.Language
 
 
 usersEditTours : UuidOrCurrent -> Route
 usersEditTours =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.Tours
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.Tours
 
 
 usersEditLanguageCurrent : Route
@@ -957,22 +957,22 @@ usersEditLanguageCurrent =
 
 usersEditApiKeys : UuidOrCurrent -> Route
 usersEditApiKeys =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ApiKeys
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.ApiKeys
 
 
 usersEditAppKeys : UuidOrCurrent -> Route
 usersEditAppKeys =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.AppKeys
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.AppKeys
 
 
 usersEditActiveSessions : UuidOrCurrent -> Route
 usersEditActiveSessions =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.ActiveSessions
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.ActiveSessions
 
 
 usersEditSubmissionSettings : UuidOrCurrent -> Route
 usersEditSubmissionSettings =
-    UsersRoute << flip Wizard.Users.Routes.EditRoute UserEditRoute.SubmissionSettings
+    UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.SubmissionSettings
 
 
 usersEditCurrent : Route
@@ -982,21 +982,21 @@ usersEditCurrent =
 
 usersIndex : Route
 usersIndex =
-    UsersRoute (Wizard.Users.Routes.IndexRoute PaginationQueryString.empty Nothing)
+    UsersRoute (Wizard.Pages.Users.Routes.IndexRoute PaginationQueryString.empty Nothing)
 
 
 usersIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 usersIndexWithFilters filters pagination =
     UsersRoute
-        (Wizard.Users.Routes.IndexRoute pagination
-            (PaginationQueryFilters.getValue Wizard.Users.Routes.indexRouteRoleFilterId filters)
+        (Wizard.Pages.Users.Routes.IndexRoute pagination
+            (PaginationQueryFilters.getValue Wizard.Pages.Users.Routes.indexRouteRoleFilterId filters)
         )
 
 
 isUsersIndex : Route -> Bool
 isUsersIndex route =
     case route of
-        UsersRoute (Wizard.Users.Routes.IndexRoute _ _) ->
+        UsersRoute (Wizard.Pages.Users.Routes.IndexRoute _ _) ->
             True
 
         _ ->
@@ -1010,7 +1010,7 @@ isUsersIndex route =
 isLocalesRoute : Route -> Bool
 isLocalesRoute route =
     case route of
-        LocalesRoute (Wizard.Locales.Routes.IndexRoute _) ->
+        LocalesRoute (Wizard.Pages.Locales.Routes.IndexRoute _) ->
             True
 
         _ ->
@@ -1019,33 +1019,33 @@ isLocalesRoute route =
 
 localesCreate : Route
 localesCreate =
-    LocalesRoute <| Wizard.Locales.Routes.CreateRoute
+    LocalesRoute <| Wizard.Pages.Locales.Routes.CreateRoute
 
 
 localesImport : Maybe String -> Route
 localesImport =
-    LocalesRoute << Wizard.Locales.Routes.ImportRoute
+    LocalesRoute << Wizard.Pages.Locales.Routes.ImportRoute
 
 
 localesIndex : Route
 localesIndex =
-    LocalesRoute (Wizard.Locales.Routes.IndexRoute PaginationQueryString.empty)
+    LocalesRoute (Wizard.Pages.Locales.Routes.IndexRoute PaginationQueryString.empty)
 
 
 localesIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
 localesIndexWithFilters _ pagination =
-    LocalesRoute (Wizard.Locales.Routes.IndexRoute pagination)
+    LocalesRoute (Wizard.Pages.Locales.Routes.IndexRoute pagination)
 
 
 localesDetail : String -> Route
 localesDetail =
-    LocalesRoute << Wizard.Locales.Routes.DetailRoute
+    LocalesRoute << Wizard.Pages.Locales.Routes.DetailRoute
 
 
 isLocalesIndex : Route -> Bool
 isLocalesIndex route =
     case route of
-        LocalesRoute (Wizard.Locales.Routes.IndexRoute _) ->
+        LocalesRoute (Wizard.Pages.Locales.Routes.IndexRoute _) ->
             True
 
         _ ->

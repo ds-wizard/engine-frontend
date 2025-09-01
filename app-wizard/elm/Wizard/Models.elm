@@ -10,84 +10,84 @@ module Wizard.Models exposing
     )
 
 import Random exposing (Seed)
+import Shared.Components.AIAssistant as AIAssistant
 import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig
-import Wizard.Comments.Models
-import Wizard.Common.AppState exposing (AppState)
-import Wizard.Common.Components.AIAssistant as AIAssistant
-import Wizard.Common.Menu.Models
-import Wizard.Dashboard.Models
+import Wizard.Components.Menu.Models
+import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session exposing (Session)
-import Wizard.Dev.Models
-import Wizard.DocumentTemplateEditors.Models
-import Wizard.DocumentTemplates.Models
-import Wizard.Documents.Models
-import Wizard.KMEditor.Models
-import Wizard.KnowledgeModelSecrets.Models
-import Wizard.KnowledgeModels.Models
-import Wizard.Locales.Models
-import Wizard.ProjectActions.Models
-import Wizard.ProjectFiles.Models
-import Wizard.ProjectImporters.Models
-import Wizard.Projects.Models
-import Wizard.Public.Models
-import Wizard.Registry.Models
+import Wizard.Pages.Comments.Models
+import Wizard.Pages.Dashboard.Models
+import Wizard.Pages.Dev.Models
+import Wizard.Pages.DocumentTemplateEditors.Models
+import Wizard.Pages.DocumentTemplates.Models
+import Wizard.Pages.Documents.Models
+import Wizard.Pages.KMEditor.Models
+import Wizard.Pages.KnowledgeModelSecrets.Models
+import Wizard.Pages.KnowledgeModels.Models
+import Wizard.Pages.Locales.Models
+import Wizard.Pages.ProjectActions.Models
+import Wizard.Pages.ProjectFiles.Models
+import Wizard.Pages.ProjectImporters.Models
+import Wizard.Pages.Projects.Models
+import Wizard.Pages.Public.Models
+import Wizard.Pages.Registry.Models
+import Wizard.Pages.Settings.Models
+import Wizard.Pages.Tenants.Models
+import Wizard.Pages.Users.Models
 import Wizard.Routes as Routes
-import Wizard.Settings.Models
-import Wizard.Tenants.Models
-import Wizard.Users.Models
 
 
 type alias Model =
     { appState : AppState
-    , menuModel : Wizard.Common.Menu.Models.Model
+    , menuModel : Wizard.Components.Menu.Models.Model
     , aiAssistantState : AIAssistant.State
-    , adminModel : Wizard.Dev.Models.Model
-    , commentsModel : Wizard.Comments.Models.Model
-    , dashboardModel : Wizard.Dashboard.Models.Model
-    , documentsModel : Wizard.Documents.Models.Model
-    , documentTemplateEditorsModel : Wizard.DocumentTemplateEditors.Models.Model
-    , documentTemplatesModel : Wizard.DocumentTemplates.Models.Model
-    , kmEditorModel : Wizard.KMEditor.Models.Model
-    , kmPackagesModel : Wizard.KnowledgeModels.Models.Model
-    , kmSecretsModel : Wizard.KnowledgeModelSecrets.Models.Model
-    , localeModel : Wizard.Locales.Models.Model
-    , projectActionsModel : Wizard.ProjectActions.Models.Model
-    , projectFilesModel : Wizard.ProjectFiles.Models.Model
-    , projectImportersModel : Wizard.ProjectImporters.Models.Model
-    , projectsModel : Wizard.Projects.Models.Model
-    , publicModel : Wizard.Public.Models.Model
-    , registryModel : Wizard.Registry.Models.Model
-    , settingsModel : Wizard.Settings.Models.Model
-    , tenantsModel : Wizard.Tenants.Models.Model
-    , users : Wizard.Users.Models.Model
+    , adminModel : Wizard.Pages.Dev.Models.Model
+    , commentsModel : Wizard.Pages.Comments.Models.Model
+    , dashboardModel : Wizard.Pages.Dashboard.Models.Model
+    , documentsModel : Wizard.Pages.Documents.Models.Model
+    , documentTemplateEditorsModel : Wizard.Pages.DocumentTemplateEditors.Models.Model
+    , documentTemplatesModel : Wizard.Pages.DocumentTemplates.Models.Model
+    , kmEditorModel : Wizard.Pages.KMEditor.Models.Model
+    , kmPackagesModel : Wizard.Pages.KnowledgeModels.Models.Model
+    , kmSecretsModel : Wizard.Pages.KnowledgeModelSecrets.Models.Model
+    , localeModel : Wizard.Pages.Locales.Models.Model
+    , projectActionsModel : Wizard.Pages.ProjectActions.Models.Model
+    , projectFilesModel : Wizard.Pages.ProjectFiles.Models.Model
+    , projectImportersModel : Wizard.Pages.ProjectImporters.Models.Model
+    , projectsModel : Wizard.Pages.Projects.Models.Model
+    , publicModel : Wizard.Pages.Public.Models.Model
+    , registryModel : Wizard.Pages.Registry.Models.Model
+    , settingsModel : Wizard.Pages.Settings.Models.Model
+    , tenantsModel : Wizard.Pages.Tenants.Models.Model
+    , users : Wizard.Pages.Users.Models.Model
     }
 
 
 initialModel : AppState -> Model
 initialModel appState =
     { appState = appState
-    , menuModel = Wizard.Common.Menu.Models.initialModel
+    , menuModel = Wizard.Components.Menu.Models.initialModel
     , aiAssistantState = AIAssistant.initialState
-    , adminModel = Wizard.Dev.Models.initialModel
-    , commentsModel = Wizard.Comments.Models.initialModel PaginationQueryString.empty Nothing
-    , tenantsModel = Wizard.Tenants.Models.initialModel
-    , dashboardModel = Wizard.Dashboard.Models.initialModel appState
-    , documentsModel = Wizard.Documents.Models.initialModel
-    , documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initialModel appState
-    , documentTemplatesModel = Wizard.DocumentTemplates.Models.initialModel appState
-    , kmEditorModel = Wizard.KMEditor.Models.initialModel appState
-    , kmPackagesModel = Wizard.KnowledgeModels.Models.initialModel appState
-    , kmSecretsModel = Wizard.KnowledgeModelSecrets.Models.initialModel appState
-    , localeModel = Wizard.Locales.Models.initialModel appState
-    , projectActionsModel = Wizard.ProjectActions.Models.initialModel
-    , projectFilesModel = Wizard.ProjectFiles.Models.initialModel
-    , projectImportersModel = Wizard.ProjectImporters.Models.initialModel
-    , projectsModel = Wizard.Projects.Models.initialModel appState
-    , publicModel = Wizard.Public.Models.initialModel appState
-    , registryModel = Wizard.Registry.Models.initialModel
-    , settingsModel = Wizard.Settings.Models.initialModel appState
-    , users = Wizard.Users.Models.initialModel appState
+    , adminModel = Wizard.Pages.Dev.Models.initialModel
+    , commentsModel = Wizard.Pages.Comments.Models.initialModel PaginationQueryString.empty Nothing
+    , tenantsModel = Wizard.Pages.Tenants.Models.initialModel
+    , dashboardModel = Wizard.Pages.Dashboard.Models.initialModel appState
+    , documentsModel = Wizard.Pages.Documents.Models.initialModel
+    , documentTemplateEditorsModel = Wizard.Pages.DocumentTemplateEditors.Models.initialModel appState
+    , documentTemplatesModel = Wizard.Pages.DocumentTemplates.Models.initialModel appState
+    , kmEditorModel = Wizard.Pages.KMEditor.Models.initialModel appState
+    , kmPackagesModel = Wizard.Pages.KnowledgeModels.Models.initialModel appState
+    , kmSecretsModel = Wizard.Pages.KnowledgeModelSecrets.Models.initialModel appState
+    , localeModel = Wizard.Pages.Locales.Models.initialModel appState
+    , projectActionsModel = Wizard.Pages.ProjectActions.Models.initialModel
+    , projectFilesModel = Wizard.Pages.ProjectFiles.Models.initialModel
+    , projectImportersModel = Wizard.Pages.ProjectImporters.Models.initialModel
+    , projectsModel = Wizard.Pages.Projects.Models.initialModel appState
+    , publicModel = Wizard.Pages.Public.Models.initialModel appState
+    , registryModel = Wizard.Pages.Registry.Models.initialModel
+    , settingsModel = Wizard.Pages.Settings.Models.initialModel appState
+    , users = Wizard.Pages.Users.Models.initialModel appState
     }
 
 
@@ -143,30 +143,30 @@ initLocalModel : AppState -> Model -> Model
 initLocalModel appState model =
     case model.appState.route of
         Routes.CommentsRoute paginationQueryString mbResolved ->
-            { model | commentsModel = Wizard.Comments.Models.initialModel paginationQueryString mbResolved }
+            { model | commentsModel = Wizard.Pages.Comments.Models.initialModel paginationQueryString mbResolved }
 
         Routes.DashboardRoute ->
-            { model | dashboardModel = Wizard.Dashboard.Models.initialModel model.appState }
+            { model | dashboardModel = Wizard.Pages.Dashboard.Models.initialModel model.appState }
 
         Routes.DevRoute route ->
-            { model | adminModel = Wizard.Dev.Models.initLocalModel route model.adminModel }
+            { model | adminModel = Wizard.Pages.Dev.Models.initLocalModel route model.adminModel }
 
         Routes.TenantsRoute route ->
-            { model | tenantsModel = Wizard.Tenants.Models.initLocalModel route model.tenantsModel }
+            { model | tenantsModel = Wizard.Pages.Tenants.Models.initLocalModel route model.tenantsModel }
 
         Routes.DocumentsRoute route ->
-            { model | documentsModel = Wizard.Documents.Models.initLocalModel route model.documentsModel }
+            { model | documentsModel = Wizard.Pages.Documents.Models.initLocalModel route model.documentsModel }
 
         Routes.DocumentTemplatesRoute route ->
-            { model | documentTemplatesModel = Wizard.DocumentTemplates.Models.initLocalModel route model.appState model.documentTemplatesModel }
+            { model | documentTemplatesModel = Wizard.Pages.DocumentTemplates.Models.initLocalModel route model.appState model.documentTemplatesModel }
 
         Routes.DocumentTemplateEditorsRoute route ->
-            { model | documentTemplateEditorsModel = Wizard.DocumentTemplateEditors.Models.initLocalModel appState route model.documentTemplateEditorsModel }
+            { model | documentTemplateEditorsModel = Wizard.Pages.DocumentTemplateEditors.Models.initLocalModel appState route model.documentTemplateEditorsModel }
 
         Routes.KMEditorRoute route ->
             let
                 ( newSeed, kmEditorModel ) =
-                    Wizard.KMEditor.Models.initLocalModel model.appState route model.kmEditorModel
+                    Wizard.Pages.KMEditor.Models.initLocalModel model.appState route model.kmEditorModel
             in
             setSeed newSeed
                 { model
@@ -174,37 +174,37 @@ initLocalModel appState model =
                 }
 
         Routes.KnowledgeModelsRoute route ->
-            { model | kmPackagesModel = Wizard.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
+            { model | kmPackagesModel = Wizard.Pages.KnowledgeModels.Models.initLocalModel route model.appState model.kmPackagesModel }
 
         Routes.KnowledgeModelSecretsRoute ->
-            { model | kmSecretsModel = Wizard.KnowledgeModelSecrets.Models.initialModel appState }
+            { model | kmSecretsModel = Wizard.Pages.KnowledgeModelSecrets.Models.initialModel appState }
 
         Routes.LocalesRoute route ->
-            { model | localeModel = Wizard.Locales.Models.initLocalModel model.appState route model.localeModel }
+            { model | localeModel = Wizard.Pages.Locales.Models.initLocalModel model.appState route model.localeModel }
 
         Routes.ProjectActionsRoute route ->
-            { model | projectActionsModel = Wizard.ProjectActions.Models.initLocalModel route model.projectActionsModel }
+            { model | projectActionsModel = Wizard.Pages.ProjectActions.Models.initLocalModel route model.projectActionsModel }
 
         Routes.ProjectFilesRoute route ->
-            { model | projectFilesModel = Wizard.ProjectFiles.Models.initLocalModel route model.projectFilesModel }
+            { model | projectFilesModel = Wizard.Pages.ProjectFiles.Models.initLocalModel route model.projectFilesModel }
 
         Routes.ProjectImportersRoute route ->
-            { model | projectImportersModel = Wizard.ProjectImporters.Models.initLocalModel route model.projectImportersModel }
+            { model | projectImportersModel = Wizard.Pages.ProjectImporters.Models.initLocalModel route model.projectImportersModel }
 
         Routes.ProjectsRoute route ->
-            { model | projectsModel = Wizard.Projects.Models.initLocalModel model.appState route model.projectsModel }
+            { model | projectsModel = Wizard.Pages.Projects.Models.initLocalModel model.appState route model.projectsModel }
 
         Routes.PublicRoute route ->
-            { model | publicModel = Wizard.Public.Models.initLocalModel model.appState route model.publicModel }
+            { model | publicModel = Wizard.Pages.Public.Models.initLocalModel model.appState route model.publicModel }
 
         Routes.RegistryRoute _ ->
-            { model | registryModel = Wizard.Registry.Models.initLocalModel model.registryModel }
+            { model | registryModel = Wizard.Pages.Registry.Models.initLocalModel model.registryModel }
 
         Routes.SettingsRoute route ->
-            { model | settingsModel = Wizard.Settings.Models.initLocalModel model.appState route model.settingsModel }
+            { model | settingsModel = Wizard.Pages.Settings.Models.initLocalModel model.appState route model.settingsModel }
 
         Routes.UsersRoute route ->
-            { model | users = Wizard.Users.Models.initLocalModel model.appState route model.users }
+            { model | users = Wizard.Pages.Users.Models.initLocalModel model.appState route model.users }
 
         _ ->
             model

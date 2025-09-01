@@ -20,7 +20,7 @@ import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConf
 import Wizard.Api.Models.Tenant as Tenant exposing (Tenant)
 import Wizard.Api.Models.TenantDetail as TenantDetail exposing (TenantDetail)
 import Wizard.Api.Models.Usage as Usage exposing (Usage)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getTenants : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Tenant) msg -> Cmd msg

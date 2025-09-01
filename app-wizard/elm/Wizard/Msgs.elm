@@ -5,31 +5,31 @@ module Wizard.Msgs exposing
     )
 
 import Browser exposing (UrlRequest)
+import Shared.Components.AIAssistant
 import Time
 import Url exposing (Url)
-import Wizard.Auth.Msgs
-import Wizard.Comments.Msgs
-import Wizard.Common.Components.AIAssistant
-import Wizard.Common.Menu.Msgs
-import Wizard.Dashboard.Msgs
-import Wizard.Dev.Msgs
-import Wizard.DocumentTemplateEditors.Msgs
-import Wizard.DocumentTemplates.Msgs
-import Wizard.Documents.Msgs
-import Wizard.KMEditor.Msgs
-import Wizard.KnowledgeModelSecrets.Msgs
-import Wizard.KnowledgeModels.Msgs
-import Wizard.Locales.Msgs
-import Wizard.ProjectActions.Msgs
-import Wizard.ProjectFiles.Msgs
-import Wizard.ProjectImporters.Msgs
-import Wizard.Projects.Msgs
-import Wizard.Public.Msgs
-import Wizard.Registry.Msgs
+import Wizard.Components.Menu.Msgs
+import Wizard.Pages.Auth.Msgs
+import Wizard.Pages.Comments.Msgs
+import Wizard.Pages.Dashboard.Msgs
+import Wizard.Pages.Dev.Msgs
+import Wizard.Pages.DocumentTemplateEditors.Msgs
+import Wizard.Pages.DocumentTemplates.Msgs
+import Wizard.Pages.Documents.Msgs
+import Wizard.Pages.KMEditor.Msgs
+import Wizard.Pages.KnowledgeModelSecrets.Msgs
+import Wizard.Pages.KnowledgeModels.Msgs
+import Wizard.Pages.Locales.Msgs
+import Wizard.Pages.ProjectActions.Msgs
+import Wizard.Pages.ProjectFiles.Msgs
+import Wizard.Pages.ProjectImporters.Msgs
+import Wizard.Pages.Projects.Msgs
+import Wizard.Pages.Public.Msgs
+import Wizard.Pages.Registry.Msgs
+import Wizard.Pages.Settings.Msgs
+import Wizard.Pages.Tenants.Msgs
+import Wizard.Pages.Users.Msgs
 import Wizard.Routes as Routes
-import Wizard.Settings.Msgs
-import Wizard.Tenants.Msgs
-import Wizard.Users.Msgs
 
 
 type Msg
@@ -39,41 +39,41 @@ type Msg
     | OnTime Time.Posix
     | OnTimeZone Time.Zone
     | AcceptCookies
-    | AuthMsg Wizard.Auth.Msgs.Msg
-    | AIAssistantMsg Wizard.Common.Components.AIAssistant.Msg
+    | AuthMsg Wizard.Pages.Auth.Msgs.Msg
+    | AIAssistantMsg Shared.Components.AIAssistant.Msg
     | SetSidebarCollapsed Bool
     | SetRightPanelCollapsed Bool
     | SetFullscreen Bool
     | HideSessionExpiresSoonModal
-    | MenuMsg Wizard.Common.Menu.Msgs.Msg
-    | AdminMsg Wizard.Dev.Msgs.Msg
-    | CommentsMsg Wizard.Comments.Msgs.Msg
-    | DashboardMsg Wizard.Dashboard.Msgs.Msg
-    | DocumentsMsg Wizard.Documents.Msgs.Msg
-    | DocumentTemplateEditorsMsg Wizard.DocumentTemplateEditors.Msgs.Msg
-    | DocumentTemplatesMsg Wizard.DocumentTemplates.Msgs.Msg
-    | KMEditorMsg Wizard.KMEditor.Msgs.Msg
-    | KnowledgeModelsMsg Wizard.KnowledgeModels.Msgs.Msg
-    | KnowledgeModelSecretsMsg Wizard.KnowledgeModelSecrets.Msgs.Msg
-    | LocaleMsg Wizard.Locales.Msgs.Msg
-    | ProjectActionsMsg Wizard.ProjectActions.Msgs.Msg
-    | ProjectFilesMsg Wizard.ProjectFiles.Msgs.Msg
-    | ProjectImportersMsg Wizard.ProjectImporters.Msgs.Msg
-    | ProjectsMsg Wizard.Projects.Msgs.Msg
-    | PublicMsg Wizard.Public.Msgs.Msg
-    | RegistryMsg Wizard.Registry.Msgs.Msg
-    | SettingsMsg Wizard.Settings.Msgs.Msg
-    | TenantsMsg Wizard.Tenants.Msgs.Msg
-    | UsersMsg Wizard.Users.Msgs.Msg
+    | MenuMsg Wizard.Components.Menu.Msgs.Msg
+    | AdminMsg Wizard.Pages.Dev.Msgs.Msg
+    | CommentsMsg Wizard.Pages.Comments.Msgs.Msg
+    | DashboardMsg Wizard.Pages.Dashboard.Msgs.Msg
+    | DocumentsMsg Wizard.Pages.Documents.Msgs.Msg
+    | DocumentTemplateEditorsMsg Wizard.Pages.DocumentTemplateEditors.Msgs.Msg
+    | DocumentTemplatesMsg Wizard.Pages.DocumentTemplates.Msgs.Msg
+    | KMEditorMsg Wizard.Pages.KMEditor.Msgs.Msg
+    | KnowledgeModelsMsg Wizard.Pages.KnowledgeModels.Msgs.Msg
+    | KnowledgeModelSecretsMsg Wizard.Pages.KnowledgeModelSecrets.Msgs.Msg
+    | LocaleMsg Wizard.Pages.Locales.Msgs.Msg
+    | ProjectActionsMsg Wizard.Pages.ProjectActions.Msgs.Msg
+    | ProjectFilesMsg Wizard.Pages.ProjectFiles.Msgs.Msg
+    | ProjectImportersMsg Wizard.Pages.ProjectImporters.Msgs.Msg
+    | ProjectsMsg Wizard.Pages.Projects.Msgs.Msg
+    | PublicMsg Wizard.Pages.Public.Msgs.Msg
+    | RegistryMsg Wizard.Pages.Registry.Msgs.Msg
+    | SettingsMsg Wizard.Pages.Settings.Msgs.Msg
+    | TenantsMsg Wizard.Pages.Tenants.Msgs.Msg
+    | UsersMsg Wizard.Pages.Users.Msgs.Msg
     | TourDone String
     | TourPutCompleted
 
 
 logoutMsg : Msg
 logoutMsg =
-    AuthMsg Wizard.Auth.Msgs.Logout
+    AuthMsg Wizard.Pages.Auth.Msgs.Logout
 
 
 logoutToMsg : Routes.Route -> Msg
 logoutToMsg =
-    AuthMsg << Wizard.Auth.Msgs.LogoutTo
+    AuthMsg << Wizard.Pages.Auth.Msgs.LogoutTo

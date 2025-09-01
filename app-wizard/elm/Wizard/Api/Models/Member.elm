@@ -17,7 +17,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion as UserGroupSuggestion exposing (UserGroupSuggestion)
 import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
-import Wizard.Projects.Common.QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
+import Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
 
 
 type Member

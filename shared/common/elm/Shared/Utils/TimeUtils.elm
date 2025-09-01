@@ -1,5 +1,7 @@
 module Shared.Utils.TimeUtils exposing
-    ( monthToInt
+    ( getTime
+    , getTimeZone
+    , monthToInt
     , monthToString
     , toReadableDate
     , toReadableDateTime
@@ -7,7 +9,18 @@ module Shared.Utils.TimeUtils exposing
     )
 
 import Gettext exposing (gettext)
+import Task
 import Time exposing (Month(..))
+
+
+getTime : (Time.Posix -> msg) -> Cmd msg
+getTime toMsg =
+    Task.perform toMsg Time.now
+
+
+getTimeZone : (Time.Zone -> msg) -> Cmd msg
+getTimeZone toMsg =
+    Task.perform toMsg Time.here
 
 
 toReadableDateTime : Time.Zone -> Time.Posix -> String

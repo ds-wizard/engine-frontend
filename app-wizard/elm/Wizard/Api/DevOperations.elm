@@ -8,7 +8,7 @@ import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.DevOperationExecution as DevOperationExecution exposing (DevOperationExecution)
 import Shared.Data.DevOperationExecutionResult as DevOperationExecutionResult exposing (DevOperationExecutionResult)
 import Shared.Data.DevOperationSection as DevOperationSection exposing (DevOperationSection)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getOperations : AppState -> ToMsg (List DevOperationSection) msg -> Cmd msg

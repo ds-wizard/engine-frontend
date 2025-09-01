@@ -22,7 +22,7 @@ import Shared.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Wizard.Api.Models.Locale as Locale exposing (Locale)
 import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Wizard.Api.Models.LocaleSuggestion as LocaleSuggestion exposing (LocaleSuggestion)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getLocales : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Locale) msg -> Cmd msg

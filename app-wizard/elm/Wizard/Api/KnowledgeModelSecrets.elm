@@ -4,8 +4,8 @@ import Json.Decode as D
 import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelSecret as KnowledgeModelSecret exposing (KnowledgeModelSecret)
-import Wizard.Common.AppState as AppState exposing (AppState)
-import Wizard.KnowledgeModelSecrets.Forms.KnowledgeModelSecretForm as KnowledgeModelSecretForm exposing (KnowledgeModelSecretForm)
+import Wizard.Data.AppState as AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModelSecrets.Forms.KnowledgeModelSecretForm as KnowledgeModelSecretForm exposing (KnowledgeModelSecretForm)
 
 
 getKnowledgeModelSecrets : AppState -> ToMsg (List KnowledgeModelSecret) msg -> Cmd msg

@@ -20,7 +20,7 @@ import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState 
 import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
 import Wizard.Api.Models.UserInfo as UserInfo exposing (UserInfo)
-import Wizard.Common.AppState exposing (AppState)
+import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
 
 

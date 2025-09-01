@@ -7,11 +7,8 @@ port module Wizard.Ports exposing
     , consoleError
     , convertLocaleFile
     , createDropzone
-    , downloadFile
     , fileContentRead
     , fileSelected
-    , focus
-    , gotScrollTop
     , historyBack
     , historyBackCallback
     , localStorageData
@@ -21,20 +18,12 @@ port module Wizard.Ports exposing
     , localStorageSet
     , localeConverted
     , refresh
-    , scrollIntoView
-    , scrollIntoViewCenter
-    , scrollIntoViewInstant
-    , scrollToTop
-    , scrollTreeItemIntoView
-    , setScrollTop
     , setUnloadMessage
     , storeSession
-    , subscribeScrollTop
     )
 
 import Json.Decode as D
 import Json.Encode as E
-import Wizard.Common.ElementScrollTop as ElementScrollTop exposing (ElementScrollTop)
 
 
 
@@ -81,42 +70,6 @@ port createDropzone : String -> Cmd msg
 
 
 
--- DOM
-
-
-port focus : String -> Cmd msg
-
-
-port scrollIntoView : String -> Cmd msg
-
-
-port scrollIntoViewInstant : String -> Cmd msg
-
-
-port scrollIntoViewCenter : String -> Cmd msg
-
-
-port scrollTreeItemIntoView : String -> Cmd msg
-
-
-port scrollToTop : String -> Cmd msg
-
-
-setScrollTop : ElementScrollTop -> Cmd msg
-setScrollTop =
-    setScrollTopPort << ElementScrollTop.encode
-
-
-port setScrollTopPort : E.Value -> Cmd msg
-
-
-port subscribeScrollTop : String -> Cmd msg
-
-
-port gotScrollTop : (E.Value -> msg) -> Sub msg
-
-
-
 -- Page Unload
 
 
@@ -141,13 +94,6 @@ port refresh : () -> Cmd msg
 
 
 port acceptCookies : () -> Cmd msg
-
-
-
--- File Download
-
-
-port downloadFile : String -> Cmd msg
 
 
 

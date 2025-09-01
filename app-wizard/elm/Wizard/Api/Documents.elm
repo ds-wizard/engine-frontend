@@ -11,6 +11,7 @@ module Wizard.Api.Documents exposing
 import Json.Decode as D
 import Json.Encode as E
 import Maybe.Extra as Maybe
+import Shared.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -19,8 +20,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)
 import Wizard.Api.Models.SubmissionService as SubmissionService exposing (SubmissionService)
-import Wizard.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getDocuments : AppState -> Maybe Uuid -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Document) msg -> Cmd msg

@@ -15,7 +15,7 @@ import Wizard.Api.Models.TypeHint as TypeHint exposing (TypeHint)
 import Wizard.Api.Models.TypeHintLegacy as TypeHintLegacy exposing (TypeHintLegacy)
 import Wizard.Api.Models.TypeHintRequest as TypeHintRequest exposing (TypeHintRequest)
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (TypeHintTestResponse)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 fetchTypeHints : AppState -> TypeHintRequest -> ToMsg (List TypeHint) msg -> Cmd msg

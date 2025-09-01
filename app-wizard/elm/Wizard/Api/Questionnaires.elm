@@ -40,6 +40,7 @@ import Dict exposing (Dict)
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (Value)
+import Shared.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Shared.Api.Request as Request exposing (ToMsg)
 import Shared.Api.WebSocket as WebSocket
 import Shared.Data.Pagination as Pagination exposing (Pagination)
@@ -62,9 +63,8 @@ import Wizard.Api.Models.QuestionnaireSettings as QuestionnaireSettings exposing
 import Wizard.Api.Models.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Wizard.Api.Models.SummaryReport as SummaryReport exposing (SummaryReport)
-import Wizard.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getQuestionnaires : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Questionnaire) msg -> Cmd msg

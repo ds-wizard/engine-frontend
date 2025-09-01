@@ -10,7 +10,7 @@ import Shared.Api.Request as Request exposing (ToMsg)
 import String.Extra as String
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
-import Wizard.Common.AppState as AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getToken : AppState -> String -> Maybe String -> Maybe String -> Maybe String -> ToMsg TokenResponse msg -> Cmd msg
