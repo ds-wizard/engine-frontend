@@ -4,7 +4,7 @@ const _ = require('lodash')
 function getComponentData() {
     const component = process.env.COMPONENT
     const moduleName = _.upperFirst(_.camelCase(component))
-    const componentSource = `engine-${component}/elm`
+    const componentSource = `app-${component}/elm`
 
     return {
         component,

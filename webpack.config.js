@@ -6,15 +6,15 @@ const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const TerserPlugin = require("terser-webpack-plugin")
 
-const component = `engine-${process.env.COMPONENT}`
+const component = `app-${process.env.COMPONENT}`
 
 const components = {
-    'engine-wizard': {
+    'app-wizard': {
         port: 8080,
         extraEntries: [],
         publicPath: '/wizard/'
     },
-    'engine-registry': {
+    'app-registry': {
         port: 8081,
         extraEntries: [],
         publicPath: '/'
@@ -149,7 +149,7 @@ module.exports = {
         },
         port: components[component].port,
         static: {
-            directory: (component === 'engine-registry') ? __dirname : path.join(__dirname, component, 'static')
+            directory: (component === 'app-registry') ? __dirname : path.join(__dirname, component, 'static')
         }
     }
 }

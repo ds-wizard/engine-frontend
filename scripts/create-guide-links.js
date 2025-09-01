@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 
-const elmFile = 'engine-wizard/elm/Wizard/Common/GuideLinks.elm'
+const elmFile = 'app-wizard/elm/Wizard/Common/GuideLinks.elm'
 const fileContent = fs.readFileSync(elmFile, 'utf8')
 const keyValueRegex = /\( "(.*?)", "(.*?)" \)/g
 const result = {}
