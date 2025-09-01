@@ -19,7 +19,7 @@ jobs:
       PUBLIC_IMAGE_PREFIX: datastewardshipwizard
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
       DOCKER_META_CONTEXT: '.'
-      DOCKER_META_FILE: './engine-registry/docker/Dockerfile'
+      DOCKER_META_FILE: './app-registry/docker/Dockerfile'
       DOCKER_META_PLATFORMS: 'linux/amd64,linux/arm64'
 
     steps:
