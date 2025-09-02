@@ -2,6 +2,7 @@ module Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing
     ( AddItemData
     , ImporterEvent(..)
     , ReplyIntegrationData
+    , ReplyIntegrationLegacyData
     , ReplyItemSelectData
     , ReplyListData
     , ReplyStringData
@@ -10,12 +11,14 @@ module Wizard.Common.Components.Questionnaire.Importer.ImporterEvent exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Json.Value as JsonValue exposing (JsonValue)
 
 
 type ImporterEvent
     = ReplyString ReplyStringData
     | ReplyList ReplyListData
     | ReplyIntegration ReplyIntegrationData
+    | ReplyIntegrationLegacy ReplyIntegrationLegacyData
     | ReplyItemSelect ReplyItemSelectData
     | AddItem AddItemData
 
@@ -37,6 +40,9 @@ decoderByType eventType =
 
         "ReplyIntegration" ->
             D.map ReplyIntegration decodeReplyIntegrationData
+
+        "ReplyIntegrationLegacy" ->
+            D.map ReplyIntegrationLegacy decodeReplyIntegrationLegacyData
 
         "ReplyItemSelect" ->
             D.map ReplyItemSelect decodeReplyItemSelectData
@@ -77,13 +83,28 @@ decodeReplyListData =
 type alias ReplyIntegrationData =
     { path : String
     , value : String
-    , id : Maybe String
+    , raw : JsonValue
     }
 
 
 decodeReplyIntegrationData : Decoder ReplyIntegrationData
 decodeReplyIntegrationData =
     D.succeed ReplyIntegrationData
+        |> D.required "path" D.string
+        |> D.required "value" D.string
+        |> D.required "raw" JsonValue.decoder
+
+
+type alias ReplyIntegrationLegacyData =
+    { path : String
+    , value : String
+    , id : Maybe String
+    }
+
+
+decodeReplyIntegrationLegacyData : Decoder ReplyIntegrationLegacyData
+decodeReplyIntegrationLegacyData =
+    D.succeed ReplyIntegrationLegacyData
         |> D.required "path" D.string
         |> D.required "value" D.string
         |> D.required "id" (D.maybe D.string)
