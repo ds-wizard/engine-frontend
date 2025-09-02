@@ -8,6 +8,7 @@ import Json.Decode as D exposing (Decoder)
 
 type IntegrationType
     = Api
+    | ApiLegacy
     | Widget
 
 
@@ -19,6 +20,9 @@ decoder =
                 case str of
                     "ApiIntegration" ->
                         D.succeed Api
+
+                    "ApiLegacyIntegration" ->
+                        D.succeed ApiLegacy
 
                     "WidgetIntegration" ->
                         D.succeed Widget

@@ -226,7 +226,7 @@ sidePanelKmInfo appState template =
         templateInfoList =
             [ ( gettext "ID" appState.locale, "id", text template.id )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString template.version )
-            , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt template.metamodelVersion )
+            , ( gettext "Metamodel" appState.locale, "metamodel", text <| Version.toStringMinor template.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text template.license )
             ]
     in

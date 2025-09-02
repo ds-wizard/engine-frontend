@@ -19,6 +19,7 @@ import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.KnowledgeModelSecrets as KnowledgeModelSecrets
 import Wizard.Api.Models.Branch.BranchState as BranchState
 import Wizard.Api.Models.Event as Event
 import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
@@ -34,7 +35,7 @@ import Wizard.KMEditor.Editor.Components.PublishModal as PublishModal
 import Wizard.KMEditor.Editor.Components.Settings as Settings
 import Wizard.KMEditor.Editor.Components.TagEditor as TagEditor
 import Wizard.KMEditor.Editor.KMEditorRoute as KMEditorRoute
-import Wizard.KMEditor.Editor.Models exposing (Model, addSavingActionUuid, initPageModel, removeSavingActionUuid)
+import Wizard.KMEditor.Editor.Models exposing (Model, addSavingActionUuid, getSecrets, initPageModel, removeSavingActionUuid)
 import Wizard.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.KMEditor.Routes exposing (Route(..))
 import Wizard.Msgs
@@ -56,6 +57,7 @@ fetchData appState uuid model =
         Cmd.batch
             [ BranchesApi.getBranch appState uuid GetBranchComplete
             , PrefabsApi.getIntegrationPrefabs appState GetIntegrationPrefabsComplete
+            , KnowledgeModelSecrets.getKnowledgeModelSecrets appState GetKnowledgeModelSecretsComplete
             ]
 
 
@@ -156,7 +158,7 @@ update wrapMsg msg appState model =
                                 fetchSubrouteDataFromAfter wrapMsg
                                     appState
                                     { model
-                                        | branchModel = Success (EditorBranch.init appState branch model.mbEditorUuid)
+                                        | branchModel = Success (EditorBranch.init appState (getSecrets model) branch model.mbEditorUuid)
                                         , settingsModel = Settings.setBranchDetail appState branch model.settingsModel
                                     }
                         in
@@ -185,6 +187,23 @@ update wrapMsg msg appState model =
                 Err _ ->
                     withSeed ( { model | integrationPrefabs = Error "" }, Cmd.none )
 
+        GetKnowledgeModelSecretsComplete result ->
+            case result of
+                Ok secrets ->
+                    withSeed
+                        ( { model
+                            | kmSecrets = Success secrets
+                            , branchModel = ActionResult.map (EditorBranch.computeWarnings appState (List.map .name secrets)) model.branchModel
+                          }
+                        , Cmd.none
+                        )
+
+                Err error ->
+                    withSeed <|
+                        ( { model | kmSecrets = ApiError.toActionResult appState (gettext "Unable to get knowledge model secrets." appState.locale) error }
+                        , Cmd.none
+                        )
+
         WebSocketMsg wsMsg ->
             handleWebSocketMsg wsMsg appState model
 
@@ -201,8 +220,14 @@ update wrapMsg msg appState model =
             case model.branchModel of
                 Success branchModel ->
                     let
+                        updateConfig =
+                            { setFullscreenMsg = Wizard.Msgs.SetFullscreen
+                            , wrapMsg = wrapMsg << KMEditorMsg
+                            , eventMsg = \shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent -> wrapMsg <| EventMsg shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent
+                            }
+
                         ( editorBranch, kmEditorModel, cmd ) =
-                            KMEditor.update Wizard.Msgs.SetFullscreen kmEditorMsg model.kmEditorModel branchModel
+                            KMEditor.update appState updateConfig kmEditorMsg ( branchModel, model.kmEditorModel )
                     in
                     withSeed ( { model | kmEditorModel = kmEditorModel, branchModel = Success editorBranch }, cmd )
 
@@ -285,7 +310,7 @@ update wrapMsg msg appState model =
                         }
 
                 newBranchModel =
-                    ActionResult.map (EditorBranch.applyEvent appState True event) model.branchModel
+                    ActionResult.map (EditorBranch.applyEvent appState (getSecrets model) True event) model.branchModel
 
                 setUnloadMessageCmd =
                     Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
@@ -415,7 +440,7 @@ handleWebSocketMsg websocketMsg appState model =
 
                 newModel2 =
                     if not removed then
-                        { newModel | branchModel = ActionResult.map (EditorBranch.applyEvent appState False eventData.event) newModel.branchModel }
+                        { newModel | branchModel = ActionResult.map (EditorBranch.applyEvent appState (getSecrets model) False eventData.event) newModel.branchModel }
 
                     else
                         newModel

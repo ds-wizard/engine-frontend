@@ -173,7 +173,10 @@ getStringReply replyValue =
                 PlainType value ->
                     value
 
-                IntegrationType _ value ->
+                IntegrationType value _ ->
+                    value
+
+                IntegrationLegacyType _ value ->
                     value
 
         _ ->

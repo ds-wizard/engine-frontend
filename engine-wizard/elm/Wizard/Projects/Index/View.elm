@@ -701,7 +701,11 @@ stateBadge : AppState -> Questionnaire -> Html msg
 stateBadge appState questionnaire =
     case questionnaire.state of
         Migrating ->
-            Badge.info [] [ text (gettext "migrating" appState.locale) ]
+            linkTo (Routes.projectsMigration questionnaire.uuid)
+                [ class Badge.infoClass, dataCy "badge_project_migrating" ]
+                [ faQuestionnaireListCreateMigration
+                , text (gettext "migrating" appState.locale)
+                ]
 
         Outdated ->
             linkTo (Routes.projectsCreateMigration questionnaire.uuid)

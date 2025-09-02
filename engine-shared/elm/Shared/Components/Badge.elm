@@ -3,6 +3,7 @@ module Shared.Components.Badge exposing
     , danger
     , dark
     , info
+    , infoClass
     , light
     , secondary
     , success

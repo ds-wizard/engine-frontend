@@ -245,8 +245,8 @@ questionDecoderTest =
                             "referenceUuids": [],
                             "expertUuids": [],
                             "integrationUuid": "b50bf5ce-2fc3-4779-9756-5f176c233374",
-                            "props": {
-                                "prop": "value"
+                            "variables": {
+                                "variable": "value"
                             },
                             "annotations": []
                         }
@@ -264,7 +264,7 @@ questionDecoderTest =
                             , annotations = []
                             }
                             { integrationUuid = "b50bf5ce-2fc3-4779-9756-5f176c233374"
-                            , props = Dict.fromList [ ( "prop", "value" ) ]
+                            , variables = Dict.fromList [ ( "variable", "value" ) ]
                             }
                 in
                 expectDecoder Question.decoder raw expected

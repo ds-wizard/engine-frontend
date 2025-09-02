@@ -417,7 +417,9 @@ viewProjectContent appState route model questionnaire =
                         , revertQuestionnaireMsg = Just OpenRevertModal
                         , isKmEditor = False
                         }
-                        { events = [] }
+                        { events = []
+                        , branchUuid = Nothing
+                        }
                         qm
             in
             Page.actionResultView appState viewContent model.questionnaireModel

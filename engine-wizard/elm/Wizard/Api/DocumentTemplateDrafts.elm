@@ -30,6 +30,7 @@ import Shared.Data.Pagination as Pagination exposing (Pagination)
 import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.CreatedEntityWithId as CreatedEntityWithId exposing (CreatedEntityWithId)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset as DocumentTemplateAsset exposing (DocumentTemplateAsset)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile as DocumentTemplateFile exposing (DocumentTemplateFile)
 import Wizard.Api.Models.DocumentTemplateDraft as DocumentTemplateDraft exposing (DocumentTemplateDraft)
@@ -56,9 +57,9 @@ getDraft appState templateId =
     Request.get (AppState.toServerInfo appState) ("/document-template-drafts/" ++ templateId) DocumentTemplateDraftDetail.decoder
 
 
-postDraft : AppState -> E.Value -> ToMsg DocumentTemplateDraftDetail msg -> Cmd msg
+postDraft : AppState -> E.Value -> ToMsg CreatedEntityWithId msg -> Cmd msg
 postDraft appState body =
-    Request.post (AppState.toServerInfo appState) "/document-template-drafts" DocumentTemplateDraftDetail.decoder body
+    Request.post (AppState.toServerInfo appState) "/document-template-drafts" CreatedEntityWithId.decoder body
 
 
 putDraft : AppState -> String -> E.Value -> ToMsg DocumentTemplateDraftDetail msg -> Cmd msg

@@ -23,7 +23,7 @@ type alias EditQuestionIntegrationEventData =
     , referenceUuids : EventField (List String)
     , expertUuids : EventField (List String)
     , integrationUuid : EventField String
-    , props : EventField (Dict String String)
+    , variables : EventField (Dict String String)
     , annotations : EventField (List Annotation)
     }
 
@@ -38,7 +38,7 @@ decoder =
         |> D.required "referenceUuids" (EventField.decoder (D.list D.string))
         |> D.required "expertUuids" (EventField.decoder (D.list D.string))
         |> D.required "integrationUuid" (EventField.decoder D.string)
-        |> D.required "props" (EventField.decoder (D.dict D.string))
+        |> D.required "variables" (EventField.decoder (D.dict D.string))
         |> D.required "annotations" (EventField.decoder (D.list Annotation.decoder))
 
 
@@ -52,7 +52,7 @@ encode data =
     , ( "referenceUuids", EventField.encode (E.list E.string) data.referenceUuids )
     , ( "expertUuids", EventField.encode (E.list E.string) data.expertUuids )
     , ( "integrationUuid", EventField.encode E.string data.integrationUuid )
-    , ( "props", EventField.encode (E.dict identity E.string) data.props )
+    , ( "variables", EventField.encode (E.dict identity E.string) data.variables )
     , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
 
@@ -66,7 +66,7 @@ init =
     , referenceUuids = EventField.empty
     , expertUuids = EventField.empty
     , integrationUuid = EventField.empty
-    , props = EventField.empty
+    , variables = EventField.empty
     , annotations = EventField.empty
     }
 
@@ -80,6 +80,6 @@ squash oldData newData =
     , referenceUuids = EventField.squash oldData.referenceUuids newData.referenceUuids
     , expertUuids = EventField.squash oldData.expertUuids newData.expertUuids
     , integrationUuid = EventField.squash oldData.integrationUuid newData.integrationUuid
-    , props = EventField.squash oldData.props newData.props
+    , variables = EventField.squash oldData.variables newData.variables
     , annotations = EventField.squash oldData.annotations newData.annotations
     }

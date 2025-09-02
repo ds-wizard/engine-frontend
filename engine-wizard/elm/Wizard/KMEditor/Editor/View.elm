@@ -227,7 +227,7 @@ viewKMEditorContent : AppState -> KMEditorRoute -> Model -> EditorBranch -> Html
 viewKMEditorContent appState route model editorBranch =
     case route of
         KMEditorRoute.Edit _ ->
-            KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) editorBranch
+            KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) (ActionResult.withDefault [] model.kmSecrets) editorBranch
 
         KMEditorRoute.Phases ->
             PhaseEditor.view appState PhaseEditorMsg (EventMsg False Nothing) editorBranch model.phaseEditorModel

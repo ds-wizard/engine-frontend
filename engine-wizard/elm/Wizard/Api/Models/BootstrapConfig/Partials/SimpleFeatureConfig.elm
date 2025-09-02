@@ -42,6 +42,4 @@ field =
 
 validation : Validation e SimpleFeatureConfig
 validation =
-    V.bool
-        |> V.andThen
-            (\value -> V.succeed { enabled = value })
+    V.bool |> V.map (\value -> { enabled = value })

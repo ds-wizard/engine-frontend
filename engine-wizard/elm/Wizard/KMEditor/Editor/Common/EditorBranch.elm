@@ -2,6 +2,7 @@ module Wizard.KMEditor.Editor.Common.EditorBranch exposing
     ( EditorBranch
     , EditorBranchWarning
     , applyEvent
+    , computeWarnings
     , editorRoute
     , filterDeleted
     , filterDeletedWith
@@ -37,7 +38,9 @@ import Regex
 import Set exposing (Set)
 import Shared.RegexPatterns as RegexPatterns
 import Shared.Utils exposing (flip)
+import Shared.Utils.JinjaUtils as JinjaUtils
 import String.Extra as String
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Api.Models.Event exposing (Event(..))
@@ -74,6 +77,7 @@ import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Expert as Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration)
+import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData as ApiIntegrationData
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
@@ -82,6 +86,7 @@ import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCol
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
+import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse
 import Wizard.Common.AppState exposing (AppState)
 import Wizard.Routes as Routes
 
@@ -105,8 +110,8 @@ type alias EditorBranchWarning =
     }
 
 
-init : AppState -> BranchDetail -> Maybe Uuid -> EditorBranch
-init appState branch mbEditorUuid =
+init : AppState -> List String -> BranchDetail -> Maybe Uuid -> EditorBranch
+init appState secrets branch mbEditorUuid =
     let
         kmUuid =
             Uuid.toString branch.knowledgeModel.uuid
@@ -123,9 +128,9 @@ init appState branch mbEditorUuid =
             , warnings = []
             }
     in
-    List.foldl (applyEvent appState False) editorBranch editorBranch.branch.events
+    List.foldl (applyEvent appState secrets False) editorBranch editorBranch.branch.events
         |> setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)
-        |> computeWarnings appState
+        |> computeWarnings appState secrets
 
 
 setReplies : Dict String Reply -> EditorBranch -> EditorBranch
@@ -614,8 +619,8 @@ isEmptyIntegrationEditorUuid uuid editorBranch =
     Set.member uuid editorBranch.emptyIntegrationEditorUuids
 
 
-applyEvent : AppState -> Bool -> Event -> EditorBranch -> EditorBranch
-applyEvent appState local event originalEditorBranch =
+applyEvent : AppState -> List String -> Bool -> Event -> EditorBranch -> EditorBranch
+applyEvent appState secrets local event originalEditorBranch =
     let
         branch =
             originalEditorBranch.branch
@@ -626,7 +631,7 @@ applyEvent appState local event originalEditorBranch =
         editorBranch =
             { originalEditorBranch | branch = { branch | events = branch.events ++ [ event ] } }
     in
-    computeWarnings appState <|
+    computeWarnings appState secrets <|
         case event of
             AddKnowledgeModelEvent _ _ ->
                 editorBranch
@@ -931,8 +936,8 @@ applyMove updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorBra
             editorBranch
 
 
-computeWarnings : AppState -> EditorBranch -> EditorBranch
-computeWarnings appState editorBranch =
+computeWarnings : AppState -> List String -> EditorBranch -> EditorBranch
+computeWarnings appState secrets editorBranch =
     let
         filteredKM =
             getFilteredKM editorBranch
@@ -942,7 +947,7 @@ computeWarnings appState editorBranch =
                 |> flip (++) (List.concatMap (computeMetricWarnings appState) (KnowledgeModel.getMetrics filteredKM))
                 |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases filteredKM))
                 |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags filteredKM))
-                |> flip (++) (List.concatMap (computeIntegrationWarnings appState) (KnowledgeModel.getIntegrations filteredKM))
+                |> flip (++) (List.concatMap (computeIntegrationWarnings appState secrets) (KnowledgeModel.getIntegrations filteredKM))
                 |> flip (++) (List.concatMap (computeResourceCollectionWarnings appState filteredKM) (KnowledgeModel.getResourceCollections filteredKM))
     in
     { editorBranch | warnings = warnings }
@@ -1009,11 +1014,35 @@ computeQuestionWarnings appState editorBranch km question =
                             (KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km)
 
                 Question.IntegrationQuestion _ data ->
-                    if data.integrationUuid == Uuid.toString Uuid.nil then
-                        createError (gettext "No integration selected for integration question" appState.locale)
+                    let
+                        integrationUuidWarning =
+                            if data.integrationUuid == Uuid.toString Uuid.nil then
+                                createError (gettext "No integration selected for integration question" appState.locale)
 
-                    else
-                        []
+                            else
+                                []
+
+                        variablesWarning =
+                            if data.integrationUuid /= Uuid.toString Uuid.nil then
+                                case KnowledgeModel.getIntegration data.integrationUuid km of
+                                    Just integration ->
+                                        let
+                                            missingVariables =
+                                                List.any (Maybe.isNothing << flip Dict.get data.variables) (Integration.getVariables integration)
+                                        in
+                                        if missingVariables then
+                                            createError (gettext "Missing variables for integration question" appState.locale)
+
+                                        else
+                                            []
+
+                                    Nothing ->
+                                        []
+
+                            else
+                                []
+                    in
+                    integrationUuidWarning ++ variablesWarning
 
                 Question.MultiChoiceQuestion _ data ->
                     if List.isEmpty data.choiceUuids then
@@ -1175,57 +1204,162 @@ computeTagWarnings appState tag =
         []
 
 
-computeIntegrationWarnings : AppState -> Integration -> List EditorBranchWarning
-computeIntegrationWarnings appState integration =
+computeIntegrationWarnings : AppState -> List String -> Integration -> List EditorBranchWarning
+computeIntegrationWarnings appState secrets integration =
     let
         createError message =
             [ { editorUuid = Integration.getUuid integration
               , message = message
               }
             ]
+    in
+    case integration of
+        Integration.ApiIntegration data ->
+            let
+                nameWarning =
+                    if String.isEmpty (Integration.getName integration) then
+                        createError (gettext "Empty name for integration" appState.locale)
 
-        idWarning =
-            if String.isEmpty (Integration.getId integration) then
-                createError (gettext "Empty ID for integration" appState.locale)
+                    else
+                        []
 
-            else
-                []
+                variablesWarning =
+                    if List.any String.isEmpty data.variables then
+                        createError (gettext "Empty variable name for integration" appState.locale)
 
-        typeWarnings =
-            case integration of
-                Integration.ApiIntegration _ data ->
-                    let
-                        urlError =
-                            if String.isEmpty data.requestUrl then
-                                createError (gettext "Empty request URL for integration" appState.locale)
+                    else
+                        []
 
-                            else
-                                []
+                urlWarning =
+                    if String.isEmpty data.requestUrl then
+                        createError (gettext "Empty request URL for integration" appState.locale)
 
-                        requestMethod =
-                            if String.isEmpty data.requestMethod then
-                                createError (gettext "Empty request HTTP method for integration" appState.locale)
+                    else
+                        let
+                            result =
+                                JinjaUtils.parseJinja data.requestUrl
 
-                            else
-                                []
+                            unknownVariables =
+                                ApiIntegrationData.getUnknownVariables result secrets data
 
-                        responseItemTemplate =
-                            if String.isEmpty data.responseItemTemplate then
-                                createError (gettext "Empty response item template for integration" appState.locale)
+                            missingQWarning =
+                                if not (List.member "q" result.properties) then
+                                    createError (gettext "Missing {{ q }} in request URL for integration" appState.locale)
 
-                            else
-                                []
-                    in
-                    urlError ++ requestMethod ++ responseItemTemplate
+                                else
+                                    []
 
-                Integration.WidgetIntegration _ data ->
+                            unknownPropertyWarning =
+                                if not (List.isEmpty unknownVariables.properties) then
+                                    createError (String.format (gettext "Unknown Jinja property in request URL for integration: %s" appState.locale) [ String.join ", " unknownVariables.properties ])
+
+                                else
+                                    []
+
+                            unknownVariableWarning =
+                                if not (List.isEmpty unknownVariables.variables) then
+                                    createError (String.format (gettext "Unknown variable in request URL for integration: %s" appState.locale) [ String.join ", " unknownVariables.variables ])
+
+                                else
+                                    []
+
+                            unknownSecretWarning =
+                                if not (List.isEmpty unknownVariables.secrets) then
+                                    createError (String.format (gettext "Unknown secret in request URL for integration: %s" appState.locale) [ String.join ", " unknownVariables.secrets ])
+
+                                else
+                                    []
+                        in
+                        missingQWarning ++ unknownPropertyWarning ++ unknownVariableWarning ++ unknownSecretWarning
+
+                ( testDataLoaded, testDataWarning ) =
+                    case data.testResponse of
+                        Nothing ->
+                            ( False, createError (gettext "No test data loaded for integration" appState.locale) )
+
+                        Just testData ->
+                            case testData.response of
+                                TypeHintTestResponse.SuccessTypeHintResponse response ->
+                                    let
+                                        responseListFieldWarning =
+                                            case data.responseListField of
+                                                Just responseListField ->
+                                                    case TypeHintTestResponse.checkListField responseListField response of
+                                                        TypeHintTestResponse.CheckListFieldResultNotFound ->
+                                                            createError (gettext "Response list field not found in test data for integration" appState.locale)
+
+                                                        TypeHintTestResponse.CheckListFieldResultNoList ->
+                                                            createError (gettext "Response list field is not a list in test data for integration" appState.locale)
+
+                                                        TypeHintTestResponse.CheckListFieldResultOk ->
+                                                            []
+
+                                                Nothing ->
+                                                    []
+                                    in
+                                    ( True, responseListFieldWarning )
+
+                                _ ->
+                                    ( False, createError (gettext "No test data success response for integration" appState.locale) )
+
+                itemTemplateWarning =
+                    if testDataLoaded && String.isEmpty data.responseItemTemplate then
+                        createError (gettext "Empty response item template for integration" appState.locale)
+
+                    else
+                        []
+            in
+            nameWarning ++ variablesWarning ++ urlWarning ++ testDataWarning ++ itemTemplateWarning
+
+        Integration.ApiLegacyIntegration _ data ->
+            let
+                idWarning =
+                    if String.isEmpty (Integration.getId integration) then
+                        createError (gettext "Empty ID for integration" appState.locale)
+
+                    else
+                        []
+
+                urlError =
+                    if String.isEmpty data.requestUrl then
+                        createError (gettext "Empty request URL for integration" appState.locale)
+
+                    else
+                        []
+
+                requestMethod =
+                    if String.isEmpty data.requestMethod then
+                        createError (gettext "Empty request HTTP method for integration" appState.locale)
+
+                    else
+                        []
+
+                responseItemTemplate =
+                    if String.isEmpty data.responseItemTemplate then
+                        createError (gettext "Empty response item template for integration" appState.locale)
+
+                    else
+                        []
+            in
+            idWarning ++ urlError ++ requestMethod ++ responseItemTemplate
+
+        Integration.WidgetIntegration _ data ->
+            let
+                idWarning =
+                    if String.isEmpty (Integration.getId integration) then
+                        createError (gettext "Empty ID for integration" appState.locale)
+
+                    else
+                        []
+
+                widgetUrlWarning =
                     if String.isEmpty data.widgetUrl then
                         createError (gettext "Empty widget URL for integration" appState.locale)
 
                     else
                         []
-    in
-    idWarning ++ typeWarnings
+            in
+            idWarning ++ widgetUrlWarning
 
 
 computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorBranchWarning

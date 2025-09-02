@@ -82,11 +82,19 @@ viewNavigation appState model questionnaire importResult =
                 , errorsLink
                 ]
 
-        changesCount =
-            List.length importResult.questionnaireEvents
-
         changesLink =
-            a [ onClick (ChangeSidePanel ChangesSidePanel), class "ms-3" ]
+            let
+                changesElement =
+                    if List.isEmpty importResult.errors then
+                        span [ class "ms-3" ]
+
+                    else
+                        a [ onClick (ChangeSidePanel ChangesSidePanel), class "ms-3" ]
+
+                changesCount =
+                    List.length importResult.questionnaireEvents
+            in
+            changesElement
                 (String.formatHtml
                     (ngettext ( "%s questionnaire change will be imported", "%s questionnaire changes will be imported" ) changesCount appState.locale)
                     [ strong []
@@ -162,7 +170,9 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
             , revertQuestionnaireMsg = Nothing
             , isKmEditor = False
             }
-            { events = [] }
+            { events = []
+            , branchUuid = Nothing
+            }
             questionnaireModel
         ]
 
@@ -274,13 +284,14 @@ viewReply appState questionnaire question data =
                 IntegrationReplyType.PlainType reply ->
                     eventView [ ( fa "far fa-edit", text reply ) ]
 
-                IntegrationReplyType.IntegrationType _ reply ->
+                IntegrationReplyType.IntegrationType reply _ ->
+                    eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
+
+                IntegrationReplyType.IntegrationLegacyType _ reply ->
                     eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
 
         ReplyValue.ItemSelectReply _ ->
-            -- TODO
             eventView [ ( fa "fas fa-plus", text (gettext "Added item" appState.locale) ) ]
 
         ReplyValue.FileReply _ ->
-            -- TODO
             eventView [ ( fa "fas fa-plus", text (gettext "Added file" appState.locale) ) ]

@@ -108,6 +108,12 @@ menuItems appState =
               , isActive = Routes.isKmEditorIndex
               , isVisible = always True
               }
+            , { title = gettext "Secrets" appState.locale
+              , id = "knowledge-model-secrets"
+              , route = Routes.knowledgeModelSecrets
+              , isActive = Routes.isKnowledgeModelSecrets
+              , isVisible = Feature.knowledgeModelSecrets
+              }
             ]
         }
     , MenuGroup

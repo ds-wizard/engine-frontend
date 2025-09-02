@@ -1,4 +1,4 @@
-module String.Extra exposing (fromMaybe, toMaybe, withDefault)
+module String.Extra exposing (fromBool, fromMaybe, stripQuotes, toMaybe, withDefault)
 
 
 toMaybe : String -> Maybe String
@@ -22,3 +22,28 @@ withDefault default string =
 
     else
         string
+
+
+fromBool : Bool -> String
+fromBool bool =
+    if bool then
+        "true"
+
+    else
+        "false"
+
+
+stripQuotes : String -> String
+stripQuotes str =
+    str
+        |> String.trim
+        |> (\s ->
+                if String.startsWith "\"" s && String.endsWith "\"" s then
+                    String.dropRight 1 (String.dropLeft 1 s)
+
+                else if String.startsWith "'" s && String.endsWith "'" s then
+                    String.dropRight 1 (String.dropLeft 1 s)
+
+                else
+                    s
+           )

@@ -19,7 +19,7 @@ type alias DocumentTemplateDetail =
     , version : Version
     , description : String
     , organization : OrganizationInfo
-    , metamodelVersion : Int
+    , metamodelVersion : Version
     , readme : String
     , versions : List Version
     , license : String
@@ -36,7 +36,7 @@ decoder =
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
         |> D.required "organization" OrganizationInfo.decoder
-        |> D.required "metamodelVersion" D.int
+        |> D.required "metamodelVersion" Version.decoder
         |> D.required "readme" D.string
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "license" D.string

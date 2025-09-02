@@ -138,7 +138,9 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                         (wrapMsg << QuestionnaireMsg)
                         (Just Wizard.Msgs.SetFullscreen)
                         appState
-                        { events = [] }
+                        { events = []
+                        , branchUuid = Nothing
+                        }
                         questionnaireModel
 
                 ( newSeed2, saveCmd ) =

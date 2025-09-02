@@ -1,7 +1,7 @@
 module Wizard.Tenants.Detail.View exposing (view)
 
 import Form
-import Html exposing (Html, a, div, h3, span, text)
+import Html exposing (Html, a, br, div, h3, span, strong, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
@@ -148,7 +148,7 @@ sidePanelAdmins tenantDetail =
     let
         users =
             tenantDetail.users
-                |> List.filter .active
+                --|> List.filter .active
                 |> List.sortWith User.compare
                 |> List.map viewUser
     in
@@ -157,8 +157,19 @@ sidePanelAdmins tenantDetail =
 
 viewUser : User -> Html msg
 viewUser user =
-    DetailPage.sidePanelItemWithIcon (User.fullName user)
-        (a [ href ("mailto:" ++ user.email) ] [ text user.email ])
+    DetailPage.sidePanelHtmlItemWithIcon
+        [ strong []
+            [ text (User.fullName user)
+            , Html.viewIf (not user.active) <| Badge.danger [ class "ms-1" ] [ text "inactive" ]
+            ]
+        , br [] []
+        , a
+            [ href ("mailto:" ++ user.email)
+            , class "d-block"
+            ]
+            [ text user.email
+            ]
+        ]
         (UserIcon.viewUser user)
 
 

@@ -15,8 +15,6 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     , getItemTemplateQuestionUuids
     , getListQuestionUuid
     , getMaxSize
-    , getPropValue
-    , getProps
     , getReferenceUuids
     , getRequiredPhaseUuid
     , getTagUuids
@@ -26,6 +24,8 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     , getUuid
     , getValidations
     , getValueType
+    , getVariables
+    , getVariablesValue
     , isDesirable
     , isList
     , isMultiChoice
@@ -402,21 +402,21 @@ getFileTypes question =
             Nothing
 
 
-getProps : Question -> Maybe (Dict String String)
-getProps question =
+getVariables : Question -> Maybe (Dict String String)
+getVariables question =
     case question of
         IntegrationQuestion _ data ->
-            Just data.props
+            Just data.variables
 
         _ ->
             Nothing
 
 
-getPropValue : String -> Question -> Maybe String
-getPropValue prop question =
+getVariablesValue : String -> Question -> Maybe String
+getVariablesValue variable question =
     case question of
         IntegrationQuestion _ data ->
-            Dict.get prop data.props
+            Dict.get variable data.variables
 
         _ ->
             Nothing

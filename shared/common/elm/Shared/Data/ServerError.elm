@@ -184,6 +184,9 @@ messageToReadable appState message =
         -- Wizard
         "error.database.entity_not_found" ->
             case List.head message.params of
+                Just "action_key" ->
+                    Just <| gettext "Activation link is no longer valid." appState.locale
+
                 Just "branch" ->
                     Just <| gettext "Knowledge model editor not found." appState.locale
 
@@ -256,7 +259,7 @@ messageToReadable appState message =
         "error.validation.openid_profile_info_absence" ->
             Just <| gettext "Profile Information from OpenID service is missing." appState.locale
 
-        "error.validation.tml_deletation" ->
+        "error.validation.tml_deletion" ->
             Just <| gettext "Document template cannot be deleted because it is used in some projects or documents." appState.locale
 
         "error.validation.tml_unsupported_metamodel_version" ->

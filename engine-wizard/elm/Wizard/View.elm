@@ -14,6 +14,7 @@ import Wizard.DocumentTemplateEditors.View
 import Wizard.DocumentTemplates.View
 import Wizard.Documents.View
 import Wizard.KMEditor.View
+import Wizard.KnowledgeModelSecrets.View
 import Wizard.KnowledgeModels.View
 import Wizard.Locales.View
 import Wizard.Models exposing (Model)
@@ -86,6 +87,12 @@ view model =
                     |> Wizard.KnowledgeModels.View.view route model.appState
                     |> Html.map KnowledgeModelsMsg
                     |> Layout.mixedApp model
+
+            Routes.KnowledgeModelSecretsRoute ->
+                model.kmSecretsModel
+                    |> Wizard.KnowledgeModelSecrets.View.view model.appState
+                    |> Html.map KnowledgeModelSecretsMsg
+                    |> Layout.app model
 
             Routes.LocalesRoute route ->
                 model.localeModel

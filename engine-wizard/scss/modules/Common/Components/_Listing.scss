@@ -169,7 +169,7 @@
         }
 
         .title {
-            a {
+            a:not(.badge) {
                 color: $body-color !important;
             }
         }

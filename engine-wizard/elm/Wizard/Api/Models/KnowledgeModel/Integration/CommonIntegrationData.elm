@@ -9,7 +9,7 @@ type alias CommonIntegrationData =
     { uuid : String
     , id : String
     , name : String
-    , props : List String
+    , variables : List String
     , logo : Maybe String
     , itemUrl : Maybe String
     , annotations : List Annotation
@@ -22,7 +22,7 @@ decoder =
         |> D.required "uuid" D.string
         |> D.required "id" D.string
         |> D.required "name" D.string
-        |> D.required "props" (D.list D.string)
+        |> D.required "variables" (D.list D.string)
         |> D.required "logo" (D.maybe D.string)
         |> D.required "itemUrl" (D.maybe D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
