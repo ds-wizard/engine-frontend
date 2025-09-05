@@ -1,4 +1,11 @@
-module UserAgent exposing (Browser, browserToString, getBrowser, getOS, isMobile, osToString)
+module UserAgent exposing
+    ( Browser
+    , browserToString
+    , getBrowser
+    , getOS
+    , isMobile
+    , osToString
+    )
 
 import Regex exposing (Regex)
 

@@ -1,4 +1,12 @@
-module Tuple.Extra exposing (prepend, sum)
+module Tuple.Extra exposing
+    ( T4(..)
+    , prepend
+    , sum
+    )
+
+
+type T4 a b c d
+    = T4 a b c d
 
 
 prepend : a -> ( b, c ) -> ( a, b, c )

@@ -3,8 +3,8 @@ module Html.Events.Extensions exposing
     , alwaysPreventDefaultOnWithDecoder
     )
 
-import Html exposing (Attribute)
-import Html.Events exposing (preventDefaultOn)
+import Html
+import Html.Events exposing (preventDefaultOn, stopPropagationOn)
 import Json.Decode as D
 
 

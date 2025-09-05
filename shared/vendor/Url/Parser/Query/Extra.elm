@@ -1,6 +1,8 @@
-module Url.Parser.Query.Extra exposing (bool, uuid)
+module Url.Parser.Query.Extra exposing (bool, datetime, uuid)
 
 import Dict
+import Iso8601
+import Time
 import Url.Parser.Query exposing (Parser, custom, enum)
 import Uuid exposing (Uuid)
 
@@ -20,3 +22,15 @@ uuid key =
 bool : String -> Parser (Maybe Bool)
 bool key =
     enum key (Dict.fromList [ ( "true", True ), ( "false", False ) ])
+
+
+datetime : String -> Parser (Maybe Time.Posix)
+datetime key =
+    custom key <|
+        \stringList ->
+            case stringList of
+                [ str ] ->
+                    Result.toMaybe (Iso8601.toTime str)
+
+                _ ->
+                    Nothing
