@@ -37,7 +37,7 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , warningsLength
     )
 
-import Bool.Extra as Bool
+import Common.Utils.Bool as Bool
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RegexPatterns as RegexPatterns
 import Dict exposing (Dict)

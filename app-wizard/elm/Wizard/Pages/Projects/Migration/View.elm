@@ -1,9 +1,9 @@
 module Wizard.Pages.Projects.Migration.View exposing (view)
 
-import Bool.Extra as Bool
 import Common.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, faQuestionnaireMigrationResolveAll, faQuestionnaireMigrationUndo)
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
+import Common.Utils.Bool as Bool
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)

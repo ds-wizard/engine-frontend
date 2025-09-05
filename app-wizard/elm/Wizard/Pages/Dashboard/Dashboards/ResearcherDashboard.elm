@@ -8,11 +8,11 @@ module Wizard.Pages.Dashboard.Dashboards.ResearcherDashboard exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Bool.Extra as Bool
 import Common.Data.ApiError exposing (ApiError)
 import Common.Data.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.Bool as Bool
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setCommentThreads, setQuestionnaires)
 import Gettext exposing (gettext)

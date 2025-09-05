@@ -1,4 +1,4 @@
-module Bool.Extra exposing
+module Common.Utils.Bool exposing
     ( toInt
     , toString
     )

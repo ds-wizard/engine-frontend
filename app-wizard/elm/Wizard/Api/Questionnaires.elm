@@ -35,7 +35,6 @@ module Wizard.Api.Questionnaires exposing
     , websocket
     )
 
-import Bool.Extra as Bool
 import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Api.WebSocket as WebSocket
@@ -43,6 +42,7 @@ import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.Bool as Bool
 import Dict exposing (Dict)
 import Http
 import Json.Decode as D

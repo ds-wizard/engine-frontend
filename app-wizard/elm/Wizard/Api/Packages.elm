@@ -16,11 +16,11 @@ module Wizard.Api.Packages exposing
     , putPackage
     )
 
-import Bool.Extra as Bool
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.Bool as Bool
 import File exposing (File)
 import Http
 import Json.Encode as E

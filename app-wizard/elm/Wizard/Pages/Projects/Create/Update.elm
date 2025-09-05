@@ -1,13 +1,13 @@
 module Wizard.Pages.Projects.Create.Update exposing (fetchData, update)
 
 import ActionResult
-import Bool.Extra as Bool
 import Cmd.Extra exposing (withNoCmd)
 import Common.Api.Request exposing (ToMsg)
 import Common.Data.ApiError as ApiError
 import Common.Data.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.Bool as Bool
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form

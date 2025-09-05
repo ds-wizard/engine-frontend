@@ -13,11 +13,11 @@ module Wizard.Api.DocumentTemplates exposing
     , putTemplate
     )
 
-import Bool.Extra as Bool
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.Bool as Bool
 import File exposing (File)
 import Json.Decode as D
 import Maybe.Extra as Maybe
