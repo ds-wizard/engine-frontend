@@ -8,20 +8,20 @@ module Wizard.Pages.Users.Edit.Components.Password exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Ports.Dom as Dom
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Common.UserPasswordForm as UserPasswordForm exposing (UserPasswordForm)

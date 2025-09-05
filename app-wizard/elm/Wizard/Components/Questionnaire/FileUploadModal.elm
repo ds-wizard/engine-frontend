@@ -10,6 +10,16 @@ module Wizard.Components.Questionnaire.FileUploadModal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (fa, faCancel)
+import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.FileIcon as FileIcon
+import Common.Utils.FileUtils as FileUtils
+import Common.Utils.Markdown as Markdown
 import File exposing (File)
 import File.Select as Select
 import Gettext exposing (gettext)
@@ -22,16 +32,6 @@ import Html.Extra as Html
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (fa, faCancel)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Modal as Modal
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.ByteUnits as ByteUnits
-import Shared.Utils.FileIcon as FileIcon
-import Shared.Utils.FileUtils as FileUtils
-import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Task.Extra as Task
 import Uuid exposing (Uuid)

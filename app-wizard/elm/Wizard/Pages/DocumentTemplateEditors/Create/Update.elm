@@ -4,14 +4,14 @@ module Wizard.Pages.DocumentTemplateEditors.Create.Update exposing
     )
 
 import ActionResult
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Normalize as Normalize
 import Version exposing (Version)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi

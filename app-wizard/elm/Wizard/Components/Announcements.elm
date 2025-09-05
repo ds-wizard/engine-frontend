@@ -3,11 +3,11 @@ module Wizard.Components.Announcements exposing
     , viewLoginScreen
     )
 
+import Common.Utils.Markdown as Markdown
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Shared.Utils.Markdown as Markdown
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement exposing (Announcement)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 

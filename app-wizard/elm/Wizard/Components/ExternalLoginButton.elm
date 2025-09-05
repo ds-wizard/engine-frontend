@@ -8,6 +8,8 @@ module Wizard.Components.ExternalLoginButton exposing
     , view
     )
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (fa, faLoginExternalService)
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, a, text)
 import Html.Attributes exposing (class, style)
@@ -16,8 +18,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (fa, faLoginExternalService)
 import Uuid
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)

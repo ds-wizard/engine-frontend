@@ -6,8 +6,8 @@ module Wizard.Components.Menu.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Browser.Dom as Dom
+import Common.Data.BuildInfo exposing (BuildInfo)
 import Dict exposing (Dict)
-import Shared.Data.BuildInfo exposing (BuildInfo)
 
 
 type alias Model =

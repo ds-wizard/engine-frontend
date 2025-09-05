@@ -4,9 +4,9 @@ module Wizard.Api.Auth exposing
     , postConsents
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Api.Request as Request exposing (ToMsg)
 import String.Extra as String
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)

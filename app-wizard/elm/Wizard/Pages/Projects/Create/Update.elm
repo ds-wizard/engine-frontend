@@ -3,18 +3,18 @@ module Wizard.Pages.Projects.Create.Update exposing (fetchData, update)
 import ActionResult
 import Bool.Extra as Bool
 import Cmd.Extra exposing (withNoCmd)
+import Common.Api.Request exposing (ToMsg)
+import Common.Data.ApiError as ApiError
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.Driver as Driver exposing (TourConfig)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Html.Attributes.Extensions exposing (selectDataTour)
 import Maybe.Extra as Maybe
-import Shared.Api.Request exposing (ToMsg)
-import Shared.Data.ApiError as ApiError
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils.Driver as Driver exposing (TourConfig)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Extra as String
 import Uuid
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi

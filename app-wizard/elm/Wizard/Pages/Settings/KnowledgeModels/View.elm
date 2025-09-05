@@ -1,5 +1,9 @@
 module Wizard.Pages.Settings.KnowledgeModels.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Utils.Form.FormError exposing (FormError)
 import Compose exposing (compose2)
 import Form exposing (Form)
 import Form.Input as Input
@@ -8,10 +12,6 @@ import Html exposing (Html, a, div, hr, span, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Common.Forms.EditableKnowledgeModelConfigFrom exposing (EditableKnowledgeModelConfigForm)

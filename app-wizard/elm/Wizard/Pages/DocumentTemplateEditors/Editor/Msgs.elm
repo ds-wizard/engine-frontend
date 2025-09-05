@@ -1,7 +1,7 @@
 module Wizard.Pages.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
 
-import Shared.Data.ApiError exposing (ApiError)
-import Shared.Data.Prefab exposing (Prefab)
+import Common.Data.ApiError exposing (ApiError)
+import Common.Data.Prefab exposing (Prefab)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)

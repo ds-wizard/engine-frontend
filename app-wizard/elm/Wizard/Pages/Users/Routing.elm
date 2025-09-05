@@ -4,10 +4,10 @@ module Wizard.Pages.Users.Routing exposing
     , toUrl
     )
 
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Flip exposing (flip)
 import List.Utils as List
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.UuidOrCurrent as UuidOrCurrent
 import Url.Parser exposing ((</>), Parser, map, s)
 import Url.Parser.Query as Query
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin

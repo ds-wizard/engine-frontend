@@ -16,15 +16,15 @@ module Wizard.Data.AppState exposing
     )
 
 import Browser.Navigation as Navigation exposing (Key)
+import Common.Api.Request exposing (ServerInfo)
+import Common.Components.GuideLink as GuideLink
+import Common.Data.Navigator exposing (Navigator)
+import Common.Data.Role exposing (Role)
+import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
+import Common.Utils.Theme exposing (Theme)
 import Gettext
 import Json.Decode as D exposing (Error(..))
 import Random exposing (Seed)
-import Shared.Api.Request exposing (ServerInfo)
-import Shared.Components.GuideLink as GuideLink
-import Shared.Data.Navigator exposing (Navigator)
-import Shared.Data.Role exposing (Role)
-import Shared.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
-import Shared.Utils.Theme exposing (Theme)
 import String.Extra as String
 import Time
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)

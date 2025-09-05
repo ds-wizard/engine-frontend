@@ -1,10 +1,10 @@
 module Wizard.Pages.Tenants.Common.TenantEditForm exposing (TenantEditForm, encode, init, validation)
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 

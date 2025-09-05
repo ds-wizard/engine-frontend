@@ -5,8 +5,8 @@ module Wizard.Pages.Projects.DocumentDownload.Update exposing
 
 import ActionResult
 import Browser.Navigation as Navigation
+import Common.Data.ApiError as ApiError
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError
 import Uuid exposing (Uuid)
 import Wizard.Api.Documents as DocumentsApi
 import Wizard.Data.AppState exposing (AppState)

@@ -4,10 +4,10 @@ module Wizard.Api.Models.DocumentTemplateSuggestion exposing
     , decoder
     )
 
+import Common.Utils.IdentifierUtils as IdentifierUtils
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import List.Extra as List
-import Shared.Utils.IdentifierUtils as IdentifierUtils
 import Version exposing (Version)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatSimple as DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 

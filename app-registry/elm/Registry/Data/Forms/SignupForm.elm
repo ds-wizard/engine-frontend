@@ -1,13 +1,13 @@
 module Registry.Data.Forms.SignupForm exposing (SignupForm, encode, init, validation)
 
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
 import Form exposing (Form)
 import Form.Error as Error exposing (Error, ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Registry.Data.AppState exposing (AppState)
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Form.Validate as V
 
 
 type alias SignupForm =

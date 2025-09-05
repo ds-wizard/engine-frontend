@@ -7,12 +7,12 @@ module Registry.Components.ItemIdBox exposing
     , view
     )
 
+import Common.Ports.Copy as Copy
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, i, text)
 import Html.Attributes exposing (attribute, class)
 import Html.Events exposing (onClick, onMouseOut)
 import Registry.Data.AppState exposing (AppState)
-import Shared.Ports.Copy as Copy
 
 
 type State

@@ -1,15 +1,15 @@
 module Wizard.Pages.Locales.Import.RegistryImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (faSuccess)
+import Common.Components.FormResult as FormResult
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h1, hr, input, p, text)
 import Html.Attributes exposing (class, href, placeholder, target, type_, value)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onInput, onSubmit)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (faSuccess)
-import Shared.Components.FormResult as FormResult
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))

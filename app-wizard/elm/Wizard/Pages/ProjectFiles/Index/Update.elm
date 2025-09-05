@@ -4,10 +4,10 @@ module Wizard.Pages.ProjectFiles.Index.Update exposing
     )
 
 import ActionResult
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi

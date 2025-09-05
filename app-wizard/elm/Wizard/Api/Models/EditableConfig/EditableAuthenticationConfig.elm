@@ -6,10 +6,10 @@ module Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig exposing
     , encode
     )
 
+import Common.Data.Role as Role exposing (Role)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Data.Role as Role exposing (Role)
 import Wizard.Api.Models.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Api.Models.EditableConfig.EditableTwoFactorAuthConfig as EditableTwoFactorAuthConfig exposing (EditableTwoFactorAuthConfig)

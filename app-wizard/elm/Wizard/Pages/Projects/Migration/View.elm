@@ -1,6 +1,9 @@
 module Wizard.Pages.Projects.Migration.View exposing (view)
 
 import Bool.Extra as Bool
+import Common.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, faQuestionnaireMigrationResolveAll, faQuestionnaireMigrationUndo)
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
@@ -8,9 +11,6 @@ import Html.Attributes exposing (class, classList, style, target)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, faQuestionnaireMigrationResolveAll, faQuestionnaireMigrationUndo)
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Question as Question
 import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)

@@ -1,17 +1,17 @@
 module Wizard.Pages.KMEditor.Index.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faCancel, faDelete, faKmEditorListContinueMigration, faKmEditorListEdit, faKmEditorListEdited, faKmEditorListUpdate, faKmFork)
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.IdentifierUtils as IdentifierUtils
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faCancel, faDelete, faKmEditorListContinueMigration, faKmEditorListEdit, faKmEditorListEdited, faKmEditorListUpdate, faKmFork)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Utils.IdentifierUtils as IdentifierUtils
 import Version
 import Wizard.Api.Models.Branch exposing (Branch)
 import Wizard.Api.Models.Branch.BranchState as BranchState

@@ -4,7 +4,7 @@ module Wizard.Pages.DocumentTemplateEditors.Models exposing
     , initialModel
     )
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Create.Models
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute

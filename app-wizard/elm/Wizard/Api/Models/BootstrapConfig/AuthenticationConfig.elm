@@ -6,9 +6,9 @@ module Wizard.Api.Models.BootstrapConfig.AuthenticationConfig exposing
     , default
     )
 
+import Common.Data.Role as Role exposing (Role)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.Role as Role exposing (Role)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.TwoFactorAuthConfig as TwoFactorAuthConfig exposing (TwoFactorAuthConfig)
 import Wizard.Api.Models.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)

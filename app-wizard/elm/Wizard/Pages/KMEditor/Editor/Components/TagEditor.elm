@@ -7,15 +7,15 @@ module Wizard.Pages.KMEditor.Editor.Components.TagEditor exposing
     , view
     )
 
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmItemTemplate, faKmQuestion)
+import Common.Utils.ColorUtils as ColorUtils
 import Dict
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, div, input, label, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (checked, class, classList, style, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmItemTemplate, faKmQuestion)
-import Shared.Utils.ColorUtils as ColorUtils
 import String.Extra as String
 import Wizard.Api.Models.Event exposing (Event(..))
 import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)

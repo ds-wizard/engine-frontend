@@ -12,11 +12,11 @@ port module Wizard.Data.Integrations exposing
     , openIntegrationWidget
     )
 
+import Common.Utils.Theme as Theme exposing (Theme)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Utils.Theme as Theme exposing (Theme)
 import Uuid exposing (Uuid)
 import Wizard.Components.Questionnaire.Importer.ImporterEvent as ImporterEvent exposing (ImporterEvent)
 import Wizard.Data.IntegrationWidgetValue as IntegrationWidgetValue exposing (IntegrationWidgetValue)

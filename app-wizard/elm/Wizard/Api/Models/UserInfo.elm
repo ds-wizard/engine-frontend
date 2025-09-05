@@ -6,11 +6,11 @@ module Wizard.Api.Models.UserInfo exposing
     , toUserSuggestion
     )
 
+import Common.Data.Role as Role exposing (Role)
 import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
-import Shared.Data.Role as Role exposing (Role)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 

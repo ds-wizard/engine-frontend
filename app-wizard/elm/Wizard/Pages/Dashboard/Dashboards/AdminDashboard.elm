@@ -8,18 +8,18 @@ module Wizard.Pages.Dashboard.Dashboards.AdminDashboard exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiErrorOld exposing (ApiError)
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.UuidOrCurrent as UuidOrCurrent
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import List.Utils as List
 import Maybe.Extra as Maybe
-import Shared.Data.ApiError as ApiErrorOld exposing (ApiError)
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.UuidOrCurrent as UuidOrCurrent
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin

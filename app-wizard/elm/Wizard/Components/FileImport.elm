@@ -9,6 +9,12 @@ module Wizard.Components.FileImport exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.Request exposing (ToMsg)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faError, faImportFile, faSpinner, faSuccess, faWarning)
+import Common.Components.Tooltip exposing (tooltipLeft)
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Dict exposing (Dict)
 import File exposing (File)
 import File.Select as Select
@@ -20,12 +26,6 @@ import Html.Events exposing (onClick)
 import Html.Events.Extensions exposing (alwaysPreventDefaultOn, alwaysPreventDefaultOnWithDecoder)
 import Html.Extra as Html
 import Json.Decode as D
-import Shared.Api.Request exposing (ToMsg)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faError, faImportFile, faSpinner, faSuccess, faWarning)
-import Shared.Components.Tooltip exposing (tooltipLeft)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes exposing (Route)

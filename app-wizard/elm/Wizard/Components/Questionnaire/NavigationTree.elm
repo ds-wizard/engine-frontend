@@ -8,6 +8,8 @@ module Wizard.Components.Questionnaire.NavigationTree exposing
     , view
     )
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faKmEditorTreeClosed, faKmEditorTreeOpened, faKmItemTemplate, faKmQuestion, faQuestionnaireAnsweredIndication)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, strong, text, ul)
@@ -17,8 +19,6 @@ import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Roman
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faKmEditorTreeClosed, faKmEditorTreeOpened, faKmItemTemplate, faKmQuestion, faQuestionnaireAnsweredIndication)
 import String.Format as String
 import Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel

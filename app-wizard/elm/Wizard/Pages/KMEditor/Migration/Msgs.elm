@@ -1,6 +1,6 @@
 module Wizard.Pages.KMEditor.Migration.Msgs exposing (Msg(..))
 
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.Migration exposing (Migration)
 
 

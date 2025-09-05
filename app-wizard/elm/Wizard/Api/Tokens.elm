@@ -6,9 +6,9 @@ module Wizard.Api.Tokens exposing
     , getTokens
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
 import Json.Encode as E
-import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)

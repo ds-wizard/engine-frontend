@@ -1,11 +1,11 @@
 module Wizard.Pages.Comments.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
-import Shared.Components.Page as Page
 import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)

@@ -1,7 +1,7 @@
 module Wizard.Pages.Documents.Index.Msgs exposing (Msg(..))
 
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Wizard.Api.Models.Submission exposing (Submission)

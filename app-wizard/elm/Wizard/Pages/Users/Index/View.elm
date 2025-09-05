@@ -1,16 +1,16 @@
 module Wizard.Pages.Users.Index.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faDelete, faEdit)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Data.Role as Role
+import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faDelete, faEdit)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Data.Role as Role
-import Shared.Data.UuidOrCurrent as UuidOrCurrent
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton
 import Wizard.Components.Html exposing (linkTo)

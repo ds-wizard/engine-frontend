@@ -1,7 +1,7 @@
 module Wizard.Api.KnowledgeModelSecrets exposing (deleteKnowledgeModelSecret, getKnowledgeModelSecrets, postKnowledgeModelSecret, putKnowledgeModelSecret)
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
-import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelSecret as KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Data.AppState as AppState exposing (AppState)

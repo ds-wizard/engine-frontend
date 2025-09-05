@@ -9,6 +9,20 @@ module Wizard.Pages.Users.Edit.Components.Profile exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (fa, faInfo)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.Role as Role
+import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Ports.Dom as Dom
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Markdown as Markdown
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, strong, text)
@@ -16,20 +30,6 @@ import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (fa, faInfo)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.Role as Role
-import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Users as UsersApi

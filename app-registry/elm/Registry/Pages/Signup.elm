@@ -7,6 +7,10 @@ module Registry.Pages.Signup exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Undraw as Undraw
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -21,10 +25,6 @@ import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.SignupForm as SignupForm exposing (SignupForm)
 import Registry.Routes as Routes
-import Shared.Components.Undraw as Undraw
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 
 

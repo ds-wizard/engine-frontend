@@ -4,8 +4,8 @@ module Wizard.Pages.DocumentTemplateEditors.Create.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Components.TypeHintInput as TypeHintInput

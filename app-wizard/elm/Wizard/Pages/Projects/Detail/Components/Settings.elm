@@ -9,6 +9,18 @@ module Wizard.Pages.Projects.Detail.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuestions, faQuestionnaireSettingsKmFiltered, faRemove)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Setters exposing (setSelected)
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Form exposing (Form)
 import Form.Field as Field
@@ -22,18 +34,6 @@ import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuestions, faQuestionnaireSettingsKmFiltered, faRemove)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Setters exposing (setSelected)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi

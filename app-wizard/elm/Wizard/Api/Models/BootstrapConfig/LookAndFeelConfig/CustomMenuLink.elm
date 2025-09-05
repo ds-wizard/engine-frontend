@@ -5,11 +5,11 @@ module Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposi
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form.Validate as V exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias CustomMenuLink =

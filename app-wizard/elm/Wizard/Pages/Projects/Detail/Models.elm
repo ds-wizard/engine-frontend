@@ -9,10 +9,10 @@ module Wizard.Pages.Projects.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.WebSocket as WebSocket exposing (WebSocket)
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
-import Shared.Api.WebSocket as WebSocket exposing (WebSocket)
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
 import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)

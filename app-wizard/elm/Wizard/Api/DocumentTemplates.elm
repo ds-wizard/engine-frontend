@@ -14,13 +14,13 @@ module Wizard.Api.DocumentTemplates exposing
     )
 
 import Bool.Extra as Bool
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import File exposing (File)
 import Json.Decode as D
 import Maybe.Extra as Maybe
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)

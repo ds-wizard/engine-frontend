@@ -1,6 +1,6 @@
 module Wizard.Pages.Projects.Detail.ProjectDetailRoute exposing (ProjectDetailRoute(..))
 
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 
 

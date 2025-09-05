@@ -4,11 +4,11 @@ module Wizard.Pages.KMEditor.Publish.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Branches as BranchesApi

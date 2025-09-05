@@ -7,13 +7,13 @@ module Wizard.Components.FormActions exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (faSpinner, faSuccess)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
 import Html.Attributes exposing (class, classList, disabled, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (faSpinner, faSuccess)
 import Wizard.Data.AppState exposing (AppState)
 
 

@@ -4,11 +4,11 @@ module Wizard.Pages.Tenants.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setTenant)
 import Form
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setTenant)
 import Uuid exposing (Uuid)
 import Wizard.Api.Tenants as TenantsApi
 import Wizard.Data.AppState exposing (AppState)

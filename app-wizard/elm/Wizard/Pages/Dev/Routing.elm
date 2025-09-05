@@ -4,7 +4,7 @@ module Wizard.Pages.Dev.Routing exposing
     , toUrl
     )
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Url.Parser exposing ((</>), Parser, map, s)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query

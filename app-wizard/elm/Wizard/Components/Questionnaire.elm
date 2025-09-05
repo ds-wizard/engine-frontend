@@ -36,6 +36,25 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import CharIdentifier
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.Badge as Badge
+import Common.Components.DatePicker as DatePicker
+import Common.Components.FileDownloader as FileDownloader
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess)
+import Common.Components.Modal as Modal
+import Common.Components.Tooltip exposing (tooltip, tooltipLeft, tooltipRight)
+import Common.Components.Undraw as Undraw
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Copy as Copy
+import Common.Ports.Dom as Dom
+import Common.Ports.Dom.ElementScrollTop as ElementScrollTop
+import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.FileIcon as FileIcon
+import Common.Utils.Markdown as Markdown
+import Common.Utils.RegexPatterns as RegexPatterns
+import Common.Utils.TimeDistance as TimeDistance
+import Common.Utils.TimeUtils as TimeUtils
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Flip exposing (flip)
@@ -57,25 +76,6 @@ import Regex
 import Registry.Components.FontAwesome exposing (fas)
 import Roman
 import Set exposing (Set)
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.Badge as Badge
-import Shared.Components.DatePicker as DatePicker
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess)
-import Shared.Components.Modal as Modal
-import Shared.Components.Tooltip exposing (tooltip, tooltipLeft, tooltipRight)
-import Shared.Components.Undraw as Undraw
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Copy as Copy
-import Shared.Ports.Dom as Dom
-import Shared.Ports.Dom.ElementScrollTop as ElementScrollTop
-import Shared.Utils.ByteUnits as ByteUnits
-import Shared.Utils.FileIcon as FileIcon
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.RegexPatterns as RegexPatterns
-import Shared.Utils.TimeDistance as TimeDistance
-import Shared.Utils.TimeUtils as TimeUtils
 import SplitPane
 import String
 import String.Extra as String

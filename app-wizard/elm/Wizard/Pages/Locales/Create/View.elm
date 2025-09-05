@@ -1,5 +1,10 @@
 module Wizard.Pages.Locales.Create.View exposing (view)
 
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Page as Page
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Field exposing (FieldValue(..))
 import Form.Input as Input
@@ -9,11 +14,6 @@ import Html.Attributes exposing (class, id, name)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Page as Page
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Components.Dropzone as Dropzone
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState as AppState exposing (AppState)

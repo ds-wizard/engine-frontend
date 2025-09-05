@@ -1,12 +1,12 @@
 module Wizard.Pages.ProjectActions.Index.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faDisable, faEnable)
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faDisable, faEnable)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
 import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
 import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)

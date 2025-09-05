@@ -8,6 +8,7 @@ module Registry.Pages.SignupConfirmation exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h5, p, strong, text)
 import Html.Attributes exposing (class, href)
@@ -17,7 +18,6 @@ import Registry.Components.FontAwesome exposing (fas)
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 
 

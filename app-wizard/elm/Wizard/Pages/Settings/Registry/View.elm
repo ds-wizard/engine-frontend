@@ -1,22 +1,22 @@
 module Wizard.Pages.Settings.Registry.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionButton
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.Flash as Flash
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, form, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.Flash as Flash
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState as AppState exposing (AppState)

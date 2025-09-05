@@ -6,17 +6,17 @@ module Wizard.Components.Listing.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
+import Common.Api.Request exposing (ToMsg)
+import Common.Data.ApiError as ApiError
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setDropdownState)
 import Debouncer.Extra as Debouncer
 import Dict
 import List.Extra as List
 import Set
-import Shared.Api.Request exposing (ToMsg)
-import Shared.Data.ApiError as ApiError
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setDropdownState)
 import Task.Extra as Task
 import Wizard.Components.Listing.Models exposing (Model, setPagination)
 import Wizard.Components.Listing.Msgs exposing (Msg(..))

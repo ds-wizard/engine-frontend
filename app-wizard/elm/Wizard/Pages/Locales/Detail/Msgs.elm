@@ -1,8 +1,8 @@
 module Wizard.Pages.Locales.Detail.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.LocaleDetail exposing (LocaleDetail)
 
 

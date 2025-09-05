@@ -6,6 +6,8 @@ module Wizard.Components.SummaryReport exposing
     )
 
 import ChartJS
+import Common.Ports.Dom as Dom
+import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h2, h3, h4, hr, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, colspan, id, style)
@@ -13,8 +15,6 @@ import Html.Events exposing (onClick)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Round
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Markdown as Markdown
 import String exposing (fromFloat, fromInt)
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)

@@ -38,6 +38,8 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     )
 
 import Bool.Extra as Bool
+import Common.Utils.Markdown as Markdown
+import Common.Utils.RegexPatterns as RegexPatterns
 import Dict exposing (Dict)
 import Dict.Extra as Dict
 import Flip exposing (flip)
@@ -49,8 +51,6 @@ import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
 import Result.Extra as Result
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Extra as String
 import String.Format as String
 import Time

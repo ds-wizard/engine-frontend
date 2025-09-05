@@ -2,11 +2,11 @@ module Wizard.Components.Menu.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
+import Common.Data.ApiError as ApiError
+import Common.Data.BuildInfo as BuildInfo
+import Common.Ports.Copy as Copy
 import Dict
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError
-import Shared.Data.BuildInfo as BuildInfo
-import Shared.Ports.Copy as Copy
 import Task
 import Wizard.Api.BuildInfo as BuildInfoApi
 import Wizard.Components.Menu.Models exposing (Model)

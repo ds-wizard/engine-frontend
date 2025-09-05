@@ -1,12 +1,12 @@
 module Registry.Components.Page exposing (illustratedMessage, view)
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, i, p, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Registry.Data.AppState exposing (AppState)
-import Shared.Components.Undraw as Undraw
 
 
 view : AppState -> (a -> Html msg) -> ActionResult a -> Html msg

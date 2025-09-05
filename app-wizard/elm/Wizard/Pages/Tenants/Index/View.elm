@@ -1,12 +1,12 @@
 module Wizard.Pages.Tenants.Index.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faWarning)
+import Common.Components.Page as Page
+import Common.Utils.Markdown as Markdown
 import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faWarning)
-import Shared.Components.Page as Page
-import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.Tenant exposing (Tenant)

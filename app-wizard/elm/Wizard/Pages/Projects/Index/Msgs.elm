@@ -1,8 +1,8 @@
 module Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
 
+import Common.Data.ApiError exposing (ApiError)
+import Common.Data.Pagination exposing (Pagination)
 import Debouncer.Extra as Debouncer
-import Shared.Data.ApiError exposing (ApiError)
-import Shared.Data.Pagination exposing (Pagination)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)

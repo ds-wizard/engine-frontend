@@ -1,9 +1,9 @@
 module Wizard.Pages.DocumentTemplates.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setPulling)
 import Gettext exposing (gettext)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setPulling)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs

@@ -11,6 +11,12 @@ module Wizard.Components.Questionnaire.UserSuggestionDropdown exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.FontAwesome exposing (faQuestionnaireCommentsAssign)
+import Common.Components.Tooltip exposing (tooltipLeft)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.Pagination exposing (Pagination)
+import Common.Ports.Dom as Dom
+import Common.Utils.Setters exposing (setDebouncer)
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, input, span, text)
@@ -18,12 +24,6 @@ import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onClickStopPropagation)
-import Shared.Components.FontAwesome exposing (faQuestionnaireCommentsAssign)
-import Shared.Components.Tooltip exposing (tooltipLeft)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Setters exposing (setDebouncer)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User

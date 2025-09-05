@@ -1,6 +1,12 @@
 module Wizard.Pages.Projects.Import.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
+import Common.Utils.Markdown as Markdown
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, div, h5, li, span, strong, text, ul)
@@ -9,12 +15,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
-import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)

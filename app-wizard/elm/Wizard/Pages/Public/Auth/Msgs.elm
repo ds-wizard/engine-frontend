@@ -1,7 +1,7 @@
 module Wizard.Pages.Public.Auth.Msgs exposing (Msg(..))
 
+import Common.Data.ApiError exposing (ApiError)
 import Json.Encode as E
-import Shared.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.TokenResponse exposing (TokenResponse)
 
 

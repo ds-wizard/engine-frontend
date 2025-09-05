@@ -4,8 +4,8 @@ module Wizard.Pages.Settings.Generic.Model exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.EditableConfig exposing (EditableConfig)
 
 

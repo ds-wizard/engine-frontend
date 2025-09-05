@@ -4,11 +4,11 @@ module Wizard.Api.TypeHints exposing
     , testTypeHints
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Dict exposing (Dict)
 import Json.Decode as D
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.TypeHint as TypeHint exposing (TypeHint)

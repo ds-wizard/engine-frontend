@@ -5,10 +5,10 @@ module Wizard.Pages.Users.Common.ApiKeyCreateForm exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias ApiKeyCreateForm =

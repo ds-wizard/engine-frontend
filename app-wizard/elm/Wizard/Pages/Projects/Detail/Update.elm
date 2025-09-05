@@ -6,6 +6,12 @@ module Wizard.Pages.Projects.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.WebSocket as WebSocket
+import Common.Data.ApiError as ApiError exposing (ApiError(..))
+import Common.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
+import Common.Ports.Copy as Ports
+import Common.Utils.Driver as Driver exposing (TourConfig)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Debounce
 import Dict
 import Form
@@ -13,12 +19,6 @@ import Gettext exposing (gettext)
 import Html.Attributes.Extensions exposing (selectDataTour)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.WebSocket as WebSocket
-import Shared.Data.ApiError as ApiError exposing (ApiError(..))
-import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
-import Shared.Ports.Copy as Ports
-import Shared.Utils.Driver as Driver exposing (TourConfig)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Triple
 import Uuid exposing (Uuid)

@@ -4,8 +4,8 @@ module Wizard.Pages.Public.ForgottenPassword.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Pages.Public.Common.ForgottenPasswordForm as ForgottenPasswordForm exposing (ForgottenPasswordForm)
 
 

@@ -1,6 +1,6 @@
 module Wizard.Pages.Dev.Routes exposing (Route(..), persistentCommandIndexRouteStateFilterId)
 
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 
 

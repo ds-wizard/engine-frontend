@@ -9,6 +9,15 @@ module Wizard.Pages.Users.Edit.Components.SubmissionSettings exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Flash as Flash
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Dom as Dom
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -16,15 +25,6 @@ import Html exposing (Html, div, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Flash as Flash
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import String.Format as String
 import Wizard.Api.Models.SubmissionProps exposing (SubmissionProps)
 import Wizard.Api.Users as UsersApi

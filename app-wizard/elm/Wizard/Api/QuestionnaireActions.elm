@@ -4,11 +4,11 @@ module Wizard.Api.QuestionnaireActions exposing
     , putQuestionnaireAction
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Json.Decode as D
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireAction as QuestionnaireAction exposing (QuestionnaireAction)
 import Wizard.Data.AppState as AppState exposing (AppState)

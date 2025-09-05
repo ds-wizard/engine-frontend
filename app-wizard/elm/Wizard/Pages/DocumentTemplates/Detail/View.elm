@@ -1,16 +1,16 @@
 module Wizard.Pages.DocumentTemplates.Detail.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Version
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))

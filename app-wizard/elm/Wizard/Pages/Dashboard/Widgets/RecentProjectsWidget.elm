@@ -1,11 +1,11 @@
 module Wizard.Pages.Dashboard.Widgets.RecentProjectsWidget exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FontAwesome exposing (faArrowRight)
+import Common.Utils.TimeDistance exposing (locale)
 import Gettext exposing (gettext)
 import Html exposing (Html, br, div, h2, p, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Components.FontAwesome exposing (faArrowRight)
-import Shared.Utils.TimeDistance exposing (locale)
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)

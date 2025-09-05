@@ -1,6 +1,14 @@
 module Wizard.Pages.Dev.Operations.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Flash as Flash
+import Common.Components.Page as Page
+import Common.Data.DevOperation exposing (DevOperation)
+import Common.Data.DevOperation.DevOperationParameter exposing (AdminOperationParameter)
+import Common.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType
+import Common.Data.DevOperationSection exposing (DevOperationSection)
+import Common.Utils.Markdown as Markdown
 import Dict
 import Html exposing (Html, a, div, h2, h3, input, label, span, strong, text)
 import Html.Attributes exposing (class, classList, placeholder, type_, value)
@@ -8,14 +16,6 @@ import Html.Events exposing (onClick, onInput)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Flash as Flash
-import Shared.Components.Page as Page
-import Shared.Data.DevOperation exposing (DevOperation)
-import Shared.Data.DevOperation.DevOperationParameter exposing (AdminOperationParameter)
-import Shared.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType
-import Shared.Data.DevOperationSection exposing (DevOperationSection)
-import Shared.Utils.Markdown as Markdown
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dev.Operations.Models exposing (Model, fieldPath, operationPath)
 import Wizard.Pages.Dev.Operations.Msgs exposing (Msg(..))

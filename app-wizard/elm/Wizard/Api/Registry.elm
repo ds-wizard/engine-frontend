@@ -3,8 +3,8 @@ module Wizard.Api.Registry exposing
     , postSignup
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Encode as E
-import Shared.Api.Request as Request exposing (ToMsg)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 

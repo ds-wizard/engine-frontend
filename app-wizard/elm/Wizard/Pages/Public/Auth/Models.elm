@@ -4,7 +4,7 @@ module Wizard.Pages.Public.Auth.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Shared.Data.Token exposing (Token)
+import Common.Data.Token exposing (Token)
 
 
 type alias Model =

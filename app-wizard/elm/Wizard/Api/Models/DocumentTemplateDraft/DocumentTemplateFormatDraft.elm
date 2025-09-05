@@ -6,13 +6,13 @@ module Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft expos
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Form.Validate as V
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep as DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 

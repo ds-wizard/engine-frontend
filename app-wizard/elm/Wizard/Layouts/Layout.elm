@@ -6,14 +6,14 @@ module Wizard.Layouts.Layout exposing
     )
 
 import Browser exposing (Document)
+import Common.Components.AIAssistant as AIAssistant
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
 import Html exposing (Html, div, img, li, nav, text, ul)
 import Html.Attributes exposing (class, classList, src)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Shared.Components.AIAssistant as AIAssistant
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Components.CookieConsent as CookieConsent

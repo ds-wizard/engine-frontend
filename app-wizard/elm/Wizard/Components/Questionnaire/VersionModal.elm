@@ -10,14 +10,14 @@ module Wizard.Components.Questionnaire.VersionModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Maybe.Extra as Maybe
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
 import Wizard.Api.Questionnaires as QuestionnairesApi

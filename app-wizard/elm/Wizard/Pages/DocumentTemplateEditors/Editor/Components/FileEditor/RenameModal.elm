@@ -12,15 +12,15 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor.RenameM
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, form, input, p, text)
 import Html.Attributes exposing (class, classList, id, value)
 import Html.Events exposing (onInput, onSubmit)
 import List.Extra as List
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi

@@ -1,6 +1,6 @@
 module Wizard.Pages.ProjectImporters.Index.Msgs exposing (Msg(..))
 
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
 import Wizard.Components.Listing.Msgs as Listing
 

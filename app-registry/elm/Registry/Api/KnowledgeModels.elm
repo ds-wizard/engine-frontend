@@ -1,10 +1,10 @@
 module Registry.Api.KnowledgeModels exposing (getKnowledgeModel, getKnowledgeModels)
 
+import Common.Api.Request as Requests exposing (ToMsg)
 import Json.Decode as D
 import Registry.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Registry.Api.Models.KnowledgeModelDetail as KnowledgeModelDetail exposing (KnowledgeModelDetail)
 import Registry.Data.AppState as AppState exposing (AppState)
-import Shared.Api.Request as Requests exposing (ToMsg)
 
 
 getKnowledgeModels : AppState -> ToMsg (List KnowledgeModel) msg -> Cmd msg

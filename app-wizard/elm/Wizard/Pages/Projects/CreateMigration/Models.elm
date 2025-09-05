@@ -4,8 +4,8 @@ module Wizard.Pages.Projects.CreateMigration.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)

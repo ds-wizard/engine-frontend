@@ -1,14 +1,14 @@
 module Wizard.Pages.Public.ForgottenPassword.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Page as Page
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Page as Page
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Public.Common.ForgottenPasswordForm exposing (ForgottenPasswordForm)
 import Wizard.Pages.Public.Common.View exposing (publicForm)

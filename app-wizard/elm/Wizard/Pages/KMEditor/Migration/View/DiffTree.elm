@@ -1,11 +1,11 @@
 module Wizard.Pages.KMEditor.Migration.View.DiffTree exposing (view)
 
+import Common.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmChoice, faKmExpert, faKmIntegration, faKmKnowledgeModel, faKmMetric, faKmPhase, faKmQuestion, faKmReference, faKmResourceCollection, faKmResourcePage, faKmTag)
 import Html exposing (Html, div, li, span, text, ul)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmChoice, faKmExpert, faKmIntegration, faKmKnowledgeModel, faKmMetric, faKmPhase, faKmQuestion, faKmReference, faKmResourceCollection, faKmResourcePage, faKmTag)
 import Wizard.Api.Models.Event as Event exposing (Event(..))
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration

@@ -4,10 +4,10 @@ module Wizard.Pages.KMEditor.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setMigration)
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setMigration)
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi
 import Wizard.Api.Models.Event as Event

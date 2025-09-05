@@ -6,12 +6,12 @@ module Wizard.Api.PersistentCommands exposing
     , updateState
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Json.Encode as E
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PersistentCommand as PersistentCommand exposing (PersistentCommand)
 import Wizard.Api.Models.PersistentCommandDetail as PersistentCommandDetail exposing (PersistentCommandDetail)

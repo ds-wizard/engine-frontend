@@ -4,11 +4,11 @@ module Wizard.Pages.KnowledgeModels.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setPackage)
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setPackage)
 import Wizard.Api.Models.Package.PackagePhase exposing (PackagePhase)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Data.AppState as AppState exposing (AppState)

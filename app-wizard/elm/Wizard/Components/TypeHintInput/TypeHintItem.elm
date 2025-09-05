@@ -8,12 +8,12 @@ module Wizard.Components.TypeHintInput.TypeHintItem exposing
     , userGroupSuggestion
     )
 
+import Common.Components.Badge as Badge
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
 import Version
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)

@@ -1,6 +1,6 @@
 module Wizard.Pages.Locales.Models exposing (Model, initLocalModel, initialModel)
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Locales.Create.Models
 import Wizard.Pages.Locales.Detail.Models

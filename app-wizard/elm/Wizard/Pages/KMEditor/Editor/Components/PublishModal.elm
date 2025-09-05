@@ -10,15 +10,15 @@ module Wizard.Pages.KMEditor.Editor.Components.PublishModal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.FontAwesome exposing (faSettings)
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Components.FontAwesome exposing (faSettings)
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Uuid exposing (Uuid)
 import Version

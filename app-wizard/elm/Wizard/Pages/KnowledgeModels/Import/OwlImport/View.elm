@@ -1,6 +1,10 @@
 module Wizard.Pages.KnowledgeModels.Import.OwlImport.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (faImportFile, faRemove)
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
 import File
 import Form
 import Gettext exposing (gettext)
@@ -9,10 +13,6 @@ import Html.Attributes exposing (class, disabled, id, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (custom, on, onClick)
 import Json.Decode as Decode
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (faImportFile, faRemove)
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Import.OwlImport.Models exposing (Model, dropzoneId, fileInputId)

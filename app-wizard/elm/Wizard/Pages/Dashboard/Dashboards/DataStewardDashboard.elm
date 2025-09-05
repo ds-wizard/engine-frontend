@@ -8,15 +8,15 @@ module Wizard.Pages.Dashboard.Dashboards.DataStewardDashboard exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError exposing (ApiError)
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Shared.Data.ApiError exposing (ApiError)
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates)
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)

@@ -1,11 +1,11 @@
 module Wizard.Pages.Projects.Import.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
 import Gettext exposing (gettext)
 import Random exposing (Seed)
-import Shared.Data.ApiError as ApiError
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel

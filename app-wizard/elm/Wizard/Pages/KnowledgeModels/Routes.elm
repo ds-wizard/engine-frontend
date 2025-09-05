@@ -1,6 +1,6 @@
 module Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 
 
 type Route

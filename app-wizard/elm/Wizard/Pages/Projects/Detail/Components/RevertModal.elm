@@ -9,13 +9,13 @@ module Wizard.Pages.Projects.Detail.Components.RevertModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.Flash as Flash
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, br, p, strong, text)
 import Maybe.Extra as Maybe
-import Shared.Components.Flash as Flash
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)

@@ -1,7 +1,7 @@
 module Wizard.Pages.Locales.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.Locale exposing (Locale)
 import Wizard.Components.Listing.Models as Listing
 

@@ -16,13 +16,13 @@ module Wizard.Api.Users exposing
     , putUserPasswordPublic
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Json.Decode as D
 import Json.Encode as E
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Wizard.Api.Models.SubmissionProps as SubmissionProps exposing (SubmissionProps)
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Models.UserLocale as UserLocale exposing (UserLocale)

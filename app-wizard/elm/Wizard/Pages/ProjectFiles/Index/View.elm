@@ -1,14 +1,14 @@
 module Wizard.Pages.ProjectFiles.Index.View exposing (view)
 
+import Common.Components.FontAwesome exposing (fa, faDelete, faDownload)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.FileIcon as FileIcon
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Shared.Components.FontAwesome exposing (fa, faDelete, faDownload)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Utils.ByteUnits as ByteUnits
-import Shared.Utils.FileIcon as FileIcon
 import String.Format as String
 import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
 import Wizard.Api.Models.User as User

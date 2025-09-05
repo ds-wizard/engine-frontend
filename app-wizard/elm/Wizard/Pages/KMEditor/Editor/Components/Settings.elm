@@ -9,6 +9,13 @@ module Wizard.Pages.KMEditor.Editor.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
@@ -17,13 +24,6 @@ import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Branches as BranchesApi

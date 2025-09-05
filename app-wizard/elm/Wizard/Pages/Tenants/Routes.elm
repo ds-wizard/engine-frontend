@@ -4,7 +4,7 @@ module Wizard.Pages.Tenants.Routes exposing
     , indexRouteStatesFilterId
     )
 
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 
 

@@ -1,10 +1,10 @@
 module Wizard.Pages.Public.Auth.Update exposing (fetchData, update)
 
 import ActionResult
+import Common.Data.ApiError as ApiError
+import Common.Data.Token as Token
 import Gettext exposing (gettext)
 import Json.Decode as D
-import Shared.Data.ApiError as ApiError
-import Shared.Data.Token as Token
 import Task.Extra as Task
 import Wizard.Api.Auth as AuthApi
 import Wizard.Api.Models.TokenResponse as TokenResponse

@@ -10,13 +10,13 @@ module Registry.Data.AppState exposing
     )
 
 import Browser.Navigation as Navigation
+import Common.Api.Request exposing (ServerInfo)
 import Gettext
 import Json.Decode as D
 import Registry.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Registry.Data.Flags as Flags
 import Registry.Data.Session exposing (Session)
 import Registry.Routes as Routes
-import Shared.Api.Request exposing (ServerInfo)
 import Time
 
 

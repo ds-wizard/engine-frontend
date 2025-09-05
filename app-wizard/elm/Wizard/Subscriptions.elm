@@ -1,6 +1,6 @@
 module Wizard.Subscriptions exposing (subscriptions)
 
-import Shared.Utils.Driver as Driver
+import Common.Utils.Driver as Driver
 import Wizard.Components.Menu.Subscriptions
 import Wizard.Models exposing (Model)
 import Wizard.Msgs exposing (Msg(..))

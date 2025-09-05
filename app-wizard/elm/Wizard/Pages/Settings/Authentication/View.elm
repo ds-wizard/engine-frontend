@@ -1,5 +1,11 @@
 module Wizard.Pages.Settings.Authentication.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Page as Page
+import Common.Data.Role as Role
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -8,12 +14,6 @@ import Html.Attributes exposing (attribute, class, placeholder)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Page as Page
-import Shared.Data.Role as Role
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Extra as String
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton

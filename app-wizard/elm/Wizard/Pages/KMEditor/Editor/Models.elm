@@ -8,10 +8,10 @@ module Wizard.Pages.KMEditor.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.WebSocket as WebSocket exposing (WebSocket)
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Random exposing (Seed)
-import Shared.Api.WebSocket as WebSocket exposing (WebSocket)
 import String.Extra as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi

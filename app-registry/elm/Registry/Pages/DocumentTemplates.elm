@@ -8,6 +8,7 @@ module Registry.Pages.DocumentTemplates exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
@@ -17,7 +18,6 @@ import Registry.Components.ListItem as ListItem
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Time
 
 

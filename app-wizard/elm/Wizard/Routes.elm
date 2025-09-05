@@ -122,11 +122,11 @@ module Wizard.Routes exposing
     , usersIndexWithFilters
     )
 
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.Role as Role
+import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Flip exposing (flip)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Shared.Data.Role as Role
-import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Data.Session exposing (Session)

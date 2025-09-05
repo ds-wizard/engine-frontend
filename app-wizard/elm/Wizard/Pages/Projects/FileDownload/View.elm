@@ -1,9 +1,9 @@
 module Wizard.Pages.Projects.FileDownload.View exposing (view)
 
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Projects.FileDownload.Models exposing (Model)
 import Wizard.Pages.Projects.FileDownload.Msgs exposing (Msg)

@@ -21,14 +21,14 @@ module Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing
     , validate
     )
 
+import Common.Data.DateTimeString as DateTimeString
+import Common.Utils.RegexPatterns as RegexPatterns
 import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
 import Regex
-import Shared.Data.DateTimeString as DateTimeString
-import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Format as String
 
 

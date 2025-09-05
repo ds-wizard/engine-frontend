@@ -1,9 +1,9 @@
 module Wizard.Api.CommentThreads exposing (getCommentThreads)
 
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.QuestionnaireCommentThreadAssigned as QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Data.AppState as AppState exposing (AppState)
 

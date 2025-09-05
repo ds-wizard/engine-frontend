@@ -1,6 +1,6 @@
 module Wizard.Pages.Public.SignupConfirmation.Msgs exposing (Msg(..))
 
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Data.ApiError exposing (ApiError)
 
 
 type Msg

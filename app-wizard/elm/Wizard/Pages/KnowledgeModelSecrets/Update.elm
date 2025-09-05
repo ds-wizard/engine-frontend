@@ -5,11 +5,11 @@ module Wizard.Pages.KnowledgeModelSecrets.Update exposing
     )
 
 import ActionResult
+import Common.Data.ApiError as ApiError
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Shared.Data.ApiError as ApiError
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.KnowledgeModelSecrets as KnowledgeModelSecretsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModelSecrets.Forms.KnowledgeModelSecretForm as KnowledgeModelSecretForm

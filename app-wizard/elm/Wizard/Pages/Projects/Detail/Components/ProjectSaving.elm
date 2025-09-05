@@ -10,11 +10,11 @@ module Wizard.Pages.Projects.Detail.Components.ProjectSaving exposing
     , view
     )
 
+import Common.Components.FontAwesome exposing (faQuestionnaireSavingSaved, faQuestionnaireSavingSaving)
+import Common.Components.Tooltip exposing (tooltipRight)
 import Gettext exposing (gettext)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
-import Shared.Components.FontAwesome exposing (faQuestionnaireSavingSaved, faQuestionnaireSavingSaving)
-import Shared.Components.Tooltip exposing (tooltipRight)
 import Time
 import Wizard.Data.AppState exposing (AppState)
 

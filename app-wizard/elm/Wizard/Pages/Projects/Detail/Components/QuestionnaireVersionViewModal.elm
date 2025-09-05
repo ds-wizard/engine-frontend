@@ -9,6 +9,10 @@ module Wizard.Pages.Projects.Detail.Components.QuestionnaireVersionViewModal exp
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FontAwesome exposing (faClose)
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.TimeUtils as TimeUtils
 import Html exposing (Html, button, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataCy)
@@ -16,10 +20,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.FontAwesome exposing (faClose)
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.TimeUtils as TimeUtils
 import Shortcut
 import Triple
 import Uuid exposing (Uuid)

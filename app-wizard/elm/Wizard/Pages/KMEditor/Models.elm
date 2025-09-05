@@ -1,7 +1,7 @@
 module Wizard.Pages.KMEditor.Models exposing (Model, initLocalModel, initialModel)
 
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Random exposing (Seed)
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Create.Models

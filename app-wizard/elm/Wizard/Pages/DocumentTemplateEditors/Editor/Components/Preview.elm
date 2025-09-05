@@ -14,6 +14,17 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.Models.UrlResponse exposing (UrlResponse)
+import Common.Components.FontAwesome exposing (fa, faDownload)
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Components.Undraw as Undraw
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters
+import Common.Data.ServerError as ServerError
+import Common.Utils.ContentType as ContentType
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, iframe, option, p, pre, select, text)
 import Html.Attributes exposing (class, classList, href, id, name, selected, src, target, value)
@@ -23,17 +34,6 @@ import Html.Extra as Html
 import Http
 import Maybe.Extra as Maybe
 import Process
-import Shared.Api.Models.UrlResponse exposing (UrlResponse)
-import Shared.Components.FontAwesome exposing (fa, faDownload)
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Components.Undraw as Undraw
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters
-import Shared.Data.ServerError as ServerError
-import Shared.Utils.ContentType as ContentType
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
 import String.Format as String
 import Task
 import Task.Extra as Task

@@ -1,6 +1,13 @@
 module Wizard.Components.Menu.View exposing (view, viewAboutModal, viewReportIssueModal)
 
 import ActionResult exposing (ActionResult)
+import Common.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Data.BuildInfo as BuildInfo exposing (BuildInfo)
+import Common.Data.Role as Role
+import Common.Utils.TimeUtils as TimeUtils
 import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, img, li, p, span, table, tbody, td, text, th, thead, tr, ul)
@@ -10,13 +17,6 @@ import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Html.Extra as Html
 import Json.Decode as D
 import Json.Decode.Extra as D
-import Shared.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
-import Shared.Data.Role as Role
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)

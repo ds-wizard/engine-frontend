@@ -1,6 +1,6 @@
 module Wizard.Pages.Auth.Msgs exposing (Msg(..))
 
-import Shared.Data.Token exposing (Token)
+import Common.Data.Token exposing (Token)
 import Wizard.Routes exposing (Route)
 
 

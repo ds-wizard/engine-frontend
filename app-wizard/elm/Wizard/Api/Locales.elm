@@ -12,13 +12,13 @@ module Wizard.Api.Locales exposing
     , setEnabled
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import File exposing (File)
 import Http
 import Json.Decode as D
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.Locale as Locale exposing (Locale)
 import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Wizard.Api.Models.LocaleSuggestion as LocaleSuggestion exposing (LocaleSuggestion)

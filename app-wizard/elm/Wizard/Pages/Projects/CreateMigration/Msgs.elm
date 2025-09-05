@@ -1,7 +1,7 @@
 module Wizard.Pages.Projects.CreateMigration.Msgs exposing (Msg(..))
 
+import Common.Data.ApiError exposing (ApiError)
 import Form
-import Shared.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)

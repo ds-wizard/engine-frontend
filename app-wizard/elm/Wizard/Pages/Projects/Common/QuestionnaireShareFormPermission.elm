@@ -5,11 +5,11 @@ module Wizard.Pages.Projects.Common.QuestionnaireShareFormPermission exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Form.Validate as V
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)

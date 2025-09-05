@@ -11,6 +11,11 @@ module Wizard.Components.Questionnaire.History exposing
 
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
+import Common.Components.Page as Page
+import Common.Utils.FileIcon as FileIcon
+import Common.Utils.Markdown as Markdown
+import Common.Utils.TimeUtils as TimeUtils
 import Dict exposing (Dict)
 import Flip exposing (flip)
 import Gettext exposing (gettext)
@@ -20,11 +25,6 @@ import Html.Events exposing (onCheck, onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
-import Shared.Components.Page as Page
-import Shared.Utils.FileIcon as FileIcon
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Uuid exposing (Uuid)

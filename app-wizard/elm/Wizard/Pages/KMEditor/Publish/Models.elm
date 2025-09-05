@@ -4,8 +4,8 @@ module Wizard.Pages.KMEditor.Publish.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Pages.KMEditor.Common.BranchPublishForm as BranchPublishForm exposing (BranchPublishForm)
 

@@ -1,8 +1,8 @@
 module Wizard.Pages.KnowledgeModels.Import.OwlImport.Msgs exposing (Msg(..))
 
+import Common.Data.ApiError exposing (ApiError)
 import Form
 import Json.Encode as E
-import Shared.Data.ApiError exposing (ApiError)
 
 
 type Msg

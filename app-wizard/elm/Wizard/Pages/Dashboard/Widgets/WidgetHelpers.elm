@@ -6,10 +6,10 @@ module Wizard.Pages.Dashboard.Widgets.WidgetHelpers exposing
     , widgetLoader
     )
 
+import Common.Components.FontAwesome exposing (faSpinner, faWarning)
+import Common.Utils.Markdown as Markdown
 import Html exposing (Html, div, h2, span, text)
 import Html.Attributes exposing (class)
-import Shared.Components.FontAwesome exposing (faSpinner, faWarning)
-import Shared.Utils.Markdown as Markdown
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Routes as Routes
 

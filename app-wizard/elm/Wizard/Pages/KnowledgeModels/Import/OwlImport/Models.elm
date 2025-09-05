@@ -6,9 +6,9 @@ module Wizard.Pages.KnowledgeModels.Import.OwlImport.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import File exposing (File)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Common.OwlImportForm as OwlImportForm exposing (OwlImportForm)
 

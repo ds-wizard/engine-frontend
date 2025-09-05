@@ -6,7 +6,7 @@ module Wizard.Pages.Projects.Detail.Documents.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
 import Wizard.Api.Models.Submission exposing (Submission)

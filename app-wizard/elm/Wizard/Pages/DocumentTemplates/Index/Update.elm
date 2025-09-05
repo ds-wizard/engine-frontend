@@ -4,10 +4,10 @@ module Wizard.Pages.DocumentTemplates.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)

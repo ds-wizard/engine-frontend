@@ -4,7 +4,7 @@ module Wizard.Pages.ProjectFiles.Models exposing
     , initialModel
     )
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Pages.ProjectFiles.Index.Models
 import Wizard.Pages.ProjectFiles.Routes exposing (Route(..))
 

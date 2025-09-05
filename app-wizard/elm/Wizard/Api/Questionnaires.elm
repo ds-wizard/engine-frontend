@@ -36,17 +36,17 @@ module Wizard.Api.Questionnaires exposing
     )
 
 import Bool.Extra as Bool
+import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Api.WebSocket as WebSocket
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Dict exposing (Dict)
 import Http
 import Json.Decode as D
 import Json.Encode as E exposing (Value)
-import Shared.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Api.WebSocket as WebSocket
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Questionnaire as Questionnaire exposing (Questionnaire)

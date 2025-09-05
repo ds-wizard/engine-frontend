@@ -9,21 +9,21 @@ module Wizard.Pages.Users.Edit.Components.AppKeys exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setAppKeys)
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, strong, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setAppKeys)
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Wizard.Api.AppKeys as AppKeysApi
 import Wizard.Api.Models.AppKey exposing (AppKey)

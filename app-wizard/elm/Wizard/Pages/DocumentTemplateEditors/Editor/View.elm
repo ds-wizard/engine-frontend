@@ -1,15 +1,15 @@
 module Wizard.Pages.DocumentTemplateEditors.Editor.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionResult
+import Common.Components.FontAwesome exposing (faDocumentTemplateEditorFiles, faDocumentTemplateEditorPublish, faPreview, faSettings)
+import Common.Components.Page as Page
 import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, span, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
-import Shared.Components.ActionButton as ActionResult
-import Shared.Components.FontAwesome exposing (faDocumentTemplateEditorFiles, faDocumentTemplateEditorPublish, faPreview, faSettings)
-import Shared.Components.Page as Page
 import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Data.AppState exposing (AppState)

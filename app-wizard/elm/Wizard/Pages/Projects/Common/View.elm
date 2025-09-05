@@ -5,11 +5,11 @@ module Wizard.Pages.Projects.Common.View exposing
     , visibilityIcon
     )
 
+import Common.Components.FontAwesome exposing (faProjectSharingInternal, faProjectSharingPrivate, faProjectSharingPublic)
+import Common.Components.Tooltip exposing (tooltipCustom)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, small, span, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Components.FontAwesome exposing (faProjectSharingInternal, faProjectSharingPrivate, faProjectSharingPublic)
-import Shared.Components.Tooltip exposing (tooltipCustom)
 import String.Format as String
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)

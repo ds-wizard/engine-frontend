@@ -1,5 +1,13 @@
 module Wizard.Pages.Settings.LookAndFeel.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Markdown as Markdown
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -7,14 +15,6 @@ import Html exposing (Html, a, div, form, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Markdown as Markdown
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig

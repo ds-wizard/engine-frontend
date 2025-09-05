@@ -5,10 +5,10 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Update exposing
     )
 
 import ActionResult
+import Common.Data.ApiError as ApiError
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Random exposing (Seed)
-import Shared.Data.ApiError as ApiError
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail

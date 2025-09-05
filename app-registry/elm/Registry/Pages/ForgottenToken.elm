@@ -1,6 +1,9 @@
 module Registry.Pages.ForgottenToken exposing (Model, Msg, initialModel, update, view)
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Undraw as Undraw
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, text)
@@ -13,9 +16,6 @@ import Registry.Components.FormWrapper as FormWrapper
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.ForgottenTokenForm as ForgottenTokenForm exposing (ForgottenTokenForm)
-import Shared.Components.Undraw as Undraw
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias Model =

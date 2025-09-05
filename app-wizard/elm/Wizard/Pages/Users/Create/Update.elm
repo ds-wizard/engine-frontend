@@ -1,13 +1,13 @@
 module Wizard.Pages.Users.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Dom as Dom
+import Common.Utils.Form as Form
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Gettext exposing (gettext)
 import Random exposing (Seed, step)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Form as Form
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Tuple.Extra as Tuple
 import Uuid
 import Wizard.Api.Users as UsersApi

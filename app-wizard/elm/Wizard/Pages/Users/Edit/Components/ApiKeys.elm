@@ -1,28 +1,28 @@
 module Wizard.Pages.Users.Edit.Components.ApiKeys exposing (Model, Msg, UpdateConfig, fetchData, initialModel, update, view)
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Markdown as Markdown
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setApiKey, setApiKeys)
+import Common.Utils.TimeUtils as TimeUtils
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, form, h3, hr, strong, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.UuidOrCurrent exposing (UuidOrCurrent)
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setApiKey, setApiKeys)
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Wizard.Api.ApiKeys as ApiKeysApi
 import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)

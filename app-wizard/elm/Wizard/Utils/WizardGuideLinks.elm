@@ -39,7 +39,7 @@ module Wizard.Utils.WizardGuideLinks exposing
     , usersCreate
     )
 
-import Shared.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
+import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 
 
 default : GuideLinks

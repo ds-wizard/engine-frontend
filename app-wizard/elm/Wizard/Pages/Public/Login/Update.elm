@@ -2,11 +2,11 @@ module Wizard.Pages.Public.Login.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.Token as Token
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.Token as Token
 import String.Extra as String
 import Task.Extra as Task
 import Wizard.Api.Auth as AuthApi

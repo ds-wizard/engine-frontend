@@ -4,13 +4,13 @@ module Wizard.Pages.Projects.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError exposing (ApiError)
+import Common.Ports.Dom as Dom
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Data.ApiError exposing (ApiError)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Time
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid

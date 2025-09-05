@@ -8,6 +8,8 @@ module Registry.Pages.Login exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, hr, span, text)
@@ -22,8 +24,6 @@ import Registry.Data.AppState exposing (AppState)
 import Registry.Data.Forms.LoginForm as LoginForm exposing (LoginForm)
 import Registry.Data.Session as Session exposing (Session)
 import Registry.Routes as Routes
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Task.Extra as Task
 
 

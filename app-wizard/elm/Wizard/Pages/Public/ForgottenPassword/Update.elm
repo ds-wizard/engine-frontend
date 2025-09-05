@@ -1,10 +1,10 @@
 module Wizard.Pages.Public.ForgottenPassword.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
 import Form
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
 import Wizard.Api.ActionKeys as ActionKeysApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs

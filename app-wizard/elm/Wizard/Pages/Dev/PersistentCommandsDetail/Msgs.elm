@@ -1,7 +1,7 @@
 module Wizard.Pages.Dev.PersistentCommandsDetail.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
 
 

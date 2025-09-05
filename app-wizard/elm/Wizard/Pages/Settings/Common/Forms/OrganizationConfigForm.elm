@@ -6,11 +6,11 @@ module Wizard.Pages.Settings.Common.Forms.OrganizationConfigForm exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.BootstrapConfig.OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Data.AppState exposing (AppState)
 

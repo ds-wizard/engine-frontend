@@ -1,13 +1,13 @@
 module Wizard.Pages.Locales.Create.Update exposing (update)
 
 import ActionResult
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import File exposing (File)
 import Form
 import Gettext exposing (gettext)
 import Json.Decode as D
 import Json.Encode as E
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import String exposing (fromInt)
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Components.Dropzone as Dropzone

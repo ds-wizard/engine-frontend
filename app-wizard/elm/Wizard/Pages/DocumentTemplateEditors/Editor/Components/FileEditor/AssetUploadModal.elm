@@ -8,6 +8,12 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUp
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (faImportFile)
+import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.ContentType as ContentType
 import Dict exposing (Dict)
 import File exposing (File)
 import File.Select as Select
@@ -19,12 +25,6 @@ import Html.Events exposing (onClick)
 import Html.Events.Extensions exposing (alwaysPreventDefaultOn, alwaysPreventDefaultOnWithDecoder)
 import Json.Decode as D
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (faImportFile)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.ContentType as ContentType
 import Task
 import Task.Extra as Task
 import Uuid

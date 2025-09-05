@@ -9,16 +9,16 @@ module Wizard.Components.Tag exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.Flash as Flash
+import Common.Components.FormExtra as FormExtra
+import Common.Components.Tooltip exposing (tooltipCustom)
+import Common.Utils.ColorUtils as ColorUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, div, input, label, text)
 import Html.Attributes exposing (checked, class, classList, disabled, id, style, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.Flash as Flash
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.Tooltip exposing (tooltipCustom)
-import Shared.Utils.ColorUtils as ColorUtils
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Data.AppState exposing (AppState)

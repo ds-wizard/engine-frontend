@@ -7,9 +7,9 @@ module Wizard.Pages.DocumentTemplates.Common.DocumentTemplateActionsDropdown exp
     )
 
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faEdit, faExport, faView)
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faEdit, faExport, faView)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)

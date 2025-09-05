@@ -8,14 +8,14 @@ module Wizard.Api.Documents exposing
     , postSubmission
     )
 
+import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Json.Decode as D
 import Json.Encode as E
 import Maybe.Extra as Maybe
-import Shared.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)

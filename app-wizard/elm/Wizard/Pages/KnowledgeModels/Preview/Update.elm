@@ -4,15 +4,15 @@ module Wizard.Pages.KnowledgeModels.Preview.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError
+import Common.Ports.Dom as Dom
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setKnowledgeModel, setPackage)
 import Dict
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
-import Shared.Data.ApiError as ApiError
-import Shared.Ports.Dom as Dom
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setKnowledgeModel, setPackage)
 import Uuid.Extra as Uuid
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.PackageDetail as PackageDetail

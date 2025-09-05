@@ -3,7 +3,7 @@ module Wizard.Api.Tours exposing
     , resetTours
     )
 
-import Shared.Api.Request as Request exposing (ToMsg)
+import Common.Api.Request as Request exposing (ToMsg)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 

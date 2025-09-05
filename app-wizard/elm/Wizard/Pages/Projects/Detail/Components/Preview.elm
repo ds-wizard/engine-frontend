@@ -9,19 +9,19 @@ module Wizard.Pages.Projects.Detail.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.Models.UrlResponse exposing (UrlResponse)
+import Common.Components.FontAwesome exposing (faArrowRight, faDownload)
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.ServerError as ServerError
+import Common.Utils.ContentType as ContentType
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, iframe, p, pre, text)
 import Html.Attributes exposing (class, href, src, target)
 import Html.Attributes.Extensions exposing (dataCy)
 import Http
 import Process
-import Shared.Api.Models.UrlResponse exposing (UrlResponse)
-import Shared.Components.FontAwesome exposing (faArrowRight, faDownload)
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.ServerError as ServerError
-import Shared.Utils.ContentType as ContentType
 import String.Format as String
 import Task
 import Uuid exposing (Uuid)

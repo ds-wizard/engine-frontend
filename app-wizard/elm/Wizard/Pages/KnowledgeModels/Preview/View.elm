@@ -1,12 +1,12 @@
 module Wizard.Pages.KnowledgeModels.Preview.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Page as Page
 import Version
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Components.ActionResultView as ActionResultView

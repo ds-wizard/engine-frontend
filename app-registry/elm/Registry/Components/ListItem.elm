@@ -1,5 +1,6 @@
 module Registry.Components.ListItem exposing (Item, ViewConfig, view)
 
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, text)
 import Html.Attributes exposing (class, href, src)
@@ -7,7 +8,6 @@ import Html.Extra as Html
 import Registry.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Version exposing (Version)

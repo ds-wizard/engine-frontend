@@ -1,11 +1,11 @@
 module Wizard.Pages.Dashboard.Widgets.AssignedComments exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.TimeDistance exposing (locale)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h2, strong, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
-import Shared.Utils.TimeDistance exposing (locale)
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)

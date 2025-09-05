@@ -17,14 +17,14 @@ module Wizard.Api.Packages exposing
     )
 
 import Bool.Extra as Bool
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import File exposing (File)
 import Http
 import Json.Encode as E
 import Maybe.Extra as Maybe
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Package as Package exposing (Package)
 import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)

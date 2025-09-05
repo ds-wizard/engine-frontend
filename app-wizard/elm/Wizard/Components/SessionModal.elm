@@ -3,9 +3,9 @@ module Wizard.Components.SessionModal exposing
     , expiresSoonModal
     )
 
+import Common.Components.Modal as Modal
 import Gettext exposing (gettext)
 import Html exposing (Html, text)
-import Shared.Components.Modal as Modal
 import String.Format as String
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.Session as Session

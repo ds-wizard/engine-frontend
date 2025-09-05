@@ -2,6 +2,7 @@ module Registry exposing (Model, Msg, main)
 
 import Browser exposing (Document, UrlRequest)
 import Browser.Navigation as Navigation exposing (Key)
+import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
 import Html
 import Json.Decode as D
@@ -25,7 +26,6 @@ import Registry.Pages.Signup as Signup
 import Registry.Pages.SignupConfirmation as SignupConfirmation
 import Registry.Ports as Ports
 import Registry.Routes as Routes
-import Shared.Components.Undraw as Undraw
 import Task
 import Task.Extra as Task
 import Time

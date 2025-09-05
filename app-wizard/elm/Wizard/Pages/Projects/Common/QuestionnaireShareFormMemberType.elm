@@ -5,10 +5,10 @@ module Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberType exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type QuestionnaireShareFormMemberType

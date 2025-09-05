@@ -1,8 +1,8 @@
 module Wizard.Pages.Dev.Operations.Msgs exposing (Msg(..))
 
-import Shared.Data.ApiError exposing (ApiError)
-import Shared.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
-import Shared.Data.DevOperationSection exposing (DevOperationSection)
+import Common.Data.ApiError exposing (ApiError)
+import Common.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
+import Common.Data.DevOperationSection exposing (DevOperationSection)
 
 
 type Msg

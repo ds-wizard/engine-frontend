@@ -1,8 +1,8 @@
 module Registry.Api.BuildInfo exposing (getBuildInfo)
 
+import Common.Api.Request as Requests exposing (ToMsg)
+import Common.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Registry.Data.AppState as AppState exposing (AppState)
-import Shared.Api.Request as Requests exposing (ToMsg)
-import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 
 
 getBuildInfo : AppState -> ToMsg BuildInfo msg -> Cmd msg

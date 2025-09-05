@@ -1,13 +1,13 @@
 module Wizard.Pages.Dev.PersistentCommandsDetail.View exposing (view)
 
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Components.PersistentCommandBadge as PersistentCommandBadge
+import Common.Utils.TimeUtils as TimeUtils
 import Html exposing (Html, code, div, h3, pre, span, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Json.Print
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Components.PersistentCommandBadge as PersistentCommandBadge
-import Shared.Utils.TimeUtils as TimeUtils
 import SyntaxHighlight
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PersistentCommand as PersistentCommand

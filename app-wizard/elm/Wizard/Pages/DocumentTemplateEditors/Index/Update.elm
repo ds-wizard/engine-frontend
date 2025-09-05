@@ -1,9 +1,9 @@
 module Wizard.Pages.DocumentTemplateEditors.Index.Update exposing (fetchData, update)
 
 import ActionResult
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)

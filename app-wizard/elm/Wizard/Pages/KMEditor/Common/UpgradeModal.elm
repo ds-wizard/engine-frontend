@@ -9,17 +9,17 @@ module Wizard.Pages.KMEditor.Common.UpgradeModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi

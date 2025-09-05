@@ -4,7 +4,7 @@ module Wizard.Pages.Dev.Models exposing
     , initialModel
     )
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Uuid
 import Wizard.Pages.Dev.Operations.Models
 import Wizard.Pages.Dev.PersistentCommandsDetail.Models

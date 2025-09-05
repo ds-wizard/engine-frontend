@@ -6,12 +6,12 @@ module Wizard.Components.Questionnaire.VersionForm exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Utils.Form.FormError exposing (FormError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
 

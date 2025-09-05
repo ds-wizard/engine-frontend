@@ -7,9 +7,9 @@ module Wizard.Pages.Locales.Common.LocaleActionsDropdown exposing
     )
 
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.FontAwesome exposing (faDelete, faDisable, faEnable, faExport, faLocaleDefault, faView)
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Components.FontAwesome exposing (faDelete, faDisable, faEnable, faExport, faLocaleDefault, faView)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes

@@ -8,10 +8,10 @@ module Wizard.Api.Models.User exposing
     , imageUrlOrGravatar
     )
 
+import Common.Data.Role as Role exposing (Role)
 import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.Role as Role exposing (Role)
 import Uuid exposing (Uuid)
 
 

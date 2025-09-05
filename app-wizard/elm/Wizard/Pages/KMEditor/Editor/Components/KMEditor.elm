@@ -14,6 +14,24 @@ module Wizard.Pages.KMEditor.Editor.Components.KMEditor exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Badge as Badge
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faCopy, faDelete, faKmEditorCopyUuid, faKmEditorMove, faKmIntegration, faQuestionnaireExpand, faQuestionnaireShrink, faWarning, fas)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.GuideLink as GuideLink
+import Common.Components.Modal as Modal
+import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Copy as Copy
+import Common.Ports.Dom as Dom
+import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.CurlUtils as CurlUtils
+import Common.Utils.GuideLinks exposing (GuideLinks)
+import Common.Utils.HttpMethod as HttpMethod
+import Common.Utils.HttpStatus as HttpStatus
+import Common.Utils.Markdown as Markdown
 import Compose exposing (compose2)
 import Dict exposing (Dict)
 import Flip exposing (flip)
@@ -30,24 +48,6 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Badge as Badge
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faCopy, faDelete, faKmEditorCopyUuid, faKmEditorMove, faKmIntegration, faQuestionnaireExpand, faQuestionnaireShrink, faWarning, fas)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.GuideLink as GuideLink
-import Shared.Components.Modal as Modal
-import Shared.Components.Tooltip exposing (tooltip, tooltipLeft)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Copy as Copy
-import Shared.Ports.Dom as Dom
-import Shared.Utils.ByteUnits as ByteUnits
-import Shared.Utils.CurlUtils as CurlUtils
-import Shared.Utils.GuideLinks exposing (GuideLinks)
-import Shared.Utils.HttpMethod as HttpMethod
-import Shared.Utils.HttpStatus as HttpStatus
-import Shared.Utils.Markdown as Markdown
 import SplitPane
 import String.Extra as String
 import String.Format as String

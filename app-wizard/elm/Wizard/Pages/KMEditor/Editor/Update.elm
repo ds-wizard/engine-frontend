@@ -6,16 +6,16 @@ module Wizard.Pages.KMEditor.Editor.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.WebSocket as WebSocket
+import Common.Data.ApiError as ApiError
+import Common.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
+import Common.Ports.Dom as Dom
+import Common.Utils.RequestHelpers as RequestHelpers
 import Debounce
 import Dict
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Shared.Api.WebSocket as WebSocket
-import Shared.Data.ApiError as ApiError
-import Shared.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
-import Shared.Ports.Dom as Dom
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid

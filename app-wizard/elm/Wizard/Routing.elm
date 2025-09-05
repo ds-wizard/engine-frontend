@@ -6,7 +6,7 @@ module Wizard.Routing exposing
     )
 
 import Browser.Navigation exposing (pushUrl)
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Url exposing (Url)
 import Url.Parser exposing ((</>), Parser, map, oneOf, s)
 import Url.Parser.Query as Query

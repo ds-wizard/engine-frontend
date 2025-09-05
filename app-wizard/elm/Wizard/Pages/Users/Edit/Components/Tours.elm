@@ -9,16 +9,16 @@ module Wizard.Pages.Users.Edit.Components.Tours exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Driver as Driver exposing (TourConfig)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Html exposing (Html, div, p, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataTour, selectDataTour)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Driver as Driver exposing (TourConfig)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Tours as ToursApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Utils.Driver as Driver

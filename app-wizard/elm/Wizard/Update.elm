@@ -2,8 +2,8 @@ module Wizard.Update exposing (update)
 
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
-import Shared.Components.AIAssistant as AIAssistant
-import Shared.Utils.TimeUtils as TimeUtils
+import Common.Components.AIAssistant as AIAssistant
+import Common.Utils.TimeUtils as TimeUtils
 import Url
 import Wizard.Api.Tours as ToursApi
 import Wizard.Components.Menu.Update

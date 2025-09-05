@@ -18,6 +18,16 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor exposin
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (fa, faClose, faDelete, faDownload, faKmEditorTreeClosed, faKmEditorTreeOpened)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltipLeft)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Dom as Dom
+import Common.Utils.ContentType as ContentType
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setAssets, setFiles)
 import Compose exposing (compose2)
 import Dict exposing (Dict)
 import Flip exposing (flip)
@@ -32,16 +42,6 @@ import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (fa, faClose, faDelete, faDownload, faKmEditorTreeClosed, faKmEditorTreeOpened)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltipLeft)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.ContentType as ContentType
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setAssets, setFiles)
 import SplitPane
 import String.Format as String
 import Task.Extra as Task

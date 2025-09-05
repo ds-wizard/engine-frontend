@@ -4,17 +4,17 @@ module Wizard.Pages.Projects.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.Driver as Driver exposing (TourConfig)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setDebouncer)
 import Debouncer.Extra as Debouncer
 import Dict
 import Gettext exposing (gettext)
 import Html.Attributes.Extensions exposing (selectDataTour)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils.Driver as Driver exposing (TourConfig)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setDebouncer)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion

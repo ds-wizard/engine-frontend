@@ -1,6 +1,9 @@
 module Wizard.Pages.KMEditor.Migration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
 import Dict exposing (Dict)
 import Flip exposing (flip)
 import Gettext exposing (gettext)
@@ -11,9 +14,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
 import String.Extra as String
 import String.Format as String exposing (format)
 import Wizard.Api.Models.Event as Event exposing (Event(..))

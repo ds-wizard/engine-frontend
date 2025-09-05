@@ -8,13 +8,13 @@ module Wizard.Pages.Settings.Common.Forms.AuthenticationConfigForm exposing
     , validation
     )
 
+import Common.Data.Role as Role exposing (Role)
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Maybe.Extra as Maybe
-import Shared.Data.Role as Role exposing (Role)
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Form.Validate as V
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Data.AppState exposing (AppState)

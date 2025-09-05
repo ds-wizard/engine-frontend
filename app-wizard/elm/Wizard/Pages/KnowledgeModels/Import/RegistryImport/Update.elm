@@ -1,9 +1,9 @@
 module Wizard.Pages.KnowledgeModels.Import.RegistryImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setPulling)
 import Gettext exposing (gettext)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setPulling)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs

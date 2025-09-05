@@ -1,13 +1,13 @@
 module Wizard.Pages.Tenants.Create.View exposing (view)
 
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Html exposing (Html, div, form)
 import Html.Events exposing (onSubmit)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Tenants.Common.TenantCreateForm exposing (TenantCreateForm)

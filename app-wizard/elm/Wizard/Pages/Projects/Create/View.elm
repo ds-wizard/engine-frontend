@@ -1,6 +1,12 @@
 module Wizard.Pages.Projects.Create.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionButton
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.FontAwesome exposing (faKnowledgeModel, faQuestionnaire)
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, text, ul)
@@ -8,12 +14,6 @@ import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.FontAwesome exposing (faKnowledgeModel, faQuestionnaire)
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
 import Wizard.Api.Models.PackageDetail as PackageDetail
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Tag as Tag

@@ -5,13 +5,13 @@ module Wizard.Pages.Settings.Generic.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Dom as Dom
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Form.Validate exposing (Validation)
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Dom as Dom
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConfig)
 import Wizard.Api.Tenants as TenantsApi
 import Wizard.Data.AppState exposing (AppState)

@@ -3,6 +3,13 @@ module Wizard.Pages.Projects.Detail.View exposing (view)
 import ActionResult
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (fa, faPreview, faProjectDocuments, faProjectFiles, faProjectMetrics, faProjectQuestionnaire, faQuestionnaireCopyLink, faSettings)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
@@ -10,13 +17,6 @@ import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (fa, faPreview, faProjectDocuments, faProjectFiles, faProjectMetrics, faProjectQuestionnaire, faQuestionnaireCopyLink, faSettings)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import String.Format as String
 import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Wizard.Components.ActionResultView as ActionResultView

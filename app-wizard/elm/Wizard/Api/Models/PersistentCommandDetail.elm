@@ -3,10 +3,10 @@ module Wizard.Api.Models.PersistentCommandDetail exposing
     , decoder
     )
 
+import Common.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
-import Shared.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.TenantSuggestion as TenantSuggestion exposing (TenantSuggestion)

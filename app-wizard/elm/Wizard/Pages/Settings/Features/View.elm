@@ -1,16 +1,16 @@
 module Wizard.Pages.Settings.Features.View exposing (view)
 
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.EditableConfig.EditableFeaturesConfig exposing (EditableFeaturesConfig)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)

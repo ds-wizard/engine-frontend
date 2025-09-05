@@ -13,12 +13,12 @@ module Wizard.Api.Branches exposing
     , websocket
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Api.WebSocket as WebSocket
+import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Json.Encode as E
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Api.WebSocket as WebSocket
-import Shared.Data.Pagination as Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Branch as Branch exposing (Branch)
 import Wizard.Api.Models.BranchDetail as BranchDetail exposing (BranchDetail)

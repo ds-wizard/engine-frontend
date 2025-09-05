@@ -14,6 +14,13 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.FontAwesome exposing (fa, faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
@@ -25,13 +32,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
-import Shared.Components.FontAwesome exposing (fa, faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
 import Uuid
 import Uuid.Extra as Uuid

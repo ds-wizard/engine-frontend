@@ -6,8 +6,8 @@ module Wizard.Pages.Projects.Routes exposing
     , indexRouteUsersFilterId
     )
 
-import Shared.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute exposing (ProjectDetailRoute)
 

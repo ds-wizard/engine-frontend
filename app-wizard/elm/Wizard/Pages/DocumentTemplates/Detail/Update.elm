@@ -4,11 +4,11 @@ module Wizard.Pages.DocumentTemplates.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setTemplate)
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setTemplate)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Data.AppState as AppState exposing (AppState)

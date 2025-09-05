@@ -4,9 +4,9 @@ module Wizard.Pages.Dev.PersistentCommandsDetail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.ApiError as ApiError
-import Shared.Data.PersistentCommandState as PersistentCommandState
-import Shared.Utils.RequestHelpers as RequestHelpers
+import Common.Data.ApiError as ApiError
+import Common.Data.PersistentCommandState as PersistentCommandState
+import Common.Utils.RequestHelpers as RequestHelpers
 import Uuid exposing (Uuid)
 import Wizard.Api.PersistentCommands as PersistentCommandsApi
 import Wizard.Data.AppState exposing (AppState)

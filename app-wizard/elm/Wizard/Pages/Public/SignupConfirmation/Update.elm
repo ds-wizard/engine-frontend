@@ -1,8 +1,8 @@
 module Wizard.Pages.Public.SignupConfirmation.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs

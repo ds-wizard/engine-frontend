@@ -1,6 +1,19 @@
 module Wizard.Pages.Documents.Index.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.ActionButton as ActionButton
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.Badge as Badge
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faRemove, faSpinner, faSuccess)
+import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip, tooltipCustom)
+import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.Markdown as Markdown
+import Common.Utils.TimeDistance as TimeDistance
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, input, label, p, span, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (checked, class, classList, disabled, for, href, id, target, type_)
@@ -8,19 +21,6 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onCheck, onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.Badge as Badge
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faRemove, faSpinner, faSuccess)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip, tooltipCustom)
-import Shared.Utils.ByteUnits as ByteUnits
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.TimeDistance as TimeDistance
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time.Distance as TimeDistance
 import Wizard.Api.Models.Document exposing (Document)

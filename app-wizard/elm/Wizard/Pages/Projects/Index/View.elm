@@ -2,6 +2,13 @@ module Wizard.Pages.Projects.Index.View exposing (view)
 
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.Pagination as Pagination
+import Common.Data.PaginationQueryFilters as PaginationQueryFilter
+import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
@@ -13,13 +20,6 @@ import Html.Extra as Html
 import List.Extra as List
 import List.Utils as List
 import Maybe.Extra as Maybe
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.Pagination as Pagination
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilter
-import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Uuid
 import Version
 import Wizard.Api.Models.Member as Member

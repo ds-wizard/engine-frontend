@@ -1,5 +1,13 @@
 module Wizard.Pages.Settings.Submission.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Page as Page
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.HttpMethod as HttpMethod
+import Common.Utils.IdentifierUtils as IdentifierUtils
+import Common.Utils.Markdown as Markdown
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -8,14 +16,6 @@ import Html.Attributes exposing (class, placeholder, type_)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Page as Page
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.HttpMethod as HttpMethod
-import Shared.Utils.IdentifierUtils as IdentifierUtils
-import Shared.Utils.Markdown as Markdown
 import Uuid
 import Version
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)

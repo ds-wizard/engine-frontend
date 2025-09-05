@@ -1,10 +1,10 @@
 module Wizard.Pages.Dashboard.Dashboards.WelcomeDashboard exposing (view)
 
+import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
-import Shared.Components.Undraw as Undraw
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Data.AppState exposing (AppState)

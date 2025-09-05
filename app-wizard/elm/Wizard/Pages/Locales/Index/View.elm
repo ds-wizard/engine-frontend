@@ -1,15 +1,15 @@
 module Wizard.Pages.Locales.Index.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faLocaleCreate, faLocaleImport)
+import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faLocaleCreate, faLocaleImport)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
 import String.Format as String
 import Version
 import Wizard.Api.Models.Locale as Locale exposing (Locale)

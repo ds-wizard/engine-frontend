@@ -10,22 +10,22 @@ module Wizard.Pages.Users.Edit.Components.ActiveSessions exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faActiveSessionRevoke, faUserAgentDesktop, faUserAgentMobile, faUserAgentTdk)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Markdown as Markdown
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setTokens)
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Html.Extra as Html exposing (viewIf)
 import Maybe.Extra as Maybe
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faActiveSessionRevoke, faUserAgentDesktop, faUserAgentMobile, faUserAgentTdk)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setTokens)
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import UserAgent

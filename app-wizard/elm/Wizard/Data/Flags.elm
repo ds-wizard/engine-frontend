@@ -4,11 +4,11 @@ module Wizard.Data.Flags exposing
     , default
     )
 
+import Common.Data.Navigator as Navigator exposing (Navigator)
+import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Gettext
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Shared.Data.Navigator as Navigator exposing (Navigator)
-import Shared.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Data.Session as Session exposing (Session)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks

@@ -2,6 +2,9 @@ module Wizard.Pages.Public.Signup.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Form exposing (label)
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Page as Page
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
@@ -9,9 +12,6 @@ import Html exposing (Html, a, div, p, text)
 import Html.Attributes exposing (class, classList, for, href, id, name, target)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Page as Page
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Public.Common.SignupForm exposing (SignupForm)

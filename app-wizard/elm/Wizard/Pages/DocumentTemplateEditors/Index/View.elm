@@ -1,14 +1,14 @@
 module Wizard.Pages.DocumentTemplateEditors.Index.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faDelete, faEdit)
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faDelete, faEdit)
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
 import String.Format as String
 import Version
 import Wizard.Api.Models.DocumentTemplateDraft exposing (DocumentTemplateDraft)

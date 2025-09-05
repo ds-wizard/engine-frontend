@@ -1,11 +1,11 @@
 module Wizard.Pages.Public.SignupConfirmation.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faSuccess)
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
-import Shared.Components.FontAwesome exposing (faSuccess)
-import Shared.Components.Page as Page
 import String.Format as String
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)

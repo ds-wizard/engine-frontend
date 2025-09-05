@@ -3,8 +3,8 @@ module Wizard.Pages.Dashboard.Update exposing
     , update
     )
 
+import Common.Utils.Driver as Driver exposing (TourConfig)
 import Gettext exposing (gettext)
-import Shared.Utils.Driver as Driver exposing (TourConfig)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs

@@ -4,8 +4,8 @@ module Wizard.Pages.Public.Signup.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Public.Common.SignupForm as SignupForm exposing (SignupForm)
 

@@ -1,5 +1,6 @@
 module Registry.Components.SidebarRow exposing (ViewIdProps, ViewOtherVersionsProps, ViewProps, view, viewId, viewLicense, viewMetamodelVersion, viewOrganization, viewOtherVersions, viewPublishedOn, viewVersion)
 
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, h3, img, strong, text)
 import Html.Attributes exposing (class, href, src, target)
@@ -8,7 +9,6 @@ import Registry.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Registry.Components.ItemIdBox as ItemIdBox
 import Registry.Components.VersionList as VersionList
 import Registry.Data.AppState exposing (AppState)
-import Shared.Utils.TimeUtils as TimeUtils
 import Time
 import Version exposing (Version)
 

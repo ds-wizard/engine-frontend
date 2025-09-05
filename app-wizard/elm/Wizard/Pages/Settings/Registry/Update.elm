@@ -4,11 +4,11 @@ module Wizard.Pages.Settings.Registry.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.EditableConfig as EditableConfig
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig as EditableRegistryConfig
 import Wizard.Api.Registry as RegistryApi

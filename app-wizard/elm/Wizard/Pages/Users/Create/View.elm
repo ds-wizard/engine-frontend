@@ -1,15 +1,15 @@
 module Wizard.Pages.Users.Create.View exposing (view)
 
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.Role as Role
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Events exposing (onSubmit)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.Role as Role
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Users.Common.UserCreateForm exposing (UserCreateForm)

@@ -1,11 +1,11 @@
 module Wizard.Components.OnlineUser exposing (view)
 
+import Common.Components.FontAwesome exposing (fa)
+import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, img)
 import Html.Attributes exposing (class, src)
 import List.Extra as List
-import Shared.Components.FontAwesome exposing (fa)
-import Shared.Components.Tooltip exposing (tooltip, tooltipLeft)
 import Wizard.Api.Models.OnlineUserInfo as OnlineUserInfo exposing (LoggedData, OnlineUserInfo)
 import Wizard.Api.Models.User as User
 import Wizard.Data.AppState exposing (AppState)

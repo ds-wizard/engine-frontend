@@ -1,9 +1,9 @@
 module Wizard.Pages.Projects.Common.CloneProjectModal.View exposing (view)
 
+import Common.Components.Modal as Modal
 import Gettext exposing (gettext)
 import Html exposing (Html, i, p, strong, text)
 import Html.Attributes exposing (class)
-import Shared.Components.Modal as Modal
 import String.Format as String
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Projects.Common.CloneProjectModal.Models exposing (Model)

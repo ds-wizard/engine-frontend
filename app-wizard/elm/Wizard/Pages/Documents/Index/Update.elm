@@ -4,11 +4,11 @@ module Wizard.Pages.Documents.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setQuestionnaire)
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setQuestionnaire)
 import Task.Extra as Task
 import Uuid
 import Wizard.Api.Documents as DocumentsApi

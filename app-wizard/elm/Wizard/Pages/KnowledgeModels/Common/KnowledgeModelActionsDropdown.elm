@@ -7,9 +7,9 @@ module Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposin
     )
 
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faOpen, faPreview)
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faOpen, faPreview)
 import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)

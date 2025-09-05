@@ -6,12 +6,12 @@ module Registry.Api.Organizations exposing
     , putOrganizationToken
     )
 
+import Common.Api.Request as Requests exposing (ToMsg)
 import Json.Encode as E
 import Registry.Api.Models.Organization as Organization exposing (Organization)
 import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Data.Forms.OrganizationForm as OrganizationForm exposing (OrganizationForm)
 import Registry.Data.Forms.SignupForm as SignupForm exposing (SignupForm)
-import Shared.Api.Request as Requests exposing (ToMsg)
 
 
 getOrganization : AppState -> String -> ToMsg Organization msg -> Cmd msg

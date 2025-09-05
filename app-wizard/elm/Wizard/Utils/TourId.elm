@@ -7,7 +7,7 @@ module Wizard.Utils.TourId exposing
     , usersEditTours
     )
 
-import Shared.Utils.Driver as Driver exposing (TourId)
+import Common.Utils.Driver as Driver exposing (TourId)
 
 
 dashboard : TourId

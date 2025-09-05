@@ -1,6 +1,6 @@
 module Wizard.Pages.KnowledgeModels.Models exposing (Model, initLocalModel, initialModel)
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Detail.Models
 import Wizard.Pages.KnowledgeModels.Import.Models

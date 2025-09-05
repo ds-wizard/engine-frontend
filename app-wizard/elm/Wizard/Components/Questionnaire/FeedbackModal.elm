@@ -7,16 +7,16 @@ module Wizard.Components.Questionnaire.FeedbackModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form.FormError exposing (FormError)
 import String exposing (fromInt)
 import String.Format as String
 import Wizard.Api.Feedbacks as FeedbacksApi

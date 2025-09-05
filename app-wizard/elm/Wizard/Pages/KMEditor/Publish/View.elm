@@ -1,17 +1,17 @@
 module Wizard.Pages.KMEditor.Publish.View exposing (view)
 
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Utils.Form.FormError exposing (FormError)
 import Flip exposing (flip)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, text)
 import Html.Attributes exposing (href, target)
 import Html.Attributes.Extensions exposing (dataCy)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Version exposing (Version)
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)

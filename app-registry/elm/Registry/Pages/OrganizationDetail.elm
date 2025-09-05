@@ -8,6 +8,9 @@ module Registry.Pages.OrganizationDetail exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.Form as Form
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html)
@@ -20,9 +23,6 @@ import Registry.Components.FormWrapper as FormWrapper
 import Registry.Components.Page as Page
 import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Data.Forms.OrganizationForm as OrganizationForm exposing (OrganizationForm)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.Form as Form
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias Model =

@@ -1,11 +1,11 @@
 module Wizard.Components.UsageTable exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Utils.ByteUnits as ByteUnits
 import Gettext exposing (gettext)
 import Html exposing (Html, div, table, tbody, td, text, th, tr)
 import Html.Attributes exposing (class, style)
 import Registry.Components.FontAwesome exposing (fas)
-import Shared.Components.Badge as Badge
-import Shared.Utils.ByteUnits as ByteUnits
 import Wizard.Api.Models.Usage exposing (Usage, UsageValue)
 import Wizard.Data.AppState exposing (AppState)
 

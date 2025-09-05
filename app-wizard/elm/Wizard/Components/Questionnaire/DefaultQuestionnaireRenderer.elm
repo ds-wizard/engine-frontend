@@ -1,5 +1,8 @@
 module Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create, defaultResourcePageToRoute)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
+import Common.Utils.Markdown as Markdown
 import Dict
 import Dict.Extra as Dict
 import Flip exposing (flip)
@@ -9,9 +12,6 @@ import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
-import Shared.Utils.Markdown as Markdown
 import String.Extra as String
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)

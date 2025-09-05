@@ -2,10 +2,10 @@ module Wizard exposing (main)
 
 import Browser
 import Browser.Navigation exposing (Key)
+import Common.Components.AIAssistant as AIAssistant
+import Common.Utils.Theme as Theme
+import Common.Utils.TimeUtils as TimeUtils
 import Json.Decode exposing (Value)
-import Shared.Components.AIAssistant as AIAssistant
-import Shared.Utils.Theme as Theme
-import Shared.Utils.TimeUtils as TimeUtils
 import Task.Extra as Task
 import Url exposing (Url)
 import Wizard.Data.AppState as AppState

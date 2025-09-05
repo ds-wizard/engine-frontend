@@ -1,9 +1,9 @@
 module Wizard.Pages.Projects.Detail.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.WebSocket as WebSocket
+import Common.Data.ApiError exposing (ApiError)
 import Debounce
-import Shared.Api.WebSocket as WebSocket
-import Shared.Data.ApiError exposing (ApiError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)

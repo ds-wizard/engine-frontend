@@ -10,11 +10,11 @@ module Wizard.Components.ListingDropdown exposing
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.FontAwesome exposing (faListingActions)
 import Html exposing (Html, text)
 import Html.Attributes exposing (class, href)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
-import Shared.Components.FontAwesome exposing (faListingActions)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 

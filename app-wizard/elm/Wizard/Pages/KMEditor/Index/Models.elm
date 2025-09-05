@@ -4,9 +4,9 @@ module Wizard.Pages.KMEditor.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.Branch exposing (Branch)
 import Wizard.Components.Listing.Models as Listing
 import Wizard.Pages.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)

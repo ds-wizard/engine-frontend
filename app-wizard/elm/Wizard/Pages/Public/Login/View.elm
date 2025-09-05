@@ -1,5 +1,9 @@
 module Wizard.Pages.Public.Login.View exposing (view)
 
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (fa)
+import Common.Components.FormResult as FormResult
+import Common.Utils.MarkdownOrHtml as MarkdownOrHtml
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form, input, p, span, text)
 import Html.Attributes exposing (attribute, class, disabled, id, pattern, placeholder, type_)
@@ -8,10 +12,6 @@ import Html.Events exposing (onInput, onSubmit)
 import Html.Extra as Html
 import Html.Keyed
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (fa)
-import Shared.Components.FormResult as FormResult
-import Shared.Utils.MarkdownOrHtml as MarkdownOrHtml
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Components.Announcements as Announcements
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton

@@ -1,10 +1,10 @@
 module Wizard.Pages.Dashboard.Widgets.WelcomeWidget exposing (view)
 
+import Common.Components.Undraw as Undraw
+import Common.Data.Role as Role
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
-import Shared.Components.Undraw as Undraw
-import Shared.Data.Role as Role
 import String.Format as String
 import Wizard.Data.AppState as AppState exposing (AppState)
 

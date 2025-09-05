@@ -9,9 +9,9 @@ module Wizard.Models exposing
     , userLoggedIn
     )
 
+import Common.Components.AIAssistant as AIAssistant
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Random exposing (Seed)
-import Shared.Components.AIAssistant as AIAssistant
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig
 import Wizard.Components.Menu.Models
 import Wizard.Data.AppState exposing (AppState)

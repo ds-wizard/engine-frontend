@@ -4,11 +4,11 @@ module Wizard.Pages.Public.Common.View exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormResult as FormResult
 import Html exposing (Html, div, form, span, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onSubmit)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormResult as FormResult
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Routes as Routes
 

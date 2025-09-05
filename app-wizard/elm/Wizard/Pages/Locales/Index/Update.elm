@@ -1,10 +1,10 @@
 module Wizard.Pages.Locales.Index.Update exposing (fetchData, update)
 
 import ActionResult
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Api.Models.Locale exposing (Locale)
 import Wizard.Components.Listing.Msgs as ListingMsgs

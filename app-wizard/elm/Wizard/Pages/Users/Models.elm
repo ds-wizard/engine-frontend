@@ -1,7 +1,7 @@
 module Wizard.Pages.Users.Models exposing (Model, initLocalModel, initialModel)
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Data.UuidOrCurrent as UuidOrCurrent
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Create.Models
 import Wizard.Pages.Users.Edit.Models

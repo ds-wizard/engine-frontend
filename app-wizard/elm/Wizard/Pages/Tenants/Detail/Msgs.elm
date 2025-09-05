@@ -1,7 +1,7 @@
 module Wizard.Pages.Tenants.Detail.Msgs exposing (Msg(..))
 
+import Common.Data.ApiError exposing (ApiError)
 import Form
-import Shared.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 

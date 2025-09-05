@@ -10,14 +10,14 @@ module Wizard.Components.Listing.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Debouncer.Extra as Debouncer exposing (Debouncer)
 import Dict exposing (Dict)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Set exposing (Set)
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Components.Listing.Msgs exposing (Msg)
 
 

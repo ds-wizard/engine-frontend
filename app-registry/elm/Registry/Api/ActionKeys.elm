@@ -1,8 +1,8 @@
 module Registry.Api.ActionKeys exposing (postForgottenTokenActionKey)
 
+import Common.Api.Request as Requests exposing (ToMsg)
 import Registry.Data.AppState as AppState exposing (AppState)
 import Registry.Data.Forms.ForgottenTokenForm as ForgottenTokenForm exposing (ForgottenTokenForm)
-import Shared.Api.Request as Requests exposing (ToMsg)
 
 
 postForgottenTokenActionKey : AppState -> ForgottenTokenForm -> ToMsg () msg -> Cmd msg

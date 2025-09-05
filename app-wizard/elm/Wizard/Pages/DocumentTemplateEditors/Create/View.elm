@@ -1,15 +1,15 @@
 module Wizard.Pages.DocumentTemplateEditors.Create.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Html.Events exposing (onSubmit)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem

@@ -3,9 +3,9 @@ module Wizard.Api.KnowledgeModels exposing
     , fetchPreview
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Shared.Api.Request as Request exposing (ToMsg)
 import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Data.AppState as AppState exposing (AppState)

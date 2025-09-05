@@ -1,11 +1,11 @@
 module Wizard.Pages.Dashboard.Widgets.OutdatedTemplatesWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Badge as Badge
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
-import Shared.Components.Badge as Badge
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon

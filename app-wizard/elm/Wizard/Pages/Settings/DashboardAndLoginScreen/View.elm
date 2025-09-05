@@ -1,5 +1,10 @@
 module Wizard.Pages.Settings.DashboardAndLoginScreen.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.Form.FormError exposing (FormError)
 import Compose exposing (compose2)
 import Form exposing (Form)
 import Gettext exposing (gettext)
@@ -8,11 +13,6 @@ import Html.Attributes exposing (class, src)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.FontAwesome exposing (faDelete)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Wizard.Data.AppState exposing (AppState)

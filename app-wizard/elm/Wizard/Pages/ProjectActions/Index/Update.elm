@@ -4,8 +4,8 @@ module Wizard.Pages.ProjectActions.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
 import Wizard.Api.QuestionnaireActions as QuestionnaireActionsApi
 import Wizard.Components.Listing.Msgs as ListingMsgs

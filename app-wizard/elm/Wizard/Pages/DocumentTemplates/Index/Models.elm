@@ -4,7 +4,7 @@ module Wizard.Pages.DocumentTemplates.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Components.Listing.Models as Listing
 

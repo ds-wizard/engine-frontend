@@ -8,6 +8,7 @@ module Registry.Pages.DocumentTemplatesDetail exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Registry.Api.DocumentTemplates as DocumentTemplatesApi
@@ -19,7 +20,6 @@ import Registry.Components.SidebarRow as SidebarRow
 import Registry.Components.VersionList as VersionList
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Version
 
 

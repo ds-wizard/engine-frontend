@@ -1,12 +1,12 @@
 module Wizard.Pages.KnowledgeModels.Import.OwlImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import File
 import Form
 import Gettext exposing (gettext)
 import Json.Decode exposing (decodeValue)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs

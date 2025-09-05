@@ -1,10 +1,10 @@
 module Wizard.View exposing (view)
 
 import Browser exposing (Document)
+import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Shared.Components.Page as Page
-import Shared.Components.Undraw as Undraw
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Layouts.Layout as Layout
 import Wizard.Models exposing (Model)

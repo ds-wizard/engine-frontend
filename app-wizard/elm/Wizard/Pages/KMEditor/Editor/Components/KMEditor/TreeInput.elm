@@ -8,6 +8,7 @@ module Wizard.Pages.KMEditor.Editor.Components.KMEditor.TreeInput exposing
     , view
     )
 
+import Common.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmEditorCollapseAll, faKmEditorExpandAll, faKmEditorTreeClosed, faKmEditorTreeOpened, faKmExpert, faKmKnowledgeModel, faKmQuestion, faKmReference)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
@@ -15,7 +16,6 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Set exposing (Set)
-import Shared.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmEditorCollapseAll, faKmEditorExpandAll, faKmEditorTreeClosed, faKmEditorTreeOpened, faKmExpert, faKmKnowledgeModel, faKmQuestion, faKmReference)
 import Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)

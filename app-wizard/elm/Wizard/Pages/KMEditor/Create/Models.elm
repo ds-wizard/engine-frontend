@@ -4,8 +4,8 @@ module Wizard.Pages.KMEditor.Create.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Components.TypeHintInput as TypeHintInput

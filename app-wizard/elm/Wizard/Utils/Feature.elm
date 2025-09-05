@@ -82,8 +82,8 @@ module Wizard.Utils.Feature exposing
     , usersView
     )
 
+import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Maybe.Extra as Maybe
-import Shared.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.Branch as Branch exposing (Branch)

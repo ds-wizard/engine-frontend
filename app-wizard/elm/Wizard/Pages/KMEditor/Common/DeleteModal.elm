@@ -9,10 +9,10 @@ module Wizard.Pages.KMEditor.Common.DeleteModal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.Modal as Modal
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
-import Shared.Components.Modal as Modal
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Branches as BranchesApi

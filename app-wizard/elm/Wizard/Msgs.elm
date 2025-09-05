@@ -5,7 +5,7 @@ module Wizard.Msgs exposing
     )
 
 import Browser exposing (UrlRequest)
-import Shared.Components.AIAssistant
+import Common.Components.AIAssistant
 import Time
 import Url exposing (Url)
 import Wizard.Components.Menu.Msgs
@@ -40,7 +40,7 @@ type Msg
     | OnTimeZone Time.Zone
     | AcceptCookies
     | AuthMsg Wizard.Pages.Auth.Msgs.Msg
-    | AIAssistantMsg Shared.Components.AIAssistant.Msg
+    | AIAssistantMsg Common.Components.AIAssistant.Msg
     | SetSidebarCollapsed Bool
     | SetRightPanelCollapsed Bool
     | SetFullscreen Bool

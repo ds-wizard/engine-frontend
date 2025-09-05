@@ -4,11 +4,11 @@ module Wizard.Pages.Locales.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FileDownloader as FileDownloader
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setLocale)
 import Gettext exposing (gettext)
-import Shared.Components.FileDownloader as FileDownloader
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setLocale)
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs

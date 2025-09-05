@@ -17,11 +17,11 @@ module Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig exposing
 
 import Color exposing (Color)
 import Color.Convert as Convert
+import Common.Utils.Theme exposing (Theme)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Color as D
 import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
-import Shared.Utils.Theme exposing (Theme)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig.CustomMenuLink as CustomMenuLink exposing (CustomMenuLink)
 
 

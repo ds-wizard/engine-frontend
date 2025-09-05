@@ -1,8 +1,8 @@
 module Wizard.Api.Feedbacks exposing (getFeedbacks, postFeedback)
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
 import Json.Encode exposing (Value)
-import Shared.Api.Request as Request exposing (ToMsg)
 import Wizard.Api.Models.Feedback as Feedback exposing (Feedback)
 import Wizard.Data.AppState as AppState exposing (AppState)
 

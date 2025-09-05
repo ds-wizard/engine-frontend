@@ -2,13 +2,13 @@ module Wizard.Pages.Projects.CreateMigration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Cmd.Extra exposing (withNoCmd)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setSelected)
 import Form
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
-import Shared.Utils.Setters exposing (setSelected)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)

@@ -8,6 +8,9 @@ module Registry.Components.AboutModal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.BuildInfo as BuildInfo exposing (BuildInfo)
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class, classList, colspan, href, target)
@@ -17,9 +20,6 @@ import Json.Decode.Extra as D
 import Registry.Api.BuildInfo as BuildInfoApi
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Data.BuildInfo as BuildInfo exposing (BuildInfo)
-import Shared.Utils.TimeUtils as TimeUtils
 
 
 type alias Model =

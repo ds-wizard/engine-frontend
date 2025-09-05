@@ -1,15 +1,15 @@
 module Wizard.Pages.Public.ForgottenPasswordConfirmation.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.FontAwesome exposing (faSuccess)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, p, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
-import Shared.Components.FontAwesome exposing (faSuccess)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Utils.Form.FormError exposing (FormError)
 import String.Format as String
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)

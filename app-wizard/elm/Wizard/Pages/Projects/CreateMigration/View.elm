@@ -1,16 +1,16 @@
 module Wizard.Pages.Projects.CreateMigration.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.ActionButton as ActionResult
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (faArrowRight)
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
-import Shared.Components.ActionButton as ActionResult
-import Shared.Components.Flash as Flash
-import Shared.Components.FontAwesome exposing (faArrowRight)
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
 import Version
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)

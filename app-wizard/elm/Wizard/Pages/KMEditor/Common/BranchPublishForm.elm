@@ -5,11 +5,11 @@ module Wizard.Pages.KMEditor.Common.BranchPublishForm exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as Validate
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
-import Shared.Utils.Form.Validate as Validate
 import String exposing (fromInt)
 import Uuid exposing (Uuid)
 

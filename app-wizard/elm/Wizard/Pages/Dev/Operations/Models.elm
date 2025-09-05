@@ -7,10 +7,10 @@ module Wizard.Pages.Dev.Operations.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
+import Common.Data.DevOperationSection exposing (DevOperationSection)
 import Dict exposing (Dict)
 import List.Extra as List
-import Shared.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
-import Shared.Data.DevOperationSection exposing (DevOperationSection)
 
 
 type alias Model =

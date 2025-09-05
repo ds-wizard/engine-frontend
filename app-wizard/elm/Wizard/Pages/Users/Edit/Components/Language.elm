@@ -9,17 +9,17 @@ module Wizard.Pages.Users.Edit.Components.Language exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Badge as Badge
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form, input, label, text)
 import Html.Attributes exposing (checked, class, classList, name, type_)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Badge as Badge
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Utils.RequestHelpers as RequestHelpers
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Api.Models.LocaleSuggestion exposing (LocaleSuggestion)
 import Wizard.Api.Models.UserLocale exposing (UserLocale)

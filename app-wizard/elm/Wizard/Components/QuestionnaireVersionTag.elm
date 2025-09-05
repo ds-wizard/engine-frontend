@@ -3,9 +3,9 @@ module Wizard.Components.QuestionnaireVersionTag exposing
     , version
     )
 
+import Common.Components.Badge as Badge
 import Gettext exposing (gettext)
 import Html exposing (Html, text)
-import Shared.Components.Badge as Badge
 import Wizard.Data.AppState exposing (AppState)
 
 

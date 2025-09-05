@@ -10,6 +10,17 @@ module Wizard.Components.Listing.View exposing
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (fa, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faListingFilterSingleNotSelected, faListingFilterSingleSelected, faSortAsc, faSortDesc)
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Components.Undraw as Undraw
+import Common.Data.Pagination exposing (Pagination)
+import Common.Data.Pagination.Page exposing (Page)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
+import Common.Utils.TimeDistance exposing (locale)
+import Common.Utils.TimeUtils as TimeUtils
 import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, input, li, nav, span, text, ul)
@@ -19,17 +30,6 @@ import Html.Events exposing (onClick, onInput)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (fa, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faListingFilterSingleNotSelected, faListingFilterSingleSelected, faSortAsc, faSortDesc)
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Components.Undraw as Undraw
-import Shared.Data.Pagination exposing (Pagination)
-import Shared.Data.Pagination.Page exposing (Page)
-import Shared.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
-import Shared.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
-import Shared.Utils.TimeDistance exposing (locale)
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time
 import Time.Distance exposing (inWordsWithConfig)

@@ -1,20 +1,20 @@
 module Wizard.Pages.KnowledgeModelSecrets.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faDelete, faEdit, fas)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Components.Undraw as Undraw
+import Common.Utils.TimeDistance as TimeDistance
+import Common.Utils.TimeUtils as TimeUtils
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, em, p, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (attribute, class, colspan)
 import Html.Events exposing (onClick)
 import Maybe.Extra as Maybe
-import Shared.Components.FontAwesome exposing (faDelete, faEdit, fas)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Components.Undraw as Undraw
-import Shared.Utils.TimeDistance as TimeDistance
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)

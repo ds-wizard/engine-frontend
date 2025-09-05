@@ -7,12 +7,12 @@ module Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberPermType exposin
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form.Error as Error exposing (ErrorValue(..))
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
 import Gettext exposing (gettext)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
 import Wizard.Data.AppState exposing (AppState)
 

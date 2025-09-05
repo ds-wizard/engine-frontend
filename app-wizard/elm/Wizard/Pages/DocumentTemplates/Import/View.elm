@@ -1,5 +1,7 @@
 module Wizard.Pages.DocumentTemplates.Import.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromRegistry)
+import Common.Components.Page as Page
 import File exposing (File)
 import File.Extra as File
 import Gettext exposing (gettext)
@@ -8,8 +10,6 @@ import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Shared.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromRegistry)
-import Shared.Components.Page as Page
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Components.FileImport as FileImport
 import Wizard.Data.AppState as AppState exposing (AppState)

@@ -5,10 +5,10 @@ module Wizard.Components.Questionnaire.FeedbackForm exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias FeedbackForm =

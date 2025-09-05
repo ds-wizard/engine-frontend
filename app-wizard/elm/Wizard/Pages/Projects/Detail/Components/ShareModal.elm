@@ -11,6 +11,18 @@ module Wizard.Pages.Projects.Detail.Components.ShareModal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Cmd.Extra exposing (withNoCmd)
+import Common.Components.ActionButton as ActionButton
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faFwRemove, faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, fas)
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Components.FormResult as FormResult
+import Common.Components.GuideLink as GuideLink
+import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
+import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Copy as Copy
+import Common.Utils.Driver as Driver exposing (TourConfig)
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
@@ -21,18 +33,6 @@ import Html.Events exposing (onClick, onMouseOut)
 import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faFwRemove, faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, fas)
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.FormResult as FormResult
-import Shared.Components.GuideLink as GuideLink
-import Shared.Components.Tooltip exposing (tooltip, tooltipLeft)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
-import Shared.Ports.Copy as Copy
-import Shared.Utils.Driver as Driver exposing (TourConfig)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Shortcut
 import String.Format as String
 import Task.Extra as Task

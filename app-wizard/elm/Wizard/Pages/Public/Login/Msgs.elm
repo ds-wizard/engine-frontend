@@ -1,6 +1,6 @@
 module Wizard.Pages.Public.Login.Msgs exposing (Msg(..))
 
-import Shared.Data.ApiError exposing (ApiError)
+import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Api.Models.TokenResponse exposing (TokenResponse)
 

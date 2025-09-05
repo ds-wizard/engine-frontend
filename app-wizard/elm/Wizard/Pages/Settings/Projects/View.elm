@@ -1,5 +1,8 @@
 module Wizard.Pages.Settings.Projects.View exposing (view)
 
+import Common.Components.FormExtra as FormExtra
+import Common.Components.FormGroup as FormGroup
+import Common.Utils.Form.FormError exposing (FormError)
 import Compose exposing (compose2)
 import Form exposing (Form)
 import Gettext exposing (gettext)
@@ -7,9 +10,6 @@ import Html exposing (Html, div, hr)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Html.Keyed
-import Shared.Components.FormExtra as FormExtra
-import Shared.Components.FormGroup as FormGroup
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility

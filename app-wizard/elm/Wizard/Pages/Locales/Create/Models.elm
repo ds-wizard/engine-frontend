@@ -6,9 +6,9 @@ module Wizard.Pages.Locales.Create.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Utils.Form.FormError exposing (FormError)
 import File exposing (File)
 import Form exposing (Form)
-import Shared.Utils.Form.FormError exposing (FormError)
 import Wizard.Components.Dropzone as Dropzone
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Locales.Common.LocaleCreateForm as LocaleCreateFrom exposing (LocaleCreateForm)

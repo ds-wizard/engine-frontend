@@ -4,8 +4,8 @@ module Wizard.Pages.KMEditor.Routing exposing
     , toUrl
     )
 
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Flip exposing (flip)
-import Shared.Data.PaginationQueryString as PaginationQueryString
 import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query

@@ -4,7 +4,7 @@ module Wizard.Pages.Dashboard.Models exposing
     , initialModel
     )
 
-import Shared.Data.Role as Role
+import Common.Data.Role as Role
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Dashboards.AdminDashboard as AdminDashboard

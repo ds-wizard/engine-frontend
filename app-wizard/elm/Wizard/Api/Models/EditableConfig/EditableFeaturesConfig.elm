@@ -7,13 +7,13 @@ module Wizard.Api.Models.EditableConfig.EditableFeaturesConfig exposing
     , validation
     )
 
+import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
-import Shared.Utils.Form.FormError exposing (FormError)
 
 
 type alias EditableFeaturesConfig =

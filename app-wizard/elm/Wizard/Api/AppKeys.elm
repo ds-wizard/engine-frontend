@@ -3,8 +3,8 @@ module Wizard.Api.AppKeys exposing
     , getAppKeys
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
-import Shared.Api.Request as Request exposing (ToMsg)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.AppKey as AppKey exposing (AppKey)
 import Wizard.Data.AppState as AppState exposing (AppState)

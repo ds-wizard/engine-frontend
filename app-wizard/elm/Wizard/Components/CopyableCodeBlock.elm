@@ -6,13 +6,13 @@ module Wizard.Components.CopyableCodeBlock exposing
     , view
     )
 
+import Common.Components.FontAwesome exposing (faCopy)
+import Common.Components.Tooltip exposing (tooltip)
+import Common.Ports.Copy as Copy
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick, onMouseOut)
-import Shared.Components.FontAwesome exposing (faCopy)
-import Shared.Components.Tooltip exposing (tooltip)
-import Shared.Ports.Copy as Copy
 import Wizard.Data.AppState exposing (AppState)
 
 

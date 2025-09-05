@@ -4,10 +4,10 @@ module Wizard.Pages.Projects.Routing exposing
     , toUrl
     )
 
+import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.UrlUtils exposing (queryParamsToString)
 import Flip exposing (flip)
-import Shared.Data.PaginationQueryFilters.FilterOperator as FilterOperator
-import Shared.Data.PaginationQueryString as PaginationQueryString
-import Shared.Utils.UrlUtils exposing (queryParamsToString)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Extra exposing (uuid)
 import Url.Parser.Query as Query

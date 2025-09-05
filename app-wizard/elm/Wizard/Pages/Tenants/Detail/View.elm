@@ -1,5 +1,12 @@
 module Wizard.Pages.Tenants.Detail.View exposing (view)
 
+import Common.Components.Badge as Badge
+import Common.Components.FontAwesome exposing (faEdit, faWarning)
+import Common.Components.FormGroup as FormGroup
+import Common.Components.Modal as Modal
+import Common.Components.Page as Page
+import Common.Utils.Markdown as Markdown
+import Common.Utils.TimeUtils as TimeUtils
 import Form
 import Html exposing (Html, a, br, div, h3, span, strong, text)
 import Html.Attributes exposing (class, href, target)
@@ -8,13 +15,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Registry.Components.FontAwesome exposing (fas)
-import Shared.Components.Badge as Badge
-import Shared.Components.FontAwesome exposing (faEdit, faWarning)
-import Shared.Components.FormGroup as FormGroup
-import Shared.Components.Modal as Modal
-import Shared.Components.Page as Page
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.TimeUtils as TimeUtils
 import String.Format as String
 import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin

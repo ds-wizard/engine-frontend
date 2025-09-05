@@ -1,6 +1,9 @@
 module Wizard.Pages.Public.Auth.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, input, label, span, text)
 import Html.Attributes exposing (checked, class, disabled, href, target, type_)
@@ -8,9 +11,6 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onCheck, onSubmit)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
 import String.Format as String
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Public.Auth.Models exposing (Model)

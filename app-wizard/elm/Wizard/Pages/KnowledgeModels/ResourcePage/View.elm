@@ -1,11 +1,11 @@
 module Wizard.Pages.KnowledgeModels.ResourcePage.View exposing (view)
 
+import Common.Components.FontAwesome exposing (faKmResourceCollection)
+import Common.Components.Page as Page
+import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
-import Shared.Components.FontAwesome exposing (faKmResourceCollection)
-import Shared.Components.Page as Page
-import Shared.Utils.Markdown as Markdown
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.ResourcePage.Models exposing (Model)

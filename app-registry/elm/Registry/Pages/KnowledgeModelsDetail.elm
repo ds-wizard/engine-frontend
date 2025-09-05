@@ -8,6 +8,7 @@ module Registry.Pages.KnowledgeModelsDetail exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, text)
 import Html.Attributes exposing (href)
@@ -22,7 +23,6 @@ import Registry.Components.SidebarRow as SidebarRow
 import Registry.Components.VersionList as VersionList
 import Registry.Data.AppState exposing (AppState)
 import Registry.Routes as Routes
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 
 
 type alias Model =

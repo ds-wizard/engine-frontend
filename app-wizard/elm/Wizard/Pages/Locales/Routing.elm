@@ -4,7 +4,7 @@ module Wizard.Pages.Locales.Routing exposing
     , toUrl
     )
 
-import Shared.Data.PaginationQueryString as PaginationQueryString
+import Common.Data.PaginationQueryString as PaginationQueryString
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin

@@ -1,13 +1,13 @@
 module Wizard.Pages.Dev.PersistentCommandsIndex.View exposing (view)
 
+import Common.Components.ActionButton as ActionButton
+import Common.Components.FontAwesome exposing (faPersistentCommandRetry)
+import Common.Components.FormResult as FormResult
+import Common.Components.Page as Page
+import Common.Components.PersistentCommandBadge as PersistentCommandBadge
 import Html exposing (Html, div, img, span, text)
 import Html.Attributes exposing (class, src)
 import Html.Extra as Html
-import Shared.Components.ActionButton as ActionButton
-import Shared.Components.FontAwesome exposing (faPersistentCommandRetry)
-import Shared.Components.FormResult as FormResult
-import Shared.Components.Page as Page
-import Shared.Components.PersistentCommandBadge as PersistentCommandBadge
 import Wizard.Api.Models.PersistentCommand as PersistentCommand exposing (PersistentCommand)
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)

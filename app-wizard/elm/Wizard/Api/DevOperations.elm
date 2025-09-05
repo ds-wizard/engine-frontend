@@ -3,11 +3,11 @@ module Wizard.Api.DevOperations exposing
     , getOperations
     )
 
+import Common.Api.Request as Request exposing (ToMsg)
+import Common.Data.DevOperationExecution as DevOperationExecution exposing (DevOperationExecution)
+import Common.Data.DevOperationExecutionResult as DevOperationExecutionResult exposing (DevOperationExecutionResult)
+import Common.Data.DevOperationSection as DevOperationSection exposing (DevOperationSection)
 import Json.Decode as D
-import Shared.Api.Request as Request exposing (ToMsg)
-import Shared.Data.DevOperationExecution as DevOperationExecution exposing (DevOperationExecution)
-import Shared.Data.DevOperationExecutionResult as DevOperationExecutionResult exposing (DevOperationExecutionResult)
-import Shared.Data.DevOperationSection as DevOperationSection exposing (DevOperationSection)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 

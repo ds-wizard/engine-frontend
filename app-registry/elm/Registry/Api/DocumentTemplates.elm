@@ -1,10 +1,10 @@
 module Registry.Api.DocumentTemplates exposing (getDocumentTemplate, getDocumentTemplates)
 
+import Common.Api.Request as Requests exposing (ToMsg)
 import Json.Decode as D
 import Registry.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Registry.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Registry.Data.AppState as AppState exposing (AppState)
-import Shared.Api.Request as Requests exposing (ToMsg)
 
 
 getDocumentTemplates : AppState -> ToMsg (List DocumentTemplate) msg -> Cmd msg

@@ -1,8 +1,8 @@
 module Wizard.Pages.Projects.Common.CloneProjectModal.Update exposing (UpdateConfig, update)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
-import Shared.Data.ApiError as ApiError exposing (ApiError)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Data.AppState exposing (AppState)

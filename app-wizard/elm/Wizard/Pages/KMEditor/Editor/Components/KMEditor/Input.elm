@@ -40,6 +40,13 @@ module Wizard.Pages.KMEditor.Editor.Components.KMEditor.Input exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.DatePicker as DatePicker
+import Common.Components.FontAwesome exposing (faAdd, faDelete, fas)
+import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
+import Common.Utils.ByteUnits as ByteUnits
+import Common.Utils.Markdown as Markdown
+import Common.Utils.RegexPatterns as RegexPatterns
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
@@ -53,13 +60,6 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
 import Reorderable
-import Shared.Components.ActionResultBlock as ActionResultBlock
-import Shared.Components.DatePicker as DatePicker
-import Shared.Components.FontAwesome exposing (faAdd, faDelete, fas)
-import Shared.Components.Tooltip exposing (tooltip, tooltipLeft)
-import Shared.Utils.ByteUnits as ByteUnits
-import Shared.Utils.Markdown as Markdown
-import Shared.Utils.RegexPatterns as RegexPatterns
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
