@@ -5,6 +5,7 @@ module Wizard.Api.Models.Questionnaire exposing
     , isOwner
     )
 
+import Common.Api.Models.UserInfo as UserInfo exposing (UserInfo)
 import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -19,7 +20,6 @@ import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireShar
 import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
 import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
-import Wizard.Api.Models.UserInfo as UserInfo exposing (UserInfo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
 

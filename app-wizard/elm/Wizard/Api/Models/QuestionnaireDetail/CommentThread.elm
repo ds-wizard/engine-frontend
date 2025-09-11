@@ -1,5 +1,6 @@
 module Wizard.Api.Models.QuestionnaireDetail.CommentThread exposing (CommentThread, commentCount, compare, decoder, isAssigned, isAuthor)
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
@@ -8,7 +9,6 @@ import Time
 import Time.Extra as Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireDetail.Comment as Comment exposing (Comment)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias CommentThread =

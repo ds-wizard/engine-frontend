@@ -1,11 +1,13 @@
 module Common.Utils.Form.Field exposing
     ( dict
     , int
+    , maybeInt
     , maybeString
     )
 
 import Dict exposing (Dict)
 import Form.Field as Field exposing (Field)
+import Maybe.Extra as Maybe
 
 
 maybeString : Maybe String -> Field
@@ -32,3 +34,8 @@ dict valueField inputDict =
 int : Int -> Field
 int =
     Field.string << String.fromInt
+
+
+maybeInt : Maybe Int -> Field
+maybeInt =
+    Field.string << Maybe.unwrap "" String.fromInt

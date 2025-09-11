@@ -36,19 +36,22 @@ import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import CharIdentifier
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.UserInfo as UserInfo
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
 import Common.Components.DatePicker as DatePicker
 import Common.Components.FileDownloader as FileDownloader
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess)
+import Common.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess, fas)
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft, tooltipRight)
 import Common.Components.Undraw as Undraw
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Copy as Copy
 import Common.Ports.Dom as Dom
 import Common.Ports.Dom.ElementScrollTop as ElementScrollTop
+import Common.Ports.LocalStorage as LocalStorage
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.FileIcon as FileIcon
 import Common.Utils.Markdown as Markdown
@@ -65,15 +68,14 @@ import Html.Attributes.Extensions exposing (dataCy, dataTour, disableGrammarly)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
 import Html.Extra as Html
-import Json.Decode as D exposing (Decoder, decodeValue)
+import Json.Decode as D exposing (decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
+import List.Extensions as List
 import List.Extra as List
-import List.Utils as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
-import Registry.Components.FontAwesome exposing (fas)
 import Roman
 import Set exposing (Set)
 import SplitPane
@@ -115,8 +117,6 @@ import Wizard.Api.Models.TypeHint exposing (TypeHint)
 import Wizard.Api.Models.TypeHintLegacy exposing (TypeHintLegacy)
 import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
-import Wizard.Api.Models.UserInfo as UserInfo
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Api.Models.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
 import Wizard.Api.QuestionnaireActions as QuestionnaireActionsApi
 import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
@@ -138,10 +138,8 @@ import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Data.Integrations as Integrations
-import Wizard.Data.LocalStorageData as LocalStorageData exposing (LocalStorageData)
 import Wizard.Data.Session as Session
 import Wizard.Pages.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
@@ -298,15 +296,15 @@ init appState questionnaire mbPath mbCommentThreadUuid =
                     Cmd.none
 
                 _ ->
-                    Ports.localStorageGet (localStorageRightPanelKey questionnaire.uuid)
+                    LocalStorage.getItem (localStorageRightPanelKey questionnaire.uuid)
     in
     ( model
     , Cmd.batch
         [ scrollCmd
-        , Ports.localStorageGet (localStorageCollapsedItemKey questionnaire.uuid)
-        , Ports.localStorageGet (localStorageViewResolvedKey questionnaire.uuid)
-        , Ports.localStorageGet (localStorageNamedOnlyKey questionnaire.uuid)
-        , Ports.localStorageGet localStorageViewSettingsKey
+        , LocalStorage.getItem (localStorageCollapsedItemKey questionnaire.uuid)
+        , LocalStorage.getItem (localStorageViewResolvedKey questionnaire.uuid)
+        , LocalStorage.getItem (localStorageNamedOnlyKey questionnaire.uuid)
+        , LocalStorage.getItem localStorageViewSettingsKey
         , rightPanelCmd
         ]
     )
@@ -591,32 +589,9 @@ localStorageViewSettingsKey =
     "project-view-settings"
 
 
-localStorageViewSettingsDecoder : Decoder (LocalStorageData QuestionnaireViewSettings)
-localStorageViewSettingsDecoder =
-    LocalStorageData.decoder QuestionnaireViewSettings.decoder
-
-
-localStorageViewSettingsEncode : QuestionnaireViewSettings -> E.Value
-localStorageViewSettingsEncode qvs =
-    LocalStorageData.encode QuestionnaireViewSettings.encode
-        { key = localStorageViewSettingsKey
-        , value = qvs
-        }
-
-
 localStorageCollapsedItemKey : Uuid -> String
 localStorageCollapsedItemKey uuid =
     "project-" ++ Uuid.toString uuid ++ "-items"
-
-
-localStorageCollapsedItemsDecoder : Decoder (LocalStorageData (Set String))
-localStorageCollapsedItemsDecoder =
-    LocalStorageData.decoder (D.set D.string)
-
-
-localStorageCollapsedItemsEncode : LocalStorageData (Set String) -> E.Value
-localStorageCollapsedItemsEncode =
-    LocalStorageData.encode (E.list E.string << Set.toList)
 
 
 localStorageRightPanelKey : Uuid -> String
@@ -624,29 +599,14 @@ localStorageRightPanelKey uuid =
     "project-" ++ Uuid.toString uuid ++ "-right-panel"
 
 
-localStorageRightPanelDecoder : Decoder (LocalStorageData RightPanel)
-localStorageRightPanelDecoder =
-    LocalStorageData.decoder RightPanel.decoder
-
-
 localStorageViewResolvedKey : Uuid -> String
 localStorageViewResolvedKey uuid =
     "project-" ++ Uuid.toString uuid ++ "-view-resolved"
 
 
-localStorageViewResolvedDecoder : Decoder (LocalStorageData Bool)
-localStorageViewResolvedDecoder =
-    LocalStorageData.decoder D.bool
-
-
 localStorageNamedOnlyKey : Uuid -> String
 localStorageNamedOnlyKey uuid =
     "project-" ++ Uuid.toString uuid ++ "-named-only"
-
-
-localStorageNamedOnlyDecoder : Decoder (LocalStorageData Bool)
-localStorageNamedOnlyDecoder =
-    LocalStorageData.decoder D.bool
 
 
 contentElementSelector : String
@@ -1023,7 +983,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap <| { model | deleteFile = Nothing }
 
         DownloadFile uuid ->
-            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl appState model.uuid uuid)) )
+            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl model.uuid uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.update fileDownloaderMsg) )
@@ -1113,7 +1073,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         SetViewSettings viewSettings ->
             withSeed
                 ( { model | viewSettings = viewSettings }
-                , Ports.localStorageSet (localStorageViewSettingsEncode viewSettings)
+                , LocalStorage.setItem localStorageViewSettingsKey (QuestionnaireViewSettings.encode viewSettings)
                 )
 
         GetQuestionnaireEventsCompleted result ->
@@ -1385,45 +1345,45 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             updateCollapsedItems <|
                 List.foldl Set.remove model.collapsedItems paths
 
-        GotLocalStorageData value ->
-            case decodeValue (D.field "key" D.string) value of
+        GotLocalStorageData data ->
+            case decodeValue (D.field "key" D.string) data of
                 Ok key ->
                     if key == localStorageViewSettingsKey then
-                        case decodeValue localStorageViewSettingsDecoder value of
-                            Ok data ->
-                                wrap { model | viewSettings = data.value }
+                        case LocalStorage.decodeItemValue QuestionnaireViewSettings.decoder data of
+                            Ok value ->
+                                wrap { model | viewSettings = value }
 
                             Err _ ->
                                 wrap model
 
                     else if key == localStorageCollapsedItemKey model.uuid then
-                        case decodeValue localStorageCollapsedItemsDecoder value of
-                            Ok data ->
-                                wrap { model | collapsedItems = data.value }
+                        case LocalStorage.decodeItemValue (D.set D.string) data of
+                            Ok value ->
+                                wrap { model | collapsedItems = value }
 
                             Err _ ->
                                 wrap model
 
                     else if key == localStorageRightPanelKey model.uuid then
-                        case decodeValue localStorageRightPanelDecoder value of
-                            Ok data ->
-                                withSeed ( model, Task.dispatch (SetRightPanel data.value) )
+                        case LocalStorage.decodeItemValue RightPanel.decoder data of
+                            Ok value ->
+                                withSeed ( model, Task.dispatch (SetRightPanel value) )
 
                             Err _ ->
                                 wrap model
 
                     else if key == localStorageViewResolvedKey model.uuid then
-                        case decodeValue localStorageViewResolvedDecoder value of
-                            Ok data ->
-                                wrap { model | commentsViewResolved = data.value }
+                        case LocalStorage.decodeItemValue D.bool data of
+                            Ok value ->
+                                wrap { model | commentsViewResolved = value }
 
                             Err _ ->
                                 wrap model
 
                     else if key == localStorageNamedOnlyKey model.uuid then
-                        case decodeValue localStorageNamedOnlyDecoder value of
-                            Ok data ->
-                                wrap { model | historyModel = History.setNamedOnly data.value model.historyModel }
+                        case LocalStorage.decodeItemValue D.bool data of
+                            Ok value ->
+                                wrap { model | historyModel = History.setNamedOnly value model.historyModel }
 
                             Err _ ->
                                 wrap model
@@ -1529,58 +1489,34 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
 localStorageCollapsedItemsCmd : Uuid -> Set String -> Cmd msg
 localStorageCollapsedItemsCmd uuid items =
-    let
-        data =
-            { key = localStorageCollapsedItemKey uuid
-            , value = items
-            }
-    in
-    data
-        |> localStorageCollapsedItemsEncode
-        |> Ports.localStorageSet
+    LocalStorage.setItem
+        (localStorageCollapsedItemKey uuid)
+        (E.list E.string (Set.toList items))
 
 
 localStorageRightPanelCmd : Model -> Cmd msg
 localStorageRightPanelCmd model =
     if model.rightPanel == RightPanel.None then
-        Ports.localStorageRemove (localStorageRightPanelKey model.uuid)
+        LocalStorage.removeItem (localStorageRightPanelKey model.uuid)
 
     else
-        let
-            data =
-                { key = localStorageRightPanelKey model.uuid
-                , value = model.rightPanel
-                }
-        in
-        data
-            |> LocalStorageData.encode RightPanel.encode
-            |> Ports.localStorageSet
+        LocalStorage.setItem
+            (localStorageRightPanelKey model.uuid)
+            (RightPanel.encode model.rightPanel)
 
 
 localStorageViewResolvedCmd : Model -> Cmd msg
 localStorageViewResolvedCmd model =
-    let
-        data =
-            { key = localStorageViewResolvedKey model.uuid
-            , value = model.commentsViewResolved
-            }
-    in
-    data
-        |> LocalStorageData.encode E.bool
-        |> Ports.localStorageSet
+    LocalStorage.setItem
+        (localStorageViewResolvedKey model.uuid)
+        (E.bool model.commentsViewResolved)
 
 
 localStorageNamedOnlyCmd : Model -> Cmd msg
 localStorageNamedOnlyCmd model =
-    let
-        data =
-            { key = localStorageNamedOnlyKey model.uuid
-            , value = model.historyModel.namedOnly
-            }
-    in
-    data
-        |> LocalStorageData.encode E.bool
-        |> Ports.localStorageSet
+    LocalStorage.setItem
+        (localStorageNamedOnlyKey model.uuid)
+        (E.bool model.historyModel.namedOnly)
 
 
 handleScrollToPath : Model -> Bool -> String -> ( Model, Cmd Msg )
@@ -1935,7 +1871,7 @@ subscriptions model =
                 SplitPane.subscriptions model.splitPane
 
         collapsedItemsSub =
-            Ports.localStorageData GotLocalStorageData
+            LocalStorage.gotItemRaw GotLocalStorageData
 
         contentScrollSub =
             Dom.gotScrollTop GotContentScroll

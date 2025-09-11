@@ -4,7 +4,7 @@ module Wizard.Pages.Registry.RegistrySignupConfirmation.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Wizard.Api.Registry as RegistryApi
 import Wizard.Data.AppState exposing (AppState)

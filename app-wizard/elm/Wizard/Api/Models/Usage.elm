@@ -1,5 +1,6 @@
-module Wizard.Api.Models.Usage exposing (Usage, UsageValue, decoder)
+module Wizard.Api.Models.Usage exposing (Usage, decoder)
 
+import Common.Api.Models.UsageValue as UsageValue exposing (UsageValue)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 
@@ -18,29 +19,16 @@ type alias Usage =
     }
 
 
-type alias UsageValue =
-    { max : Int
-    , current : Int
-    }
-
-
 decoder : Decoder Usage
 decoder =
     D.succeed Usage
-        |> D.required "activeUsers" decodeUsageValue
-        |> D.required "branches" decodeUsageValue
-        |> D.required "documents" decodeUsageValue
-        |> D.required "documentTemplateDrafts" decodeUsageValue
-        |> D.required "documentTemplates" decodeUsageValue
-        |> D.required "knowledgeModels" decodeUsageValue
-        |> D.required "locales" decodeUsageValue
-        |> D.required "questionnaires" decodeUsageValue
-        |> D.required "storage" decodeUsageValue
-        |> D.required "users" decodeUsageValue
-
-
-decodeUsageValue : Decoder UsageValue
-decodeUsageValue =
-    D.succeed UsageValue
-        |> D.required "max" D.int
-        |> D.required "current" D.int
+        |> D.required "activeUsers" UsageValue.decoder
+        |> D.required "branches" UsageValue.decoder
+        |> D.required "documents" UsageValue.decoder
+        |> D.required "documentTemplateDrafts" UsageValue.decoder
+        |> D.required "documentTemplates" UsageValue.decoder
+        |> D.required "knowledgeModels" UsageValue.decoder
+        |> D.required "locales" UsageValue.decoder
+        |> D.required "questionnaires" UsageValue.decoder
+        |> D.required "storage" UsageValue.decoder
+        |> D.required "users" UsageValue.decoder

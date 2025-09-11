@@ -10,6 +10,7 @@ module Wizard.Components.Dropzone exposing
     , update
     )
 
+import Common.Components.FontAwesome exposing (fas)
 import File exposing (File)
 import File.Select as Select
 import Html exposing (Html, button, div, p, span, text)
@@ -17,7 +18,6 @@ import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Events.Extensions exposing (alwaysPreventDefaultOn, alwaysPreventDefaultOnWithDecoder)
 import Json.Decode as D
-import Registry.Components.FontAwesome exposing (fas)
 import Task
 
 

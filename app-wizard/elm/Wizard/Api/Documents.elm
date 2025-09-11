@@ -8,9 +8,9 @@ module Wizard.Api.Documents exposing
     , postSubmission
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Json.Decode as D
@@ -57,9 +57,9 @@ getDocumentUrl appState uuid =
     Request.get (AppState.toServerInfo appState) ("/documents/" ++ Uuid.toString uuid ++ "/download") UrlResponse.decoder
 
 
-downloadDocumentUrl : AppState -> Uuid -> String
-downloadDocumentUrl appState uuid =
-    appState.apiUrl ++ "/documents/" ++ Uuid.toString uuid ++ "/download"
+downloadDocumentUrl : Uuid -> String
+downloadDocumentUrl uuid =
+    "/documents/" ++ Uuid.toString uuid ++ "/download"
 
 
 postSubmission : AppState -> String -> String -> ToMsg Submission msg -> Cmd msg

@@ -4,7 +4,7 @@ module Wizard.Pages.Settings.Routing exposing
     , toUrl
     )
 
-import List.Utils as List
+import List.Extensions as List
 import Url.Parser exposing ((</>), Parser, map, s)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Data.AppState exposing (AppState)

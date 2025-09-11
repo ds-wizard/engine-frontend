@@ -4,7 +4,7 @@ module Wizard.Pages.Settings.Registry.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Form as Form
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form

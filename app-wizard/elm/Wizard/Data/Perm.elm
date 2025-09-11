@@ -19,8 +19,8 @@ module Wizard.Data.Perm exposing
     , userManagement
     )
 
+import Common.Api.Models.UserInfo exposing (UserInfo)
 import Maybe.Extra as Maybe
-import Wizard.Api.Models.UserInfo exposing (UserInfo)
 
 
 hasPerm : Maybe UserInfo -> String -> Bool

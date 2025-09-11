@@ -4,8 +4,8 @@ module Wizard.Pages.KnowledgeModels.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
@@ -56,7 +56,7 @@ update msg wrapMsg appState model =
                     )
 
         ExportPackage package ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (PackagesApi.exportPackageUrl appState package.id)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (PackagesApi.exportPackageUrl package.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )

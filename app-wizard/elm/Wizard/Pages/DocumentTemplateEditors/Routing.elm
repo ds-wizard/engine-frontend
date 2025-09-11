@@ -8,7 +8,7 @@ import Common.Data.PaginationQueryString as PaginationQueryString
 import Flip exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Query as Query
-import Url.Parser.Query.Extra as Query
+import Url.Parser.Query.Extensions as Query
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute
 import Wizard.Pages.DocumentTemplateEditors.Routes exposing (Route(..))

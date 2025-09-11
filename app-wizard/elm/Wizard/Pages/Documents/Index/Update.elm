@@ -4,8 +4,8 @@ module Wizard.Pages.Documents.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setQuestionnaire)
 import Gettext exposing (gettext)
@@ -83,7 +83,7 @@ update wrapMsg msg appState model =
             ( { model | submissionErrorModal = mbError }, Cmd.none )
 
         DownloadDocument document ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentsApi.downloadDocumentUrl appState document.uuid)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentsApi.downloadDocumentUrl document.uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )

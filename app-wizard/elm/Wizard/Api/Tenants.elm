@@ -9,8 +9,8 @@ module Wizard.Api.Tenants exposing
     , putTenantLimits
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)

@@ -2,8 +2,9 @@ module Wizard.Pages.Public.Login.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
-import Common.Data.ApiError as ApiError exposing (ApiError)
-import Common.Data.Token as Token
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Token as Token
+import Common.Ports.LocalStorage as LocalStorage
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
@@ -14,13 +15,11 @@ import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.LocalStorageData as LocalStorageData
 import Wizard.Data.Session as Session
 import Wizard.Msgs
 import Wizard.Pages.Auth.Msgs
 import Wizard.Pages.Public.Login.Models exposing (Model)
 import Wizard.Pages.Public.Login.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -104,7 +103,7 @@ saveOriginalUrlCmd : Maybe String -> Cmd msg
 saveOriginalUrlCmd originalUrl =
     case originalUrl of
         Just url ->
-            Ports.localStorageSet (LocalStorageData.encode E.string { key = "wizard/originalUrl", value = url })
+            LocalStorage.setItem "wizard/originalUrl" (E.string url)
 
         Nothing ->
             Cmd.none

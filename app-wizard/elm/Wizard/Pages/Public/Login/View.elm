@@ -38,7 +38,7 @@ view appState model =
 
             loginInfoSidebar =
                 ( "login-info-sidebar"
-                , Maybe.unwrap Html.nothing (MarkdownOrHtml.view [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
+                , Maybe.unwrap Html.nothing (MarkdownOrHtml.toHtml [ class "mt-4", dataCy "login_info-sidebar" ]) appState.config.dashboardAndLoginScreen.loginInfoSidebar
                 )
 
             content =
@@ -53,7 +53,7 @@ view appState model =
                                 [ class <| splitScreenClass ++ " justify-content-start col-xl-8 col-lg-7 side-info"
                                 , dataCy "login_info"
                                 ]
-                                [ MarkdownOrHtml.view [ class "flex-grow-1" ] loginInfo ]
+                                [ MarkdownOrHtml.toHtml [ class "flex-grow-1" ] loginInfo ]
                           )
                         , ( "login-form"
                           , Html.Keyed.node "div"

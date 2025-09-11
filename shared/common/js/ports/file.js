@@ -1,5 +1,5 @@
 module.exports = function (app) {
-    app.ports.downloadFile.subscribe(downloadFile)
+    app.ports.downloadFile?.subscribe(downloadFile)
 
     function downloadFile(fileUrl) {
         const iframe = document.createElement('iframe')

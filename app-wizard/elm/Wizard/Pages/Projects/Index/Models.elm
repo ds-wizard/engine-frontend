@@ -4,14 +4,14 @@ module Wizard.Pages.Projects.Index.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Debouncer.Extra as Debounce exposing (Debouncer)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Components.Listing.Models as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal

@@ -3,13 +3,13 @@ module Wizard.Api.Models.QuestionnaireFile exposing
     , decoder
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias QuestionnaireFile =

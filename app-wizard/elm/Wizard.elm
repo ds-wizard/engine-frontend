@@ -14,7 +14,7 @@ import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn
 import Wizard.Msgs exposing (Msg)
 import Wizard.Pages.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Pages.Projects.Routes as ProjectsRoutes
-import Wizard.Ports as Ports
+import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
@@ -33,7 +33,7 @@ init flags location key =
 
         cmd =
             if appState.invalidSession then
-                Ports.clearSessionAndReload ()
+                Session.clearSessionAndReload ()
 
             else
                 let

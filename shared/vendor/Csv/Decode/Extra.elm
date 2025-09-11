@@ -1,7 +1,7 @@
 module Csv.Decode.Extra exposing (email, hardcoded, maybeString, notEmptyString)
 
+import Common.Utils.RegexPatterns as RegexPatterns
 import Csv.Decode as Decode exposing (Decoder)
-import Internal.Utils.RegexPatterns as RegexPatterns
 import Regex
 import String.Extra as String
 

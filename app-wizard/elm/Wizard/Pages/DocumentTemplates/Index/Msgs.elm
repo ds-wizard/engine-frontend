@@ -1,7 +1,7 @@
 module Wizard.Pages.DocumentTemplates.Index.Msgs exposing (Msg(..))
 
+import Common.Api.ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)

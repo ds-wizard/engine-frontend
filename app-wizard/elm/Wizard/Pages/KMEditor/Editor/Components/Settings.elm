@@ -9,11 +9,12 @@ module Wizard.Pages.KMEditor.Editor.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
@@ -39,7 +40,6 @@ import Wizard.Pages.KMEditor.Common.BranchEditForm as BranchEditForm exposing (B
 import Wizard.Pages.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.Pages.KMEditor.Common.DeleteModal as DeleteModal
 import Wizard.Pages.KMEditor.Common.UpgradeModal as UpgradeModal
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -118,7 +118,7 @@ update cfg appState msg model =
             case result of
                 Ok _ ->
                     ( { model | savingBranch = ActionResult.Success "" }
-                    , Ports.refresh ()
+                    , Window.refresh ()
                     )
 
                 Err error ->

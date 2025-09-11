@@ -9,12 +9,12 @@ module Wizard.Components.FileImport exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Request exposing (ToMsg)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (faError, faImportFile, faSpinner, faSuccess, faWarning)
 import Common.Components.Tooltip exposing (tooltipLeft)
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Dict exposing (Dict)
 import File exposing (File)
 import File.Select as Select

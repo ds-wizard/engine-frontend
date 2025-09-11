@@ -11,6 +11,7 @@ module Wizard.Components.Questionnaire.History exposing
 
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
 import Common.Components.Page as Page
 import Common.Utils.FileIcon as FileIcon
@@ -39,7 +40,6 @@ import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyTy
 import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Wizard.Api.Models.User as User
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Data.AppState exposing (AppState)

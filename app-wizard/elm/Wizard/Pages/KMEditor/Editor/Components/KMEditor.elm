@@ -14,6 +14,7 @@ module Wizard.Pages.KMEditor.Editor.Components.KMEditor exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Badge as Badge
 import Common.Components.Flash as Flash
@@ -23,7 +24,6 @@ import Common.Components.FormGroup as FormGroup
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Copy as Copy
 import Common.Ports.Dom as Dom
 import Common.Utils.ByteUnits as ByteUnits

@@ -6,10 +6,11 @@ module Wizard.Pages.KMEditor.Editor.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError
+import Common.Api.Models.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Common.Api.WebSocket as WebSocket
-import Common.Data.ApiError as ApiError
-import Common.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Common.Ports.Dom as Dom
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Debounce
 import Dict
@@ -41,7 +42,6 @@ import Wizard.Pages.KMEditor.Editor.Models exposing (Model, addSavingActionUuid,
 import Wizard.Pages.KMEditor.Editor.Msgs exposing (Msg(..))
 import Wizard.Pages.KMEditor.Routes exposing (Route(..))
 import Wizard.Pages.Projects.Detail.Components.ProjectSaving as ProjectSaving
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing exposing (cmdNavigate)
 
@@ -215,7 +215,7 @@ update wrapMsg msg appState model =
             withSeed ( { model | savingModel = ProjectSaving.update savingMsg model.savingModel }, Cmd.none )
 
         Refresh ->
-            withSeed ( model, Ports.refresh () )
+            withSeed ( model, Window.refresh () )
 
         KMEditorMsg kmEditorMsg ->
             case model.branchModel of
@@ -314,7 +314,7 @@ update wrapMsg msg appState model =
                     ActionResult.map (EditorBranch.applyEvent appState (getSecrets model) True event) model.branchModel
 
                 setUnloadMessageCmd =
-                    Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+                    Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
 
                 focusSelectorCmd =
                     Maybe.unwrap Cmd.none Dom.focus mbFocusSelector
@@ -448,7 +448,7 @@ handleWebSocketMsg websocketMsg appState model =
 
                 clearUnloadMessageCmd =
                     if removed && List.isEmpty newModel2.savingActionUuids then
-                        Ports.clearUnloadMessage ()
+                        Window.clearUnloadMessage ()
 
                     else
                         Cmd.none
@@ -461,7 +461,7 @@ handleWebSocketMsg websocketMsg appState model =
             , Cmd.batch [ clearUnloadMessageCmd, navigateCmd ]
             )
     in
-    case WebSocket.receive ServerBranchAction.decoder websocketMsg model.websocket of
+    case WebSocket.receive (WebSocketServerAction.decoder ServerBranchAction.decoder) websocketMsg model.websocket of
         WebSocket.Message serverAction ->
             case serverAction of
                 WebSocketServerAction.Success message ->

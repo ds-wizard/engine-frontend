@@ -4,7 +4,7 @@ module Wizard.Pages.Dev.Operations.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.DevOperationSection as AdminOperationSection
+import Common.Api.Models.DevOperationSection as AdminOperationSection
 import Common.Utils.RequestHelpers as RequestHelpers
 import Dict
 import Wizard.Api.DevOperations as DevOperationsApi

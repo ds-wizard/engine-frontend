@@ -8,7 +8,7 @@ module Registry.Pages.SignupConfirmation exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, h5, p, strong, text)
 import Html.Attributes exposing (class, href)

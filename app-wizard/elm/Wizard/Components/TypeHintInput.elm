@@ -13,9 +13,9 @@ module Wizard.Components.TypeHintInput exposing
 import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
 import Browser.Events
+import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Components.FontAwesome exposing (fa, faError, faRemove, faSpinner)
-import Common.Data.ApiError exposing (ApiError)
-import Common.Data.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Debounce exposing (Debounce)
 import Gettext exposing (gettext)

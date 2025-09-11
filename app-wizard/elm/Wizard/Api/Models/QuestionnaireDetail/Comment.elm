@@ -5,6 +5,7 @@ module Wizard.Api.Models.QuestionnaireDetail.Comment exposing
     , isAuthor
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
@@ -12,7 +13,6 @@ import Maybe.Extra as Maybe
 import Time
 import Time.Extra as Time
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias Comment =

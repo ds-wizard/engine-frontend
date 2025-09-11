@@ -18,12 +18,12 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor exposin
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faClose, faDelete, faDownload, faKmEditorTreeClosed, faKmEditorTreeOpened)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltipLeft)
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
 import Common.Utils.ContentType as ContentType
 import Common.Utils.RequestHelpers as RequestHelpers

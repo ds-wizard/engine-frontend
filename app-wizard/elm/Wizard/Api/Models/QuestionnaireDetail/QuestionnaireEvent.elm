@@ -10,6 +10,7 @@ module Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing
     , isInvisible
     )
 
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import List.Extra as List
@@ -27,7 +28,6 @@ import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetLabelsData as
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData as SetPhaseData exposing (SetPhaseData)
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData exposing (SetReplyData)
 import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 
 
 type QuestionnaireEvent

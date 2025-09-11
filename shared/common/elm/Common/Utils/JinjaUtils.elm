@@ -5,7 +5,7 @@ module Common.Utils.JinjaUtils exposing
 
 import Common.Utils.RegexPatterns as RegexPatterns
 import Regex exposing (Match)
-import Set exposing (Set)
+import Set
 import String
 
 

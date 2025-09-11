@@ -5,7 +5,7 @@ module Wizard.Pages.Projects.FileDownload.Update exposing
 
 import ActionResult
 import Browser.Navigation as Navigation
-import Common.Data.ApiError as ApiError
+import Common.Api.ApiError as ApiError
 import Gettext exposing (gettext)
 import Uuid exposing (Uuid)
 import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi

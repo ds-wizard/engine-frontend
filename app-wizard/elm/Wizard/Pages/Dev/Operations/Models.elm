@@ -7,8 +7,8 @@ module Wizard.Pages.Dev.Operations.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.DevOperationExecutionResult exposing (DevOperationExecutionResult)
-import Common.Data.DevOperationSection exposing (DevOperationSection)
+import Common.Api.Models.DevOperationExecutionResult exposing (DevOperationExecutionResult)
+import Common.Api.Models.DevOperationSection exposing (DevOperationSection)
 import Dict exposing (Dict)
 import List.Extra as List
 

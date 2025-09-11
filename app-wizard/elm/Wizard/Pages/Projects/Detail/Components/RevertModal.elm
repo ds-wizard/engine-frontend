@@ -9,9 +9,10 @@ module Wizard.Pages.Projects.Detail.Components.RevertModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Flash as Flash
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, br, p, strong, text)
@@ -21,7 +22,6 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Ports as Ports
 
 
 
@@ -84,7 +84,7 @@ update cfg appState msg model =
         PostRevertVersionComplete result ->
             case result of
                 Ok _ ->
-                    ( model, Ports.refresh () )
+                    ( model, Window.refresh () )
 
                 Err error ->
                     ( { model | revertResult = ApiError.toActionResult appState "Unable to revert the project" error }

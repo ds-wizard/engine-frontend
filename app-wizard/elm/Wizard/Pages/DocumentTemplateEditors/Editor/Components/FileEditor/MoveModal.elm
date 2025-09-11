@@ -12,8 +12,9 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor.MoveMod
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Components.FontAwesome exposing (fas)
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, strong, text, ul)
@@ -21,7 +22,6 @@ import Html.Attributes exposing (class, classList)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
-import Registry.Components.FontAwesome exposing (fas)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi

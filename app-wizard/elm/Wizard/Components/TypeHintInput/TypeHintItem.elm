@@ -8,6 +8,7 @@ module Wizard.Components.TypeHintInput.TypeHintItem exposing
     , userGroupSuggestion
     )
 
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.Badge as Badge
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
@@ -19,7 +20,6 @@ import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSu
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion exposing (UserGroupSuggestion)
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState exposing (AppState)

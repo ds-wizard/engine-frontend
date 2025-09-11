@@ -2,15 +2,15 @@ module Wizard.Pages.KnowledgeModels.Import.View exposing (view)
 
 import Common.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromOwl, faKmImportFromRegistry)
 import Common.Components.Page as Page
+import Common.Utils.FileUtils as File
 import File exposing (File)
-import File.Extra as File
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import List.Utils as List
+import List.Extensions as List
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Components.FileImport as FileImport
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -118,11 +118,7 @@ viewNavbar items =
 
 validateKmFile : AppState -> File -> Maybe String
 validateKmFile appState file =
-    let
-        ext =
-            File.ext file
-    in
-    if ext == Just "km" || ext == Just "json" then
+    if File.matchExtension [ "km", "json" ] file then
         Nothing
 
     else

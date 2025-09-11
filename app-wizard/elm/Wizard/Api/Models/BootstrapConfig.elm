@@ -5,10 +5,11 @@ module Wizard.Api.Models.BootstrapConfig exposing
     , default
     )
 
+import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
+import Common.Api.Models.UserInfo as UserInfo exposing (UserInfo)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.BootstrapConfig.Admin as AdminConfig exposing (Admin)
-import Wizard.Api.Models.BootstrapConfig.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Wizard.Api.Models.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
@@ -21,7 +22,6 @@ import Wizard.Api.Models.BootstrapConfig.QuestionnaireConfig as QuestionnaireCon
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig)
 import Wizard.Api.Models.BootstrapConfig.SignalBridgeConfig as SignalBridgeConfig exposing (SignalBridgeConfig)
 import Wizard.Api.Models.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
-import Wizard.Api.Models.UserInfo as UserInfo exposing (UserInfo)
 
 
 type alias BootstrapConfig =

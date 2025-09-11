@@ -6,7 +6,7 @@ import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, setSession)
 import Wizard.Msgs exposing (Msg)
 import Wizard.Pages.Auth.Msgs as AuthMsgs
-import Wizard.Ports as Ports
+import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -29,7 +29,7 @@ update msg model =
             in
             ( newModel
             , Cmd.batch
-                [ Ports.storeSession (Session.encode newModel.appState.session)
+                [ Session.storeSession (Session.encode newModel.appState.session)
                 , Navigation.load redirectUrl
                 ]
             )
@@ -54,7 +54,7 @@ logoutTo route model =
     let
         cmd =
             Cmd.batch
-                [ Ports.clearSession ()
+                [ Session.clearSession ()
                 , TokensApi.deleteCurrentToken model.appState (Wizard.Msgs.AuthMsg << always AuthMsgs.LogoutDone)
                 , cmdNavigate model.appState route
                 ]

@@ -1,8 +1,8 @@
 module.exports = function (app) {
-    if (app.ports.wsOpen) app.ports.wsOpen.subscribe(wsOpen)
-    if (app.ports.wsClose) app.ports.wsClose.subscribe(wsClose)
-    if (app.ports.wsSend) app.ports.wsSend.subscribe(wsSend)
-    if (app.ports.wsPing) app.ports.wsPing.subscribe(wsPing)
+    app.ports.wsOpen?.subscribe(wsOpen)
+    app.ports.wsClose?.subscribe(wsClose)
+    app.ports.wsSend?.subscribe(wsSend)
+    app.ports.wsPing?.subscribe(wsPing)
 
     const websockets = {}
     const queues = {}

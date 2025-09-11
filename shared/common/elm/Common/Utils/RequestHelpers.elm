@@ -7,7 +7,7 @@ module Common.Utils.RequestHelpers exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Gettext
 import Task.Extra as Task
 

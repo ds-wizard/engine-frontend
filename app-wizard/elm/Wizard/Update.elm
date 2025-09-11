@@ -3,6 +3,7 @@ module Wizard.Update exposing (update)
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
 import Common.Components.AIAssistant as AIAssistant
+import Common.Ports.Window as Window
 import Common.Utils.TimeUtils as TimeUtils
 import Url
 import Wizard.Api.Tours as ToursApi
@@ -31,7 +32,8 @@ import Wizard.Pages.Registry.Update
 import Wizard.Pages.Settings.Update
 import Wizard.Pages.Tenants.Update
 import Wizard.Pages.Users.Update
-import Wizard.Ports as Ports
+import Wizard.Ports.Cookies as Cookies
+import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation, routeIfAllowed)
 
@@ -199,7 +201,7 @@ update msg model =
                             in
                             case isGuarded nextRoute model of
                                 Just guardMsg ->
-                                    ( model, Ports.alert guardMsg )
+                                    ( model, Window.alert guardMsg )
 
                                 Nothing ->
                                     ( model, pushUrl model.appState.key (Url.toString url) )
@@ -228,7 +230,7 @@ update msg model =
                 ( { model | appState = AppState.setTimeZone model.appState timeZone }, Cmd.none )
 
             Wizard.Msgs.AcceptCookies ->
-                ( { model | appState = AppState.acceptCookies model.appState }, Ports.acceptCookies () )
+                ( { model | appState = AppState.acceptCookies model.appState }, Cookies.acceptCookies () )
 
             Wizard.Msgs.AuthMsg authMsg ->
                 Wizard.Pages.Auth.Update.update authMsg model
@@ -255,7 +257,7 @@ update msg model =
                     newModel =
                         setSession newSession model
                 in
-                ( newModel, Ports.storeSession <| Session.encode newSession )
+                ( newModel, Session.storeSession <| Session.encode newSession )
 
             Wizard.Msgs.SetRightPanelCollapsed collapsed ->
                 let
@@ -265,7 +267,7 @@ update msg model =
                     newModel =
                         setSession newSession model
                 in
-                ( newModel, Ports.storeSession <| Session.encode newSession )
+                ( newModel, Session.storeSession <| Session.encode newSession )
 
             Wizard.Msgs.SetFullscreen fullscreen ->
                 let
@@ -275,7 +277,7 @@ update msg model =
                     newModel =
                         setSession newSession model
                 in
-                ( newModel, Ports.storeSession <| Session.encode newSession )
+                ( newModel, Session.storeSession <| Session.encode newSession )
 
             Wizard.Msgs.HideSessionExpiresSoonModal ->
                 let

@@ -16,8 +16,8 @@ module Wizard.Api.Packages exposing
     , putPackage
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Utils.Bool as Bool
@@ -153,6 +153,6 @@ importFromOwl appState params file =
     Request.postFileWithDataWhatever (AppState.toServerInfo appState) "/packages/bundle" file httpParams
 
 
-exportPackageUrl : AppState -> String -> String
-exportPackageUrl appState packageId =
-    appState.apiUrl ++ "/packages/" ++ packageId ++ "/bundle"
+exportPackageUrl : String -> String
+exportPackageUrl packageId =
+    "/packages/" ++ packageId ++ "/bundle"

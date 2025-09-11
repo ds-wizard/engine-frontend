@@ -1,7 +1,7 @@
 module Registry.Api.BuildInfo exposing (getBuildInfo)
 
+import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
 import Common.Api.Request as Requests exposing (ToMsg)
-import Common.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Registry.Data.AppState as AppState exposing (AppState)
 
 

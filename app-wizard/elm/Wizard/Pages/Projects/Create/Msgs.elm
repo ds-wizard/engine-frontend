@@ -1,7 +1,7 @@
 module Wizard.Pages.Projects.Create.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
-import Common.Data.Pagination exposing (Pagination)
+import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Form
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)

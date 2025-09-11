@@ -1,7 +1,7 @@
 module Wizard.Pages.Projects.Import.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError
+import Common.Api.ApiError as ApiError
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
 import Gettext exposing (gettext)

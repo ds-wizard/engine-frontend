@@ -4,13 +4,13 @@ module Wizard.Api.Models.QuestionnaireVersion exposing
     , getVersionByEventUuid
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import List.Extra as List
 import Time
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias QuestionnaireVersion =

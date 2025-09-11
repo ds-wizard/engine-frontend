@@ -1,13 +1,13 @@
 module Wizard.Pages.Dev.Operations.View exposing (view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.Models.DevOperation exposing (DevOperation)
+import Common.Api.Models.DevOperation.DevOperationParameter exposing (DevOperationParameter)
+import Common.Api.Models.DevOperation.DevOperationParameterType as DevOperationParameterType
+import Common.Api.Models.DevOperationSection exposing (DevOperationSection)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.Page as Page
-import Common.Data.DevOperation exposing (DevOperation)
-import Common.Data.DevOperation.DevOperationParameter exposing (AdminOperationParameter)
-import Common.Data.DevOperation.DevOperationParameterType as AdminOperationParameterType
-import Common.Data.DevOperationSection exposing (DevOperationSection)
 import Common.Utils.Markdown as Markdown
 import Dict
 import Html exposing (Html, a, div, h2, h3, input, label, span, strong, text)
@@ -16,6 +16,7 @@ import Html.Events exposing (onClick, onInput)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
+import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dev.Operations.Models exposing (Model, fieldPath, operationPath)
 import Wizard.Pages.Dev.Operations.Msgs exposing (Msg(..))
@@ -125,25 +126,28 @@ viewOperation model sectionName operation =
         ]
 
 
-viewParameter : Model -> String -> String -> AdminOperationParameter -> Html Msg
+viewParameter : Model -> String -> String -> DevOperationParameter -> Html Msg
 viewParameter model sectionName operationName parameter =
     let
         ( parameterTypeLabel, parameterTypePlaceholder ) =
             case parameter.type_ of
-                AdminOperationParameterType.String ->
+                DevOperationParameterType.String ->
                     ( "string", "abc" )
 
-                AdminOperationParameterType.Int ->
+                DevOperationParameterType.Int ->
                     ( "int", "1" )
 
-                AdminOperationParameterType.Double ->
+                DevOperationParameterType.Double ->
                     ( "double", "2.3" )
 
-                AdminOperationParameterType.Bool ->
+                DevOperationParameterType.Bool ->
                     ( "bool", "True / False" )
 
-                AdminOperationParameterType.Json ->
+                DevOperationParameterType.Json ->
                     ( "Json", " { \"prop\": 1 }" )
+
+                DevOperationParameterType.Tenant ->
+                    ( "tenant", Uuid.toString Uuid.nil )
 
         path =
             fieldPath sectionName operationName parameter.name

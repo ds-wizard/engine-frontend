@@ -9,12 +9,12 @@ module Wizard.Pages.Users.Edit.Components.AppKeys exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (faDelete)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setAppKeys)

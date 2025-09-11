@@ -12,8 +12,8 @@ module Wizard.Api.Locales exposing
     , setEnabled
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import File exposing (File)
@@ -100,6 +100,6 @@ importLocale appState file =
     Request.postFile (AppState.toServerInfo appState) "/locales/bundle" file
 
 
-exportLocaleUrl : AppState -> String -> String
-exportLocaleUrl appState localeId =
-    appState.apiUrl ++ "/locales/" ++ localeId ++ "/bundle"
+exportLocaleUrl : String -> String
+exportLocaleUrl localeId =
+    "/locales/" ++ localeId ++ "/bundle"

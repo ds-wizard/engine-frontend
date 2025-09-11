@@ -13,9 +13,9 @@ module Wizard.Api.Branches exposing
     , websocket
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Api.WebSocket as WebSocket
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Json.Encode as E

@@ -6,7 +6,7 @@ module Wizard.Components.Menu.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Browser.Dom as Dom
-import Common.Data.BuildInfo exposing (BuildInfo)
+import Common.Api.Models.BuildInfo exposing (BuildInfo)
 import Dict exposing (Dict)
 
 

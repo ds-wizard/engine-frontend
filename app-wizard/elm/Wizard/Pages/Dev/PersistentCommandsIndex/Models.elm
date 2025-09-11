@@ -4,9 +4,9 @@ module Wizard.Pages.Dev.PersistentCommandsIndex.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.Models.PersistentCommand exposing (PersistentCommand)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
-import Wizard.Api.Models.PersistentCommand exposing (PersistentCommand)
 import Wizard.Components.Listing.Models as Listing
 import Wizard.Pages.Dev.Routes exposing (persistentCommandIndexRouteStateFilterId)
 

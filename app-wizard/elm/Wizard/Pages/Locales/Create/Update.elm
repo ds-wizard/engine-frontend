@@ -1,7 +1,9 @@
 module Wizard.Pages.Locales.Create.Update exposing (update)
 
 import ActionResult
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Locale as Locale
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import File exposing (File)
 import Form
@@ -16,7 +18,6 @@ import Wizard.Msgs
 import Wizard.Pages.Locales.Common.LocaleCreateForm as LocaleCreateForm
 import Wizard.Pages.Locales.Create.Models exposing (Model, combineContentFiles)
 import Wizard.Pages.Locales.Create.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -46,7 +47,7 @@ update appState msg wrapMsg model =
             handleCreateCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl Routes.localesIndex) )
+            ( model, Window.historyBack (Routing.toUrl Routes.localesIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model
@@ -100,7 +101,7 @@ updateDropzoneState cfg =
                 localeCmd =
                     case Dropzone.getFileContent newDropzoneState of
                         Just fileContent ->
-                            Ports.convertLocaleFile <|
+                            Locale.convertLocaleFile <|
                                 E.object
                                     [ ( "fileName", E.string fileName )
                                     , ( "fileContent", E.string fileContent )

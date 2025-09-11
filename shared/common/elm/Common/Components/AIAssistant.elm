@@ -10,6 +10,7 @@ module Common.Components.AIAssistant exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Request exposing (ServerInfo)
 import Common.Components.AIAssistant.Api as Api
 import Common.Components.AIAssistant.Models.Answer exposing (Answer)
@@ -17,7 +18,6 @@ import Common.Components.AIAssistant.Models.Conversation exposing (Conversation)
 import Common.Components.AIAssistant.Models.Message exposing (Message)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.FontAwesome exposing (fa, faClose)
-import Common.Data.ApiError exposing (ApiError)
 import Common.Utils.Markdown as Markdown
 import Gettext
 import Html exposing (Html, a, button, div, form, h5, input, p, text)

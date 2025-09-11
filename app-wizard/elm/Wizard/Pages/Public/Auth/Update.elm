@@ -1,27 +1,25 @@
 module Wizard.Pages.Public.Auth.Update exposing (fetchData, update)
 
 import ActionResult
-import Common.Data.ApiError as ApiError
-import Common.Data.Token as Token
+import Common.Api.ApiError as ApiError
+import Common.Api.Models.Token as Token
+import Common.Ports.LocalStorage as LocalStorage
 import Gettext exposing (gettext)
-import Json.Decode as D
 import Task.Extra as Task
 import Wizard.Api.Auth as AuthApi
 import Wizard.Api.Models.TokenResponse as TokenResponse
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.LocalStorageData as LocalStorageData
 import Wizard.Msgs
 import Wizard.Pages.Auth.Msgs
 import Wizard.Pages.Public.Auth.Models exposing (Model)
 import Wizard.Pages.Public.Auth.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 
 
 fetchData : String -> Maybe String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
 fetchData id mbError mbCode mbSessionState appState =
     Cmd.batch
         [ AuthApi.getToken appState id mbError mbCode mbSessionState AuthenticationCompleted
-        , Ports.localStorageGetAndRemove "wizard/originalUrl"
+        , LocalStorage.getAndRemoveItem "wizard/originalUrl"
         ]
 
 
@@ -39,8 +37,8 @@ update msg wrapMsg appState model =
                     ( newModel, Cmd.none )
     in
     case msg of
-        GotOriginalUrl value ->
-            case D.decodeValue (LocalStorageData.decoder (D.maybe D.string)) value of
+        GotOriginalUrl localStorageItemResult ->
+            case localStorageItemResult of
                 Ok localStorageData ->
                     if localStorageData.key == "wizard/originalUrl" then
                         ( { model | originalUrl = ActionResult.Success localStorageData.value }, Cmd.none )

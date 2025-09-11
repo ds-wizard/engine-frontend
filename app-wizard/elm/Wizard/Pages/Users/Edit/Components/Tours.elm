@@ -9,10 +9,10 @@ module Wizard.Pages.Users.Edit.Components.Tours exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)

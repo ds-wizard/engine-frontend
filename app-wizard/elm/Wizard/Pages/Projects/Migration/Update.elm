@@ -4,7 +4,7 @@ module Wizard.Pages.Projects.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)

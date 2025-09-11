@@ -1,5 +1,8 @@
 module Wizard.Pages.Dev.PersistentCommandsDetail.View exposing (view)
 
+import Common.Api.Models.PersistentCommand as PersistentCommand
+import Common.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.PersistentCommandBadge as PersistentCommandBadge
@@ -10,10 +13,7 @@ import Html.Extra as Html
 import Json.Print
 import SyntaxHighlight
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.PersistentCommand as PersistentCommand
-import Wizard.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
 import Wizard.Api.Models.User as User
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.TenantIcon as TenantIcon
 import Wizard.Components.UserIcon as UserIcon

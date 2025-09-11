@@ -13,7 +13,7 @@ module Wizard.Data.Session exposing
     , setToken
     )
 
-import Common.Data.Token as Token exposing (Token)
+import Common.Api.Models.Token as Token exposing (Token)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E

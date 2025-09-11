@@ -1,6 +1,6 @@
 module Common.Data.ServerErrorTest exposing (errorDecoderTests)
 
-import Common.Data.ServerError as ServerError
+import Common.Api.ServerError as ServerError
 import Dict
 import Expect
 import Json.Decode exposing (decodeString)

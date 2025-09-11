@@ -4,8 +4,8 @@ module Wizard.Pages.DocumentTemplates.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setTemplate)
 import Gettext exposing (gettext)
@@ -63,7 +63,7 @@ update msg wrapMsg appState model =
                 }
 
         ExportTemplate template ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentTemplatesApi.exportTemplateUrl appState template.id)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentTemplatesApi.exportTemplateUrl template.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )

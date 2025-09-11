@@ -7,8 +7,8 @@ module Wizard.Pages.Dev.Common.PersistentCommandActionsDropdown exposing
     )
 
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Common.Components.FontAwesome exposing (fa, faOpen, faPersistentCommandRetry)
-import Common.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Html exposing (Html)
 import Uuid exposing (Uuid)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)

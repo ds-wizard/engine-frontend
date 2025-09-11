@@ -10,10 +10,10 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.PublishModal expos
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FontAwesome exposing (faSettings)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)

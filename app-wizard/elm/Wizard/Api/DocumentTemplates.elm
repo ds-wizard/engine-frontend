@@ -13,8 +13,8 @@ module Wizard.Api.DocumentTemplates exposing
     , putTemplate
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Utils.Bool as Bool
@@ -134,6 +134,6 @@ importTemplate appState file =
     Request.postFile (AppState.toServerInfo appState) "/document-templates/bundle" file
 
 
-exportTemplateUrl : AppState -> String -> String
-exportTemplateUrl appState templateId =
-    appState.apiUrl ++ "/document-templates/" ++ templateId ++ "/bundle"
+exportTemplateUrl : String -> String
+exportTemplateUrl templateId =
+    "/document-templates/" ++ templateId ++ "/bundle"

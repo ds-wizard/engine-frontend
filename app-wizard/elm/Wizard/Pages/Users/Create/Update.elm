@@ -1,14 +1,15 @@
 module Wizard.Pages.Users.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
+import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Gettext exposing (gettext)
 import Random exposing (Seed, step)
-import Tuple.Extra as Tuple
+import Tuple.Extensions as Tuple
 import Uuid
 import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState exposing (AppState)
@@ -16,7 +17,6 @@ import Wizard.Msgs
 import Wizard.Pages.Users.Common.UserCreateForm as UserCreateForm
 import Wizard.Pages.Users.Create.Models exposing (Model)
 import Wizard.Pages.Users.Create.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -25,7 +25,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, 
 update msg wrapMsg appState model =
     case msg of
         Cancel ->
-            ( appState.seed, model, Ports.historyBack (Routing.toUrl Routes.usersIndex) )
+            ( appState.seed, model, Window.historyBack (Routing.toUrl Routes.usersIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState.seed appState model

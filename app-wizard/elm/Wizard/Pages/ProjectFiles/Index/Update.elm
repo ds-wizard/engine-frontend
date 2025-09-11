@@ -4,8 +4,8 @@ module Wizard.Pages.ProjectFiles.Index.Update exposing
     )
 
 import ActionResult
+import Common.Api.ApiError as ApiError
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
@@ -34,7 +34,7 @@ update msg wrapMsg appState model =
         DownloadFile file ->
             ( model
             , Cmd.map (wrapMsg << FileDownloaderMsg)
-                (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl appState file.questionnaire.uuid file.uuid))
+                (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl file.questionnaire.uuid file.uuid))
             )
 
         FileDownloaderMsg fileDownloaderMsg ->

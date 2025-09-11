@@ -5,11 +5,11 @@ module Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig exposing
     , encode
     )
 
+import Common.Api.Models.Announcement as Announcement exposing (Announcement)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
-import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement as Announcement exposing (Announcement)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType exposing (DashboardType)
 
 

@@ -503,7 +503,7 @@ markdownEditor locale markdownGuideLink =
 htmlOrMarkdownEditor : Gettext.Locale -> String -> Form FormError o -> String -> String -> Html Form.Msg
 htmlOrMarkdownEditor locale markdownGuideLink =
     markupEditor
-        { toPreview = MarkdownOrHtml.view []
+        { toPreview = MarkdownOrHtml.toHtml []
         , hint = gettext "You can use HTML or %s and see the result in the preview tab." locale
         , extraClass = ""
         , markdownGuideLink = markdownGuideLink

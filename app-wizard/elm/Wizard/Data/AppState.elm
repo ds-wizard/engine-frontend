@@ -35,7 +35,7 @@ import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
 import Wizard.Pages.Projects.Routes
-import Wizard.Ports as Ports
+import Wizard.Ports.Console as Console
 import Wizard.Routes as Routes
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
@@ -76,7 +76,7 @@ init flagsValue key =
                     Cmd.none
 
                 Err err ->
-                    Ports.consoleError (D.errorToString err)
+                    Console.consoleError (D.errorToString err)
 
         invalidSession =
             case flagsResult of

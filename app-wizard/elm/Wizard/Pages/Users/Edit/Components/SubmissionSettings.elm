@@ -9,11 +9,11 @@ module Wizard.Pages.Users.Edit.Components.SubmissionSettings exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)

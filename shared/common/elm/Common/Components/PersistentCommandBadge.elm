@@ -1,7 +1,7 @@
 module Common.Components.PersistentCommandBadge exposing (badge)
 
+import Common.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Common.Components.Badge as Badge
-import Common.Data.PersistentCommandState as PersistentCommandState exposing (PersistentCommandState)
 import Html exposing (Html, text)
 
 

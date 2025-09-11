@@ -1,6 +1,7 @@
 module Common.Data.Role exposing
     ( Role
     , admin
+    , csvDecoder
     , dataSteward
     , decoder
     , encode
@@ -14,6 +15,7 @@ module Common.Data.Role exposing
     , validation
     )
 
+import Csv.Decode as CsvDecode
 import Form.Error as Error
 import Form.Validate as V exposing (Validation)
 import Gettext exposing (gettext)
@@ -61,6 +63,18 @@ decoder =
                 Maybe.unwrap
                     (D.fail <| "Unknown role " ++ str)
                     D.succeed
+                    (fromString str)
+            )
+
+
+csvDecoder : CsvDecode.Decoder Role
+csvDecoder =
+    CsvDecode.string
+        |> CsvDecode.andThen
+            (\str ->
+                Maybe.unwrap
+                    (CsvDecode.fail <| "Unknown role " ++ str)
+                    CsvDecode.succeed
                     (fromString str)
             )
 

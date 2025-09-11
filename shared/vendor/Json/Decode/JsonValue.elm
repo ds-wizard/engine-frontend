@@ -1,6 +1,3 @@
--- TODO: Remove this module and use json-tools/json-value instead
-
-
 module Json.Decode.JsonValue exposing
     ( JsonValue(..)
     , decoder

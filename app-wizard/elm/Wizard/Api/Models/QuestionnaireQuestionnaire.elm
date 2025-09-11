@@ -54,7 +54,7 @@ import Result.Extra as Result
 import String.Extra as String
 import String.Format as String
 import Time
-import Tuple.Extra as Tuple
+import Tuple.Extensions as Tuple
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)

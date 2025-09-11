@@ -23,4 +23,4 @@ module.exports = function (app, sessionKey, otherSessionKeys) {
         clearSession()
         location.reload()
     }
-};
+}

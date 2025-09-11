@@ -4,7 +4,8 @@ module Wizard.Pages.KMEditor.Publish.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Ports
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Form.Field as Field
@@ -21,7 +22,6 @@ import Wizard.Msgs
 import Wizard.Pages.KMEditor.Common.BranchPublishForm as BranchPublishForm
 import Wizard.Pages.KMEditor.Publish.Models exposing (Model)
 import Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 

@@ -1,7 +1,9 @@
 module Common.Data.PaginationQueryFilters exposing
     ( PaginationQueryFilters
     , create
+    , decoder
     , empty
+    , encode
     , fromValues
     , getOp
     , getValue
@@ -9,12 +11,17 @@ module Common.Data.PaginationQueryFilters exposing
     , insertValue
     , isFilterActive
     , removeFilter
+    , removeValue
+    , toList
     )
 
-import Common.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
+import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator exposing (FilterOperator)
 import Dict exposing (Dict)
-import Dict.Utils as Dict
+import Dict.Extensions as Dict
 import Flip exposing (flip)
+import Json.Decode as D exposing (Decoder)
+import Json.Decode.Pipeline as D
+import Json.Encode as E
 
 
 
@@ -25,6 +32,21 @@ type alias PaginationQueryFilters =
     { values : Dict String String
     , operators : Dict String FilterOperator
     }
+
+
+decoder : Decoder PaginationQueryFilters
+decoder =
+    D.succeed PaginationQueryFilters
+        |> D.required "values" (D.dict D.string)
+        |> D.required "operators" (D.dict FilterOperator.decoder)
+
+
+encode : PaginationQueryFilters -> E.Value
+encode pqf =
+    E.object
+        [ ( "values", E.dict identity E.string pqf.values )
+        , ( "operators", E.dict identity FilterOperator.encode pqf.operators )
+        ]
 
 
 empty : PaginationQueryFilters
@@ -91,3 +113,8 @@ removeOp filterId pqf =
 getOp : String -> PaginationQueryFilters -> Maybe FilterOperator
 getOp filterId pqf =
     Dict.get filterId pqf.operators
+
+
+toList : PaginationQueryFilters -> List ( String, String )
+toList pqf =
+    Dict.toList pqf.values ++ Dict.toList (Dict.map (always FilterOperator.toString) pqf.operators)

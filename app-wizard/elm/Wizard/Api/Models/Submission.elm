@@ -1,5 +1,6 @@
 module Wizard.Api.Models.Submission exposing (Submission, compare, decoder, getReturnedData, visibleName)
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
@@ -7,7 +8,6 @@ import Time
 import Time.Extra as Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Submission.SubmissionState as SubmissionState exposing (SubmissionState)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias Submission =

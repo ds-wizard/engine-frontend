@@ -6,9 +6,9 @@ module Wizard.Api.QuestionnaireFiles exposing
     , postFile
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import File exposing (File)
@@ -61,6 +61,6 @@ getFileUrl appState projectUuid fileUuid =
     Request.get (AppState.toServerInfo appState) url UrlResponse.decoder
 
 
-fileUrl : AppState -> Uuid -> Uuid -> String
-fileUrl appState questionnaireUuid fileUuid =
-    appState.apiUrl ++ "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files/" ++ Uuid.toString fileUuid
+fileUrl : Uuid -> Uuid -> String
+fileUrl questionnaireUuid fileUuid =
+    "/questionnaires/" ++ Uuid.toString questionnaireUuid ++ "/files/" ++ Uuid.toString fileUuid
