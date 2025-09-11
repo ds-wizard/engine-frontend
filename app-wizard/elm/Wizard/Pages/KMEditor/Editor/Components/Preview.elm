@@ -13,6 +13,7 @@ module Wizard.Pages.KMEditor.Editor.Components.Preview exposing
     , view
     )
 
+import Common.Components.FontAwesome exposing (fas)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, strong, text)
@@ -22,7 +23,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
-import Registry.Components.FontAwesome exposing (fas)
 import Set exposing (Set)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)

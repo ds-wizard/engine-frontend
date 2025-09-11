@@ -5,6 +5,7 @@ module Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exp
     , toReply
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
@@ -13,7 +14,6 @@ import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
 import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias SetReplyData =

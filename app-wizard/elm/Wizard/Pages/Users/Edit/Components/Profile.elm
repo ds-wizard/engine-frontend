@@ -9,16 +9,17 @@ module Wizard.Pages.Users.Edit.Components.Profile exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (fa, faInfo)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Data.Role as Role
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Ports.Dom as Dom
+import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Markdown as Markdown
@@ -36,7 +37,6 @@ import Wizard.Api.Users as UsersApi
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Common.UserEditForm as UserEditForm exposing (UserEditForm)
-import Wizard.Ports as Ports
 
 
 type alias Model =
@@ -136,7 +136,7 @@ putUserCompleted cfg appState model result =
             let
                 updateCmd =
                     if Just user.uuid == Maybe.map .uuid appState.config.user then
-                        Ports.refresh ()
+                        Window.refresh ()
 
                     else
                         Cmd.none

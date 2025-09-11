@@ -4,7 +4,7 @@ module Wizard.Pages.KMEditor.Migration.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setMigration)
 import Gettext exposing (gettext)

@@ -27,7 +27,7 @@ module Common.Api.Request exposing
     , putWhatever
     )
 
-import Common.Data.ApiError as ApiError exposing (ApiError(..))
+import Common.Api.ApiError as ApiError exposing (ApiError(..))
 import File exposing (File)
 import Http
 import Json.Decode as D exposing (Decoder)

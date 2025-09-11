@@ -1,6 +1,9 @@
 module Common.Utils.TimeUtils exposing
     ( getTime
     , getTimeZone
+    , isAfter
+    , isBefore
+    , isBetween
     , monthToInt
     , monthToString
     , toReadableDate
@@ -149,3 +152,42 @@ monthToString appState month =
 
         Dec ->
             gettext "December" appState.locale
+
+
+isBetween : Time.Posix -> Time.Posix -> Time.Posix -> Bool
+isBetween start end time =
+    let
+        startMillis =
+            Time.posixToMillis start
+
+        endMillis =
+            Time.posixToMillis end
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    startMillis < timeMillis && endMillis > timeMillis
+
+
+isBefore : Time.Posix -> Time.Posix -> Bool
+isBefore expected time =
+    let
+        expectedMillis =
+            Time.posixToMillis expected
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    timeMillis < expectedMillis
+
+
+isAfter : Time.Posix -> Time.Posix -> Bool
+isAfter expected time =
+    let
+        expectedMillis =
+            Time.posixToMillis expected
+
+        timeMillis =
+            Time.posixToMillis time
+    in
+    timeMillis < expectedMillis

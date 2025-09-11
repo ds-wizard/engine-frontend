@@ -6,9 +6,9 @@ module Wizard.Components.Listing.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Navigation as Navigation
+import Common.Api.ApiError as ApiError
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Request exposing (ToMsg)
-import Common.Data.ApiError as ApiError
-import Common.Data.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Utils.RequestHelpers as RequestHelpers

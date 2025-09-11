@@ -7,6 +7,7 @@ module Wizard.Utils.QuestionnaireUtils exposing
     , isOwner
     )
 
+import Common.Api.Models.UserInfo as UserInfo
 import Flip exposing (flip)
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -16,7 +17,6 @@ import Wizard.Api.Models.Permission exposing (Permission)
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
-import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
 

@@ -88,12 +88,6 @@ maybeString =
     V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.string |> V.map Just ]
 
 
-
---maybeInt : Validation e (Maybe Int)
---maybeInt =
---    V.oneOf [ V.emptyString |> V.map (\_ -> Nothing), V.int |> V.map Just ]
-
-
 optionalString : Validation e String
 optionalString =
     V.oneOf [ V.emptyString, V.string ]

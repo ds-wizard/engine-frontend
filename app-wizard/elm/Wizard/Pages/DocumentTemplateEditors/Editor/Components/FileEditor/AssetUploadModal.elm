@@ -8,11 +8,11 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor.AssetUp
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (faImportFile)
 import Common.Components.FormResult as FormResult
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.ContentType as ContentType
 import Dict exposing (Dict)
 import File exposing (File)

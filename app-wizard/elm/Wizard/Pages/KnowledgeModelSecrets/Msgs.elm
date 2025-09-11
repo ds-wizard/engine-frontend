@@ -1,6 +1,6 @@
 module Wizard.Pages.KnowledgeModelSecrets.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Form
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 

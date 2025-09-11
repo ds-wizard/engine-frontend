@@ -1,8 +1,9 @@
 module Wizard.Pages.Locales.Index.Update exposing (fetchData, update)
 
 import ActionResult
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Wizard.Api.Locales as LocalesApi
@@ -13,7 +14,6 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Locales.Index.Models exposing (Model)
 import Wizard.Pages.Locales.Index.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 
 
@@ -55,7 +55,7 @@ update msg wrapMsg appState model =
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , transform = always (gettext "Locale was changed successfully." appState.locale)
-                , cmd = Ports.refresh ()
+                , cmd = Window.refresh ()
                 , locale = appState.locale
                 }
 
@@ -84,7 +84,7 @@ deleteLocaleCompleted appState model result =
     case result of
         Ok _ ->
             ( model
-            , Ports.refresh ()
+            , Window.refresh ()
             )
 
         Err error ->

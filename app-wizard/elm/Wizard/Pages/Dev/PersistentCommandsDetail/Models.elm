@@ -5,8 +5,8 @@ module Wizard.Pages.Dev.PersistentCommandsDetail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
 
 
 type alias Model =

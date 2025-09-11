@@ -7,9 +7,9 @@ module Wizard.Pages.KMEditor.Routing exposing
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Flip exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s)
-import Url.Parser.Extra exposing (uuid)
+import Url.Parser.Extensions exposing (uuid)
 import Url.Parser.Query as Query
-import Url.Parser.Query.Extra as Query
+import Url.Parser.Query.Extensions as Query
 import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute as KMEditorRoute

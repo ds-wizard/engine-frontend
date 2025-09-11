@@ -1,7 +1,8 @@
 module Wizard.Pages.Tenants.Create.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form
@@ -11,7 +12,6 @@ import Wizard.Msgs
 import Wizard.Pages.Tenants.Common.TenantCreateForm as AppCreateForm
 import Wizard.Pages.Tenants.Create.Models exposing (Model)
 import Wizard.Pages.Tenants.Create.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -20,7 +20,7 @@ update : AppState -> Msg -> (Msg -> Wizard.Msgs.Msg) -> Model -> ( Model, Cmd Wi
 update appState msg wrapMsg model =
     case msg of
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl Routes.tenantsIndex) )
+            ( model, Window.historyBack (Routing.toUrl Routes.tenantsIndex) )
 
         FormMsg formMsg ->
             handleForm formMsg wrapMsg appState model

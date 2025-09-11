@@ -4,11 +4,12 @@ module Wizard.Pages.Dev.PersistentCommandsIndex.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError
-import Common.Data.PersistentCommandState as PersistentCommandState
+import Common.Api.ApiError as ApiError
+import Common.Api.Models.PersistentCommand exposing (PersistentCommand)
+import Common.Api.Models.PersistentCommand.PersistentCommandState as PersistentCommandState
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Task.Extra as Task
-import Wizard.Api.Models.PersistentCommand exposing (PersistentCommand)
 import Wizard.Api.PersistentCommands as PersistentCommandsApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
@@ -16,7 +17,6 @@ import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Dev.PersistentCommandsIndex.Models exposing (Model)
 import Wizard.Pages.Dev.PersistentCommandsIndex.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 
 
@@ -45,7 +45,7 @@ update msg wrapMsg appState model =
         RetryFailedComplete result ->
             case result of
                 Ok _ ->
-                    ( model, Ports.refresh () )
+                    ( model, Window.refresh () )
 
                 Err error ->
                     ( { model | updating = ApiError.toActionResult appState "Unable to retry all failed persistent commands." error }

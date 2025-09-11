@@ -8,11 +8,11 @@ module Wizard.Pages.Users.Edit.Components.Password exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Ports.Dom as Dom
 import Common.Utils.Form.FormError exposing (FormError)

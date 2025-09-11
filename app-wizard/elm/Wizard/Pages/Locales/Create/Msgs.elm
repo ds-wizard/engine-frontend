@@ -1,6 +1,6 @@
 module Wizard.Pages.Locales.Create.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Form
 import Json.Decode as D
 import Wizard.Components.Dropzone as Dropzone

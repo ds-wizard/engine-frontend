@@ -2,8 +2,8 @@ module Wizard.Pages.DocumentTemplates.Import.View exposing (view)
 
 import Common.Components.FontAwesome exposing (faKmImportFromFile, faKmImportFromRegistry)
 import Common.Components.Page as Page
+import Common.Utils.FileUtils as File
 import File exposing (File)
-import File.Extra as File
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, text, ul)
 import Html.Attributes exposing (class, classList)
@@ -88,13 +88,10 @@ viewNavbar appState registryActive =
 validateDocumentTemplateFile : AppState -> File -> Maybe String
 validateDocumentTemplateFile appState file =
     let
-        ext =
-            File.ext file
-
         mime =
             File.mime file
     in
-    if ext == Just "zip" || mime == "application/json" then
+    if File.matchExtension [ "zip" ] file || mime == "application/json" then
         Nothing
 
     else

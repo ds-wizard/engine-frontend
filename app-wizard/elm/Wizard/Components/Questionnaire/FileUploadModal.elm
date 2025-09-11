@@ -10,12 +10,12 @@ module Wizard.Components.Questionnaire.FileUploadModal exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (fa, faCancel)
 import Common.Components.FormResult as FormResult
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip)
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.FileIcon as FileIcon
 import Common.Utils.FileUtils as FileUtils

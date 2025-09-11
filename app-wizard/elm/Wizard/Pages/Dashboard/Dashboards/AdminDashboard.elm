@@ -8,8 +8,8 @@ module Wizard.Pages.Dashboard.Dashboards.AdminDashboard exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Common.Data.ApiError as ApiErrorOld exposing (ApiError)
-import Common.Data.Pagination exposing (Pagination)
+import Common.Api.ApiError as ApiErrorOld exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Data.UuidOrCurrent as UuidOrCurrent
@@ -18,7 +18,7 @@ import Common.Utils.Setters exposing (setCommentThreads, setPackages, setTemplat
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import List.Utils as List
+import List.Extensions as List
 import Maybe.Extra as Maybe
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi

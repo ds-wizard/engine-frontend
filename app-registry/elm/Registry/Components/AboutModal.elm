@@ -8,8 +8,8 @@ module Registry.Components.AboutModal exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Common.Data.ApiError as ApiError exposing (ApiError)
-import Common.Data.BuildInfo as BuildInfo exposing (BuildInfo)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
 import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, code, div, em, h5, table, tbody, td, text, th, thead, tr)

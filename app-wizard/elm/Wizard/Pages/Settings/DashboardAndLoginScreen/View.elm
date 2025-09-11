@@ -1,5 +1,6 @@
 module Wizard.Pages.Settings.DashboardAndLoginScreen.View exposing (view)
 
+import Common.Api.Models.Announcement.AnnouncementLevel as AnnouncementLevel
 import Common.Components.FontAwesome exposing (faDelete)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
@@ -14,7 +15,6 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
-import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Common.Forms.DashboardAndLoginScreenConfigForm as DashboardAndLoginScreenConfigForm exposing (DashboardAndLoginScreenConfigForm)
 import Wizard.Pages.Settings.DashboardAndLoginScreen.Models exposing (Model)

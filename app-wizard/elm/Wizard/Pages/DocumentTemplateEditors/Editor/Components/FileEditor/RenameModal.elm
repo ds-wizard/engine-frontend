@@ -12,8 +12,8 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.FileEditor.RenameM
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Dict exposing (Dict)
 import Gettext exposing (gettext)

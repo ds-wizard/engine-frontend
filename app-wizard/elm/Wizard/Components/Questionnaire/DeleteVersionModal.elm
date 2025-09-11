@@ -9,8 +9,8 @@ module Wizard.Components.Questionnaire.DeleteVersionModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)

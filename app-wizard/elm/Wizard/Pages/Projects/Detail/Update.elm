@@ -6,10 +6,12 @@ module Wizard.Pages.Projects.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError(..))
+import Common.Api.Models.UserInfo as UserInfo
+import Common.Api.Models.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Common.Api.WebSocket as WebSocket
-import Common.Data.ApiError as ApiError exposing (ApiError(..))
-import Common.Data.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Common.Ports.Copy as Ports
+import Common.Ports.Window as Window
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Debounce
@@ -30,7 +32,6 @@ import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.AddCommentData a
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
 import Wizard.Api.Models.QuestionnairePerm as QuestionnairePerm
 import Wizard.Api.Models.QuestionnairePreview as QuestionnairePreview
-import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Api.Models.WebSockets.ClientQuestionnaireAction as ClientQuestionnaireAction
 import Wizard.Api.Models.WebSockets.ServerQuestionnaireAction as ServerQuestionnaireAction
 import Wizard.Api.Questionnaires as QuestionnairesApi
@@ -53,7 +54,6 @@ import Wizard.Pages.Projects.Detail.Models exposing (Model, addQuestionnaireEven
 import Wizard.Pages.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Pages.Projects.Routes exposing (Route(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Routing as Routing exposing (cmdNavigate)
 import Wizard.Utils.Driver as Driver
@@ -283,7 +283,7 @@ update wrapMsg msg appState model =
                                 |> WebSocket.send model.websocket
 
                         setUnloadMessageCmd =
-                            Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+                            Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
                     in
                     ( applyActionSeed, updatedModel, Cmd.batch [ wsCmd, setUnloadMessageCmd ] )
 
@@ -307,7 +307,7 @@ update wrapMsg msg appState model =
                             { newModel1 | questionnaireWebSocketDebounce = Dict.insert path debounce model.questionnaireWebSocketDebounce }
 
                         setUnloadMessageCmd =
-                            Ports.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+                            Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
                     in
                     ( applyActionSeed, updatedModel, Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd ] )
 
@@ -771,7 +771,7 @@ update wrapMsg msg appState model =
             withSeed ( { model | settingsModel = settingsModel }, cmd )
 
         Refresh ->
-            withSeed ( model, Ports.refresh () )
+            withSeed ( model, Window.refresh () )
 
         QuestionnaireVersionViewModalMsg qMsg ->
             let
@@ -862,7 +862,7 @@ update wrapMsg msg appState model =
         PutQuestionnaireComplete result ->
             case result of
                 Ok _ ->
-                    ( appState.seed, model, Ports.refresh () )
+                    ( appState.seed, model, Window.refresh () )
 
                 Err error ->
                     ( appState.seed, { model | addingToMyProjects = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }, Cmd.none )
@@ -886,7 +886,7 @@ handleWebsocketMsg websocketMsg appState model =
 
                 clearUnloadMessageCmd =
                     if removed && List.isEmpty newModel2.savingActionUuids then
-                        Ports.clearUnloadMessage ()
+                        Window.clearUnloadMessage ()
 
                     else
                         Cmd.none
@@ -905,7 +905,7 @@ handleWebsocketMsg websocketMsg appState model =
             , Cmd.none
             )
     in
-    case WebSocket.receive ServerQuestionnaireAction.decoder websocketMsg model.websocket of
+    case WebSocket.receive (WebSocketServerAction.decoder ServerQuestionnaireAction.decoder) websocketMsg model.websocket of
         WebSocket.Message serverAction ->
             case serverAction of
                 WebSocketServerAction.Success message ->

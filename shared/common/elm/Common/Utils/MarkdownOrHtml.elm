@@ -1,4 +1,4 @@
-module Common.Utils.MarkdownOrHtml exposing (view)
+module Common.Utils.MarkdownOrHtml exposing (toHtml)
 
 import Common.Utils.Markdown as Markdown
 import Html exposing (Html, div)
@@ -7,8 +7,8 @@ import Html.Parser.Util
 import Regex exposing (Regex)
 
 
-view : List (Html.Attribute msg) -> String -> Html msg
-view attributes str =
+toHtml : List (Html.Attribute msg) -> String -> Html msg
+toHtml attributes str =
     let
         toMarkdown =
             Markdown.toHtml attributes

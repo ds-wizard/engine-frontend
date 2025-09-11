@@ -14,7 +14,6 @@ port module Common.Api.WebSocket exposing
     )
 
 import Common.Api.Request as Request exposing (ServerInfo)
-import Common.Data.WebSockets.WebSocketServerAction as WebSocketServerAction exposing (WebSocketServerAction)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
@@ -71,7 +70,7 @@ close ws =
     wsClose ws.url
 
 
-receive : Decoder a -> RawMsg -> WebSocket -> WebSocketMsg (WebSocketServerAction a)
+receive : Decoder a -> RawMsg -> WebSocket -> WebSocketMsg a
 receive messageDecoder value ws =
     case D.decodeValue decodeWebSocketRawMsg value of
         Ok rawMsg ->
@@ -81,7 +80,7 @@ receive messageDecoder value ws =
                         Open
 
                     "message" ->
-                        case D.decodeValue (WebSocketServerAction.decoder messageDecoder) rawMsg.data of
+                        case D.decodeValue messageDecoder rawMsg.data of
                             Ok action ->
                                 Message action
 

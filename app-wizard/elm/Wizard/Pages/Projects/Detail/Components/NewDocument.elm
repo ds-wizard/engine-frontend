@@ -11,11 +11,12 @@ module Wizard.Pages.Projects.Detail.Components.NewDocument exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionResult
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Setters exposing (setSelected)
 import Common.Utils.TimeUtils as TimeUtils
@@ -44,7 +45,6 @@ import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
@@ -131,7 +131,7 @@ update cfg msg appState model =
             handleGetQuestionnaireEventCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsDetailDocuments cfg.questionnaireUuid)) )
+            ( model, Window.historyBack (Routing.toUrl (Routes.projectsDetailDocuments cfg.questionnaireUuid)) )
 
         FormMsg formMsg ->
             handleForm cfg formMsg appState model

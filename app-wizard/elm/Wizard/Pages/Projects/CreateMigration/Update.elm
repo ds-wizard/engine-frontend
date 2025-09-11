@@ -1,8 +1,9 @@
 module Wizard.Pages.Projects.CreateMigration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
-import Cmd.Extra exposing (withNoCmd)
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
+import Common.Utils.CmdUtils exposing (withNoCmd)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setSelected)
 import Form
@@ -25,7 +26,6 @@ import Wizard.Msgs
 import Wizard.Pages.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
 import Wizard.Pages.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Pages.Projects.CreateMigration.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -51,7 +51,7 @@ update wrapMsg msg appState model =
             handleGetQuestionnaireCompleted appState wrapMsg model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
+            ( model, Window.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model

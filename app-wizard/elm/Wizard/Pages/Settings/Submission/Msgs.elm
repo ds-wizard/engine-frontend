@@ -1,6 +1,6 @@
 module Wizard.Pages.Settings.Submission.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs
 

@@ -9,9 +9,9 @@ module Wizard.Pages.Projects.Detail.Components.QuestionnaireVersionViewModal exp
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FontAwesome exposing (faClose)
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.TimeUtils as TimeUtils
 import Html exposing (Html, button, div, strong, text)
 import Html.Attributes exposing (class, classList)

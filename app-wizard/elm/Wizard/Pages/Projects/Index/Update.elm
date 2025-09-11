@@ -4,7 +4,7 @@ module Wizard.Pages.Projects.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.RequestHelpers as RequestHelpers

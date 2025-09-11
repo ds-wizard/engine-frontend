@@ -1,7 +1,8 @@
 module Wizard.Pages.KnowledgeModels.Import.OwlImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import File
 import Form
@@ -13,7 +14,7 @@ import Wizard.Msgs
 import Wizard.Pages.KnowledgeModels.Common.OwlImportForm as OwlImportForm
 import Wizard.Pages.KnowledgeModels.Import.OwlImport.Models exposing (Model, dropzoneId, fileInputId)
 import Wizard.Pages.KnowledgeModels.Import.OwlImport.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports exposing (createDropzone, fileSelected)
+import Wizard.Ports.Import as Import
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -22,13 +23,13 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         DragEnter ->
-            ( { model | dnd = model.dnd + 1 }, createDropzone dropzoneId )
+            ( { model | dnd = model.dnd + 1 }, Import.createDropzone dropzoneId )
 
         DragLeave ->
             ( { model | dnd = model.dnd - 1 }, Cmd.none )
 
         FileSelected ->
-            ( model, fileSelected fileInputId )
+            ( model, Import.fileSelected fileInputId )
 
         FileRead data ->
             case decodeValue File.decoder data of
@@ -45,7 +46,7 @@ update msg wrapMsg appState model =
             importOwlCompleted appState model result
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl Routes.knowledgeModelsIndex) )
+            ( model, Window.historyBack (Routing.toUrl Routes.knowledgeModelsIndex) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form, model.file ) of

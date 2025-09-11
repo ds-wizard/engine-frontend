@@ -1,6 +1,6 @@
 module Wizard.Pages.Settings.Registry.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Form
 import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs
 

@@ -7,8 +7,8 @@ module Registry.Pages.Signup exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Undraw as Undraw
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)

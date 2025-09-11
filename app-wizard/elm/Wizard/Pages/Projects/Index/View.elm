@@ -2,11 +2,11 @@ module Wizard.Pages.Projects.Index.View exposing (view)
 
 import ActionResult
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.Models.Pagination as Pagination
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.Pagination as Pagination
 import Common.Data.PaginationQueryFilters as PaginationQueryFilter
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Flip exposing (flip)
@@ -17,8 +17,8 @@ import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onClick, onInput)
 import Html.Events.Extra exposing (onClickStopPropagation)
 import Html.Extra as Html
+import List.Extensions as List
 import List.Extra as List
-import List.Utils as List
 import Maybe.Extra as Maybe
 import Uuid
 import Version

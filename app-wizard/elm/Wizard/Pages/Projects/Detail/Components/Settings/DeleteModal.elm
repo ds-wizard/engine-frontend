@@ -1,8 +1,8 @@
 module Wizard.Pages.Projects.Detail.Components.Settings.DeleteModal exposing (Model, Msg, UpdateConfig, initialModel, open, update, view)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.Modal as Modal
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import String.Format as String

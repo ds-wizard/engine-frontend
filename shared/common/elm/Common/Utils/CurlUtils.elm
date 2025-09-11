@@ -4,8 +4,7 @@ module Common.Utils.CurlUtils exposing
     )
 
 import Common.Utils.RegexPatterns as RegexPatterns
-import Maybe.Extra as Maybe
-import Regex exposing (Regex)
+import Regex
 import String.Extra as String
 
 

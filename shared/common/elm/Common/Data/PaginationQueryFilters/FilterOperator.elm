@@ -1,11 +1,39 @@
-module Common.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator(..), queryParser, toString, toUrlParam)
+module Common.Data.PaginationQueryFilters.FilterOperator exposing
+    ( FilterOperator(..)
+    , decoder
+    , encode
+    , queryParser
+    , toString
+    , toUrlParam
+    )
 
+import Json.Decode as D exposing (Decoder)
+import Json.Encode as E
 import Url.Parser.Query as Query
 
 
 type FilterOperator
     = AND
     | OR
+
+
+decoder : Decoder FilterOperator
+decoder =
+    D.string
+        |> D.andThen
+            (\str ->
+                case fromString str of
+                    Just op ->
+                        D.succeed op
+
+                    Nothing ->
+                        D.fail ("Invalid FilterOperator: " ++ str)
+            )
+
+
+encode : FilterOperator -> E.Value
+encode =
+    E.string << toString
 
 
 queryParser : String -> Query.Parser (Maybe FilterOperator)

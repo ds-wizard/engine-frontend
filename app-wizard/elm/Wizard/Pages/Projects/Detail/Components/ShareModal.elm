@@ -10,7 +10,8 @@ module Wizard.Pages.Projects.Detail.Components.ShareModal exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Cmd.Extra exposing (withNoCmd)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faFwRemove, faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, fas)
@@ -19,8 +20,8 @@ import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Copy as Copy
+import Common.Utils.CmdUtils exposing (withNoCmd)
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
@@ -37,7 +38,7 @@ import Shortcut
 import String.Format as String
 import Task.Extra as Task
 import Time
-import Tuple.Extra as Tuple
+import Tuple.Extensions as Tuple
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
@@ -47,7 +48,6 @@ import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
 import Wizard.Api.Models.QuestionnairePermission as QuestionnairePermission
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion exposing (UserGroupSuggestion)
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Api.UserGroups as UserGroupsApi
 import Wizard.Api.Users as UsersApi

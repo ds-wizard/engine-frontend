@@ -4,11 +4,11 @@ module Wizard.Api.ApiKeys exposing
     , getApiKeys
     )
 
+import Common.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
 import Json.Encode as E
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 

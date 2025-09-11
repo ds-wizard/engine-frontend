@@ -9,12 +9,12 @@ module Wizard.Pages.Projects.Detail.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UrlResponse exposing (UrlResponse)
+import Common.Api.ServerError as ServerError
 import Common.Components.FontAwesome exposing (faArrowRight, faDownload)
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
-import Common.Data.ApiError as ApiError exposing (ApiError)
-import Common.Data.ServerError as ServerError
 import Common.Utils.ContentType as ContentType
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, iframe, p, pre, text)

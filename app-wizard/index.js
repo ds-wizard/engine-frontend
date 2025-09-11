@@ -14,7 +14,6 @@ require('../shared/common/js/components/datetime-pickers')
 require('./js/components/shortcut-element')
 
 const cookies = require('./js/ports/cookies')
-const registerBrowserPorts = require('./js/ports/browser')
 const registerConsolePorts = require('./js/ports/console')
 const registerCopyPorts = require('../shared/common/js/ports/copy')
 const registerDomPorts = require('../shared/common/js/ports/dom')
@@ -22,13 +21,12 @@ const registerDownloadPorts = require('../shared/common/js/ports/file')
 const registerDriverPorts = require('../shared/common/js/ports/driver')
 const registerImportPorts = require('./js/ports/import')
 const registerIntegrationPorts = require('./js/ports/integrations')
-const registerLocalePorts = require('./js/ports/locale')
-const registerLocalStoragePorts = require('./js/ports/local-storage')
-const registerPageUnloadPorts = require('./js/ports/page-unload')
-const registerRefreshPorts = require('./js/ports/refresh')
+const registerLocalePorts = require('../shared/common/js/ports/locale')
+const registerLocalStoragePorts = require('../shared/common/js/ports/local-storage')
 const registerSessionPorts = require('./js/ports/session')
 const registerThemePorts = require('../shared/common/js/ports/theme')
 const registerWebsocketPorts = require('../shared/common/js/ports/websocket')
+const registerWindowPorts = require('../shared/common/js/ports/window')
 
 
 const sessionKey = 'session/wizard'
@@ -111,7 +109,6 @@ function loadApp(config, locale) {
         flags: flags,
     })
 
-    registerBrowserPorts(app)
     registerConsolePorts(app)
     registerCopyPorts(app)
     registerDomPorts(app)
@@ -121,11 +118,10 @@ function loadApp(config, locale) {
     registerIntegrationPorts(app)
     registerLocalePorts(app)
     registerLocalStoragePorts(app)
-    registerPageUnloadPorts(app)
-    registerRefreshPorts(app)
     registerSessionPorts(app, sessionKey, [appSessionKey])
     registerThemePorts(app)
     registerWebsocketPorts(app)
+    registerWindowPorts(app)
     cookies.registerCookiePorts(app)
 
     cookies.init()

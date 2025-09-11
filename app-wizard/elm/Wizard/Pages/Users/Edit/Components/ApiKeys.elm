@@ -1,6 +1,8 @@
 module Wizard.Pages.Users.Edit.Components.ApiKeys exposing (Model, Msg, UpdateConfig, fetchData, initialModel, update, view)
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Flash as Flash
@@ -10,7 +12,7 @@ import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Data.Forms.ApiKeyCreateForm as ApiKeyCreateForm exposing (ApiKeyCreateForm)
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Markdown as Markdown
@@ -25,10 +27,8 @@ import Html.Events exposing (onClick, onSubmit)
 import Maybe.Extra as Maybe
 import String.Format as String
 import Wizard.Api.ApiKeys as ApiKeysApi
-import Wizard.Api.Models.ApiKey as ApiKey exposing (ApiKey)
 import Wizard.Components.CopyableCodeBlock as CopyableCodeBlock
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.Users.Common.ApiKeyCreateForm as ApiKeyCreateForm exposing (ApiKeyCreateForm)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 

@@ -4,11 +4,10 @@ module Common.Components.FileDownloader exposing
     , update
     )
 
+import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
 import Common.Api.Request as Request exposing (ServerInfo)
-import Common.Data.ApiError exposing (ApiError)
 import Common.Ports.File as File
-import Http
 
 
 type Msg
@@ -18,18 +17,6 @@ type Msg
 fetchFile : ServerInfo -> String -> Cmd Msg
 fetchFile serverInfo fileUrl =
     Request.get serverInfo fileUrl UrlResponse.decoder GotFileUrl
-
-
-
---Http.request
---    { method = "GET"
---    , headers = Request.authorizationHeaders serverInfo
---    , url = fileUrl
---    , body = Http.emptyBody
---    , expect = Request.expectJson GotFileUrl UrlResponse.decoder
---    , timeout = Nothing
---    , tracker = Nothing
---    }
 
 
 update : Msg -> Cmd Msg

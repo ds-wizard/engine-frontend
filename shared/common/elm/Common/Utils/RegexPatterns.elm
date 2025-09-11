@@ -1,4 +1,23 @@
-module Common.Utils.RegexPatterns exposing (authenticationServiceId, color, date, datetime, documentTemplateId, doi, email, fromString, jinjaSafe, kmId, kmSecret, localeId, orcid, organizationId, projectTag, time, url, uuid)
+module Common.Utils.RegexPatterns exposing
+    ( authenticationServiceId
+    , color
+    , date
+    , datetime
+    , documentTemplateId
+    , doi
+    , email
+    , fromString
+    , jinjaSafe
+    , kmId
+    , kmSecret
+    , localeId
+    , orcid
+    , organizationId
+    , projectTag
+    , time
+    , url
+    , uuid
+    )
 
 import Regex exposing (Regex)
 

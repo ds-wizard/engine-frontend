@@ -12,11 +12,11 @@ module Wizard.Api.Models.Member exposing
     , visibleName
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion as UserGroupSuggestion exposing (UserGroupSuggestion)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
 
 

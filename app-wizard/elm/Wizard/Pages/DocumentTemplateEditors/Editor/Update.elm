@@ -5,7 +5,8 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Update exposing
     )
 
 import ActionResult
-import Common.Data.ApiError as ApiError
+import Common.Api.ApiError as ApiError
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Random exposing (Seed)
@@ -22,7 +23,6 @@ import Wizard.Pages.DocumentTemplateEditors.Editor.Components.Settings as Settin
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute exposing (DTEditorRoute)
 import Wizard.Pages.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model, containsChanges)
 import Wizard.Pages.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 
 
@@ -95,7 +95,7 @@ update appState wrapMsg msg model =
                 , { m | unloadMessageSet = True }
                 , Cmd.batch
                     [ cmd
-                    , Ports.setUnloadMessage (gettext "There are unsaved changes." appState.locale)
+                    , Window.setUnloadMessage (gettext "There are unsaved changes." appState.locale)
                     ]
                 )
 
@@ -104,7 +104,7 @@ update appState wrapMsg msg model =
                 , { m | unloadMessageSet = True }
                 , Cmd.batch
                     [ cmd
-                    , Ports.clearUnloadMessage ()
+                    , Window.clearUnloadMessage ()
                     ]
                 )
 
@@ -240,6 +240,6 @@ update appState wrapMsg msg model =
                     [ DocumentTemplateDraftsApi.getDraft appState model.documentTemplateId (wrapMsg << GetTemplateCompleted)
                     , Cmd.map (wrapMsg << FileEditorMsg) (FileEditor.fetchData model.documentTemplateId appState)
                     , Cmd.map wrapMsg (loadPreviewCmd (model.currentEditor == PreviewEditor))
-                    , Ports.clearUnloadMessage ()
+                    , Window.clearUnloadMessage ()
                     ]
                 )

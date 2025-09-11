@@ -10,7 +10,7 @@ module Wizard.Components.Listing.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Common.Data.Pagination exposing (Pagination)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Debouncer.Extra as Debouncer exposing (Debouncer)

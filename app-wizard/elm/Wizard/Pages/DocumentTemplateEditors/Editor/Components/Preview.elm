@@ -14,14 +14,14 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Preview exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UrlResponse exposing (UrlResponse)
+import Common.Api.ServerError as ServerError
 import Common.Components.FontAwesome exposing (fa, faDownload)
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
 import Common.Components.Undraw as Undraw
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
-import Common.Data.ServerError as ServerError
 import Common.Utils.ContentType as ContentType
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)

@@ -9,11 +9,12 @@ module Wizard.Pages.Users.Edit.Components.Language exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Badge as Badge
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Html exposing (Html, div, form, input, label, text)
@@ -25,7 +26,6 @@ import Wizard.Api.Models.LocaleSuggestion exposing (LocaleSuggestion)
 import Wizard.Api.Models.UserLocale exposing (UserLocale)
 import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Ports as Ports
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -114,7 +114,7 @@ update cfg appState msg model =
             case result of
                 Ok _ ->
                     ( { model | savingLocale = ActionResult.Success () }
-                    , Ports.refresh ()
+                    , Window.refresh ()
                     )
 
                 Err error ->

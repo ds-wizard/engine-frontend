@@ -5,8 +5,9 @@ module Wizard.Pages.Settings.Generic.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
+import Common.Ports.Window as Window
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
@@ -18,7 +19,6 @@ import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Settings.Generic.Model exposing (Model)
 import Wizard.Pages.Settings.Generic.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 
 
 type alias UpdateProps form =
@@ -86,7 +86,7 @@ handlePutConfigCompleted _ appState model result =
             case result of
                 Ok _ ->
                     ( Success ()
-                    , Ports.refresh ()
+                    , Window.refresh ()
                     )
 
                 Err error ->

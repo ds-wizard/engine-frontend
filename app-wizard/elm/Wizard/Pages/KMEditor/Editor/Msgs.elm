@@ -1,8 +1,8 @@
 module Wizard.Pages.KMEditor.Editor.Msgs exposing (Msg(..))
 
+import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.Prefab exposing (Prefab)
 import Common.Api.WebSocket as WebSocket
-import Common.Data.ApiError exposing (ApiError)
-import Common.Data.Prefab exposing (Prefab)
 import Debounce
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)

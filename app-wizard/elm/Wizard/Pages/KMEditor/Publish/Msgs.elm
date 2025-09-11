@@ -1,6 +1,6 @@
 module Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Form
 import Version exposing (Version)
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)

@@ -7,7 +7,7 @@ module Wizard.Pages.Documents.Routing exposing
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Maybe.Extra as Maybe
 import Url.Parser exposing ((<?>), Parser, map, s)
-import Url.Parser.Query.Extra as Query
+import Url.Parser.Query.Extensions as Query
 import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Documents.Routes exposing (Route(..))

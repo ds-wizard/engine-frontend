@@ -3,13 +3,13 @@ module Wizard.Components.Announcements exposing
     , viewLoginScreen
     )
 
+import Common.Api.Models.Announcement exposing (Announcement)
+import Common.Api.Models.Announcement.AnnouncementLevel as AnnouncementLevel
 import Common.Utils.Markdown as Markdown
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement exposing (Announcement)
-import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement.AnnouncementLevel as AnnouncementLevel
 
 
 viewDashboard : List Announcement -> Html msg

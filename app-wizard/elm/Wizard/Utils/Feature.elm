@@ -82,6 +82,7 @@ module Wizard.Utils.Feature exposing
     , usersView
     )
 
+import Common.Api.Models.UserInfo as UserInfo
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Maybe.Extra as Maybe
 import Uuid
@@ -96,7 +97,6 @@ import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCre
 import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState
 import Wizard.Api.Models.QuestionnaireDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
-import Wizard.Api.Models.UserInfo as UserInfo
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Perm as Perm
 import Wizard.Data.Session as Session

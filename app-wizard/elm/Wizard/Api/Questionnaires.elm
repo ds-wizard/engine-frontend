@@ -35,10 +35,11 @@ module Wizard.Api.Questionnaires exposing
     , websocket
     )
 
+import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Models.UrlResponse as UrlResponse exposing (UrlResponse)
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Api.WebSocket as WebSocket
-import Common.Data.Pagination as Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -63,7 +64,6 @@ import Wizard.Api.Models.QuestionnaireSettings as QuestionnaireSettings exposing
 import Wizard.Api.Models.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
 import Wizard.Api.Models.SummaryReport as SummaryReport exposing (SummaryReport)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 

@@ -4,13 +4,13 @@ module Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.ReopenCommentThr
     , encode
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Time
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias ReopenCommentThreadData =

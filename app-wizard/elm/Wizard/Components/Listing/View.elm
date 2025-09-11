@@ -10,13 +10,13 @@ module Wizard.Components.Listing.View exposing
 
 import Bootstrap.Button as Button
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Api.Models.Pagination.Page exposing (Page)
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (fa, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faListingFilterSingleNotSelected, faListingFilterSingleSelected, faSortAsc, faSortDesc)
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
 import Common.Components.Undraw as Undraw
-import Common.Data.Pagination exposing (Pagination)
-import Common.Data.Pagination.Page exposing (Page)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString exposing (PaginationQueryString, SortDirection(..))
 import Common.Utils.TimeDistance exposing (locale)

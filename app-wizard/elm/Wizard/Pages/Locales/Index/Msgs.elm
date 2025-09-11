@@ -1,7 +1,7 @@
 module Wizard.Pages.Locales.Index.Msgs exposing (Msg(..))
 
+import Common.Api.ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.Locale exposing (Locale)
 import Wizard.Components.Listing.Msgs as Listing
 

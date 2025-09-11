@@ -5,8 +5,8 @@ module Wizard.Api.Prefabs exposing
     , getOpenIDPrefabs
     )
 
+import Common.Api.Models.Prefab as Prefab exposing (Prefab)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.Prefab as Prefab exposing (Prefab)
 import Json.Decode as D
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep as DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)

@@ -1,8 +1,8 @@
 module Wizard.Pages.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
+import Common.Api.ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError exposing (ApiError)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 

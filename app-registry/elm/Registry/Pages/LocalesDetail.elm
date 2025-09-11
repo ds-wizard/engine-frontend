@@ -8,7 +8,7 @@ module Registry.Pages.LocalesDetail exposing
     )
 
 import ActionResult exposing (ActionResult)
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Registry.Api.Locales as LocalesApi

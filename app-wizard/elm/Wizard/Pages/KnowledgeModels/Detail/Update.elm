@@ -4,8 +4,8 @@ module Wizard.Pages.KnowledgeModels.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setPackage)
 import Gettext exposing (gettext)

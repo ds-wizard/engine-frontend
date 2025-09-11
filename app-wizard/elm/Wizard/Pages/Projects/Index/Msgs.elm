@@ -1,12 +1,12 @@
 module Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
-import Common.Data.Pagination exposing (Pagination)
+import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Debouncer.Extra as Debouncer
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Wizard.Components.Listing.Msgs as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Msgs as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModal

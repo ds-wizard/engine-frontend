@@ -1,11 +1,12 @@
 module Common.Utils.Form exposing
     ( containsChanges
     , errorToString
+    , isValid
     , setFormErrors
     )
 
-import Common.Data.ApiError as ApiError exposing (ApiError)
-import Common.Data.ServerError as ServerError
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.ServerError as ServerError
 import Common.Utils.Form.FormError exposing (FormError(..))
 import Dict
 import Form exposing (Form)
@@ -92,3 +93,8 @@ containsChanges =
             not << String.endsWith "__"
     in
     not << Set.isEmpty << Set.filter isNotHelperField << Form.getChangedFields
+
+
+isValid : Form e a -> Bool
+isValid =
+    List.isEmpty << Form.getErrors

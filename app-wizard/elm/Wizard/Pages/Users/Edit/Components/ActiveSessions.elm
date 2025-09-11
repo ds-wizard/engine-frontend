@@ -10,12 +10,13 @@ module Wizard.Pages.Users.Edit.Components.ActiveSessions exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.ApiKey exposing (ApiKey)
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faActiveSessionRevoke, faUserAgentDesktop, faUserAgentMobile, faUserAgentTdk)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setTokens)
@@ -29,7 +30,6 @@ import Maybe.Extra as Maybe
 import String.Format as String
 import Time
 import UserAgent
-import Wizard.Api.Models.ApiKey exposing (ApiKey)
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks

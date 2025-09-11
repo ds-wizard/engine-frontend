@@ -9,15 +9,16 @@ module Wizard.Pages.Projects.Detail.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuestions, faQuestionnaireSettingsKmFiltered, faRemove)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.ApiError as ApiError exposing (ApiError)
-import Common.Data.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Setters exposing (setSelected)
@@ -54,7 +55,6 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Pages.Projects.Common.QuestionnaireSettingsForm as QuestionnaireSettingsForm exposing (QuestionnaireSettingsForm)
 import Wizard.Pages.Projects.Detail.Components.Settings.DeleteModal as DeleteModal
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
@@ -188,7 +188,7 @@ handlePutQuestionnaireComplete appState model result =
     case result of
         Ok _ ->
             ( { model | savingQuestionnaire = Success "" }
-            , Ports.refresh ()
+            , Window.refresh ()
             )
 
         Err error ->

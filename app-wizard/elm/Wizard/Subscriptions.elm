@@ -1,5 +1,6 @@
 module Wizard.Subscriptions exposing (subscriptions)
 
+import Common.Ports.Window as Window
 import Common.Utils.Driver as Driver
 import Wizard.Components.Menu.Subscriptions
 import Wizard.Models exposing (Model)
@@ -20,7 +21,6 @@ import Wizard.Pages.Projects.Subscriptions
 import Wizard.Pages.Public.Subscriptions
 import Wizard.Pages.Tenants.Subscriptions
 import Wizard.Pages.Users.Subscriptions
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 
 
@@ -84,7 +84,7 @@ subscriptions model =
             Wizard.Components.Menu.Subscriptions.subscriptions model.menuModel
 
         historySubscriptions =
-            Ports.historyBackCallback HistoryBackCallback
+            Window.historyBackCallback HistoryBackCallback
 
         tourSubscriptions =
             Driver.onTourDone TourDone

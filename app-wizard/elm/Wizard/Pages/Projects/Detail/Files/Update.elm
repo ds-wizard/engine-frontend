@@ -4,8 +4,8 @@ module Wizard.Pages.Projects.Detail.Files.Update exposing
     )
 
 import ActionResult
+import Common.Api.ApiError as ApiError
 import Common.Components.FileDownloader as FileDownloader
-import Common.Data.ApiError as ApiError
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task

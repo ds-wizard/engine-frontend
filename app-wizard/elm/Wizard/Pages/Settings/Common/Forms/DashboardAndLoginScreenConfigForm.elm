@@ -8,6 +8,7 @@ module Wizard.Pages.Settings.Common.Forms.DashboardAndLoginScreenConfigForm expo
     , validation
     )
 
+import Common.Api.Models.Announcement as Announcement exposing (Announcement)
 import Common.Utils.Form.Field as Field
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Form.Validate as V
@@ -15,7 +16,6 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
-import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.Announcement as Announcement exposing (Announcement)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
 
 

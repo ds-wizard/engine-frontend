@@ -1,6 +1,6 @@
 module Wizard.Pages.KMEditor.Index.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Branch exposing (Branch)
 import Wizard.Components.Listing.Msgs as Listing

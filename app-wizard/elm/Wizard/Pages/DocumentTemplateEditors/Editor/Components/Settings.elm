@@ -14,10 +14,10 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Settings exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FontAwesome exposing (fa, faDelete)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Data.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers

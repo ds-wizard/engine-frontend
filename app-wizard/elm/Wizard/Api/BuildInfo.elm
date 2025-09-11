@@ -1,7 +1,7 @@
 module Wizard.Api.BuildInfo exposing (getBuildInfo)
 
+import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.BuildInfo as BuildInfo exposing (BuildInfo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 

@@ -2,8 +2,8 @@ module Wizard.Components.Menu.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Browser.Dom as Dom
-import Common.Data.ApiError as ApiError
-import Common.Data.BuildInfo as BuildInfo
+import Common.Api.ApiError as ApiError
+import Common.Api.Models.BuildInfo as BuildInfo
 import Common.Ports.Copy as Copy
 import Dict
 import Gettext exposing (gettext)

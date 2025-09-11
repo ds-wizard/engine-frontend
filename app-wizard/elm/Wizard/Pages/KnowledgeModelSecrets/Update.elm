@@ -5,7 +5,7 @@ module Wizard.Pages.KnowledgeModelSecrets.Update exposing
     )
 
 import ActionResult
-import Common.Data.ApiError as ApiError
+import Common.Api.ApiError as ApiError
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form
 import Gettext exposing (gettext)

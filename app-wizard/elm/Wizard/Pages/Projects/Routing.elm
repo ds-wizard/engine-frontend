@@ -9,9 +9,9 @@ import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Utils.UrlUtils exposing (queryParamsToString)
 import Flip exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
-import Url.Parser.Extra exposing (uuid)
+import Url.Parser.Extensions exposing (uuid)
 import Url.Parser.Query as Query
-import Url.Parser.Query.Extra as Query
+import Url.Parser.Query.Extensions as Query
 import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Perm as Perm

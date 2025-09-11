@@ -2,8 +2,8 @@ module Wizard.Components.Menu.Msgs exposing (Msg(..))
 
 import Bootstrap.Dropdown as Dropdown
 import Browser.Dom as Dom
-import Common.Data.ApiError exposing (ApiError)
-import Common.Data.BuildInfo exposing (BuildInfo)
+import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.BuildInfo exposing (BuildInfo)
 
 
 type Msg

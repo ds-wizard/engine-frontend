@@ -1,6 +1,6 @@
 module Wizard.Pages.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
 
-import Common.Data.ApiError exposing (ApiError)
+import Common.Api.ApiError exposing (ApiError)
 import Form
 import Version exposing (Version)
 import Wizard.Api.Models.CreatedEntityWithId exposing (CreatedEntityWithId)

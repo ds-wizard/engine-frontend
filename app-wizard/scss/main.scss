@@ -22,7 +22,8 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'animations';
 @import 'layout';
 
-@import 'elements/ai-assistant';
+@import '../../shared/common/scss/components/ai-assistant';
+
 @import 'elements/alert';
 @import 'elements/animation';
 @import 'elements/code';

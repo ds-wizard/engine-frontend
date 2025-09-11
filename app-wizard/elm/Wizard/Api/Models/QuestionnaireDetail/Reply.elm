@@ -4,6 +4,7 @@ module Wizard.Api.Models.QuestionnaireDetail.Reply exposing
     , encode
     )
 
+import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Iso8601
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -12,7 +13,6 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Time
 import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
-import Wizard.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 
 
 type alias Reply =

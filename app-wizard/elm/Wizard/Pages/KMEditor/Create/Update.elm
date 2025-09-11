@@ -4,7 +4,8 @@ module Wizard.Pages.KMEditor.Create.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Data.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -25,7 +26,6 @@ import Wizard.Msgs
 import Wizard.Pages.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
 import Wizard.Pages.KMEditor.Create.Models exposing (Model)
 import Wizard.Pages.KMEditor.Create.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
@@ -44,7 +44,7 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl Routes.kmEditorIndex) )
+            ( model, Window.historyBack (Routing.toUrl Routes.kmEditorIndex) )
 
         FormMsg formMsg ->
             handleFormMsg wrapMsg formMsg appState model

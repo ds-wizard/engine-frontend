@@ -1,13 +1,14 @@
 module Wizard.Pages.Projects.Create.Update exposing (fetchData, update)
 
 import ActionResult
-import Cmd.Extra exposing (withNoCmd)
+import Common.Api.ApiError as ApiError
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Request exposing (ToMsg)
-import Common.Data.ApiError as ApiError
-import Common.Data.Pagination exposing (Pagination)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Ports.Window as Window
 import Common.Utils.Bool as Bool
+import Common.Utils.CmdUtils exposing (withNoCmd)
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form
@@ -27,7 +28,6 @@ import Wizard.Msgs
 import Wizard.Pages.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
 import Wizard.Pages.Projects.Create.Models exposing (Model, mapMode, updateDefaultMode)
 import Wizard.Pages.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Ports as Ports
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 import Wizard.Utils.Driver as Driver
@@ -200,7 +200,7 @@ update wrapMsg msg appState model =
                 |> updateModelDefaultMode
 
         Cancel ->
-            ( model, Ports.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
+            ( model, Window.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.form ) of
