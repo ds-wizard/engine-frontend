@@ -2015,7 +2015,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                 , onChange = createTypeEditEventWithFocusSelector setVariables
                 , copyableInput = copyableJinjaVariable config "variables"
                 }
-            , FormExtra.mdAfter (gettext "Variables can be used to parametrize the integration for each question. Use this to define the variables whose value can be filled on the questions using this integration. The variables can then be used in the request configuration. For example, if you define a variable named *type*, you can use it as `{{ variables.type }}`, such as *ht&#8203;tps://example.com/{{ type }}*." appState.locale)
+            , FormExtra.mdAfter (gettext "Variables can be used to parametrize the integration for each question. Use this to define the variables whose value can be filled on the questions using this integration. The variables can then be used in the request configuration. For example, if you define a variable named *type*, you can use it as `{{ variables.type }}`, such as *ht&#8203;tps://example.com/{{ variables.type }}*." appState.locale)
             ]
 
         secretsGroup =
