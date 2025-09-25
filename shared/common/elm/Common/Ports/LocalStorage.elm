@@ -40,7 +40,7 @@ getItem =
 
 getAndRemoveItem : String -> Cmd msg
 getAndRemoveItem =
-    localStorageGetAndRemove
+    localStorageGetAndRemoveItem
 
 
 gotItem : Decoder a -> (Result D.Error (Item a) -> msg) -> Sub msg
@@ -65,7 +65,7 @@ setItem key value =
 
 removeItem : String -> Cmd msg
 removeItem =
-    localStorageRemove
+    localStorageRemoveItem
 
 
 port localStorageGetItem : String -> Cmd msg
@@ -77,7 +77,7 @@ port localStorageSetItem : E.Value -> Cmd msg
 port localStorageGotItem : (E.Value -> msg) -> Sub msg
 
 
-port localStorageGetAndRemove : String -> Cmd msg
+port localStorageGetAndRemoveItem : String -> Cmd msg
 
 
-port localStorageRemove : String -> Cmd msg
+port localStorageRemoveItem : String -> Cmd msg

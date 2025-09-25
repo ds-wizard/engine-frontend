@@ -41,7 +41,7 @@ update msg wrapMsg appState model =
             case localStorageItemResult of
                 Ok localStorageData ->
                     if localStorageData.key == "wizard/originalUrl" then
-                        ( { model | originalUrl = ActionResult.Success localStorageData.value }, Cmd.none )
+                        dispatchToken { model | originalUrl = ActionResult.Success localStorageData.value }
 
                     else
                         ( model, Cmd.none )
