@@ -2292,7 +2292,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                         Just jsonData ->
                             let
                                 responseListFieldVisible =
-                                    Maybe.isJust data.responseListField
+                                    not (String.isEmpty (String.fromMaybe data.responseListField))
                                         || (case jsonData of
                                                 JsonValue.ArrayValue _ ->
                                                     False
