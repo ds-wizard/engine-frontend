@@ -53,6 +53,7 @@ import Html exposing (Html, a, div, input, label, li, optgroup, option, span, te
 import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
 import Html.Attributes.Extensions exposing (dataCy, disableGrammarly)
 import Html.Events exposing (onCheck, onClick, onInput)
+import Html.Events.Extensions exposing (onBlurWithSelection)
 import Html.Events.Extra exposing (onChange)
 import Html.Extra as Html
 import Html.Keyed
@@ -60,6 +61,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Regex
 import Reorderable
+import String.Extra as String
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
@@ -414,12 +416,14 @@ type alias ItemTemplateEditorConfig msg =
     { name : String
     , label : String
     , value : String
-    , onInput : Maybe String -> String -> msg
+    , onInput : Maybe String -> Maybe Int -> String -> msg
+    , onBlurWithSelection : String -> Int -> Int -> msg
     , showPreviewMsg : String -> msg
     , showTemplateMsg : String -> msg
     , entityUuid : String
     , markdownPreviews : List String
     , integrationTestPreviews : Dict String (ActionResult (List TypeHint))
+    , cursorPositions : Dict String ( Int, Int )
     , fieldSuggestions : List String
     , toPreview : TypeHint -> String
     }
@@ -455,7 +459,8 @@ itemTemplateEditor appState config =
                     [ class "form-control"
                     , id config.name
                     , name config.name
-                    , onInput (config.onInput Nothing)
+                    , onInput (config.onInput Nothing Nothing)
+                    , onBlurWithSelection (config.onBlurWithSelection config.name)
                     , value config.value
                     , rows <| List.length <| String.lines config.value
                     , disableGrammarly
@@ -464,12 +469,25 @@ itemTemplateEditor appState config =
 
         viewItemTemplateFieldSuggestion suggestion =
             let
-                newContent =
-                    config.value ++ toJinja "item" suggestion
+                ( newContent, mbCursorPosition ) =
+                    case Dict.get config.name config.cursorPositions of
+                        Just ( start, _ ) ->
+                            let
+                                jinjaStr =
+                                    toJinja "item" suggestion
+                            in
+                            ( String.insertAt start jinjaStr config.value
+                            , Just (start + String.length jinjaStr)
+                            )
+
+                        Nothing ->
+                            ( config.value ++ toJinja "item" suggestion
+                            , Nothing
+                            )
             in
             a
-                [ class "btn btn-outline-primary btn-sm py-0 me-1 fst-normal"
-                , onClick (config.onInput (Just ("#" ++ config.name)) newContent)
+                [ class "btn btn-outline-primary btn-sm py-0 me-1 mb-1 fst-normal"
+                , onClick (config.onInput (Just ("#" ++ config.name)) mbCursorPosition newContent)
                 ]
                 [ text suggestion ]
 

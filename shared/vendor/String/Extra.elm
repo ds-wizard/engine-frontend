@@ -1,6 +1,7 @@
 module String.Extra exposing
     ( fromBool
     , fromMaybe
+    , insertAt
     , removeNonNumbers
     , stripQuotes
     , toBool
@@ -79,3 +80,14 @@ stripQuotes str =
                 else
                     s
            )
+
+
+insertAt : Int -> String -> String -> String
+insertAt pos insert original =
+    let
+        safePos =
+            clamp 0 (String.length original) pos
+    in
+    String.left safePos original
+        ++ insert
+        ++ String.dropLeft safePos original

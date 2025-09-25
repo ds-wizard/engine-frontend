@@ -1,5 +1,6 @@
 port module Common.Ports.Dom exposing
     ( focus
+    , focusAndSetCaret
     , gotScrollTop
     , scrollIntoView
     , scrollIntoViewCenter
@@ -15,6 +16,18 @@ import Json.Encode as E
 
 
 port focus : String -> Cmd msg
+
+
+focusAndSetCaret : String -> Int -> Cmd msg
+focusAndSetCaret elementId caretPos =
+    focusAndSetCaretPort <|
+        E.object
+            [ ( "elementSelector", E.string elementId )
+            , ( "caretPos", E.int caretPos )
+            ]
+
+
+port focusAndSetCaretPort : E.Value -> Cmd msg
 
 
 port scrollIntoView : String -> Cmd msg

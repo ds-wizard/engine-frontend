@@ -2,6 +2,7 @@ const {waitForElement} = require('../utils.js')
 
 module.exports = function (app) {
     app.ports.focus?.subscribe(focus)
+    app.ports.focusAndSetCaretPort?.subscribe(focusAndSetCaretPort)
     app.ports.scrollIntoView?.subscribe(scrollIntoView)
     app.ports.scrollIntoViewInstant?.subscribe(scrollIntoViewInstant)
     app.ports.scrollIntoViewCenter?.subscribe(scrollIntoViewCenter)
@@ -13,6 +14,13 @@ module.exports = function (app) {
     function focus(elementSelector) {
         waitForElement(elementSelector, true, function ($element) {
             $element.focus()
+        })
+    }
+
+    function focusAndSetCaretPort({ elementSelector, caretPos }) {
+        waitForElement(elementSelector, true, function ($element) {
+            $element.focus()
+            $element.setSelectionRange(caretPos, caretPos)
         })
     }
 

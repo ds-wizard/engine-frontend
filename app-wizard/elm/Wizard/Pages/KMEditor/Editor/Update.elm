@@ -15,7 +15,6 @@ import Common.Utils.RequestHelpers as RequestHelpers
 import Debounce
 import Dict
 import Gettext exposing (gettext)
-import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
@@ -224,7 +223,7 @@ update wrapMsg msg appState model =
                         updateConfig =
                             { setFullscreenMsg = Wizard.Msgs.SetFullscreen
                             , wrapMsg = wrapMsg << KMEditorMsg
-                            , eventMsg = \shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent -> wrapMsg <| EventMsg shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent
+                            , eventMsg = \shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent -> wrapMsg <| EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent
                             }
 
                         ( editorBranch, kmEditorModel, cmd ) =
@@ -286,7 +285,7 @@ update wrapMsg msg appState model =
             in
             withSeed ( { model | publishModalModel = publishModalModel }, publishModalCmd )
 
-        EventMsg shouldDebounce mbFocusSelector parentUuid mbEntityUuid createEvent ->
+        EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent ->
             let
                 ( kmEventUuid, newSeed1 ) =
                     Uuid.stepString appState.seed
@@ -317,7 +316,17 @@ update wrapMsg msg appState model =
                     Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
 
                 focusSelectorCmd =
-                    Maybe.unwrap Cmd.none Dom.focus mbFocusSelector
+                    case mbFocusSelector of
+                        Just selector ->
+                            case mbFocusCaretPosition of
+                                Just caretPosition ->
+                                    Dom.focusAndSetCaret selector caretPosition
+
+                                Nothing ->
+                                    Dom.focus selector
+
+                        Nothing ->
+                            Cmd.none
             in
             if shouldDebounce then
                 let

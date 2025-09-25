@@ -1,10 +1,11 @@
 module Html.Events.Extensions exposing
     ( alwaysPreventDefaultOn
     , alwaysPreventDefaultOnWithDecoder
+    , onBlurWithSelection
     )
 
 import Html
-import Html.Events exposing (preventDefaultOn, stopPropagationOn)
+import Html.Events exposing (on, preventDefaultOn, stopPropagationOn)
 import Json.Decode as D
 
 
@@ -16,3 +17,14 @@ alwaysPreventDefaultOn event msg =
 alwaysPreventDefaultOnWithDecoder : String -> D.Decoder msg -> Html.Attribute msg
 alwaysPreventDefaultOnWithDecoder event decoder =
     preventDefaultOn event (D.map (\msg -> ( msg, True )) decoder)
+
+
+onBlurWithSelection : (Int -> Int -> msg) -> Html.Attribute msg
+onBlurWithSelection tagger =
+    let
+        decoder =
+            D.map2 tagger
+                (D.at [ "target", "selectionStart" ] D.int)
+                (D.at [ "target", "selectionEnd" ] D.int)
+    in
+    on "blur" decoder
