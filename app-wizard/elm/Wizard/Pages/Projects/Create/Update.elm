@@ -203,7 +203,17 @@ update wrapMsg msg appState model =
             ( model, Window.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
 
         FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.form ) of
+            let
+                validationMode =
+                    mapMode model
+                        QuestionnaireCreateForm.TemplateValidationMode
+                        QuestionnaireCreateForm.PackageValidationMode
+
+                formOutput =
+                    -- Force validate to get output in the correct validation mode
+                    Form.getOutput (Form.update (QuestionnaireCreateForm.validation validationMode) Form.Validate model.form)
+            in
+            case ( formMsg, formOutput ) of
                 ( Form.Submit, Just form ) ->
                     let
                         projectTemplateModeRequest =
@@ -233,11 +243,6 @@ update wrapMsg msg appState model =
 
                 _ ->
                     let
-                        validationMode =
-                            mapMode model
-                                QuestionnaireCreateForm.TemplateValidationMode
-                                QuestionnaireCreateForm.PackageValidationMode
-
                         newModel =
                             { model | form = Form.update (QuestionnaireCreateForm.validation validationMode) formMsg model.form }
 
