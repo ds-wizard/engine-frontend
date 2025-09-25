@@ -2388,7 +2388,9 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                 [ Flash.warning (gettext "Response is not a valid JSON." appState.locale) ]
 
                 _ ->
-                    Html.nothing
+                    div [ class "mb-5" ]
+                        [ Flash.info (gettext "Run a successful test to configure the response." appState.locale)
+                        ]
     in
     integrationNameInput appState integration (createTypeEditEvent setName)
         ++ [ advancedIntegrationConfiguration
