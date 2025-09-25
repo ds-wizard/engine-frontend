@@ -6,6 +6,7 @@ module Wizard.Utils.WizardGuideLinks exposing
     , documentTemplatesPublish
     , documentTemplatesUnsupportedMetamodel
     , integrationQuestionSecrets
+    , jinjaCheatsheet
     , kmEditorCreate
     , kmEditorIntegrationQuestion
     , kmEditorMigration
@@ -51,6 +52,7 @@ default =
         , ( "documentTemplatesPublish", "https://guide.ds-wizard.org/en/latest/application/document-templates/editors/detail/publish.html" )
         , ( "documentTemplatesUnsupportedMetamodel", "https://guide.ds-wizard.org/en/latest/more/self-hosted-dsw/faq-notes.html#document-templates-show-unsupported-metamodel-what-should-i-do" )
         , ( "integrationQuestionSecrets", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties" )
+        , ( "jinjaCheatsheet", "https://guide.ds-wizard.org/en/latest/more/miscellaneous/jinja-cheatsheet.html" )
         , ( "kmEditorCreate", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/create.html" )
         , ( "kmEditorIntegrationQuestion", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/index.html" )
         , ( "kmEditorMigration", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/migration.html" )
@@ -113,6 +115,11 @@ documentTemplatesUnsupportedMetamodel =
 integrationQuestionSecrets : GuideLinks -> String
 integrationQuestionSecrets =
     GuideLinks.get "integrationQuestionSecrets"
+
+
+jinjaCheatsheet : GuideLinks -> String
+jinjaCheatsheet =
+    GuideLinks.get "jinjaCheatsheet"
 
 
 kmEditorCreate : GuideLinks -> String

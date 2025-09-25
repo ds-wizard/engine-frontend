@@ -511,6 +511,13 @@ itemTemplateEditor appState config =
             , div [ class "card-body" ] [ content ]
             , fieldSuggestionsFooter
             ]
+        , Markdown.toHtml [ class "text-muted" ]
+            (String.format
+                (gettext "You can use [Jinja](%s) and [Markdown](%s) to create and format the template." appState.locale)
+                [ WizardGuideLinks.jinjaCheatsheet appState.guideLinks
+                , WizardGuideLinks.markdownCheatsheet appState.guideLinks
+                ]
+            )
         ]
 
 
