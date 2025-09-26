@@ -657,15 +657,22 @@ userView appState users form i =
 formView : AppState -> Form FormError QuestionnaireShareForm -> Html Msg
 formView appState form =
     let
+        sharingEnabled =
+            Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
+
         visibilityInputs =
             if appState.config.questionnaire.questionnaireVisibility.enabled then
                 let
                     visibilitySelect =
                         let
-                            sharingPermission =
-                                (Form.getFieldAsString "sharingPermission" form).value
+                            mbFilterPerm =
+                                if sharingEnabled then
+                                    (Form.getFieldAsString "sharingPermission" form).value
+
+                                else
+                                    Nothing
                         in
-                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState sharingPermission) form "visibilityPermission" False
+                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState mbFilterPerm) form "visibilityPermission" False
 
                     visibilityEnabled =
                         Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
@@ -693,9 +700,6 @@ formView appState form =
         sharingInputs =
             if appState.config.questionnaire.questionnaireSharing.enabled then
                 let
-                    sharingEnabled =
-                        Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
-
                     sharingSelect =
                         FormExtra.inlineSelect (QuestionnairePermission.formOptions appState Nothing) form "sharingPermission" False
 
