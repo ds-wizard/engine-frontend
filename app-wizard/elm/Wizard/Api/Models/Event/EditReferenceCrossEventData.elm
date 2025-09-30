@@ -2,6 +2,7 @@ module Wizard.Api.Models.Event.EditReferenceCrossEventData exposing
     ( EditReferenceCrossEventData
     , decoder
     , encode
+    , init
     , squash
     )
 
@@ -34,6 +35,14 @@ encode data =
     , ( "description", EventField.encode E.string data.description )
     , ( "annotations", EventField.encode (E.list Annotation.encode) data.annotations )
     ]
+
+
+init : EditReferenceCrossEventData
+init =
+    { targetUuid = EventField.empty
+    , description = EventField.empty
+    , annotations = EventField.empty
+    }
 
 
 squash : EditReferenceCrossEventData -> EditReferenceCrossEventData -> EditReferenceCrossEventData

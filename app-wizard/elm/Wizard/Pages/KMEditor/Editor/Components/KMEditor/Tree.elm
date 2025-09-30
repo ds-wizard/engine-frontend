@@ -400,7 +400,7 @@ treeNodeReference props appState editorBranch reference =
         config =
             { uuid = Reference.getUuid reference
             , icon = faKmReference
-            , label = Reference.getVisibleName (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel) reference
+            , label = Reference.getVisibleName (KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel) (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel) reference
             , children = []
             , untitledLabel = gettext "Untitled reference" appState.locale
             }

@@ -71,7 +71,7 @@ import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
 import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
 import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
-import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables, setWidgetUrl)
+import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTargetUuid, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables, setWidgetUrl)
 import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
 import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Wizard.Api.Models.Event.EditIntegrationApiLegacyEventData as EditIntegrationApiLegacyEventData
@@ -88,6 +88,7 @@ import Wizard.Api.Models.Event.EditQuestionListEventData as EditQuestionListEven
 import Wizard.Api.Models.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
 import Wizard.Api.Models.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
 import Wizard.Api.Models.Event.EditQuestionValueEventData as EditQuestionValueEventData
+import Wizard.Api.Models.Event.EditReferenceCrossEventData as EditReferenceCrossEventData
 import Wizard.Api.Models.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
 import Wizard.Api.Models.Event.EditReferenceResourcePageEventData as EditReferenceResourcePageEventData
 import Wizard.Api.Models.Event.EditReferenceURLEventData as EditReferenceURLEventData
@@ -2817,13 +2818,18 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                         EditReferenceResourcePageEventData.init
                             |> (EditReferenceEvent << EditReferenceResourcePageEvent)
 
-                    _ ->
+                    "URL" ->
                         EditReferenceURLEventData.init
                             |> (EditReferenceEvent << EditReferenceURLEvent)
+
+                    _ ->
+                        EditReferenceCrossEventData.init
+                            |> (EditReferenceEvent << EditReferenceCrossEvent)
 
         referenceTypeOptions =
             [ ( "ResourcePage", gettext "Resource Page" appState.locale )
             , ( "URL", gettext "URL" appState.locale )
+            , ( "Cross", gettext "Cross Reference" appState.locale )
             ]
 
         referenceEditorTitle =
@@ -2936,8 +2942,71 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                     , annotationsInput
                     ]
 
-                CrossReference _ ->
-                    []
+                CrossReference data ->
+                    let
+                        createTypeEditEvent map value =
+                            EditReferenceCrossEventData.init
+                                |> map value
+                                |> (EditReferenceEvent << EditReferenceCrossEvent)
+                                |> eventMsg False Nothing Nothing parentUuid (Just referenceUuid)
+
+                        listQuestionUuidOptgroup ( chapter, questions ) =
+                            let
+                                filteredQuestions =
+                                    questions
+                                        |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                        |> List.filter (\q -> Question.getUuid q /= parentUuid)
+                                        |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
+                            in
+                            if List.isEmpty filteredQuestions then
+                                Nothing
+
+                            else
+                                Just
+                                    ( chapter.title, filteredQuestions )
+
+                        listQuestionUuidOptions =
+                            KnowledgeModel.getAllNestedQuestionsByChapter editorBranch.branch.knowledgeModel
+                                |> List.filter (not << flip EditorBranch.isDeleted editorBranch << .uuid << Tuple.first)
+                                |> List.filterMap listQuestionUuidOptgroup
+
+                        listQuestionUuidInput =
+                            Input.selectWithGroups
+                                { name = "listQuestionUuid"
+                                , label = gettext "Question" appState.locale
+                                , value = String.fromMaybe <| Reference.getTargetUuid reference
+                                , defaultOption = ( "", gettext "- select related question -" appState.locale )
+                                , options = listQuestionUuidOptions
+                                , onChange = createTypeEditEvent setTargetUuid
+                                , extra =
+                                    case Reference.getTargetUuid reference of
+                                        Just listQuestionUuid ->
+                                            if EditorBranch.isQuestionDeletedInHierarchy listQuestionUuid editorBranch then
+                                                Nothing
+
+                                            else
+                                                Just <|
+                                                    div [ class "mt-1" ]
+                                                        [ linkTo (EditorBranch.editorRoute editorBranch listQuestionUuid)
+                                                            []
+                                                            [ text (gettext "Go to related question" appState.locale) ]
+                                                        ]
+
+                                        Nothing ->
+                                            Nothing
+                                }
+
+                        descriptionInput =
+                            Input.string
+                                { name = "description"
+                                , label = gettext "Description" appState.locale
+                                , value = data.description
+                                , onInput = createTypeEditEvent setDescription
+                                }
+                    in
+                    [ listQuestionUuidInput
+                    , descriptionInput
+                    ]
     in
     editor ("reference-" ++ Reference.getUuid reference)
         ([ referenceEditorTitle

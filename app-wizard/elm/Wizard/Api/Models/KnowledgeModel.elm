@@ -455,7 +455,7 @@ getExpertName km uuid =
 
 getReferenceName : KnowledgeModel -> String -> String
 getReferenceName km uuid =
-    Maybe.unwrap "" (Reference.getVisibleName (getAllResourcePages km)) <| getReference uuid km
+    Maybe.unwrap "" (Reference.getVisibleName (getAllQuestions km) (getAllResourcePages km)) <| getReference uuid km
 
 
 getResourceCollectionName : KnowledgeModel -> String -> String

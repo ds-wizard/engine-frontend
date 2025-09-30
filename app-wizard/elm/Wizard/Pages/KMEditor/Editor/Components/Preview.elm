@@ -223,8 +223,10 @@ view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
                     }
                 , renderer =
                     DefaultQuestionnaireRenderer.create appState
-                        knowledgeModel
-                        (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid << Just << Uuid.fromUuidString)
+                        (DefaultQuestionnaireRenderer.config questionnaireDetail
+                            |> DefaultQuestionnaireRenderer.withKnowledgeModel knowledgeModel
+                            |> DefaultQuestionnaireRenderer.withResourcePageToRoute (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid << Just << Uuid.fromUuidString)
+                        )
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing

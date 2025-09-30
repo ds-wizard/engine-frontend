@@ -384,7 +384,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (gettext "Untitled choice" appState.locale) << .label) KnowledgeModel.getChoice
 
         getReferenceName =
-            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel)) KnowledgeModel.getReference
+            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel) (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel)) KnowledgeModel.getReference
 
         getExpertName =
             getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert

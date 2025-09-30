@@ -1,14 +1,22 @@
-module Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer exposing (create, defaultResourcePageToRoute)
+module Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer exposing
+    ( DefaultQuestionnaireRendererConfig
+    , config
+    , create
+    , withKnowledgeModel
+    , withResourcePageToRoute
+    )
 
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
+import Common.Components.FontAwesome exposing (faKmQuestion, faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
 import Common.Utils.Markdown as Markdown
+import Common.Utils.Setters exposing (setKnowledgeModel)
 import Dict
 import Dict.Extra as Dict
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, p, span, text)
 import Html.Attributes exposing (class, href, target)
+import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -21,22 +29,54 @@ import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.Reference.CrossReferenceData exposing (CrossReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
+import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Components.Html exposing (linkTo)
-import Wizard.Components.Questionnaire exposing (QuestionnaireRenderer)
+import Wizard.Components.Questionnaire as Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes
 
 
-create : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> QuestionnaireRenderer msg
-create appState km resourcePageToRoute =
+type DefaultQuestionnaireRendererConfig
+    = DefaultQuestionnaireRendererConfig DefaultQuestionnaireRendererConfigData
+
+
+type alias DefaultQuestionnaireRendererConfigData =
+    { knowledgeModel : KnowledgeModel
+    , questionnaire : QuestionnaireQuestionnaire
+    , resourcePageToRoute : String -> Wizard.Routes.Route
+    }
+
+
+config : QuestionnaireQuestionnaire -> DefaultQuestionnaireRendererConfig
+config questionnaire =
+    DefaultQuestionnaireRendererConfig
+        { knowledgeModel = questionnaire.knowledgeModel
+        , questionnaire = questionnaire
+        , resourcePageToRoute = defaultResourcePageToRoute questionnaire.packageId
+        }
+
+
+withKnowledgeModel : KnowledgeModel -> DefaultQuestionnaireRendererConfig -> DefaultQuestionnaireRendererConfig
+withKnowledgeModel km (DefaultQuestionnaireRendererConfig cfg) =
+    DefaultQuestionnaireRendererConfig { cfg | knowledgeModel = km }
+
+
+withResourcePageToRoute : (String -> Wizard.Routes.Route) -> DefaultQuestionnaireRendererConfig -> DefaultQuestionnaireRendererConfig
+withResourcePageToRoute f (DefaultQuestionnaireRendererConfig cfg) =
+    DefaultQuestionnaireRendererConfig { cfg | resourcePageToRoute = f }
+
+
+create : AppState -> DefaultQuestionnaireRendererConfig -> QuestionnaireRenderer
+create appState (DefaultQuestionnaireRendererConfig cfg) =
     { renderQuestionLabel = renderQuestionLabel
-    , renderQuestionDescription = renderQuestionDescription appState km resourcePageToRoute
+    , renderQuestionDescription = renderQuestionDescription appState cfg
     , getQuestionExtraClass = always Nothing
     , renderAnswerLabel = renderAnswerLabel
-    , renderAnswerBadges = renderAnswerBadges (KnowledgeModel.getMetrics km)
+    , renderAnswerBadges = renderAnswerBadges (KnowledgeModel.getMetrics cfg.knowledgeModel)
     , renderAnswerAdvice = renderAnswerAdvice
     , renderChoiceLabel = renderChoiceLabel
     }
@@ -52,19 +92,16 @@ renderQuestionLabel question =
     text <| Question.getTitle question
 
 
-renderQuestionDescription : AppState -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> QuestionnaireViewSettings -> Question -> Html msg
-renderQuestionDescription appState km resourcePageToRoute qvs question =
+renderQuestionDescription : AppState -> DefaultQuestionnaireRendererConfigData -> QuestionnaireViewSettings -> Question -> Html Questionnaire.Msg
+renderQuestionDescription appState cfg qvs question =
     let
         description =
             Question.getText question
                 |> Maybe.map (\t -> p [ class "form-text text-muted" ] [ Markdown.toHtml [] t ])
                 |> Maybe.withDefault (text "")
 
-        phases =
-            KnowledgeModel.getPhases km
-
         extraData =
-            viewExtraData appState qvs km resourcePageToRoute phases <| createQuestionExtraData km question
+            viewExtraData appState cfg qvs <| createQuestionExtraData cfg.knowledgeModel question
     in
     div [ class "description" ]
         [ description
@@ -137,6 +174,7 @@ renderChoiceLabel choice =
 type alias FormExtraData =
     { resourcePageReferences : List ResourcePageReferenceData
     , urlReferences : List URLReferenceData
+    , crossReferences : List CrossReferenceData
     , experts : List Expert
     , requiredPhaseUuid : Maybe String
     }
@@ -153,12 +191,13 @@ createQuestionExtraData km question =
                 URLReference data ->
                     { extraData | urlReferences = extraData.urlReferences ++ [ data ] }
 
-                _ ->
-                    extraData
+                CrossReference data ->
+                    { extraData | crossReferences = extraData.crossReferences ++ [ data ] }
 
         newExtraData =
             { resourcePageReferences = []
             , urlReferences = []
+            , crossReferences = []
             , experts = KnowledgeModel.getQuestionExperts (Question.getUuid question) km
             , requiredPhaseUuid = Question.getRequiredPhaseUuid question
             }
@@ -167,8 +206,8 @@ createQuestionExtraData km question =
         |> List.foldl foldReferences newExtraData
 
 
-viewExtraData : AppState -> QuestionnaireViewSettings -> KnowledgeModel -> (String -> Wizard.Routes.Route) -> List Phase -> FormExtraData -> Html msg
-viewExtraData appState qvs km resourcePageToRoute phases data =
+viewExtraData : AppState -> DefaultQuestionnaireRendererConfigData -> QuestionnaireViewSettings -> FormExtraData -> Html Questionnaire.Msg
+viewExtraData appState cfg qvs data =
     let
         isEmpty =
             List.isEmpty data.resourcePageReferences
@@ -180,10 +219,15 @@ viewExtraData appState qvs km resourcePageToRoute phases data =
         Html.nothing
 
     else
+        let
+            phases =
+                KnowledgeModel.getPhases cfg.knowledgeModel
+        in
         p [ class "extra-data" ]
             (viewRequiredLevel appState qvs phases data.requiredPhaseUuid
-                :: viewResourcePageReferences km resourcePageToRoute data.resourcePageReferences
+                :: viewResourcePageReferences cfg.knowledgeModel cfg.resourcePageToRoute data.resourcePageReferences
                 ++ [ viewUrlReferences appState data.urlReferences
+                   , viewCrossReferences appState cfg data.crossReferences
                    , viewExperts appState data.experts
                    ]
             )
@@ -291,6 +335,48 @@ viewUrlReference data =
     in
     a [ href data.url, target "_blank" ]
         [ text urlLabel ]
+
+
+viewCrossReferences : AppState -> DefaultQuestionnaireRendererConfigData -> List CrossReferenceData -> Html Questionnaire.Msg
+viewCrossReferences appState cfg crossReferences =
+    if List.isEmpty crossReferences then
+        Html.nothing
+
+    else
+        let
+            parentMap =
+                KnowledgeModel.createParentMap cfg.knowledgeModel
+
+            questionnaire =
+                setKnowledgeModel cfg.knowledgeModel cfg.questionnaire
+
+            scrollToQuestionUuidMsg questionUuid =
+                QuestionnaireQuestionnaire.getClosestQuestionParentPath questionnaire
+                    parentMap
+                    questionUuid
+                    |> Maybe.withDefault ""
+                    |> Questionnaire.ScrollToPath
+        in
+        viewExtraItems
+            { icon = faKmQuestion
+            , label = gettext "Related questions" appState.locale
+            , viewItem = viewCrossReference cfg.knowledgeModel scrollToQuestionUuidMsg
+            }
+            crossReferences
+
+
+viewCrossReference : KnowledgeModel -> (String -> msg) -> CrossReferenceData -> Html msg
+viewCrossReference km scrollToQuestionMsg data =
+    case KnowledgeModel.getQuestion data.targetUuid km of
+        Just question ->
+            span []
+                [ a [ onClick (scrollToQuestionMsg data.targetUuid) ] [ text (Question.getTitle question) ]
+                , Html.viewIf (not (String.isEmpty data.description)) <|
+                    text (" (" ++ data.description ++ ")")
+                ]
+
+        Nothing ->
+            Html.nothing
 
 
 viewExperts : AppState -> List Expert -> Html msg

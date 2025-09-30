@@ -60,7 +60,7 @@ viewEvent kmName km event =
             Maybe.map .label <| KnowledgeModel.getChoice commonData.entityUuid km
 
         getReferenceName commonData =
-            Maybe.map (Reference.getVisibleName (KnowledgeModel.getAllResourcePages km)) <| KnowledgeModel.getReference commonData.entityUuid km
+            Maybe.map (Reference.getVisibleName (KnowledgeModel.getAllQuestions km) (KnowledgeModel.getAllResourcePages km)) <| KnowledgeModel.getReference commonData.entityUuid km
 
         getExpertName commonData =
             Maybe.map .name <| KnowledgeModel.getExpert commonData.entityUuid km

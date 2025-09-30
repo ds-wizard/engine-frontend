@@ -543,7 +543,7 @@ addFile file model =
 
 type alias Config msg =
     { features : FeaturesConfig
-    , renderer : QuestionnaireRenderer Msg
+    , renderer : QuestionnaireRenderer
     , wrapMsg : Msg -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
     , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
@@ -561,14 +561,14 @@ type alias FeaturesConfig =
     }
 
 
-type alias QuestionnaireRenderer msg =
-    { renderQuestionLabel : Question -> Html msg
-    , renderQuestionDescription : QuestionnaireViewSettings -> Question -> Html msg
+type alias QuestionnaireRenderer =
+    { renderQuestionLabel : Question -> Html Msg
+    , renderQuestionDescription : QuestionnaireViewSettings -> Question -> Html Msg
     , getQuestionExtraClass : Question -> Maybe String
-    , renderAnswerLabel : Answer -> Html msg
-    , renderAnswerBadges : Bool -> Answer -> Html msg
-    , renderAnswerAdvice : Answer -> Html msg
-    , renderChoiceLabel : Choice -> Html msg
+    , renderAnswerLabel : Answer -> Html Msg
+    , renderAnswerBadges : Bool -> Answer -> Html Msg
+    , renderAnswerAdvice : Answer -> Html Msg
+    , renderChoiceLabel : Choice -> Html Msg
     }
 
 
