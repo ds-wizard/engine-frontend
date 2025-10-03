@@ -9,6 +9,7 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , calculateUnansweredQuestionsForChapter
     , clearReplyValue
     , commentsLength
+    , concatMapVisibleQuestions
     , createQuestionnaireDetail
     , decoder
     , generateReplies

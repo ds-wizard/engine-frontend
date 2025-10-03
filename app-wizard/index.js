@@ -58,6 +58,10 @@ function getPdfSupport() {
     return !!(navigator.mimeTypes['application/pdf'] || hasAcrobatInstalled() || isIos())
 }
 
+function isMac() {
+    return /Macintosh|MacIntel|MacPPC|Mac68K/.test(navigator.userAgent)
+}
+
 function getApiUrl(config) {
     if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
         return config.cloud.serverUrl
@@ -92,7 +96,8 @@ function loadApp(config, locale) {
         webSocketThrottleDelay: appConfig.getWebSocketThrottleDelay(),
         config: config,
         navigator: {
-            pdf: getPdfSupport()
+            pdf: getPdfSupport(),
+            isMac: isMac(),
         },
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),

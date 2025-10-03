@@ -119,6 +119,7 @@ initPageModel appState route model =
                         ( newSeed, previewModel ) =
                             model.previewModel
                                 |> Preview.setPackageId appState packageId
+                                |> Preview.setKnowledgeModel (EditorBranch.getFilteredKM editorBranch)
                                 |> Preview.setReplies editorBranch.branch.replies
                                 |> Preview.generateReplies appState currentQuestionUuid editorBranch.branch.knowledgeModel
                                 |> Tuple.mapSecond (Preview.setActiveChapterIfNot selectedChapterUuid)

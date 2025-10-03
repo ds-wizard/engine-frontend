@@ -135,6 +135,7 @@ module Common.Components.FontAwesome exposing
     , faQuestionnaireShrink
     , faQuestionnaireUrlReferences
     , faRemove
+    , faSearch
     , faSecretHide
     , faSecretShow
     , faSettings
@@ -910,6 +911,11 @@ faQuestionnaireMigrationResolveAll =
 faQuestionnaireMigrationUndo : Html msg
 faQuestionnaireMigrationUndo =
     fas "fa-undo-alt"
+
+
+faSearch : Html msg
+faSearch =
+    fas "fa-magnifying-glass"
 
 
 faUserAgentDesktop : Html msg

@@ -9,7 +9,6 @@ module Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer exposing
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faKmQuestion, faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences)
 import Common.Utils.Markdown as Markdown
-import Common.Utils.Setters exposing (setKnowledgeModel)
 import Dict
 import Dict.Extra as Dict
 import Flip exposing (flip)
@@ -32,7 +31,7 @@ import Wizard.Api.Models.KnowledgeModel.Reference exposing (Reference(..))
 import Wizard.Api.Models.KnowledgeModel.Reference.CrossReferenceData exposing (CrossReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Questionnaire as Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
@@ -339,38 +338,21 @@ viewUrlReference data =
 
 viewCrossReferences : AppState -> DefaultQuestionnaireRendererConfigData -> List CrossReferenceData -> Html Questionnaire.Msg
 viewCrossReferences appState cfg crossReferences =
-    if List.isEmpty crossReferences then
-        Html.nothing
-
-    else
-        let
-            parentMap =
-                KnowledgeModel.createParentMap cfg.knowledgeModel
-
-            questionnaire =
-                setKnowledgeModel cfg.knowledgeModel cfg.questionnaire
-
-            scrollToQuestionUuidMsg questionUuid =
-                QuestionnaireQuestionnaire.getClosestQuestionParentPath questionnaire
-                    parentMap
-                    questionUuid
-                    |> Maybe.withDefault ""
-                    |> Questionnaire.ScrollToPath
-        in
-        viewExtraItems
-            { icon = faKmQuestion
-            , label = gettext "Related questions" appState.locale
-            , viewItem = viewCrossReference cfg.knowledgeModel scrollToQuestionUuidMsg
-            }
-            crossReferences
+    viewExtraItems
+        { icon = faKmQuestion
+        , label = gettext "Related questions" appState.locale
+        , viewItem = viewCrossReference cfg.knowledgeModel
+        }
+        crossReferences
 
 
-viewCrossReference : KnowledgeModel -> (String -> msg) -> CrossReferenceData -> Html msg
-viewCrossReference km scrollToQuestionMsg data =
+viewCrossReference : KnowledgeModel -> CrossReferenceData -> Html Questionnaire.Msg
+viewCrossReference km data =
     case KnowledgeModel.getQuestion data.targetUuid km of
         Just question ->
             span []
-                [ a [ onClick (scrollToQuestionMsg data.targetUuid) ] [ text (Question.getTitle question) ]
+                [ a [ onClick (Questionnaire.ScrollToQuestion data.targetUuid) ]
+                    [ text (Question.getTitle question) ]
                 , Html.viewIf (not (String.isEmpty data.description)) <|
                     text (" (" ++ data.description ++ ")")
                 ]

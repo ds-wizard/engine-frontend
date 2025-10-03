@@ -8,3 +8,12 @@
         opacity: 1;
     }
 }
+
+@include keyframes(highlightFade) {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
+    }
+}

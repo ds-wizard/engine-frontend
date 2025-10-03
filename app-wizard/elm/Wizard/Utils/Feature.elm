@@ -60,6 +60,7 @@ module Wizard.Utils.Feature exposing
     , projectMetrics
     , projectOpen
     , projectPreview
+    , projectSearch
     , projectSettings
     , projectTagging
     , projectTemplatesCreate
@@ -332,6 +333,11 @@ projectPreview _ =
 projectDocumentsView : AppState -> Bool
 projectDocumentsView _ =
     True
+
+
+projectSearch : AppState -> QuestionnaireLike q -> Bool
+projectSearch _ questionnaire =
+    not (QuestionnaireUtils.isMigrating questionnaire)
 
 
 projectTodos : AppState -> QuestionnaireLike q -> Bool

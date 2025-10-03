@@ -19,7 +19,7 @@ module Wizard.Components.Questionnaire exposing
     , init
     , initSimple
     , reopenCommentThread
-    , resetUserSugggestionDropdownModels
+    , resetUserSuggestionDropdownModels
     , resolveCommentThread
     , setActiveChapterUuid
     , setLabels
@@ -44,7 +44,7 @@ import Common.Components.Badge as Badge
 import Common.Components.DatePicker as DatePicker
 import Common.Components.FileDownloader as FileDownloader
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSpinner, faSuccess, fas)
+import Common.Components.FontAwesome exposing (fa, faAdd, faClose, faDelete, faError, faInfo, faListingActions, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink, faQuestionnaireExpand, faQuestionnaireFeedback, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireShrink, faRemove, faSearch, faSpinner, faSuccess, fas)
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft, tooltipRight)
 import Common.Components.Undraw as Undraw
@@ -56,6 +56,7 @@ import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.FileIcon as FileIcon
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RegexPatterns as RegexPatterns
+import Common.Utils.ShortcutUtils as Shortcut
 import Common.Utils.TimeDistance as TimeDistance
 import Common.Utils.TimeUtils as TimeUtils
 import Debounce exposing (Debounce)
@@ -78,6 +79,7 @@ import Random exposing (Seed)
 import Regex
 import Roman
 import Set exposing (Set)
+import Shortcut
 import SplitPane
 import String
 import String.Extra as String
@@ -131,6 +133,7 @@ import Wizard.Components.Questionnaire.History as History
 import Wizard.Components.Questionnaire.NavigationTree as NavigationTree
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings as QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Components.Questionnaire.RightPanel as RightPanel exposing (RightPanel)
+import Wizard.Components.Questionnaire.SearchPanel as SearchPanel
 import Wizard.Components.Questionnaire.UserSuggestionDropdown as UserSuggestionDropdown
 import Wizard.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Components.Tag as Tag
@@ -156,6 +159,7 @@ type alias Model =
     , activePage : ActivePage
     , rightPanel : RightPanel
     , questionnaire : QuestionnaireQuestionnaire
+    , knowledgeModelParentMap : KnowledgeModel.ParentMap
     , questionnaireEvents : ActionResult (List QuestionnaireEvent)
     , questionnaireVersions : ActionResult (List QuestionnaireVersion)
     , phaseModalOpen : Bool
@@ -193,6 +197,8 @@ type alias Model =
     , commentThreadsMap : Dict String (ActionResult (List CommentThread))
     , userSuggestionDropdownModels : Dict String UserSuggestionDropdown.Model
     , linkedItemsDropdownStates : Dict String Dropdown.State
+    , searchPanelModel : SearchPanel.Model
+    , mbHighlightedPath : Maybe String
     }
 
 
@@ -240,6 +246,7 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , activePage = activePage
             , rightPanel = RightPanel.None
             , questionnaire = questionnaire
+            , knowledgeModelParentMap = KnowledgeModel.createParentMap questionnaire.knowledgeModel
             , questionnaireEvents = ActionResult.Unset
             , questionnaireVersions = ActionResult.Unset
             , phaseModalOpen = False
@@ -277,6 +284,8 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , commentThreadsMap = Dict.empty
             , userSuggestionDropdownModels = Dict.empty
             , linkedItemsDropdownStates = Dict.empty
+            , searchPanelModel = SearchPanel.init
+            , mbHighlightedPath = Nothing
             }
 
         ( model, scrollCmd ) =
@@ -520,8 +529,8 @@ wrapMapCommentThread threadUuid mapCommentThread commentThread =
         commentThread
 
 
-resetUserSugggestionDropdownModels : Model -> Model
-resetUserSugggestionDropdownModels model =
+resetUserSuggestionDropdownModels : Model -> Model
+resetUserSuggestionDropdownModels model =
     { model | userSuggestionDropdownModels = Dict.empty }
 
 
@@ -623,6 +632,9 @@ type Msg
     | SetRightPanel RightPanel
     | SetFullscreen Bool
     | ScrollToPath String
+    | ScrollToQuestion String
+    | OpenChapter String
+    | ClearHighlight String
     | UpdateContentScroll
     | GotContentScroll E.Value
     | ShowTypeHints (List String) Bool String String
@@ -704,6 +716,7 @@ type Msg
     | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
     | LinkedItemsDropdownMsg String Dropdown.State
+    | SearchPanelMsg SearchPanel.Msg
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -726,23 +739,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
     in
     case msg of
         SetActivePage activePage ->
-            let
-                newNavigationTreeModel =
-                    case activePage of
-                        PageChapter chapterUuid ->
-                            NavigationTree.openChapter chapterUuid model.navigationTreeModel
-
-                        _ ->
-                            model.navigationTreeModel
-            in
-            withSeed <|
-                ( { model
-                    | activePage = activePage
-                    , navigationTreeModel = newNavigationTreeModel
-                    , contentScrollTop = Nothing
-                  }
-                , Dom.scrollToTop contentElementSelector
-                )
+            withSeed <| handleSetActivePage model activePage
 
         SetRightPanel rightPanel ->
             let
@@ -757,6 +754,11 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     case rightPanel of
                         RightPanel.None ->
                             RightPanel.None
+
+                        RightPanel.Search ->
+                            showRightPanel
+                                (Feature.projectSearch appState model.questionnaire)
+                                RightPanel.Search
 
                         RightPanel.TODOs ->
                             showRightPanel
@@ -785,6 +787,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                 panelCmd =
                     case updatedRightPanel of
+                        RightPanel.Search ->
+                            Dom.focus ("#" ++ SearchPanel.searchInputId)
+
                         RightPanel.VersionHistory ->
                             Cmd.batch
                                 [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid GetQuestionnaireEventsCompleted
@@ -818,6 +823,28 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         ScrollToPath path ->
             withSeed <| handleScrollToPath model False path
+
+        ScrollToQuestion questionUuid ->
+            case QuestionnaireQuestionnaire.getClosestQuestionParentPath model.questionnaire model.knowledgeModelParentMap questionUuid of
+                Just path ->
+                    withSeed <| handleScrollToPath model True path
+
+                Nothing ->
+                    wrap model
+
+        OpenChapter chapterUuid ->
+            let
+                ( newModel, cmd ) =
+                    handleSetActivePage { model | mbHighlightedPath = Just chapterUuid } (PageChapter chapterUuid)
+            in
+            withSeed ( newModel, Cmd.batch [ cmd, Task.dispatchAfter 3000 (ClearHighlight chapterUuid) ] )
+
+        ClearHighlight path ->
+            if model.mbHighlightedPath == Just path then
+                wrap { model | mbHighlightedPath = Nothing }
+
+            else
+                wrap model
 
         UpdateContentScroll ->
             let
@@ -1483,6 +1510,13 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         LinkedItemsDropdownMsg itemUuid state ->
             wrap { model | linkedItemsDropdownStates = Dict.insert itemUuid state model.linkedItemsDropdownStates }
 
+        SearchPanelMsg searchPanelMsg ->
+            let
+                ( searchPanelModel, searchPanelCmd ) =
+                    SearchPanel.update appState model.questionnaire searchPanelMsg model.searchPanelModel
+            in
+            withSeed ( { model | searchPanelModel = searchPanelModel }, Cmd.map SearchPanelMsg searchPanelCmd )
+
         _ ->
             wrap model
 
@@ -1517,6 +1551,26 @@ localStorageNamedOnlyCmd model =
     LocalStorage.setItem
         (localStorageNamedOnlyKey model.uuid)
         (E.bool model.historyModel.namedOnly)
+
+
+handleSetActivePage : Model -> ActivePage -> ( Model, Cmd Msg )
+handleSetActivePage model activePage =
+    let
+        newNavigationTreeModel =
+            case activePage of
+                PageChapter chapterUuid ->
+                    NavigationTree.openChapter chapterUuid model.navigationTreeModel
+
+                _ ->
+                    model.navigationTreeModel
+    in
+    ( { model
+        | activePage = activePage
+        , navigationTreeModel = newNavigationTreeModel
+        , contentScrollTop = Nothing
+      }
+    , Dom.scrollToTop contentElementSelector
+    )
 
 
 handleScrollToPath : Model -> Bool -> String -> ( Model, Cmd Msg )
@@ -1561,10 +1615,12 @@ handleScrollToPath model immediate path =
         , navigationTreeModel = NavigationTree.openChapter chapterUuid model.navigationTreeModel
         , removeItem = Nothing
         , collapsedItems = newCollapsedItems
+        , mbHighlightedPath = Just path
       }
     , Cmd.batch
         [ scrollIntoViewCmd
         , localStorageCollapsedItemsCmd model.uuid newCollapsedItems
+        , Task.dispatchAfter 3000 (ClearHighlight path)
         ]
     )
 
@@ -1921,8 +1977,14 @@ view appState cfg ctx model =
                 { toMsg = cfg.wrapMsg << SplitPaneMsg
                 , customSplitter = Nothing
                 }
+
+        searchShortcut =
+            Shortcut.primaryShortcut appState.navigator.isMac (Shortcut.Regular "f") (cfg.wrapMsg (SetRightPanel RightPanel.Search))
+
+        shortcuts =
+            [ searchShortcut ]
     in
-    div
+    Shortcut.shortcutElement shortcuts
         [ class "questionnaire"
         , classList [ ( "toolbar-enabled", toolbarEnabled ) ]
         ]
@@ -2076,6 +2138,14 @@ viewQuestionnaireToolbar appState cfg model =
             else
                 Html.nothing
 
+        ( searchPanel, searchOpen ) =
+            case model.rightPanel of
+                RightPanel.Search ->
+                    ( RightPanel.None, True )
+
+                _ ->
+                    ( RightPanel.Search, False )
+
         ( todosPanel, todosOpen ) =
             case model.rightPanel of
                 RightPanel.TODOs ->
@@ -2110,6 +2180,18 @@ viewQuestionnaireToolbar appState cfg model =
 
                 _ ->
                     ( RightPanel.Warnings, False )
+
+        searchButtonVisible =
+            Feature.projectSearch appState model.questionnaire
+
+        searchButton =
+            div [ class "item-group" ]
+                [ a
+                    (tooltip (gettext "Search" appState.locale)
+                        ++ [ class "item", classList [ ( "selected", searchOpen ) ], onClick (SetRightPanel searchPanel) ]
+                    )
+                    [ faSearch ]
+                ]
 
         todosLength =
             QuestionnaireQuestionnaire.todosLength model.questionnaire
@@ -2194,6 +2276,7 @@ viewQuestionnaireToolbar appState cfg model =
             , navButton todosButton todosButtonVisible
             , navButton commentsOverviewButton commentsOverviewButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
+            , navButton searchButton searchButtonVisible
             , div [ class "item-group" ]
                 [ a [ class "item", onClick expandMsg ] [ expandIcon ]
                 ]
@@ -2404,6 +2487,18 @@ viewQuestionnaireRightPanel appState cfg model =
     case model.rightPanel of
         RightPanel.None ->
             Html.nothing
+
+        RightPanel.Search ->
+            let
+                viewConfig =
+                    { scrollToPathMsg = cfg.wrapMsg << ScrollToPath
+                    , scrollToQuestionMsg = cfg.wrapMsg << ScrollToQuestion
+                    , openChapterMsg = cfg.wrapMsg << OpenChapter
+                    , wrapMsg = cfg.wrapMsg << SearchPanelMsg
+                    }
+            in
+            Html.viewIf (Feature.projectSearch appState model.questionnaire) <|
+                wrapPanel [ SearchPanel.view appState viewConfig model.searchPanelModel ]
 
         RightPanel.TODOs ->
             Html.viewIf (Feature.projectTodos appState model.questionnaire) <|
@@ -3245,7 +3340,10 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
                     div [ class "flex-grow-1" ] <|
                         List.indexedMap (viewQuestion appState cfg ctx model [ chapter.uuid ] [ chapterNumber ]) questions
     in
-    div [ class "questionnaire__form container" ]
+    div
+        [ class "questionnaire__form container"
+        , classList [ ( "scroll-target-highlight", model.mbHighlightedPath == Just chapter.uuid ) ]
+        ]
         [ h2 [] [ text (chapterNumber ++ ". " ++ chapter.title) ]
         , Markdown.toHtml [ class "chapter-description" ] (Maybe.withDefault "" chapter.text)
         , questionViews
@@ -3432,11 +3530,15 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 
         questionExtraClass =
             Maybe.withDefault "" (cfg.renderer.getQuestionExtraClass question)
+
+        pathString =
+            pathToString newPath
     in
     div
         [ class ("form-group " ++ questionClass ++ " " ++ questionExtraClass)
+        , classList [ ( "scroll-target-highlight", model.mbHighlightedPath == Just pathString ) ]
         , id ("question-" ++ Question.getUuid question)
-        , attribute "data-path" (pathToString newPath)
+        , attribute "data-path" pathString
         ]
         content
 
@@ -3961,7 +4063,7 @@ viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
             else
                 div [ class "input-group" ]
                     [ span [ class "input-group-text" ]
-                        [ fas "fa-magnifying-glass" ]
+                        [ faSearch ]
                     , input ([ class "form-control", type_ "text" ] ++ extraArgs) []
                     ]
 
@@ -4265,24 +4367,15 @@ viewQuestionItemSelect appState cfg model path question =
 
                         noItemsWarning =
                             if List.isEmpty itemOptions then
-                                let
-                                    mbClosestQuestionParentPath =
-                                        QuestionnaireQuestionnaire.getClosestQuestionParentPath model.questionnaire
-                                            (KnowledgeModel.createParentMap model.questionnaire.knowledgeModel)
-                                            itemQuestionUuid
-
-                                    viewItemQuestionLink itemQuestionPath =
-                                        a
-                                            [ onClick (ScrollToPath itemQuestionPath)
+                                Flash.warningHtml
+                                    (div []
+                                        [ text (gettext "There are no items to select from yet." appState.locale)
+                                        , a
+                                            [ onClick (ScrollToQuestion itemQuestionUuid)
                                             , class "ms-1"
                                             ]
                                             [ text (gettext "Create them now." appState.locale)
                                             ]
-                                in
-                                Flash.warningHtml
-                                    (div []
-                                        [ text (gettext "There are no items to select from yet." appState.locale)
-                                        , Maybe.unwrap Html.nothing viewItemQuestionLink mbClosestQuestionParentPath
                                         ]
                                     )
 

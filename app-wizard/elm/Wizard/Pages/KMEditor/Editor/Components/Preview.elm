@@ -5,6 +5,7 @@ module Wizard.Pages.KMEditor.Editor.Components.Preview exposing
     , generateReplies
     , initialModel
     , setActiveChapterIfNot
+    , setKnowledgeModel
     , setPackageId
     , setPhase
     , setReplies
@@ -96,6 +97,14 @@ setPackageId appState packageId model =
     { model | questionnaireModel = questionnaireModel }
 
 
+setKnowledgeModel : KnowledgeModel -> Model -> Model
+setKnowledgeModel km model =
+    { model
+        | questionnaireModel =
+            questionnaireModelWithKnowledgeModel km model.questionnaireModel
+    }
+
+
 setReplies : Dict String Reply -> Model -> Model
 setReplies replies model =
     let
@@ -138,6 +147,18 @@ createQuestionnaireDetail packageId km =
             Package.dummy
     in
     QuestionnaireQuestionnaire.createQuestionnaireDetail { package | id = packageId } km
+
+
+questionnaireModelWithKnowledgeModel : KnowledgeModel -> Questionnaire.Model -> Questionnaire.Model
+questionnaireModelWithKnowledgeModel km questionnaireModel =
+    let
+        questionnaire =
+            questionnaireModel.questionnaire
+    in
+    { questionnaireModel
+        | questionnaire = { questionnaire | knowledgeModel = km }
+        , knowledgeModelParentMap = KnowledgeModel.createParentMap km
+    }
 
 
 type Msg
@@ -203,10 +224,7 @@ view : AppState -> ViewConfig msg -> Model -> Html msg
 view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
     let
         knowledgeModel =
-            EditorBranch.getFilteredKM editorBranch
-
-        questionnaireDetail =
-            model.questionnaireModel.questionnaire
+            model.questionnaireModel.questionnaire.knowledgeModel
 
         questionnaireModel =
             model.questionnaireModel
@@ -223,8 +241,7 @@ view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
                     }
                 , renderer =
                     DefaultQuestionnaireRenderer.create appState
-                        (DefaultQuestionnaireRenderer.config questionnaireDetail
-                            |> DefaultQuestionnaireRenderer.withKnowledgeModel knowledgeModel
+                        (DefaultQuestionnaireRenderer.config model.questionnaireModel.questionnaire
                             |> DefaultQuestionnaireRenderer.withResourcePageToRoute (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid << Just << Uuid.fromUuidString)
                         )
                 , wrapMsg = QuestionnaireMsg
@@ -235,28 +252,23 @@ view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
                 { events = []
                 , branchUuid = Just editorBranch.branch.uuid
                 }
-                { questionnaireModel
-                    | questionnaire =
-                        { questionnaireDetail
-                            | knowledgeModel = KnowledgeModel.filterWithTags (Set.toList model.tags) knowledgeModel
-                        }
-                }
+                (questionnaireModelWithKnowledgeModel (KnowledgeModel.filterWithTags (Set.toList model.tags) knowledgeModel) questionnaireModel)
     in
     div
         [ class "col KMEditor__Editor__Preview"
-        , classList [ ( "KMEditor__Editor__Preview--WithTags", tagSelectionVisible knowledgeModel ) ]
+        , classList [ ( "KMEditor__Editor__Preview--WithTags", tagSelectionVisible model ) ]
         , dataCy "km-editor_preview"
         ]
-        [ toolbar appState wrapMsg saveRepliesMsg model knowledgeModel
+        [ toolbar appState wrapMsg saveRepliesMsg model
         , Html.map wrapMsg questionnaire
         ]
 
 
-toolbar : AppState -> (Msg -> msg) -> msg -> Model -> KnowledgeModel -> Html msg
-toolbar appState wrapMsg saveRepliesMsg model km =
+toolbar : AppState -> (Msg -> msg) -> msg -> Model -> Html msg
+toolbar appState wrapMsg saveRepliesMsg model =
     let
         tagHeader =
-            if tagSelectionVisible km then
+            if tagSelectionVisible model then
                 Html.map wrapMsg <|
                     div [ class "d-flex align-items-center mb-1" ]
                         [ strong [ class "me-1" ] [ text (gettext "Tags" appState.locale) ]
@@ -295,24 +307,24 @@ toolbar appState wrapMsg saveRepliesMsg model km =
                     ]
                 ]
             ]
-        , Html.map wrapMsg <| tagSelection appState model.tags km
+        , Html.map wrapMsg <| tagSelection appState model
         ]
 
 
-tagSelectionVisible : KnowledgeModel -> Bool
-tagSelectionVisible km =
-    List.length km.tagUuids > 0
+tagSelectionVisible : Model -> Bool
+tagSelectionVisible model =
+    List.length model.questionnaireModel.questionnaire.knowledgeModel.tagUuids > 0
 
 
-tagSelection : AppState -> Set String -> KnowledgeModel -> Html Msg
-tagSelection appState selected knowledgeModel =
-    if tagSelectionVisible knowledgeModel then
+tagSelection : AppState -> Model -> Html Msg
+tagSelection appState model =
+    if tagSelectionVisible model then
         let
             tags =
-                KnowledgeModel.getTags knowledgeModel
+                KnowledgeModel.getTags model.questionnaireModel.questionnaire.knowledgeModel
 
             tagListConfig =
-                { selected = Set.toList selected
+                { selected = Set.toList model.tags
                 , addMsg = AddTag
                 , removeMsg = RemoveTag
                 , showDescription = False
