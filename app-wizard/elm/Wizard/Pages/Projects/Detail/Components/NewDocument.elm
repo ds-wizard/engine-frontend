@@ -16,6 +16,7 @@ import Common.Components.ActionButton as ActionResult
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Window as Window
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Setters exposing (setSelected)
@@ -41,8 +42,7 @@ import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.SummaryReport exposing (viewIndications)
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
 import Wizard.Routes as Routes
@@ -298,17 +298,18 @@ formView : AppState -> QuestionnaireCommon -> Maybe QuestionnaireEvent -> Model 
 formView appState questionnaire mbEvent model summaryReport =
     let
         cfg =
-            { viewItem = TypeHintItem.templateSuggestion
+            { viewItem = TypeHintInputItem.templateSuggestion
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
+            , locale = appState.locale
             }
 
         nameInput =
             FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
 
         templateInput =
-            TypeHintInput.view appState cfg model.templateTypeHintInputModel
+            TypeHintInput.view cfg model.templateTypeHintInputModel
 
         formatInput =
             case model.templateTypeHintInputModel.selected of

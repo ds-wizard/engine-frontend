@@ -17,6 +17,7 @@ import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
@@ -49,8 +50,7 @@ import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Tag as Tag
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Pages.Projects.Common.QuestionnaireSettingsForm as QuestionnaireSettingsForm exposing (QuestionnaireSettingsForm)
@@ -326,10 +326,11 @@ formView : AppState -> QuestionnaireSettings -> Model -> Html Msg
 formView appState questionnaire model =
     let
         typeHintInputConfig =
-            { viewItem = TypeHintItem.templateSuggestion
+            { viewItem = TypeHintInputItem.templateSuggestion
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = True
+            , locale = appState.locale
             }
 
         typeHintInput isInvalid =
@@ -357,7 +358,7 @@ formView appState questionnaire model =
             in
             div []
                 [ templateFlash
-                , TypeHintInput.view appState typeHintInputConfig model.templateTypeHintInputModel isInvalid
+                , TypeHintInput.view typeHintInputConfig model.templateTypeHintInputModel isInvalid
                 ]
 
         formatInput =
@@ -541,7 +542,7 @@ knowledgeModel appState questionnaire =
         , deprecatedWarning
         , linkTo (Routes.knowledgeModelsDetail questionnaire.package.id)
             [ class "package-link mb-2" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage questionnaire.package) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage questionnaire.package) ]
         , tagList
         , div [ class "mt-3" ]
             [ linkTo (Routes.projectsCreateMigration questionnaire.uuid)

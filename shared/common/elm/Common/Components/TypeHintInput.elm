@@ -1,4 +1,4 @@
-module Wizard.Components.TypeHintInput exposing
+module Common.Components.TypeHintInput exposing
     ( Model
     , Msg(..)
     , UpdateCofnig
@@ -15,19 +15,20 @@ import Browser.Dom as Dom
 import Browser.Events
 import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
-import Common.Components.FontAwesome exposing (fa, faError, faRemove, faSpinner)
+import Common.Components.FontAwesome exposing (faError, faRemove, faSearch, faSpinner)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Debounce exposing (Debounce)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, text, ul)
-import Html.Attributes exposing (class, classList, id, type_, value)
-import Html.Events exposing (onClick, onInput, onMouseDown, stopPropagationOn)
+import Html.Attributes exposing (class, classList, id, tabindex, type_, value)
+import Html.Events exposing (onBlur, onFocus, onInput, onMouseDown, stopPropagationOn)
 import Html.Extra as Html
 import Json.Decode as D exposing (Decoder)
+import List.Extra as List
 import Maybe.Extra as Maybe
+import Shortcut
 import Task
 import Task.Extra as Task
-import Wizard.Data.AppState exposing (AppState)
 
 
 
@@ -36,6 +37,7 @@ import Wizard.Data.AppState exposing (AppState)
 
 type alias Model a =
     { typehints : Maybe (ActionResult (Pagination a))
+    , typehintFocus : Maybe Int
     , q : String
     , debounce : Debounce String
     , selected : Maybe a
@@ -46,6 +48,7 @@ type alias Model a =
 init : String -> Model a
 init fieldId =
     { typehints = Nothing
+    , typehintFocus = Nothing
     , q = ""
     , debounce = Debounce.init
     , selected = Nothing
@@ -70,6 +73,9 @@ type Msg a
     | SetReply a
     | ClearReply
     | DebounceMsg Debounce.Msg
+    | SetTypehintFocusNext
+    | SetTypehintFocusPrev
+    | SelectTypehintByFocus
     | NoOp
 
 
@@ -137,7 +143,12 @@ update cfg msg model =
                                             Nothing ->
                                                 typehints
                                 in
-                                ( { model | typehints = Just <| Success filteredTypehints }, Cmd.none )
+                                ( { model
+                                    | typehints = Just <| Success filteredTypehints
+                                    , typehintFocus = Nothing
+                                  }
+                                , Cmd.none
+                                )
 
                             Err _ ->
                                 ( { model | typehints = Just <| Error cfg.getError }, Cmd.none )
@@ -146,6 +157,67 @@ update cfg msg model =
                         ( model, Cmd.none )
 
                 Nothing ->
+                    ( model, Cmd.none )
+
+        SetTypehintFocusNext ->
+            let
+                newFocus =
+                    case ( model.typehints, model.typehintFocus ) of
+                        ( Just (Success hints), Just focus ) ->
+                            if focus + 1 < List.length hints.items then
+                                Just (focus + 1)
+
+                            else
+                                Just 0
+
+                        ( Just (Success hints), Nothing ) ->
+                            if not (List.isEmpty hints.items) then
+                                Just 0
+
+                            else
+                                Nothing
+
+                        _ ->
+                            Nothing
+            in
+            ( { model | typehintFocus = newFocus }, Cmd.none )
+
+        SetTypehintFocusPrev ->
+            let
+                newFocus =
+                    case ( model.typehints, model.typehintFocus ) of
+                        ( Just (Success hints), Just focus ) ->
+                            if focus - 1 >= 0 then
+                                Just (focus - 1)
+
+                            else
+                                Just (List.length hints.items - 1)
+
+                        ( Just (Success hints), Nothing ) ->
+                            if not (List.isEmpty hints.items) then
+                                Just (List.length hints.items - 1)
+
+                            else
+                                Nothing
+
+                        _ ->
+                            Nothing
+            in
+            ( { model | typehintFocus = newFocus }, Cmd.none )
+
+        SelectTypehintByFocus ->
+            case ( model.typehints, model.typehintFocus ) of
+                ( Just (Success hints), Just focus ) ->
+                    case List.getAt focus hints.items of
+                        Just item ->
+                            ( { model | selected = Just item, typehints = Nothing, q = "" }
+                            , Task.dispatch (cfg.setReply item)
+                            )
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
                     ( model, Cmd.none )
 
         NoOp ->
@@ -177,6 +249,13 @@ subscriptions model =
         Sub.none
 
 
+succeedIfClickOutside : String -> Decoder ()
+succeedIfClickOutside targetId =
+    onClickDecoder targetId
+        |> D.field "target"
+        |> invertDecoder
+
+
 onClickDecoder : String -> Decoder ()
 onClickDecoder targetId =
     D.field "id" D.string
@@ -203,13 +282,6 @@ invertDecoder decoder =
             )
 
 
-succeedIfClickOutside : String -> Decoder ()
-succeedIfClickOutside targetId =
-    onClickDecoder targetId
-        |> D.field "target"
-        |> invertDecoder
-
-
 
 -- VIEW
 
@@ -219,12 +291,16 @@ type alias ViewConfig a msg =
     , wrapMsg : Msg a -> msg
     , nothingSelectedItem : Html msg
     , clearEnabled : Bool
+    , locale : Gettext.Locale
     }
 
 
-view : AppState -> ViewConfig a msg -> Model a -> Bool -> Html msg
-view appState cfg model isInvalid =
+view : ViewConfig a msg -> Model a -> Bool -> Html msg
+view cfg model isInvalid =
     let
+        isOpen =
+            Maybe.isJust model.typehints
+
         value =
             case model.selected of
                 Just item ->
@@ -247,62 +323,78 @@ view appState cfg model isInvalid =
                 Nothing ->
                     [ cfg.nothingSelectedItem ]
 
-        onClickMsg =
-            case model.typehints of
-                Just _ ->
-                    cfg.wrapMsg HideTypeHints
+        typeHintInputTabinex =
+            if isOpen then
+                -1
 
-                Nothing ->
-                    cfg.wrapMsg ShowTypeHints
+            else
+                0
     in
-    div [ class "TypeHintInput", classList [ ( "is-invalid", isInvalid ) ], id model.fieldId ]
+    div
+        [ class "typehint-input"
+        , classList [ ( "is-invalid", isInvalid ) ]
+        , id model.fieldId
+        ]
         [ div
-            [ class "TypeHintInput__Value form-control"
-            , classList [ ( "is-invalid", isInvalid ) ]
-            , onClick onClickMsg
+            [ class "typehint-input-value form-control"
+            , classList
+                [ ( "is-invalid", isInvalid )
+                , ( "focus", isOpen )
+                ]
+            , tabindex typeHintInputTabinex
+            , onFocus (cfg.wrapMsg ShowTypeHints)
             ]
             value
-        , viewTypeHints appState cfg model
+        , viewTypeHints cfg model
         ]
 
 
-viewTypeHints : AppState -> ViewConfig a msg -> Model a -> Html msg
-viewTypeHints appState cfg model =
+viewTypeHints : ViewConfig a msg -> Model a -> Html msg
+viewTypeHints cfg model =
     if Maybe.isJust model.typehints then
         let
             content =
                 case Maybe.withDefault Unset model.typehints of
                     Success hints ->
                         if List.isEmpty hints.items then
-                            div [ class "empty" ] [ text (gettext "No results matching your search were found." appState.locale) ]
+                            div [ class "typehints-empty" ] [ text (gettext "No results matching your search were found." cfg.locale) ]
 
                         else
-                            ul [] (List.map (viewTypeHint cfg) hints.items)
+                            ul [] (List.indexedMap (viewTypeHint cfg model) hints.items)
 
                     Loading ->
-                        div [ class "loading" ]
+                        div [ class "typehints-loading" ]
                             [ faSpinner
-                            , text (gettext "Loading..." appState.locale)
+                            , text (gettext "Loading..." cfg.locale)
                             ]
 
                     Error err ->
-                        div [ class "error" ]
+                        div [ class "typehints-error" ]
                             [ faError
                             , text err
                             ]
 
                     Unset ->
                         Html.nothing
+
+            shortcuts =
+                [ Shortcut.simpleShortcut Shortcut.ArrowDown (cfg.wrapMsg SetTypehintFocusNext)
+                , Shortcut.simpleShortcut Shortcut.ArrowUp (cfg.wrapMsg SetTypehintFocusPrev)
+                , Shortcut.simpleShortcut Shortcut.Enter (cfg.wrapMsg SelectTypehintByFocus)
+                , Shortcut.simpleShortcut Shortcut.Escape (cfg.wrapMsg HideTypeHints)
+                ]
         in
-        div [ class "TypeHintInput__TypeHints" ]
-            [ div [ class "TypeHintInput__TypeHints__Search" ]
-                [ fa "fas fa-search"
+        Shortcut.shortcutElement shortcuts
+            [ class "typehints" ]
+            [ div [ class "typehints-search" ]
+                [ faSearch
                 , input
                     [ class " form-control"
                     , type_ "text"
                     , onInput (cfg.wrapMsg << TypeHintInput)
                     , id (model.fieldId ++ "-search")
                     , value model.q
+                    , onBlur (cfg.wrapMsg HideTypeHints)
                     ]
                     []
                 ]
@@ -313,7 +405,12 @@ viewTypeHints appState cfg model =
         Html.nothing
 
 
-viewTypeHint : ViewConfig a msg -> a -> Html msg
-viewTypeHint cfg item =
+viewTypeHint : ViewConfig a msg -> Model a -> Int -> a -> Html msg
+viewTypeHint cfg model i item =
     li []
-        [ a [ onMouseDown (cfg.wrapMsg <| SetReply item) ] [ cfg.viewItem item ] ]
+        [ a
+            [ onMouseDown (cfg.wrapMsg <| SetReply item)
+            , classList [ ( "selected", model.typehintFocus == Just i ) ]
+            ]
+            [ cfg.viewItem item ]
+        ]

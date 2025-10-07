@@ -5,6 +5,8 @@ module Wizard.Pages.DocumentTemplateEditors.Create.Update exposing
 
 import ActionResult
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Components.TypeHintInput as TypeHintInput
+import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -19,7 +21,6 @@ import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.CreatedEntityWithId exposing (CreatedEntityWithId)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.DocumentTemplateEditors.Common.DocumentTemplateEditorCreateForm as DocumentTemplateEditorCreateForm exposing (DocumentTemplateEditorCreateForm)
@@ -31,12 +32,16 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
-    case ( model.selectedDocumentTemplate, model.edit ) of
-        ( Just documentTemplateId, True ) ->
-            DocumentTemplatesApi.getTemplate appState documentTemplateId GetDocumentTemplateCompleted
+    let
+        fetchDocumentTemplateCmd =
+            case ( model.selectedDocumentTemplate, model.edit ) of
+                ( Just documentTemplateId, True ) ->
+                    DocumentTemplatesApi.getTemplate appState documentTemplateId GetDocumentTemplateCompleted
 
-        _ ->
-            Cmd.none
+                _ ->
+                    Cmd.none
+    in
+    Cmd.batch [ fetchDocumentTemplateCmd, Dom.focus "#name" ]
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
