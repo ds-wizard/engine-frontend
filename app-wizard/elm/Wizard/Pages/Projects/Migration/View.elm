@@ -44,7 +44,7 @@ contentView appState model migration =
             if List.isEmpty model.changes.questions then
                 div [ class "content" ]
                     [ Page.illustratedMessage
-                        { image = Undraw.happyFeeling
+                        { illustration = Undraw.happyFeeling
                         , heading = gettext "No changes to review" appState.locale
                         , lines =
                             [ gettext "There are no changes affecting your answers." appState.locale

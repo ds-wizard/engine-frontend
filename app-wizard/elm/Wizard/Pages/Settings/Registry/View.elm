@@ -4,6 +4,7 @@ import ActionResult
 import Common.Components.ActionButton as ActionButton
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Flash as Flash
+import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
@@ -13,12 +14,11 @@ import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
-import Html exposing (Html, button, div, form, h5, text)
+import Html exposing (Html, button, div, h5, text)
 import Html.Attributes exposing (class, disabled, readonly)
-import Html.Events exposing (onClick, onSubmit)
+import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig exposing (EditableRegistryConfig)
-import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Pages.Settings.Registry.Models exposing (Model)
@@ -35,20 +35,17 @@ view appState model =
 viewForm : AppState -> Model -> config -> Html Msg
 viewForm appState model _ =
     let
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.genericModel.savingConfig
-            , formChanged = model.genericModel.formRemoved || Form.containsChanges model.genericModel.form
-            , wide = True
-            }
+        form =
+            Form.initDynamic appState (GenericMsg (GenericMsgs.FormMsg Form.Submit)) model.genericModel.savingConfig
+                |> Form.setFormView (formView appState model.genericModel.form)
+                |> Form.setFormChanged (model.genericModel.formRemoved || Form.containsChanges model.genericModel.form)
+                |> Form.setFormValid (Form.isValid model.genericModel.form)
+                |> Form.setWide
+                |> Form.viewDynamic
     in
     div [ wideDetailClass "" ]
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.settingsRegistry) (gettext "DSW Registry" appState.locale)
-        , form [ onSubmit (GenericMsg <| GenericMsgs.FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView model.genericModel.savingConfig
-            , formView appState model.genericModel.form
-            , FormActions.viewDynamic formActionsConfig appState
-            ]
+        , form
         , registrySignupModal appState model
         ]
 

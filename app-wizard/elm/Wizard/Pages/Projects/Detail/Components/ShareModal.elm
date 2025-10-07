@@ -14,12 +14,13 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faFwRemove, faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, fas)
+import Common.Components.FontAwesome exposing (faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, faRemoveFw, fas)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Copy as Copy
 import Common.Utils.CmdUtils exposing (withNoCmd)
 import Common.Utils.Driver as Driver exposing (TourConfig)
@@ -52,8 +53,7 @@ import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Api.UserGroups as UserGroupsApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.MemberIcon as MemberIcon
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintInput
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInput
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Common.QuestionnaireShareForm as QuestionnaireShareForm exposing (QuestionnaireShareForm)
 import Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberPermType as QuestionnaireEditFormMemberPerms
@@ -499,10 +499,11 @@ userGroupsView appState model =
             , wrapMsg = UserGroupTypeHintInputMsg
             , nothingSelectedItem = span [ class "text-muted" ] [ text <| gettext "Add user group" appState.locale ]
             , clearEnabled = False
+            , locale = appState.locale
             }
 
         userGroupTypeHintInput =
-            TypeHintInput.view appState userGroupTypeHintInputCfg model.userGroupTypeHintInputModel False
+            TypeHintInput.view userGroupTypeHintInputCfg model.userGroupTypeHintInputModel False
     in
     div [ class "ShareModal__Users" ]
         [ div []
@@ -568,10 +569,11 @@ usersView appState model =
             , wrapMsg = UserTypeHintInputMsg
             , nothingSelectedItem = span [ class "text-muted" ] [ text <| gettext "Add users" appState.locale ]
             , clearEnabled = False
+            , locale = appState.locale
             }
 
         userTypeHintInput =
-            TypeHintInput.view appState userTypeHintInputCfg model.userTypeHintInputModel False
+            TypeHintInput.view userTypeHintInputCfg model.userTypeHintInputModel False
 
         separator =
             if appState.config.questionnaire.questionnaireVisibility.enabled || appState.config.questionnaire.questionnaireSharing.enabled then
@@ -637,7 +639,7 @@ userView appState users form i =
                             , onClick (Form.RemoveItem "permissions" i)
                             , title (gettext "Remove" appState.locale)
                             ]
-                            [ faFwRemove ]
+                            [ faRemoveFw ]
             in
             div [ class "user-row" ]
                 [ div []

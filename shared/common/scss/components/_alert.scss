@@ -1,0 +1,16 @@
+@import '../mixins/fade-in';
+
+
+.alert {
+  word-break: break-word;
+
+  p:last-child {
+    margin-bottom: 0;
+  }
+
+  &-inline-loader {
+    color: var(--bs-gray-500);
+    opacity: 0;
+    @include fade-in;
+  }
+}

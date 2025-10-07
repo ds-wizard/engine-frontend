@@ -16,8 +16,10 @@ export class ShortcutElement extends HTMLElement {
                         (ctrl == null || ctrl === event.ctrlKey) &&
                         (meta == null || meta === event.metaKey)
                 ) // now we have all the shortcuts that match the current event
-                .map(({ name }) => {
-                    if (event.target instanceof HTMLTextAreaElement) {
+                .map(({ name, ctrl, meta, baseKey }) => {
+                    const isSubmitShortcut = (ctrl === true || meta === true) && baseKey.toLowerCase() === 'enter'
+
+                    if (!isSubmitShortcut && event.target instanceof HTMLTextAreaElement) {
                         return
                     }
 

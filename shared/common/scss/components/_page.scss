@@ -1,0 +1,17 @@
+@import '../mixins/fade-in';
+
+.page-loader {
+  text-align: center;
+  color: var(--bs-gray-500);
+  @include fade-in;
+
+  .fas {
+    font-size: 3rem;
+    margin: var(--bs-spacer-3);
+  }
+
+  &-empty {
+    height: 100vh;
+    padding-top: 40vh;
+  }
+}

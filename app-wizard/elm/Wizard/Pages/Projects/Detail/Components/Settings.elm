@@ -13,10 +13,12 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (faQuestionnaireSettingsKmAllQuestions, faQuestionnaireSettingsKmFiltered, faRemove)
+import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
@@ -27,7 +29,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, br, button, div, form, h2, hr, label, li, p, span, strong, text, ul)
+import Html exposing (Html, br, button, div, form, h2, hr, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, disabled, id, name, style, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onMouseDown, onSubmit)
@@ -49,8 +51,7 @@ import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Tag as Tag
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
 import Wizard.Pages.Projects.Common.QuestionnaireSettingsForm as QuestionnaireSettingsForm exposing (QuestionnaireSettingsForm)
@@ -326,10 +327,11 @@ formView : AppState -> QuestionnaireSettings -> Model -> Html Msg
 formView appState questionnaire model =
     let
         typeHintInputConfig =
-            { viewItem = TypeHintItem.templateSuggestion
+            { viewItem = TypeHintInputItem.templateSuggestion
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = True
+            , locale = appState.locale
             }
 
         typeHintInput isInvalid =
@@ -357,7 +359,7 @@ formView appState questionnaire model =
             in
             div []
                 [ templateFlash
-                , TypeHintInput.view appState typeHintInputConfig model.templateTypeHintInputModel isInvalid
+                , TypeHintInput.view typeHintInputConfig model.templateTypeHintInputModel isInvalid
                 ]
 
         formatInput =
@@ -403,20 +405,27 @@ formView appState questionnaire model =
             , formChanged = tagsChanged || formChanged
             , wide = False
             }
+
+        formContent =
+            div []
+                ([ FormResult.errorOnlyView model.savingQuestionnaire
+                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
+                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" <| gettext "Description" appState.locale
+                 , Html.map FormMsg <| projectTagsInput
+                 , hr [] []
+                 , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateId" <| gettext "Default document template" appState.locale
+                 , Html.map FormMsg <| formatInput
+                 ]
+                    ++ isTemplateInput
+                    ++ [ FormActions.viewDynamic formActionsConfig appState
+                       ]
+                )
     in
-    form [ onSubmit (FormMsg Form.Submit) ]
-        ([ FormResult.errorOnlyView model.savingQuestionnaire
-         , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
-         , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" <| gettext "Description" appState.locale
-         , Html.map FormMsg <| projectTagsInput
-         , hr [] []
-         , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateId" <| gettext "Default document template" appState.locale
-         , Html.map FormMsg <| formatInput
-         ]
-            ++ isTemplateInput
-            ++ [ FormActions.viewDynamic formActionsConfig appState
-               ]
-        )
+    Form.initDynamic appState (FormMsg Form.Submit) model.savingQuestionnaire
+        |> Form.setFormView formContent
+        |> Form.setFormChanged (tagsChanged || formChanged)
+        |> Form.setFormValid (Form.isValid model.form)
+        |> Form.viewDynamic
 
 
 projectTagsFormGroup : AppState -> Model -> Html Form.Msg
@@ -442,8 +451,8 @@ projectTagView form i =
     in
     div [ class "project-tag", dataCy "project_settings_tag" ]
         [ text value
-        , a
-            [ class "text-danger ms-2"
+        , button
+            [ class "btn btn-link text-danger ms-2 p-1"
             , onClick (Form.RemoveItem "projectTags" i)
             , dataCy "project_settings_tag-remove"
             ]
@@ -489,7 +498,7 @@ projectTagInput appState model =
                 ul [ class "typehints" ]
                     (List.map typehintView typehints)
     in
-    [ div [ class "input-group" ]
+    [ form [ class "input-group", onSubmit (Form.Append "projectTags") ]
         [ Input.textInput field
             [ class "form-control"
             , classList [ ( "is-invalid", hasError ) ]
@@ -541,7 +550,7 @@ knowledgeModel appState questionnaire =
         , deprecatedWarning
         , linkTo (Routes.knowledgeModelsDetail questionnaire.package.id)
             [ class "package-link mb-2" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage questionnaire.package) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage questionnaire.package) ]
         , tagList
         , div [ class "mt-3" ]
             [ linkTo (Routes.projectsCreateMigration questionnaire.uuid)

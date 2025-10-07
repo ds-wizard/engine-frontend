@@ -11,6 +11,7 @@ $min-contrast-ratio: 3 !default;
 
 @import '~bootstrap/scss/variables';
 @import '~bootstrap/scss/variables-dark';
+@import '../../shared/common/scss/_variables.scss';
 
 
 // public layout
@@ -20,8 +21,8 @@ $public-header-height: 50px !default;
 // side navigation
 $side-navigation-bg: $gray-100 !default;
 $side-navigation-border-color: $gray-400 !default;
-$side-navigation-width: 240px !default;
-$side-navigation-width-collapsed: 50px !default;
+$side-navigation-width: $sidebar-width;
+$side-navigation-width-collapsed: $sidebar-width-collapsed;
 $side-navigation-gap: 1.5rem !default;
 $side-navigation-submenu-max-width: 220px !default;
 $side-navigation-icon-spacing: 0.5rem !default;
@@ -106,18 +107,5 @@ $comments-private-border: shift-color($purple, $alert-border-scale) !default;
 $tag-default-background: $gray-400 !default;
 $tag-default-color: $body-color !default;
 
-
-// spacer helpers
-$spacer-0: map-get($spacers, 0); // 0
-$spacer-1: map-get($spacers, 1); // 0.25rem
-$spacer-2: map-get($spacers, 2); // 0.5rem
-$spacer-3: map-get($spacers, 3); // 1rem
-$spacer-4: map-get($spacers, 4); // 1.5rem
-$spacer-5: map-get($spacers, 5); // 3rem
-$spacer-6: 5rem;
-
-
-// forms
-$form-actions-dynamic-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
 
 @import '~bootstrap/scss/maps';

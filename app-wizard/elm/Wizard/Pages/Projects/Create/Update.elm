@@ -4,8 +4,10 @@ import ActionResult
 import Common.Api.ApiError as ApiError
 import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Request exposing (ToMsg)
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
 import Common.Utils.Bool as Bool
 import Common.Utils.CmdUtils exposing (withNoCmd)
@@ -22,7 +24,6 @@ import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Questionnaires as QuestionnaireApi
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
@@ -93,6 +94,7 @@ fetchData appState model =
         , loadProjectTemplates
         , loadKnowledgeModels
         , tourCmd
+        , Dom.focus "#name"
         ]
 
 

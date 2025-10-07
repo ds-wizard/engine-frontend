@@ -10,7 +10,7 @@ import Wizard.Data.AppState exposing (AppState)
 view : AppState -> Html msg
 view appState =
     Page.illustratedMessage
-        { image = Undraw.windyDay
+        { illustration = Undraw.windyDay
         , heading = gettext "Logged out" appState.locale
         , lines = [ gettext "You have been successfully logged out." appState.locale ]
         , cy = "logout-successful"

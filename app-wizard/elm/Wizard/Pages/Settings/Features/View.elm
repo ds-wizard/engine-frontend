@@ -2,57 +2,38 @@ module Wizard.Pages.Settings.Features.View exposing (view)
 
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
-import Common.Components.Page as Page
-import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
+import Compose exposing (compose2)
 import Form
 import Gettext exposing (gettext)
-import Html exposing (Html, div, form)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onSubmit)
 import Wizard.Api.Models.EditableConfig.EditableFeaturesConfig exposing (EditableFeaturesConfig)
-import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Features.Models exposing (Model)
-import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs exposing (Msg)
+import Wizard.Pages.Settings.Generic.Msgs exposing (Msg(..))
+import Wizard.Pages.Settings.Generic.View as GenericView
+import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewForm appState model) model.config
+    GenericView.view viewProps appState model
 
 
-viewForm : AppState -> Model -> config -> Html Msg
-viewForm appState model _ =
-    let
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.savingConfig
-            , formChanged = model.formRemoved || Form.containsChanges model.form
-            , wide = True
-            }
-
-        headerTitle =
-            gettext "Features" appState.locale
-    in
-    div [ class "Features" ]
-        [ Page.header headerTitle []
-        , form [ onSubmit (GenericMsgs.FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView model.savingConfig
-            , formView appState model.form
-            , FormActions.viewDynamic formActionsConfig appState
-            ]
-        ]
+viewProps : GenericView.ViewProps EditableFeaturesConfig Msg
+viewProps =
+    { locTitle = gettext "Features"
+    , locSave = gettext "Save"
+    , formView = compose2 (Html.map FormMsg) formView
+    , guideLink = WizardGuideLinks.settingsFeatures
+    , wrapMsg = FormMsg
+    }
 
 
-formView : AppState -> Form.Form FormError EditableFeaturesConfig -> Html Msg
+formView : AppState -> Form.Form FormError EditableFeaturesConfig -> Html Form.Msg
 formView appState form =
-    let
-        formWrap =
-            Html.map GenericMsgs.FormMsg
-    in
     div [ class "FeaturesForm" ]
-        [ formWrap <| FormGroup.toggle form "toursEnabled" (gettext "Tours" appState.locale)
+        [ FormGroup.toggle form "toursEnabled" (gettext "Tours" appState.locale)
         , FormExtra.mdAfter (gettext "If enabled, Tours help users navigate the application when opening specific screens for the first time." appState.locale)
         ]

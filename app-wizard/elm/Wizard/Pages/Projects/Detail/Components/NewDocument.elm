@@ -12,10 +12,12 @@ module Wizard.Pages.Projects.Detail.Components.NewDocument exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
-import Common.Components.ActionButton as ActionResult
+import Common.Components.Container as Container
+import Common.Components.Form as Form
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Components.TypeHintInput as TypeHintInput
+import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Setters exposing (setSelected)
@@ -38,16 +40,13 @@ import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as Questionnaire
 import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
 import Wizard.Api.Questionnaires as QuestionnairesApi
-import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.SummaryReport exposing (viewIndications)
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Documents.Common.DocumentCreateForm as DocumentCreateForm exposing (DocumentCreateForm)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
-import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -110,7 +109,11 @@ fetchData appState questionnaireUuid mbEventUuid =
         summaryReportCmd =
             QuestionnairesApi.getSummaryReport appState questionnaireUuid GetSummaryReportComplete
     in
-    Cmd.batch [ eventCmd, summaryReportCmd ]
+    Cmd.batch
+        [ eventCmd
+        , summaryReportCmd
+        , Dom.focus "#name"
+        ]
 
 
 type alias UpdateConfig msg =
@@ -280,17 +283,17 @@ view appState questionnaire model =
 
 viewFormState : AppState -> QuestionnaireCommon -> Model -> ( SummaryReport, Maybe QuestionnaireEvent ) -> Html Msg
 viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
-    div [ class "Projects__Detail__Content Projects__Detail__Content--NewDocument" ]
-        [ div [ detailClass "container" ]
-            [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsNewDocument) (gettext "New Document" appState.locale)
-            , div []
-                [ FormResult.view model.savingDocument
-                , formView appState questionnaire mbEvent model summaryReport
-                , FormActions.view appState
-                    Cancel
-                    (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingDocument (FormMsg Form.Submit) False)
-                ]
-            ]
+    Container.simpleForm
+        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsNewDocument) (gettext "New Document" appState.locale)
+        , Form.viewSimple
+            { formMsg = FormMsg
+            , formResult = model.savingDocument
+            , formView = formView appState questionnaire mbEvent model summaryReport
+            , submitLabel = gettext "Create" appState.locale
+            , cancelMsg = Just Cancel
+            , locale = appState.locale
+            , isMac = appState.navigator.isMac
+            }
         ]
 
 
@@ -298,17 +301,18 @@ formView : AppState -> QuestionnaireCommon -> Maybe QuestionnaireEvent -> Model 
 formView appState questionnaire mbEvent model summaryReport =
     let
         cfg =
-            { viewItem = TypeHintItem.templateSuggestion
+            { viewItem = TypeHintInputItem.templateSuggestion
             , wrapMsg = TemplateTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
+            , locale = appState.locale
             }
 
         nameInput =
             FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
 
         templateInput =
-            TypeHintInput.view appState cfg model.templateTypeHintInputModel
+            TypeHintInput.view cfg model.templateTypeHintInputModel
 
         formatInput =
             case model.templateTypeHintInputModel.selected of

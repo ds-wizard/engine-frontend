@@ -1,0 +1,47 @@
+@import '../variables';
+@import '../mixins/border-radius';
+@import '../mixins/transition';
+
+$form-actions-dynamic-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+
+.form-actions-dynamic {
+  $transition: bottom 0.15s ease-in-out, max-width $transition-time-default ease-in-out;
+  @include transition($transition);
+  @include border-radius-top(var(--bs-border-radius));
+  bottom: -5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  background-color: var(--bs-white);
+  box-shadow: $form-actions-dynamic-shadow;
+  width: 35rem + 2 * $spacer-3;
+  max-width: calc(100% - $sidebar-width - 22rem);
+  padding: 1rem;
+  z-index: 900;
+
+  .app-sidebar-collapsed & {
+    max-width: calc(100% - $sidebar-width-collapsed - 22rem);
+  }
+
+  .col-detail & {
+    width: 33rem;
+  }
+
+  &-wide {
+    width: 61rem;
+  }
+
+  &-visible {
+    bottom: 0;
+  }
+
+  &-success {
+    @include transition(bottom 0.15s ease-in-out 1s);
+    bottom: -5rem;
+  }
+
+  p {
+    margin: 0;
+  }
+}

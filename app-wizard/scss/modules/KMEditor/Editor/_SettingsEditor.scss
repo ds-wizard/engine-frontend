@@ -13,14 +13,23 @@
         display: block;
         margin-top: 1rem;
 
-        .TypeHintInput__TypeHints__ComplexItem {
+        .typehints-complex-item {
+            display: flex;
             @include border-radius($border-radius);
             border: 1px solid $gray-400;
             padding: .375rem .75rem;
+
+            .ItemIcon {
+              margin-right: 0.5rem;
+            }
+
+            .badge {
+              margin-left: 0.5rem;
+            }
         }
 
         &:hover {
-            .TypeHintInput__TypeHints__ComplexItem {
+            .typehints-complex-item {
                 background: $gray-200;
             }
         }

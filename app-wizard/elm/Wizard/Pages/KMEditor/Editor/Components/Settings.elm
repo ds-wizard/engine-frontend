@@ -10,9 +10,9 @@ module Wizard.Pages.KMEditor.Editor.Components.Settings exposing
 
 import ActionResult exposing (ActionResult)
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
@@ -20,10 +20,10 @@ import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
-import Html exposing (Html, br, button, div, form, h2, hr, p, strong, text)
+import Html exposing (Html, br, button, div, h2, hr, p, strong, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
-import Html.Events exposing (onClick, onSubmit)
+import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Uuid exposing (Uuid)
 import Version exposing (Version)
@@ -32,9 +32,8 @@ import Wizard.Api.Models.Branch.BranchState as BranchState exposing (BranchState
 import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
-import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
 import Wizard.Pages.KMEditor.Common.BranchUtils as BranchUtils
@@ -174,33 +173,34 @@ view appState branchDetail model =
             , setVersionMsg = Just FormSetVersion
             }
 
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.savingBranch
-            , formChanged = Form.containsChanges model.form
-            , wide = False
-            }
+        formContent =
+            div []
+                ([ Html.map FormMsg <| FormGroup.input appState.locale model.form "name" (gettext "Name" appState.locale)
+                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" (gettext "Description" appState.locale)
+                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
+                 , FormExtra.textAfter <| gettext "Knowledge model ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
+                 , FormGroup.version appState.locale versionInputConfig model.form
+                 , Html.map FormMsg <| FormGroup.input appState.locale model.form "license" <| gettext "License" appState.locale
+                 , Html.map FormMsg <| FormGroup.markdownEditor appState.locale (WizardGuideLinks.markdownCheatsheet appState.guideLinks) model.form "readme" <| gettext "Readme" appState.locale
+                 ]
+                    ++ parentKnowledgeModelView
+                    ++ [ hr [ class "separator" ] []
+                       , dangerZone appState branchDetail
+                       ]
+                )
+
+        form =
+            Form.initDynamic appState (FormMsg Form.Submit) model.savingBranch
+                |> Form.setFormView formContent
+                |> Form.setFormChanged (Form.containsChanges model.form)
+                |> Form.setFormValid (Form.isValid model.form)
+                |> Form.viewDynamic
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]
         [ div [ detailClass "" ]
-            ([ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.kmEditorSettings) (gettext "Settings" appState.locale)
-             , form [ onSubmit (FormMsg Form.Submit) ]
-                [ FormResult.errorOnlyView model.savingBranch
-                , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" (gettext "Name" appState.locale)
-                , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" (gettext "Description" appState.locale)
-                , Html.map FormMsg <| FormGroup.input appState.locale model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
-                , FormExtra.textAfter <| gettext "Knowledge model ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
-                , FormGroup.version appState.locale versionInputConfig model.form
-                , Html.map FormMsg <| FormGroup.input appState.locale model.form "license" <| gettext "License" appState.locale
-                , Html.map FormMsg <| FormGroup.markdownEditor appState.locale (WizardGuideLinks.markdownCheatsheet appState.guideLinks) model.form "readme" <| gettext "Readme" appState.locale
-                , FormActions.viewDynamic formActionsConfig appState
-                ]
-             ]
-                ++ parentKnowledgeModelView
-                ++ [ hr [ class "separator" ] []
-                   , dangerZone appState branchDetail
-                   ]
-            )
+            [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.kmEditorSettings) (gettext "Settings" appState.locale)
+            , form
+            ]
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModal
         , Html.map UpgradeModalMsg <| UpgradeModal.view appState model.upgradeModal
         ]
@@ -228,7 +228,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
         , linkTo (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
         , outdatedWarning
         ]
 

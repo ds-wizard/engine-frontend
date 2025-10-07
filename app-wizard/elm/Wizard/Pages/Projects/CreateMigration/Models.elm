@@ -4,6 +4,7 @@ module Wizard.Pages.Projects.CreateMigration.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Uuid exposing (Uuid)
@@ -11,7 +12,6 @@ import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Pages.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm exposing (QuestionnaireMigrationCreateForm)
 
 

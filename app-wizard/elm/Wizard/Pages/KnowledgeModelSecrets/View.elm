@@ -35,7 +35,7 @@ viewContent appState model list =
         content =
             if List.isEmpty list then
                 Page.illustratedMessage
-                    { image = Undraw.noData
+                    { illustration = Undraw.noData
                     , heading = gettext "No secrets yet" appState.locale
                     , lines = [ gettext "Create a knowledge model secret to store sensitive information used for integrations in knowledge models." appState.locale ]
                     , cy = "km-secrets-empty"
