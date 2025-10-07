@@ -4,11 +4,11 @@ module Wizard.Pages.KMEditor.Create.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
 

@@ -3,13 +3,15 @@ module Common.Components.Flash exposing
     , info
     , loader
     , success
+    , tip
     , warning
     , warningHtml
     )
 
-import Common.Components.FontAwesome exposing (faError, faInfo, faSpinner, faSuccess, faWarning)
+import Common.Components.FontAwesome exposing (faError, faInfo, faSpinner, faSuccess, faWarning, fas)
+import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
-import Html exposing (Html, div, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
@@ -47,15 +49,20 @@ loader locale =
         (gettext "Loading..." locale)
 
 
+tip : String -> Html msg
+tip =
+    flashView "alert-info" (fas "fa-lightbulb")
+
+
 flashView : String -> Html msg -> String -> Html msg
 flashView className icon msg =
     if msg /= "" then
         div
-            [ class ("alert " ++ className)
+            [ class ("alert d-flex align-items-baseline " ++ className)
             , dataCy ("flash_" ++ className)
             ]
             [ icon
-            , text msg
+            , Markdown.toHtml [ class "ms-2" ] msg
             ]
 
     else

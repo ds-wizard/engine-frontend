@@ -52,7 +52,7 @@ viewContent appState model ( questionnaire, questionnaireModel, _ ) =
 viewContentBeforeImport : AppState -> Html msg
 viewContentBeforeImport appState =
     Page.illustratedMessage
-        { image = Undraw.addInformation
+        { illustration = Undraw.addInformation
         , heading = gettext "Import" appState.locale
         , lines = [ gettext "Follow the instructions in the importer window." appState.locale ]
         , cy = "import"

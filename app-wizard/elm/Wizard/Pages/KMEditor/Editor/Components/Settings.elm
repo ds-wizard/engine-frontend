@@ -34,7 +34,7 @@ import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
 import Wizard.Pages.KMEditor.Common.BranchUtils as BranchUtils
@@ -228,7 +228,7 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
         , linkTo (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
-            [ TypeHintItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
         , outdatedWarning
         ]
 

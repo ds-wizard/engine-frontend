@@ -1,18 +1,17 @@
-module Wizard.Components.TypeHintInput.TypeHintItem exposing
+module Wizard.Components.TypeHintInput.TypeHintInputItem exposing
     ( memberSuggestion
     , packageSuggestion
     , packageSuggestionWithVersion
     , questionnaireSuggestion
-    , simple
     , templateSuggestion
     , userGroupSuggestion
     )
 
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.Badge as Badge
+import Common.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
-import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Version
@@ -25,14 +24,9 @@ import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState exposing (AppState)
 
 
-simple : (a -> String) -> a -> Html msg
-simple toName item =
-    div [ class "TypeHintInput__TypeHints__SimpleItem" ] [ text (toName item) ]
-
-
 memberSuggestion : UserSuggestion -> Html msg
 memberSuggestion user =
-    complexItem
+    TypeHintInputItem.complex
         [ div [] [ UserIcon.viewSmall user ]
         , div [] [ text <| User.fullName user ]
         ]
@@ -40,7 +34,7 @@ memberSuggestion user =
 
 questionnaireSuggestion : { a | name : String, description : Maybe String } -> Html msg
 questionnaireSuggestion questionnaire =
-    complexItem
+    TypeHintInputItem.complex
         [ div [] [ ItemIcon.view { text = questionnaire.name, image = Nothing } ]
         , div []
             [ div []
@@ -66,7 +60,7 @@ packageSuggestion withVersion pkg =
             else
                 Html.nothing
     in
-    complexItem
+    TypeHintInputItem.complex
         [ div [] [ ItemIcon.view { text = pkg.name, image = Nothing } ]
         , div []
             [ div []
@@ -80,7 +74,7 @@ packageSuggestion withVersion pkg =
 
 templateSuggestion : DocumentTemplateSuggestion -> Html msg
 templateSuggestion template =
-    complexItem
+    TypeHintInputItem.complex
         [ div [] [ ItemIcon.view { text = template.name, image = Nothing } ]
         , div []
             [ div []
@@ -102,7 +96,7 @@ userGroupSuggestion appState userGroup =
             else
                 Html.nothing
     in
-    complexItem
+    TypeHintInputItem.complex
         [ div [] [ ItemIcon.view { text = userGroup.name, image = Nothing } ]
         , div []
             [ div []
@@ -112,8 +106,3 @@ userGroupSuggestion appState userGroup =
             , div [] [ text (Maybe.withDefault "-" userGroup.description) ]
             ]
         ]
-
-
-complexItem : List (Html msg) -> Html msg
-complexItem =
-    div [ class "TypeHintInput__TypeHints__ComplexItem" ]

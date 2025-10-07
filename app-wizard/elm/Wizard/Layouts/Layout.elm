@@ -32,7 +32,7 @@ misconfigured appState =
     let
         html =
             Page.illustratedMessage
-                { image = Undraw.bugFixing
+                { illustration = Undraw.bugFixing
                 , heading = gettext "Configuration Error" appState.locale
                 , lines =
                     [ gettext "Application is not configured correctly and cannot run." appState.locale

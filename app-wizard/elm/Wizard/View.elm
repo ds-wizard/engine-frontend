@@ -159,7 +159,7 @@ view model =
 notFoundView : AppState -> Html msg
 notFoundView appState =
     Page.illustratedMessage
-        { image = Undraw.pageNotFound
+        { illustration = Undraw.pageNotFound
         , heading = gettext "Not Found" appState.locale
         , lines = [ gettext "The page you are looking for was not found." appState.locale ]
         , cy = "not-found"
@@ -169,7 +169,7 @@ notFoundView appState =
 notAllowedView : AppState -> Html msg
 notAllowedView appState =
     Page.illustratedMessage
-        { image = Undraw.security
+        { illustration = Undraw.security
         , heading = gettext "Not Allowed" appState.locale
         , lines = [ gettext "You don't have permission to view this page." appState.locale ]
         , cy = "not-allowed"

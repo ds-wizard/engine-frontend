@@ -1,9 +1,8 @@
 module Wizard.Pages.Tenants.Index.View exposing (view)
 
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faWarning)
+import Common.Components.Flash as Flash
 import Common.Components.Page as Page
-import Common.Utils.Markdown as Markdown
 import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
@@ -27,9 +26,8 @@ view appState model =
     let
         editWarning =
             Html.viewIf (Admin.isEnabled appState.config.admin) <|
-                div [ class "alert alert-danger mt-n3 mb-4 d-flex align-items-center" ]
-                    [ faWarning
-                    , Markdown.toHtml [] (String.format "Do not edit tenants here. Go to [Admin Center](%s)." [ "/admin/tenants" ])
+                div [ class "mt-n3" ]
+                    [ Flash.error (String.format "Do not edit tenants here. Go to [Admin Center](%s)." [ "/admin/tenants" ])
                     ]
     in
     div [ listClass "Tenants__Index" ]
@@ -57,6 +55,13 @@ listingConfig appState =
                 , options = TenantState.filterOptions
                 , maxVisibleValues = 1
                 }
+
+        toolbarExtra =
+            if Admin.isEnabled appState.config.admin then
+                Nothing
+
+            else
+                Just createButton
     in
     { title = listingTitle
     , description = listingDescription
@@ -83,7 +88,7 @@ listingConfig appState =
         , stateFilter
         ]
     , toRoute = Routes.tenantsIndexWithFilters
-    , toolbarExtra = Just createButton
+    , toolbarExtra = toolbarExtra
     }
 
 

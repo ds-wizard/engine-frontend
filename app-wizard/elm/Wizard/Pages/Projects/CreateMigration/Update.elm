@@ -2,6 +2,7 @@ module Wizard.Pages.Projects.CreateMigration.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Window as Window
 import Common.Utils.CmdUtils exposing (withNoCmd)
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -20,7 +21,6 @@ import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Questionnaires as QuestionnairesApi
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm

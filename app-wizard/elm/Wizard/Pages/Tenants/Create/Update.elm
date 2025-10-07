@@ -1,7 +1,8 @@
-module Wizard.Pages.Tenants.Create.Update exposing (update)
+module Wizard.Pages.Tenants.Create.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -14,6 +15,11 @@ import Wizard.Pages.Tenants.Create.Models exposing (Model)
 import Wizard.Pages.Tenants.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
+
+
+fetchData : Cmd Msg
+fetchData =
+    Dom.focus "#tenantId"
 
 
 update : AppState -> Msg -> (Msg -> Wizard.Msgs.Msg) -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

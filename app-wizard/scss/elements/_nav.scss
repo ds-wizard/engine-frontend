@@ -3,124 +3,128 @@
 
 
 .nav-tabs:not(.card-header-tabs) {
-    margin-bottom: $spacer-4;
+  margin-bottom: $spacer-4;
 
-    .nav-link {
-        &.active, &.active:hover {
-            color: $gray-700;
-            cursor: default;
-        }
-
-        .fas, .far, .fab{
-            margin-right: $spacer-2;
-        }
+  .nav-link {
+    &.active, &.active:hover {
+      color: $gray-700;
+      cursor: default;
     }
+
+    .fas, .far, .fab {
+      margin-right: $spacer-2;
+    }
+  }
 }
 
 .nav-pills {
+  .nav-link {
+    color: $gray-700 !important;
+    font-weight: 500;
+    cursor: pointer;
+
+    &.active, &.active:hover, &:hover {
+      color: var(--bs-primary) !important;
+      background: var(--bs-primary-bg);
+    }
+
+    &.active {
+      cursor: default;
+    }
+  }
+
+  &.flex-column {
     .nav-link {
-        color: $gray-700 !important;
-        font-weight: 500;
-        cursor: pointer;
-
-        &.active, &.active:hover, &:hover {
-            color: var(--bs-primary) !important;
-            background: var(--bs-primary-bg);
-        }
-
-        &.active {
-            cursor: default;
-        }
+      margin-bottom: 1px;
     }
-
-    &.flex-column {
-        .nav-link {
-            margin-bottom: 1px;
-        }
-    }
+  }
 }
 
 .nav-underline-tabs {
-    padding: 0;
-    margin: 0;
-    display: flex;
-    flex-wrap: nowrap;
-    max-width: 100%;
-    overflow: auto;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: nowrap;
+  max-width: 100%;
+  overflow: auto;
 
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 
-    &::-webkit-scrollbar {
-        display: none;
-    }
+  &::-webkit-scrollbar {
+    display: none;
+  }
 
-    &-full {
-        .nav-item {
-            flex: 1 1 0;
-        }
-    }
+  &-full {
+    overflow: visible;
 
     .nav-item {
-        .nav-link {
-            color: $body-color;
-            text-align: center;
-            text-decoration: none !important;
-            line-height: 31px;
-            padding: 0 1rem;
-            display: flex;
-            justify-content: center;
-            align-items: baseline;
-            border-bottom: 2px solid rgba(0, 0, 0, 0);
-            white-space: nowrap;
-            @include transition(border-bottom-color 120ms ease-in-out);
-
-            & > .fas, & > .far, & > .fab{
-                margin-right: 0.3rem;
-                color: $gray-600;
-            }
-
-            .badge {
-                margin-left: 0.5rem;
-            }
-
-            &:hover {
-                color: $body-color;
-                border-bottom-color: $gray-500;
-            }
-
-            &.active {
-                font-weight: 500;
-                border-bottom-color: var(--bs-primary);
-
-                & > .fas, & > .far, & > .fab{
-                    color: $body-color;
-                }
-            }
-
-            [data-content] {
-                &:before {
-                    content: attr(data-content);
-                    display: block;
-                    font-weight: bold;
-                    height: 0;
-                    visibility: hidden;
-                }
-            }
-        }
+      flex: 1 1 0;
     }
+  }
+
+  .nav-item {
+    .nav-link {
+      color: $body-color;
+      text-align: center;
+      text-decoration: none !important;
+      line-height: 31px;
+      padding: 0 1rem;
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      border-bottom: 2px solid rgba(0, 0, 0, 0);
+      white-space: nowrap;
+      @include transition(border-bottom-color 120ms ease-in-out);
+      @include border-radius-top($border-radius);
+      width: 100%;
+
+      & > .fas, & > .far, & > .fab {
+        margin-right: 0.3rem;
+        color: $gray-600;
+      }
+
+      .badge {
+        margin-left: 0.5rem;
+      }
+
+      &:hover {
+        color: $body-color;
+        border-bottom-color: $gray-500;
+      }
+
+      &.active {
+        font-weight: 500;
+        border-bottom-color: var(--bs-primary);
+
+        & > .fas, & > .far, & > .fab {
+          color: $body-color;
+        }
+      }
+
+      [data-content] {
+        &:before {
+          content: attr(data-content);
+          display: block;
+          font-weight: bold;
+          height: 0;
+          visibility: hidden;
+        }
+      }
+    }
+  }
 }
 
 .nav-languages {
-    .nav-link {
-        position: relative;
-        padding: $nav-link-padding-y 2rem;
+  .nav-link {
+    position: relative;
+    padding: $nav-link-padding-y 2rem;
 
-        .fas, .far, .fab{
-            position: absolute;
-            left: 0.75rem;
-            top: 50%;
-            transform: translateY(-50%);
-        }
+    .fas, .far, .fab {
+      position: absolute;
+      left: 0.75rem;
+      top: 50%;
+      transform: translateY(-50%);
     }
+  }
 }
