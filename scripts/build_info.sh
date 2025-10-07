@@ -4,7 +4,7 @@ set -e
 
 
 # File with build info
-BUILD_INFO_FILE=$(dirname $0)/../dist/engine-$COMPONENT/main.*.js
+BUILD_INFO_FILE=$(dirname $0)/../dist/app-$COMPONENT/main.*.js
 
 
 # Create version based on git tag or branch

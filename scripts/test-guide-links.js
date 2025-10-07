@@ -1,7 +1,7 @@
 const fs = require('fs')
 
 
-const guideLinksFile = 'engine-wizard/elm/Wizard/Common/GuideLinks.elm'
+const guideLinksFile = 'app-wizard/elm/Wizard/Utils/WizardGuideLinks.elm'
 
 const regexDef = /\( "([^"]*)"/g
 const regexUse = /get "([^"]*)"/g

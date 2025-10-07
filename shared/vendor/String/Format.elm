@@ -1,4 +1,7 @@
-module String.Format exposing (format, formatHtml)
+module String.Format exposing
+    ( format
+    , formatHtml
+    )
 
 import Html exposing (Html, text)
 

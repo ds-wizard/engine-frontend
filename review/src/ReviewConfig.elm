@@ -12,6 +12,7 @@ when inside the directory containing this file.
 -}
 
 import Docs.ReviewAtDocs
+import NoAppModuleImportInShared
 import NoDebug.Log
 import NoDebug.TodoOrToString
 import NoExposingEverything
@@ -61,5 +62,7 @@ config =
     , NoUnused.Variables.rule
         |> Rule.ignoreErrorsForDirectories [ "shared/common/" ]
     , Simplify.rule Simplify.defaults
+    , NoAppModuleImportInShared.rule
+            |> Rule.ignoreErrorsForDirectories [ "app-registry", "app-wizard", "tests" ]
     ]
         |> List.map (Rule.ignoreErrorsForDirectories [ "shared/vendor/" ])

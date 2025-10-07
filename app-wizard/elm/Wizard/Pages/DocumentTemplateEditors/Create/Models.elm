@@ -1,0 +1,34 @@
+module Wizard.Pages.DocumentTemplateEditors.Create.Models exposing
+    ( Model
+    , initialModel
+    )
+
+import ActionResult exposing (ActionResult)
+import Common.Utils.Form.FormError exposing (FormError)
+import Form exposing (Form)
+import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
+import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Components.TypeHintInput as TypeHintInput
+import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.DocumentTemplateEditors.Common.DocumentTemplateEditorCreateForm as DocumentTemplateEditorCreateForm exposing (DocumentTemplateEditorCreateForm)
+
+
+type alias Model =
+    { savingDocumentTemplate : ActionResult ()
+    , form : Form FormError DocumentTemplateEditorCreateForm
+    , documentTemplateTypeHintInputModel : TypeHintInput.Model DocumentTemplateSuggestion
+    , documentTemplate : ActionResult DocumentTemplateDetail
+    , selectedDocumentTemplate : Maybe String
+    , edit : Bool
+    }
+
+
+initialModel : AppState -> Maybe String -> Maybe Bool -> Model
+initialModel appState selectedDocumentTemplate edit =
+    { savingDocumentTemplate = ActionResult.Unset
+    , form = DocumentTemplateEditorCreateForm.init appState selectedDocumentTemplate
+    , documentTemplateTypeHintInputModel = TypeHintInput.init "basedOn"
+    , documentTemplate = ActionResult.Loading
+    , selectedDocumentTemplate = selectedDocumentTemplate
+    , edit = Maybe.withDefault False edit
+    }

@@ -45,10 +45,10 @@ module Wizard.Api.Models.EventTest exposing
 
 import Dict
 import Expect exposing (Expectation)
-import Shared.Utils exposing (nilUuid)
 import Test exposing (Test, describe, test)
 import TestUtils exposing (expectEncodeDecode, parametrized)
 import Time
+import Uuid
 import Wizard.Api.Models.Event as Event exposing (Event(..))
 import Wizard.Api.Models.Event.AddIntegrationEventData exposing (AddIntegrationEventData(..))
 import Wizard.Api.Models.Event.AddQuestionEventData exposing (AddQuestionEventData(..))
@@ -98,7 +98,7 @@ editKnowledgeModelEvent =
         }
         { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
         , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , parentUuid = nilUuid
+        , parentUuid = Uuid.toString Uuid.nil
         , createdAt = Time.millisToPosix 1642607898
         }
 

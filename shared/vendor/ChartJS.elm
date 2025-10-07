@@ -1,3 +1,6 @@
+-- TODO: Remove this module in favor of the shared chart components
+
+
 module ChartJS exposing
     ( Data
     , DataSet

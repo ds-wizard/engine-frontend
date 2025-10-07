@@ -1,4 +1,15 @@
-module String.Extra exposing (fromBool, fromMaybe, stripQuotes, toMaybe, withDefault)
+module String.Extra exposing
+    ( fromBool
+    , fromMaybe
+    , insertAt
+    , removeNonNumbers
+    , stripQuotes
+    , toBool
+    , toMaybe
+    , withDefault
+    )
+
+import Regex
 
 
 toMaybe : String -> Maybe String
@@ -33,6 +44,28 @@ fromBool bool =
         "false"
 
 
+toBool : String -> Maybe Bool
+toBool str =
+    if str == "true" then
+        Just True
+
+    else if str == "false" then
+        Just False
+
+    else
+        Nothing
+
+
+removeNonNumbers : String -> String
+removeNonNumbers inputString =
+    case Regex.fromString "[^0-9]" of
+        Nothing ->
+            inputString
+
+        Just regex ->
+            Regex.replace regex (\_ -> "") inputString
+
+
 stripQuotes : String -> String
 stripQuotes str =
     str
@@ -47,3 +80,14 @@ stripQuotes str =
                 else
                     s
            )
+
+
+insertAt : Int -> String -> String -> String
+insertAt pos insert original =
+    let
+        safePos =
+            clamp 0 (String.length original) pos
+    in
+    String.left safePos original
+        ++ insert
+        ++ String.dropLeft safePos original
