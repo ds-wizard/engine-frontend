@@ -480,7 +480,7 @@ viewEmpty appState config model =
                 config.emptyText
     in
     Page.illustratedMessage
-        { image = Undraw.noData
+        { illustration = Undraw.noData
         , heading = gettext "No data" appState.locale
         , lines = [ emptyText ]
         , cy = "listing-empty"

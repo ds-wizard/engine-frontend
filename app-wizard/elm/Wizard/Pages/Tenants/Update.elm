@@ -16,6 +16,10 @@ import Wizard.Pages.Tenants.Routes exposing (Route(..))
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
+        CreateRoute ->
+            Cmd.map CreateMsg <|
+                Wizard.Pages.Tenants.Create.Update.fetchData
+
         IndexRoute _ _ _ ->
             Cmd.map IndexMsg <|
                 Wizard.Pages.Tenants.Index.Update.fetchData
@@ -23,9 +27,6 @@ fetchData route appState =
         DetailRoute uuid ->
             Cmd.map DetailMsg <|
                 Wizard.Pages.Tenants.Detail.Update.fetchData appState uuid
-
-        _ ->
-            Cmd.none
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

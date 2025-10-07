@@ -449,6 +449,7 @@ $toolbar-height: 40px;
       }
 
       & > .CommentReplyForm {
+        display: block;
         margin-top: 1rem;
         padding-bottom: 2rem;
       }
@@ -1209,7 +1210,7 @@ $toolbar-height: 40px;
       background: linear-gradient(to bottom, shift-color($warning, -80%), rgba(0, 0, 0, 0));
       pointer-events: none;
       z-index: -1;
-      animation: highlightFade 3s ease-in-out;
+      animation: fadeOut 3s ease-in-out;
       opacity: 0;
     }
 

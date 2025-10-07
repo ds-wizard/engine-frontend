@@ -23,8 +23,13 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'layout';
 
 @import '../../shared/common/scss/components/ai-assistant';
+@import '../../shared/common/scss/components/alert';
+@import '../../shared/common/scss/components/guide-link';
+@import '../../shared/common/scss/components/page';
+@import '../../shared/common/scss/components/tooltips';
+@import '../../shared/common/scss/components/typehint-input';
+@import '../../shared/common/scss/components/undraw';
 
-@import 'elements/alert';
 @import 'elements/animation';
 @import 'elements/code';
 @import 'elements/cursor';
@@ -38,8 +43,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'elements/files';
 @import 'elements/flex';
 @import 'elements/forms';
-@import 'elements/full-page';
-@import 'elements/header';
 @import 'elements/illustrated-message';
 @import 'elements/layouts';
 @import 'elements/links';
@@ -51,8 +54,6 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'elements/tag-selection';
 @import 'elements/text';
 @import 'elements/top-header';
-@import 'elements/tooltips';
-@import 'elements/undraw';
 @import 'elements/user-icon';
 
 @import 'modules/Common';
@@ -72,5 +73,11 @@ $fa-font-path: '~@fortawesome/fontawesome-free/webfonts' !default;
 @import 'customizations/overrides';
 
 :root {
-    --illustrations-color: #{$illustrations-color};
+  --illustrations-color: #{$illustrations-color};
+
+  --bs-spacer-1: #{$spacer-1};
+  --bs-spacer-2: #{$spacer-2};
+  --bs-spacer-3: #{$spacer-3};
+  --bs-spacer-4: #{$spacer-4};
+  --bs-spacer-5: #{$spacer-5};
 }

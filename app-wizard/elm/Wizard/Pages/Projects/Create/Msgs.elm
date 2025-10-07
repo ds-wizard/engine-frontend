@@ -2,6 +2,7 @@ module Wizard.Pages.Projects.Create.Msgs exposing (Msg(..))
 
 import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
@@ -9,7 +10,6 @@ import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Pages.Projects.Create.Models exposing (ActiveTab)
 
 

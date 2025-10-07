@@ -2,11 +2,12 @@ module Html.Events.Extensions exposing
     ( alwaysPreventDefaultOn
     , alwaysPreventDefaultOnWithDecoder
     , onBlurWithSelection
+    , onKeyConfirm
     )
 
 import Html
-import Html.Events exposing (on, preventDefaultOn, stopPropagationOn)
-import Json.Decode as D
+import Html.Events exposing (on, preventDefaultOn)
+import Json.Decode as D exposing (Decoder)
 
 
 alwaysPreventDefaultOn : String -> msg -> Html.Attribute msg
@@ -28,3 +29,21 @@ onBlurWithSelection tagger =
                 (D.at [ "target", "selectionEnd" ] D.int)
     in
     on "blur" decoder
+
+
+onKeyConfirm : msg -> Html.Attribute msg
+onKeyConfirm msg =
+    on "keydown" (confirmKeyDecoder msg)
+
+
+confirmKeyDecoder : msg -> Decoder msg
+confirmKeyDecoder msg =
+    D.field "key" D.string
+        |> D.andThen
+            (\key ->
+                if key == "Enter" || key == " " then
+                    D.succeed msg
+
+                else
+                    D.fail "Not enter or space"
+            )

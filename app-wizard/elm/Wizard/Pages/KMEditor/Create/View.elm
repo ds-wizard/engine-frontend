@@ -1,22 +1,18 @@
 module Wizard.Pages.KMEditor.Create.View exposing (view)
 
 import ActionResult
-import Common.Components.ActionButton as ActionButton
+import Common.Components.Container as Container
+import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Form
+import Common.Components.TypeHintInput as TypeHintInput
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
-import Html.Events exposing (onSubmit)
-import Wizard.Components.FormActions as FormActions
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Create.Models exposing (Model)
 import Wizard.Pages.KMEditor.Create.Msgs exposing (Msg(..))
-import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -36,15 +32,19 @@ view appState model =
 
 viewCreate : AppState -> Model -> a -> Html Msg
 viewCreate appState model _ =
-    div [ detailClass "KMEditor__Create" ]
-        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.kmEditorCreate) (gettext "Create knowledge model" appState.locale)
-        , Html.form [ onSubmit (FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView model.savingBranch
-            , formView appState model
-            , FormActions.viewSubmit appState
-                Cancel
-                (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingBranch)
-            ]
+    Container.simpleForm
+        [ Page.headerWithGuideLink
+            (AppState.toGuideLinkConfig appState WizardGuideLinks.kmEditorCreate)
+            (gettext "Create knowledge model" appState.locale)
+        , Form.simple
+            { formMsg = FormMsg
+            , formResult = model.savingBranch
+            , formView = formView appState model
+            , submitLabel = gettext "Create" appState.locale
+            , cancelMsg = Just Cancel
+            , locale = appState.locale
+            , isMac = appState.navigator.isMac
+            }
         ]
 
 
@@ -59,14 +59,15 @@ formView appState model =
                 Nothing ->
                     let
                         cfg =
-                            { viewItem = TypeHintItem.packageSuggestionWithVersion
+                            { viewItem = TypeHintInputItem.packageSuggestionWithVersion
                             , wrapMsg = PackageTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = True
+                            , locale = appState.locale
                             }
 
                         typeHintInput =
-                            TypeHintInput.view appState cfg model.packageTypeHintInputModel
+                            TypeHintInput.view cfg model.packageTypeHintInputModel
                     in
                     FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousPackageId"
 

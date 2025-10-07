@@ -1,12 +1,12 @@
 module Wizard.Pages.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
 
 import Common.Api.ApiError exposing (ApiError)
+import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Version exposing (Version)
 import Wizard.Api.Models.CreatedEntityWithId exposing (CreatedEntityWithId)
 import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Wizard.Components.TypeHintInput as TypeHintInput
 
 
 type Msg
