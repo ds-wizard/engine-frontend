@@ -1,6 +1,6 @@
 module Wizard.Pages.KMEditor.Create.Subscriptions exposing (subscriptions)
 
-import Wizard.Components.TypeHintInput as TypeHintInput
+import Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Pages.KMEditor.Create.Models exposing (Model)
 import Wizard.Pages.KMEditor.Create.Msgs exposing (Msg(..))
 

@@ -20,6 +20,8 @@ import Common.Api.ServerError as ServerError
 import Common.Components.FontAwesome exposing (fa, faDownload)
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
+import Common.Components.TypeHintInput as TypeHintInput
+import Common.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Utils.ContentType as ContentType
@@ -46,8 +48,6 @@ import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDet
 import Wizard.Api.Models.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Components.Html exposing (linkTo)
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes
 
@@ -308,14 +308,15 @@ view cfg appState model =
                 QuestionnaireMode ->
                     let
                         projectTypeHintInputCfg =
-                            { viewItem = TypeHintItem.simple .name
+                            { viewItem = TypeHintInputItem.simple .name
                             , wrapMsg = QuestionnaireTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = False
+                            , locale = appState.locale
                             }
 
                         projectTypeHintInput =
-                            TypeHintInput.view appState projectTypeHintInputCfg model.questionnaireHintInputModel False
+                            TypeHintInput.view projectTypeHintInputCfg model.questionnaireHintInputModel False
 
                         projectLink =
                             case model.questionnaireHintInputModel.selected of
@@ -332,14 +333,15 @@ view cfg appState model =
                 BranchMode ->
                     let
                         branchTypeHintInputCfg =
-                            { viewItem = TypeHintItem.simple .name
+                            { viewItem = TypeHintInputItem.simple .name
                             , wrapMsg = BranchTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = False
+                            , locale = appState.locale
                             }
 
                         branchTypeHintInput =
-                            TypeHintInput.view appState branchTypeHintInputCfg model.branchTypeHintInputModal False
+                            TypeHintInput.view branchTypeHintInputCfg model.branchTypeHintInputModal False
 
                         branchLink =
                             case model.branchTypeHintInputModal.selected of
@@ -402,7 +404,7 @@ view cfg appState model =
 viewNotSet : AppState -> Html msg
 viewNotSet appState =
     Page.illustratedMessage
-        { image = Undraw.settingsTab
+        { illustration = Undraw.settingsTab
         , heading = gettext "Preview not set" appState.locale
         , lines = [ gettext "Select a project or knowledge model editor and format you want to preview." appState.locale ]
         , cy = "preview-not-set"
@@ -426,7 +428,7 @@ viewError error =
 viewNotSupported : AppState -> String -> Html msg
 viewNotSupported appState documentUrl =
     Page.illustratedMessageHtml
-        { image = Undraw.downloadFiles
+        { illustration = Undraw.downloadFiles
         , heading = gettext "Download preview" appState.locale
         , content =
             [ p [] [ text (gettext "The document format cannot be displayed in the web browser. You can still download and view it." appState.locale) ]

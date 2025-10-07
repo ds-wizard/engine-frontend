@@ -1,4 +1,4 @@
-module Common.Utils.ShortcutUtils exposing (primaryShortcut)
+module Common.Utils.ShortcutUtils exposing (primaryShortcut, submitShortcut)
 
 import Shortcut exposing (Shortcut)
 
@@ -10,3 +10,8 @@ primaryShortcut isMac key =
 
     else
         Shortcut.ctrlShortcut key
+
+
+submitShortcut : Bool -> msg -> Shortcut msg
+submitShortcut isMac =
+    primaryShortcut isMac Shortcut.Enter

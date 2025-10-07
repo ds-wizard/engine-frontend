@@ -1,6 +1,6 @@
 module Wizard.Pages.Projects.Create.Subscriptions exposing (subscriptions)
 
-import Wizard.Components.TypeHintInput as TypeHintInput
+import Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Pages.Projects.Create.Models exposing (Model)
 import Wizard.Pages.Projects.Create.Msgs exposing (Msg(..))
 

@@ -1,28 +1,25 @@
 module Wizard.Pages.Projects.Create.View exposing (view)
 
 import ActionResult
-import Common.Components.ActionButton as ActionButton
 import Common.Components.ActionResultBlock as ActionResultBlock
+import Common.Components.Container as Container
 import Common.Components.FontAwesome exposing (faKnowledgeModel, faQuestionnaire)
+import Common.Components.Form as Form
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Form
+import Common.Components.TypeHintInput as TypeHintInput
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, li, p, text, ul)
-import Html.Attributes exposing (class, classList)
+import Html exposing (Html, button, div, li, p, text, ul)
+import Html.Attributes exposing (class, classList, tabindex)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Wizard.Api.Models.PackageDetail as PackageDetail
-import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Tag as Tag
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Create.Models exposing (ActiveTab(..), DefaultMode(..), Mode(..), Model, mapMode)
 import Wizard.Pages.Projects.Create.Msgs exposing (Msg(..))
-import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -43,10 +40,19 @@ view appState model =
 
 viewPageContent : AppState -> Model -> List a -> Html Msg
 viewPageContent appState model _ =
-    div [ detailClass "Projects__Create" ]
-        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsCreate) (gettext "Create Project" appState.locale)
-        , FormResult.errorOnlyView model.savingQuestionnaire
-        , formView appState model
+    Container.simpleForm
+        [ Page.headerWithGuideLink
+            (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsCreate)
+            (gettext "Create Project" appState.locale)
+        , Form.simple
+            { formMsg = FormMsg
+            , formResult = model.savingQuestionnaire
+            , formView = formView appState model
+            , submitLabel = gettext "Create" appState.locale
+            , cancelMsg = Just Cancel
+            , locale = appState.locale
+            , isMac = appState.navigator.isMac
+            }
         ]
 
 
@@ -55,9 +61,6 @@ formView appState model =
     div []
         [ Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
         , formContent appState model
-        , FormActions.view appState
-            Cancel
-            (ActionButton.ButtonConfig (gettext "Create" appState.locale) model.savingQuestionnaire (FormMsg Form.Submit) False)
         ]
 
 
@@ -79,7 +82,7 @@ formContentSelectedProjectTemplate appState model =
     let
         viewProjectTemplate questionnaire =
             div [ class "bg-light px-2 py-1 rounded" ]
-                [ TypeHintItem.questionnaireSuggestion questionnaire ]
+                [ TypeHintInputItem.questionnaireSuggestion questionnaire ]
 
         projectTemplateBlock =
             ActionResultBlock.inlineView
@@ -96,7 +99,7 @@ formContentSelectedKnowledgeModel appState model =
     let
         viewKnowledgeModel packageDetail =
             div [ class "bg-light px-2 py-1 rounded" ]
-                [ TypeHintItem.packageSuggestionWithVersion (PackageDetail.toPackageSuggestion packageDetail) ]
+                [ TypeHintInputItem.packageSuggestionWithVersion (PackageDetail.toPackageSuggestion packageDetail) ]
 
         viewFormContent ( packageDetail, _ ) =
             div []
@@ -133,10 +136,11 @@ defaultContentTabs : AppState -> Model -> Html Msg
 defaultContentTabs appState model =
     ul [ class "nav nav-underline-tabs nav-underline-tabs-full border-bottom" ]
         [ li [ class "nav-item" ]
-            [ a
+            [ button
                 [ class "nav-link"
                 , classList [ ( "active", model.activeTab == ProjectTemplateTab ) ]
                 , onClick (SetActiveTab ProjectTemplateTab)
+                , tabindex 0
                 , dataCy "project_create_nav_template"
                 ]
                 [ faQuestionnaire
@@ -144,10 +148,11 @@ defaultContentTabs appState model =
                 ]
             ]
         , li [ class "nav-item" ]
-            [ a
+            [ button
                 [ class "nav-link"
                 , classList [ ( "active", model.activeTab == KnowledgeModelTab ) ]
                 , onClick (SetActiveTab KnowledgeModelTab)
+                , tabindex 0
                 , dataCy "project_create_nav_custom"
                 ]
                 [ faKnowledgeModel
@@ -175,14 +180,15 @@ projectTemplateFormFields appState model =
         projectTemplateInput =
             let
                 cfg =
-                    { viewItem = TypeHintItem.questionnaireSuggestion
+                    { viewItem = TypeHintInputItem.questionnaireSuggestion
                     , wrapMsg = ProjectTemplateTypeHintInputMsg
                     , nothingSelectedItem = text "--"
                     , clearEnabled = True
+                    , locale = appState.locale
                     }
 
                 typeHintInput =
-                    TypeHintInput.view appState cfg model.projectTemplateTypeHintInputModel
+                    TypeHintInput.view cfg model.projectTemplateTypeHintInputModel
             in
             FormGroup.formGroupCustom typeHintInput appState.locale model.form "templateId" (gettext "Project Template" appState.locale)
     in
@@ -195,14 +201,15 @@ knowledgeModelFormFields appState model =
         knowledgeModelInput =
             let
                 cfg =
-                    { viewItem = TypeHintItem.packageSuggestionWithVersion
+                    { viewItem = TypeHintInputItem.packageSuggestionWithVersion
                     , wrapMsg = KnowledgeModelTypeHintInputMsg
                     , nothingSelectedItem = text "--"
                     , clearEnabled = True
+                    , locale = appState.locale
                     }
 
                 typeHintInput =
-                    TypeHintInput.view appState cfg model.knowledgeModelTypeHintInputModel
+                    TypeHintInput.view cfg model.knowledgeModelTypeHintInputModel
             in
             FormGroup.formGroupCustom typeHintInput appState.locale model.form "packageId" (gettext "Knowledge Model" appState.locale)
     in

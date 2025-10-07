@@ -9,6 +9,7 @@ module Wizard.Pages.Projects.Create.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Maybe.Extra as Maybe
@@ -18,7 +19,6 @@ import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm exposing (QuestionnaireCreateForm)
 import Wizard.Utils.Feature as Feature

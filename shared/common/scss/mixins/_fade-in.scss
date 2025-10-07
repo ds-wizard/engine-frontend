@@ -1,0 +1,9 @@
+@import 'animation';
+
+@mixin fade-in() {
+  opacity: 0;
+  @include animation(fadeIn, ease-in, 1);
+  @include animation-duration(1s);
+  @include animation-delay(.4s);
+  @include animation-fill-mode(forwards);
+}

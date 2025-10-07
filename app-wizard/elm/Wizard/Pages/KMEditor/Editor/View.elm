@@ -46,7 +46,7 @@ view route appState model =
 viewOffline : AppState -> Html Msg
 viewOffline appState =
     Page.illustratedMessageHtml
-        { image = Undraw.warning
+        { illustration = Undraw.warning
         , heading = gettext "Disconnected" appState.locale
         , content =
             [ p [] [ text (gettext "You have been disconnected, try to refresh the page." appState.locale) ]
@@ -59,7 +59,7 @@ viewOffline appState =
 viewError : AppState -> Html Msg
 viewError appState =
     Page.illustratedMessageHtml
-        { image = Undraw.warning
+        { illustration = Undraw.warning
         , heading = gettext "Oops!" appState.locale
         , content =
             [ p [] [ text (gettext "Something went wrong, try to refresh the page." appState.locale) ]

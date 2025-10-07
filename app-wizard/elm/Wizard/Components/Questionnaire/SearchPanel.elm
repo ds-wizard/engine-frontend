@@ -17,8 +17,9 @@ import Debounce exposing (Debounce)
 import Dict
 import Gettext exposing (gettext)
 import Html exposing (Html, div, input, small, span, text)
-import Html.Attributes exposing (class, id, placeholder)
+import Html.Attributes exposing (class, id, placeholder, tabindex)
 import Html.Events exposing (onClick, onInput)
+import Html.Events.Extensions exposing (onKeyConfirm)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -307,7 +308,12 @@ viewResult cfg model result =
                 ChapterSearchResultLink chapterUuid ->
                     cfg.openChapterMsg chapterUuid
     in
-    div [ onClick onClickMsg, class "list-group-item list-group-item-action cursor-pointer" ]
+    div
+        [ onClick onClickMsg
+        , onKeyConfirm onClickMsg
+        , class "list-group-item list-group-item-action cursor-pointer"
+        , tabindex 0
+        ]
         [ small [ class "text-muted" ] [ text result.type_ ]
         , highlightTermWithContext 30 model.searchTerm result.value
         ]

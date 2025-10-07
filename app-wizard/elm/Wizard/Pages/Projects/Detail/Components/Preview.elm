@@ -159,7 +159,7 @@ viewError msg =
 viewNotSupported : AppState -> String -> Html msg
 viewNotSupported appState documentUrl =
     Page.illustratedMessageHtml
-        { image = Undraw.downloadFiles
+        { illustration = Undraw.downloadFiles
         , heading = gettext "Download preview" appState.locale
         , content =
             [ p [] [ text (gettext "The document format cannot be displayed in the web browser. You can still download and view it." appState.locale) ]
@@ -198,7 +198,7 @@ viewTemplateNotSet appState questionnaire =
                 ]
     in
     Page.illustratedMessageHtml
-        { image = Undraw.websiteBuilder
+        { illustration = Undraw.websiteBuilder
         , heading = gettext "Default document template is not set." appState.locale
         , content = content
         , cy = "template-not-set"
@@ -229,7 +229,7 @@ viewTemplateUnsupported appState questionnaire =
                 ]
     in
     Page.illustratedMessageHtml
-        { image = Undraw.warning
+        { illustration = Undraw.warning
         , heading = gettext "Default document template is no longer supported." appState.locale
         , content = content
         , cy = "template-not-set"

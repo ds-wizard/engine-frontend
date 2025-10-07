@@ -1,6 +1,6 @@
 module Wizard.Pages.DocumentTemplateEditors.Create.Subscriptions exposing (subscriptions)
 
-import Wizard.Components.TypeHintInput as TypeHintInput
+import Common.Components.TypeHintInput as TypeHintInput
 import Wizard.Pages.DocumentTemplateEditors.Create.Models exposing (Model)
 import Wizard.Pages.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
 

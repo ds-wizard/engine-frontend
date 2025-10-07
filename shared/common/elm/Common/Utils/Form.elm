@@ -2,6 +2,7 @@ module Common.Utils.Form exposing
     ( containsChanges
     , errorToString
     , isValid
+    , reset
     , setFormErrors
     )
 
@@ -13,6 +14,7 @@ import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
 import Form.Validate as V exposing (Validation, customError)
 import Gettext exposing (gettext)
+import Maybe.Extra as Maybe
 import Set
 import String.Format as String
 
@@ -98,3 +100,8 @@ containsChanges =
 isValid : Form e a -> Bool
 isValid =
     List.isEmpty << Form.getErrors
+
+
+reset : (a -> Form e a) -> Form e a -> Form e a
+reset initForm form =
+    Maybe.unwrap form initForm (Form.getOutput form)

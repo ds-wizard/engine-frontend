@@ -17,7 +17,7 @@ view appState model =
 viewSuccess : AppState -> Html Msg
 viewSuccess appState =
     Page.illustratedMessage
-        { image = Undraw.exportFiles
+        { illustration = Undraw.exportFiles
         , heading = gettext "Downloading" appState.locale
         , lines = [ gettext "Your download should start shortly." appState.locale ]
         , cy = "download-success"

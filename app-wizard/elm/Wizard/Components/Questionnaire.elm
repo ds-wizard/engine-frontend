@@ -3222,12 +3222,16 @@ viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThre
                 Nothing ->
                     base ++ "_new_" ++ privateType
 
-        newThreadFormSubmit =
+        ( newThreadFormSubmit, shortcuts ) =
             if String.isEmpty commentValue then
-                Html.nothing
+                ( Html.nothing, [] )
 
             else
-                div []
+                let
+                    submitMsg =
+                        CommentSubmit path mbThreadUuid commentValue private
+                in
+                ( div []
                     [ button
                         [ class "btn btn-primary btn-sm me-1"
                         , onClick (CommentSubmit path mbThreadUuid commentValue private)
@@ -3241,8 +3245,11 @@ viewCommentReplyForm appState { submitText, placeholderText, model, path, mbThre
                         ]
                         [ text (gettext "Cancel" appState.locale) ]
                     ]
+                , [ Shortcut.submitShortcut appState.navigator.isMac submitMsg ]
+                )
     in
-    div [ class "CommentReplyForm", classList [ ( "CommentReplyForm--Private", private ) ] ]
+    Shortcut.shortcutElement shortcuts
+        [ class "CommentReplyForm", classList [ ( "CommentReplyForm--Private", private ) ] ]
         [ resizableTextarea 2
             commentValue
             [ class "form-control"
