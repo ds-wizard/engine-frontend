@@ -49,7 +49,7 @@ import Form.Input as Input
 import Gettext exposing (gettext)
 import Html exposing (Html, a, code, div, label, li, p, span, text, ul)
 import Html.Attributes exposing (autocomplete, checked, class, classList, for, href, id, name, readonly, rows, target, type_, value, wrap)
-import Html.Attributes.Extensions exposing (dataCy, dataTour, disableGrammarly)
+import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onCheck, onClick, onMouseDown)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
@@ -360,7 +360,7 @@ textarea =
 
 textareaAttrs : List (Html.Attribute Form.Msg) -> Gettext.Locale -> Form FormError o -> String -> String -> Html Form.Msg
 textareaAttrs attrs =
-    formGroup Input.textArea (disableGrammarly :: attrs)
+    formGroup Input.textArea attrs
 
 
 resizableTextarea : Gettext.Locale -> Form FormError o -> String -> String -> Html Form.Msg
@@ -372,7 +372,7 @@ resizableTextarea locale form fieldName =
                 |> Maybe.withDefault 3
 
         attributes =
-            [ rows lines, wrap "off", disableGrammarly ]
+            [ rows lines, wrap "off" ]
     in
     formGroup Input.textArea attributes locale form fieldName
 
@@ -557,7 +557,6 @@ markupEditor cfg locale form fieldName labelText =
                     , id fieldName
                     , name fieldName
                     , rows <| List.length <| String.lines valueString
-                    , disableGrammarly
                     ]
 
         previewActiveMsg =

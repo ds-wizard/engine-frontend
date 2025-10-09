@@ -181,6 +181,7 @@ window.onload = function () {
                 if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
                     showMessageAndRetry(housekeepingHTML)
                 } else {
+                    document.body.innerHTML = ''
                     const config = results[0].data
                     const locale = results[1].data
                     loadApp(config, locale)

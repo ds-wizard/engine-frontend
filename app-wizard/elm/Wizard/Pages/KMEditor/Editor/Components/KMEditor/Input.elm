@@ -51,7 +51,7 @@ import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
 import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
-import Html.Attributes.Extensions exposing (dataCy, disableGrammarly)
+import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Events.Extensions exposing (onBlurWithSelection)
 import Html.Events.Extra exposing (onChange)
@@ -372,7 +372,6 @@ markdown appState config =
                     , onInput config.onInput
                     , value config.value
                     , rows <| List.length <| String.lines config.value
-                    , disableGrammarly
                     ]
                     []
     in
@@ -463,7 +462,6 @@ itemTemplateEditor appState config =
                     , onBlurWithSelection (config.onBlurWithSelection config.name)
                     , value config.value
                     , rows <| List.length <| String.lines config.value
-                    , disableGrammarly
                     ]
                     []
 
@@ -678,7 +676,6 @@ annotations appState config =
                         , class "form-control"
                         , placeholder (gettext "Value" appState.locale)
                         , dataCy "annotation_value"
-                        , disableGrammarly
                         , rows lines
                         ]
                         []

@@ -39,6 +39,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: '[app] Elm Kernel Replacements'
+        run: npm run replace-kernel-packages
+
       - name: '[app] Install'
         run: npm ci
 

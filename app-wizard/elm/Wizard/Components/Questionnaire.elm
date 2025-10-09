@@ -65,7 +65,7 @@ import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, small, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
-import Html.Attributes.Extensions exposing (dataCy, dataTour, disableGrammarly)
+import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
 import Html.Extra as Html
@@ -4000,7 +4000,7 @@ viewQuestionValue appState cfg model path question =
                     ]
 
                 Just TextQuestionValueType ->
-                    [ resizableTextarea 3 answer (disableGrammarly :: defaultAttrs ++ extraAttrs) [] ]
+                    [ resizableTextarea 3 answer (defaultAttrs ++ extraAttrs) [] ]
 
                 Just ColorQuestionValueType ->
                     [ input (type_ "color" :: defaultAttrs ++ extraAttrs) []
