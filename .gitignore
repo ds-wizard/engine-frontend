@@ -1,6 +1,7 @@
 # dependencies
 node_modules
 elm-stuff
+!elm-kernel-replacements/elm-stuff
 
 # build
 dist
