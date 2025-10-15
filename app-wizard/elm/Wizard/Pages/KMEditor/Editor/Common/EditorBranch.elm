@@ -172,7 +172,18 @@ filterDeleted =
 
 filterDeletedWith : (a -> String) -> EditorBranch -> List a -> List a
 filterDeletedWith toUuid editorBranch =
-    List.filter (not << flip isDeleted editorBranch << toUuid)
+    let
+        allUuids =
+            getAllUuids editorBranch
+
+        isGood item =
+            let
+                uuid =
+                    toUuid item
+            in
+            List.member uuid allUuids && not (isDeleted uuid editorBranch)
+    in
+    List.filter isGood
 
 
 isQuestionDeletedInHierarchy : String -> EditorBranch -> Bool
