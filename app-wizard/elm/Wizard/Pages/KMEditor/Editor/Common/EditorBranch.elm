@@ -6,6 +6,18 @@ module Wizard.Pages.KMEditor.Editor.Common.EditorBranch exposing
     , editorRoute
     , filterDeleted
     , filterDeletedWith
+    , filterExistingAnswers
+    , filterExistingChapters
+    , filterExistingChoices
+    , filterExistingExperts
+    , filterExistingIntegrations
+    , filterExistingMetrics
+    , filterExistingPhases
+    , filterExistingQuestions
+    , filterExistingReferences
+    , filterExistingResourceCollections
+    , filterExistingResourcePages
+    , filterExistingTags
     , getActiveQuestionUuid
     , getAllUuids
     , getChapterUuid
@@ -172,18 +184,72 @@ filterDeleted =
 
 filterDeletedWith : (a -> String) -> EditorBranch -> List a -> List a
 filterDeletedWith toUuid editorBranch =
-    let
-        allUuids =
-            getAllUuids editorBranch
+    List.filter (not << flip isDeleted editorBranch << toUuid)
 
-        isGood item =
-            let
-                uuid =
-                    toUuid item
-            in
-            List.member uuid allUuids && not (isDeleted uuid editorBranch)
-    in
-    List.filter isGood
+
+filterExistingChapters : EditorBranch -> List String -> List String
+filterExistingChapters editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.chapters
+
+
+filterExistingQuestions : EditorBranch -> List String -> List String
+filterExistingQuestions editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.questions
+
+
+filterExistingAnswers : EditorBranch -> List String -> List String
+filterExistingAnswers editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.answers
+
+
+filterExistingChoices : EditorBranch -> List String -> List String
+filterExistingChoices editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.choices
+
+
+filterExistingExperts : EditorBranch -> List String -> List String
+filterExistingExperts editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.experts
+
+
+filterExistingReferences : EditorBranch -> List String -> List String
+filterExistingReferences editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.references
+
+
+filterExistingIntegrations : EditorBranch -> List String -> List String
+filterExistingIntegrations editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.integrations
+
+
+filterExistingResourceCollections : EditorBranch -> List String -> List String
+filterExistingResourceCollections editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.resourceCollections
+
+
+filterExistingResourcePages : EditorBranch -> List String -> List String
+filterExistingResourcePages editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.resourcePages
+
+
+filterExistingTags : EditorBranch -> List String -> List String
+filterExistingTags editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.tags
+
+
+filterExistingMetrics : EditorBranch -> List String -> List String
+filterExistingMetrics editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.metrics
+
+
+filterExistingPhases : EditorBranch -> List String -> List String
+filterExistingPhases editorBranch =
+    filterExisting editorBranch.branch.knowledgeModel.entities.phases
+
+
+filterExisting : Dict String a -> List String -> List String
+filterExisting entitiesDict =
+    List.filter (\entityUuid -> Dict.member entityUuid entitiesDict)
 
 
 isQuestionDeletedInHierarchy : String -> EditorBranch -> Bool

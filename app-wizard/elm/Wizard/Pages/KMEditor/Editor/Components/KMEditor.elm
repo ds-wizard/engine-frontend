@@ -759,7 +759,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             Input.reorderable
                 { name = "chapters"
                 , label = gettext "Chapters" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch km.chapterUuids
+                , items =
+                    km.chapterUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingChapters editorBranch
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -776,7 +779,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             Input.reorderable
                 { name = "metrics"
                 , label = gettext "Metrics" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch km.metricUuids
+                , items =
+                    km.metricUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingMetrics editorBranch
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -793,7 +799,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             Input.reorderable
                 { name = "phases"
                 , label = gettext "Phases" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch km.phaseUuids
+                , items =
+                    km.phaseUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingPhases editorBranch
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -810,7 +819,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             Input.reorderable
                 { name = "tags"
                 , label = gettext "Question Tags" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch km.tagUuids
+                , items =
+                    km.tagUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingTags editorBranch
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -827,7 +839,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             Input.reorderable
                 { name = "integrations"
                 , label = gettext "Integrations" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch km.integrationUuids
+                , items =
+                    km.integrationUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingIntegrations editorBranch
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -844,7 +859,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
             Input.reorderable
                 { name = "resourceCollections"
                 , label = gettext "Resource Collections" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch km.resourceCollectionUuids
+                , items =
+                    km.resourceCollectionUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingResourceCollections editorBranch
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -933,7 +951,10 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
             Input.reorderable
                 { name = "questions"
                 , label = gettext "Questions" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch chapter.questionUuids
+                , items =
+                    chapter.questionUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingQuestions editorBranch
                 , entityUuid = chapter.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -1179,7 +1200,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             Input.reorderable
                 { name = "references"
                 , label = gettext "References" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch <| Question.getReferenceUuids question
+                , items =
+                    Question.getReferenceUuids question
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingReferences editorBranch
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -1196,7 +1220,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             Input.reorderable
                 { name = "experts"
                 , label = gettext "Experts" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch <| Question.getExpertUuids question
+                , items =
+                    Question.getExpertUuids question
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingExperts editorBranch
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -1234,7 +1261,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             Input.reorderable
                                 { name = "answers"
                                 , label = gettext "Answers" appState.locale
-                                , items = EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question
+                                , items =
+                                    Question.getAnswerUuids question
+                                        |> EditorBranch.filterDeleted editorBranch
+                                        |> EditorBranch.filterExistingAnswers editorBranch
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -1266,7 +1296,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             Input.reorderable
                                 { name = "questions"
                                 , label = gettext "Questions" appState.locale
-                                , items = EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question
+                                , items =
+                                    Question.getItemTemplateQuestionUuids question
+                                        |> EditorBranch.filterDeleted editorBranch
+                                        |> EditorBranch.filterExistingQuestions editorBranch
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -1421,7 +1454,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             Input.reorderable
                                 { name = "choices"
                                 , label = gettext "Choices" appState.locale
-                                , items = EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question
+                                , items =
+                                    Question.getChoiceUuids question
+                                        |> EditorBranch.filterDeleted editorBranch
+                                        |> EditorBranch.filterExistingChoices editorBranch
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -2706,7 +2742,10 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
             Input.reorderable
                 { name = "questions"
                 , label = gettext "Follow-Up Questions" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch answer.followUpUuids
+                , items =
+                    answer.followUpUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingQuestions editorBranch
                 , entityUuid = answer.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
@@ -3054,7 +3093,10 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
             Input.reorderable
                 { name = "resourcePages"
                 , label = gettext "Resource Pages" appState.locale
-                , items = EditorBranch.filterDeleted editorBranch resourceCollection.resourcePageUuids
+                , items =
+                    resourceCollection.resourcePageUuids
+                        |> EditorBranch.filterDeleted editorBranch
+                        |> EditorBranch.filterExistingResourcePages editorBranch
                 , entityUuid = resourceCollection.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
