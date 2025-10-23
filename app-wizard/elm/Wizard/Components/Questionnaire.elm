@@ -185,7 +185,6 @@ type alias Model =
     , commentsViewPrivate : Bool
     , commentDropdownStates : Dict String Dropdown.State
     , splitPane : SplitPane.State
-    , navigationTreeModel : NavigationTree.Model
     , questionnaireImportersDropdown : Dropdown.State
     , questionnaireImporters : ActionResult (List QuestionnaireImporter)
     , questionnaireActionsDropdown : Dropdown.State
@@ -235,11 +234,6 @@ init appState questionnaire mbPath mbCommentThreadUuid =
         activePage =
             Maybe.unwrap PageNone PageChapter mbChapterUuid
 
-        navigationTreeModel =
-            Maybe.unwrap NavigationTree.initialModel
-                (flip NavigationTree.openChapter NavigationTree.initialModel)
-                mbChapterUuid
-
         defaultModel =
             { uuid = questionnaire.uuid
             , mbCommentThreadUuid = mbCommentThreadUuid
@@ -272,7 +266,6 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , commentsViewPrivate = False
             , commentDropdownStates = Dict.empty
             , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.1, 0.7 )))
-            , navigationTreeModel = navigationTreeModel
             , questionnaireImportersDropdown = Dropdown.initialState
             , questionnaireImporters = ActionResult.Unset
             , questionnaireActionsDropdown = Dropdown.initialState
@@ -326,10 +319,7 @@ addEvent event model =
 
 setActiveChapterUuid : String -> Model -> Model
 setActiveChapterUuid uuid model =
-    { model
-        | activePage = PageChapter uuid
-        , navigationTreeModel = NavigationTree.openChapter uuid model.navigationTreeModel
-    }
+    { model | activePage = PageChapter uuid }
 
 
 updateWithQuestionnaireData : AppState -> SetQuestionnaireData -> Model -> Model
@@ -698,7 +688,6 @@ type Msg
     | CommentsViewPrivate Bool
     | CommentDropdownMsg String Dropdown.State
     | SplitPaneMsg SplitPane.Msg
-    | NavigationTreeMsg NavigationTree.Msg
     | ImportersDropdownMsg Dropdown.State
     | ActionsDropdownMsg Dropdown.State
     | GotActionResult (Result D.Error Integrations.ActionResult)
@@ -1284,9 +1273,6 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         SplitPaneMsg splitPaneMsg ->
             wrap { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }
 
-        NavigationTreeMsg navigationTreeMsg ->
-            wrap { model | navigationTreeModel = NavigationTree.update navigationTreeMsg model.navigationTreeModel }
-
         ImportersDropdownMsg state ->
             let
                 ( questionnaireImporters, cmd ) =
@@ -1555,18 +1541,8 @@ localStorageNamedOnlyCmd model =
 
 handleSetActivePage : Model -> ActivePage -> ( Model, Cmd Msg )
 handleSetActivePage model activePage =
-    let
-        newNavigationTreeModel =
-            case activePage of
-                PageChapter chapterUuid ->
-                    NavigationTree.openChapter chapterUuid model.navigationTreeModel
-
-                _ ->
-                    model.navigationTreeModel
-    in
     ( { model
         | activePage = activePage
-        , navigationTreeModel = newNavigationTreeModel
         , contentScrollTop = Nothing
       }
     , Dom.scrollToTop contentElementSelector
@@ -1612,7 +1588,6 @@ handleScrollToPath model immediate path =
     in
     ( { model
         | activePage = PageChapter chapterUuid
-        , navigationTreeModel = NavigationTree.openChapter chapterUuid model.navigationTreeModel
         , removeItem = Nothing
         , collapsedItems = newCollapsedItems
         , mbHighlightedPath = Just path
@@ -2467,10 +2442,12 @@ viewQuestionnaireLeftPanelChapters appState model =
             , questionnaire = model.questionnaire
             , openChapter = SetActivePage << PageChapter
             , scrollToPath = ScrollToPath
-            , wrapMsg = NavigationTreeMsg
+            , collapseItem = CollapseItem
+            , expandItem = ExpandItem
+            , collapsedItems = model.collapsedItems
             }
     in
-    NavigationTree.view appState navigationTreeConfig model.navigationTreeModel
+    NavigationTree.view appState navigationTreeConfig
 
 
 
