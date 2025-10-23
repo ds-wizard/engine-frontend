@@ -121,11 +121,15 @@ searchReplies appState term questionnaire =
     let
         tryCreateResult path value =
             if containsSearchTerm term value then
-                Just
-                    { type_ = gettext "Reply" appState.locale
-                    , value = value
-                    , link = PathSearchResultLink path
-                    }
+                if QuestionnaireQuestionnaire.isPathVisible questionnaire path then
+                    Just
+                        { type_ = gettext "Reply" appState.locale
+                        , value = value
+                        , link = PathSearchResultLink path
+                        }
+
+                else
+                    Nothing
 
             else
                 Nothing

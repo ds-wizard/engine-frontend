@@ -24,6 +24,7 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , getWarnings
     , hasReply
     , isCurrentVersion
+    , isPathVisible
     , itemSelectQuestionItemMissing
     , itemSelectQuestionItemPath
     , removeCommentThreadFromCount
@@ -524,6 +525,52 @@ getItemSelectQuestionValueLabel appState questionnaire itemSelectQuestionUuid it
 
         Nothing ->
             fallbackItemName
+
+
+isPathVisible : QuestionnaireQuestionnaire -> String -> Bool
+isPathVisible questionnaire path =
+    case String.split "." path of
+        chapterUuid :: rest ->
+            isPathVisibleStep questionnaire chapterUuid rest
+
+        [] ->
+            False
+
+
+isPathVisibleStep : QuestionnaireQuestionnaire -> String -> List String -> Bool
+isPathVisibleStep questionnaire prefix rest =
+    case rest of
+        [] ->
+            -- This should never happen
+            False
+
+        _ :: [] ->
+            -- End of the path reached, so far everything is visible
+            True
+
+        questionUuid :: nextUuid :: tail ->
+            let
+                currentPath =
+                    prefix ++ "." ++ questionUuid
+            in
+            case getReplyValue questionnaire currentPath of
+                Just (AnswerReply answerUuid) ->
+                    if answerUuid == nextUuid then
+                        isPathVisibleStep questionnaire (currentPath ++ "." ++ answerUuid) tail
+
+                    else
+                        False
+
+                Just (ItemListReply itemUuids) ->
+                    if List.member nextUuid itemUuids then
+                        isPathVisibleStep questionnaire (currentPath ++ "." ++ nextUuid) tail
+
+                    else
+                        False
+
+                _ ->
+                    -- This should never happen
+                    False
 
 
 type alias QuestionnaireWarning =
