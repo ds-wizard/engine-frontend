@@ -5,10 +5,6 @@
 .btn {
     @include not-selectable();
 
-    &:not(.btn-link):hover {
-        color: var(--bs-btn-hover-color) !important;
-    }
-
     &-wide {
         min-width: 100px;
         text-align: center;
