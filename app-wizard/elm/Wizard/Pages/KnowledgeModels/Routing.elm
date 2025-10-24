@@ -23,7 +23,7 @@ parsers wrapRoute =
         wrapResourcePageRoute kmId resourcePageUuid =
             wrapRoute <| ResourcePageRoute kmId resourcePageUuid
     in
-    [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "packageId")
+    [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "knowledgeModelPackageId")
     , map (detail wrapRoute) (s moduleRoot </> string)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     , map (project wrapRoute) (s moduleRoot </> string </> s "preview" <?> Query.string "questionUuid")
@@ -32,25 +32,25 @@ parsers wrapRoute =
 
 
 detail : (Route -> a) -> String -> a
-detail wrapRoute packageId =
-    wrapRoute <| DetailRoute packageId
+detail wrapRoute kmPackageId =
+    wrapRoute <| DetailRoute kmPackageId
 
 
 project : (Route -> a) -> String -> Maybe String -> a
-project wrapRoute packageId mbQuestionUuid =
-    wrapRoute <| PreviewRoute packageId mbQuestionUuid
+project wrapRoute kmPackageId mbQuestionUuid =
+    wrapRoute <| PreviewRoute kmPackageId mbQuestionUuid
 
 
 toUrl : Route -> List String
 toUrl route =
     case route of
-        DetailRoute packageId ->
-            [ moduleRoot, packageId ]
+        DetailRoute kmPackageId ->
+            [ moduleRoot, kmPackageId ]
 
-        ImportRoute packageId ->
-            case packageId of
+        ImportRoute kmPackageId ->
+            case kmPackageId of
                 Just id ->
-                    [ moduleRoot, "import", "?" ++ "packageId" ++ "=" ++ id ]
+                    [ moduleRoot, "import", "?" ++ "knowledgeModelPackageId" ++ "=" ++ id ]
 
                 Nothing ->
                     [ moduleRoot, "import" ]
@@ -58,13 +58,13 @@ toUrl route =
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
-        PreviewRoute packageId mbQuestionUuid ->
+        PreviewRoute kmPackageId mbQuestionUuid ->
             case mbQuestionUuid of
                 Just uuid ->
-                    [ moduleRoot, packageId, "preview", "?" ++ "questionUuid" ++ "=" ++ uuid ]
+                    [ moduleRoot, kmPackageId, "preview", "?" ++ "questionUuid" ++ "=" ++ uuid ]
 
                 Nothing ->
-                    [ moduleRoot, packageId, "preview" ]
+                    [ moduleRoot, kmPackageId, "preview" ]
 
         ResourcePageRoute kmId resourcePageUuid ->
             [ moduleRoot, kmId, "resource-pages", resourcePageUuid ]

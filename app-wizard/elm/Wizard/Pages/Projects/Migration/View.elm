@@ -86,22 +86,22 @@ migrationInfo appState migration =
         , table []
             [ tr []
                 [ th [] [ text (gettext "Source knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.oldQuestionnaire.packageId ]
+                , td [] [ packageInfo migration.oldQuestionnaire.knowledgeModelPackageId ]
                 ]
             , tr []
                 [ th [] [ text (gettext "Target knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.newQuestionnaire.packageId ]
+                , td [] [ packageInfo migration.newQuestionnaire.knowledgeModelPackageId ]
                 ]
             ]
         ]
 
 
 packageInfo : String -> Html Msg
-packageInfo packageId =
+packageInfo kmPackageId =
     code []
-        [ linkTo (Routes.knowledgeModelsDetail packageId)
+        [ linkTo (Routes.knowledgeModelsDetail kmPackageId)
             [ target "_blank" ]
-            [ text packageId ]
+            [ text kmPackageId ]
         ]
 
 

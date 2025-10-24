@@ -93,7 +93,7 @@ import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
 import Wizard.Api.Models.KnowledgeModelEditor as KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
-import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState
@@ -198,16 +198,16 @@ knowledgeModelsPreview _ =
     True
 
 
-knowledgeModelSetDeprecated : AppState -> { a | phase : PackagePhase } -> Bool
-knowledgeModelSetDeprecated appState package =
+knowledgeModelSetDeprecated : AppState -> { a | phase : KnowledgeModelPackagePhase } -> Bool
+knowledgeModelSetDeprecated appState kmPackage =
     adminOr Perm.packageManagementWrite appState
-        && (package.phase == PackagePhase.Released)
+        && (kmPackage.phase == KnowledgeModelPackagePhase.Released)
 
 
-knowledgeModelRestore : AppState -> { a | phase : PackagePhase } -> Bool
-knowledgeModelRestore appState package =
+knowledgeModelRestore : AppState -> { a | phase : KnowledgeModelPackagePhase } -> Bool
+knowledgeModelRestore appState kmPackage =
     adminOr Perm.packageManagementWrite appState
-        && (package.phase == PackagePhase.Deprecated)
+        && (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated)
 
 
 

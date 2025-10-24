@@ -28,11 +28,11 @@ parsers wrapRoute =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        DetailRoute packageId ->
-            [ moduleRoot, packageId ]
+        DetailRoute kmPackageId ->
+            [ moduleRoot, kmPackageId ]
 
-        ImportRoute packageId ->
-            case packageId of
+        ImportRoute kmPackageId ->
+            case kmPackageId of
                 Just id ->
                     [ moduleRoot, "import", "?" ++ "documentTemplateId" ++ "=" ++ id ]
 

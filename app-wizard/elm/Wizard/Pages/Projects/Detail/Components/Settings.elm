@@ -43,8 +43,8 @@ import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Wizard.Api.Models.Package.PackagePhase as PackagePhase
-import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Permission exposing (Permission)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Api.Questionnaires as QuestionnairesApi
@@ -109,7 +109,7 @@ type Msg
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , redirectCmd : Cmd msg
-    , packageId : String
+    , knowledgeModelPackageId : String
     , questionnaireUuid : Uuid
     , permissions : List Permission
     }
@@ -231,7 +231,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.packageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageId
             , getError = gettext "Unable to get document templates." appState.locale
             , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
@@ -538,7 +538,7 @@ knowledgeModel appState questionnaire =
                     ]
 
         deprecatedWarning =
-            if questionnaire.package.phase == PackagePhase.Deprecated then
+            if questionnaire.knowledgeModelPackage.phase == KnowledgeModelPackagePhase.Deprecated then
                 Flash.warning (gettext "This knowledge model is now deprecated." appState.locale)
 
             else
@@ -547,9 +547,9 @@ knowledgeModel appState questionnaire =
     div []
         [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
         , deprecatedWarning
-        , linkTo (Routes.knowledgeModelsDetail questionnaire.package.id)
+        , linkTo (Routes.knowledgeModelsDetail questionnaire.knowledgeModelPackage.id)
             [ class "package-link mb-2" ]
-            [ TypeHintInputItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage questionnaire.package) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage questionnaire.knowledgeModelPackage) ]
         , tagList
         , div [ class "mt-3" ]
             [ linkTo (Routes.projectsCreateMigration questionnaire.uuid)

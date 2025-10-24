@@ -20,7 +20,7 @@ import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (Organiza
 
 
 type alias DocumentTemplateDetail =
-    { allowedPackages : List DocumentTemplateAllowedPackage
+    { allowedKnowledgeModelPackages : List DocumentTemplateAllowedPackage
     , createdAt : Time.Posix
     , description : String
     , formats : List DocumentTemplateFormat
@@ -36,7 +36,7 @@ type alias DocumentTemplateDetail =
     , remoteLatestVersion : Maybe Version
     , state : DocumentTemplateState
     , templateId : String
-    , usablePackages : List DocumentTemplatePackage
+    , usableKnowledgeModelPackages : List DocumentTemplatePackage
     , version : Version
     , versions : List Version
     , nonEditable : Bool
@@ -46,7 +46,7 @@ type alias DocumentTemplateDetail =
 decoder : Decoder DocumentTemplateDetail
 decoder =
     D.succeed DocumentTemplateDetail
-        |> D.required "allowedPackages" (D.list DocumentTemplateAllowedPackage.decoder)
+        |> D.required "allowedKnowledgeModelPackages" (D.list DocumentTemplateAllowedPackage.decoder)
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormat.decoder)
@@ -62,7 +62,7 @@ decoder =
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "state" DocumentTemplateState.decoder
         |> D.required "templateId" D.string
-        |> D.required "usablePackages" (D.list DocumentTemplatePackage.decoder)
+        |> D.required "usableKnowledgeModelPackages" (D.list DocumentTemplatePackage.decoder)
         |> D.required "version" Version.decoder
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "nonEditable" D.bool

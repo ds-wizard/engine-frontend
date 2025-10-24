@@ -30,8 +30,8 @@ import Version exposing (Version)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState exposing (KnowledgeModelEditorState)
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
-import Wizard.Api.Models.Package exposing (Package)
-import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -154,7 +154,7 @@ view : AppState -> KnowledgeModelEditorDetail -> Model -> Html Msg
 view appState kmEditorDetail model =
     let
         parentKnowledgeModelView =
-            case kmEditorDetail.forkOfPackage of
+            case kmEditorDetail.forkOfKnowledgeModelPackage of
                 Just forkOfPackage ->
                     [ hr [ class "separator" ] []
                     , parentKnowledgeModel appState kmEditorDetail.state forkOfPackage kmEditorDetail
@@ -205,7 +205,7 @@ view appState kmEditorDetail model =
         ]
 
 
-parentKnowledgeModel : AppState -> KnowledgeModelEditorState -> Package -> KnowledgeModelEditorDetail -> Html Msg
+parentKnowledgeModel : AppState -> KnowledgeModelEditorState -> KnowledgeModelPackage -> KnowledgeModelEditorDetail -> Html Msg
 parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
     let
         outdatedWarning =
@@ -227,7 +227,7 @@ parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
         [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
         , linkTo (Routes.knowledgeModelsDetail forkOfPackage.id)
             [ class "package-link" ]
-            [ TypeHintInputItem.packageSuggestionWithVersion (PackageSuggestion.fromPackage forkOfPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage forkOfPackage) ]
         , outdatedWarning
         ]
 

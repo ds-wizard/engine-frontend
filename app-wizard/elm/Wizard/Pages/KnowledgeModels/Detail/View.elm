@@ -13,10 +13,10 @@ import Html.Extra as Html
 import String.Format as String
 import Version
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
-import Wizard.Api.Models.Package as Package
-import Wizard.Api.Models.Package.PackagePhase as PackagePhase
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -30,31 +30,31 @@ import Wizard.Utils.Feature as Feature
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewPackage appState model) model.package
+    Page.actionResultView appState (viewPackage appState model) model.knowledgeModelPackage
 
 
-viewPackage : AppState -> Model -> PackageDetail -> Html Msg
-viewPackage appState model package =
+viewPackage : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
+viewPackage appState model kmPackage =
     DetailPage.container
-        [ header appState model package
-        , readme appState package
-        , sidePanel appState model package
-        , deleteVersionModal appState model package
+        [ header appState model kmPackage
+        , readme appState kmPackage
+        , sidePanel appState model kmPackage
+        , deleteVersionModal appState model kmPackage
         ]
 
 
-header : AppState -> Model -> PackageDetail -> Html Msg
-header appState model package =
+header : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
+header appState model kmPackage =
     let
         deprecatedBadge =
-            if package.phase == PackagePhase.Deprecated then
+            if kmPackage.phase == KnowledgeModelPackagePhase.Deprecated then
                 Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
             else
                 Html.nothing
 
         nonEditableBadge =
-            if package.nonEditable then
+            if kmPackage.nonEditable then
                 Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
             else
@@ -65,24 +65,24 @@ header appState model package =
                 { dropdownState = model.dropdownState
                 , toggleMsg = DropdownMsg
                 }
-                { exportMsg = ExportPackage
+                { exportMsg = ExportKnowledgeModelPackage
                 , updatePhaseMsg = \_ phase -> UpdatePhase phase
                 , deleteMsg = always (ShowDeleteDialog True)
                 , viewActionVisible = False
                 }
-                package
+                kmPackage
     in
-    DetailPage.header (span [] [ text package.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.header (span [] [ text kmPackage.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
 
 
-readme : AppState -> PackageDetail -> Html msg
-readme appState package =
+readme : AppState -> KnowledgeModelPackageDetail -> Html msg
+readme appState kmPackage =
     let
         containsNewerVersions =
-            (List.length <| List.filter (Version.greaterThan package.version) package.versions) > 0
+            (List.length <| List.filter (Version.greaterThan kmPackage.version) kmPackage.versions) > 0
 
         nonEditableInfo =
-            if package.nonEditable then
+            if kmPackage.nonEditable then
                 div [ class "alert alert-info" ]
                     [ faInfo
                     , text (gettext "This is a non-editable knowledge model, i.e., it cannot be edited, forked, or exported." appState.locale)
@@ -97,25 +97,25 @@ readme appState package =
                     [ text (gettext "This is not the latest available version of this knowledge model." appState.locale) ]
 
             else
-                newVersionInRegistryWarning appState package
+                newVersionInRegistryWarning appState kmPackage
     in
     DetailPage.content
         [ nonEditableInfo
         , warning
-        , Markdown.toHtml [ DetailPage.contentInnerClass ] package.readme
+        , Markdown.toHtml [ DetailPage.contentInnerClass ] kmPackage.readme
         ]
 
 
-newVersionInRegistryWarning : AppState -> PackageDetail -> Html msg
-newVersionInRegistryWarning appState package =
-    case ( package.remoteLatestVersion, Package.isOutdated package, appState.config.registry ) of
+newVersionInRegistryWarning : AppState -> KnowledgeModelPackageDetail -> Html msg
+newVersionInRegistryWarning appState kmPackage =
+    case ( kmPackage.remoteLatestVersion, KnowledgeModelPackage.isOutdated kmPackage, appState.config.registry ) of
         ( Just remoteLatestVersion, True, RegistryEnabled _ ) ->
             let
                 importLink =
                     if Feature.knowledgeModelsImport appState then
                         let
                             latestPackageId =
-                                package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString remoteLatestVersion
+                                kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString remoteLatestVersion
                         in
                         [ linkTo (Routes.knowledgeModelsImport (Just latestPackageId))
                             [ class "btn btn-primary btn-sm with-icon ms-2" ]
@@ -138,32 +138,32 @@ newVersionInRegistryWarning appState package =
             Html.nothing
 
 
-sidePanel : AppState -> Model -> PackageDetail -> Html Msg
-sidePanel appState model package =
+sidePanel : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
+sidePanel appState model kmPackage =
     let
         sections =
-            [ sidePanelKmInfo appState package
-            , sidePanelOrganizationInfo appState package
-            , sidePanelRegistryLink appState package
-            , sidePanelOtherVersions appState model package
+            [ sidePanelKmInfo appState kmPackage
+            , sidePanelOrganizationInfo appState kmPackage
+            , sidePanelRegistryLink appState kmPackage
+            , sidePanelOtherVersions appState model kmPackage
             ]
     in
     DetailPage.sidePanel
         [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
-sidePanelKmInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
-sidePanelKmInfo appState package =
+sidePanelKmInfo : AppState -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html msg )
+sidePanelKmInfo appState kmPackage =
     let
         kmInfoList =
-            [ ( gettext "ID" appState.locale, "id", text package.id )
-            , ( gettext "Version" appState.locale, "version", text <| Version.toString package.version )
-            , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt package.metamodelVersion )
-            , ( gettext "License" appState.locale, "license", text package.license )
+            [ ( gettext "ID" appState.locale, "id", text kmPackage.id )
+            , ( gettext "Version" appState.locale, "version", text <| Version.toString kmPackage.version )
+            , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt kmPackage.metamodelVersion )
+            , ( gettext "License" appState.locale, "license", text kmPackage.license )
             ]
 
         parentInfo =
-            case package.forkOfPackageId of
+            case kmPackage.forkOfKnowledgeModelPackageId of
                 Just parentPackageId ->
                     [ ( gettext "Fork of" appState.locale
                       , "fork-of"
@@ -174,15 +174,15 @@ sidePanelKmInfo appState package =
                 Nothing ->
                     []
     in
-    Just ( gettext "Knowledge Model" appState.locale, "package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
+    Just ( gettext "Knowledge Model" appState.locale, "knowledge-model-package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
 
 
-sidePanelOtherVersions : AppState -> Model -> PackageDetail -> Maybe ( String, String, Html Msg )
-sidePanelOtherVersions appState model package =
+sidePanelOtherVersions : AppState -> Model -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html Msg )
+sidePanelOtherVersions appState model kmPackage =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail <| package.organizationId ++ ":" ++ package.kmId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.knowledgeModelsDetail <| kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString version)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -195,8 +195,8 @@ sidePanelOtherVersions appState model package =
                 List.take 10
 
         versionLinks =
-            package.versions
-                |> List.filter ((/=) package.version)
+            kmPackage.versions
+                |> List.filter ((/=) kmPackage.version)
                 |> List.sortWith Version.compare
                 |> List.reverse
                 |> takeFirstVersions
@@ -205,7 +205,7 @@ sidePanelOtherVersions appState model package =
     if List.length versionLinks > 0 then
         let
             showAllLink =
-                if model.showAllVersions || List.length package.versions <= 10 then
+                if model.showAllVersions || List.length kmPackage.versions <= 10 then
                     Html.nothing
 
                 else
@@ -222,17 +222,17 @@ sidePanelOtherVersions appState model package =
         Nothing
 
 
-sidePanelOrganizationInfo : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
-sidePanelOrganizationInfo appState package =
+sidePanelOrganizationInfo : AppState -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html msg )
+sidePanelOrganizationInfo appState kmPackage =
     let
         toOrganizationInfo organization =
             ( gettext "Published by" appState.locale, "published-by", viewOrganization organization )
     in
-    Maybe.map toOrganizationInfo package.organization
+    Maybe.map toOrganizationInfo kmPackage.organization
 
 
-sidePanelRegistryLink : AppState -> PackageDetail -> Maybe ( String, String, Html msg )
-sidePanelRegistryLink appState package =
+sidePanelRegistryLink : AppState -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html msg )
+sidePanelRegistryLink appState kmPackage =
     let
         toRegistryLinkInfo registryLink =
             ( gettext "Registry Link" appState.locale
@@ -247,7 +247,7 @@ sidePanelRegistryLink appState package =
                 ]
             )
     in
-    Maybe.map toRegistryLinkInfo package.registryLink
+    Maybe.map toRegistryLinkInfo kmPackage.registryLink
 
 
 viewOrganization : OrganizationInfo -> Html msg
@@ -257,14 +257,14 @@ viewOrganization organization =
         (ItemIcon.view { text = organization.name, image = organization.logo })
 
 
-deleteVersionModal : AppState -> Model -> PackageDetail -> Html Msg
-deleteVersionModal appState model package =
+deleteVersionModal : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
+deleteVersionModal appState model kmPackage =
     let
         modalContent =
             [ p []
                 (String.formatHtml
                     (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                    [ strong [] [ text package.id ] ]
+                    [ strong [] [ text kmPackage.id ] ]
                 )
             ]
 

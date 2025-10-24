@@ -17,7 +17,7 @@ type alias OwlImportForm =
     , organizationId : String
     , kmId : String
     , version : String
-    , previousPackageId : Maybe String
+    , previousKnowledgeModelPackageId : Maybe String
     , rootElement : String
     }
 
@@ -30,7 +30,7 @@ init appState =
             , ( "organizationId", Field.maybeString appState.config.owl.organizationId )
             , ( "kmId", Field.maybeString appState.config.owl.kmId )
             , ( "version", Field.maybeString appState.config.owl.version )
-            , ( "previousPackageId", Field.maybeString appState.config.owl.previousPackageId )
+            , ( "previousKnowledgeModelPackageId", Field.maybeString appState.config.owl.previousKnowledgeModelPackageId )
             , ( "rootElement", Field.maybeString appState.config.owl.rootElement )
             ]
     in
@@ -44,5 +44,5 @@ validation =
         |> V.andMap (V.field "organizationId" V.string)
         |> V.andMap (V.field "kmId" V.string)
         |> V.andMap (V.field "version" V.string)
-        |> V.andMap (V.field "previousPackageId" V.maybeString)
+        |> V.andMap (V.field "previousKnowledgeModelPackageId" V.maybeString)
         |> V.andMap (V.field "rootElement" V.string)

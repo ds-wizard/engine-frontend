@@ -135,7 +135,7 @@ migrationSummary appState migration =
         [ p []
             (String.formatHtml (gettext "Migration of %s from %s to %s." appState.locale)
                 [ strong [] [ text migration.knowledgeModelEditorName ]
-                , code [] [ text migration.knowledgeModelEditorPreviousPackageId ]
+                , code [] [ text migration.knowledgeModelEditorPreviousKnowledgeModelPackageId ]
                 , code [] [ text migration.targetPackageId ]
                 ]
             )

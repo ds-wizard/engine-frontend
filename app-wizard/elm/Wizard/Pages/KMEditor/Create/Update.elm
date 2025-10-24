@@ -19,9 +19,9 @@ import Result exposing (Result)
 import String.Normalize as Normalize
 import Version exposing (Version)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorCreateForm as KnowledgeModelEditorCreateForm exposing (KnowledgeModelEditorCreateForm)
@@ -35,9 +35,9 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         fetchPackageCmd =
-            case ( model.selectedPackage, model.edit ) of
-                ( Just packageId, True ) ->
-                    PackagesApi.getPackage appState packageId GetPackageCompleted
+            case ( model.selectedKmPackage, model.edit ) of
+                ( Just kmPackageId, True ) ->
+                    KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageCompleted
 
                 _ ->
                     Cmd.none
@@ -60,22 +60,22 @@ update msg wrapMsg appState model =
         PostKmEditorCompleted result ->
             handlePostKmEditorCompleted appState model result
 
-        PackageTypeHintInputMsg typeHintInputMsg ->
+        KnowledgeModelPackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
 
         GetPackageCompleted result ->
             case result of
-                Ok package ->
+                Ok kmPackage ->
                     let
                         form =
                             model.form
-                                |> setKmEditorCreateFormValue appState "name" package.name
-                                |> setKmEditorCreateFormValue appState "kmId" package.kmId
+                                |> setKmEditorCreateFormValue appState "name" kmPackage.name
+                                |> setKmEditorCreateFormValue appState "kmId" kmPackage.kmId
                     in
-                    ( { model | package = Success package, form = form }, Cmd.none )
+                    ( { model | kmPackage = Success kmPackage, form = form }, Cmd.none )
 
                 Err error ->
-                    ( { model | package = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }, Cmd.none )
+                    ( { model | kmPackage = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }, Cmd.none )
 
 
 handleFormMsg : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -145,15 +145,15 @@ handlePostKmEditorCompleted appState model result =
             )
 
 
-handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg PackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg KnowledgeModelPackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         formMsg =
-            wrapMsg << FormMsg << Form.Input "previousPackageId" Form.Select << Field.String
+            wrapMsg << FormMsg << Form.Input "previousKnowledgeModelPackageId" Form.Select << Field.String
 
         cfg =
-            { wrapMsg = wrapMsg << PackageTypeHintInputMsg
-            , getTypeHints = PackagesApi.getPackagesSuggestions appState (Just False)
+            { wrapMsg = wrapMsg << KnowledgeModelPackageTypeHintInputMsg
+            , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState (Just False)
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
@@ -161,9 +161,9 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             }
 
         ( packageTypeHintInputModel, cmd ) =
-            TypeHintInput.update cfg typeHintInputMsg model.packageTypeHintInputModel
+            TypeHintInput.update cfg typeHintInputMsg model.kmPackageTypeHintInputModel
     in
-    ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
+    ( { model | kmPackageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
 
 setKmEditorCreateFormValue : AppState -> String -> String -> Form FormError KnowledgeModelEditorCreateForm -> Form FormError KnowledgeModelEditorCreateForm

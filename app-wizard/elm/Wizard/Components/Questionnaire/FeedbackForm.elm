@@ -30,10 +30,10 @@ validation =
 
 
 encode : String -> String -> FeedbackForm -> E.Value
-encode questionUuid packageId form =
+encode questionUuid knowledgeModelPackageId form =
     E.object
         [ ( "questionUuid", E.string questionUuid )
-        , ( "packageId", E.string packageId )
+        , ( "knowledgeModelPackageId", E.string knowledgeModelPackageId )
         , ( "title", E.string form.title )
         , ( "content", E.string form.content )
         ]

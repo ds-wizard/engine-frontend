@@ -14,7 +14,7 @@ type alias Migration =
     { knowledgeModelEditorUuid : Uuid
     , knowledgeModelEditorName : String
     , migrationState : MigrationState
-    , knowledgeModelEditorPreviousPackageId : String
+    , knowledgeModelEditorPreviousKnowledgeModelPackageId : String
     , targetPackageId : String
     , currentKnowledgeModel : KnowledgeModel
     }
@@ -26,6 +26,6 @@ decoder =
         |> D.required "knowledgeModelEditorUuid" Uuid.decoder
         |> D.required "knowledgeModelEditorName" D.string
         |> D.required "migrationState" MigrationState.decoder
-        |> D.required "knowledgeModelEditorPreviousPackageId" D.string
+        |> D.required "knowledgeModelEditorPreviousKnowledgeModelPackageId" D.string
         |> D.required "targetPackageId" D.string
         |> D.required "currentKnowledgeModel" KnowledgeModel.decoder

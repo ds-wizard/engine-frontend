@@ -4,13 +4,13 @@ import ActionResult exposing (ActionResult(..))
 
 
 type alias Model =
-    { packageId : String
+    { knwoledgeModelPackageId : String
     , pulling : ActionResult ()
     }
 
 
 initialModel : String -> Model
-initialModel packageId =
-    { packageId = packageId
+initialModel kmPackageId =
+    { knwoledgeModelPackageId = kmPackageId
     , pulling = Unset
     }

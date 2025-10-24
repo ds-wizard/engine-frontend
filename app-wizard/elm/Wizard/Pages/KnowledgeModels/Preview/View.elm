@@ -8,7 +8,7 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Version
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Components.ActionResultView as ActionResultView
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
@@ -22,13 +22,13 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         actionResult =
-            ActionResult.combine model.package model.questionnaireModel
+            ActionResult.combine model.knowledgeModelPackage model.questionnaireModel
     in
     Page.actionResultView appState (viewProject appState model) actionResult
 
 
-viewProject : AppState -> Model -> ( PackageDetail, Questionnaire.Model ) -> Html Msg
-viewProject appState model ( package, questionnaireModel ) =
+viewProject : AppState -> Model -> ( KnowledgeModelPackageDetail, Questionnaire.Model ) -> Html Msg
+viewProject appState model ( kmPackage, questionnaireModel ) =
     let
         questionnaire =
             Questionnaire.view appState
@@ -54,13 +54,13 @@ viewProject appState model ( package, questionnaireModel ) =
                 questionnaireModel
     in
     div [ class "KnowledgeModels__Preview" ]
-        [ viewHeader appState model package
+        [ viewHeader appState model kmPackage
         , questionnaire
         ]
 
 
-viewHeader : AppState -> Model -> PackageDetail -> Html Msg
-viewHeader appState model package =
+viewHeader : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
+viewHeader appState model kmPackage =
     let
         actions =
             if Features.projectsCreateCustom appState then
@@ -81,7 +81,7 @@ viewHeader appState model package =
     in
     div [ class "top-header" ]
         [ div [ class "top-header-content" ]
-            [ div [ class "top-header-title", dataCy "km-preview_header_title" ] [ text <| package.name ++ ", " ++ Version.toString package.version ]
+            [ div [ class "top-header-title", dataCy "km-preview_header_title" ] [ text <| kmPackage.name ++ ", " ++ Version.toString kmPackage.version ]
             , div [ class "top-header-actions" ] actions
             ]
         ]

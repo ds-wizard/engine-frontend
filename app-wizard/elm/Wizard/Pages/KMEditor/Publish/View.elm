@@ -89,5 +89,5 @@ lastVersion : AppState -> Maybe Version -> Html msg
 lastVersion appState mbVersion =
     mbVersion
         |> Maybe.map Version.toString
-        |> Maybe.withDefault (gettext "No version of this package has been published yet." appState.locale)
+        |> Maybe.withDefault (gettext "No version of this knowledge model has been published yet." appState.locale)
         |> flip (FormGroup.textView "last-version") (gettext "Last version" appState.locale)

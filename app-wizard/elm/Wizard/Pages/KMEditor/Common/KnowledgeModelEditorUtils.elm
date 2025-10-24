@@ -10,7 +10,7 @@ lastVersion :
     ->
         { a
             | kmId : String
-            , previousPackageId : Maybe String
+            , previousKnowledgeModelPackageId : Maybe String
         }
     -> Maybe Version
 lastVersion appState kmEditor =
@@ -37,4 +37,4 @@ lastVersion appState kmEditor =
             else
                 Nothing
     in
-    Maybe.andThen getVersion kmEditor.previousPackageId
+    Maybe.andThen getVersion kmEditor.previousKnowledgeModelPackageId

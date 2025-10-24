@@ -16,8 +16,8 @@ type alias KnowledgeModelEditor =
     { uuid : Uuid
     , name : String
     , kmId : String
-    , forkOfPackageId : Maybe String
-    , previousPackageId : Maybe String
+    , forkOfKnowledgeModelPackageId : Maybe String
+    , previousKnowledgeModelPackageId : Maybe String
     , state : KnowledgeModelEditorState
     , updatedAt : Time.Posix
     }
@@ -29,8 +29,8 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "kmId" D.string
-        |> D.required "forkOfPackageId" (D.nullable D.string)
-        |> D.required "previousPackageId" (D.nullable D.string)
+        |> D.required "forkOfKnowledgeModelPackageId" (D.nullable D.string)
+        |> D.required "previousKnowledgeModelPackageId" (D.nullable D.string)
         |> D.required "state" KnowledgeModelEditorState.decoder
         |> D.required "updatedAt" D.datetime
 

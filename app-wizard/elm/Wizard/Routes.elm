@@ -536,8 +536,8 @@ isKnowledgeModelsIndex route =
 
 
 knowledgeModelsPreview : String -> Maybe String -> Route
-knowledgeModelsPreview packageId mbQuestionUuid =
-    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute packageId mbQuestionUuid
+knowledgeModelsPreview kmPackageId mbQuestionUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute kmPackageId mbQuestionUuid
 
 
 knowledgeModelsResourcePage : String -> String -> Route

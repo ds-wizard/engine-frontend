@@ -5,8 +5,8 @@ import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Version exposing (Version)
 import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 
 
 type Msg
@@ -14,5 +14,5 @@ type Msg
     | FormMsg Form.Msg
     | FormSetVersion Version
     | PostKmEditorCompleted (Result ApiError KnowledgeModelEditor)
-    | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)
-    | GetPackageCompleted (Result ApiError PackageDetail)
+    | KnowledgeModelPackageTypeHintInputMsg (TypeHintInput.Msg KnowledgeModelPackageSuggestion)
+    | GetPackageCompleted (Result ApiError KnowledgeModelPackageDetail)

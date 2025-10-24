@@ -13,10 +13,10 @@ import Gettext exposing (gettext)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
-import Wizard.Api.Models.Package exposing (Package)
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm as KnowledgeModelEditorPublishForm
@@ -37,7 +37,7 @@ update msg wrapMsg appState model =
         GetKnowledgeModelEditorCompleted result ->
             handleGetKnowledgeModelEditorCompleted wrapMsg appState model result
 
-        GetPreviousPackageCompleted result ->
+        GetPreviousKnowledgeModelPackageCompleted result ->
             handleGetPreviousPackageCompleted model result
 
         Cancel ->
@@ -63,10 +63,10 @@ handleGetKnowledgeModelEditorCompleted wrapMsg appState model result =
         Ok kmEditor ->
             let
                 cmd =
-                    case kmEditor.previousPackageId of
-                        Just previousPackageId ->
+                    case kmEditor.previousKnowledgeModelPackageId of
+                        Just previousKnowledgeModelPackageId ->
                             Cmd.map wrapMsg <|
-                                PackagesApi.getPackage appState previousPackageId GetPreviousPackageCompleted
+                                KnowledgeModelPackagesApi.getKnowledgeModelPackage appState previousKnowledgeModelPackageId GetPreviousKnowledgeModelPackageCompleted
 
                         Nothing ->
                             Cmd.none
@@ -81,19 +81,19 @@ handleGetKnowledgeModelEditorCompleted wrapMsg appState model result =
             )
 
 
-handleGetPreviousPackageCompleted : Model -> Result ApiError PackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetPreviousPackageCompleted : Model -> Result ApiError KnowledgeModelPackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetPreviousPackageCompleted model result =
     case result of
-        Ok package ->
+        Ok kmPackage ->
             let
                 formMsg field value =
                     Form.Input field Form.Text <| Field.String value
 
                 form =
                     model.form
-                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "description" package.description)
-                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "readme" package.readme)
-                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "license" package.license)
+                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "description" kmPackage.description)
+                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "readme" kmPackage.readme)
+                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "license" kmPackage.license)
             in
             ( { model | form = form }
             , Cmd.none
@@ -113,7 +113,7 @@ handleFormMsg formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.postFromMigration appState body PutKnowledgeModelEditorCompleted
+                        KnowledgeModelPackagesApi.postFromMigration appState body PutKnowledgeModelEditorCompleted
             in
             ( { model | publishingKnowledgeModelEditor = Loading }, cmd )
 
@@ -140,11 +140,11 @@ handleFormSetVersion version model =
     ( { model | form = form }, Cmd.none )
 
 
-handlePutKnowledgeModelEditorCompleted : AppState -> Model -> Result ApiError Package -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePutKnowledgeModelEditorCompleted : AppState -> Model -> Result ApiError KnowledgeModelPackage -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePutKnowledgeModelEditorCompleted appState model result =
     case result of
-        Ok package ->
-            ( model, cmdNavigate appState (Routes.knowledgeModelsDetail package.id) )
+        Ok kmPackage ->
+            ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.id) )
 
         Err error ->
             ( { model | publishingKnowledgeModelEditor = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }

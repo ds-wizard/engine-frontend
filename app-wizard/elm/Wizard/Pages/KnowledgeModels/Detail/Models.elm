@@ -5,11 +5,11 @@ module Wizard.Pages.KnowledgeModels.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 
 
 type alias Model =
-    { package : ActionResult PackageDetail
+    { knowledgeModelPackage : ActionResult KnowledgeModelPackageDetail
     , dropdownState : Dropdown.State
     , deletingVersion : ActionResult String
     , showDeleteDialog : Bool
@@ -19,7 +19,7 @@ type alias Model =
 
 initialModel : Model
 initialModel =
-    { package = Loading
+    { knowledgeModelPackage = Loading
     , dropdownState = Dropdown.initialState
     , deletingVersion = Unset
     , showDeleteDialog = False
