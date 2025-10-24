@@ -15,6 +15,7 @@ module Wizard.Api.Models.QuestionnaireQuestionnaire exposing
     , generateReplies
     , getClosestQuestionParentPath
     , getComments
+    , getCurrentPhaseIndex
     , getFile
     , getItemSelectQuestionValueLabel
     , getItemTitle
@@ -261,6 +262,19 @@ updateWithQuestionnaireData data detail =
 setPhaseUuid : Maybe Uuid -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire
 setPhaseUuid phaseUuid questionnaire =
     { questionnaire | phaseUuid = phaseUuid }
+
+
+getCurrentPhaseIndex : QuestionnaireQuestionnaire -> Int
+getCurrentPhaseIndex questionnaire =
+    case questionnaire.phaseUuid of
+        Just phaseUuid ->
+            KnowledgeModel.getPhases questionnaire.knowledgeModel
+                |> List.map .uuid
+                |> List.elemIndex (Uuid.toString phaseUuid)
+                |> Maybe.withDefault 0
+
+        Nothing ->
+            0
 
 
 setReply : String -> Reply -> QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire

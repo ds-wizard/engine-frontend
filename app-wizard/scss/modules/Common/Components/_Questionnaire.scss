@@ -127,6 +127,51 @@ $toolbar-height: 40px;
       background: $gray-100;
       padding: 1rem;
       margin: 1rem;
+
+      $point-size: 0.75rem;
+      $bar-height: 0.25rem;
+
+      .phase-progress {
+        margin-top: $spacer-2;
+        position: relative;
+        display: flex;
+        justify-content: space-between;
+        cursor: pointer;
+
+        &__point {
+          @include border-radius(100%);
+          width: $point-size;
+          height: $point-size;
+          background: $gray-300;
+          z-index: 1;
+
+          &--active {
+            background: var(--bs-primary);
+          }
+
+          &--current {
+            box-shadow: 0 0 $focus-ring-blur $focus-ring-width #{rgba(var(--bs-focus-ring-color), $focus-ring-opacity)};
+          }
+        }
+
+        &__bar {
+          position: absolute;
+          height: $bar-height;
+          left: calc($point-size / 2);
+          right: calc($point-size / 2);
+          top: 50%;
+          transform: translateY(-50%);
+          background: $gray-300;
+          box-sizing: border-box;
+          z-index: 0;
+        }
+
+        &__fill {
+          position: absolute;
+          height: 100%;
+          background: var(--bs-primary);
+        }
+      }
     }
 
     .NavigationTree {

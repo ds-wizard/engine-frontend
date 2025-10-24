@@ -64,7 +64,7 @@ import Dict exposing (Dict)
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, small, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, target, type_, value)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, style, target, type_, value)
 import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
@@ -2335,17 +2335,48 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
             phaseButton =
                 button
                     ([ class "btn btn-input w-100"
-                     , onClick (PhaseModalUpdate True Nothing)
                      , dataCy "phase-selection"
                      , disabled cfg.features.readonly
                      ]
                         ++ phaseButtonOnClick
                     )
                     [ text selectedPhaseTitle ]
+
+            currentPhaseIndex =
+                QuestionnaireQuestionnaire.getCurrentPhaseIndex model.questionnaire
+
+            progress =
+                toFloat currentPhaseIndex / toFloat (List.length phases - 1)
+
+            phaseProgressPoint i _ =
+                div
+                    [ class "phase-progress__point"
+                    , classList
+                        [ ( "phase-progress__point--active", i <= currentPhaseIndex )
+                        , ( "phase-progress__point--current", i == currentPhaseIndex )
+                        ]
+                    ]
+                    []
+
+            phaseProgressPoints =
+                List.indexedMap phaseProgressPoint phases
+
+            phaseProgress =
+                div (class "phase-progress" :: phaseButtonOnClick)
+                    (div [ class "phase-progress__bar" ]
+                        [ div
+                            [ class "phase-progress__fill"
+                            , style "width" (String.fromFloat (progress * 100) ++ "%")
+                            ]
+                            []
+                        ]
+                        :: phaseProgressPoints
+                    )
         in
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ text (gettext "Current phase" appState.locale) ]
             , phaseButton
+            , phaseProgress
             ]
 
     else
@@ -2359,14 +2390,7 @@ viewPhaseModal appState model =
             KnowledgeModel.getPhases model.questionnaire.knowledgeModel
 
         currentPhaseIndex =
-            case model.questionnaire.phaseUuid of
-                Just phaseUuid ->
-                    List.map .uuid phases
-                        |> List.elemIndex (Uuid.toString phaseUuid)
-                        |> Maybe.withDefault 0
-
-                Nothing ->
-                    0
+            QuestionnaireQuestionnaire.getCurrentPhaseIndex model.questionnaire
 
         viewPhase : Int -> Phase -> Html Msg
         viewPhase index phase =
