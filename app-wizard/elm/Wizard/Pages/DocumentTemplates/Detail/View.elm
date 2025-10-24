@@ -304,11 +304,11 @@ sidePanelRegistryLink appState template =
 sidePanelUsableWith : AppState -> Model -> DocumentTemplateDetail -> Maybe ( String, String, Html Msg )
 sidePanelUsableWith appState model template =
     let
-        packageLink package =
+        packageLink kmPackage =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail package.id)
+                [ linkTo (Routes.knowledgeModelsDetail kmPackage.id)
                     [ dataCy "template_km-link" ]
-                    [ text package.id ]
+                    [ text kmPackage.id ]
                 ]
 
         takeFirstPackages =
@@ -318,16 +318,16 @@ sidePanelUsableWith appState model template =
             else
                 List.take 10
 
-        packageLinks =
-            template.usablePackages
+        kmPackageLinks =
+            template.usableKnowledgeModelPackages
                 |> List.sortWith DocumentTemplatePackage.compareById
                 |> takeFirstPackages
                 |> List.map packageLink
     in
-    if List.length packageLinks > 0 then
+    if List.length kmPackageLinks > 0 then
         let
             showAllLink =
-                if model.showAllKms || List.length template.usablePackages <= 10 then
+                if model.showAllKms || List.length template.usableKnowledgeModelPackages <= 10 then
                     Html.nothing
 
                 else
@@ -338,7 +338,7 @@ sidePanelUsableWith appState model template =
                             ]
                         ]
         in
-        Just ( gettext "Usable with" appState.locale, "usable-with", ul [] (packageLinks ++ [ showAllLink ]) )
+        Just ( gettext "Usable with" appState.locale, "usable-with", ul [] (kmPackageLinks ++ [ showAllLink ]) )
 
     else
         Nothing

@@ -1,5 +1,5 @@
-module Wizard.Api.Models.PackageInfo exposing
-    ( PackageInfo
+module Wizard.Api.Models.KnowledgeModelPackageInfo exposing
+    ( KnowledgeModelPackageInfo
     , decoder
     )
 
@@ -8,16 +8,16 @@ import Json.Decode.Pipeline as D
 import Version exposing (Version)
 
 
-type alias PackageInfo =
+type alias KnowledgeModelPackageInfo =
     { id : String
     , name : String
     , version : Version
     }
 
 
-decoder : Decoder PackageInfo
+decoder : Decoder KnowledgeModelPackageInfo
 decoder =
-    D.succeed PackageInfo
+    D.succeed KnowledgeModelPackageInfo
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "version" Version.decoder

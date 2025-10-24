@@ -22,9 +22,9 @@ import Html.Events exposing (onClick)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Version
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
-import Wizard.Api.Models.Package exposing (Package)
-import Wizard.Api.Packages as Packages
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Routes as Routes
@@ -56,7 +56,7 @@ initialModel =
 type Msg
     = SetOpen Bool
     | Publish
-    | PublishCompleted (Result ApiError Package)
+    | PublishCompleted (Result ApiError KnowledgeModelPackage)
 
 
 openMsg : Msg
@@ -82,13 +82,13 @@ update cfg appState msg model =
 
         Publish ->
             ( { model | publishing = ActionResult.Loading }
-            , Packages.postFromKnowledgeModelEditor appState cfg.kmEditorUuid (cfg.wrapMsg << PublishCompleted)
+            , KnowledgeModelPackagesApi.postFromKnowledgeModelEditor appState cfg.kmEditorUuid (cfg.wrapMsg << PublishCompleted)
             )
 
         PublishCompleted result ->
             case result of
-                Ok package ->
-                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail package.id) )
+                Ok kmPackage ->
+                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.id) )
 
                 Err error ->
                     ( { model | publishing = ApiError.toActionResult appState (gettext "Unable to publish knowledge model" appState.locale) error }

@@ -55,7 +55,7 @@ config questionnaire =
     DefaultQuestionnaireRendererConfig
         { knowledgeModel = questionnaire.knowledgeModel
         , questionnaire = questionnaire
-        , resourcePageToRoute = defaultResourcePageToRoute questionnaire.packageId
+        , resourcePageToRoute = defaultResourcePageToRoute questionnaire.knowledgeModelPackageId
         }
 
 
@@ -82,8 +82,8 @@ create appState (DefaultQuestionnaireRendererConfig cfg) =
 
 
 defaultResourcePageToRoute : String -> String -> Wizard.Routes.Route
-defaultResourcePageToRoute packageId =
-    Wizard.Routes.knowledgeModelsResourcePage packageId
+defaultResourcePageToRoute kmPackageId =
+    Wizard.Routes.knowledgeModelsResourcePage kmPackageId
 
 
 renderQuestionLabel : Question -> Html msg

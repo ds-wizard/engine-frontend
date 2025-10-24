@@ -10,14 +10,14 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTempl
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.KnowledgeModel.Tag as Tag exposing (Tag)
-import Wizard.Api.Models.Package as Package exposing (Package)
+import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
 
 
 type alias QuestionnaireSettings =
     { uuid : Uuid
     , name : String
     , description : Maybe String
-    , package : Package
+    , knowledgeModelPackage : KnowledgeModelPackage
     , projectTags : List String
     , selectedQuestionTagUuids : List String
     , documentTemplate : Maybe DocumentTemplateSuggestion
@@ -35,7 +35,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" (D.maybe D.string)
-        |> D.required "package" Package.decoder
+        |> D.required "knowledgeModelPackage" KnowledgeModelPackage.decoder
         |> D.required "projectTags" (D.list D.string)
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)

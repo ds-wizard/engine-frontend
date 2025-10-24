@@ -12,12 +12,12 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
-import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage as AllowedPackage exposing (AllowedPackage)
+import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedKnowledgeModelPackage as AllowedKnowledgeModelPackage exposing (AllowedKnowledgeModelPackage)
 
 
 type alias EditableKnowledgeModelConfigForm =
     { publicEnabled : Bool
-    , publicPackages : List AllowedPackage
+    , publicPackages : List AllowedKnowledgeModelPackage
     , integrationConfig : String
     }
 
@@ -32,7 +32,7 @@ init config =
     let
         fields =
             [ ( "publicEnabled", Field.bool config.public.enabled )
-            , ( "publicPackages", Field.list (List.map AllowedPackage.init config.public.packages) )
+            , ( "publicPackages", Field.list (List.map AllowedKnowledgeModelPackage.init config.public.knowledgeModelPackages) )
             , ( "integrationConfig", Field.string config.integrationConfig )
             ]
     in
@@ -43,7 +43,7 @@ validation : Validation FormError EditableKnowledgeModelConfigForm
 validation =
     V.succeed EditableKnowledgeModelConfigForm
         |> V.andMap (V.field "publicEnabled" V.bool)
-        |> V.andMap (V.field "publicPackages" (V.list AllowedPackage.validation))
+        |> V.andMap (V.field "publicPackages" (V.list AllowedKnowledgeModelPackage.validation))
         |> V.andMap (V.field "integrationConfig" V.optionalString)
 
 
@@ -52,6 +52,6 @@ toEditableKnowledgeModelConfig form =
     { integrationConfig = form.integrationConfig
     , public =
         { enabled = form.publicEnabled
-        , packages = form.publicPackages
+        , knowledgeModelPackages = form.publicPackages
         }
     }

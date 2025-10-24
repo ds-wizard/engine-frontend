@@ -29,8 +29,8 @@ initLocalModel route appState model =
         DetailRoute _ ->
             { model | detailModel = Wizard.Pages.DocumentTemplates.Detail.Models.initialModel }
 
-        ImportRoute packageId ->
-            { model | importModel = Wizard.Pages.DocumentTemplates.Import.Models.initialModel appState packageId }
+        ImportRoute kmPackageId ->
+            { model | importModel = Wizard.Pages.DocumentTemplates.Import.Models.initialModel appState kmPackageId }
 
         IndexRoute paginationQuerystring ->
             { model | indexModel = Wizard.Pages.DocumentTemplates.Index.Models.initialModel paginationQuerystring }

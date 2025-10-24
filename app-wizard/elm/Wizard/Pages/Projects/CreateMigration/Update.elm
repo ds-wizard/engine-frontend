@@ -12,14 +12,14 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.Api.Models.PackageDetail as PackageDetail exposing (PackageDetail)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -56,8 +56,8 @@ update wrapMsg msg appState model =
         FormMsg formMsg ->
             handleForm wrapMsg formMsg appState model
 
-        SelectPackage package ->
-            handleSelectPackage wrapMsg appState model package
+        SelectKnowledgeModelPackage kmPackage ->
+            handleSelectPackage wrapMsg appState model kmPackage
 
         PostMigrationCompleted result ->
             handlePostMigrationCompleted appState model result
@@ -65,13 +65,13 @@ update wrapMsg msg appState model =
         GetKnowledgeModelPreviewCompleted result ->
             handleGetKnowledgeModelPreviewCompleted appState model result
 
-        GetCurrentPackageCompleted result ->
+        GetCurrentKnowledgeModelPackageCompleted result ->
             handleGetCurrentPackageCompleted appState wrapMsg model result
 
-        GetSelectedPackageCompleted result ->
+        GetSelectedKnowledgeModelPackageCompleted result ->
             handleGetSelectedPackageCompleted appState wrapMsg model result
 
-        PackageTypeHintInputMsg typeHintInputMsg ->
+        KnowledgeModelPackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
 
 
@@ -118,7 +118,7 @@ handleGetQuestionnaireCompleted appState wrapMsg model result =
             }
 
 
-handleGetCurrentPackageCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError PackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetCurrentPackageCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError KnowledgeModelPackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetCurrentPackageCompleted appState wrapMsg model result =
     let
         setResult r m =
@@ -135,7 +135,7 @@ handleGetCurrentPackageCompleted appState wrapMsg model result =
             }
 
 
-handleGetSelectedPackageCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError PackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetSelectedPackageCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError KnowledgeModelPackageDetail -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetSelectedPackageCompleted appState wrapMsg model result =
     let
         setResult r m =
@@ -179,15 +179,15 @@ handleForm wrapMsg formMsg appState model =
                     { model | form = Form.update QuestionnaireMigrationCreateForm.validation formMsg model.form }
             in
             case getSelectedPackageId newModel of
-                Just packageId ->
-                    if needFetchKnowledgeModelPreview model packageId then
+                Just kmPackageId ->
+                    if needFetchKnowledgeModelPreview model kmPackageId then
                         ( { newModel
-                            | lastFetchedPreview = Just packageId
+                            | lastFetchedPreview = Just kmPackageId
                             , knowledgeModelPreview = Loading
                             , selectedTags = []
                           }
                         , Cmd.map wrapMsg <|
-                            KnowledgeModelsApi.fetchPreview appState (Just packageId) [] [] GetKnowledgeModelPreviewCompleted
+                            KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] GetKnowledgeModelPreviewCompleted
                         )
 
                     else
@@ -197,18 +197,18 @@ handleForm wrapMsg formMsg appState model =
                     ( { newModel | knowledgeModelPreview = Unset, selectedTags = [] }, Cmd.none )
 
 
-handleSelectPackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> PackageSuggestion -> ( Model, Cmd Wizard.Msgs.Msg )
-handleSelectPackage wrapMsg appState model package =
+handleSelectPackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> KnowledgeModelPackageSuggestion -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSelectPackage wrapMsg appState model kmPackage =
     let
         formMsg =
-            Form.Input "packageId" Form.Select Field.EmptyField
+            Form.Input "knowledgeModelPackageId" Form.Select Field.EmptyField
 
         getSelectedPackageCmd =
             Cmd.map wrapMsg <|
-                PackagesApi.getPackageWithoutDeprecatedVersions appState package.id GetSelectedPackageCompleted
+                KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackage.id GetSelectedKnowledgeModelPackageCompleted
     in
     ( { model
-        | selectedPackage = Just package
+        | selectedPackage = Just kmPackage
         , selectedPackageDetail = Loading
         , knowledgeModelPreview = Unset
         , selectedTags = []
@@ -247,22 +247,22 @@ handleGetKnowledgeModelPreviewCompleted appState model result =
     ( newModel, cmd )
 
 
-handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg PackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg KnowledgeModelPackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         cfg =
-            { wrapMsg = wrapMsg << PackageTypeHintInputMsg
-            , getTypeHints = PackagesApi.getPackagesSuggestions appState Nothing
+            { wrapMsg = wrapMsg << KnowledgeModelPackageTypeHintInputMsg
+            , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState Nothing
             , getError = gettext "Unable to get knowledge models." appState.locale
-            , setReply = wrapMsg << SelectPackage
+            , setReply = wrapMsg << SelectKnowledgeModelPackage
             , clearReply = Nothing
             , filterResults = Nothing
             }
 
         ( packageTypeHintInputModel, cmd ) =
-            TypeHintInput.update cfg typeHintInputMsg model.packageTypeHintInputModel
+            TypeHintInput.update cfg typeHintInputMsg model.knowledgeModelPackageTypeHintInputModel
     in
-    ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
+    ( { model | knowledgeModelPackageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
 
 
@@ -276,7 +276,7 @@ loadCurrentPackage appState wrapMsg ( model, cmd ) =
             let
                 getCurrentPackageCmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.getPackageWithoutDeprecatedVersions appState questionnaire.package.id GetCurrentPackageCompleted
+                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState questionnaire.knowledgeModelPackage.id GetCurrentKnowledgeModelPackageCompleted
             in
             ( model, Cmd.batch [ cmd, getCurrentPackageCmd ] )
 
@@ -287,10 +287,10 @@ loadCurrentPackage appState wrapMsg ( model, cmd ) =
 preselectKnowledgeModel : AppState -> (Msg -> Wizard.Msgs.Msg) -> ( Model, Cmd Wizard.Msgs.Msg ) -> ( Model, Cmd Wizard.Msgs.Msg )
 preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
     case model.selectedPackageDetail of
-        Success package ->
+        Success kmPackage ->
             let
                 mbLatestPackageId =
-                    PackageDetail.getLatestPackageId package
+                    KnowledgeModelPackageDetail.getLatestPackageId kmPackage
 
                 ( packageCmd, lastFetchedPreview ) =
                     case mbLatestPackageId of
@@ -310,12 +310,12 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
                         mbLatestPackageId
 
                 packageSuggestion =
-                    PackageDetail.toPackageSuggestion package
+                    KnowledgeModelPackageDetail.toPackageSuggestion kmPackage
             in
             ( { model
                 | selectedPackage = Just packageSuggestion
                 , form = form
-                , packageTypeHintInputModel = setSelected (Just packageSuggestion) model.packageTypeHintInputModel
+                , knowledgeModelPackageTypeHintInputModel = setSelected (Just packageSuggestion) model.knowledgeModelPackageTypeHintInputModel
                 , lastFetchedPreview = lastFetchedPreview
               }
             , Cmd.batch [ cmd, packageCmd ]
@@ -327,9 +327,9 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
 
 getSelectedPackageId : Model -> Maybe String
 getSelectedPackageId model =
-    (Form.getFieldAsString "packageId" model.form).value
+    (Form.getFieldAsString "knowledgeModelPackageId" model.form).value
 
 
 needFetchKnowledgeModelPreview : Model -> String -> Bool
-needFetchKnowledgeModelPreview model packageId =
-    model.lastFetchedPreview /= Just packageId
+needFetchKnowledgeModelPreview model kmPackageId =
+    model.lastFetchedPreview /= Just kmPackageId

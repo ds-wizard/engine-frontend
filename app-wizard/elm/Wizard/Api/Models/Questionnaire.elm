@@ -13,8 +13,8 @@ import Json.Decode.Pipeline as D
 import List.Extra as List
 import Time
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.KnowledgeModelPackageInfo as KnowledgeModelPackageInfo exposing (KnowledgeModelPackageInfo)
 import Wizard.Api.Models.Member as Member
-import Wizard.Api.Models.PackageInfo as PackageInfo exposing (PackageInfo)
 import Wizard.Api.Models.Permission as Permission exposing (Permission)
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState exposing (QuestionnaireState)
@@ -29,7 +29,7 @@ type alias Questionnaire =
     , name : String
     , description : Maybe String
     , isTemplate : Bool
-    , package : PackageInfo
+    , knowledgeModelPackage : KnowledgeModelPackageInfo
     , visibility : QuestionnaireVisibility
     , sharing : QuestionnaireSharing
     , permissions : List Permission
@@ -82,7 +82,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "description" (D.maybe D.string)
         |> D.required "isTemplate" D.bool
-        |> D.required "package" PackageInfo.decoder
+        |> D.required "knowledgeModelPackage" KnowledgeModelPackageInfo.decoder
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)

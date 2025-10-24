@@ -40,4 +40,4 @@ indexRouteProjectTagsFilterId =
 
 indexRoutePackagesFilterId : String
 indexRoutePackagesFilterId =
-    "packages"
+    "knowledgeModelPackages"

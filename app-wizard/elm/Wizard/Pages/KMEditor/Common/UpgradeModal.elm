@@ -23,8 +23,8 @@ import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
-import Wizard.Api.Models.PackageDetail as PackageDetail exposing (PackageDetail)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUpgradeForm as KnowledgeModelEditorUpgradeForm exposing (KnowledgeModelEditorUpgradeForm)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -34,7 +34,7 @@ type alias Model =
     { kmEditor : Maybe ( Uuid, String )
     , kmEditorUpgradeForm : Form FormError KnowledgeModelEditorUpgradeForm
     , creatingMigration : ActionResult String
-    , package : ActionResult PackageDetail
+    , kmPackage : ActionResult KnowledgeModelPackageDetail
     }
 
 
@@ -43,7 +43,7 @@ initialModel =
     { kmEditor = Nothing
     , kmEditorUpgradeForm = KnowledgeModelEditorUpgradeForm.init
     , creatingMigration = ActionResult.Unset
-    , package = ActionResult.Unset
+    , kmPackage = ActionResult.Unset
     }
 
 
@@ -51,7 +51,7 @@ type Msg
     = Open Uuid String String
     | FormMsg Form.Msg
     | UpgradeComplete (Result ApiError ())
-    | GetPackageComplete (Result ApiError PackageDetail)
+    | GetKnowledgeModelPackageComplete (Result ApiError KnowledgeModelPackageDetail)
     | Close
 
 
@@ -73,9 +73,9 @@ update cfg appState msg model =
             ( { model
                 | kmEditor = Just ( uuid, name )
                 , creatingMigration = ActionResult.Unset
-                , package = ActionResult.Loading
+                , kmPackage = ActionResult.Loading
               }
-            , Cmd.map cfg.wrapMsg <| PackagesApi.getPackage appState forkOfPackageId GetPackageComplete
+            , Cmd.map cfg.wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackage appState forkOfPackageId GetKnowledgeModelPackageComplete
             )
 
         FormMsg formMsg ->
@@ -108,13 +108,13 @@ update cfg appState msg model =
                     , Cmd.none
                     )
 
-        GetPackageComplete result ->
+        GetKnowledgeModelPackageComplete result ->
             case result of
-                Ok package ->
-                    ( { model | package = ActionResult.Success package }, Cmd.none )
+                Ok kmPackage ->
+                    ( { model | kmPackage = ActionResult.Success kmPackage }, Cmd.none )
 
                 Err error ->
-                    ( { model | package = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
+                    ( { model | kmPackage = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -134,7 +134,7 @@ view appState model =
                     ( False, "" )
 
         modalContent =
-            case model.package of
+            case model.kmPackage of
                 Unset ->
                     [ Html.nothing ]
 
@@ -147,9 +147,9 @@ view appState model =
                 Success _ ->
                     let
                         options =
-                            case model.package of
-                                Success package ->
-                                    ( "", gettext "- select parent knowledge model -" appState.locale ) :: PackageDetail.createFormOptions package
+                            case model.kmPackage of
+                                Success kmPackage ->
+                                    ( "", gettext "- select parent knowledge model -" appState.locale ) :: KnowledgeModelPackageDetail.createFormOptions kmPackage
 
                                 _ ->
                                     []

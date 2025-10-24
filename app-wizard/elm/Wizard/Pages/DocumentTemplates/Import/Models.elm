@@ -16,10 +16,10 @@ type alias Model =
 
 
 initialModel : AppState -> Maybe String -> Model
-initialModel appState packageId =
+initialModel appState documentTemplateId =
     case appState.config.registry of
         RegistryEnabled _ ->
-            { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" packageId }
+            { importModel = RegistryImportModel <| RegistryImportModels.initialModel <| Maybe.withDefault "" documentTemplateId }
 
         _ ->
             { importModel = FileImportModel <| FileImport.initialModel }

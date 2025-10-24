@@ -22,9 +22,9 @@ view appState model =
         pageView =
             Page.actionResultView appState (viewCreate appState model)
     in
-    case ( model.selectedPackage, model.edit ) of
+    case ( model.selectedKmPackage, model.edit ) of
         ( Just _, True ) ->
-            pageView model.package
+            pageView model.kmPackage
 
         _ ->
             pageView (ActionResult.Success ())
@@ -52,28 +52,28 @@ formView : AppState -> Model -> Html Msg
 formView appState model =
     let
         parentInput =
-            case model.selectedPackage of
-                Just package ->
-                    FormGroup.codeView package
+            case model.selectedKmPackage of
+                Just kmPackageId ->
+                    FormGroup.codeView kmPackageId
 
                 Nothing ->
                     let
                         cfg =
                             { viewItem = TypeHintInputItem.packageSuggestionWithVersion
-                            , wrapMsg = PackageTypeHintInputMsg
+                            , wrapMsg = KnowledgeModelPackageTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = True
                             , locale = appState.locale
                             }
 
                         typeHintInput =
-                            TypeHintInput.view cfg model.packageTypeHintInputModel
+                            TypeHintInput.view cfg model.kmPackageTypeHintInputModel
                     in
-                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousPackageId"
+                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousKnowledgeModelPackageId"
 
         previousVersion =
             if model.edit then
-                model.package
+                model.kmPackage
                     |> ActionResult.toMaybe
                     |> Maybe.map .version
 

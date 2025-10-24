@@ -14,8 +14,8 @@ import Wizard.Pages.Locales.Import.RegistryImport.Msgs exposing (Msg(..))
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ChangeLocaleId packageId ->
-            ( { model | localeId = packageId }, Cmd.none )
+        ChangeLocaleId localeId ->
+            ( { model | localeId = localeId }, Cmd.none )
 
         Submit ->
             if String.length model.localeId > 0 then

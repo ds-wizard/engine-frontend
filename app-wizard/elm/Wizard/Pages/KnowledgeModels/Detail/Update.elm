@@ -7,10 +7,10 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setPackage)
+import Common.Utils.Setters exposing (setKnowledgeModelPackage)
 import Gettext exposing (gettext)
-import Wizard.Api.Models.Package.PackagePhase exposing (PackagePhase)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KnowledgeModels.Detail.Models exposing (Model)
@@ -20,16 +20,16 @@ import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : String -> AppState -> Cmd Msg
-fetchData packageId appState =
-    PackagesApi.getPackage appState packageId GetPackageCompleted
+fetchData kmPackageId appState =
+    KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetKnowledgeModelPackageCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetPackageCompleted result ->
+        GetKnowledgeModelPackageCompleted result ->
             RequestHelpers.applyResult
-                { setResult = setPackage
+                { setResult = setKnowledgeModelPackage
                 , defaultError = gettext "Unable to get the Knowledge Model." appState.locale
                 , model = model
                 , result = result
@@ -53,23 +53,23 @@ update msg wrapMsg appState model =
             handleSetUpdatePhase wrapMsg appState model phase
 
         UpdatePhaseCompleted phase result ->
-            case model.package of
-                Success package ->
+            case model.knowledgeModelPackage of
+                Success kmPackage ->
                     RequestHelpers.applyResultTransform
-                        { setResult = setPackage
+                        { setResult = setKnowledgeModelPackage
                         , defaultError = gettext "Unable to update the knowledge model." appState.locale
                         , model = model
                         , result = result
                         , logoutMsg = Wizard.Msgs.logoutMsg
-                        , transform = always { package | phase = phase }
+                        , transform = always { kmPackage | phase = phase }
                         , locale = appState.locale
                         }
 
                 _ ->
                     ( model, Cmd.none )
 
-        ExportPackage package ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (PackagesApi.exportPackageUrl package.id)) )
+        ExportKnowledgeModelPackage kmPackage ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -80,10 +80,10 @@ update msg wrapMsg appState model =
 
 handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteVersion wrapMsg appState model =
-    case model.package of
-        Success package ->
+    case model.knowledgeModelPackage of
+        Success kmPackage ->
             ( { model | deletingVersion = Loading }
-            , PackagesApi.deletePackageVersion appState package.id (wrapMsg << DeleteVersionCompleted)
+            , KnowledgeModelPackagesApi.deleteKnowledgeModelPackageVersion appState kmPackage.id (wrapMsg << DeleteVersionCompleted)
             )
 
         _ ->
@@ -102,15 +102,15 @@ deleteVersionCompleted appState model result =
             )
 
 
-handleSetUpdatePhase : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> PackagePhase -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSetUpdatePhase : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> KnowledgeModelPackagePhase -> ( Model, Cmd Wizard.Msgs.Msg )
 handleSetUpdatePhase wrapMsg appState model phase =
-    case model.package of
-        Success package ->
+    case model.knowledgeModelPackage of
+        Success kmPackage ->
             let
                 newPackage =
-                    { package | phase = phase }
+                    { kmPackage | phase = phase }
             in
-            ( model, PackagesApi.putPackage appState newPackage (wrapMsg << UpdatePhaseCompleted phase) )
+            ( model, KnowledgeModelPackagesApi.putKnowledgeModelPackage appState newPackage (wrapMsg << UpdatePhaseCompleted phase) )
 
         _ ->
             ( model, Cmd.none )

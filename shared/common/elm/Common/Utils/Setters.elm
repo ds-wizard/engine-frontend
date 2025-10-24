@@ -14,12 +14,12 @@ module Common.Utils.Setters exposing
     , setFormatUuid
     , setKnowledgeModel
     , setKnowledgeModelEditorUuid
+    , setKnowledgeModelPackage
+    , setKnowledgeModelPackages
     , setKnowledgeModelString
     , setKnowledgeModels
     , setLocale
     , setMigration
-    , setPackage
-    , setPackages
     , setPlans
     , setProjects
     , setPublic
@@ -127,6 +127,16 @@ setKnowledgeModelEditorUuid value record =
     { record | knowledgeModelEditorUuid = value }
 
 
+setKnowledgeModelPackage : a -> { b | knowledgeModelPackage : a } -> { b | knowledgeModelPackage : a }
+setKnowledgeModelPackage value record =
+    { record | knowledgeModelPackage = value }
+
+
+setKnowledgeModelPackages : a -> { b | knowledgeModelPackages : a } -> { b | knowledgeModelPackages : a }
+setKnowledgeModelPackages value record =
+    { record | knowledgeModelPackages = value }
+
+
 setKnowledgeModelString : a -> { b | knowledgeModelString : a } -> { b | knowledgeModelString : a }
 setKnowledgeModelString value record =
     { record | knowledgeModelString = value }
@@ -145,16 +155,6 @@ setLocale value record =
 setMigration : a -> { b | migration : a } -> { b | migration : a }
 setMigration value record =
     { record | migration = value }
-
-
-setPackage : a -> { b | package : a } -> { b | package : a }
-setPackage value record =
-    { record | package = value }
-
-
-setPackages : a -> { b | packages : a } -> { b | packages : a }
-setPackages value record =
-    { record | packages = value }
 
 
 setPlans : v -> { a | plans : v } -> { a | plans : v }

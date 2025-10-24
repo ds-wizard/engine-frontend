@@ -16,7 +16,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Version
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion exposing (UserGroupSuggestion)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -45,12 +45,12 @@ questionnaireSuggestion questionnaire =
         ]
 
 
-packageSuggestionWithVersion : PackageSuggestion -> Html msg
+packageSuggestionWithVersion : KnowledgeModelPackageSuggestion -> Html msg
 packageSuggestionWithVersion =
     packageSuggestion True
 
 
-packageSuggestion : Bool -> PackageSuggestion -> Html msg
+packageSuggestion : Bool -> KnowledgeModelPackageSuggestion -> Html msg
 packageSuggestion withVersion pkg =
     let
         version =

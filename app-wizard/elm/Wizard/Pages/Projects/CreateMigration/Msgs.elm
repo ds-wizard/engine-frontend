@@ -4,8 +4,8 @@ import Common.Api.ApiError exposing (ApiError)
 import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
 import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
@@ -15,12 +15,12 @@ type Msg
     = GetQuestionnaireCompleted (Result ApiError (QuestionnaireDetailWrapper QuestionnaireSettings))
     | Cancel
     | FormMsg Form.Msg
-    | SelectPackage PackageSuggestion
+    | SelectKnowledgeModelPackage KnowledgeModelPackageSuggestion
     | PostMigrationCompleted (Result ApiError QuestionnaireMigration)
     | GetKnowledgeModelPreviewCompleted (Result ApiError KnowledgeModel)
-    | GetCurrentPackageCompleted (Result ApiError PackageDetail)
-    | GetSelectedPackageCompleted (Result ApiError PackageDetail)
+    | GetCurrentKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)
+    | GetSelectedKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)
     | AddTag String
     | RemoveTag String
     | ChangeUseAllQuestions Bool
-    | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)
+    | KnowledgeModelPackageTypeHintInputMsg (TypeHintInput.Msg KnowledgeModelPackageSuggestion)

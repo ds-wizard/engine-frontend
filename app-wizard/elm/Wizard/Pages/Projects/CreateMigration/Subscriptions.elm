@@ -7,5 +7,5 @@ import Wizard.Pages.Projects.CreateMigration.Msgs exposing (Msg(..))
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map PackageTypeHintInputMsg <|
-        TypeHintInput.subscriptions model.packageTypeHintInputModel
+    Sub.map KnowledgeModelPackageTypeHintInputMsg <|
+        TypeHintInput.subscriptions model.knowledgeModelPackageTypeHintInputModel

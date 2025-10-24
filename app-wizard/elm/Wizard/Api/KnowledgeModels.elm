@@ -12,11 +12,11 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 fetchPreview : AppState -> Maybe String -> List Event -> List String -> ToMsg KnowledgeModel msg -> Cmd msg
-fetchPreview appState packageId events tagUuids =
+fetchPreview appState kmPackageId events tagUuids =
     let
         body =
             E.object
-                [ ( "packageId", E.maybe E.string packageId )
+                [ ( "knowledgeModelPackageId", E.maybe E.string kmPackageId )
                 , ( "events", E.list Event.encode events )
                 , ( "tagUuids", E.list E.string tagUuids )
                 ]
@@ -25,11 +25,11 @@ fetchPreview appState packageId events tagUuids =
 
 
 fetchAsString : AppState -> String -> List String -> ToMsg String msg -> Cmd msg
-fetchAsString appState packageId tagUuids =
+fetchAsString appState kmPackageId tagUuids =
     let
         body =
             E.object
-                [ ( "packageId", E.string packageId )
+                [ ( "knowledgeModelPackageId", E.string kmPackageId )
                 , ( "events", E.list E.string [] )
                 , ( "tagUuids", E.list E.string tagUuids )
                 ]

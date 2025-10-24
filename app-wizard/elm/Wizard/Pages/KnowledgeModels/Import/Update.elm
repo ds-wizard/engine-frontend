@@ -1,6 +1,6 @@
 module Wizard.Pages.KnowledgeModels.Import.Update exposing (update)
 
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Components.FileImport as FileImport
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -20,7 +20,7 @@ update msg wrapMsg appState model =
                 ( newFileImportModel, fileImportCmd ) =
                     FileImport.update
                         { mimes = [ "*/*" ]
-                        , upload = PackagesApi.importPackage
+                        , upload = KnowledgeModelPackagesApi.importKnowledgeModelPackage
                         , wrapMsg = wrapMsg << FileImportMsg
                         }
                         appState

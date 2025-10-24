@@ -10,7 +10,7 @@ type alias Model =
 
 
 initialModel : String -> Model
-initialModel packageId =
-    { documentTemplateId = packageId
+initialModel documentTemplateId =
+    { documentTemplateId = documentTemplateId
     , pulling = Unset
     }

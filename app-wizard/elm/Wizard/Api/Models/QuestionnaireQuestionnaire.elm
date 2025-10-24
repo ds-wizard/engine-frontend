@@ -65,7 +65,7 @@ import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.Permission as Permission exposing (Permission)
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing(..))
 import Wizard.Api.Models.Questionnaire.QuestionnaireTodo exposing (QuestionnaireTodo)
@@ -83,7 +83,7 @@ type alias QuestionnaireQuestionnaire =
     { uuid : Uuid
     , name : String
     , isTemplate : Bool
-    , packageId : String
+    , knowledgeModelPackageId : String
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
     , phaseUuid : Maybe Uuid
@@ -107,7 +107,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "isTemplate" D.bool
-        |> D.required "packageId" D.string
+        |> D.required "knowledgeModelPackageId" D.string
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
         |> D.required "phaseUuid" (D.maybe Uuid.decoder)
@@ -222,15 +222,15 @@ removeCommentThreadFromCount path threadUuid questionnaire =
         |> removeFromResolvedCommentCounts
 
 
-createQuestionnaireDetail : Package -> KnowledgeModel -> QuestionnaireQuestionnaire
-createQuestionnaireDetail package km =
+createQuestionnaireDetail : KnowledgeModelPackage -> KnowledgeModel -> QuestionnaireQuestionnaire
+createQuestionnaireDetail kmPackage km =
     { uuid = Uuid.nil
     , name = ""
     , isTemplate = False
     , visibility = PrivateQuestionnaire
     , sharing = RestrictedQuestionnaire
     , permissions = []
-    , packageId = package.id
+    , knowledgeModelPackageId = kmPackage.id
     , knowledgeModel = km
     , replies = Dict.empty
     , unresolvedCommentCounts = Dict.empty

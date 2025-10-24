@@ -6,7 +6,7 @@ module Wizard.Pages.KMEditor.Editor.Components.Preview exposing
     , initialModel
     , setActiveChapterIfNot
     , setKnowledgeModel
-    , setPackageId
+    , setKnowledgeModelPackageId
     , setPhase
     , setReplies
     , subscriptions
@@ -27,7 +27,7 @@ import Random exposing (Seed)
 import Set exposing (Set)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
-import Wizard.Api.Models.Package as Package
+import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage
 import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
 import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
 import Wizard.Components.Questionnaire as Questionnaire exposing (ActivePage(..))
@@ -45,10 +45,10 @@ type alias Model =
 
 
 initialModel : AppState -> String -> Model
-initialModel appState packageId =
+initialModel appState kmPackageId =
     let
         questionnaire =
-            createQuestionnaireDetail packageId KnowledgeModel.empty
+            createQuestionnaireDetail kmPackageId KnowledgeModel.empty
     in
     { questionnaireModel = initQuestionnaireModel appState questionnaire
     , tags = Set.empty
@@ -85,11 +85,11 @@ setPhase mbPhaseUuid model =
         model
 
 
-setPackageId : AppState -> String -> Model -> Model
-setPackageId appState packageId model =
+setKnowledgeModelPackageId : AppState -> String -> Model -> Model
+setKnowledgeModelPackageId appState kmPackageId model =
     let
         questionnaire =
-            createQuestionnaireDetail packageId KnowledgeModel.empty
+            createQuestionnaireDetail kmPackageId KnowledgeModel.empty
 
         questionnaireModel =
             initQuestionnaireModel appState questionnaire
@@ -141,12 +141,12 @@ generateReplies appState questionUuid knowledgeModel model =
 
 
 createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireQuestionnaire
-createQuestionnaireDetail packageId km =
+createQuestionnaireDetail kmPackageId km =
     let
-        package =
-            Package.dummy
+        kmPackage =
+            KnowledgeModelPackage.dummy
     in
-    QuestionnaireQuestionnaire.createQuestionnaireDetail { package | id = packageId } km
+    QuestionnaireQuestionnaire.createQuestionnaireDetail { kmPackage | id = kmPackageId } km
 
 
 questionnaireModelWithKnowledgeModel : KnowledgeModel -> Questionnaire.Model -> Questionnaire.Model

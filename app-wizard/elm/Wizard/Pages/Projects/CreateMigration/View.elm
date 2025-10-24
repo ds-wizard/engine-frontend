@@ -13,7 +13,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
 import Version
-import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Tag as Tag
@@ -33,20 +33,20 @@ view appState model =
 createMigrationView : AppState -> Model -> QuestionnaireSettings -> Html Msg
 createMigrationView appState model questionnaire =
     let
-        createVersionOption package version =
+        createVersionOption kmPackage version =
             let
                 versionString =
                     Version.toString version
 
-                packageId =
+                kmPackageId =
                     String.join ":" <|
-                        List.take 2 (String.split ":" package.id)
+                        List.take 2 (String.split ":" kmPackage.id)
                             ++ [ versionString ]
             in
-            ( packageId, versionString )
+            ( kmPackageId, versionString )
 
-        createOptions package =
-            ( "", "--" ) :: List.map (createVersionOption package) (List.reverse (List.sortWith Version.compare package.versions))
+        createOptions kmPackage =
+            ( "", "--" ) :: List.map (createVersionOption kmPackage) (List.reverse (List.sortWith Version.compare kmPackage.versions))
 
         originalTagList =
             div [ class "form-group form-group-tags" ]
@@ -56,21 +56,21 @@ createMigrationView appState model questionnaire =
 
         cfg =
             { viewItem = TypeHintInputItem.packageSuggestion False
-            , wrapMsg = PackageTypeHintInputMsg
+            , wrapMsg = KnowledgeModelPackageTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
             , locale = appState.locale
             }
 
         typeHintInput =
-            TypeHintInput.view cfg model.packageTypeHintInputModel
+            TypeHintInput.view cfg model.knowledgeModelPackageTypeHintInputModel
 
         versionSelect =
             case model.selectedPackage of
                 Just _ ->
                     case model.selectedPackageDetail of
                         Success selectedPackageDetail ->
-                            FormGroup.select appState.locale (createOptions selectedPackageDetail) model.form "packageId"
+                            FormGroup.select appState.locale (createOptions selectedPackageDetail) model.form "knowledgeModelPackageId"
 
                         _ ->
                             always (Flash.loader appState.locale)
@@ -86,9 +86,9 @@ createMigrationView appState model questionnaire =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintInputItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
+                    (TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage questionnaire.knowledgeModelPackage))
                     (gettext "Original Knowledge Model" appState.locale)
-                , FormGroup.codeView (Version.toString questionnaire.package.version) (gettext "Original Version" appState.locale)
+                , FormGroup.codeView (Version.toString questionnaire.knowledgeModelPackage.version) (gettext "Original Version" appState.locale)
                 , originalTagList
                 ]
             , faArrowRight

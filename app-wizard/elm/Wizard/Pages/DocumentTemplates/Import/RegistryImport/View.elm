@@ -76,16 +76,16 @@ viewRegistryText appState =
 
 
 viewImported : AppState -> String -> Html Msg
-viewImported appState packageId =
+viewImported appState documentTemplateId =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
                 (gettext "Document template %s has been imported!" appState.locale)
-                [ code [] [ text packageId ] ]
+                [ code [] [ text documentTemplateId ] ]
             )
         , p [ class "lead" ]
-            [ linkTo (Routes.documentTemplatesDetail packageId)
+            [ linkTo (Routes.documentTemplatesDetail documentTemplateId)
                 [ class "btn btn-primary" ]
                 [ text (gettext "View detail" appState.locale) ]
             ]

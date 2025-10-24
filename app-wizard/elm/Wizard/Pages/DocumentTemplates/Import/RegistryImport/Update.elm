@@ -14,8 +14,8 @@ import Wizard.Pages.DocumentTemplates.Import.RegistryImport.Msgs exposing (Msg(.
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ChangeTemplateId packageId ->
-            ( { model | documentTemplateId = packageId }, Cmd.none )
+        ChangeTemplateId documentTemplateId ->
+            ( { model | documentTemplateId = documentTemplateId }, Cmd.none )
 
         Submit ->
             if String.length model.documentTemplateId > 0 then

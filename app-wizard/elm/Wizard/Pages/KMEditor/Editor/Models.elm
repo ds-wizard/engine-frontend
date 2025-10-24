@@ -94,7 +94,7 @@ initPageModel appState route model =
                         currentQuestionUuid =
                             EditorContext.getActiveQuestionUuid editorContext
 
-                        packageId =
+                        kmPackageId =
                             ActionResult.map .kmEditor model.editorContext
                                 |> ActionResult.toMaybe
                                 |> Maybe.andThen .previousPackageId
@@ -118,7 +118,7 @@ initPageModel appState route model =
 
                         ( newSeed, previewModel ) =
                             model.previewModel
-                                |> Preview.setPackageId appState packageId
+                                |> Preview.setKnowledgeModelPackageId appState kmPackageId
                                 |> Preview.setKnowledgeModel (EditorContext.getFilteredKM editorContext)
                                 |> Preview.setReplies editorContext.kmEditor.replies
                                 |> Preview.generateReplies appState currentQuestionUuid editorContext.kmEditor.knowledgeModel

@@ -5,7 +5,7 @@ import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Debouncer.Extra as Debouncer
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Components.Listing.Msgs as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Msgs as CloneProjectModal
@@ -16,7 +16,7 @@ type Msg
     = DeleteQuestionnaireMigration Uuid
     | DeleteQuestionnaireMigrationCompleted (Result ApiError ())
     | ListingMsg (Listing.Msg Questionnaire)
-    | ListingFilterAddSelectedPackage PackageSuggestion (Listing.Msg Questionnaire)
+    | ListingFilterAddSelectedPackage KnowledgeModelPackageSuggestion (Listing.Msg Questionnaire)
     | ListingFilterAddSelectedUser UserSuggestion (Listing.Msg Questionnaire)
     | DeleteQuestionnaireModalMsg DeleteProjectModal.Msg
     | CloneQuestionnaireModalMsg CloneProjectModal.Msg
@@ -27,8 +27,8 @@ type Msg
     | UsersFilterInput String
     | UsersFilterSearch String
     | UsersFilterSearchComplete (Result ApiError (Pagination UserSuggestion))
-    | PackagesFilterGetValuesComplete (Result ApiError (Pagination PackageSuggestion))
+    | PackagesFilterGetValuesComplete (Result ApiError (Pagination KnowledgeModelPackageSuggestion))
     | PackagesFilterInput String
     | PackagesFilterSearch String
-    | PackagesFilterSearchComplete (Result ApiError (Pagination PackageSuggestion))
+    | PackagesFilterSearchComplete (Result ApiError (Pagination KnowledgeModelPackageSuggestion))
     | DebouncerMsg (Debouncer.Msg Msg)

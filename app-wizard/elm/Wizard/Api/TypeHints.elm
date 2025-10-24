@@ -28,7 +28,7 @@ fetchTypeHints appState typeHintRequest =
 
 
 fetchTypeHintsLegacy : AppState -> Maybe String -> List Event -> String -> String -> ToMsg (List TypeHintLegacy) msg -> Cmd msg
-fetchTypeHintsLegacy appState mbPackageId events questionUuid q =
+fetchTypeHintsLegacy appState mbKmPackageId events questionUuid q =
     let
         strToMaybe str =
             if String.isEmpty str then
@@ -39,7 +39,7 @@ fetchTypeHintsLegacy appState mbPackageId events questionUuid q =
 
         data =
             E.object
-                [ ( "packageId", E.maybe E.string <| Maybe.andThen strToMaybe mbPackageId )
+                [ ( "knowledgeModelPackageId", E.maybe E.string <| Maybe.andThen strToMaybe mbKmPackageId )
                 , ( "events", E.list Event.encode events )
                 , ( "questionUuid", E.string questionUuid )
                 , ( "q", E.string q )

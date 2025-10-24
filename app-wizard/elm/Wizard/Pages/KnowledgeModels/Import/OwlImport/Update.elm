@@ -8,7 +8,7 @@ import File
 import Form
 import Gettext exposing (gettext)
 import Json.Decode exposing (decodeValue)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KnowledgeModels.Common.OwlImportForm as OwlImportForm
@@ -61,15 +61,15 @@ update msg wrapMsg appState model =
                             ]
 
                         dataWithPreviousPackageId =
-                            case owlImportForm.previousPackageId of
+                            case owlImportForm.previousKnowledgeModelPackageId of
                                 Just previousPackageId ->
-                                    ( "previousPackageId", previousPackageId ) :: data
+                                    ( "previousKnowledgeModelPackageId", previousPackageId ) :: data
 
                                 Nothing ->
                                     data
                     in
                     ( { model | importing = Loading }
-                    , Cmd.map wrapMsg <| PackagesApi.importFromOwl appState dataWithPreviousPackageId file ImportOwlCompleted
+                    , Cmd.map wrapMsg <| KnowledgeModelPackagesApi.importFromOwl appState dataWithPreviousPackageId file ImportOwlCompleted
                     )
 
                 _ ->
@@ -86,6 +86,6 @@ importOwlCompleted appState model result =
             ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
 
         Err error ->
-            ( { model | importing = ApiError.toActionResult appState (gettext "Importing the package failed." appState.locale) error }
+            ( { model | importing = ApiError.toActionResult appState (gettext "Import failed." appState.locale) error }
             , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
