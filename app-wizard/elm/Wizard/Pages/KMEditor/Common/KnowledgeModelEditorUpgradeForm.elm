@@ -1,5 +1,5 @@
-module Wizard.Pages.KMEditor.Common.BranchUpgradeForm exposing
-    ( BranchUpgradeForm
+module Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUpgradeForm exposing
+    ( KnowledgeModelEditorUpgradeForm
     , encode
     , init
     , validation
@@ -11,22 +11,22 @@ import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 
 
-type alias BranchUpgradeForm =
+type alias KnowledgeModelEditorUpgradeForm =
     { targetPackageId : String }
 
 
-init : Form FormError BranchUpgradeForm
+init : Form FormError KnowledgeModelEditorUpgradeForm
 init =
     Form.initial [] validation
 
 
-validation : Validation FormError BranchUpgradeForm
+validation : Validation FormError KnowledgeModelEditorUpgradeForm
 validation =
-    Validate.map BranchUpgradeForm
+    Validate.map KnowledgeModelEditorUpgradeForm
         (Validate.field "targetPackageId" Validate.string)
 
 
-encode : BranchUpgradeForm -> E.Value
+encode : KnowledgeModelEditorUpgradeForm -> E.Value
 encode form =
     E.object
         [ ( "targetPackageId", E.string form.targetPackageId ) ]

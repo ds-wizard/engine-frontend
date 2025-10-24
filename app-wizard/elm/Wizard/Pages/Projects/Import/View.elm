@@ -173,7 +173,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
             , isKmEditor = False
             }
             { events = []
-            , branchUuid = Nothing
+            , kmEditorUuid = Nothing
             }
             questionnaireModel
         ]

@@ -1,5 +1,5 @@
-module Wizard.Pages.KMEditor.Common.BranchEditForm exposing
-    ( BranchEditForm
+module Wizard.Pages.KMEditor.Common.KnowledgeModelEditorEditForm exposing
+    ( KnowledgeModelEditorEditForm
     , encode
     , init
     , initEmpty
@@ -13,11 +13,11 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Version
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Data.AppState exposing (AppState)
 
 
-type alias BranchEditForm =
+type alias KnowledgeModelEditorEditForm =
     { name : String
     , description : String
     , kmId : String
@@ -29,31 +29,31 @@ type alias BranchEditForm =
     }
 
 
-init : AppState -> BranchDetail -> Form FormError BranchEditForm
-init appState branch =
+init : AppState -> KnowledgeModelEditorDetail -> Form FormError KnowledgeModelEditorEditForm
+init appState kmEditor =
     let
         initials =
-            [ ( "name", Field.string branch.name )
-            , ( "description", Field.string branch.description )
-            , ( "kmId", Field.string branch.kmId )
-            , ( "versionMajor", Field.string (String.fromInt (Version.getMajor branch.version)) )
-            , ( "versionMinor", Field.string (String.fromInt (Version.getMinor branch.version)) )
-            , ( "versionPatch", Field.string (String.fromInt (Version.getPatch branch.version)) )
-            , ( "license", Field.string branch.license )
-            , ( "readme", Field.string branch.readme )
+            [ ( "name", Field.string kmEditor.name )
+            , ( "description", Field.string kmEditor.description )
+            , ( "kmId", Field.string kmEditor.kmId )
+            , ( "versionMajor", Field.string (String.fromInt (Version.getMajor kmEditor.version)) )
+            , ( "versionMinor", Field.string (String.fromInt (Version.getMinor kmEditor.version)) )
+            , ( "versionPatch", Field.string (String.fromInt (Version.getPatch kmEditor.version)) )
+            , ( "license", Field.string kmEditor.license )
+            , ( "readme", Field.string kmEditor.readme )
             ]
     in
     Form.initial initials (validation appState)
 
 
-initEmpty : AppState -> Form FormError BranchEditForm
+initEmpty : AppState -> Form FormError KnowledgeModelEditorEditForm
 initEmpty appState =
     Form.initial [] (validation appState)
 
 
-validation : AppState -> Validation FormError BranchEditForm
+validation : AppState -> Validation FormError KnowledgeModelEditorEditForm
 validation appState =
-    V.succeed BranchEditForm
+    V.succeed KnowledgeModelEditorEditForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "description" V.string)
         |> V.andMap (V.field "kmId" (V.kmId appState))
@@ -64,7 +64,7 @@ validation appState =
         |> V.andMap (V.field "readme" V.string)
 
 
-encode : BranchEditForm -> E.Value
+encode : KnowledgeModelEditorEditForm -> E.Value
 encode form =
     let
         version =

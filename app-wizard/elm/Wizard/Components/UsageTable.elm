@@ -17,7 +17,7 @@ view appState showSoftLimits usage =
         [ tbody []
             [ viewUsageRowSimple appState showSoftLimits (gettext "Users" appState.locale) usage.users
             , viewUsageRowSimple appState showSoftLimits (gettext "Active Users" appState.locale) usage.activeUsers
-            , viewUsageRowSimple appState showSoftLimits (gettext "Knowledge Model Editors" appState.locale) usage.branches
+            , viewUsageRowSimple appState showSoftLimits (gettext "Knowledge Model Editors" appState.locale) usage.knowledgeModelEditors
             , viewUsageRowSimple appState showSoftLimits (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
             , viewUsageRowSimple appState showSoftLimits (gettext "Document Template Editors" appState.locale) usage.documentTemplateDrafts
             , viewUsageRowSimple appState showSoftLimits (gettext "Document Templates" appState.locale) usage.documentTemplates

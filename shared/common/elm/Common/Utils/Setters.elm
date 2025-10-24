@@ -3,7 +3,6 @@ module Common.Utils.Setters exposing
     , setApiKeys
     , setAppKeys
     , setAssets
-    , setBranchUuid
     , setCommentThreads
     , setDashboard
     , setDebouncer
@@ -14,6 +13,7 @@ module Common.Utils.Setters exposing
     , setFiles
     , setFormatUuid
     , setKnowledgeModel
+    , setKnowledgeModelEditorUuid
     , setKnowledgeModelString
     , setKnowledgeModels
     , setLocale
@@ -72,11 +72,6 @@ setAssets value record =
     { record | assets = value }
 
 
-setBranchUuid : a -> { b | branchUuid : a } -> { b | branchUuid : a }
-setBranchUuid value record =
-    { record | branchUuid = value }
-
-
 setCommentThreads : a -> { b | commentThreads : a } -> { b | commentThreads : a }
 setCommentThreads value record =
     { record | commentThreads = value }
@@ -125,6 +120,11 @@ setFormatUuid value record =
 setKnowledgeModel : a -> { b | knowledgeModel : a } -> { b | knowledgeModel : a }
 setKnowledgeModel value record =
     { record | knowledgeModel = value }
+
+
+setKnowledgeModelEditorUuid : a -> { b | knowledgeModelEditorUuid : a } -> { b | knowledgeModelEditorUuid : a }
+setKnowledgeModelEditorUuid value record =
+    { record | knowledgeModelEditorUuid = value }
 
 
 setKnowledgeModelString : a -> { b | knowledgeModelString : a } -> { b | knowledgeModelString : a }

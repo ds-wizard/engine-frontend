@@ -101,7 +101,7 @@ migrationView appState model migration =
                                 |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
                         kmName =
-                            ActionResult.unwrap "" .branchName model.migration
+                            ActionResult.unwrap "" .knowledgeModelEditorName model.migration
 
                         diffTree =
                             migration.migrationState.targetEvent
@@ -134,8 +134,8 @@ migrationSummary appState migration =
     div [ class "col-12" ]
         [ p []
             (String.formatHtml (gettext "Migration of %s from %s to %s." appState.locale)
-                [ strong [] [ text migration.branchName ]
-                , code [] [ text migration.branchPreviousPackageId ]
+                [ strong [] [ text migration.knowledgeModelEditorName ]
+                , code [] [ text migration.knowledgeModelEditorPreviousPackageId ]
                 , code [] [ text migration.targetPackageId ]
                 ]
             )
@@ -2631,7 +2631,7 @@ viewCompletedMigration appState model =
                 , br [] []
                 , text (gettext "You can publish the new version now." appState.locale)
                 ]
-            , linkTo (Routes.kmEditorPublish model.branchUuid)
+            , linkTo (Routes.kmEditorPublish model.kmEditorUuid)
                 [ class "btn btn-primary btn-lg with-icon-after"
                 , dataCy "km-migration_publish-button"
                 ]

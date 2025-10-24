@@ -1,5 +1,5 @@
-module Wizard.Api.Models.BranchDetail exposing
-    ( BranchDetail
+module Wizard.Api.Models.KnowledgeModelEditorDetail exposing
+    ( KnowledgeModelEditorDetail
     , decoder
     )
 
@@ -8,14 +8,14 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Api.Models.Branch.BranchState as BranchState exposing (BranchState)
 import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
+import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState exposing (KnowledgeModelEditorState)
 import Wizard.Api.Models.Package as Package exposing (Package)
 import Wizard.Api.Models.QuestionnaireDetail.Reply as Reply exposing (Reply)
 
 
-type alias BranchDetail =
+type alias KnowledgeModelEditorDetail =
     { uuid : Uuid
     , name : String
     , description : String
@@ -28,14 +28,14 @@ type alias BranchDetail =
     , forkOfPackage : Maybe Package
     , previousPackageId : Maybe String
     , events : List Event
-    , state : BranchState
+    , state : KnowledgeModelEditorState
     , replies : Dict String Reply
     }
 
 
-decoder : Decoder BranchDetail
+decoder : Decoder KnowledgeModelEditorDetail
 decoder =
-    D.succeed BranchDetail
+    D.succeed KnowledgeModelEditorDetail
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" D.string
@@ -48,5 +48,5 @@ decoder =
         |> D.required "forkOfPackage" (D.nullable Package.decoder)
         |> D.required "previousPackageId" (D.nullable D.string)
         |> D.required "events" (D.list Event.decoder)
-        |> D.required "state" BranchState.decoder
+        |> D.required "state" KnowledgeModelEditorState.decoder
         |> D.required "replies" (D.dict Reply.decoder)

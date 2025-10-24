@@ -1,4 +1,4 @@
-module Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings, clearQuestionnaireAndBranch, decoder, encode, init, isPreviewSet)
+module Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings, clearQuestionnaireAndKmEditor, decoder, encode, init, isPreviewSet)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -6,7 +6,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.BranchSuggestion as BranchSuggestion exposing (BranchSuggestion)
+import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
 import Wizard.Api.Models.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 
 
@@ -14,8 +14,8 @@ type alias DocumentTemplateDraftPreviewSettings =
     { formatUuid : Maybe Uuid
     , questionnaireUuid : Maybe Uuid
     , questionnaire : Maybe QuestionnaireSuggestion
-    , branchUuid : Maybe Uuid
-    , branch : Maybe BranchSuggestion
+    , knowledgeModelEditorUuid : Maybe Uuid
+    , knowledgeModelEditor : Maybe KnowledgeModelEditorSuggestion
     }
 
 
@@ -24,14 +24,14 @@ init =
     { formatUuid = Nothing
     , questionnaireUuid = Nothing
     , questionnaire = Nothing
-    , branchUuid = Nothing
-    , branch = Nothing
+    , knowledgeModelEditorUuid = Nothing
+    , knowledgeModelEditor = Nothing
     }
 
 
-clearQuestionnaireAndBranch : DocumentTemplateDraftPreviewSettings -> DocumentTemplateDraftPreviewSettings
-clearQuestionnaireAndBranch settings =
-    { settings | questionnaireUuid = Nothing, questionnaire = Nothing, branchUuid = Nothing, branch = Nothing }
+clearQuestionnaireAndKmEditor : DocumentTemplateDraftPreviewSettings -> DocumentTemplateDraftPreviewSettings
+clearQuestionnaireAndKmEditor settings =
+    { settings | questionnaireUuid = Nothing, questionnaire = Nothing, knowledgeModelEditorUuid = Nothing, knowledgeModelEditor = Nothing }
 
 
 decoder : Decoder DocumentTemplateDraftPreviewSettings
@@ -40,8 +40,8 @@ decoder =
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "questionnaireUuid" (D.maybe Uuid.decoder)
         |> D.required "questionnaire" (D.maybe QuestionnaireSuggestion.decoder)
-        |> D.required "branchUuid" (D.maybe Uuid.decoder)
-        |> D.required "branch" (D.maybe BranchSuggestion.decoder)
+        |> D.required "knowledgeModelEditorUuid" (D.maybe Uuid.decoder)
+        |> D.required "knowledgeModelEditor" (D.maybe KnowledgeModelEditorSuggestion.decoder)
 
 
 encode : DocumentTemplateDraftPreviewSettings -> E.Value
@@ -49,11 +49,11 @@ encode settings =
     E.object
         [ ( "formatUuid", E.maybe Uuid.encode settings.formatUuid )
         , ( "questionnaireUuid", E.maybe Uuid.encode settings.questionnaireUuid )
-        , ( "branchUuid", E.maybe Uuid.encode settings.branchUuid )
+        , ( "knowledgeModelEditorUuid", E.maybe Uuid.encode settings.knowledgeModelEditorUuid )
         ]
 
 
 isPreviewSet : DocumentTemplateDraftPreviewSettings -> Bool
 isPreviewSet settings =
     Maybe.isJust settings.formatUuid
-        && (Maybe.isJust settings.questionnaireUuid || Maybe.isJust settings.branchUuid)
+        && (Maybe.isJust settings.questionnaireUuid || Maybe.isJust settings.knowledgeModelEditorUuid)

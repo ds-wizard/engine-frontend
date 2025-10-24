@@ -155,7 +155,7 @@ update wrapMsg msg appState model =
                                 Nothing
                                 appState
                                 { events = []
-                                , branchUuid = Nothing
+                                , kmEditorUuid = Nothing
                                 }
                                 questionnaireModel
                     in

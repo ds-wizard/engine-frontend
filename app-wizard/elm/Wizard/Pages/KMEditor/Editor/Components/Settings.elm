@@ -3,7 +3,7 @@ module Wizard.Pages.KMEditor.Editor.Components.Settings exposing
     , Msg
     , UpdateConfig
     , initialModel
-    , setBranchDetail
+    , setKnowledgeModelEditorDetail
     , update
     , view
     )
@@ -27,17 +27,17 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Api.Branches as BranchesApi
-import Wizard.Api.Models.Branch.BranchState as BranchState exposing (BranchState)
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState exposing (KnowledgeModelEditorState)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Common.BranchEditForm as BranchEditForm exposing (BranchEditForm)
-import Wizard.Pages.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.Pages.KMEditor.Common.DeleteModal as DeleteModal
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorEditForm as KnowledgeModelEditorEditForm exposing (KnowledgeModelEditorEditForm)
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUtils as KnowledgeModelEditorUtils
 import Wizard.Pages.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.Routes as Routes
 import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
@@ -45,8 +45,8 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 type alias Model =
-    { form : Form FormError BranchEditForm
-    , savingBranch : ActionResult String
+    { form : Form FormError KnowledgeModelEditorEditForm
+    , savingKMEditor : ActionResult String
     , deleteModal : DeleteModal.Model
     , upgradeModal : UpgradeModal.Model
     }
@@ -54,22 +54,22 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { form = BranchEditForm.initEmpty appState
-    , savingBranch = ActionResult.Unset
+    { form = KnowledgeModelEditorEditForm.initEmpty appState
+    , savingKMEditor = ActionResult.Unset
     , deleteModal = DeleteModal.initialModel
     , upgradeModal = UpgradeModal.initialModel
     }
 
 
-setBranchDetail : AppState -> BranchDetail -> Model -> Model
-setBranchDetail appState branch model =
-    { model | form = BranchEditForm.init appState branch }
+setKnowledgeModelEditorDetail : AppState -> KnowledgeModelEditorDetail -> Model -> Model
+setKnowledgeModelEditorDetail appState kmEditor model =
+    { model | form = KnowledgeModelEditorEditForm.init appState kmEditor }
 
 
 type Msg
     = FormMsg Form.Msg
     | FormSetVersion Version
-    | PutBranchComplete (Result ApiError ())
+    | PutKnowledgeModelEditorComplete (Result ApiError ())
     | DeleteModalMsg DeleteModal.Msg
     | UpgradeModalMsg UpgradeModal.Msg
 
@@ -77,7 +77,7 @@ type Msg
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , cmdNavigate : AppState -> Routes.Route -> Cmd msg
-    , branchUuid : Uuid
+    , kmEditorUuid : Uuid
     }
 
 
@@ -89,21 +89,21 @@ update cfg appState msg model =
                 ( Form.Submit, Just form ) ->
                     let
                         body =
-                            BranchEditForm.encode form
+                            KnowledgeModelEditorEditForm.encode form
 
                         cmd =
                             Cmd.map cfg.wrapMsg <|
-                                BranchesApi.putBranch appState cfg.branchUuid body PutBranchComplete
+                                KnowledgeModelEditorsApi.putKnowledgeModelEditor appState cfg.kmEditorUuid body PutKnowledgeModelEditorComplete
                     in
-                    ( { model | savingBranch = ActionResult.Loading }, cmd )
+                    ( { model | savingKMEditor = ActionResult.Loading }, cmd )
 
                 _ ->
-                    ( { model | form = Form.update (BranchEditForm.validation appState) formMsg model.form }, Cmd.none )
+                    ( { model | form = Form.update (KnowledgeModelEditorEditForm.validation appState) formMsg model.form }, Cmd.none )
 
         FormSetVersion version ->
             let
                 setFormValue field value =
-                    Form.update (BranchEditForm.validation appState) (Form.Input field Form.Text (Field.String value))
+                    Form.update (KnowledgeModelEditorEditForm.validation appState) (Form.Input field Form.Text (Field.String value))
 
                 form =
                     model.form
@@ -113,15 +113,15 @@ update cfg appState msg model =
             in
             ( { model | form = form }, Cmd.none )
 
-        PutBranchComplete result ->
+        PutKnowledgeModelEditorComplete result ->
             case result of
                 Ok _ ->
-                    ( { model | savingBranch = ActionResult.Success "" }
+                    ( { model | savingKMEditor = ActionResult.Success "" }
                     , Window.refresh ()
                     )
 
                 Err error ->
-                    ( { model | savingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be saved." appState.locale) error }
+                    ( { model | savingKMEditor = ApiError.toActionResult appState (gettext "Knowledge model could not be saved." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -150,14 +150,14 @@ update cfg appState msg model =
             ( { model | upgradeModal = upgradeModal }, cmd )
 
 
-view : AppState -> BranchDetail -> Model -> Html Msg
-view appState branchDetail model =
+view : AppState -> KnowledgeModelEditorDetail -> Model -> Html Msg
+view appState kmEditorDetail model =
     let
         parentKnowledgeModelView =
-            case branchDetail.forkOfPackage of
+            case kmEditorDetail.forkOfPackage of
                 Just forkOfPackage ->
                     [ hr [ class "separator" ] []
-                    , parentKnowledgeModel appState branchDetail.state forkOfPackage branchDetail
+                    , parentKnowledgeModel appState kmEditorDetail.state forkOfPackage kmEditorDetail
                     ]
 
                 Nothing ->
@@ -168,7 +168,7 @@ view appState branchDetail model =
             , majorField = "versionMajor"
             , minorField = "versionMinor"
             , patchField = "versionPatch"
-            , currentVersion = BranchUtils.lastVersion appState branchDetail
+            , currentVersion = KnowledgeModelEditorUtils.lastVersion appState kmEditorDetail
             , wrapFormMsg = FormMsg
             , setVersionMsg = Just FormSetVersion
             }
@@ -185,12 +185,12 @@ view appState branchDetail model =
                  ]
                     ++ parentKnowledgeModelView
                     ++ [ hr [ class "separator" ] []
-                       , dangerZone appState branchDetail
+                       , dangerZone appState kmEditorDetail
                        ]
                 )
 
         form =
-            Form.initDynamic appState (FormMsg Form.Submit) model.savingBranch
+            Form.initDynamic appState (FormMsg Form.Submit) model.savingKMEditor
                 |> Form.setFormView formContent
                 |> Form.setFormChanged (Form.containsChanges model.form)
                 |> Form.viewDynamic
@@ -205,17 +205,17 @@ view appState branchDetail model =
         ]
 
 
-parentKnowledgeModel : AppState -> BranchState -> Package -> BranchDetail -> Html Msg
-parentKnowledgeModel appState branchState forkOfPackage branchDetail =
+parentKnowledgeModel : AppState -> KnowledgeModelEditorState -> Package -> KnowledgeModelEditorDetail -> Html Msg
+parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
     let
         outdatedWarning =
-            case branchState of
-                BranchState.Outdated ->
+            case kmEditorState of
+                KnowledgeModelEditorState.Outdated ->
                     div [ class "alert alert-warning mt-2 d-flex justify-content-between align-items-center" ]
                         [ div [] [ text (gettext "This is not the latest version of the parent knowledge model." appState.locale) ]
                         , button
                             [ class "btn btn-warning"
-                            , onClick (UpgradeModalMsg (UpgradeModal.open branchDetail.uuid branchDetail.name forkOfPackage.id))
+                            , onClick (UpgradeModalMsg (UpgradeModal.open kmEditorDetail.uuid kmEditorDetail.name forkOfPackage.id))
                             ]
                             [ text (gettext "Update" appState.locale) ]
                         ]
@@ -232,8 +232,8 @@ parentKnowledgeModel appState branchState forkOfPackage branchDetail =
         ]
 
 
-dangerZone : AppState -> BranchDetail -> Html Msg
-dangerZone appState branchDetail =
+dangerZone : AppState -> KnowledgeModelEditorDetail -> Html Msg
+dangerZone appState kmEditorDetail =
     div [ class "pb-6" ]
         [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger mt-3" ]
@@ -245,7 +245,7 @@ dangerZone appState branchDetail =
                     ]
                 , button
                     [ class "btn btn-outline-danger"
-                    , onClick (DeleteModalMsg (DeleteModal.open branchDetail.uuid branchDetail.name))
+                    , onClick (DeleteModalMsg (DeleteModal.open kmEditorDetail.uuid kmEditorDetail.name))
                     ]
                     [ text (gettext "Delete" appState.locale) ]
                 ]

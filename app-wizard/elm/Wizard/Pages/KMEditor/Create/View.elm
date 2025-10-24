@@ -38,7 +38,7 @@ viewCreate appState model _ =
             (gettext "Create knowledge model" appState.locale)
         , Form.viewSimple
             { formMsg = FormMsg
-            , formResult = model.savingBranch
+            , formResult = model.savingKmEditor
             , formView = formView appState model
             , submitLabel = gettext "Create" appState.locale
             , cancelMsg = Just Cancel

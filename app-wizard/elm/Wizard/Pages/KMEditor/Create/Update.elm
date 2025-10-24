@@ -18,13 +18,13 @@ import Maybe.Extra as Maybe
 import Result exposing (Result)
 import String.Normalize as Normalize
 import Version exposing (Version)
-import Wizard.Api.Branches as BranchesApi
-import Wizard.Api.Models.Branch exposing (Branch)
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorCreateForm as KnowledgeModelEditorCreateForm exposing (KnowledgeModelEditorCreateForm)
 import Wizard.Pages.KMEditor.Create.Models exposing (Model)
 import Wizard.Pages.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -57,8 +57,8 @@ update msg wrapMsg appState model =
         FormSetVersion version ->
             handleFormSetVersion appState version model
 
-        PostBranchCompleted result ->
-            handlePostBranchCompleted appState model result
+        PostKmEditorCompleted result ->
+            handlePostKmEditorCompleted appState model result
 
         PackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
@@ -69,8 +69,8 @@ update msg wrapMsg appState model =
                     let
                         form =
                             model.form
-                                |> setBranchCreateFormValue appState "name" package.name
-                                |> setBranchCreateFormValue appState "kmId" package.kmId
+                                |> setKmEditorCreateFormValue appState "name" package.name
+                                |> setKmEditorCreateFormValue appState "kmId" package.kmId
                     in
                     ( { model | package = Success package, form = form }, Cmd.none )
 
@@ -84,18 +84,18 @@ handleFormMsg wrapMsg formMsg appState model =
         ( Form.Submit, Just kmCreateForm ) ->
             let
                 body =
-                    BranchCreateForm.encode kmCreateForm
+                    KnowledgeModelEditorCreateForm.encode kmCreateForm
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        BranchesApi.postBranch appState body PostBranchCompleted
+                        KnowledgeModelEditorsApi.postKnowledgeModelEditor appState body PostKmEditorCompleted
             in
-            ( { model | savingBranch = Loading }, cmd )
+            ( { model | savingKmEditor = Loading }, cmd )
 
         _ ->
             let
                 newForm =
-                    Form.update (BranchCreateForm.validation appState) formMsg model.form
+                    Form.update (KnowledgeModelEditorCreateForm.validation appState) formMsg model.form
 
                 kmIdEmpty =
                     Maybe.unwrap True String.isEmpty (Form.getFieldAsString "kmId" model.form).value
@@ -108,7 +108,7 @@ handleFormMsg wrapMsg formMsg appState model =
                                     (Form.getFieldAsString "name" model.form).value
                                         |> Maybe.unwrap "" Normalize.slug
                             in
-                            setBranchCreateFormValue appState "kmId" suggestedKmId newForm
+                            setKmEditorCreateFormValue appState "kmId" suggestedKmId newForm
 
                         _ ->
                             newForm
@@ -121,25 +121,25 @@ handleFormSetVersion appState version model =
     let
         form =
             model.form
-                |> setBranchCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor version))
-                |> setBranchCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor version))
-                |> setBranchCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch version))
+                |> setKmEditorCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor version))
+                |> setKmEditorCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor version))
+                |> setKmEditorCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch version))
     in
     ( { model | form = form }, Cmd.none )
 
 
-handlePostBranchCompleted : AppState -> Model -> Result ApiError Branch -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePostBranchCompleted appState model result =
+handlePostKmEditorCompleted : AppState -> Model -> Result ApiError KnowledgeModelEditor -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostKmEditorCompleted appState model result =
     case result of
-        Ok km ->
+        Ok kmEditor ->
             ( model
-            , cmdNavigate appState (Routes.kmEditorEditor km.uuid Nothing)
+            , cmdNavigate appState (Routes.kmEditorEditor kmEditor.uuid Nothing)
             )
 
         Err error ->
             ( { model
                 | form = Form.setFormErrors appState error model.form
-                , savingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be created." appState.locale) error
+                , savingKmEditor = ApiError.toActionResult appState (gettext "Knowledge model could not be created." appState.locale) error
               }
             , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
@@ -166,6 +166,6 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
 
-setBranchCreateFormValue : AppState -> String -> String -> Form FormError BranchCreateForm -> Form FormError BranchCreateForm
-setBranchCreateFormValue appState field value =
-    Form.update (BranchCreateForm.validation appState) (Form.Input field Form.Text (Field.String value))
+setKmEditorCreateFormValue : AppState -> String -> String -> Form FormError KnowledgeModelEditorCreateForm -> Form FormError KnowledgeModelEditorCreateForm
+setKmEditorCreateFormValue appState field value =
+    Form.update (KnowledgeModelEditorCreateForm.validation appState) (Form.Input field Form.Text (Field.String value))

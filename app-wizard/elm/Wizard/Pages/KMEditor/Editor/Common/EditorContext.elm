@@ -1,6 +1,6 @@
-module Wizard.Pages.KMEditor.Editor.Common.EditorBranch exposing
-    ( EditorBranch
-    , EditorBranchWarning
+module Wizard.Pages.KMEditor.Editor.Common.EditorContext exposing
+    ( EditorContext
+    , EditorContextWarning
     , applyEvent
     , computeWarnings
     , editorRoute
@@ -54,7 +54,6 @@ import Set exposing (Set)
 import String.Extra as String
 import String.Format as String
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Api.Models.Event exposing (Event(..))
 import Wizard.Api.Models.Event.AddAnswerEventData as AddAnswerEventData
 import Wizard.Api.Models.Event.AddChapterEventData as AddChapterEventData
@@ -97,14 +96,15 @@ import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Referen
 import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes
 
 
-type alias EditorBranch =
-    { branch : BranchDetail
+type alias EditorContext =
+    { kmEditor : KnowledgeModelEditorDetail
     , parentMap : KnowledgeModel.ParentMap
     , activeUuid : String
     , openNodeUuids : List String
@@ -112,25 +112,25 @@ type alias EditorBranch =
     , editedUuids : List String
     , deletedUuids : List String
     , emptyIntegrationEditorUuids : Set String
-    , warnings : List EditorBranchWarning
+    , warnings : List EditorContextWarning
     }
 
 
-type alias EditorBranchWarning =
+type alias EditorContextWarning =
     { editorUuid : String
     , message : String
     }
 
 
-init : AppState -> List String -> BranchDetail -> Maybe Uuid -> EditorBranch
-init appState secrets branch mbEditorUuid =
+init : AppState -> List String -> KnowledgeModelEditorDetail -> Maybe Uuid -> EditorContext
+init appState secrets kmEditor mbEditorUuid =
     let
         kmUuid =
-            Uuid.toString branch.knowledgeModel.uuid
+            Uuid.toString kmEditor.knowledgeModel.uuid
 
-        editorBranch =
-            { branch = branch
-            , parentMap = KnowledgeModel.createParentMap branch.knowledgeModel
+        editorContext =
+            { kmEditor = kmEditor
+            , parentMap = KnowledgeModel.createParentMap kmEditor.knowledgeModel
             , activeUuid = kmUuid
             , openNodeUuids = [ kmUuid ]
             , addedUuids = []
@@ -140,122 +140,122 @@ init appState secrets branch mbEditorUuid =
             , warnings = []
             }
     in
-    List.foldl (applyEvent appState secrets False) editorBranch editorBranch.branch.events
+    List.foldl (applyEvent appState secrets False) editorContext editorContext.kmEditor.events
         |> setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)
         |> computeWarnings appState secrets
 
 
-setReplies : Dict String Reply -> EditorBranch -> EditorBranch
-setReplies replies editorBranch =
+setReplies : Dict String Reply -> EditorContext -> EditorContext
+setReplies replies editorContext =
     let
-        branch =
-            editorBranch.branch
+        kmEditor =
+            editorContext.kmEditor
     in
-    { editorBranch | branch = { branch | replies = replies } }
+    { editorContext | kmEditor = { kmEditor | replies = replies } }
 
 
-getEditUuid : String -> EditorBranch -> Maybe Uuid
-getEditUuid entityUuidString editorBranch =
+getEditUuid : String -> EditorContext -> Maybe Uuid
+getEditUuid entityUuidString editorContext =
     let
         entityUuid =
             Uuid.fromUuidString entityUuidString
     in
-    if entityUuid == editorBranch.branch.knowledgeModel.uuid then
+    if entityUuid == editorContext.kmEditor.knowledgeModel.uuid then
         Nothing
 
     else
         Just entityUuid
 
 
-getParentUuid : String -> EditorBranch -> String
-getParentUuid uuid editorBranch =
-    Maybe.withDefault "" (Dict.get uuid editorBranch.parentMap)
+getParentUuid : String -> EditorContext -> String
+getParentUuid uuid editorContext =
+    Maybe.withDefault "" (Dict.get uuid editorContext.parentMap)
 
 
-editorRoute : EditorBranch -> String -> Routes.Route
-editorRoute editorBranch entityUuidString =
-    Routes.kmEditorEditor editorBranch.branch.uuid (getEditUuid entityUuidString editorBranch)
+editorRoute : EditorContext -> String -> Routes.Route
+editorRoute editorContext entityUuidString =
+    Routes.kmEditorEditor editorContext.kmEditor.uuid (getEditUuid entityUuidString editorContext)
 
 
-filterDeleted : EditorBranch -> List String -> List String
+filterDeleted : EditorContext -> List String -> List String
 filterDeleted =
     filterDeletedWith identity
 
 
-filterDeletedWith : (a -> String) -> EditorBranch -> List a -> List a
-filterDeletedWith toUuid editorBranch =
+filterDeletedWith : (a -> String) -> EditorContext -> List a -> List a
+filterDeletedWith toUuid editorContext =
     let
         allUuids =
-            getAllUuids editorBranch
+            getAllUuids editorContext
 
         isGood item =
             let
                 uuid =
                     toUuid item
             in
-            List.member uuid allUuids && not (isDeleted uuid editorBranch)
+            List.member uuid allUuids && not (isDeleted uuid editorContext)
     in
     List.filter isGood
 
 
-filterExistingChapters : EditorBranch -> List String -> List String
-filterExistingChapters editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.chapters
+filterExistingChapters : EditorContext -> List String -> List String
+filterExistingChapters editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.chapters
 
 
-filterExistingQuestions : EditorBranch -> List String -> List String
-filterExistingQuestions editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.questions
+filterExistingQuestions : EditorContext -> List String -> List String
+filterExistingQuestions editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.questions
 
 
-filterExistingAnswers : EditorBranch -> List String -> List String
-filterExistingAnswers editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.answers
+filterExistingAnswers : EditorContext -> List String -> List String
+filterExistingAnswers editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.answers
 
 
-filterExistingChoices : EditorBranch -> List String -> List String
-filterExistingChoices editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.choices
+filterExistingChoices : EditorContext -> List String -> List String
+filterExistingChoices editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.choices
 
 
-filterExistingExperts : EditorBranch -> List String -> List String
-filterExistingExperts editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.experts
+filterExistingExperts : EditorContext -> List String -> List String
+filterExistingExperts editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.experts
 
 
-filterExistingReferences : EditorBranch -> List String -> List String
-filterExistingReferences editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.references
+filterExistingReferences : EditorContext -> List String -> List String
+filterExistingReferences editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.references
 
 
-filterExistingIntegrations : EditorBranch -> List String -> List String
-filterExistingIntegrations editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.integrations
+filterExistingIntegrations : EditorContext -> List String -> List String
+filterExistingIntegrations editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.integrations
 
 
-filterExistingResourceCollections : EditorBranch -> List String -> List String
-filterExistingResourceCollections editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.resourceCollections
+filterExistingResourceCollections : EditorContext -> List String -> List String
+filterExistingResourceCollections editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.resourceCollections
 
 
-filterExistingResourcePages : EditorBranch -> List String -> List String
-filterExistingResourcePages editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.resourcePages
+filterExistingResourcePages : EditorContext -> List String -> List String
+filterExistingResourcePages editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.resourcePages
 
 
-filterExistingTags : EditorBranch -> List String -> List String
-filterExistingTags editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.tags
+filterExistingTags : EditorContext -> List String -> List String
+filterExistingTags editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.tags
 
 
-filterExistingMetrics : EditorBranch -> List String -> List String
-filterExistingMetrics editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.metrics
+filterExistingMetrics : EditorContext -> List String -> List String
+filterExistingMetrics editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.metrics
 
 
-filterExistingPhases : EditorBranch -> List String -> List String
-filterExistingPhases editorBranch =
-    filterExisting editorBranch.branch.knowledgeModel.entities.phases
+filterExistingPhases : EditorContext -> List String -> List String
+filterExistingPhases editorContext =
+    filterExisting editorContext.kmEditor.knowledgeModel.entities.phases
 
 
 filterExisting : Dict String a -> List String -> List String
@@ -263,65 +263,65 @@ filterExisting entitiesDict =
     List.filter (\entityUuid -> Dict.member entityUuid entitiesDict)
 
 
-isQuestionDeletedInHierarchy : String -> EditorBranch -> Bool
-isQuestionDeletedInHierarchy questionUuid editorBranch =
-    if isDeleted questionUuid editorBranch then
+isQuestionDeletedInHierarchy : String -> EditorContext -> Bool
+isQuestionDeletedInHierarchy questionUuid editorContext =
+    if isDeleted questionUuid editorContext then
         True
 
     else
         let
             parentUuid =
-                getParentUuid questionUuid editorBranch
+                getParentUuid questionUuid editorContext
         in
-        if parentUuid == Uuid.toString editorBranch.branch.knowledgeModel.uuid then
+        if parentUuid == Uuid.toString editorContext.kmEditor.knowledgeModel.uuid then
             False
 
-        else if Maybe.isJust (KnowledgeModel.getQuestion parentUuid editorBranch.branch.knowledgeModel) then
-            isQuestionDeletedInHierarchy parentUuid editorBranch
+        else if Maybe.isJust (KnowledgeModel.getQuestion parentUuid editorContext.kmEditor.knowledgeModel) then
+            isQuestionDeletedInHierarchy parentUuid editorContext
 
-        else if Maybe.isJust (KnowledgeModel.getChapter parentUuid editorBranch.branch.knowledgeModel) then
-            isDeleted parentUuid editorBranch
+        else if Maybe.isJust (KnowledgeModel.getChapter parentUuid editorContext.kmEditor.knowledgeModel) then
+            isDeleted parentUuid editorContext
 
-        else if Maybe.isJust (KnowledgeModel.getAnswer parentUuid editorBranch.branch.knowledgeModel) then
-            if isDeleted parentUuid editorBranch then
+        else if Maybe.isJust (KnowledgeModel.getAnswer parentUuid editorContext.kmEditor.knowledgeModel) then
+            if isDeleted parentUuid editorContext then
                 True
 
             else
-                isQuestionDeletedInHierarchy (getParentUuid parentUuid editorBranch) editorBranch
+                isQuestionDeletedInHierarchy (getParentUuid parentUuid editorContext) editorContext
 
         else
             True
 
 
-getFilteredKM : EditorBranch -> KnowledgeModel
-getFilteredKM editorBranch =
+getFilteredKM : EditorContext -> KnowledgeModel
+getFilteredKM editorContext =
     let
         knowledgeModel =
-            editorBranch.branch.knowledgeModel
+            editorContext.kmEditor.knowledgeModel
 
         knowledgeModelEntities =
             knowledgeModel.entities
 
         filterChapter _ chapter =
-            { chapter | questionUuids = filterDeleted editorBranch chapter.questionUuids }
+            { chapter | questionUuids = filterDeleted editorContext chapter.questionUuids }
 
         filterQuestion _ question =
             let
                 filterCommonData commonData =
                     { commonData
-                        | tagUuids = filterDeleted editorBranch commonData.tagUuids
-                        , referenceUuids = filterDeleted editorBranch commonData.referenceUuids
-                        , expertUuids = filterDeleted editorBranch commonData.expertUuids
+                        | tagUuids = filterDeleted editorContext commonData.tagUuids
+                        , referenceUuids = filterDeleted editorContext commonData.referenceUuids
+                        , expertUuids = filterDeleted editorContext commonData.expertUuids
                     }
             in
             case question of
                 OptionsQuestion commonData optionsData ->
                     OptionsQuestion (filterCommonData commonData)
-                        { optionsData | answerUuids = filterDeleted editorBranch optionsData.answerUuids }
+                        { optionsData | answerUuids = filterDeleted editorContext optionsData.answerUuids }
 
                 ListQuestion commonData listData ->
                     ListQuestion (filterCommonData commonData)
-                        { listData | itemTemplateQuestionUuids = filterDeleted editorBranch listData.itemTemplateQuestionUuids }
+                        { listData | itemTemplateQuestionUuids = filterDeleted editorContext listData.itemTemplateQuestionUuids }
 
                 ValueQuestion commonData valueData ->
                     ValueQuestion (filterCommonData commonData) valueData
@@ -331,7 +331,7 @@ getFilteredKM editorBranch =
 
                 MultiChoiceQuestion commonData multichoiceData ->
                     MultiChoiceQuestion (filterCommonData commonData)
-                        { multichoiceData | choiceUuids = filterDeleted editorBranch multichoiceData.choiceUuids }
+                        { multichoiceData | choiceUuids = filterDeleted editorContext multichoiceData.choiceUuids }
 
                 ItemSelectQuestion commonData itemSelectData ->
                     ItemSelectQuestion (filterCommonData commonData) itemSelectData
@@ -340,10 +340,10 @@ getFilteredKM editorBranch =
                     FileQuestion (filterCommonData commonData) fileData
 
         filterAnswer _ answer =
-            { answer | followUpUuids = filterDeleted editorBranch answer.followUpUuids }
+            { answer | followUpUuids = filterDeleted editorContext answer.followUpUuids }
 
         filterResourceCollection _ resourceCollection =
-            { resourceCollection | resourcePageUuids = filterDeleted editorBranch resourceCollection.resourcePageUuids }
+            { resourceCollection | resourcePageUuids = filterDeleted editorContext resourceCollection.resourcePageUuids }
 
         entities =
             { knowledgeModelEntities
@@ -354,77 +354,77 @@ getFilteredKM editorBranch =
             }
     in
     { knowledgeModel
-        | chapterUuids = filterDeleted editorBranch knowledgeModel.chapterUuids
-        , tagUuids = filterDeleted editorBranch knowledgeModel.tagUuids
-        , integrationUuids = filterDeleted editorBranch knowledgeModel.integrationUuids
-        , metricUuids = filterDeleted editorBranch knowledgeModel.metricUuids
-        , phaseUuids = filterDeleted editorBranch knowledgeModel.phaseUuids
-        , resourceCollectionUuids = filterDeleted editorBranch knowledgeModel.resourceCollectionUuids
+        | chapterUuids = filterDeleted editorContext knowledgeModel.chapterUuids
+        , tagUuids = filterDeleted editorContext knowledgeModel.tagUuids
+        , integrationUuids = filterDeleted editorContext knowledgeModel.integrationUuids
+        , metricUuids = filterDeleted editorContext knowledgeModel.metricUuids
+        , phaseUuids = filterDeleted editorContext knowledgeModel.phaseUuids
+        , resourceCollectionUuids = filterDeleted editorContext knowledgeModel.resourceCollectionUuids
         , entities = entities
     }
 
 
-sortDeleted : (a -> String) -> EditorBranch -> List a -> List a
-sortDeleted toUuid editorBranch items =
+sortDeleted : (a -> String) -> EditorContext -> List a -> List a
+sortDeleted toUuid editorContext items =
     let
         ( currentItems, deletedItems ) =
-            List.partition (not << flip isDeleted editorBranch << toUuid) items
+            List.partition (not << flip isDeleted editorContext << toUuid) items
     in
     currentItems ++ deletedItems
 
 
-setParent : String -> String -> EditorBranch -> EditorBranch
-setParent entityUuid parentUuid editorBranch =
-    { editorBranch | parentMap = Dict.insert entityUuid parentUuid editorBranch.parentMap }
+setParent : String -> String -> EditorContext -> EditorContext
+setParent entityUuid parentUuid editorContext =
+    { editorContext | parentMap = Dict.insert entityUuid parentUuid editorContext.parentMap }
 
 
-setKnowledgeModel : KnowledgeModel -> EditorBranch -> EditorBranch
-setKnowledgeModel km editorBranch =
+setKnowledgeModel : KnowledgeModel -> EditorContext -> EditorContext
+setKnowledgeModel km editorContext =
     let
-        branch =
-            editorBranch.branch
+        kmEditor =
+            editorContext.kmEditor
     in
-    { editorBranch | branch = { branch | knowledgeModel = km } }
+    { editorContext | kmEditor = { kmEditor | knowledgeModel = km } }
 
 
-isReachable : EditorBranch -> String -> Bool
-isReachable editorBranch entityUuid =
+isReachable : EditorContext -> String -> Bool
+isReachable editorContext entityUuid =
     let
         parentUuid =
-            getParentUuid entityUuid editorBranch
+            getParentUuid entityUuid editorContext
 
         getEntity getter isEntityReachable =
-            getter editorBranch.branch.knowledgeModel.entities
+            getter editorContext.kmEditor.knowledgeModel.entities
                 |> Dict.get parentUuid
                 |> Maybe.map isEntityReachable
 
         isInChapterReachable : Chapter -> Bool
         isInChapterReachable chapter =
-            List.member entityUuid chapter.questionUuids && isReachable editorBranch chapter.uuid
+            List.member entityUuid chapter.questionUuids && isReachable editorContext chapter.uuid
 
         isInQuestionReachable : Question -> Bool
         isInQuestionReachable question =
             case question of
                 OptionsQuestion _ data ->
-                    List.member entityUuid data.answerUuids && isReachable editorBranch parentUuid
+                    List.member entityUuid data.answerUuids && isReachable editorContext parentUuid
 
                 ListQuestion _ data ->
-                    List.member entityUuid data.itemTemplateQuestionUuids && isReachable editorBranch parentUuid
+                    List.member entityUuid data.itemTemplateQuestionUuids && isReachable editorContext parentUuid
 
                 MultiChoiceQuestion _ data ->
-                    List.member entityUuid data.choiceUuids && isReachable editorBranch parentUuid
+                    List.member entityUuid data.choiceUuids && isReachable editorContext parentUuid
 
                 _ ->
                     False
 
         isInAnswerReachable : Answer -> Bool
         isInAnswerReachable answer =
-            List.member entityUuid answer.followUpUuids && isReachable editorBranch parentUuid
+            List.member entityUuid answer.followUpUuids && isReachable editorContext parentUuid
     in
-    if isDeleted entityUuid editorBranch then
+    if isDeleted entityUuid editorContext then
         False
 
-    else if parentUuid == Uuid.toString editorBranch.branch.knowledgeModel.uuid then
+    else if parentUuid == Uuid.toString editorContext.kmEditor.knowledgeModel.uuid then
         True
 
     else
@@ -434,15 +434,15 @@ isReachable editorBranch entityUuid =
             |> Maybe.withDefault False
 
 
-getEditorName : AppState -> String -> EditorBranch -> String
-getEditorName appState uuid editorBranch =
+getEditorName : AppState -> String -> EditorContext -> String
+getEditorName appState uuid editorContext =
     let
         getEditorName_ getEntityName getEntity =
-            Maybe.map getEntityName (getEntity uuid editorBranch.branch.knowledgeModel)
+            Maybe.map getEntityName (getEntity uuid editorContext.kmEditor.knowledgeModel)
 
         getKnowledgeModelName =
-            if uuid == Uuid.toString editorBranch.branch.knowledgeModel.uuid then
-                Just editorBranch.branch.name
+            if uuid == Uuid.toString editorContext.kmEditor.knowledgeModel.uuid then
+                Just editorContext.kmEditor.name
 
             else
                 Nothing
@@ -472,7 +472,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (gettext "Untitled choice" appState.locale) << .label) KnowledgeModel.getChoice
 
         getReferenceName =
-            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel) (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel)) KnowledgeModel.getReference
+            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllQuestions editorContext.kmEditor.knowledgeModel) (KnowledgeModel.getAllResourcePages editorContext.kmEditor.knowledgeModel)) KnowledgeModel.getReference
 
         getExpertName =
             getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert
@@ -499,37 +499,37 @@ getEditorName appState uuid editorBranch =
         |> Maybe.withDefault ""
 
 
-setActiveEditor : Maybe String -> EditorBranch -> EditorBranch
-setActiveEditor mbEditorUuid editorBranch =
+setActiveEditor : Maybe String -> EditorContext -> EditorContext
+setActiveEditor mbEditorUuid editorContext =
     let
         kmUuid =
-            Uuid.toString editorBranch.branch.knowledgeModel.uuid
+            Uuid.toString editorContext.kmEditor.knowledgeModel.uuid
 
         activeUuid =
             Maybe.withDefault kmUuid mbEditorUuid
 
         getParents childUuid =
-            case Dict.get childUuid editorBranch.parentMap of
+            case Dict.get childUuid editorContext.parentMap of
                 Just parent ->
                     childUuid :: getParents parent
 
                 Nothing ->
                     [ childUuid ]
     in
-    { editorBranch
+    { editorContext
         | activeUuid = activeUuid
-        , openNodeUuids = List.unique (List.drop 1 (getParents activeUuid) ++ editorBranch.openNodeUuids)
+        , openNodeUuids = List.unique (List.drop 1 (getParents activeUuid) ++ editorContext.openNodeUuids)
     }
 
 
-updateActiveEditor : EditorBranch -> EditorBranch
-updateActiveEditor editorBranch =
+updateActiveEditor : EditorContext -> EditorContext
+updateActiveEditor editorContext =
     let
         editorIsDeleted uuid =
-            isDeleted uuid editorBranch
+            isDeleted uuid editorContext
 
         editorHasChild parentUuid childUuid =
-            case KnowledgeModel.getQuestion parentUuid editorBranch.branch.knowledgeModel of
+            case KnowledgeModel.getQuestion parentUuid editorContext.kmEditor.knowledgeModel of
                 Just question ->
                     isQuestionChild question childUuid
 
@@ -563,7 +563,7 @@ updateActiveEditor editorBranch =
             else
                 let
                     parentUuid =
-                        Maybe.withDefault (Uuid.toString Uuid.nil) (Dict.get currentUuid editorBranch.parentMap)
+                        Maybe.withDefault (Uuid.toString Uuid.nil) (Dict.get currentUuid editorContext.parentMap)
                 in
                 if editorIsDeleted currentUuid || not (editorHasChild parentUuid currentUuid) then
                     getActiveEditor parentUuid parentUuid
@@ -572,245 +572,245 @@ updateActiveEditor editorBranch =
                     getActiveEditor parentUuid activeEditorUuid
 
         newActiveEditorUuid =
-            getActiveEditor editorBranch.activeUuid editorBranch.activeUuid
+            getActiveEditor editorContext.activeUuid editorContext.activeUuid
     in
-    setActiveEditor newActiveEditorUuid editorBranch
+    setActiveEditor newActiveEditorUuid editorContext
 
 
-getActiveQuestionUuid : EditorBranch -> String
-getActiveQuestionUuid editorBranch =
+getActiveQuestionUuid : EditorContext -> String
+getActiveQuestionUuid editorContext =
     let
         isQuestionEditor uuid =
-            Dict.member uuid editorBranch.branch.knowledgeModel.entities.questions
+            Dict.member uuid editorContext.kmEditor.knowledgeModel.entities.questions
 
         getParentQuestion uuid =
             if String.isEmpty uuid || isQuestionEditor uuid then
                 uuid
 
             else
-                getParentQuestion (getParentUuid uuid editorBranch)
+                getParentQuestion (getParentUuid uuid editorContext)
     in
-    getParentQuestion editorBranch.activeUuid
+    getParentQuestion editorContext.activeUuid
 
 
-getChapterUuid : String -> EditorBranch -> String
-getChapterUuid entityUuid editorBranch =
+getChapterUuid : String -> EditorContext -> String
+getChapterUuid entityUuid editorContext =
     let
         isChapter uuid =
-            List.member uuid editorBranch.branch.knowledgeModel.chapterUuids
+            List.member uuid editorContext.kmEditor.knowledgeModel.chapterUuids
 
         getParent uuid =
             if String.isEmpty uuid || isChapter uuid then
                 uuid
 
             else
-                getParent (getParentUuid uuid editorBranch)
+                getParent (getParentUuid uuid editorContext)
     in
     getParent entityUuid
 
 
-treeSetNodeOpen : String -> Bool -> EditorBranch -> EditorBranch
-treeSetNodeOpen entityUuid open editorBranch =
+treeSetNodeOpen : String -> Bool -> EditorContext -> EditorContext
+treeSetNodeOpen entityUuid open editorContext =
     let
         openUuids =
             if open then
-                entityUuid :: editorBranch.openNodeUuids
+                entityUuid :: editorContext.openNodeUuids
 
             else
-                List.filter ((/=) entityUuid) editorBranch.openNodeUuids
+                List.filter ((/=) entityUuid) editorContext.openNodeUuids
     in
-    { editorBranch | openNodeUuids = openUuids }
+    { editorContext | openNodeUuids = openUuids }
 
 
-treeIsNodeOpen : String -> EditorBranch -> Bool
-treeIsNodeOpen entityUuid editorBranch =
-    List.member entityUuid editorBranch.openNodeUuids
+treeIsNodeOpen : String -> EditorContext -> Bool
+treeIsNodeOpen entityUuid editorContext =
+    List.member entityUuid editorContext.openNodeUuids
 
 
-getAllUuids : EditorBranch -> List String
-getAllUuids editorBranch =
-    Uuid.toString editorBranch.branch.knowledgeModel.uuid
-        :: Dict.keys editorBranch.branch.knowledgeModel.entities.chapters
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.questions
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.answers
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.choices
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.experts
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.references
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.integrations
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourceCollections
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourcePages
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.tags
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.metrics
-        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.phases
+getAllUuids : EditorContext -> List String
+getAllUuids editorContext =
+    Uuid.toString editorContext.kmEditor.knowledgeModel.uuid
+        :: Dict.keys editorContext.kmEditor.knowledgeModel.entities.chapters
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.questions
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.answers
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.choices
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.experts
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.references
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.integrations
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.resourceCollections
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.resourcePages
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.tags
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.metrics
+        ++ Dict.keys editorContext.kmEditor.knowledgeModel.entities.phases
 
 
-treeExpandAll : EditorBranch -> EditorBranch
-treeExpandAll editorBranch =
-    { editorBranch | openNodeUuids = getAllUuids editorBranch }
+treeExpandAll : EditorContext -> EditorContext
+treeExpandAll editorContext =
+    { editorContext | openNodeUuids = getAllUuids editorContext }
 
 
-treeCollapseAll : EditorBranch -> EditorBranch
-treeCollapseAll editorBranch =
-    { editorBranch | openNodeUuids = [] }
+treeCollapseAll : EditorContext -> EditorContext
+treeCollapseAll editorContext =
+    { editorContext | openNodeUuids = [] }
 
 
-isActive : String -> EditorBranch -> Bool
-isActive activeEditor editorBranch =
-    editorBranch.activeUuid == activeEditor
+isActive : String -> EditorContext -> Bool
+isActive activeEditor editorContext =
+    editorContext.activeUuid == activeEditor
 
 
-setEdited : String -> EditorBranch -> EditorBranch
-setEdited uuid editorBranch =
-    if List.member uuid editorBranch.editedUuids then
-        editorBranch
+setEdited : String -> EditorContext -> EditorContext
+setEdited uuid editorContext =
+    if List.member uuid editorContext.editedUuids then
+        editorContext
 
     else
-        { editorBranch | editedUuids = uuid :: editorBranch.editedUuids }
+        { editorContext | editedUuids = uuid :: editorContext.editedUuids }
 
 
-isEdited : String -> EditorBranch -> Bool
-isEdited uuid editorBranch =
-    List.member uuid editorBranch.editedUuids && not (isAdded uuid editorBranch) && not (isDeleted uuid editorBranch)
+isEdited : String -> EditorContext -> Bool
+isEdited uuid editorContext =
+    List.member uuid editorContext.editedUuids && not (isAdded uuid editorContext) && not (isDeleted uuid editorContext)
 
 
-setDeleted : String -> EditorBranch -> EditorBranch
-setDeleted uuid editorBranch =
-    { editorBranch | deletedUuids = uuid :: editorBranch.deletedUuids }
+setDeleted : String -> EditorContext -> EditorContext
+setDeleted uuid editorContext =
+    { editorContext | deletedUuids = uuid :: editorContext.deletedUuids }
 
 
-isDeleted : String -> EditorBranch -> Bool
-isDeleted uuid editorBranch =
-    List.member uuid editorBranch.deletedUuids
+isDeleted : String -> EditorContext -> Bool
+isDeleted uuid editorContext =
+    List.member uuid editorContext.deletedUuids
 
 
-setAdded : String -> EditorBranch -> EditorBranch
-setAdded uuid editorBranch =
-    { editorBranch | addedUuids = uuid :: editorBranch.addedUuids }
+setAdded : String -> EditorContext -> EditorContext
+setAdded uuid editorContext =
+    { editorContext | addedUuids = uuid :: editorContext.addedUuids }
 
 
-isAdded : String -> EditorBranch -> Bool
-isAdded uuid editorBranch =
-    List.member uuid editorBranch.addedUuids && not (isDeleted uuid editorBranch)
+isAdded : String -> EditorContext -> Bool
+isAdded uuid editorContext =
+    List.member uuid editorContext.addedUuids && not (isDeleted uuid editorContext)
 
 
-addEmptyIntegrationEditorUuid : String -> EditorBranch -> EditorBranch
-addEmptyIntegrationEditorUuid uuid editorBranch =
-    { editorBranch | emptyIntegrationEditorUuids = Set.insert uuid editorBranch.emptyIntegrationEditorUuids }
+addEmptyIntegrationEditorUuid : String -> EditorContext -> EditorContext
+addEmptyIntegrationEditorUuid uuid editorContext =
+    { editorContext | emptyIntegrationEditorUuids = Set.insert uuid editorContext.emptyIntegrationEditorUuids }
 
 
-removeEmptyIntegrationEditorUuid : String -> EditorBranch -> EditorBranch
-removeEmptyIntegrationEditorUuid uuid editorBranch =
-    { editorBranch | emptyIntegrationEditorUuids = Set.remove uuid editorBranch.emptyIntegrationEditorUuids }
+removeEmptyIntegrationEditorUuid : String -> EditorContext -> EditorContext
+removeEmptyIntegrationEditorUuid uuid editorContext =
+    { editorContext | emptyIntegrationEditorUuids = Set.remove uuid editorContext.emptyIntegrationEditorUuids }
 
 
-isEmptyIntegrationEditorUuid : String -> EditorBranch -> Bool
-isEmptyIntegrationEditorUuid uuid editorBranch =
-    Set.member uuid editorBranch.emptyIntegrationEditorUuids
+isEmptyIntegrationEditorUuid : String -> EditorContext -> Bool
+isEmptyIntegrationEditorUuid uuid editorContext =
+    Set.member uuid editorContext.emptyIntegrationEditorUuids
 
 
-applyEvent : AppState -> List String -> Bool -> Event -> EditorBranch -> EditorBranch
-applyEvent appState secrets local event originalEditorBranch =
+applyEvent : AppState -> List String -> Bool -> Event -> EditorContext -> EditorContext
+applyEvent appState secrets local event originalEditorContext =
     let
-        branch =
-            originalEditorBranch.branch
+        kmEditor =
+            originalEditorContext.kmEditor
 
         knowledgeModel =
-            branch.knowledgeModel
+            kmEditor.knowledgeModel
 
-        editorBranch =
-            { originalEditorBranch | branch = { branch | events = branch.events ++ [ event ] } }
+        editorContext =
+            { originalEditorContext | kmEditor = { kmEditor | events = kmEditor.events ++ [ event ] } }
     in
     computeWarnings appState secrets <|
         case event of
             AddKnowledgeModelEvent _ _ ->
-                editorBranch
+                editorContext
 
             AddAnswerEvent eventData commonData ->
                 let
                     answer =
                         AddAnswerEventData.toAnswer commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertAnswer answer commonData editorBranch
+                applyAdd local KnowledgeModel.insertAnswer answer commonData editorContext
 
             AddChapterEvent eventData commonData ->
                 let
                     chapter =
                         AddChapterEventData.toChapter commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertChapter chapter commonData editorBranch
+                applyAdd local KnowledgeModel.insertChapter chapter commonData editorContext
 
             AddChoiceEvent eventData commonData ->
                 let
                     choice =
                         AddChoiceEventData.toChoice commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertChoice choice commonData editorBranch
+                applyAdd local KnowledgeModel.insertChoice choice commonData editorContext
 
             AddExpertEvent eventData commonData ->
                 let
                     expert =
                         AddExpertEventData.toExpert commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertExpert expert commonData editorBranch
+                applyAdd local KnowledgeModel.insertExpert expert commonData editorContext
 
             AddIntegrationEvent eventData commonData ->
                 let
                     integration =
                         AddIntegrationEventData.toIntegration commonData.entityUuid eventData
 
-                    updatedEditorBranch =
-                        addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorBranch
+                    updatedEditorContext =
+                        addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorContext
                 in
-                applyAdd local KnowledgeModel.insertIntegration integration commonData updatedEditorBranch
+                applyAdd local KnowledgeModel.insertIntegration integration commonData updatedEditorContext
 
             AddMetricEvent eventData commonData ->
                 let
                     metric =
                         AddMetricEventData.toMetric commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertMetric metric commonData editorBranch
+                applyAdd local KnowledgeModel.insertMetric metric commonData editorContext
 
             AddPhaseEvent eventData commonData ->
                 let
                     phase =
                         AddPhaseEventData.toPhase commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertPhase phase commonData editorBranch
+                applyAdd local KnowledgeModel.insertPhase phase commonData editorContext
 
             AddQuestionEvent eventData commonData ->
                 let
                     question =
                         AddQuestionEventData.toQuestion commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertQuestion question commonData editorBranch
+                applyAdd local KnowledgeModel.insertQuestion question commonData editorContext
 
             AddReferenceEvent eventData commonData ->
                 let
                     reference =
                         AddReferenceEventData.toReference commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertReference reference commonData editorBranch
+                applyAdd local KnowledgeModel.insertReference reference commonData editorContext
 
             AddResourceCollectionEvent eventData commonData ->
                 let
                     resourceCollection =
                         AddResourceCollectionEventData.toResourceCollection commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertResourceCollection resourceCollection commonData editorBranch
+                applyAdd local KnowledgeModel.insertResourceCollection resourceCollection commonData editorContext
 
             AddResourcePageEvent eventData commonData ->
                 let
                     resourcePage =
                         AddResourcePageEventData.toResourcePage commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertResourcePage resourcePage commonData editorBranch
+                applyAdd local KnowledgeModel.insertResourcePage resourcePage commonData editorContext
 
             AddTagEvent eventData commonData ->
                 let
                     tag =
                         AddTagEventData.toTag commonData.entityUuid eventData
                 in
-                applyAdd local KnowledgeModel.insertTag tag commonData editorBranch
+                applyAdd local KnowledgeModel.insertTag tag commonData editorContext
 
             EditAnswerEvent eventData commonData ->
                 let
@@ -818,7 +818,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getAnswer commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditAnswerEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateAnswer mbAnswer commonData editorBranch
+                applyEdit KnowledgeModel.updateAnswer mbAnswer commonData editorContext
 
             EditChapterEvent eventData commonData ->
                 let
@@ -826,7 +826,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getChapter commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditChapterEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateChapter mbChapter commonData editorBranch
+                applyEdit KnowledgeModel.updateChapter mbChapter commonData editorContext
 
             EditChoiceEvent eventData commonData ->
                 let
@@ -834,7 +834,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getChoice commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditChoiceEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateChoice mbChoice commonData editorBranch
+                applyEdit KnowledgeModel.updateChoice mbChoice commonData editorContext
 
             EditExpertEvent eventData commonData ->
                 let
@@ -842,7 +842,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getExpert commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditExpertEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateExpert mbExpert commonData editorBranch
+                applyEdit KnowledgeModel.updateExpert mbExpert commonData editorContext
 
             EditIntegrationEvent eventData commonData ->
                 let
@@ -850,17 +850,17 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getIntegration commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditIntegrationEvent.apply eventData)
 
-                    updatedEditorBranch =
-                        removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorBranch
+                    updatedEditorContext =
+                        removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorContext
                 in
-                applyEdit KnowledgeModel.updateIntegration mbIntegration commonData updatedEditorBranch
+                applyEdit KnowledgeModel.updateIntegration mbIntegration commonData updatedEditorContext
 
             EditKnowledgeModelEvent eventData _ ->
                 let
                     newKnowledgeModel =
                         EditKnowledgeModelEventData.apply eventData knowledgeModel
                 in
-                setKnowledgeModel newKnowledgeModel editorBranch
+                setKnowledgeModel newKnowledgeModel editorContext
                     |> setEdited (Uuid.toString knowledgeModel.uuid)
 
             EditMetricEvent eventData commonData ->
@@ -869,7 +869,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getMetric commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditMetricEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateMetric mbMetric commonData editorBranch
+                applyEdit KnowledgeModel.updateMetric mbMetric commonData editorContext
 
             EditPhaseEvent eventData commonData ->
                 let
@@ -877,7 +877,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getPhase commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditPhaseEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updatePhase mbPhase commonData editorBranch
+                applyEdit KnowledgeModel.updatePhase mbPhase commonData editorContext
 
             EditQuestionEvent eventData commonData ->
                 let
@@ -885,7 +885,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getQuestion commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditQuestionEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateQuestion mbQuestion commonData editorBranch
+                applyEdit KnowledgeModel.updateQuestion mbQuestion commonData editorContext
 
             EditReferenceEvent eventData commonData ->
                 let
@@ -893,7 +893,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getReference commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditReferenceEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateReference mbReference commonData editorBranch
+                applyEdit KnowledgeModel.updateReference mbReference commonData editorContext
 
             EditResourceCollectionEvent eventData commonData ->
                 let
@@ -901,7 +901,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getResourceCollection commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditResourceCollectionEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateResourceCollection mbResourceCollection commonData editorBranch
+                applyEdit KnowledgeModel.updateResourceCollection mbResourceCollection commonData editorContext
 
             EditResourcePageEvent eventData commonData ->
                 let
@@ -909,7 +909,7 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getResourcePage commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditResourcePageEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateResourcePage mbResourcePage commonData editorBranch
+                applyEdit KnowledgeModel.updateResourcePage mbResourcePage commonData editorContext
 
             EditTagEvent eventData commonData ->
                 let
@@ -917,62 +917,62 @@ applyEvent appState secrets local event originalEditorBranch =
                         KnowledgeModel.getTag commonData.entityUuid knowledgeModel
                             |> Maybe.map (EditTagEventData.apply eventData)
                 in
-                applyEdit KnowledgeModel.updateTag mbTag commonData editorBranch
+                applyEdit KnowledgeModel.updateTag mbTag commonData editorContext
 
             DeleteAnswerEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteChapterEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteChoiceEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteExpertEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteIntegrationEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteMetricEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeletePhaseEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteReferenceEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteResourceCollectionEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteResourcePageEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteQuestionEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             DeleteTagEvent commonData ->
-                applyDelete commonData editorBranch
+                applyDelete commonData editorContext
 
             MoveQuestionEvent moveData commonData ->
-                applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion commonData moveData editorBranch
+                applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion commonData moveData editorContext
 
             MoveAnswerEvent moveData commonData ->
-                applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer commonData moveData editorBranch
+                applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer commonData moveData editorContext
 
             MoveChoiceEvent moveData commonData ->
-                applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice commonData moveData editorBranch
+                applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice commonData moveData editorContext
 
             MoveReferenceEvent moveData commonData ->
-                applyMove KnowledgeModel.moveReference KnowledgeModel.getReference commonData moveData editorBranch
+                applyMove KnowledgeModel.moveReference KnowledgeModel.getReference commonData moveData editorContext
 
             MoveExpertEvent moveData commonData ->
-                applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert commonData moveData editorBranch
+                applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert commonData moveData editorContext
 
 
-applyAdd : Bool -> (a -> String -> KnowledgeModel -> KnowledgeModel) -> a -> CommonEventData -> EditorBranch -> EditorBranch
-applyAdd local updateKm entity { entityUuid, parentUuid } editorBranch =
+applyAdd : Bool -> (a -> String -> KnowledgeModel -> KnowledgeModel) -> a -> CommonEventData -> EditorContext -> EditorContext
+applyAdd local updateKm entity { entityUuid, parentUuid } editorContext =
     let
         openAddedEditor uuid eb =
             if local then
@@ -982,68 +982,68 @@ applyAdd local updateKm entity { entityUuid, parentUuid } editorBranch =
                 eb
 
         newKnowledgeModel =
-            updateKm entity parentUuid editorBranch.branch.knowledgeModel
+            updateKm entity parentUuid editorContext.kmEditor.knowledgeModel
     in
-    editorBranch
+    editorContext
         |> setKnowledgeModel newKnowledgeModel
         |> setParent entityUuid parentUuid
         |> setAdded entityUuid
         |> openAddedEditor entityUuid
 
 
-applyEdit : (a -> KnowledgeModel -> KnowledgeModel) -> Maybe a -> CommonEventData -> EditorBranch -> EditorBranch
-applyEdit updateKm mbEntity { entityUuid } editorBranch =
+applyEdit : (a -> KnowledgeModel -> KnowledgeModel) -> Maybe a -> CommonEventData -> EditorContext -> EditorContext
+applyEdit updateKm mbEntity { entityUuid } editorContext =
     case mbEntity of
         Just entity ->
-            editorBranch
-                |> setKnowledgeModel (updateKm entity editorBranch.branch.knowledgeModel)
+            editorContext
+                |> setKnowledgeModel (updateKm entity editorContext.kmEditor.knowledgeModel)
                 |> setEdited entityUuid
                 |> updateActiveEditor
 
         Nothing ->
-            editorBranch
+            editorContext
 
 
-applyDelete : CommonEventData -> EditorBranch -> EditorBranch
-applyDelete { entityUuid } editorBranch =
-    editorBranch
+applyDelete : CommonEventData -> EditorContext -> EditorContext
+applyDelete { entityUuid } editorContext =
+    editorContext
         |> setDeleted entityUuid
         |> updateActiveEditor
 
 
-applyMove : (a -> String -> String -> KnowledgeModel -> KnowledgeModel) -> (String -> KnowledgeModel -> Maybe a) -> CommonEventData -> MoveEventData -> EditorBranch -> EditorBranch
-applyMove updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorBranch =
-    case getEntity entityUuid editorBranch.branch.knowledgeModel of
+applyMove : (a -> String -> String -> KnowledgeModel -> KnowledgeModel) -> (String -> KnowledgeModel -> Maybe a) -> CommonEventData -> MoveEventData -> EditorContext -> EditorContext
+applyMove updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorContext =
+    case getEntity entityUuid editorContext.kmEditor.knowledgeModel of
         Just entity ->
-            editorBranch
-                |> setKnowledgeModel (updateKm entity parentUuid targetUuid editorBranch.branch.knowledgeModel)
+            editorContext
+                |> setKnowledgeModel (updateKm entity parentUuid targetUuid editorContext.kmEditor.knowledgeModel)
                 |> setParent entityUuid targetUuid
                 |> setEdited entityUuid
                 |> setActiveEditor (Just entityUuid)
 
         Nothing ->
-            editorBranch
+            editorContext
 
 
-computeWarnings : AppState -> List String -> EditorBranch -> EditorBranch
-computeWarnings appState secrets editorBranch =
+computeWarnings : AppState -> List String -> EditorContext -> EditorContext
+computeWarnings appState secrets editorContext =
     let
         filteredKM =
-            getFilteredKM editorBranch
+            getFilteredKM editorContext
 
         warnings =
-            List.concatMap (computeChapterWarnings appState editorBranch filteredKM) (KnowledgeModel.getChapters filteredKM)
+            List.concatMap (computeChapterWarnings appState editorContext filteredKM) (KnowledgeModel.getChapters filteredKM)
                 |> flip (++) (List.concatMap (computeMetricWarnings appState) (KnowledgeModel.getMetrics filteredKM))
                 |> flip (++) (List.concatMap (computePhaseWarnings appState) (KnowledgeModel.getPhases filteredKM))
                 |> flip (++) (List.concatMap (computeTagWarnings appState) (KnowledgeModel.getTags filteredKM))
                 |> flip (++) (List.concatMap (computeIntegrationWarnings appState secrets) (KnowledgeModel.getIntegrations filteredKM))
                 |> flip (++) (List.concatMap (computeResourceCollectionWarnings appState filteredKM) (KnowledgeModel.getResourceCollections filteredKM))
     in
-    { editorBranch | warnings = warnings }
+    { editorContext | warnings = warnings }
 
 
-computeChapterWarnings : AppState -> EditorBranch -> KnowledgeModel -> Chapter -> List EditorBranchWarning
-computeChapterWarnings appState editorBranch km chapter =
+computeChapterWarnings : AppState -> EditorContext -> KnowledgeModel -> Chapter -> List EditorContextWarning
+computeChapterWarnings appState editorContext km chapter =
     let
         titleWarning =
             if String.isEmpty chapter.title then
@@ -1057,14 +1057,14 @@ computeChapterWarnings appState editorBranch km chapter =
 
         questionWarnings =
             List.concatMap
-                (computeQuestionWarnings appState editorBranch km)
+                (computeQuestionWarnings appState editorContext km)
                 (KnowledgeModel.getChapterQuestions chapter.uuid km)
     in
     titleWarning ++ questionWarnings
 
 
-computeQuestionWarnings : AppState -> EditorBranch -> KnowledgeModel -> Question -> List EditorBranchWarning
-computeQuestionWarnings appState editorBranch km question =
+computeQuestionWarnings : AppState -> EditorContext -> KnowledgeModel -> Question -> List EditorContextWarning
+computeQuestionWarnings appState editorContext km question =
     let
         questionUuid =
             Question.getUuid question
@@ -1090,7 +1090,7 @@ computeQuestionWarnings appState editorBranch km question =
 
                     else
                         List.concatMap
-                            (computeAnswerWarnings appState editorBranch km)
+                            (computeAnswerWarnings appState editorContext km)
                             (KnowledgeModel.getQuestionAnswers questionUuid km)
 
                 Question.ListQuestion _ data ->
@@ -1099,7 +1099,7 @@ computeQuestionWarnings appState editorBranch km question =
 
                     else
                         List.concatMap
-                            (computeQuestionWarnings appState editorBranch km)
+                            (computeQuestionWarnings appState editorContext km)
                             (KnowledgeModel.getQuestionItemTemplateQuestions questionUuid km)
 
                 Question.IntegrationQuestion _ data ->
@@ -1147,7 +1147,7 @@ computeQuestionWarnings appState editorBranch km question =
                         listQuestionNotSelected =
                             case data.listQuestionUuid of
                                 Just listQuestionUuid ->
-                                    isDeleted listQuestionUuid editorBranch
+                                    isDeleted listQuestionUuid editorContext
 
                                 Nothing ->
                                     True
@@ -1174,8 +1174,8 @@ computeQuestionWarnings appState editorBranch km question =
     titleWarning ++ typeWarnings ++ referencesWarnings ++ expertWarnings
 
 
-computeAnswerWarnings : AppState -> EditorBranch -> KnowledgeModel -> Answer -> List EditorBranchWarning
-computeAnswerWarnings appState editorBranch km answer =
+computeAnswerWarnings : AppState -> EditorContext -> KnowledgeModel -> Answer -> List EditorContextWarning
+computeAnswerWarnings appState editorContext km answer =
     let
         labelWarning =
             if String.isEmpty answer.label then
@@ -1189,13 +1189,13 @@ computeAnswerWarnings appState editorBranch km answer =
 
         followUpQuestionsWarnings =
             List.concatMap
-                (computeQuestionWarnings appState editorBranch km)
+                (computeQuestionWarnings appState editorContext km)
                 (KnowledgeModel.getAnswerFollowupQuestions answer.uuid km)
     in
     labelWarning ++ followUpQuestionsWarnings
 
 
-computeChoiceWarnings : AppState -> Choice -> List EditorBranchWarning
+computeChoiceWarnings : AppState -> Choice -> List EditorContextWarning
 computeChoiceWarnings appState choice =
     if String.isEmpty choice.label then
         [ { editorUuid = choice.uuid
@@ -1207,7 +1207,7 @@ computeChoiceWarnings appState choice =
         []
 
 
-computeReferenceWarnings : AppState -> Reference -> List EditorBranchWarning
+computeReferenceWarnings : AppState -> Reference -> List EditorContextWarning
 computeReferenceWarnings appState reference =
     let
         createError message =
@@ -1238,7 +1238,7 @@ computeReferenceWarnings appState reference =
             []
 
 
-computeExpertWarnings : AppState -> Expert -> List EditorBranchWarning
+computeExpertWarnings : AppState -> Expert -> List EditorContextWarning
 computeExpertWarnings appState expert =
     let
         createError message =
@@ -1257,7 +1257,7 @@ computeExpertWarnings appState expert =
         []
 
 
-computeMetricWarnings : AppState -> Metric -> List EditorBranchWarning
+computeMetricWarnings : AppState -> Metric -> List EditorContextWarning
 computeMetricWarnings appState metric =
     if String.isEmpty metric.title then
         [ { editorUuid = metric.uuid
@@ -1269,7 +1269,7 @@ computeMetricWarnings appState metric =
         []
 
 
-computePhaseWarnings : AppState -> Phase -> List EditorBranchWarning
+computePhaseWarnings : AppState -> Phase -> List EditorContextWarning
 computePhaseWarnings appState phase =
     if String.isEmpty phase.title then
         [ { editorUuid = phase.uuid
@@ -1281,7 +1281,7 @@ computePhaseWarnings appState phase =
         []
 
 
-computeTagWarnings : AppState -> Tag -> List EditorBranchWarning
+computeTagWarnings : AppState -> Tag -> List EditorContextWarning
 computeTagWarnings appState tag =
     if String.isEmpty tag.name then
         [ { editorUuid = tag.uuid
@@ -1293,7 +1293,7 @@ computeTagWarnings appState tag =
         []
 
 
-computeIntegrationWarnings : AppState -> List String -> Integration -> List EditorBranchWarning
+computeIntegrationWarnings : AppState -> List String -> Integration -> List EditorContextWarning
 computeIntegrationWarnings appState secrets integration =
     let
         createError message =
@@ -1451,7 +1451,7 @@ computeIntegrationWarnings appState secrets integration =
             idWarning ++ widgetUrlWarning
 
 
-computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorBranchWarning
+computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorContextWarning
 computeResourceCollectionWarnings appState km resourceCollection =
     let
         titleWarning =
@@ -1472,7 +1472,7 @@ computeResourceCollectionWarnings appState km resourceCollection =
     titleWarning ++ resourcePagesWarnings
 
 
-computeResourcePageWarnings : AppState -> ResourcePage -> List EditorBranchWarning
+computeResourcePageWarnings : AppState -> ResourcePage -> List EditorContextWarning
 computeResourcePageWarnings appState resourcePage =
     let
         titleWarning =

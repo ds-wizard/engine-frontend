@@ -1,8 +1,8 @@
 module Wizard.Api.Models.TypeHintRequest exposing
     ( TypeHintRequest
     , encode
-    , fromBranchIntegration
-    , fromBranchQuestion
+    , fromKmEditorIntegration
+    , fromKmEditorQuestion
     , fromQuestionnaire
     )
 
@@ -11,19 +11,19 @@ import Uuid exposing (Uuid)
 
 
 type TypeHintRequest
-    = BranchIntegration BranchIntegrationData
-    | BranchQuestion BranchQuestionData
+    = KnowledgeModelEditorIntegration KnowledgeModelEditorIntegrationData
+    | KnowledgeModelEditorQuestion KnowledgeModelEditorQuestionData
     | Questionnaire QuestionnaireData
 
 
-fromBranchIntegration : Uuid -> Uuid -> TypeHintRequest
-fromBranchIntegration branchUuid integrationUuid =
-    BranchIntegration { branchUuid = branchUuid, integrationUuid = integrationUuid }
+fromKmEditorIntegration : Uuid -> Uuid -> TypeHintRequest
+fromKmEditorIntegration kmEditorUuid integrationUuid =
+    KnowledgeModelEditorIntegration { knowledgeModelEditorUuid = kmEditorUuid, integrationUuid = integrationUuid }
 
 
-fromBranchQuestion : Uuid -> Uuid -> String -> TypeHintRequest
-fromBranchQuestion branchUuid questionUuid q =
-    BranchQuestion { branchUuid = branchUuid, questionUuid = questionUuid, q = q }
+fromKmEditorQuestion : Uuid -> Uuid -> String -> TypeHintRequest
+fromKmEditorQuestion kmEditorUuid questionUuid q =
+    KnowledgeModelEditorQuestion { knowledgeModelEditorUuid = kmEditorUuid, questionUuid = questionUuid, q = q }
 
 
 fromQuestionnaire : Uuid -> Uuid -> String -> TypeHintRequest
@@ -31,14 +31,14 @@ fromQuestionnaire questionnaireUuid questionUuid q =
     Questionnaire { questionnaireUuid = questionnaireUuid, questionUuid = questionUuid, q = q }
 
 
-type alias BranchIntegrationData =
-    { branchUuid : Uuid
+type alias KnowledgeModelEditorIntegrationData =
+    { knowledgeModelEditorUuid : Uuid
     , integrationUuid : Uuid
     }
 
 
-type alias BranchQuestionData =
-    { branchUuid : Uuid
+type alias KnowledgeModelEditorQuestionData =
+    { knowledgeModelEditorUuid : Uuid
     , questionUuid : Uuid
     , q : String
     }
@@ -54,17 +54,17 @@ type alias QuestionnaireData =
 encode : TypeHintRequest -> E.Value
 encode typeHintRequest =
     case typeHintRequest of
-        BranchIntegration data ->
+        KnowledgeModelEditorIntegration data ->
             E.object
-                [ ( "requestType", E.string "BranchIntegrationTypeHintRequest" )
-                , ( "branchUuid", Uuid.encode data.branchUuid )
+                [ ( "requestType", E.string "KnowledgeModelEditorIntegrationTypeHintRequest" )
+                , ( "knowledgeModelEditorUuid", Uuid.encode data.knowledgeModelEditorUuid )
                 , ( "integrationUuid", Uuid.encode data.integrationUuid )
                 ]
 
-        BranchQuestion data ->
+        KnowledgeModelEditorQuestion data ->
             E.object
-                [ ( "requestType", E.string "BranchQuestionTypeHintRequest" )
-                , ( "branchUuid", Uuid.encode data.branchUuid )
+                [ ( "requestType", E.string "KnowledgeModelEditorQuestionTypeHintRequest" )
+                , ( "knowledgeModelEditorUuid", Uuid.encode data.knowledgeModelEditorUuid )
                 , ( "questionUuid", Uuid.encode data.questionUuid )
                 , ( "q", E.string data.q )
                 ]

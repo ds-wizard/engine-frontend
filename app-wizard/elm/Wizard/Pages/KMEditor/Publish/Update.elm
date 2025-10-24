@@ -12,14 +12,14 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Api.Branches as BranchesApi
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Packages as PackagesApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.KMEditor.Common.BranchPublishForm as BranchPublishForm
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm as KnowledgeModelEditorPublishForm
 import Wizard.Pages.KMEditor.Publish.Models exposing (Model)
 import Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -28,14 +28,14 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    BranchesApi.getBranch appState uuid GetBranchCompleted
+    KnowledgeModelEditorsApi.getKnowledgeModelEditor appState uuid GetKnowledgeModelEditorCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        GetBranchCompleted result ->
-            handleGetBranchCompleted wrapMsg appState model result
+        GetKnowledgeModelEditorCompleted result ->
+            handleGetKnowledgeModelEditorCompleted wrapMsg appState model result
 
         GetPreviousPackageCompleted result ->
             handleGetPreviousPackageCompleted model result
@@ -49,21 +49,21 @@ update msg wrapMsg appState model =
         FormSetVersion version ->
             handleFormSetVersion version model
 
-        PutBranchCompleted result ->
-            handlePutBranchCompleted appState model result
+        PutKnowledgeModelEditorCompleted result ->
+            handlePutKnowledgeModelEditorCompleted appState model result
 
 
 
 -- Handlers
 
 
-handleGetBranchCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError BranchDetail -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetBranchCompleted wrapMsg appState model result =
+handleGetKnowledgeModelEditorCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError KnowledgeModelEditorDetail -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetKnowledgeModelEditorCompleted wrapMsg appState model result =
     case result of
-        Ok branch ->
+        Ok kmEditor ->
             let
                 cmd =
-                    case branch.previousPackageId of
+                    case kmEditor.previousPackageId of
                         Just previousPackageId ->
                             Cmd.map wrapMsg <|
                                 PackagesApi.getPackage appState previousPackageId GetPreviousPackageCompleted
@@ -71,12 +71,12 @@ handleGetBranchCompleted wrapMsg appState model result =
                         Nothing ->
                             Cmd.none
             in
-            ( { model | branch = Success branch }
+            ( { model | kmEditor = Success kmEditor }
             , cmd
             )
 
         Err error ->
-            ( { model | branch = ApiError.toActionResult appState (gettext "Unable to get the knowledge model details." appState.locale) error }
+            ( { model | kmEditor = ApiError.toActionResult appState (gettext "Unable to get the knowledge model details." appState.locale) error }
             , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
@@ -91,9 +91,9 @@ handleGetPreviousPackageCompleted model result =
 
                 form =
                     model.form
-                        |> Form.update BranchPublishForm.validation (formMsg "description" package.description)
-                        |> Form.update BranchPublishForm.validation (formMsg "readme" package.readme)
-                        |> Form.update BranchPublishForm.validation (formMsg "license" package.license)
+                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "description" package.description)
+                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "readme" package.readme)
+                        |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "license" package.license)
             in
             ( { model | form = form }
             , Cmd.none
@@ -105,22 +105,22 @@ handleGetPreviousPackageCompleted model result =
 
 handleFormMsg : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleFormMsg formMsg wrapMsg appState model =
-    case ( formMsg, Form.getOutput model.form, model.branch ) of
-        ( Form.Submit, Just form, Success branch ) ->
+    case ( formMsg, Form.getOutput model.form, model.kmEditor ) of
+        ( Form.Submit, Just form, Success kmEditor ) ->
             let
                 body =
-                    BranchPublishForm.encode branch.uuid form
+                    KnowledgeModelEditorPublishForm.encode kmEditor.uuid form
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.postFromMigration appState body PutBranchCompleted
+                        PackagesApi.postFromMigration appState body PutKnowledgeModelEditorCompleted
             in
-            ( { model | publishingBranch = Loading }, cmd )
+            ( { model | publishingKnowledgeModelEditor = Loading }, cmd )
 
         _ ->
             let
                 form =
-                    Form.update BranchPublishForm.validation formMsg model.form
+                    Form.update KnowledgeModelEditorPublishForm.validation formMsg model.form
             in
             ( { model | form = form }, Cmd.none )
 
@@ -133,20 +133,20 @@ handleFormSetVersion version model =
 
         form =
             model.form
-                |> Form.update BranchPublishForm.validation (formMsg "major" <| Version.getMajor version)
-                |> Form.update BranchPublishForm.validation (formMsg "minor" <| Version.getMinor version)
-                |> Form.update BranchPublishForm.validation (formMsg "patch" <| Version.getPatch version)
+                |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "major" <| Version.getMajor version)
+                |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "minor" <| Version.getMinor version)
+                |> Form.update KnowledgeModelEditorPublishForm.validation (formMsg "patch" <| Version.getPatch version)
     in
     ( { model | form = form }, Cmd.none )
 
 
-handlePutBranchCompleted : AppState -> Model -> Result ApiError Package -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePutBranchCompleted appState model result =
+handlePutKnowledgeModelEditorCompleted : AppState -> Model -> Result ApiError Package -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePutKnowledgeModelEditorCompleted appState model result =
     case result of
         Ok package ->
             ( model, cmdNavigate appState (Routes.knowledgeModelsDetail package.id) )
 
         Err error ->
-            ( { model | publishingBranch = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }
+            ( { model | publishingKnowledgeModelEditor = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }
             , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )

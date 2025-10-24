@@ -15,20 +15,20 @@ import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import String.Format as String
 import Uuid exposing (Uuid)
-import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Data.AppState exposing (AppState)
 
 
 type alias Model =
-    { branch : Maybe ( Uuid, String )
-    , deletingBranch : ActionResult String
+    { kmEditor : Maybe ( Uuid, String )
+    , deletingKmEditor : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { branch = Nothing
-    , deletingBranch = ActionResult.Unset
+    { kmEditor = Nothing
+    , deletingKmEditor = ActionResult.Unset
     }
 
 
@@ -54,13 +54,13 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         Open uuid name ->
-            ( { model | branch = Just ( uuid, name ), deletingBranch = ActionResult.Unset }, Cmd.none )
+            ( { model | kmEditor = Just ( uuid, name ), deletingKmEditor = ActionResult.Unset }, Cmd.none )
 
         Delete ->
-            case model.branch of
+            case model.kmEditor of
                 Just ( uuid, _ ) ->
-                    ( { model | deletingBranch = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg <| BranchesApi.deleteBranch appState uuid DeleteComplete
+                    ( { model | deletingKmEditor = ActionResult.Loading }
+                    , Cmd.map cfg.wrapMsg <| KnowledgeModelEditorsApi.deleteKnowledgeModelEditor appState uuid DeleteComplete
                     )
 
                 Nothing ->
@@ -69,24 +69,24 @@ update cfg appState msg model =
         DeleteComplete result ->
             case result of
                 Ok _ ->
-                    ( { model | branch = Nothing }, cfg.cmdDeleted )
+                    ( { model | kmEditor = Nothing }, cfg.cmdDeleted )
 
                 Err error ->
-                    ( { model | deletingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be deleted." appState.locale) error }
+                    ( { model | deletingKmEditor = ApiError.toActionResult appState (gettext "Knowledge model could not be deleted." appState.locale) error }
                     , Cmd.none
                     )
 
         Close ->
-            ( { model | branch = Nothing }, Cmd.none )
+            ( { model | kmEditor = Nothing }, Cmd.none )
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
     let
         ( visible, name ) =
-            case model.branch of
-                Just ( _, branchName ) ->
-                    ( True, branchName )
+            case model.kmEditor of
+                Just ( _, kmEditorName ) ->
+                    ( True, kmEditorName )
 
                 Nothing ->
                     ( False, "" )
@@ -100,7 +100,7 @@ view appState model =
             Modal.confirmConfig (gettext "Delete knowledge model editor" appState.locale)
                 |> Modal.confirmConfigContent content
                 |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingBranch
+                |> Modal.confirmConfigActionResult model.deletingKmEditor
                 |> Modal.confirmConfigAction (gettext "Delete" appState.locale) Delete
                 |> Modal.confirmConfigCancelMsg Close
                 |> Modal.confirmConfigDangerous True

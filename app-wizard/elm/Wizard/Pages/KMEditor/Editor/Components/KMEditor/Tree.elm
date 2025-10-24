@@ -28,7 +28,7 @@ import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Routes as Routes
 
 
@@ -56,8 +56,8 @@ type alias CreateEvents msg =
     }
 
 
-view : ViewProps msg -> AppState -> EditorBranch -> Html msg
-view props appState editorBranch =
+view : ViewProps msg -> AppState -> EditorContext -> Html msg
+view props appState editorContext =
     div [ class "tree-col" ]
         [ div [ class "diff-tree" ]
             [ div [ class "inner" ]
@@ -71,97 +71,97 @@ view props appState editorBranch =
                         , text (gettext "Collapse all" appState.locale)
                         ]
                     ]
-                , ul [] [ treeNodeKM props appState editorBranch ]
+                , ul [] [ treeNodeKM props appState editorContext ]
                 ]
             ]
         ]
 
 
-treeNodeKM : ViewProps msg -> AppState -> EditorBranch -> Html msg
-treeNodeKM props appState editorBranch =
+treeNodeKM : ViewProps msg -> AppState -> EditorContext -> Html msg
+treeNodeKM props appState editorContext =
     let
         knowledgeModel =
-            editorBranch.branch.knowledgeModel
+            editorContext.kmEditor.knowledgeModel
 
         uuid =
             Uuid.toString knowledgeModel.uuid
 
         chapters =
             KnowledgeModel.getChapters knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+                |> EditorContext.sortDeleted .uuid editorContext
 
         chapterNodes =
-            List.map (treeNodeChapter props appState editorBranch) chapters
+            List.map (treeNodeChapter props appState editorContext) chapters
 
         addChapter =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid chapters))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid chapters))
                 (props.createEvents.createChapter uuid)
                 (gettext "Add chapter" appState.locale)
 
         metrics =
             KnowledgeModel.getMetrics knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+                |> EditorContext.sortDeleted .uuid editorContext
 
         metricNodes =
-            List.map (treeNodeMetric props appState editorBranch) metrics
+            List.map (treeNodeMetric props appState editorContext) metrics
 
         addMetric =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid metrics))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid metrics))
                 (props.createEvents.createMetric uuid)
                 (gettext "Add metric" appState.locale)
 
         phases =
             KnowledgeModel.getPhases knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+                |> EditorContext.sortDeleted .uuid editorContext
 
         phaseNodes =
-            List.map (treeNodePhase props appState editorBranch) phases
+            List.map (treeNodePhase props appState editorContext) phases
 
         addPhase =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid phases))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid phases))
                 (props.createEvents.createPhase uuid)
                 (gettext "Add phase" appState.locale)
 
         tags =
             KnowledgeModel.getTags knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+                |> EditorContext.sortDeleted .uuid editorContext
 
         tagNodes =
-            List.map (treeNodeTag props appState editorBranch) tags
+            List.map (treeNodeTag props appState editorContext) tags
 
         addTag =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid tags))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid tags))
                 (props.createEvents.createTag uuid)
                 (gettext "Add tag" appState.locale)
 
         integrations =
             KnowledgeModel.getIntegrations knowledgeModel
-                |> EditorBranch.sortDeleted Integration.getUuid editorBranch
+                |> EditorContext.sortDeleted Integration.getUuid editorContext
 
         integrationNodes =
-            List.map (treeNodeIntegration props appState editorBranch) integrations
+            List.map (treeNodeIntegration props appState editorContext) integrations
 
         addIntegration =
-            treeNodeAdd (anyEntityActive editorBranch (List.map Integration.getUuid integrations))
+            treeNodeAdd (anyEntityActive editorContext (List.map Integration.getUuid integrations))
                 (props.createEvents.createIntegration uuid)
                 (gettext "Add integration" appState.locale)
 
         resourceCollections =
             KnowledgeModel.getResourceCollections knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+                |> EditorContext.sortDeleted .uuid editorContext
 
         resourceCollectionNodes =
-            List.map (treeNodeResourceCollection props appState editorBranch) resourceCollections
+            List.map (treeNodeResourceCollection props appState editorContext) resourceCollections
 
         addResourceCollection =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid resourceCollections))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid resourceCollections))
                 (props.createEvents.createResourceCollection uuid)
                 (gettext "Add resource collection" appState.locale)
 
         config =
             { uuid = uuid
             , icon = faKmKnowledgeModel
-            , label = editorBranch.branch.name
+            , label = editorContext.kmEditor.name
             , children =
                 List.concat
                     [ chapterNodes
@@ -180,21 +180,21 @@ treeNodeKM props appState editorBranch =
             , untitledLabel = ""
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeChapter : ViewProps msg -> AppState -> EditorBranch -> Chapter -> Html msg
-treeNodeChapter props appState editorBranch chapter =
+treeNodeChapter : ViewProps msg -> AppState -> EditorContext -> Chapter -> Html msg
+treeNodeChapter props appState editorContext chapter =
     let
         questions =
-            KnowledgeModel.getChapterQuestions chapter.uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted Question.getUuid editorBranch
+            KnowledgeModel.getChapterQuestions chapter.uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted Question.getUuid editorContext
 
         questionNodes =
-            List.map (treeNodeQuestion props appState editorBranch) questions
+            List.map (treeNodeQuestion props appState editorContext) questions
 
         addQuestion =
-            treeNodeAdd (anyEntityActive editorBranch (List.map Question.getUuid questions))
+            treeNodeAdd (anyEntityActive editorContext (List.map Question.getUuid questions))
                 (props.createEvents.createQuestion chapter.uuid)
                 (gettext "Add question" appState.locale)
 
@@ -206,11 +206,11 @@ treeNodeChapter props appState editorBranch chapter =
             , untitledLabel = gettext "Untitled chapter" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeMetric : ViewProps msg -> AppState -> EditorBranch -> Metric -> Html msg
-treeNodeMetric props appState editorBranch metric =
+treeNodeMetric : ViewProps msg -> AppState -> EditorContext -> Metric -> Html msg
+treeNodeMetric props appState editorContext metric =
     let
         config =
             { uuid = metric.uuid
@@ -220,11 +220,11 @@ treeNodeMetric props appState editorBranch metric =
             , untitledLabel = gettext "Untitled metric" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodePhase : ViewProps msg -> AppState -> EditorBranch -> Phase -> Html msg
-treeNodePhase props appState editorBranch phase =
+treeNodePhase : ViewProps msg -> AppState -> EditorContext -> Phase -> Html msg
+treeNodePhase props appState editorContext phase =
     let
         config =
             { uuid = phase.uuid
@@ -234,11 +234,11 @@ treeNodePhase props appState editorBranch phase =
             , untitledLabel = gettext "Untitled phase" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeTag : ViewProps msg -> AppState -> EditorBranch -> Tag -> Html msg
-treeNodeTag props appState editorBranch tag =
+treeNodeTag : ViewProps msg -> AppState -> EditorContext -> Tag -> Html msg
+treeNodeTag props appState editorContext tag =
     let
         config =
             { uuid = tag.uuid
@@ -248,11 +248,11 @@ treeNodeTag props appState editorBranch tag =
             , untitledLabel = gettext "Untitled tag" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeIntegration : ViewProps msg -> AppState -> EditorBranch -> Integration -> Html msg
-treeNodeIntegration props appState editorBranch integration =
+treeNodeIntegration : ViewProps msg -> AppState -> EditorContext -> Integration -> Html msg
+treeNodeIntegration props appState editorContext integration =
     let
         config =
             { uuid = Integration.getUuid integration
@@ -262,72 +262,72 @@ treeNodeIntegration props appState editorBranch integration =
             , untitledLabel = gettext "Untitled integration" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeQuestion : ViewProps msg -> AppState -> EditorBranch -> Question -> Html msg
-treeNodeQuestion props appState editorBranch question =
+treeNodeQuestion : ViewProps msg -> AppState -> EditorContext -> Question -> Html msg
+treeNodeQuestion props appState editorContext question =
     let
         uuid =
             Question.getUuid question
 
         answers =
-            KnowledgeModel.getQuestionAnswers uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+            KnowledgeModel.getQuestionAnswers uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted .uuid editorContext
 
         answerNodes =
-            List.map (treeNodeAnswer props appState editorBranch) answers
+            List.map (treeNodeAnswer props appState editorContext) answers
 
         addAnswer =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid answers))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid answers))
                 (props.createEvents.createAnswer uuid)
                 (gettext "Add answer" appState.locale)
 
         itemTemplateQuestions =
-            KnowledgeModel.getQuestionItemTemplateQuestions uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted Question.getUuid editorBranch
+            KnowledgeModel.getQuestionItemTemplateQuestions uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted Question.getUuid editorContext
 
         itemTemplateQuestionNodes =
-            List.map (treeNodeQuestion props appState editorBranch) itemTemplateQuestions
+            List.map (treeNodeQuestion props appState editorContext) itemTemplateQuestions
 
         addItemTemplateQuestion =
-            treeNodeAdd (anyEntityActive editorBranch (List.map Question.getUuid itemTemplateQuestions))
+            treeNodeAdd (anyEntityActive editorContext (List.map Question.getUuid itemTemplateQuestions))
                 (props.createEvents.createQuestion uuid)
                 (gettext "Add question" appState.locale)
 
         choices =
-            KnowledgeModel.getQuestionChoices uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+            KnowledgeModel.getQuestionChoices uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted .uuid editorContext
 
         choiceNodes =
-            List.map (treeNodeChoice props appState editorBranch) choices
+            List.map (treeNodeChoice props appState editorContext) choices
 
         addChoice =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid choices))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid choices))
                 (props.createEvents.createChoice uuid)
                 (gettext "Add choice" appState.locale)
 
         references =
-            KnowledgeModel.getQuestionReferences uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted Reference.getUuid editorBranch
+            KnowledgeModel.getQuestionReferences uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted Reference.getUuid editorContext
 
         referenceNodes =
-            List.map (treeNodeReference props appState editorBranch) references
+            List.map (treeNodeReference props appState editorContext) references
 
         addReference =
-            treeNodeAdd (anyEntityActive editorBranch (List.map Reference.getUuid references))
+            treeNodeAdd (anyEntityActive editorContext (List.map Reference.getUuid references))
                 (props.createEvents.createReference uuid)
                 (gettext "Add reference" appState.locale)
 
         experts =
-            KnowledgeModel.getQuestionExperts uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+            KnowledgeModel.getQuestionExperts uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted .uuid editorContext
 
         expertNodes =
-            List.map (treeNodeExperts props appState editorBranch) experts
+            List.map (treeNodeExperts props appState editorContext) experts
 
         addExpert =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid experts))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid experts))
                 (props.createEvents.createExpert uuid)
                 (gettext "Add expert" appState.locale)
 
@@ -351,21 +351,21 @@ treeNodeQuestion props appState editorBranch question =
             , untitledLabel = gettext "Untitled question" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeAnswer : ViewProps msg -> AppState -> EditorBranch -> Answer -> Html msg
-treeNodeAnswer props appState editorBranch answer =
+treeNodeAnswer : ViewProps msg -> AppState -> EditorContext -> Answer -> Html msg
+treeNodeAnswer props appState editorContext answer =
     let
         followupQuestions =
-            KnowledgeModel.getAnswerFollowupQuestions answer.uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted Question.getUuid editorBranch
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted Question.getUuid editorContext
 
         followupQuestionNodes =
-            List.map (treeNodeQuestion props appState editorBranch) followupQuestions
+            List.map (treeNodeQuestion props appState editorContext) followupQuestions
 
         addFollowupQuestion =
-            treeNodeAdd (anyEntityActive editorBranch (List.map Question.getUuid followupQuestions))
+            treeNodeAdd (anyEntityActive editorContext (List.map Question.getUuid followupQuestions))
                 (props.createEvents.createQuestion answer.uuid)
                 (gettext "Add question" appState.locale)
 
@@ -377,11 +377,11 @@ treeNodeAnswer props appState editorBranch answer =
             , untitledLabel = gettext "Untitled answer" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeChoice : ViewProps msg -> AppState -> EditorBranch -> Choice -> Html msg
-treeNodeChoice props appState editorBranch choice =
+treeNodeChoice : ViewProps msg -> AppState -> EditorContext -> Choice -> Html msg
+treeNodeChoice props appState editorContext choice =
     let
         config =
             { uuid = choice.uuid
@@ -391,25 +391,25 @@ treeNodeChoice props appState editorBranch choice =
             , untitledLabel = gettext "Untitled choice" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeReference : ViewProps msg -> AppState -> EditorBranch -> Reference -> Html msg
-treeNodeReference props appState editorBranch reference =
+treeNodeReference : ViewProps msg -> AppState -> EditorContext -> Reference -> Html msg
+treeNodeReference props appState editorContext reference =
     let
         config =
             { uuid = Reference.getUuid reference
             , icon = faKmReference
-            , label = Reference.getVisibleName (KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel) (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel) reference
+            , label = Reference.getVisibleName (KnowledgeModel.getAllQuestions editorContext.kmEditor.knowledgeModel) (KnowledgeModel.getAllResourcePages editorContext.kmEditor.knowledgeModel) reference
             , children = []
             , untitledLabel = gettext "Untitled reference" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeExperts : ViewProps msg -> AppState -> EditorBranch -> Expert -> Html msg
-treeNodeExperts props appState editorBranch expert =
+treeNodeExperts : ViewProps msg -> AppState -> EditorContext -> Expert -> Html msg
+treeNodeExperts props appState editorContext expert =
     let
         config =
             { uuid = expert.uuid
@@ -419,21 +419,21 @@ treeNodeExperts props appState editorBranch expert =
             , untitledLabel = gettext "Untitled expert" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeResourceCollection : ViewProps msg -> AppState -> EditorBranch -> ResourceCollection -> Html msg
-treeNodeResourceCollection props appState editorBranch resourceCollection =
+treeNodeResourceCollection : ViewProps msg -> AppState -> EditorContext -> ResourceCollection -> Html msg
+treeNodeResourceCollection props appState editorContext resourceCollection =
     let
         resourcePages =
-            KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid editorBranch.branch.knowledgeModel
-                |> EditorBranch.sortDeleted .uuid editorBranch
+            KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid editorContext.kmEditor.knowledgeModel
+                |> EditorContext.sortDeleted .uuid editorContext
 
         resourcePageNodes =
-            List.map (treeNodeResourcePage props appState editorBranch) resourcePages
+            List.map (treeNodeResourcePage props appState editorContext) resourcePages
 
         addResourcePage =
-            treeNodeAdd (anyEntityActive editorBranch (List.map .uuid resourcePages))
+            treeNodeAdd (anyEntityActive editorContext (List.map .uuid resourcePages))
                 (props.createEvents.createResourcePage resourceCollection.uuid)
                 (gettext "Add resource page" appState.locale)
 
@@ -445,11 +445,11 @@ treeNodeResourceCollection props appState editorBranch resourceCollection =
             , untitledLabel = gettext "Untitled resource collection" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
-treeNodeResourcePage : ViewProps msg -> AppState -> EditorBranch -> ResourcePage -> Html msg
-treeNodeResourcePage props appState editorBranch resourcePage =
+treeNodeResourcePage : ViewProps msg -> AppState -> EditorContext -> ResourcePage -> Html msg
+treeNodeResourcePage props appState editorContext resourcePage =
     let
         config =
             { uuid = resourcePage.uuid
@@ -459,7 +459,7 @@ treeNodeResourcePage props appState editorBranch resourcePage =
             , untitledLabel = gettext "Untitled resource page" appState.locale
             }
     in
-    treeNode props editorBranch config
+    treeNode props editorContext config
 
 
 type alias TreeNodeConfig msg =
@@ -471,14 +471,14 @@ type alias TreeNodeConfig msg =
     }
 
 
-treeNode : ViewProps msg -> EditorBranch -> TreeNodeConfig msg -> Html msg
-treeNode props editorBranch config =
+treeNode : ViewProps msg -> EditorContext -> TreeNodeConfig msg -> Html msg
+treeNode props editorContext config =
     let
         ( caret, children ) =
-            if EditorBranch.isDeleted config.uuid editorBranch || List.isEmpty config.children then
+            if EditorContext.isDeleted config.uuid editorContext || List.isEmpty config.children then
                 ( Html.nothing, Html.nothing )
 
-            else if EditorBranch.treeIsNodeOpen config.uuid editorBranch then
+            else if EditorContext.treeIsNodeOpen config.uuid editorContext then
                 ( treeNodeCaret (props.setTreeOpen config.uuid) True
                 , ul [] config.children
                 )
@@ -489,11 +489,11 @@ treeNode props editorBranch config =
                 )
 
         link =
-            if EditorBranch.isDeleted config.uuid editorBranch then
+            if EditorContext.isDeleted config.uuid editorContext then
                 a []
 
             else
-                linkTo (Routes.kmEditorEditor editorBranch.branch.uuid (EditorBranch.getEditUuid config.uuid editorBranch))
+                linkTo (Routes.kmEditorEditor editorContext.kmEditor.uuid (EditorContext.getEditUuid config.uuid editorContext))
                     [ dataCy "km-editor_tree_link"
                     , attribute "data-km-editor-link" config.uuid
                     ]
@@ -507,10 +507,10 @@ treeNode props editorBranch config =
     in
     li
         [ classList
-            [ ( "active", EditorBranch.isActive config.uuid editorBranch )
-            , ( "state-edited", EditorBranch.isEdited config.uuid editorBranch )
-            , ( "state-deleted", EditorBranch.isDeleted config.uuid editorBranch )
-            , ( "state-added", EditorBranch.isAdded config.uuid editorBranch )
+            [ ( "active", EditorContext.isActive config.uuid editorContext )
+            , ( "state-edited", EditorContext.isEdited config.uuid editorContext )
+            , ( "state-deleted", EditorContext.isDeleted config.uuid editorContext )
+            , ( "state-added", EditorContext.isAdded config.uuid editorContext )
             ]
         ]
         [ caret
@@ -542,6 +542,6 @@ treeNodeAdd isVisible addMsg addLabel =
         []
 
 
-anyEntityActive : EditorBranch -> List String -> Bool
-anyEntityActive editorBranch =
-    List.any (flip EditorBranch.isActive editorBranch)
+anyEntityActive : EditorContext -> List String -> Bool
+anyEntityActive editorContext =
+    List.any (flip EditorContext.isActive editorContext)
