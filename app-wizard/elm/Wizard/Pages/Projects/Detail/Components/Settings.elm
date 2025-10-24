@@ -557,6 +557,8 @@ knowledgeModel appState questionnaire =
                 [ class "btn btn-outline-secondary migration-link" ]
                 [ text (gettext "Create migration" appState.locale) ]
             ]
+        , p [ class "text-muted form-text mt-1 mb-0" ]
+            [ text (gettext "Project migration lets you move your project to a newer or different version of the knowledge model, and update which questions are included by changing question tags." appState.locale) ]
         ]
 
 
