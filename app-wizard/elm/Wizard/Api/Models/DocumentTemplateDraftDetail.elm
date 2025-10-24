@@ -12,11 +12,11 @@ import Json.Decode.Pipeline as D
 import Time
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Api.Models.BranchSuggestion as BranchSuggestion exposing (BranchSuggestion)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAllowedPackage as DocumentTemplateAllowedPackage
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage exposing (AllowedPackage)
+import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
 import Wizard.Api.Models.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 
 
@@ -34,8 +34,8 @@ type alias DocumentTemplateDraftDetail =
     , formatUuid : Maybe Uuid
     , questionnaireUuid : Maybe Uuid
     , questionnaire : Maybe QuestionnaireSuggestion
-    , branchUuid : Maybe Uuid
-    , branch : Maybe BranchSuggestion
+    , knowledgeModelEditorUuid : Maybe Uuid
+    , knowledgeModelEditor : Maybe KnowledgeModelEditorSuggestion
     }
 
 
@@ -55,8 +55,8 @@ decoder =
         |> D.optional "formatUuid" (D.maybe Uuid.decoder) Nothing
         |> D.optional "questionnaireUuid" (D.maybe Uuid.decoder) Nothing
         |> D.optional "questionnaire" (D.maybe QuestionnaireSuggestion.decoder) Nothing
-        |> D.optional "branchUuid" (D.maybe Uuid.decoder) Nothing
-        |> D.optional "branch" (D.maybe BranchSuggestion.decoder) Nothing
+        |> D.optional "knowledgeModelEditorUuid" (D.maybe Uuid.decoder) Nothing
+        |> D.optional "knowledgeModelEditor" (D.maybe KnowledgeModelEditorSuggestion.decoder) Nothing
 
 
 getPreviewSettings : DocumentTemplateDraftDetail -> DocumentTemplateDraftPreviewSettings
@@ -64,8 +64,8 @@ getPreviewSettings detail =
     { formatUuid = detail.formatUuid
     , questionnaireUuid = detail.questionnaireUuid
     , questionnaire = detail.questionnaire
-    , branchUuid = detail.branchUuid
-    , branch = detail.branch
+    , knowledgeModelEditorUuid = detail.knowledgeModelEditorUuid
+    , knowledgeModelEditor = detail.knowledgeModelEditor
     }
 
 
@@ -75,8 +75,8 @@ updatePreviewSettings previewSettings detail =
         | formatUuid = previewSettings.formatUuid
         , questionnaireUuid = previewSettings.questionnaireUuid
         , questionnaire = previewSettings.questionnaire
-        , branchUuid = previewSettings.branchUuid
-        , branch = previewSettings.branch
+        , knowledgeModelEditorUuid = previewSettings.knowledgeModelEditorUuid
+        , knowledgeModelEditor = previewSettings.knowledgeModelEditor
     }
 
 

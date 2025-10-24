@@ -573,7 +573,7 @@ type alias QuestionnaireRenderer =
 
 type alias Context =
     { events : List Event
-    , branchUuid : Maybe Uuid
+    , kmEditorUuid : Maybe Uuid
     }
 
 
@@ -1855,9 +1855,9 @@ loadTypeHints appState ctx model path questionUuidStr value =
             Uuid.fromUuidString questionUuidStr
 
         typeHintRequest =
-            case ctx.branchUuid of
-                Just branchUuid ->
-                    TypeHintRequest.fromBranchQuestion branchUuid questionUuid value
+            case ctx.kmEditorUuid of
+                Just kmEditorUuid ->
+                    TypeHintRequest.fromKmEditorQuestion kmEditorUuid questionUuid value
 
                 Nothing ->
                     TypeHintRequest.fromQuestionnaire model.questionnaire.uuid questionUuid value

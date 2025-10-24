@@ -10,7 +10,7 @@ module Wizard.Api.Packages exposing
     , getPackagesSuggestionsWithOptions
     , importFromOwl
     , importPackage
-    , postFromBranch
+    , postFromKnowledgeModelEditor
     , postFromMigration
     , pullPackage
     , putPackage
@@ -101,13 +101,13 @@ getPackageWithoutDeprecatedVersions appState packageId =
     Request.get (AppState.toServerInfo appState) ("/packages/" ++ packageId ++ "?excludeDeprecatedVersions=true") PackageDetail.decoder
 
 
-postFromBranch : AppState -> Uuid -> ToMsg Package msg -> Cmd msg
-postFromBranch appState uuid =
+postFromKnowledgeModelEditor : AppState -> Uuid -> ToMsg Package msg -> Cmd msg
+postFromKnowledgeModelEditor appState uuid =
     let
         body =
-            E.object [ ( "branchUuid", Uuid.encode uuid ) ]
+            E.object [ ( "knowledgeModelEditorUuid", Uuid.encode uuid ) ]
     in
-    Request.post (AppState.toServerInfo appState) "/packages/from-branch" Package.decoder body
+    Request.post (AppState.toServerInfo appState) "/packages/from-knowledge-model-editor" Package.decoder body
 
 
 postFromMigration : AppState -> E.Value -> ToMsg Package msg -> Cmd msg

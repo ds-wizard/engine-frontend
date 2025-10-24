@@ -10,12 +10,12 @@ import Form exposing (Form)
 import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorCreateForm as KnowledgeModelEditorCreateForm exposing (KnowledgeModelEditorCreateForm)
 
 
 type alias Model =
-    { savingBranch : ActionResult ()
-    , form : Form FormError BranchCreateForm
+    { savingKmEditor : ActionResult ()
+    , form : Form FormError KnowledgeModelEditorCreateForm
     , packageTypeHintInputModel : TypeHintInput.Model PackageSuggestion
     , package : ActionResult PackageDetail
     , selectedPackage : Maybe String
@@ -25,8 +25,8 @@ type alias Model =
 
 initialModel : AppState -> Maybe String -> Maybe Bool -> Model
 initialModel appState selectedPackage edit =
-    { savingBranch = Unset
-    , form = BranchCreateForm.init appState selectedPackage
+    { savingKmEditor = Unset
+    , form = KnowledgeModelEditorCreateForm.init appState selectedPackage
     , packageTypeHintInputModel = TypeHintInput.init "previousPackageId"
     , package = ActionResult.Loading
     , selectedPackage = selectedPackage

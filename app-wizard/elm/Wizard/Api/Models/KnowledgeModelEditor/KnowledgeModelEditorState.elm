@@ -1,5 +1,5 @@
-module Wizard.Api.Models.Branch.BranchState exposing
-    ( BranchState(..)
+module Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState exposing
+    ( KnowledgeModelEditorState(..)
     , decoder
     , isEditable
     )
@@ -7,7 +7,7 @@ module Wizard.Api.Models.Branch.BranchState exposing
 import Json.Decode as D exposing (Decoder)
 
 
-type BranchState
+type KnowledgeModelEditorState
     = Default
     | Edited
     | Outdated
@@ -15,7 +15,7 @@ type BranchState
     | Migrated
 
 
-decoder : Decoder BranchState
+decoder : Decoder KnowledgeModelEditorState
 decoder =
     D.string
         |> D.andThen
@@ -41,6 +41,6 @@ decoder =
             )
 
 
-isEditable : BranchState -> Bool
-isEditable branchState =
-    not (branchState == Migrating || branchState == Migrated)
+isEditable : KnowledgeModelEditorState -> Bool
+isEditable kmEditorState =
+    not (kmEditorState == Migrating || kmEditorState == Migrated)

@@ -11,10 +11,10 @@ import Wizard.Api.Models.Migration.MigrationState as MigrationState exposing (Mi
 
 
 type alias Migration =
-    { branchUuid : Uuid
-    , branchName : String
+    { knowledgeModelEditorUuid : Uuid
+    , knowledgeModelEditorName : String
     , migrationState : MigrationState
-    , branchPreviousPackageId : String
+    , knowledgeModelEditorPreviousPackageId : String
     , targetPackageId : String
     , currentKnowledgeModel : KnowledgeModel
     }
@@ -23,9 +23,9 @@ type alias Migration =
 decoder : Decoder Migration
 decoder =
     D.succeed Migration
-        |> D.required "branchUuid" Uuid.decoder
-        |> D.required "branchName" D.string
+        |> D.required "knowledgeModelEditorUuid" Uuid.decoder
+        |> D.required "knowledgeModelEditorName" D.string
         |> D.required "migrationState" MigrationState.decoder
-        |> D.required "branchPreviousPackageId" D.string
+        |> D.required "knowledgeModelEditorPreviousPackageId" D.string
         |> D.required "targetPackageId" D.string
         |> D.required "currentKnowledgeModel" KnowledgeModel.decoder

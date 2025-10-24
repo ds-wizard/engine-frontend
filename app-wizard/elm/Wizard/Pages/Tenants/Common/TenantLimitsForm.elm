@@ -15,10 +15,10 @@ import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 
 type alias TenantLimitsForm =
     { activeUsers : Int
-    , branches : Int
     , documentTemplateDrafts : Int
     , documentTemplates : Int
     , documents : Int
+    , knowledgeModelEditors : Int
     , knowledgeModels : Int
     , locales : Int
     , questionnaires : Int
@@ -32,10 +32,10 @@ init tenantDetail =
     let
         fields =
             [ ( "activeUsers", Field.int tenantDetail.usage.activeUsers.max )
-            , ( "branches", Field.int tenantDetail.usage.branches.max )
             , ( "documentTemplateDrafts", Field.int tenantDetail.usage.documentTemplateDrafts.max )
             , ( "documentTemplates", Field.int tenantDetail.usage.documentTemplates.max )
             , ( "documents", Field.int tenantDetail.usage.documents.max )
+            , ( "knowledgeModelEditors", Field.int tenantDetail.usage.knowledgeModelEditors.max )
             , ( "knowledgeModels", Field.int tenantDetail.usage.knowledgeModels.max )
             , ( "locales", Field.int tenantDetail.usage.locales.max )
             , ( "questionnaires", Field.int tenantDetail.usage.questionnaires.max )
@@ -50,10 +50,10 @@ validation : Validation FormError TenantLimitsForm
 validation =
     V.succeed TenantLimitsForm
         |> V.andMap (V.field "activeUsers" V.int)
-        |> V.andMap (V.field "branches" V.int)
         |> V.andMap (V.field "documentTemplateDrafts" V.int)
         |> V.andMap (V.field "documentTemplates" V.int)
         |> V.andMap (V.field "documents" V.int)
+        |> V.andMap (V.field "knowledgeModelEditors" V.int)
         |> V.andMap (V.field "knowledgeModels" V.int)
         |> V.andMap (V.field "locales" V.int)
         |> V.andMap (V.field "questionnaires" V.int)
@@ -65,10 +65,10 @@ encode : TenantLimitsForm -> E.Value
 encode form =
     E.object
         [ ( "activeUsers", E.int form.activeUsers )
-        , ( "branches", E.int form.branches )
         , ( "documentTemplateDrafts", E.int form.documentTemplateDrafts )
         , ( "documentTemplates", E.int form.documentTemplates )
         , ( "documents", E.int form.documents )
+        , ( "knowledgeModelEditors", E.int form.knowledgeModelEditors )
         , ( "knowledgeModels", E.int form.knowledgeModels )
         , ( "locales", E.int form.locales )
         , ( "questionnaires", E.int form.questionnaires )

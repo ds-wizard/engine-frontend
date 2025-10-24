@@ -49,7 +49,7 @@ viewProject appState model ( package, questionnaireModel ) =
                 , isKmEditor = False
                 }
                 { events = []
-                , branchUuid = Nothing
+                , kmEditorUuid = Nothing
                 }
                 questionnaireModel
     in

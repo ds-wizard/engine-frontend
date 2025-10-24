@@ -13,14 +13,14 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Version
-import Wizard.Api.Models.Branch exposing (Branch)
-import Wizard.Api.Models.Branch.BranchState as BranchState
+import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
+import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Common.BranchUtils as BranchUtils
 import Wizard.Pages.KMEditor.Common.DeleteModal as DeleteModal
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUtils as KnowledgeModelEditorUtils
 import Wizard.Pages.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.Pages.KMEditor.Index.Models exposing (Model)
@@ -36,7 +36,7 @@ view appState model =
     div [ listClass "KMEditor__Index" ]
         [ Page.header (gettext "Knowledge Model Editors" appState.locale) []
         , FormResult.view model.deletingMigration
-        , Listing.view appState (listingConfig appState) model.branches
+        , Listing.view appState (listingConfig appState) model.kmEditors
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModal
         , Html.map UpgradeModalMsg <| UpgradeModal.view appState model.upgradeModal
         ]
@@ -51,7 +51,7 @@ createButton appState =
         [ text (gettext "Create" appState.locale) ]
 
 
-listingConfig : AppState -> ViewConfig Branch Msg
+listingConfig : AppState -> ViewConfig KnowledgeModelEditor Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
@@ -78,72 +78,72 @@ listingConfig appState =
     }
 
 
-listingTitle : AppState -> Branch -> Html Msg
-listingTitle appState branch =
+listingTitle : AppState -> KnowledgeModelEditor -> Html Msg
+listingTitle appState kmEditor =
     span []
-        [ linkToKM appState branch [] [ text branch.name ]
-        , listingTitleLastPublishedVersionBadge appState branch
-        , listingTitleBadge appState branch
+        [ linkToKM appState kmEditor [] [ text kmEditor.name ]
+        , listingTitleLastPublishedVersionBadge appState kmEditor
+        , listingTitleBadge appState kmEditor
         ]
 
 
-linkToKM : AppState -> Branch -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
-linkToKM appState branch =
-    case branch.state of
-        BranchState.Migrating ->
-            if Feature.knowledgeModelEditorContinueMigration appState branch then
-                linkTo (Routes.kmEditorMigration branch.uuid)
+linkToKM : AppState -> KnowledgeModelEditor -> List (Attribute Msg) -> List (Html Msg) -> Html Msg
+linkToKM appState kmEditor =
+    case kmEditor.state of
+        KnowledgeModelEditorState.Migrating ->
+            if Feature.knowledgeModelEditorContinueMigration appState kmEditor then
+                linkTo (Routes.kmEditorMigration kmEditor.uuid)
 
             else
                 span
 
-        BranchState.Migrated ->
-            if Feature.knowledgeModelEditorPublish appState branch then
-                linkTo (Routes.kmEditorPublish branch.uuid)
+        KnowledgeModelEditorState.Migrated ->
+            if Feature.knowledgeModelEditorPublish appState kmEditor then
+                linkTo (Routes.kmEditorPublish kmEditor.uuid)
 
             else
                 span
 
         _ ->
-            linkTo (Routes.kmEditorEditor branch.uuid Nothing)
+            linkTo (Routes.kmEditorEditor kmEditor.uuid Nothing)
 
 
-listingTitleLastPublishedVersionBadge : AppState -> Branch -> Html msg
-listingTitleLastPublishedVersionBadge appState branch =
+listingTitleLastPublishedVersionBadge : AppState -> KnowledgeModelEditor -> Html msg
+listingTitleLastPublishedVersionBadge appState kmEditor =
     let
         badge version =
             Badge.light (tooltip <| gettext "Last published version" appState.locale)
                 [ text <| Version.toString version ]
     in
-    BranchUtils.lastVersion appState branch
+    KnowledgeModelEditorUtils.lastVersion appState kmEditor
         |> Maybe.map badge
         |> Maybe.withDefault Html.nothing
 
 
-listingTitleBadge : AppState -> Branch -> Html Msg
-listingTitleBadge appState branch =
-    case branch.state of
-        BranchState.Outdated ->
+listingTitleBadge : AppState -> KnowledgeModelEditor -> Html Msg
+listingTitleBadge appState kmEditor =
+    case kmEditor.state of
+        KnowledgeModelEditorState.Outdated ->
             a
                 ([ class Badge.warningClass
-                 , onClick (UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId)))
+                 , onClick (UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.withDefault "" kmEditor.forkOfPackageId)))
                  , dataCy "km-editor_list_outdated-badge"
                  ]
                     ++ tooltip (gettext "There is a new version of parent knowledge model" appState.locale)
                 )
                 [ text (gettext "update available" appState.locale) ]
 
-        BranchState.Migrating ->
+        KnowledgeModelEditorState.Migrating ->
             Badge.info
                 (tooltip <| gettext "This editor is in the process of migration to a new parent knowledge model" appState.locale)
                 [ text (gettext "migrating" appState.locale) ]
 
-        BranchState.Migrated ->
+        KnowledgeModelEditorState.Migrated ->
             Badge.success
                 (tooltip <| gettext "This editor has been migrated to a new parent knowledge model, you can publish it now" appState.locale)
                 [ text (gettext "migrated" appState.locale) ]
 
-        BranchState.Edited ->
+        KnowledgeModelEditorState.Edited ->
             span (tooltip (gettext "This editor contains unpublished changes" appState.locale))
                 [ faKmEditorListEdited ]
 
@@ -151,11 +151,11 @@ listingTitleBadge appState branch =
             Html.nothing
 
 
-listingDescription : AppState -> Branch -> Html Msg
-listingDescription appState branch =
+listingDescription : AppState -> KnowledgeModelEditor -> Html Msg
+listingDescription appState kmEditor =
     let
         parent =
-            case branch.forkOfPackageId of
+            case kmEditor.forkOfPackageId of
                 Just forkOfPackageId ->
                     let
                         elem =
@@ -175,20 +175,20 @@ listingDescription appState branch =
                     Html.nothing
     in
     span []
-        [ span [ class "fragment" ] [ code [] [ text branch.kmId ] ]
+        [ span [ class "fragment" ] [ code [] [ text kmEditor.kmId ] ]
         , parent
         ]
 
 
-listingActions : AppState -> Branch -> List (ListingDropdownItem Msg)
-listingActions appState branch =
+listingActions : AppState -> KnowledgeModelEditor -> List (ListingDropdownItem Msg)
+listingActions appState kmEditor =
     let
         openEditor =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faKmEditorListEdit
                 , label = gettext "Open Editor" appState.locale
-                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute branch.uuid (KMEditorRoute.Edit Nothing))
+                , msg = ListingActionLink (Routes.KMEditorRoute <| EditorRoute kmEditor.uuid (KMEditorRoute.Edit Nothing))
                 , dataCy = "open-editor"
                 }
 
@@ -197,7 +197,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faKmEditorListUpdate
                 , label = gettext "Update" appState.locale
-                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open branch.uuid branch.name (Maybe.withDefault "" branch.forkOfPackageId))
+                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.withDefault "" kmEditor.forkOfPackageId))
                 , dataCy = "update"
                 }
 
@@ -206,7 +206,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faKmEditorListContinueMigration
                 , label = gettext "Continue migration" appState.locale
-                , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute branch.uuid
+                , msg = ListingActionLink <| Routes.KMEditorRoute <| MigrationRoute kmEditor.uuid
                 , dataCy = "continue-migration"
                 }
 
@@ -215,7 +215,7 @@ listingActions appState branch =
                 { extraClass = Nothing
                 , icon = faCancel
                 , label = gettext "Cancel migration" appState.locale
-                , msg = ListingActionMsg <| DeleteMigration branch.uuid
+                , msg = ListingActionMsg <| DeleteMigration kmEditor.uuid
                 , dataCy = "cancel-migration"
                 }
 
@@ -224,24 +224,24 @@ listingActions appState branch =
                 { extraClass = Just "text-danger"
                 , icon = faDelete
                 , label = gettext "Delete" appState.locale
-                , msg = ListingActionMsg <| DeleteModalMsg (DeleteModal.open branch.uuid branch.name)
+                , msg = ListingActionMsg <| DeleteModalMsg (DeleteModal.open kmEditor.uuid kmEditor.name)
                 , dataCy = "delete-migration"
                 }
 
         showOpenEditor =
-            Feature.knowledgeModelEditorOpen appState branch
+            Feature.knowledgeModelEditorOpen appState kmEditor
 
         showUpgrade =
-            Feature.knowledgeModelEditorUpgrade appState branch
+            Feature.knowledgeModelEditorUpgrade appState kmEditor
 
         showContinueMigration =
-            Feature.knowledgeModelEditorContinueMigration appState branch
+            Feature.knowledgeModelEditorContinueMigration appState kmEditor
 
         showCancelMigration =
-            Feature.knowledgeModelEditorCancelMigration appState branch
+            Feature.knowledgeModelEditorCancelMigration appState kmEditor
 
         showDelete =
-            Feature.knowledgeModelEditorDelete appState branch
+            Feature.knowledgeModelEditorDelete appState kmEditor
 
         groups =
             [ [ ( openEditor, showOpenEditor ) ]

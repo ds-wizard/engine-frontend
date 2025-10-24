@@ -1,5 +1,5 @@
-module Wizard.Api.Models.BranchSuggestion exposing
-    ( BranchSuggestion
+module Wizard.Api.Models.KnowledgeModelEditorSuggestion exposing
+    ( KnowledgeModelEditorSuggestion
     , decoder
     )
 
@@ -8,14 +8,14 @@ import Json.Decode.Pipeline as D
 import Uuid exposing (Uuid)
 
 
-type alias BranchSuggestion =
+type alias KnowledgeModelEditorSuggestion =
     { uuid : Uuid
     , name : String
     }
 
 
-decoder : Decoder BranchSuggestion
+decoder : Decoder KnowledgeModelEditorSuggestion
 decoder =
-    D.succeed BranchSuggestion
+    D.succeed KnowledgeModelEditorSuggestion
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string

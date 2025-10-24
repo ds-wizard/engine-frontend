@@ -204,7 +204,7 @@ viewEditLimitsModal appState model =
                 Just form ->
                     [ Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "users" "Users"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "activeUsers" "Active Users"
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "branches" "Knowledge Model Editors"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "knowledgeModelEditors" "Knowledge Model Editors"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "knowledgeModels" "Knowledge Models"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documentTemplateDrafts" "Document Template Editors"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documentTemplates" "Document Templates"

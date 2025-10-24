@@ -5,10 +5,10 @@ import Common.Api.Models.Prefab exposing (Prefab)
 import Common.Api.WebSocket as WebSocket
 import Debounce
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.Pages.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
@@ -20,7 +20,7 @@ import Wizard.Pages.Projects.Detail.Components.ProjectSaving as ProjectSaving
 
 
 type Msg
-    = GetBranchComplete (Result ApiError BranchDetail)
+    = GetKnowledgeModelEditorComplete (Result ApiError KnowledgeModelEditorDetail)
     | GetIntegrationPrefabsComplete (Result ApiError (List (Prefab Integration)))
     | GetKnowledgeModelSecretsComplete (Result ApiError (List KnowledgeModelSecret))
     | WebSocketMsg WebSocket.RawMsg

@@ -49,11 +49,11 @@ fetchTypeHintsLegacy appState mbPackageId events questionUuid q =
 
 
 testTypeHints : AppState -> Uuid -> String -> String -> Dict String String -> ToMsg TypeHintTestResponse msg -> Cmd msg
-testTypeHints appState branchUuid integrationUuid q variables =
+testTypeHints appState kmEditorUuid integrationUuid q variables =
     let
         data =
             E.object
-                [ ( "branchUuid", Uuid.encode branchUuid )
+                [ ( "knowledgeModelEditorUuid", Uuid.encode kmEditorUuid )
                 , ( "integrationUuid", E.string integrationUuid )
                 , ( "q", E.string q )
                 , ( "variables", E.dict identity E.string variables )

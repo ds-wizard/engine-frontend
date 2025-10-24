@@ -22,7 +22,7 @@ import Html.Events exposing (onClick)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Version
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.Package exposing (Package)
 import Wizard.Api.Packages as Packages
 import Wizard.Components.Html exposing (linkTo)
@@ -70,7 +70,7 @@ openMsg =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , branchUuid : Uuid
+    , kmEditorUuid : Uuid
     }
 
 
@@ -82,7 +82,7 @@ update cfg appState msg model =
 
         Publish ->
             ( { model | publishing = ActionResult.Loading }
-            , Packages.postFromBranch appState cfg.branchUuid (cfg.wrapMsg << PublishCompleted)
+            , Packages.postFromKnowledgeModelEditor appState cfg.kmEditorUuid (cfg.wrapMsg << PublishCompleted)
             )
 
         PublishCompleted result ->
@@ -101,7 +101,7 @@ update cfg appState msg model =
 
 
 type alias ViewConfig =
-    { branch : BranchDetail }
+    { kmEditor : KnowledgeModelEditorDetail }
 
 
 view : ViewConfig -> AppState -> Model -> Html Msg
@@ -110,7 +110,7 @@ view cfg appState model =
         info =
             div [ class "alert alert-info" ]
                 (String.formatHtml (gettext "Check the knowledge model's metadata before publishing. You change them in %s." appState.locale)
-                    [ linkTo (Routes.kmEditorEditorSettings cfg.branch.uuid)
+                    [ linkTo (Routes.kmEditorEditorSettings cfg.kmEditor.uuid)
                         [ onClick (SetOpen False), class "btn-link with-icon" ]
                         [ faSettings
                         , text (gettext "Settings" appState.locale)
@@ -120,12 +120,12 @@ view cfg appState model =
 
         modalContent =
             [ info
-            , FormGroup.readOnlyInput cfg.branch.name (gettext "Name" appState.locale)
-            , FormGroup.readOnlyInput cfg.branch.description (gettext "Description" appState.locale)
-            , FormGroup.readOnlyInput cfg.branch.kmId (gettext "Knowledge Model ID" appState.locale)
-            , FormGroup.readOnlyInput (Version.toString cfg.branch.version) (gettext "Version" appState.locale)
-            , FormGroup.readOnlyInput cfg.branch.license (gettext "License" appState.locale)
-            , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.branch.readme) (gettext "Readme" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.name (gettext "Name" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.description (gettext "Description" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.kmId (gettext "Knowledge Model ID" appState.locale)
+            , FormGroup.readOnlyInput (Version.toString cfg.kmEditor.version) (gettext "Version" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.license (gettext "License" appState.locale)
+            , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.kmEditor.readme) (gettext "Readme" appState.locale)
             ]
 
         modalConfig =

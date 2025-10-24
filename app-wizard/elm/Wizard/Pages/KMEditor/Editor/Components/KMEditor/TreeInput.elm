@@ -24,7 +24,7 @@ import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 
 
 type alias Model =
@@ -57,8 +57,8 @@ type Msg
     | CollapseAll
 
 
-update : Msg -> EditorBranch -> Model -> Model
-update msg editorBranch model =
+update : Msg -> EditorContext -> Model -> Model
+update msg editorContext model =
     case msg of
         ToggleTreeOpen uuid ->
             if Set.member uuid model.treeOpenUuids then
@@ -71,7 +71,7 @@ update msg editorBranch model =
             { model | selected = uuid }
 
         ExpandAll ->
-            { model | treeOpenUuids = Set.fromList (EditorBranch.getAllUuids editorBranch) }
+            { model | treeOpenUuids = Set.fromList (EditorContext.getAllUuids editorContext) }
 
         CollapseAll ->
             { model | treeOpenUuids = Set.empty }
@@ -86,7 +86,7 @@ type MovingEntity
 
 
 type alias ViewProps =
-    { editorBranch : EditorBranch
+    { editorContext : EditorContext
     , movingUuid : String
     , movingParentUuid : String
     , movingEntity : MovingEntity
@@ -118,20 +118,20 @@ treeNodeKM : AppState -> ViewProps -> Model -> Html Msg
 treeNodeKM appState props model =
     let
         knowledgeModel =
-            props.editorBranch.branch.knowledgeModel
+            props.editorContext.kmEditor.knowledgeModel
 
         uuid =
             Uuid.toString knowledgeModel.uuid
 
         chapters =
             KnowledgeModel.getChapters knowledgeModel
-                |> EditorBranch.filterDeletedWith .uuid props.editorBranch
+                |> EditorContext.filterDeletedWith .uuid props.editorContext
                 |> List.map (treeNodeChapter appState props model)
 
         config =
             { uuid = uuid
             , icon = faKmKnowledgeModel
-            , label = props.editorBranch.branch.name
+            , label = props.editorContext.kmEditor.name
             , children = chapters
             , untitledLabel = ""
             , allowed = False
@@ -153,8 +153,8 @@ treeNodeChapter appState props model chapter =
             not isParent && props.movingEntity == MovingQuestion
 
         questions =
-            KnowledgeModel.getChapterQuestions chapter.uuid props.editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith Question.getUuid props.editorBranch
+            KnowledgeModel.getChapterQuestions chapter.uuid props.editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith Question.getUuid props.editorContext
                 |> List.map (treeNodeQuestion appState props model False)
 
         config =
@@ -196,22 +196,22 @@ treeNodeQuestion appState props model isChild question =
                    )
 
         answers =
-            KnowledgeModel.getQuestionAnswers uuid props.editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith .uuid props.editorBranch
+            KnowledgeModel.getQuestionAnswers uuid props.editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith .uuid props.editorContext
                 |> List.map (treeNodeAnswer appState props model (isSelf || isChild))
 
         itemTemplateQuestions =
-            KnowledgeModel.getQuestionItemTemplateQuestions uuid props.editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith Question.getUuid props.editorBranch
+            KnowledgeModel.getQuestionItemTemplateQuestions uuid props.editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith Question.getUuid props.editorContext
                 |> List.map (treeNodeQuestion appState props model (isSelf || isChild))
 
         experts =
-            KnowledgeModel.getQuestionExperts uuid props.editorBranch.branch.knowledgeModel
+            KnowledgeModel.getQuestionExperts uuid props.editorContext.kmEditor.knowledgeModel
                 |> List.filter (\e -> e.uuid == props.movingUuid)
                 |> List.map (treeNodeExpert appState props)
 
         references =
-            KnowledgeModel.getQuestionReferences uuid props.editorBranch.branch.knowledgeModel
+            KnowledgeModel.getQuestionReferences uuid props.editorContext.kmEditor.knowledgeModel
                 |> List.filter (\r -> Reference.getUuid r == props.movingUuid)
                 |> List.map (treeNodeReference appState props)
 
@@ -243,8 +243,8 @@ treeNodeAnswer appState props model isChild answer =
             not isSelf && not isParent && not isChild && props.movingEntity == MovingQuestion
 
         followupQuestions =
-            KnowledgeModel.getAnswerFollowupQuestions answer.uuid props.editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith Question.getUuid props.editorBranch
+            KnowledgeModel.getAnswerFollowupQuestions answer.uuid props.editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith Question.getUuid props.editorContext
                 |> List.map (treeNodeQuestion appState props model (isSelf || isChild))
 
         config =
@@ -292,7 +292,7 @@ treeNodeReference appState props reference =
         config =
             { uuid = Reference.getUuid reference
             , icon = faKmReference
-            , label = Reference.getVisibleName (KnowledgeModel.getAllQuestions props.editorBranch.branch.knowledgeModel) (KnowledgeModel.getAllResourcePages props.editorBranch.branch.knowledgeModel) reference
+            , label = Reference.getVisibleName (KnowledgeModel.getAllQuestions props.editorContext.kmEditor.knowledgeModel) (KnowledgeModel.getAllResourcePages props.editorContext.kmEditor.knowledgeModel) reference
             , children = []
             , untitledLabel = gettext "Untitled reference" appState.locale
             , allowed = False

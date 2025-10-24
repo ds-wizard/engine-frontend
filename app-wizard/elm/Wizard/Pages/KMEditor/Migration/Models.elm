@@ -10,7 +10,7 @@ import Wizard.Api.Models.Migration exposing (Migration)
 
 
 type alias Model =
-    { branchUuid : Uuid
+    { kmEditorUuid : Uuid
     , migration : ActionResult Migration
     , conflict : ActionResult String
     , buttonClicked : Maybe ButtonClicked
@@ -24,8 +24,8 @@ type ButtonClicked
 
 
 initialModel : Uuid -> Model
-initialModel branchUuid =
-    { branchUuid = branchUuid
+initialModel kmEditorUuid =
+    { kmEditorUuid = kmEditorUuid
     , migration = Loading
     , conflict = Unset
     , buttonClicked = Nothing

@@ -7,10 +7,10 @@ import Json.Decode.Pipeline as D
 
 type alias Usage =
     { activeUsers : UsageValue
-    , branches : UsageValue
     , documents : UsageValue
     , documentTemplateDrafts : UsageValue
     , documentTemplates : UsageValue
+    , knowledgeModelEditors : UsageValue
     , knowledgeModels : UsageValue
     , locales : UsageValue
     , questionnaires : UsageValue
@@ -23,10 +23,10 @@ decoder : Decoder Usage
 decoder =
     D.succeed Usage
         |> D.required "activeUsers" UsageValue.decoder
-        |> D.required "branches" UsageValue.decoder
         |> D.required "documents" UsageValue.decoder
         |> D.required "documentTemplateDrafts" UsageValue.decoder
         |> D.required "documentTemplates" UsageValue.decoder
+        |> D.required "knowledgeModelEditors" UsageValue.decoder
         |> D.required "knowledgeModels" UsageValue.decoder
         |> D.required "locales" UsageValue.decoder
         |> D.required "questionnaires" UsageValue.decoder

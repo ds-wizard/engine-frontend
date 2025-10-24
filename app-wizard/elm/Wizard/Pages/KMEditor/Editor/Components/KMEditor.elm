@@ -121,7 +121,7 @@ import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Breadcrumbs as Breadcrumbs
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Tree as Tree
@@ -246,8 +246,8 @@ type alias UpdateConfig msg =
     }
 
 
-update : AppState -> UpdateConfig msg -> Msg -> ( EditorBranch, Model ) -> ( EditorBranch, Model, Cmd msg )
-update appState cfg msg ( editorBranch, model ) =
+update : AppState -> UpdateConfig msg -> Msg -> ( EditorContext, Model ) -> ( EditorContext, Model, Cmd msg )
+update appState cfg msg ( editorContext, model ) =
     let
         showHideMarkdownPreview visible field m =
             if visible then
@@ -258,31 +258,31 @@ update appState cfg msg ( editorBranch, model ) =
     in
     case msg of
         SplitPaneMsg splitPaneMsg ->
-            ( editorBranch, { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }, Cmd.none )
+            ( editorContext, { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }, Cmd.none )
 
         SetFullscreen fullscreen ->
-            ( editorBranch, model, Task.dispatch (cfg.setFullscreenMsg fullscreen) )
+            ( editorContext, model, Task.dispatch (cfg.setFullscreenMsg fullscreen) )
 
         SetTreeOpen entityUuid open ->
-            ( EditorBranch.treeSetNodeOpen entityUuid open editorBranch, model, Cmd.none )
+            ( EditorContext.treeSetNodeOpen entityUuid open editorContext, model, Cmd.none )
 
         ExpandAll ->
-            ( EditorBranch.treeExpandAll editorBranch, model, Cmd.none )
+            ( EditorContext.treeExpandAll editorContext, model, Cmd.none )
 
         CollapseAll ->
-            ( EditorBranch.treeCollapseAll editorBranch, model, Cmd.none )
+            ( EditorContext.treeCollapseAll editorContext, model, Cmd.none )
 
         CopyUuid uuid ->
-            ( editorBranch, model, Copy.copyToClipboard uuid )
+            ( editorContext, model, Copy.copyToClipboard uuid )
 
         CopyString value ->
-            ( editorBranch, { model | lastCopiedString = Just value }, Copy.copyToClipboard value )
+            ( editorContext, { model | lastCopiedString = Just value }, Copy.copyToClipboard value )
 
         ClearLastCopiedString ->
-            ( editorBranch, { model | lastCopiedString = Nothing }, Cmd.none )
+            ( editorContext, { model | lastCopiedString = Nothing }, Cmd.none )
 
         ShowHideMarkdownPreview visible field ->
-            ( editorBranch, showHideMarkdownPreview visible field model, Cmd.none )
+            ( editorContext, showHideMarkdownPreview visible field model, Cmd.none )
 
         ReorderableMsg field reorderableMsg ->
             let
@@ -291,38 +291,38 @@ update appState cfg msg ( editorBranch, model ) =
                         |> Maybe.withDefault Reorderable.initialState
                         |> Reorderable.update reorderableMsg
             in
-            ( editorBranch
+            ( editorContext
             , { model | reorderableStates = Dict.insert field reorderableState model.reorderableStates }
             , Cmd.none
             )
 
         SetDeleteModalState deleteModalState ->
-            ( editorBranch, { model | deleteModalState = deleteModalState }, Cmd.none )
+            ( editorContext, { model | deleteModalState = deleteModalState }, Cmd.none )
 
         OpenMoveModal movingEntity movingUuid ->
             let
                 scrollCmd =
                     Dom.scrollIntoViewCenter "[data-km-editor_move-modal_item_current]"
             in
-            ( editorBranch
+            ( editorContext
             , { model
                 | moveModalState =
                     Just
                         { movingEntity = movingEntity
                         , movingUuid = movingUuid
-                        , treeInputModel = TreeInput.initialModel (Set.fromList editorBranch.openNodeUuids)
+                        , treeInputModel = TreeInput.initialModel (Set.fromList editorContext.openNodeUuids)
                         }
               }
             , scrollCmd
             )
 
         MoveModalMsg moveModalMsg ->
-            ( editorBranch
+            ( editorContext
             , { model
                 | moveModalState =
                     case model.moveModalState of
                         Just oldState ->
-                            Just { oldState | treeInputModel = TreeInput.update moveModalMsg editorBranch oldState.treeInputModel }
+                            Just { oldState | treeInputModel = TreeInput.update moveModalMsg editorContext oldState.treeInputModel }
 
                         Nothing ->
                             Nothing
@@ -331,17 +331,17 @@ update appState cfg msg ( editorBranch, model ) =
             )
 
         CloseMoveModal ->
-            ( editorBranch, { model | moveModalState = Nothing }, Cmd.none )
+            ( editorContext, { model | moveModalState = Nothing }, Cmd.none )
 
         SetWarningPanelsOpen open ->
-            ( editorBranch, { model | warningsPanelOpen = open }, Cmd.none )
+            ( editorContext, { model | warningsPanelOpen = open }, Cmd.none )
 
         TestIntegrationRequest integrationUuid q variables ->
             let
                 cmd =
                     TypeHintsApi.testTypeHints
                         appState
-                        editorBranch.branch.uuid
+                        editorContext.kmEditor.uuid
                         integrationUuid
                         q
                         variables
@@ -350,7 +350,7 @@ update appState cfg msg ( editorBranch, model ) =
                 newModel =
                     { model | integrationTestResults = Dict.insert integrationUuid ActionResult.Loading model.integrationTestResults }
             in
-            ( editorBranch, newModel, cmd )
+            ( editorContext, newModel, cmd )
 
         TestIntegrationRequestCompleted integrationUuid result ->
             case result of
@@ -366,9 +366,9 @@ update appState cfg msg ( editorBranch, model ) =
                             EditIntegrationApiEventData.init
                                 |> setTestResponse (Just typeHintTestResponse)
                                 |> (EditIntegrationEvent << EditIntegrationApiEvent)
-                                |> cfg.eventMsg False Nothing Nothing (EditorBranch.getParentUuid integrationUuid editorBranch) (Just integrationUuid)
+                                |> cfg.eventMsg False Nothing Nothing (EditorContext.getParentUuid integrationUuid editorContext) (Just integrationUuid)
                     in
-                    ( editorBranch, newModel, Task.dispatch setTestResponseMsg )
+                    ( editorContext, newModel, Task.dispatch setTestResponseMsg )
 
                 Err error ->
                     let
@@ -380,13 +380,13 @@ update appState cfg msg ( editorBranch, model ) =
                                         model.integrationTestResults
                             }
                     in
-                    ( editorBranch, newModel, Cmd.none )
+                    ( editorContext, newModel, Cmd.none )
 
         TestIntegrationPreview integrationUuid fieldIdentifier ->
             let
                 request =
-                    TypeHintRequest.fromBranchIntegration
-                        editorBranch.branch.uuid
+                    TypeHintRequest.fromKmEditorIntegration
+                        editorContext.kmEditor.uuid
                         (Uuid.fromUuidString integrationUuid)
 
                 cmd =
@@ -399,7 +399,7 @@ update appState cfg msg ( editorBranch, model ) =
                         fieldIdentifier
                         { model | integrationTestPreviews = Dict.insert fieldIdentifier ActionResult.Loading model.integrationTestPreviews }
             in
-            ( editorBranch, newModel, cmd )
+            ( editorContext, newModel, cmd )
 
         TestIntegrationPreviewCompleted fieldIdentifier result ->
             case result of
@@ -411,7 +411,7 @@ update appState cfg msg ( editorBranch, model ) =
                                     Dict.insert fieldIdentifier (ActionResult.Success typeHints) model.integrationTestPreviews
                             }
                     in
-                    ( editorBranch, newModel, Cmd.none )
+                    ( editorContext, newModel, Cmd.none )
 
                 Err error ->
                     let
@@ -423,10 +423,10 @@ update appState cfg msg ( editorBranch, model ) =
                                         model.integrationTestPreviews
                             }
                     in
-                    ( editorBranch, newModel, Cmd.none )
+                    ( editorContext, newModel, Cmd.none )
 
         CurlImportModalSetIntegration integrationUuid ->
-            ( editorBranch
+            ( editorContext
             , { model | curlImportModalState = { integrationUuid = integrationUuid, curlString = "" } }
             , Cmd.none
             )
@@ -436,7 +436,7 @@ update appState cfg msg ( editorBranch, model ) =
                 curlImportModalState =
                     model.curlImportModalState
             in
-            ( editorBranch, { model | curlImportModalState = { curlImportModalState | curlString = curlString } }, Cmd.none )
+            ( editorContext, { model | curlImportModalState = { curlImportModalState | curlString = curlString } }, Cmd.none )
 
         CurlImportModalConfirm ->
             case model.curlImportModalState.integrationUuid of
@@ -459,7 +459,7 @@ update appState cfg msg ( editorBranch, model ) =
                                 |> setRequestHeaders (List.map KeyValuePair.fromTuple curlRequest.headers)
                                 |> setIfNotEmpty setRequestBody curlRequest.body
                                 |> (EditIntegrationEvent << EditIntegrationApiEvent)
-                                |> cfg.eventMsg False Nothing Nothing (EditorBranch.getParentUuid integrationUuid editorBranch) (Just integrationUuid)
+                                |> cfg.eventMsg False Nothing Nothing (EditorContext.getParentUuid integrationUuid editorContext) (Just integrationUuid)
 
                         newModel =
                             { model
@@ -467,13 +467,13 @@ update appState cfg msg ( editorBranch, model ) =
                                 , markdownPreviews = (integrationUuid ++ ":requestAdvancedConfiguration") :: model.markdownPreviews
                             }
                     in
-                    ( editorBranch, newModel, Task.dispatch setRequestBodyMsg )
+                    ( editorContext, newModel, Task.dispatch setRequestBodyMsg )
 
                 Nothing ->
-                    ( editorBranch, model, Cmd.none )
+                    ( editorContext, model, Cmd.none )
 
         SetCursorPosition field start end ->
-            ( editorBranch, { model | cursorPositions = Dict.insert field ( start, end ) model.cursorPositions }, Cmd.none )
+            ( editorContext, { model | cursorPositions = Dict.insert field ( start, end ) model.cursorPositions }, Cmd.none )
 
 
 
@@ -504,8 +504,8 @@ subscriptions model =
 -- VIEW
 
 
-view : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> List KnowledgeModelSecret -> EditorBranch -> Html msg
-view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
+view : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> List KnowledgeModelSecret -> EditorContext -> Html msg
+view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorContext =
     let
         ( expandIcon, expandMsg ) =
             if AppState.isFullscreen appState then
@@ -541,7 +541,7 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
                 }
 
         warningsCount =
-            List.length editorBranch.warnings
+            List.length editorContext.warnings
 
         warningsButton =
             if warningsCount > 0 then
@@ -560,42 +560,42 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
         warningsPanel =
             if warningsCount > 0 && model.warningsPanelOpen then
                 Html.map wrapMsg <|
-                    viewWarningsPanel appState editorBranch
+                    viewWarningsPanel appState editorContext
 
             else
                 Html.nothing
     in
     div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
-            [ Breadcrumbs.view appState editorBranch
+            [ Breadcrumbs.view appState editorContext
             , warningsButton
             , a [ class "breadcrumb-button", onClick expandMsg ] [ expandIcon ]
             ]
         , div [ class "editor-body" ]
             [ SplitPane.view splitPaneConfig
-                (Tree.view treeViewProps appState editorBranch)
-                (viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch)
+                (Tree.view treeViewProps appState editorContext)
+                (viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorContext)
                 model.splitPane
             , warningsPanel
             ]
-        , deleteModal appState wrapMsg eventMsg editorBranch model.deleteModalState
-        , moveModal appState wrapMsg eventMsg editorBranch model.moveModalState
+        , deleteModal appState wrapMsg eventMsg editorContext model.deleteModalState
+        , moveModal appState wrapMsg eventMsg editorContext model.moveModalState
         , curlImportModal appState wrapMsg model.curlImportModalState
         ]
 
 
-viewWarningsPanel : AppState -> EditorBranch -> Html Msg
-viewWarningsPanel appState editorBranch =
+viewWarningsPanel : AppState -> EditorContext -> Html Msg
+viewWarningsPanel appState editorContext =
     let
         viewWarning warning =
-            li [] [ linkTo (EditorBranch.editorRoute editorBranch warning.editorUuid) [] [ text warning.message ] ]
+            li [] [ linkTo (EditorContext.editorRoute editorContext warning.editorUuid) [] [ text warning.message ] ]
 
         warnings =
-            if List.isEmpty editorBranch.warnings then
+            if List.isEmpty editorContext.warnings then
                 Flash.info (gettext "There are no more warnings." appState.locale)
 
             else
-                ul [] (List.map viewWarning editorBranch.warnings)
+                ul [] (List.map viewWarning editorContext.warnings)
     in
     div [ class "editor-right-panel" ]
         [ warnings ]
@@ -606,17 +606,17 @@ type alias EditorConfig msg =
     , wrapMsg : Msg -> msg
     , eventMsg : EventMsg msg
     , model : Model
-    , editorBranch : EditorBranch
+    , editorContext : EditorContext
     , kmSecrets : List KnowledgeModelSecret
     , integrationPrefabs : List Integration
     }
 
 
-viewEditor : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> List KnowledgeModelSecret -> EditorBranch -> Html msg
-viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
+viewEditor : AppState -> (Msg -> msg) -> EventMsg msg -> Model -> List Integration -> List KnowledgeModelSecret -> EditorContext -> Html msg
+viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorContext =
     let
         km =
-            editorBranch.branch.knowledgeModel
+            editorContext.kmEditor.knowledgeModel
 
         kmUuid =
             Uuid.toString km.uuid
@@ -626,20 +626,20 @@ viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBr
             , wrapMsg = wrapMsg
             , eventMsg = eventMsg
             , model = model
-            , editorBranch = editorBranch
+            , editorContext = editorContext
             , kmSecrets = kmSecrets
             , integrationPrefabs = integrationPrefabs
             }
 
         kmEditor =
-            if editorBranch.activeUuid == kmUuid then
-                Just <| viewKnowledgeModelEditor editorConfig editorBranch.branch.knowledgeModel
+            if editorContext.activeUuid == kmUuid then
+                Just <| viewKnowledgeModelEditor editorConfig editorContext.kmEditor.knowledgeModel
 
             else
                 Nothing
 
         createEditor viewEntityEditor getEntity =
-            Maybe.map (viewEntityEditor editorConfig) (getEntity editorBranch.activeUuid km)
+            Maybe.map (viewEntityEditor editorConfig) (getEntity editorContext.activeUuid km)
 
         chapterEditor =
             createEditor viewChapterEditor KnowledgeModel.getChapter
@@ -694,11 +694,11 @@ viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBr
                 |> Maybe.orElse choiceEditor
                 |> Maybe.orElse referenceEditor
                 |> Maybe.orElse expertEditor
-                |> Maybe.map (Tuple.pair editorBranch.activeUuid)
+                |> Maybe.map (Tuple.pair editorContext.activeUuid)
                 |> Maybe.withDefault emptyEditor
     in
     Html.Keyed.node "div"
-        [ class "editor-form-view", id "editor-view", attribute "data-editor-uuid" editorBranch.activeUuid ]
+        [ class "editor-form-view", id "editor-view", attribute "data-editor-uuid" editorContext.activeUuid ]
         [ editorContent ]
 
 
@@ -707,7 +707,7 @@ viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBr
 
 
 viewKnowledgeModelEditor : EditorConfig msg -> KnowledgeModel -> Html msg
-viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km =
+viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorContext } km =
     let
         kmUuid =
             Uuid.toString km.uuid
@@ -762,13 +762,13 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , label = gettext "Chapters" appState.locale
                 , items =
                     km.chapterUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingChapters editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingChapters editorContext
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setChapterUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
+                , getRoute = EditorContext.editorRoute editorContext
                 , getName = KnowledgeModel.getChapterName km
                 , untitledLabel = gettext "Untitled chapter" appState.locale
                 , addChildLabel = gettext "Add chapter" appState.locale
@@ -782,13 +782,13 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , label = gettext "Metrics" appState.locale
                 , items =
                     km.metricUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingMetrics editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingMetrics editorContext
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setMetricUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
+                , getRoute = EditorContext.editorRoute editorContext
                 , getName = KnowledgeModel.getMetricName km
                 , untitledLabel = gettext "Untitled metric" appState.locale
                 , addChildLabel = gettext "Add metric" appState.locale
@@ -802,13 +802,13 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , label = gettext "Phases" appState.locale
                 , items =
                     km.phaseUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingPhases editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingPhases editorContext
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setPhaseUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
+                , getRoute = EditorContext.editorRoute editorContext
                 , getName = KnowledgeModel.getPhaseName km
                 , untitledLabel = gettext "Untitled phase" appState.locale
                 , addChildLabel = gettext "Add phase" appState.locale
@@ -822,13 +822,13 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , label = gettext "Question Tags" appState.locale
                 , items =
                     km.tagUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingTags editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingTags editorContext
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setTagUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
+                , getRoute = EditorContext.editorRoute editorContext
                 , getName = KnowledgeModel.getTagName km
                 , untitledLabel = gettext "Untitled tag" appState.locale
                 , addChildLabel = gettext "Add tag" appState.locale
@@ -842,13 +842,13 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , label = gettext "Integrations" appState.locale
                 , items =
                     km.integrationUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingIntegrations editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingIntegrations editorContext
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setIntegrationUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
+                , getRoute = EditorContext.editorRoute editorContext
                 , getName = KnowledgeModel.getIntegrationName km
                 , untitledLabel = gettext "Untitled integration" appState.locale
                 , addChildLabel = gettext "Add integration" appState.locale
@@ -862,13 +862,13 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
                 , label = gettext "Resource Collections" appState.locale
                 , items =
                     km.resourceCollectionUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingResourceCollections editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingResourceCollections editorContext
                 , entityUuid = kmUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setResourceCollectionUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
+                , getRoute = EditorContext.editorRoute editorContext
                 , getName = KnowledgeModel.getResourceCollectionName km
                 , untitledLabel = gettext "Untitled resource collection" appState.locale
                 , addChildLabel = gettext "Add resource collection" appState.locale
@@ -899,10 +899,10 @@ viewKnowledgeModelEditor { appState, wrapMsg, eventMsg, model, editorBranch } km
 
 
 viewChapterEditor : EditorConfig msg -> Chapter -> Html msg
-viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
+viewChapterEditor { appState, wrapMsg, eventMsg, model, editorContext } chapter =
     let
         parentUuid =
-            EditorBranch.getParentUuid chapter.uuid editorBranch
+            EditorContext.getParentUuid chapter.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -954,14 +954,14 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
                 , label = gettext "Questions" appState.locale
                 , items =
                     chapter.questionUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingQuestions editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingQuestions editorContext
                 , entityUuid = chapter.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setQuestionUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
-                , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
+                , getRoute = EditorContext.editorRoute editorContext
+                , getName = KnowledgeModel.getQuestionName editorContext.kmEditor.knowledgeModel
                 , untitledLabel = gettext "Untitled question" appState.locale
                 , addChildLabel = gettext "Add question" appState.locale
                 , addChildMsg = questionAddEvent
@@ -988,13 +988,13 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorBranch } chapter =
 
 
 viewQuestionEditor : EditorConfig msg -> Question -> Html msg
-viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question =
+viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } question =
     let
         questionUuid =
             Question.getUuid question
 
         parentUuid =
-            EditorBranch.getParentUuid questionUuid editorBranch
+            EditorContext.getParentUuid questionUuid editorContext
 
         createEditEvent setOptions setList setValue setIntegration setMultiChoice setItemSelect setFile value =
             createEditEventWithFocusSelector setOptions setList setValue setIntegration setMultiChoice setItemSelect setFile Nothing value
@@ -1099,8 +1099,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
             ]
 
         requiredPhaseUuidOptions =
-            KnowledgeModel.getPhases editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith .uuid editorBranch
+            KnowledgeModel.getPhases editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith .uuid editorContext
                 |> List.map (\phase -> ( phase.uuid, phase.title ))
                 |> (::) ( "", gettext "Never" appState.locale )
 
@@ -1128,7 +1128,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         typeWarning =
             case question of
                 OptionsQuestion _ _ ->
-                    if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getAnswerUuids question) then
+                    if List.isEmpty (EditorContext.filterDeleted editorContext <| Question.getAnswerUuids question) then
                         Html.nothing
 
                     else
@@ -1138,7 +1138,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             ]
 
                 ListQuestion _ _ ->
-                    if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getItemTemplateQuestionUuids question) then
+                    if List.isEmpty (EditorContext.filterDeleted editorContext <| Question.getItemTemplateQuestionUuids question) then
                         Html.nothing
 
                     else
@@ -1148,7 +1148,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             ]
 
                 MultiChoiceQuestion _ _ ->
-                    if List.isEmpty (EditorBranch.filterDeleted editorBranch <| Question.getChoiceUuids question) then
+                    if List.isEmpty (EditorContext.filterDeleted editorContext <| Question.getChoiceUuids question) then
                         Html.nothing
 
                     else
@@ -1192,7 +1192,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         tagUuidsInput =
             Input.tags appState
                 { label = gettext "Question Tags" appState.locale
-                , tags = EditorBranch.filterDeletedWith .uuid editorBranch <| KnowledgeModel.getTags editorBranch.branch.knowledgeModel
+                , tags = EditorContext.filterDeletedWith .uuid editorContext <| KnowledgeModel.getTags editorContext.kmEditor.knowledgeModel
                 , selected = Question.getTagUuids question
                 , onChange = createEditEvent setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids setTagUuids
                 }
@@ -1203,14 +1203,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , label = gettext "References" appState.locale
                 , items =
                     Question.getReferenceUuids question
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingReferences editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingReferences editorContext
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids setReferenceUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
-                , getName = KnowledgeModel.getReferenceName editorBranch.branch.knowledgeModel
+                , getRoute = EditorContext.editorRoute editorContext
+                , getName = KnowledgeModel.getReferenceName editorContext.kmEditor.knowledgeModel
                 , untitledLabel = gettext "Untitled reference" appState.locale
                 , addChildLabel = gettext "Add reference" appState.locale
                 , addChildMsg = addReferenceEvent
@@ -1223,14 +1223,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                 , label = gettext "Experts" appState.locale
                 , items =
                     Question.getExpertUuids question
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingExperts editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingExperts editorContext
                 , entityUuid = questionUuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids setExpertUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
-                , getName = KnowledgeModel.getExpertName editorBranch.branch.knowledgeModel
+                , getRoute = EditorContext.editorRoute editorContext
+                , getName = KnowledgeModel.getExpertName editorContext.kmEditor.knowledgeModel
                 , untitledLabel = gettext "Untitled expert" appState.locale
                 , addChildLabel = gettext "Add expert" appState.locale
                 , addChildMsg = expertAddEvent
@@ -1264,14 +1264,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , label = gettext "Answers" appState.locale
                                 , items =
                                     Question.getAnswerUuids question
-                                        |> EditorBranch.filterDeleted editorBranch
-                                        |> EditorBranch.filterExistingAnswers editorBranch
+                                        |> EditorContext.filterDeleted editorContext
+                                        |> EditorContext.filterExistingAnswers editorContext
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setAnswerUuids
-                                , getRoute = EditorBranch.editorRoute editorBranch
-                                , getName = KnowledgeModel.getAnswerName editorBranch.branch.knowledgeModel
+                                , getRoute = EditorContext.editorRoute editorContext
+                                , getName = KnowledgeModel.getAnswerName editorContext.kmEditor.knowledgeModel
                                 , untitledLabel = gettext "Untitled answer" appState.locale
                                 , addChildLabel = gettext "Add answer" appState.locale
                                 , addChildMsg = addAnswerEvent
@@ -1299,14 +1299,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , label = gettext "Questions" appState.locale
                                 , items =
                                     Question.getItemTemplateQuestionUuids question
-                                        |> EditorBranch.filterDeleted editorBranch
-                                        |> EditorBranch.filterExistingQuestions editorBranch
+                                        |> EditorContext.filterDeleted editorContext
+                                        |> EditorContext.filterExistingQuestions editorContext
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setItemTemplateQuestionUuids
-                                , getRoute = EditorBranch.editorRoute editorBranch
-                                , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
+                                , getRoute = EditorContext.editorRoute editorContext
+                                , getName = KnowledgeModel.getQuestionName editorContext.kmEditor.knowledgeModel
                                 , untitledLabel = gettext "Untitled question" appState.locale
                                 , addChildLabel = gettext "Add question" appState.locale
                                 , addChildMsg = addItemTemplateQuestionEvent
@@ -1374,14 +1374,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         integrationUuidOptions =
-                            KnowledgeModel.getIntegrations editorBranch.branch.knowledgeModel
-                                |> EditorBranch.filterDeletedWith Integration.getUuid editorBranch
+                            KnowledgeModel.getIntegrations editorContext.kmEditor.knowledgeModel
+                                |> EditorContext.filterDeletedWith Integration.getUuid editorContext
                                 |> List.map (\integration -> ( Integration.getUuid integration, String.withDefault (gettext "Untitled integration" appState.locale) (Integration.getVisibleName integration) ))
                                 |> (::) ( Uuid.toString Uuid.nil, gettext "- select integration -" appState.locale )
 
                         selectedIntegrationVariables =
                             Question.getIntegrationUuid question
-                                |> Maybe.andThen (flip KnowledgeModel.getIntegration editorBranch.branch.knowledgeModel)
+                                |> Maybe.andThen (flip KnowledgeModel.getIntegration editorContext.kmEditor.knowledgeModel)
                                 |> Maybe.unwrap [] Integration.getVariables
 
                         onVariableInput variable value =
@@ -1421,7 +1421,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             else
                                 Just <|
                                     div [ class "mt-1" ]
-                                        [ linkTo (EditorBranch.editorRoute editorBranch integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
+                                        [ linkTo (EditorContext.editorRoute editorContext integrationUuid) [] [ text (gettext "Go to integration" appState.locale) ]
                                         ]
 
                         integrationUuidInput =
@@ -1457,14 +1457,14 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , label = gettext "Choices" appState.locale
                                 , items =
                                     Question.getChoiceUuids question
-                                        |> EditorBranch.filterDeleted editorBranch
-                                        |> EditorBranch.filterExistingChoices editorBranch
+                                        |> EditorContext.filterDeleted editorContext
+                                        |> EditorContext.filterExistingChoices editorContext
                                 , entityUuid = questionUuid
                                 , getReorderableState = flip Dict.get model.reorderableStates
                                 , toMsg = compose2 wrapMsg ReorderableMsg
                                 , updateList = createTypeEditEvent setChoiceUuids
-                                , getRoute = EditorBranch.editorRoute editorBranch
-                                , getName = KnowledgeModel.getChoiceName editorBranch.branch.knowledgeModel
+                                , getRoute = EditorContext.editorRoute editorContext
+                                , getName = KnowledgeModel.getChoiceName editorContext.kmEditor.knowledgeModel
                                 , untitledLabel = gettext "Untitled choice" appState.locale
                                 , addChildLabel = gettext "Add choice" appState.locale
                                 , addChildMsg = addChoiceEvent
@@ -1485,7 +1485,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                             let
                                 filteredQuestions =
                                     questions
-                                        |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                        |> EditorContext.filterDeletedWith Question.getUuid editorContext
                                         |> List.filter Question.isList
                                         |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
                             in
@@ -1497,8 +1497,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                     ( chapter.title, filteredQuestions )
 
                         listQuestionUuidOptions =
-                            KnowledgeModel.getAllNestedQuestionsByChapter editorBranch.branch.knowledgeModel
-                                |> List.filter (not << flip EditorBranch.isDeleted editorBranch << .uuid << Tuple.first)
+                            KnowledgeModel.getAllNestedQuestionsByChapter editorContext.kmEditor.knowledgeModel
+                                |> List.filter (not << flip EditorContext.isDeleted editorContext << .uuid << Tuple.first)
                                 |> List.filterMap listQuestionUuidOptgroup
 
                         listQuestionUuidInput =
@@ -1512,13 +1512,13 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
                                 , extra =
                                     case Question.getListQuestionUuid question of
                                         Just listQuestionUuid ->
-                                            if EditorBranch.isQuestionDeletedInHierarchy listQuestionUuid editorBranch then
+                                            if EditorContext.isQuestionDeletedInHierarchy listQuestionUuid editorContext then
                                                 Nothing
 
                                             else
                                                 Just <|
                                                     div [ class "mt-1" ]
-                                                        [ linkTo (EditorBranch.editorRoute editorBranch listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
+                                                        [ linkTo (EditorContext.editorRoute editorContext listQuestionUuid) [] [ text (gettext "Go to list question" appState.locale) ]
                                                         ]
 
                                         Nothing ->
@@ -1569,12 +1569,12 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
         itemSelectQuestionsWithListQuestion =
             case question of
                 ListQuestion _ _ ->
-                    KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                        |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                    KnowledgeModel.getAllQuestions editorContext.kmEditor.knowledgeModel
+                        |> EditorContext.filterDeletedWith Question.getUuid editorContext
                         |> List.filter ((==) (Just questionUuid) << Question.getListQuestionUuid)
-                        |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
+                        |> List.filter (EditorContext.isReachable editorContext << Question.getUuid)
                         |> List.sortBy Question.getTitle
-                        |> List.map (viewQuestionLink appState editorBranch)
+                        |> List.map (viewQuestionLink appState editorContext)
                         |> wrapQuestionsWithIntegration
 
                 _ ->
@@ -1603,10 +1603,10 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorBranch } question
 
 
 viewMetricEditor : EditorConfig msg -> Metric -> Html msg
-viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
+viewMetricEditor { appState, wrapMsg, eventMsg, model, editorContext } metric =
     let
         parentUuid =
-            EditorBranch.getParentUuid metric.uuid editorBranch
+            EditorContext.getParentUuid metric.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -1675,10 +1675,10 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorBranch } metric =
 
 
 viewPhaseEditor : EditorConfig msg -> Phase -> Html msg
-viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
+viewPhaseEditor { appState, wrapMsg, eventMsg, editorContext } phase =
     let
         parentUuid =
-            EditorBranch.getParentUuid phase.uuid editorBranch
+            EditorContext.getParentUuid phase.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -1735,10 +1735,10 @@ viewPhaseEditor { appState, wrapMsg, eventMsg, editorBranch } phase =
 
 
 viewTagEditor : EditorConfig msg -> Tag -> Html msg
-viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
+viewTagEditor { appState, wrapMsg, eventMsg, editorContext } tag =
     let
         parentUuid =
-            EditorBranch.getParentUuid tag.uuid editorBranch
+            EditorContext.getParentUuid tag.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -1806,14 +1806,14 @@ viewTagEditor { appState, wrapMsg, eventMsg, editorBranch } tag =
 viewIntegrationEditor : EditorConfig msg -> Integration -> Html msg
 viewIntegrationEditor config integration =
     let
-        { appState, wrapMsg, eventMsg, integrationPrefabs, editorBranch } =
+        { appState, wrapMsg, eventMsg, integrationPrefabs, editorContext } =
             config
 
         integrationUuid =
             Integration.getUuid integration
 
         parentUuid =
-            EditorBranch.getParentUuid integrationUuid editorBranch
+            EditorContext.getParentUuid integrationUuid editorContext
 
         createEditEventWithFocusSelector setApi setApiLegacy setWidget selector value =
             eventMsg True selector Nothing parentUuid (Just integrationUuid) <|
@@ -1956,16 +1956,16 @@ viewIntegrationEditor config integration =
                 ul [] questions
 
         questionsWithIntegration =
-            KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+            KnowledgeModel.getAllQuestions editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith Question.getUuid editorContext
                 |> List.filter ((==) (Just integrationUuid) << Question.getIntegrationUuid)
-                |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
+                |> List.filter (EditorContext.isReachable editorContext << Question.getUuid)
                 |> List.sortBy Question.getTitle
-                |> List.map (viewQuestionLink appState editorBranch)
+                |> List.map (viewQuestionLink appState editorContext)
                 |> wrapQuestionsWithIntegration
 
         prefabsView =
-            if (not << List.isEmpty) integrationPrefabs && EditorBranch.isEmptyIntegrationEditorUuid integrationUuid editorBranch then
+            if (not << List.isEmpty) integrationPrefabs && EditorContext.isEmptyIntegrationEditorUuid integrationUuid editorContext then
                 let
                     viewLogo i =
                         case Integration.getLogo i of
@@ -2690,10 +2690,10 @@ integrationItemUrlInput appState integration onInput =
 
 
 viewAnswerEditor : EditorConfig msg -> Answer -> Html msg
-viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
+viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorContext } answer =
     let
         parentUuid =
-            EditorBranch.getParentUuid answer.uuid editorBranch
+            EditorContext.getParentUuid answer.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -2745,14 +2745,14 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 , label = gettext "Follow-Up Questions" appState.locale
                 , items =
                     answer.followUpUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingQuestions editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingQuestions editorContext
                 , entityUuid = answer.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setFollowUpUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
-                , getName = KnowledgeModel.getQuestionName editorBranch.branch.knowledgeModel
+                , getRoute = EditorContext.editorRoute editorContext
+                , getName = KnowledgeModel.getQuestionName editorContext.kmEditor.knowledgeModel
                 , untitledLabel = gettext "Untitled question" appState.locale
                 , addChildLabel = gettext "Add question" appState.locale
                 , addChildMsg = questionAddEvent
@@ -2760,8 +2760,8 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
                 }
 
         metrics =
-            EditorBranch.filterDeletedWith .uuid editorBranch <|
-                KnowledgeModel.getMetrics editorBranch.branch.knowledgeModel
+            EditorContext.filterDeletedWith .uuid editorContext <|
+                KnowledgeModel.getMetrics editorContext.kmEditor.knowledgeModel
 
         metricsInput =
             if List.isEmpty metrics then
@@ -2795,10 +2795,10 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorBranch } answer =
 
 
 viewChoiceEditor : EditorConfig msg -> Choice -> Html msg
-viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
+viewChoiceEditor { appState, wrapMsg, eventMsg, editorContext } choice =
     let
         parentUuid =
-            EditorBranch.getParentUuid choice.uuid editorBranch
+            EditorContext.getParentUuid choice.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -2842,13 +2842,13 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
 
 
 viewReferenceEditor : EditorConfig msg -> Reference -> Html msg
-viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
+viewReferenceEditor { appState, wrapMsg, eventMsg, editorContext } reference =
     let
         referenceUuid =
             Reference.getUuid reference
 
         parentUuid =
-            EditorBranch.getParentUuid (Reference.getUuid reference) editorBranch
+            EditorContext.getParentUuid (Reference.getUuid reference) editorContext
 
         onTypeChange value =
             eventMsg False Nothing Nothing parentUuid (Just referenceUuid) <|
@@ -2906,7 +2906,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 |> eventMsg True selector Nothing parentUuid (Just referenceUuid)
 
                         resourcePageOption resourcePageUuid =
-                            KnowledgeModel.getResourcePage resourcePageUuid editorBranch.branch.knowledgeModel
+                            KnowledgeModel.getResourcePage resourcePageUuid editorContext.kmEditor.knowledgeModel
                                 |> Maybe.map
                                     (\rp ->
                                         let
@@ -2921,7 +2921,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                     )
 
                         resourcePageUuidOptions =
-                            KnowledgeModel.getResourceCollections (EditorBranch.getFilteredKM editorBranch)
+                            KnowledgeModel.getResourceCollections (EditorContext.getFilteredKM editorContext)
                                 |> List.map (\rc -> ( rc.title, List.filterMap resourcePageOption rc.resourcePageUuids ))
 
                         resourcePageUuidSelect =
@@ -2993,7 +2993,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                             let
                                 filteredQuestions =
                                     questions
-                                        |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+                                        |> EditorContext.filterDeletedWith Question.getUuid editorContext
                                         |> List.filter (\q -> Question.getUuid q /= parentUuid)
                                         |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
                             in
@@ -3005,8 +3005,8 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                     ( chapter.title, filteredQuestions )
 
                         listQuestionUuidOptions =
-                            KnowledgeModel.getAllNestedQuestionsByChapter editorBranch.branch.knowledgeModel
-                                |> List.filter (not << flip EditorBranch.isDeleted editorBranch << .uuid << Tuple.first)
+                            KnowledgeModel.getAllNestedQuestionsByChapter editorContext.kmEditor.knowledgeModel
+                                |> List.filter (not << flip EditorContext.isDeleted editorContext << .uuid << Tuple.first)
                                 |> List.filterMap listQuestionUuidOptgroup
 
                         listQuestionUuidInput =
@@ -3020,13 +3020,13 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 , extra =
                                     case Reference.getTargetUuid reference of
                                         Just listQuestionUuid ->
-                                            if EditorBranch.isQuestionDeletedInHierarchy listQuestionUuid editorBranch then
+                                            if EditorContext.isQuestionDeletedInHierarchy listQuestionUuid editorContext then
                                                 Nothing
 
                                             else
                                                 Just <|
                                                     div [ class "mt-1" ]
-                                                        [ linkTo (EditorBranch.editorRoute editorBranch listQuestionUuid)
+                                                        [ linkTo (EditorContext.editorRoute editorContext listQuestionUuid)
                                                             []
                                                             [ text (gettext "Go to related question" appState.locale) ]
                                                         ]
@@ -3060,10 +3060,10 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
 
 
 viewExpertEditor : EditorConfig msg -> Expert -> Html msg
-viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
+viewExpertEditor { appState, wrapMsg, eventMsg, editorContext } expert =
     let
         parentUuid =
-            EditorBranch.getParentUuid expert.uuid editorBranch
+            EditorContext.getParentUuid expert.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -3120,10 +3120,10 @@ viewExpertEditor { appState, wrapMsg, eventMsg, editorBranch } expert =
 
 
 viewResourceCollectionEditor : EditorConfig msg -> ResourceCollection -> Html msg
-viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch } resourceCollection =
+viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorContext } resourceCollection =
     let
         parentUuid =
-            EditorBranch.getParentUuid resourceCollection.uuid editorBranch
+            EditorContext.getParentUuid resourceCollection.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -3164,14 +3164,14 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
                 , label = gettext "Resource Pages" appState.locale
                 , items =
                     resourceCollection.resourcePageUuids
-                        |> EditorBranch.filterDeleted editorBranch
-                        |> EditorBranch.filterExistingResourcePages editorBranch
+                        |> EditorContext.filterDeleted editorContext
+                        |> EditorContext.filterExistingResourcePages editorContext
                 , entityUuid = resourceCollection.uuid
                 , getReorderableState = flip Dict.get model.reorderableStates
                 , toMsg = compose2 wrapMsg ReorderableMsg
                 , updateList = createEditEvent setResourcePageUuids
-                , getRoute = EditorBranch.editorRoute editorBranch
-                , getName = KnowledgeModel.getResourcePageName editorBranch.branch.knowledgeModel
+                , getRoute = EditorContext.editorRoute editorContext
+                , getName = KnowledgeModel.getResourcePageName editorContext.kmEditor.knowledgeModel
                 , untitledLabel = gettext "Untitled resource page" appState.locale
                 , addChildLabel = gettext "Add resource page" appState.locale
                 , addChildMsg = resourcePageAddEvent
@@ -3197,10 +3197,10 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorBranch 
 
 
 viewResourcePageEditor : EditorConfig msg -> ResourcePage -> Html msg
-viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } resourcePage =
+viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorContext } resourcePage =
     let
         parentUuid =
-            EditorBranch.getParentUuid resourcePage.uuid editorBranch
+            EditorContext.getParentUuid resourcePage.uuid editorContext
 
         createEditEvent map value =
             createEditEventWithFocusSelector map Nothing value
@@ -3255,17 +3255,17 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorBranch } reso
                 ul [] questions
 
         filterQuestionByResourcePageUuid questionUuid =
-            KnowledgeModel.getQuestionReferences questionUuid editorBranch.branch.knowledgeModel
+            KnowledgeModel.getQuestionReferences questionUuid editorContext.kmEditor.knowledgeModel
                 |> List.filterMap Reference.getResourcePageUuid
                 |> List.member resourcePage.uuid
 
         questionsWithResourcePage =
-            KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel
-                |> EditorBranch.filterDeletedWith Question.getUuid editorBranch
+            KnowledgeModel.getAllQuestions editorContext.kmEditor.knowledgeModel
+                |> EditorContext.filterDeletedWith Question.getUuid editorContext
                 |> List.filter (filterQuestionByResourcePageUuid << Question.getUuid)
-                |> List.filter (EditorBranch.isReachable editorBranch << Question.getUuid)
+                |> List.filter (EditorContext.isReachable editorContext << Question.getUuid)
                 |> List.sortBy Question.getTitle
-                |> List.map (viewQuestionLink appState editorBranch)
+                |> List.map (viewQuestionLink appState editorContext)
                 |> wrapQuestionsWithIntegration
     in
     editor ("resource-page-" ++ resourcePage.uuid)
@@ -3371,8 +3371,8 @@ editorTitle appState config =
         ]
 
 
-viewQuestionLink : AppState -> EditorBranch -> Question -> Html msg
-viewQuestionLink appState editorBranch question =
+viewQuestionLink : AppState -> EditorContext -> Question -> Html msg
+viewQuestionLink appState editorContext question =
     let
         questionTitle =
             Question.getTitle question
@@ -3385,7 +3385,7 @@ viewQuestionLink appState editorBranch question =
                 text questionTitle
     in
     li []
-        [ linkTo (EditorBranch.editorRoute editorBranch (Question.getUuid question))
+        [ linkTo (EditorContext.editorRoute editorContext (Question.getUuid question))
             []
             [ questionTitleNode ]
         ]
@@ -3395,11 +3395,11 @@ viewQuestionLink appState editorBranch question =
 -- DELETE MODAL
 
 
-deleteModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorBranch -> DeleteModalState -> Html msg
-deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
+deleteModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorContext -> DeleteModalState -> Html msg
+deleteModal appState wrapMsg eventMsg editorContext deleteModalState =
     let
         createEvent event uuid =
-            eventMsg False Nothing Nothing (EditorBranch.getParentUuid uuid editorBranch) (Just uuid) event
+            eventMsg False Nothing Nothing (EditorContext.getParentUuid uuid editorContext) (Just uuid) event
 
         ( visible, ( content, mbConfirmMsg ) ) =
             case deleteModalState of
@@ -3529,15 +3529,15 @@ deleteModal appState wrapMsg eventMsg editorBranch deleteModalState =
 -- MOVE MODAL
 
 
-moveModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorBranch -> Maybe MoveModalState -> Html msg
-moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
+moveModal : AppState -> (Msg -> msg) -> EventMsg msg -> EditorContext -> Maybe MoveModalState -> Html msg
+moveModal appState wrapMsg eventMsg editorContext mbMoveModalState =
     let
         ( content, mbConfirmMsg ) =
             case mbMoveModalState of
                 Just moveModalState ->
                     let
                         parentUuid =
-                            EditorBranch.getParentUuid moveModalState.movingUuid editorBranch
+                            EditorContext.getParentUuid moveModalState.movingUuid editorContext
 
                         selectedUuid =
                             moveModalState.treeInputModel.selected
@@ -3546,7 +3546,7 @@ moveModal appState wrapMsg eventMsg editorBranch mbMoveModalState =
                             eventMsg False Nothing Nothing parentUuid (Just moveModalState.movingUuid) (event { targetUuid = selectedUuid })
 
                         viewProps =
-                            { editorBranch = editorBranch
+                            { editorContext = editorContext
                             , movingUuid = moveModalState.movingUuid
                             , movingParentUuid = parentUuid
                             , movingEntity = moveModalState.movingEntity

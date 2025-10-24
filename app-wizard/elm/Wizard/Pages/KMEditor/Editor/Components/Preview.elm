@@ -34,7 +34,7 @@ import Wizard.Components.Questionnaire as Questionnaire exposing (ActivePage(..)
 import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Components.Tag as Tag
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Routes
 
 
@@ -169,11 +169,11 @@ type Msg
     | SelectNoneTags
 
 
-update : Msg -> AppState -> EditorBranch -> Model -> ( Seed, Model, Cmd Msg )
-update msg appState editorBranch model =
+update : Msg -> AppState -> EditorContext -> Model -> ( Seed, Model, Cmd Msg )
+update msg appState editorContext model =
     case msg of
         QuestionnaireMsg questionnaireMsg ->
-            handleQuestionnaireMsg questionnaireMsg appState editorBranch model
+            handleQuestionnaireMsg questionnaireMsg appState editorContext model
 
         AddTag uuid ->
             ( appState.seed, { model | tags = Set.insert uuid model.tags }, Cmd.none )
@@ -182,22 +182,22 @@ update msg appState editorBranch model =
             ( appState.seed, { model | tags = Set.remove uuid model.tags }, Cmd.none )
 
         SelectAllTags ->
-            ( appState.seed, { model | tags = Set.fromList <| EditorBranch.filterDeleted editorBranch editorBranch.branch.knowledgeModel.tagUuids }, Cmd.none )
+            ( appState.seed, { model | tags = Set.fromList <| EditorContext.filterDeleted editorContext editorContext.kmEditor.knowledgeModel.tagUuids }, Cmd.none )
 
         SelectNoneTags ->
             ( appState.seed, { model | tags = Set.empty }, Cmd.none )
 
 
-handleQuestionnaireMsg : Questionnaire.Msg -> AppState -> EditorBranch -> Model -> ( Seed, Model, Cmd Msg )
-handleQuestionnaireMsg msg appState editorBranch model =
+handleQuestionnaireMsg : Questionnaire.Msg -> AppState -> EditorContext -> Model -> ( Seed, Model, Cmd Msg )
+handleQuestionnaireMsg msg appState editorContext model =
     let
         ( newSeed, newQuestionnaireModel, cmd ) =
             Questionnaire.update msg
                 QuestionnaireMsg
                 Nothing
                 appState
-                { events = editorBranch.branch.events
-                , branchUuid = Just editorBranch.branch.uuid
+                { events = editorContext.kmEditor.events
+                , kmEditorUuid = Just editorContext.kmEditor.uuid
                 }
                 model.questionnaireModel
     in
@@ -214,14 +214,14 @@ subscriptions model =
 
 
 type alias ViewConfig msg =
-    { editorBranch : EditorBranch
+    { editorContext : EditorContext
     , wrapMsg : Msg -> msg
     , saveRepliesMsg : msg
     }
 
 
 view : AppState -> ViewConfig msg -> Model -> Html msg
-view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
+view appState { editorContext, wrapMsg, saveRepliesMsg } model =
     let
         knowledgeModel =
             model.questionnaireModel.questionnaire.knowledgeModel
@@ -242,7 +242,7 @@ view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
                 , renderer =
                     DefaultQuestionnaireRenderer.create appState
                         (DefaultQuestionnaireRenderer.config model.questionnaireModel.questionnaire
-                            |> DefaultQuestionnaireRenderer.withResourcePageToRoute (Wizard.Routes.kmEditorEditor editorBranch.branch.uuid << Just << Uuid.fromUuidString)
+                            |> DefaultQuestionnaireRenderer.withResourcePageToRoute (Wizard.Routes.kmEditorEditor editorContext.kmEditor.uuid << Just << Uuid.fromUuidString)
                         )
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
@@ -250,7 +250,7 @@ view appState { editorBranch, wrapMsg, saveRepliesMsg } model =
                 , isKmEditor = True
                 }
                 { events = []
-                , branchUuid = Just editorBranch.branch.uuid
+                , kmEditorUuid = Just editorContext.kmEditor.uuid
                 }
                 (questionnaireModelWithKnowledgeModel (KnowledgeModel.filterWithTags (Set.toList model.tags) knowledgeModel) questionnaireModel)
     in

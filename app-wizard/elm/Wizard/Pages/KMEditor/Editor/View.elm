@@ -13,7 +13,7 @@ import Html.Extra as Html
 import Uuid
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext exposing (EditorContext)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.Pages.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.Pages.KMEditor.Editor.Components.Preview as Preview
@@ -36,7 +36,7 @@ view route appState model =
         viewOffline appState
 
     else
-        Page.actionResultView appState (viewKMEditor route appState model) model.branchModel
+        Page.actionResultView appState (viewKMEditor route appState model) model.editorContext
 
 
 
@@ -73,22 +73,22 @@ viewError appState =
 -- EDITOR
 
 
-viewKMEditor : KMEditorRoute -> AppState -> Model -> EditorBranch -> Html Msg
-viewKMEditor route appState model branch =
+viewKMEditor : KMEditorRoute -> AppState -> Model -> EditorContext -> Html Msg
+viewKMEditor route appState model editorContext =
     let
         navigation =
             if AppState.isFullscreen appState then
                 Html.nothing
 
             else
-                viewKMEditorNavigation appState route model branch
+                viewKMEditorNavigation appState route model editorContext
 
         publishModalViewConfig =
-            { branch = branch.branch }
+            { kmEditor = editorContext.kmEditor }
     in
     div [ class "KMEditor__Editor col-full flex-column", dataCy "km-editor" ]
         [ navigation
-        , viewKMEditorContent appState route model branch
+        , viewKMEditorContent appState route model editorContext
         , Html.map PublishModalMsg <| PublishModal.view publishModalViewConfig appState model.publishModalModel
         ]
 
@@ -97,11 +97,11 @@ viewKMEditor route appState model branch =
 -- EDITOR - NAVIGATION
 
 
-viewKMEditorNavigation : AppState -> KMEditorRoute -> Model -> EditorBranch -> Html Msg
-viewKMEditorNavigation appState route model branch =
+viewKMEditorNavigation : AppState -> KMEditorRoute -> Model -> EditorContext -> Html Msg
+viewKMEditorNavigation appState route model editorContext =
     DetailNavigation.container
-        [ viewKMEditorNavigationTitleRow appState model branch
-        , viewKMEditorNavigationNav appState route branch
+        [ viewKMEditorNavigationTitleRow appState model editorContext
+        , viewKMEditorNavigationNav appState route editorContext
         ]
 
 
@@ -109,11 +109,11 @@ viewKMEditorNavigation appState route model branch =
 -- EDITOR - NAVIGATION - TITLE ROW
 
 
-viewKMEditorNavigationTitleRow : AppState -> Model -> EditorBranch -> Html Msg
-viewKMEditorNavigationTitleRow appState model branch =
+viewKMEditorNavigationTitleRow : AppState -> Model -> EditorContext -> Html Msg
+viewKMEditorNavigationTitleRow appState model editorContext =
     DetailNavigation.row
         [ DetailNavigation.section
-            [ div [ class "title" ] [ text branch.branch.name ]
+            [ div [ class "title" ] [ text editorContext.kmEditor.name ]
             , viewKMEditorNavigationSaving appState model
             ]
         , DetailNavigation.section
@@ -142,11 +142,11 @@ viewKMEditorNavigationSaving appState model =
 -- EDITOR - NAVIGATION - NAV ROW
 
 
-viewKMEditorNavigationNav : AppState -> KMEditorRoute -> EditorBranch -> Html Msg
-viewKMEditorNavigationNav appState route editorBranch =
+viewKMEditorNavigationNav : AppState -> KMEditorRoute -> EditorContext -> Html Msg
+viewKMEditorNavigationNav appState route editorContext =
     let
-        branchUuid =
-            editorBranch.branch.uuid
+        kmEditorUuid =
+            editorContext.kmEditor.uuid
 
         isEditorRoute =
             case route of
@@ -157,14 +157,14 @@ viewKMEditorNavigationNav appState route editorBranch =
                     False
 
         editUuid =
-            if editorBranch.activeUuid == Uuid.toString editorBranch.branch.knowledgeModel.uuid then
+            if editorContext.activeUuid == Uuid.toString editorContext.kmEditor.knowledgeModel.uuid then
                 Nothing
 
             else
-                Just (Uuid.fromUuidString editorBranch.activeUuid)
+                Just (Uuid.fromUuidString editorContext.activeUuid)
 
         editorLink =
-            { route = Routes.kmEditorEditor branchUuid editUuid
+            { route = Routes.kmEditorEditor kmEditorUuid editUuid
             , label = gettext "Knowledge Model" appState.locale
             , icon = faKmEditorKnowledgeModel
             , isActive = isEditorRoute
@@ -173,7 +173,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         phasesLink =
-            { route = Routes.kmEditorEditorPhases branchUuid
+            { route = Routes.kmEditorEditorPhases kmEditorUuid
             , label = gettext "Phases" appState.locale
             , icon = faKmPhase
             , isActive = route == KMEditorRoute.Phases
@@ -182,7 +182,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         questionTagsLink =
-            { route = Routes.kmEditorEditorQuestionTags branchUuid
+            { route = Routes.kmEditorEditorQuestionTags kmEditorUuid
             , label = gettext "Question Tags" appState.locale
             , icon = faKmEditorTags
             , isActive = route == KMEditorRoute.QuestionTags
@@ -191,7 +191,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         previewLink =
-            { route = Routes.kmEditorEditorPreview branchUuid
+            { route = Routes.kmEditorEditorPreview kmEditorUuid
             , label = gettext "Preview" appState.locale
             , icon = faPreview
             , isActive = route == KMEditorRoute.Preview
@@ -200,7 +200,7 @@ viewKMEditorNavigationNav appState route editorBranch =
             }
 
         settingsLink =
-            { route = Routes.kmEditorEditorSettings branchUuid
+            { route = Routes.kmEditorEditorSettings kmEditorUuid
             , label = gettext "Settings" appState.locale
             , icon = faSettings
             , isActive = route == KMEditorRoute.Settings
@@ -223,22 +223,22 @@ viewKMEditorNavigationNav appState route editorBranch =
 -- EDITOR - CONTENT
 
 
-viewKMEditorContent : AppState -> KMEditorRoute -> Model -> EditorBranch -> Html Msg
-viewKMEditorContent appState route model editorBranch =
+viewKMEditorContent : AppState -> KMEditorRoute -> Model -> EditorContext -> Html Msg
+viewKMEditorContent appState route model editorContext =
     case route of
         KMEditorRoute.Edit _ ->
-            KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) (ActionResult.withDefault [] model.kmSecrets) editorBranch
+            KMEditor.view appState KMEditorMsg EventMsg model.kmEditorModel (ActionResult.withDefault [] model.integrationPrefabs) (ActionResult.withDefault [] model.kmSecrets) editorContext
 
         KMEditorRoute.Phases ->
-            PhaseEditor.view appState PhaseEditorMsg (EventMsg False Nothing Nothing) editorBranch model.phaseEditorModel
+            PhaseEditor.view appState PhaseEditorMsg (EventMsg False Nothing Nothing) editorContext model.phaseEditorModel
 
         KMEditorRoute.QuestionTags ->
-            TagEditor.view appState TagEditorMsg (EventMsg False Nothing Nothing) editorBranch model.tagEditorModel
+            TagEditor.view appState TagEditorMsg (EventMsg False Nothing Nothing) editorContext model.tagEditorModel
 
         KMEditorRoute.Preview ->
             let
                 previewViewConfig =
-                    { editorBranch = editorBranch
+                    { editorContext = editorContext
                     , wrapMsg = PreviewMsg
                     , saveRepliesMsg = SavePreviewReplies
                     }
@@ -247,4 +247,4 @@ viewKMEditorContent appState route model editorBranch =
 
         KMEditorRoute.Settings ->
             Html.map SettingsMsg <|
-                Settings.view appState editorBranch.branch model.settingsModel
+                Settings.view appState editorContext.kmEditor model.settingsModel
