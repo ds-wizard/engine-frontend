@@ -638,6 +638,7 @@ getAllUuids editorBranch =
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.references
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.integrations
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourceCollections
+        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourcePages
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.tags
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.metrics
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.phases
