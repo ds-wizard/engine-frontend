@@ -389,10 +389,10 @@ viewTypeHints cfg model =
             [ div [ class "typehints-search" ]
                 [ faSearch
                 , input
-                    [ class " form-control"
+                    [ class "form-control"
                     , type_ "text"
                     , onInput (cfg.wrapMsg << TypeHintInput)
-                    , id (model.fieldId ++ "-search")
+                    , id (model.fieldId ++ "_search")
                     , value model.q
                     , onBlur (cfg.wrapMsg HideTypeHints)
                     ]

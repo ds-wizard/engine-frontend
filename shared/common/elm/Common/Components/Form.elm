@@ -98,7 +98,10 @@ formActions cfg =
                 , dangerous = False
                 }
     in
-    div [ class "d-flex justify-content-between mt-4 pt-4 border-top" ]
+    div
+        [ class "d-flex justify-content-between mt-4 pt-4 border-top"
+        , dataCy "form-actions"
+        ]
         [ cancelButton
         , submitButton
         ]
@@ -261,6 +264,7 @@ formActionsDynamic cfg =
             , ( "form-actions-dynamic-wide", cfg.wide )
             , ( "form-actions-dynamic-success", ActionResult.isSuccess cfg.actionResult )
             ]
+        , dataCy "form-actions"
         ]
         [ p [] [ text (gettext "You have unsaved changes." cfg.locale) ]
         , saveButton
