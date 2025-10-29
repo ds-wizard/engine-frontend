@@ -211,6 +211,7 @@ viewExtraData appState cfg qvs data =
         isEmpty =
             List.isEmpty data.resourcePageReferences
                 && List.isEmpty data.urlReferences
+                && List.isEmpty data.crossReferences
                 && List.isEmpty data.experts
                 && Maybe.isNothing data.requiredPhaseUuid
     in
