@@ -7,6 +7,8 @@
 $toolbar-height: 40px;
 
 .questionnaire {
+  display: block;
+
   &.toolbar-enabled {
     .questionnaire__body {
       height: calc(100% - #{$toolbar-height});
@@ -179,6 +181,10 @@ $toolbar-height: 40px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+
+      &:first-child {
+        margin-top: $spacer-3;
+      }
 
       .nav {
         overflow-y: auto;
