@@ -2989,7 +2989,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 |> (EditReferenceEvent << EditReferenceCrossEvent)
                                 |> eventMsg False Nothing Nothing parentUuid (Just referenceUuid)
 
-                        listQuestionUuidOptgroup ( chapter, questions ) =
+                        targetQuestionUuidOptgroup ( chapter, questions ) =
                             let
                                 filteredQuestions =
                                     questions
@@ -3004,18 +3004,18 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 Just
                                     ( chapter.title, filteredQuestions )
 
-                        listQuestionUuidOptions =
+                        targetQuestionUuidOptions =
                             KnowledgeModel.getAllNestedQuestionsByChapter editorBranch.branch.knowledgeModel
                                 |> List.filter (not << flip EditorBranch.isDeleted editorBranch << .uuid << Tuple.first)
-                                |> List.filterMap listQuestionUuidOptgroup
+                                |> List.filterMap targetQuestionUuidOptgroup
 
-                        listQuestionUuidInput =
+                        targetQuestionUuidInput =
                             Input.selectWithGroups
-                                { name = "listQuestionUuid"
+                                { name = "targetQuestionUuid"
                                 , label = gettext "Question" appState.locale
                                 , value = String.fromMaybe <| Reference.getTargetUuid reference
                                 , defaultOption = ( "", gettext "- select related question -" appState.locale )
-                                , options = listQuestionUuidOptions
+                                , options = targetQuestionUuidOptions
                                 , onChange = createTypeEditEvent setTargetUuid
                                 , extra =
                                     case Reference.getTargetUuid reference of
@@ -3043,7 +3043,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 , onInput = createTypeEditEvent setDescription
                                 }
                     in
-                    [ listQuestionUuidInput
+                    [ targetQuestionUuidInput
                     , descriptionInput
                     ]
     in
