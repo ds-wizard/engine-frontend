@@ -91,11 +91,12 @@ formActions cfg =
                     Html.nothing
 
         submitButton =
-            ActionButton.button
+            ActionButton.buttonWithAttrs
                 { label = cfg.submitLabel
                 , result = cfg.formResult
                 , msg = cfg.formMsg Form.Submit
                 , dangerous = False
+                , attrs = [ dataCy "form_submit" ]
                 }
     in
     div
