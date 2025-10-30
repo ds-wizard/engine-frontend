@@ -102,7 +102,7 @@ type alias IllustratedMessageHtmlConfig msg =
 illustratedMessageHtml : IllustratedMessageHtmlConfig msg -> Html msg
 illustratedMessageHtml cfg =
     div
-        [ class "container mt-5"
+        [ class "container container-max-xxl mt-5"
         , dataCy ("illustrated-message_" ++ cfg.cy)
         ]
         [ div [ class "row justify-content-center" ]
