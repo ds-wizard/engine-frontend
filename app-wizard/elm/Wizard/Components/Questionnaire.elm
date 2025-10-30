@@ -2163,7 +2163,11 @@ viewQuestionnaireToolbar appState cfg model =
             div [ class "item-group" ]
                 [ a
                     (tooltip (gettext "Search" appState.locale)
-                        ++ [ class "item", classList [ ( "selected", searchOpen ) ], onClick (SetRightPanel searchPanel) ]
+                        ++ [ class "item"
+                           , classList [ ( "selected", searchOpen ) ]
+                           , onClick (SetRightPanel searchPanel)
+                           , dataCy "questionnaire-search"
+                           ]
                     )
                     [ faSearch ]
                 ]
