@@ -36,7 +36,6 @@ viewForm props appState model _ =
             Form.initDynamic appState (props.wrapMsg Form.Submit) model.savingConfig
                 |> Form.setFormView (props.formView appState model.form)
                 |> Form.setFormChanged (model.formRemoved || Form.containsChanges model.form)
-                |> Form.setFormValid (Form.isValid model.form)
                 |> Form.setWide
                 |> Form.viewDynamic
     in

@@ -193,7 +193,6 @@ view appState branchDetail model =
             Form.initDynamic appState (FormMsg Form.Submit) model.savingBranch
                 |> Form.setFormView formContent
                 |> Form.setFormChanged (Form.containsChanges model.form)
-                |> Form.setFormValid (Form.isValid model.form)
                 |> Form.viewDynamic
     in
     div [ class "KMEditor__Editor__SettingsEditor", dataCy "km-editor_settings" ]

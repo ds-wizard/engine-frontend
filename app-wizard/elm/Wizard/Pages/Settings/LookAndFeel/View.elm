@@ -45,7 +45,6 @@ viewForm appState model _ =
             Form.initDynamic appState (GenericMsgs.FormMsg Form.Submit) model.savingConfig
                 |> Form.setFormView (formView appState model.form)
                 |> Form.setFormChanged (model.formRemoved || Form.containsChanges model.form)
-                |> Form.setFormValid (Form.isValid model.form)
                 |> Form.setWide
                 |> Form.viewDynamic
     in

@@ -7,7 +7,6 @@ module Common.Components.Form exposing
     , initDynamic
     , setClass
     , setFormChanged
-    , setFormValid
     , setFormView
     , setWide
     , viewDynamic
@@ -137,7 +136,6 @@ type alias DynamicFormConfigData a msg =
     , formResult : ActionResult a
     , formView : Html msg
     , formChanged : Bool
-    , formValid : Bool
     , wide : Bool
     , isMac : Bool
     , locale : Gettext.Locale
@@ -159,7 +157,6 @@ initDynamic appState submitMsg actionResult =
         , formResult = actionResult
         , formView = Html.nothing
         , formChanged = False
-        , formValid = False
         , wide = False
         , isMac = appState.navigator.isMac
         , locale = appState.locale
@@ -175,11 +172,6 @@ setFormView view (DynamicFormConfig cfg) =
 setFormChanged : Bool -> DynamicFormConfig a msg -> DynamicFormConfig a msg
 setFormChanged changed (DynamicFormConfig cfg) =
     DynamicFormConfig { cfg | formChanged = changed }
-
-
-setFormValid : Bool -> DynamicFormConfig a msg -> DynamicFormConfig a msg
-setFormValid valid (DynamicFormConfig cfg) =
-    DynamicFormConfig { cfg | formValid = valid }
 
 
 setWide : DynamicFormConfig a msg -> DynamicFormConfig a msg
@@ -212,7 +204,6 @@ viewDynamic (DynamicFormConfig cfg) =
             { submitMsg = cfg.submitMsg
             , actionResult = cfg.formResult
             , formChanged = cfg.formChanged
-            , formValid = cfg.formValid
             , wide = cfg.wide
             , locale = cfg.locale
             }
@@ -223,7 +214,6 @@ type alias FormActionsDynamicConfig a msg =
     { submitMsg : msg
     , actionResult : ActionResult a
     , formChanged : Bool
-    , formValid : Bool
     , wide : Bool
     , locale : Gettext.Locale
     }
@@ -236,7 +226,7 @@ formActionsDynamic cfg =
             cfg.formChanged || ActionResult.isLoading cfg.actionResult || ActionResult.isSuccess cfg.actionResult
 
         isDisabled =
-            not cfg.formValid || ActionResult.isLoading cfg.actionResult || ActionResult.isSuccess cfg.actionResult
+            ActionResult.isLoading cfg.actionResult || ActionResult.isSuccess cfg.actionResult
 
         content =
             case cfg.actionResult of

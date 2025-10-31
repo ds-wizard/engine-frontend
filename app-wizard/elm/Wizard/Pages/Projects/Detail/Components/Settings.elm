@@ -424,7 +424,6 @@ formView appState questionnaire model =
     Form.initDynamic appState (FormMsg Form.Submit) model.savingQuestionnaire
         |> Form.setFormView formContent
         |> Form.setFormChanged (tagsChanged || formChanged)
-        |> Form.setFormValid (Form.isValid model.form)
         |> Form.viewDynamic
 
 
