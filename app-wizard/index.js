@@ -78,6 +78,7 @@ function loadApp(config, locale) {
         cookieConsent: cookies.getCookieConsent(),
         guideLinks: appConfig.getGuideLinks(),
         maxUploadFileSize: appConfig.getMaxUploadFileSize(),
+        urlCheckerUrl: appConfig.getUrlCheckerUrl(),
     }
 
     if (Object.keys(locale).length > 0) {
