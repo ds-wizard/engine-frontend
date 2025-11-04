@@ -5,6 +5,7 @@ module Wizard.Pages.KMEditor.Editor.Components.KMEditor exposing
     , Model
     , MoveModalState
     , Msg(..)
+    , RightPanel
     , UpdateConfig
     , closeAllModals
     , initialModel
@@ -118,6 +119,7 @@ import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Api.Models.TypeHint exposing (TypeHint)
 import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (TypeHintTestResponse)
+import Wizard.Api.Models.UrlCheckResponse.UrlResult as UrlResult
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -126,7 +128,9 @@ import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Breadcrumbs as Breadcrum
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Tree as Tree
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
+import Wizard.Pages.KMEditor.Editor.Components.KMEditor.UrlChecker as UrlChecker
 import Wizard.Routes as Routes
+import Wizard.Utils.Feature as Feature
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -140,13 +144,20 @@ type alias Model =
     , reorderableStates : Dict String Reorderable.State
     , deleteModalState : DeleteModalState
     , moveModalState : Maybe MoveModalState
-    , warningsPanelOpen : Bool
+    , rightPanel : RightPanel
     , integrationTestResults : Dict String (ActionResult TypeHintTestResponse)
     , integrationTestPreviews : Dict String (ActionResult (List TypeHint))
     , lastCopiedString : Maybe String
     , curlImportModalState : CurlImportModalState
     , cursorPositions : Dict String ( Int, Int )
+    , urlChecker : UrlChecker.Model
     }
+
+
+type RightPanel
+    = NoRightPanel
+    | WarningsRightPanel
+    | URLCheckerRightPanel
 
 
 type DeleteModalState
@@ -185,12 +196,13 @@ initialModel =
     , reorderableStates = Dict.empty
     , deleteModalState = Closed
     , moveModalState = Nothing
-    , warningsPanelOpen = False
+    , rightPanel = NoRightPanel
     , integrationTestResults = Dict.empty
     , integrationTestPreviews = Dict.empty
     , lastCopiedString = Nothing
     , curlImportModalState = { integrationUuid = Nothing, curlString = "" }
     , cursorPositions = Dict.empty
+    , urlChecker = UrlChecker.initialModel
     }
 
 
@@ -224,7 +236,7 @@ type Msg
     | OpenMoveModal TreeInput.MovingEntity String
     | MoveModalMsg TreeInput.Msg
     | CloseMoveModal
-    | SetWarningPanelsOpen Bool
+    | SetRightPanels RightPanel
     | TestIntegrationRequest String String (Dict String String)
     | TestIntegrationRequestCompleted String (Result ApiError TypeHintTestResponse)
     | TestIntegrationPreview String String
@@ -233,6 +245,7 @@ type Msg
     | CurlImportModalUpdateString String
     | CurlImportModalConfirm
     | SetCursorPosition String Int Int
+    | UrlCheckerMsg UrlChecker.Msg
 
 
 type alias EventMsg msg =
@@ -333,8 +346,8 @@ update appState cfg msg ( editorBranch, model ) =
         CloseMoveModal ->
             ( editorBranch, { model | moveModalState = Nothing }, Cmd.none )
 
-        SetWarningPanelsOpen open ->
-            ( editorBranch, { model | warningsPanelOpen = open }, Cmd.none )
+        SetRightPanels open ->
+            ( editorBranch, { model | rightPanel = open }, Cmd.none )
 
         TestIntegrationRequest integrationUuid q variables ->
             let
@@ -475,6 +488,13 @@ update appState cfg msg ( editorBranch, model ) =
         SetCursorPosition field start end ->
             ( editorBranch, { model | cursorPositions = Dict.insert field ( start, end ) model.cursorPositions }, Cmd.none )
 
+        UrlCheckerMsg urlCheckerMsg ->
+            let
+                ( newUrlChecker, urlCheckerCmd ) =
+                    UrlChecker.update appState urlCheckerMsg model.urlChecker
+            in
+            ( editorBranch, { model | urlChecker = newUrlChecker }, Cmd.map (cfg.wrapMsg << UrlCheckerMsg) urlCheckerCmd )
+
 
 
 -- SUBSCRIPTIONS
@@ -540,15 +560,60 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
                 , customSplitter = Nothing
                 }
 
+        allUrlReferences =
+            KnowledgeModel.getAllUrlReferences editorBranch.branch.knowledgeModel
+
+        urlCheckerButton =
+            if Feature.urlChecker appState && List.length allUrlReferences > 0 then
+                let
+                    newRightPanel =
+                        if model.rightPanel == URLCheckerRightPanel then
+                            NoRightPanel
+
+                        else
+                            URLCheckerRightPanel
+
+                    brokenReferencesCount =
+                        UrlChecker.countBrokenReferences allUrlReferences model.urlChecker
+
+                    brokenReferencesBadge =
+                        if brokenReferencesCount > 0 then
+                            Badge.danger
+                                [ class "rounded-pill", dataCy "km-editor_url-checker_problematic-references-badge" ]
+                                [ text (String.fromInt brokenReferencesCount) ]
+
+                        else
+                            Html.nothing
+                in
+                a
+                    [ class "item"
+                    , classList [ ( "selected", model.rightPanel == URLCheckerRightPanel ) ]
+                    , onClick (wrapMsg (SetRightPanels newRightPanel))
+                    ]
+                    [ text (gettext "URL Checker" appState.locale)
+                    , brokenReferencesBadge
+                    ]
+
+            else
+                Html.nothing
+
         warningsCount =
             List.length editorBranch.warnings
 
         warningsButton =
             if warningsCount > 0 then
+                let
+                    newRightPanel =
+                        if model.rightPanel == WarningsRightPanel then
+                            NoRightPanel
+
+                        else
+                            WarningsRightPanel
+                in
                 a
                     [ class "item"
-                    , classList [ ( "selected", model.warningsPanelOpen ) ]
-                    , onClick (wrapMsg (SetWarningPanelsOpen (not model.warningsPanelOpen)))
+                    , classList [ ( "selected", model.rightPanel == WarningsRightPanel ) ]
+                    , onClick (wrapMsg (SetRightPanels newRightPanel))
                     ]
                     [ text (gettext "Warnings" appState.locale)
                     , Badge.danger [ class "rounded-pill" ] [ text (String.fromInt warningsCount) ]
@@ -557,17 +622,33 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
             else
                 Html.nothing
 
-        warningsPanel =
-            if warningsCount > 0 && model.warningsPanelOpen then
-                Html.map wrapMsg <|
-                    viewWarningsPanel appState editorBranch
+        rightPanel =
+            case model.rightPanel of
+                NoRightPanel ->
+                    Html.nothing
 
-            else
-                Html.nothing
+                WarningsRightPanel ->
+                    if warningsCount > 0 then
+                        Html.map wrapMsg <|
+                            viewWarningsPanel appState editorBranch
+
+                    else
+                        Html.nothing
+
+                URLCheckerRightPanel ->
+                    let
+                        viewConfig =
+                            { references = KnowledgeModel.getAllUrlReferences editorBranch.branch.knowledgeModel
+                            , kmEditorUuid = editorBranch.branch.uuid
+                            }
+                    in
+                    Html.map (wrapMsg << UrlCheckerMsg) <|
+                        UrlChecker.view appState viewConfig model.urlChecker
     in
     div [ class "KMEditor__Editor__KMEditor", dataCy "km-editor_km" ]
         [ div [ class "editor-breadcrumbs" ]
             [ Breadcrumbs.view appState editorBranch
+            , urlCheckerButton
             , warningsButton
             , a [ class "breadcrumb-button", onClick expandMsg ] [ expandIcon ]
             ]
@@ -576,7 +657,7 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch =
                 (Tree.view treeViewProps appState editorBranch)
                 (viewEditor appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorBranch)
                 model.splitPane
-            , warningsPanel
+            , rightPanel
             ]
         , deleteModal appState wrapMsg eventMsg editorBranch model.deleteModalState
         , moveModal appState wrapMsg eventMsg editorBranch model.moveModalState
@@ -2842,7 +2923,7 @@ viewChoiceEditor { appState, wrapMsg, eventMsg, editorBranch } choice =
 
 
 viewReferenceEditor : EditorConfig msg -> Reference -> Html msg
-viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
+viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorBranch } reference =
     let
         referenceUuid =
             Reference.getUuid reference
@@ -2962,6 +3043,11 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 , onInput = createTypeEditEvent setUrl
                                 }
 
+                        urlError =
+                            UrlChecker.getResultByUrl data.url model.urlChecker
+                                |> Maybe.andThen (UrlResult.toReadableErrorString appState.locale)
+                                |> Maybe.unwrap Html.nothing (FormExtra.blockAfter << List.singleton << Flash.error)
+
                         labelInput =
                             Input.string
                                 { name = "label"
@@ -2977,6 +3063,7 @@ viewReferenceEditor { appState, wrapMsg, eventMsg, editorBranch } reference =
                                 }
                     in
                     [ urlInput
+                    , urlError
                     , labelInput
                     , annotationsInput
                     ]

@@ -61,6 +61,7 @@ type alias AppState =
     , theme : Maybe Theme
     , guideLinks : GuideLinks
     , maxUploadFileSize : Int
+    , urlCheckerUrl : Maybe String
     }
 
 
@@ -116,6 +117,7 @@ init flagsValue key =
       , theme = theme
       , guideLinks = GuideLinks.merge flags.guideLinks WizardGuideLinks.default
       , maxUploadFileSize = Maybe.withDefault 100000000 flags.maxUploadFileSize
+      , urlCheckerUrl = flags.urlCheckerUrl
       }
     , flagsCmd
     )

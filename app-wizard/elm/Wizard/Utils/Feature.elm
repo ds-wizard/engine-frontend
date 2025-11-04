@@ -72,6 +72,7 @@ module Wizard.Utils.Feature exposing
     , registry
     , settings
     , tenants
+    , urlChecker
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
@@ -583,6 +584,15 @@ localeDelete appState locale =
 tenants : AppState -> Bool
 tenants appState =
     Perm.hasPerm appState.config.user Perm.tenants
+
+
+
+-- Other
+
+
+urlChecker : AppState -> Bool
+urlChecker appState =
+    Maybe.isJust appState.urlCheckerUrl
 
 
 

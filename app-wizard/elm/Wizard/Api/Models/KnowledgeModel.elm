@@ -8,6 +8,7 @@ module Wizard.Api.Models.KnowledgeModel exposing
     , getAllNestedQuestionsByChapter
     , getAllQuestions
     , getAllResourcePages
+    , getAllUrlReferences
     , getAnswer
     , getAnswerFollowupQuestions
     , getAnswerName
@@ -98,6 +99,7 @@ import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference)
+import Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
 import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
@@ -375,6 +377,20 @@ getChoice uuid km =
 getReference : String -> KnowledgeModel -> Maybe Reference
 getReference uuid km =
     Dict.get uuid km.entities.references
+
+
+getAllUrlReferences : KnowledgeModel -> List URLReferenceData
+getAllUrlReferences knowledgeModel =
+    Dict.values knowledgeModel.entities.references
+        |> List.filterMap
+            (\reference ->
+                case reference of
+                    Reference.URLReference urlReferenceData ->
+                        Just urlReferenceData
+
+                    _ ->
+                        Nothing
+            )
 
 
 getResourceCollection : String -> KnowledgeModel -> Maybe ResourceCollection

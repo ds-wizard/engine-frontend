@@ -61,6 +61,7 @@ $breadcrumbs-height: 40px;
             display: flex;
             align-items: center;
             margin-right: 0.5rem;
+            white-space: nowrap;
 
             &:hover, &:focus {
                 background: $gray-200;

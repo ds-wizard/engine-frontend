@@ -27,6 +27,7 @@ type alias Flags =
     , locale : Gettext.Locale
     , guideLinks : GuideLinks
     , maxUploadFileSize : Maybe Int
+    , urlCheckerUrl : Maybe String
     , success : Bool
     }
 
@@ -46,6 +47,7 @@ decoder =
         |> D.optional "locale" Gettext.localeDecoder Gettext.defaultLocale
         |> D.required "guideLinks" GuideLinks.decoder
         |> D.optional "maxUploadFileSize" (D.maybe D.int) Nothing
+        |> D.required "urlCheckerUrl" (D.maybe D.string)
         |> D.hardcoded True
 
 
@@ -63,5 +65,6 @@ default =
     , locale = Gettext.defaultLocale
     , guideLinks = WizardGuideLinks.default
     , maxUploadFileSize = Nothing
+    , urlCheckerUrl = Nothing
     , success = False
     }
