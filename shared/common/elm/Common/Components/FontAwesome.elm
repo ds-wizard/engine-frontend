@@ -3,7 +3,9 @@ module Common.Components.FontAwesome exposing
     , faActiveSessionRevoke
     , faAdd
     , faArrowRight
+    , faArrowRightMS
     , faCancel
+    , faChangeLanguage
     , faClose
     , faCopy
     , faDelete
@@ -23,7 +25,6 @@ module Common.Components.FontAwesome exposing
     , faExport
     , faExternalLink
     , faFw
-    , faFwRemove
     , faGuideLink
     , faImportFile
     , faInfo
@@ -80,7 +81,6 @@ module Common.Components.FontAwesome exposing
     , faMenuDashboard
     , faMenuDev
     , faMenuKnowledgeModels
-    , faMenuLanguage
     , faMenuLogout
     , faMenuOpen
     , faMenuProfile
@@ -93,6 +93,7 @@ module Common.Components.FontAwesome exposing
     , faPersistentCommandRetry
     , faPrev
     , faPreview
+    , faPrivacyPolicy
     , faProjectDocuments
     , faProjectFiles
     , faProjectMetrics
@@ -135,6 +136,8 @@ module Common.Components.FontAwesome exposing
     , faQuestionnaireShrink
     , faQuestionnaireUrlReferences
     , faRemove
+    , faRemoveFw
+    , faSearch
     , faSecretHide
     , faSecretShow
     , faSettings
@@ -142,6 +145,7 @@ module Common.Components.FontAwesome exposing
     , faSortDesc
     , faSpinner
     , faSuccess
+    , faTermsOfService
     , faUserAgentDesktop
     , faUserAgentMobile
     , faUserAgentTdk
@@ -197,6 +201,11 @@ fab icon =
 -- Specific icons
 
 
+faActiveSessionRevoke : Html msg
+faActiveSessionRevoke =
+    fas "fa-ban"
+
+
 faAdd : Html msg
 faAdd =
     fas "fa-plus"
@@ -207,19 +216,19 @@ faArrowRight =
     fas "fa-long-arrow-alt-right"
 
 
+faArrowRightMS : Html msg
+faArrowRightMS =
+    fas "fa-arrow-right-long ms-2"
+
+
 faCancel : Html msg
 faCancel =
     fas "fa-ban"
 
 
-faPrev : Html msg
-faPrev =
-    fas "fa-chevron-left"
-
-
-faNext : Html msg
-faNext =
-    fas "fa-chevron-right"
+faChangeLanguage : Html msg
+faChangeLanguage =
+    fas "fa-language fa=fw"
 
 
 faClose : Html msg
@@ -237,9 +246,49 @@ faDelete =
     fas "fa-trash"
 
 
+faDetailShowAll : Html msg
+faDetailShowAll =
+    fas "fa-angle-down"
+
+
 faDisable : Html msg
 faDisable =
     fas "fa-toggle-off"
+
+
+faDocumentTemplateEditorFiles : Html msg
+faDocumentTemplateEditorFiles =
+    far "fa-file-code"
+
+
+faDocumentTemplateEditorPublish : Html msg
+faDocumentTemplateEditorPublish =
+    fas "fa-cloud-upload-alt"
+
+
+faDocumentTemplateRestore : Html msg
+faDocumentTemplateRestore =
+    fas "fa-undo-alt"
+
+
+faDocumentTemplateSetDeprecated : Html msg
+faDocumentTemplateSetDeprecated =
+    fas "fa-ban"
+
+
+faDocumentsDownload : Html msg
+faDocumentsDownload =
+    fas "fa-download"
+
+
+faDocumentsSubmit : Html msg
+faDocumentsSubmit =
+    fas "fa-paper-plane"
+
+
+faDocumentsViewError : Html msg
+faDocumentsViewError =
+    fas "fa-exclamation-circle"
 
 
 faDownload : Html msg
@@ -277,134 +326,14 @@ faGuideLink =
     fas "fa-circle-question"
 
 
-faInfo : Html msg
-faInfo =
-    fas "fa-info-circle"
-
-
-faKnowledgeModel : Html msg
-faKnowledgeModel =
-    fas "fa-sitemap"
-
-
-faOpen : Html msg
-faOpen =
-    far "fa-folder-open"
-
-
-faPreview : Html msg
-faPreview =
-    fas "fa-eye"
-
-
-faQuestionnaire : Html msg
-faQuestionnaire =
-    far "fa-list-alt"
-
-
-faRemove : Html msg
-faRemove =
-    fas "fa-times"
-
-
-faFwRemove : Html msg
-faFwRemove =
-    fas "fa-fw fa-times"
-
-
-faSecretShow : Html msg
-faSecretShow =
-    fas "fa-eye"
-
-
-faSecretHide : Html msg
-faSecretHide =
-    fas "fa-eye-slash"
-
-
-faSettings : Html msg
-faSettings =
-    fas "fa-cogs"
-
-
-faSortAsc : Html msg
-faSortAsc =
-    fas "fa-arrow-down-long"
-
-
-faSortDesc : Html msg
-faSortDesc =
-    fas "fa-arrow-up-long"
-
-
-faSpinner : Html msg
-faSpinner =
-    fas "fa-spinner fa-spin"
-
-
-faSuccess : Html msg
-faSuccess =
-    fas "fa-check"
-
-
-faView : Html msg
-faView =
-    far "fa-eye"
-
-
-faWarning : Html msg
-faWarning =
-    fas "fa-exclamation-triangle"
-
-
-faActiveSessionRevoke : Html msg
-faActiveSessionRevoke =
-    fas "fa-ban"
-
-
-faDetailShowAll : Html msg
-faDetailShowAll =
-    fas "fa-angle-down"
-
-
-faDocumentsDownload : Html msg
-faDocumentsDownload =
-    fas "fa-download"
-
-
-faDocumentsViewError : Html msg
-faDocumentsViewError =
-    fas "fa-exclamation-circle"
-
-
-faDocumentsSubmit : Html msg
-faDocumentsSubmit =
-    fas "fa-paper-plane"
-
-
-faDocumentTemplateRestore : Html msg
-faDocumentTemplateRestore =
-    fas "fa-undo-alt"
-
-
-faDocumentTemplateSetDeprecated : Html msg
-faDocumentTemplateSetDeprecated =
-    fas "fa-ban"
-
-
-faDocumentTemplateEditorFiles : Html msg
-faDocumentTemplateEditorFiles =
-    far "fa-file-code"
-
-
-faDocumentTemplateEditorPublish : Html msg
-faDocumentTemplateEditorPublish =
-    fas "fa-cloud-upload-alt"
-
-
 faImportFile : Html msg
 faImportFile =
     far "fa-file"
+
+
+faInfo : Html msg
+faInfo =
+    fas "fa-info-circle"
 
 
 faKmAnswer : Html msg
@@ -412,14 +341,99 @@ faKmAnswer =
     far "fa-dot-circle"
 
 
+faKmChapter : Html msg
+faKmChapter =
+    far "fa-file"
+
+
 faKmChoice : Html msg
 faKmChoice =
     far "fa-check-square"
 
 
-faKmChapter : Html msg
-faKmChapter =
-    far "fa-file"
+faKmDetailCreateKmEditor : Html msg
+faKmDetailCreateKmEditor =
+    fas "fa-edit"
+
+
+faKmDetailCreateQuestionnaire : Html msg
+faKmDetailCreateQuestionnaire =
+    far "fa-list-alt"
+
+
+faKmDetailFork : Html msg
+faKmDetailFork =
+    fas "fa-code-branch"
+
+
+faKmDetailRegistryLink : Html msg
+faKmDetailRegistryLink =
+    fas "fa-external-link-alt"
+
+
+faKmEditorCollapseAll : Html msg
+faKmEditorCollapseAll =
+    fas "fa-angle-double-up"
+
+
+faKmEditorCopyUuid : Html msg
+faKmEditorCopyUuid =
+    fas "fa-paste"
+
+
+faKmEditorExpandAll : Html msg
+faKmEditorExpandAll =
+    fas "fa-angle-double-down"
+
+
+faKmEditorKnowledgeModel : Html msg
+faKmEditorKnowledgeModel =
+    fas "fa-sitemap"
+
+
+faKmEditorListContinueMigration : Html msg
+faKmEditorListContinueMigration =
+    fas "fa-long-arrow-alt-right"
+
+
+faKmEditorListEdit : Html msg
+faKmEditorListEdit =
+    fas "fa-pen"
+
+
+faKmEditorListEdited : Html msg
+faKmEditorListEdited =
+    fas "fa-pen"
+
+
+faKmEditorListPublish : Html msg
+faKmEditorListPublish =
+    fas "fa-cloud-upload-alt"
+
+
+faKmEditorListUpdate : Html msg
+faKmEditorListUpdate =
+    fas "fa-sort-amount-up"
+
+
+faKmEditorMove : Html msg
+faKmEditorMove =
+    fas "fa-reply"
+
+
+faKmEditorTags : Html msg
+faKmEditorTags =
+    fas "fa-tags"
+
+
+faKmEditorTreeClosed : Html msg
+faKmEditorTreeClosed =
+    fas "fa-caret-right"
+
+
+faKmEditorTreeOpened : Html msg
+faKmEditorTreeOpened =
+    fas "fa-caret-down"
 
 
 faKmExpert : Html msg
@@ -430,6 +444,21 @@ faKmExpert =
 faKmFork : Html msg
 faKmFork =
     fas "fa-code-branch"
+
+
+faKmImportFromFile : Html msg
+faKmImportFromFile =
+    fas "fa-upload"
+
+
+faKmImportFromOwl : Html msg
+faKmImportFromOwl =
+    fas "fa-project-diagram"
+
+
+faKmImportFromRegistry : Html msg
+faKmImportFromRegistry =
+    fas "fa-cloud-download-alt"
 
 
 faKmIntegration : Html msg
@@ -482,109 +511,14 @@ faKmTag =
     fas "fa-tag"
 
 
-faKmEditorCollapseAll : Html msg
-faKmEditorCollapseAll =
-    fas "fa-angle-double-up"
-
-
-faKmEditorCopyUuid : Html msg
-faKmEditorCopyUuid =
-    fas "fa-paste"
-
-
-faKmEditorExpandAll : Html msg
-faKmEditorExpandAll =
-    fas "fa-angle-double-down"
-
-
-faKmEditorKnowledgeModel : Html msg
-faKmEditorKnowledgeModel =
-    fas "fa-sitemap"
-
-
-faKmEditorMove : Html msg
-faKmEditorMove =
-    fas "fa-reply"
-
-
-faKmEditorTags : Html msg
-faKmEditorTags =
-    fas "fa-tags"
-
-
-faKmEditorTreeOpened : Html msg
-faKmEditorTreeOpened =
-    fas "fa-caret-down"
-
-
-faKmEditorTreeClosed : Html msg
-faKmEditorTreeClosed =
-    fas "fa-caret-right"
-
-
-faKmEditorListContinueMigration : Html msg
-faKmEditorListContinueMigration =
-    fas "fa-long-arrow-alt-right"
-
-
-faKmEditorListEdit : Html msg
-faKmEditorListEdit =
-    fas "fa-pen"
-
-
-faKmEditorListEdited : Html msg
-faKmEditorListEdited =
-    fas "fa-pen"
-
-
-faKmEditorListPublish : Html msg
-faKmEditorListPublish =
-    fas "fa-cloud-upload-alt"
-
-
-faKmEditorListUpdate : Html msg
-faKmEditorListUpdate =
-    fas "fa-sort-amount-up"
-
-
-faKmDetailCreateKmEditor : Html msg
-faKmDetailCreateKmEditor =
-    fas "fa-edit"
-
-
-faKmDetailCreateQuestionnaire : Html msg
-faKmDetailCreateQuestionnaire =
-    far "fa-list-alt"
-
-
-faKmDetailFork : Html msg
-faKmDetailFork =
-    fas "fa-code-branch"
-
-
-faKmDetailRegistryLink : Html msg
-faKmDetailRegistryLink =
-    fas "fa-external-link-alt"
-
-
-faKmImportFromFile : Html msg
-faKmImportFromFile =
-    fas "fa-upload"
-
-
-faKmImportFromOwl : Html msg
-faKmImportFromOwl =
-    fas "fa-project-diagram"
-
-
-faKmImportFromRegistry : Html msg
-faKmImportFromRegistry =
-    fas "fa-cloud-download-alt"
-
-
 faKmsUpload : Html msg
 faKmsUpload =
     fas "fa-upload"
+
+
+faKnowledgeModel : Html msg
+faKnowledgeModel =
+    fas "fa-sitemap"
 
 
 faListingActions : Html msg
@@ -592,19 +526,14 @@ faListingActions =
     fas "fa-ellipsis-v"
 
 
-faListingFilterMultiSelected : Html msg
-faListingFilterMultiSelected =
-    fas "fa-check-square"
-
-
 faListingFilterMultiNotSelected : Html msg
 faListingFilterMultiNotSelected =
     far "fa-square"
 
 
-faListingFilterSingleSelected : Html msg
-faListingFilterSingleSelected =
-    fas "fa-check-circle"
+faListingFilterMultiSelected : Html msg
+faListingFilterMultiSelected =
+    fas "fa-check-square"
 
 
 faListingFilterSingleNotSelected : Html msg
@@ -612,19 +541,24 @@ faListingFilterSingleNotSelected =
     far "fa-circle"
 
 
+faListingFilterSingleSelected : Html msg
+faListingFilterSingleSelected =
+    fas "fa-check-circle"
+
+
 faLocaleCreate : Html msg
 faLocaleCreate =
     fas "fa-plus"
 
 
-faLocaleImport : Html msg
-faLocaleImport =
-    fas "fa-upload"
-
-
 faLocaleDefault : Html msg
 faLocaleDefault =
     fas "fa-check-circle"
+
+
+faLocaleImport : Html msg
+faLocaleImport =
+    fas "fa-upload"
 
 
 faLoginExternalService : Html msg
@@ -667,11 +601,6 @@ faMenuKnowledgeModels =
     fas "fa-sitemap fa-fw"
 
 
-faMenuLanguage : Html msg
-faMenuLanguage =
-    fas "fa-language fa-fw"
-
-
 faMenuLogout : Html msg
 faMenuLogout =
     fas "fa-sign-out-alt fa-fw"
@@ -707,9 +636,34 @@ faMenuTenants =
     fas "fa-server fa-fw"
 
 
+faNext : Html msg
+faNext =
+    fas "fa-chevron-right"
+
+
+faOpen : Html msg
+faOpen =
+    far "fa-folder-open"
+
+
 faPersistentCommandRetry : Html msg
 faPersistentCommandRetry =
     fas "fa-sync-alt"
+
+
+faPrev : Html msg
+faPrev =
+    fas "fa-chevron-left"
+
+
+faPreview : Html msg
+faPreview =
+    fas "fa-eye"
+
+
+faPrivacyPolicy : Html msg
+faPrivacyPolicy =
+    fas "fa-file-shield"
 
 
 faProjectDocuments : Html msg
@@ -732,19 +686,24 @@ faProjectQuestionnaire =
     far "fa-list-alt"
 
 
-faProjectSharingPrivate : Html msg
-faProjectSharingPrivate =
-    fas "fa-lock"
-
-
 faProjectSharingInternal : Html msg
 faProjectSharingInternal =
     fas "fa-user-friends"
 
 
+faProjectSharingPrivate : Html msg
+faProjectSharingPrivate =
+    fas "fa-lock"
+
+
 faProjectSharingPublic : Html msg
 faProjectSharingPublic =
     fas "fa-globe"
+
+
+faQuestionnaire : Html msg
+faQuestionnaire =
+    far "fa-list-alt"
 
 
 faQuestionnaireAnsweredIndication : Html msg
@@ -837,49 +796,14 @@ faQuestionnaireItemExpandAll =
     fas "fa-angle-double-down"
 
 
-faQuestionnaireItemMoveUp : Html msg
-faQuestionnaireItemMoveUp =
-    fas "fa-arrow-up"
-
-
 faQuestionnaireItemMoveDown : Html msg
 faQuestionnaireItemMoveDown =
     fas "fa-arrow-down"
 
 
-faQuestionnaireResourcePageReferences : Html msg
-faQuestionnaireResourcePageReferences =
-    fas "fa-book"
-
-
-faQuestionnaireSavingSaving : Html msg
-faQuestionnaireSavingSaving =
-    fas "fa-sync-alt fa-spin"
-
-
-faQuestionnaireSavingSaved : Html msg
-faQuestionnaireSavingSaved =
-    far "fa-check-circle"
-
-
-faQuestionnaireSettingsKmAllQuestions : Html msg
-faQuestionnaireSettingsKmAllQuestions =
-    far "fa-check-square"
-
-
-faQuestionnaireSettingsKmFiltered : Html msg
-faQuestionnaireSettingsKmFiltered =
-    fas "fa-filter"
-
-
-faQuestionnaireShrink : Html msg
-faQuestionnaireShrink =
-    fas "fa-compress"
-
-
-faQuestionnaireUrlReferences : Html msg
-faQuestionnaireUrlReferences =
-    fas "fa-external-link-alt"
+faQuestionnaireItemMoveUp : Html msg
+faQuestionnaireItemMoveUp =
+    fas "fa-arrow-up"
 
 
 faQuestionnaireListClone : Html msg
@@ -912,6 +836,96 @@ faQuestionnaireMigrationUndo =
     fas "fa-undo-alt"
 
 
+faQuestionnaireResourcePageReferences : Html msg
+faQuestionnaireResourcePageReferences =
+    fas "fa-book"
+
+
+faQuestionnaireSavingSaved : Html msg
+faQuestionnaireSavingSaved =
+    far "fa-check-circle"
+
+
+faQuestionnaireSavingSaving : Html msg
+faQuestionnaireSavingSaving =
+    fas "fa-sync-alt fa-spin"
+
+
+faQuestionnaireSettingsKmAllQuestions : Html msg
+faQuestionnaireSettingsKmAllQuestions =
+    far "fa-check-square"
+
+
+faQuestionnaireSettingsKmFiltered : Html msg
+faQuestionnaireSettingsKmFiltered =
+    fas "fa-filter"
+
+
+faQuestionnaireShrink : Html msg
+faQuestionnaireShrink =
+    fas "fa-compress"
+
+
+faQuestionnaireUrlReferences : Html msg
+faQuestionnaireUrlReferences =
+    fas "fa-external-link-alt"
+
+
+faRemove : Html msg
+faRemove =
+    fas "fa-times"
+
+
+faRemoveFw : Html msg
+faRemoveFw =
+    fas "fa-fw fa-times"
+
+
+faSearch : Html msg
+faSearch =
+    fas "fa-magnifying-glass"
+
+
+faSecretHide : Html msg
+faSecretHide =
+    fas "fa-eye-slash"
+
+
+faSecretShow : Html msg
+faSecretShow =
+    fas "fa-eye"
+
+
+faSettings : Html msg
+faSettings =
+    fas "fa-cogs"
+
+
+faSortAsc : Html msg
+faSortAsc =
+    fas "fa-arrow-down-long"
+
+
+faSortDesc : Html msg
+faSortDesc =
+    fas "fa-arrow-up-long"
+
+
+faSpinner : Html msg
+faSpinner =
+    fas "fa-spinner fa-spin"
+
+
+faSuccess : Html msg
+faSuccess =
+    fas "fa-check"
+
+
+faTermsOfService : Html msg
+faTermsOfService =
+    fas "fa-file-signature"
+
+
 faUserAgentDesktop : Html msg
 faUserAgentDesktop =
     fas "fa-desktop fa-fw"
@@ -925,3 +939,13 @@ faUserAgentMobile =
 faUserAgentTdk : Html msg
 faUserAgentTdk =
     fas "fa-terminal fa-fw"
+
+
+faView : Html msg
+faView =
+    far "fa-eye"
+
+
+faWarning : Html msg
+faWarning =
+    fas "fa-exclamation-triangle"

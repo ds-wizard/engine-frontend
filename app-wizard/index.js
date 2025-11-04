@@ -4,14 +4,15 @@ const axios = require('axios').default
 const axiosRetry = require('axios-retry').default
 
 const appConfig = require('./js/app-config')
-const {bootstrapErrorHTML, housekeepingHTML, notSeededHTML} = require('./js/bootstrap-error')
+const {bootstrapErrorHTML, housekeepingHTML, notSeededHTML} = require('../shared/common/js/bootstrap-error')('wizard')
+const {createNavigatorData} = require('../shared/common/js/navigator')
 
 const program = require('./elm/Wizard.elm')
 
 require('./js/components/charts')
 require('./js/components/code-editor')
 require('../shared/common/js/components/datetime-pickers')
-require('./js/components/shortcut-element')
+require('../shared/common/js/components/shortcut-element')
 
 const cookies = require('./js/ports/cookies')
 const registerConsolePorts = require('./js/ports/console')
@@ -38,25 +39,6 @@ axiosRetry(axios, {
         return retryCount * 1000
     }
 })
-
-function getPdfSupport() {
-    function hasAcrobatInstalled() {
-        function getActiveXObject(name) {
-            try {
-                return new ActiveXObject(name)
-            } catch (e) {
-            }
-        }
-
-        return getActiveXObject('AcroPDF.PDF') || getActiveXObject('PDF.PdfCtrl')
-    }
-
-    function isIos() {
-        return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream
-    }
-
-    return !!(navigator.mimeTypes['application/pdf'] || hasAcrobatInstalled() || isIos())
-}
 
 function getApiUrl(config) {
     if (config.cloud && config.cloud.enabled && config.cloud.serverUrl) {
@@ -91,9 +73,7 @@ function loadApp(config, locale) {
         clientUrl: appConfig.getClientUrl(),
         webSocketThrottleDelay: appConfig.getWebSocketThrottleDelay(),
         config: config,
-        navigator: {
-            pdf: getPdfSupport()
-        },
+        navigator: createNavigatorData(),
         gaEnabled: cookies.getGaEnabled(),
         cookieConsent: cookies.getCookieConsent(),
         guideLinks: appConfig.getGuideLinks(),
@@ -176,6 +156,7 @@ window.onload = function () {
                 if (results[0].data.type === 'HousekeepingInProgressClientConfig') {
                     showMessageAndRetry(housekeepingHTML)
                 } else {
+                    document.body.innerHTML = ''
                     const config = results[0].data
                     const locale = results[1].data
                     loadApp(config, locale)

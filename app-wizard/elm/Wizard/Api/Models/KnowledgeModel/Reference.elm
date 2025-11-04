@@ -16,6 +16,7 @@ module Wizard.Api.Models.KnowledgeModel.Reference exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
+import Wizard.Api.Models.KnowledgeModel.Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Reference.CrossReferenceData as CrossReferenceData exposing (CrossReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.ReferenceType as ReferenceType exposing (ReferenceType(..))
 import Wizard.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData as ResourcePageReferenceData exposing (ResourcePageReferenceData)
@@ -84,9 +85,12 @@ getUuid =
     map .uuid .uuid .uuid
 
 
-getVisibleName : List ResourcePage -> Reference -> String
-getVisibleName resourcePages =
-    map (ResourcePageReferenceData.toLabel resourcePages) URLReferenceData.toLabel .targetUuid
+getVisibleName : List Question -> List ResourcePage -> Reference -> String
+getVisibleName questions resourcePages =
+    map
+        (ResourcePageReferenceData.toLabel resourcePages)
+        URLReferenceData.toLabel
+        (CrossReferenceData.toLabel questions)
 
 
 getAnnotations : Reference -> List Annotation

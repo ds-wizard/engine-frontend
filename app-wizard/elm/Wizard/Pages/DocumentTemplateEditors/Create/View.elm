@@ -1,22 +1,18 @@
 module Wizard.Pages.DocumentTemplateEditors.Create.View exposing (view)
 
 import ActionResult
-import Common.Components.ActionButton as ActionButton
+import Common.Components.Container as Container
+import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Form
+import Common.Components.TypeHintInput as TypeHintInput
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
-import Html.Events exposing (onSubmit)
-import Wizard.Components.FormActions as FormActions
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Create.Models exposing (Model)
 import Wizard.Pages.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
-import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -36,15 +32,19 @@ view appState model =
 
 viewCreate : AppState -> Model -> a -> Html Msg
 viewCreate appState model _ =
-    div [ detailClass "" ]
-        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.documentTemplatesCreate) (gettext "Create Document Template" appState.locale)
-        , Html.form [ onSubmit (FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView model.savingDocumentTemplate
-            , formView appState model
-            , FormActions.viewSubmit appState
-                Cancel
-                (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingDocumentTemplate)
-            ]
+    Container.simpleForm
+        [ Page.headerWithGuideLink
+            (AppState.toGuideLinkConfig appState WizardGuideLinks.documentTemplatesCreate)
+            (gettext "Create Document Template" appState.locale)
+        , Form.viewSimple
+            { formMsg = FormMsg
+            , formResult = model.savingDocumentTemplate
+            , formView = formView appState model
+            , submitLabel = gettext "Create" appState.locale
+            , cancelMsg = Just Cancel
+            , locale = appState.locale
+            , isMac = appState.navigator.isMac
+            }
         ]
 
 
@@ -59,14 +59,15 @@ formView appState model =
                 Nothing ->
                     let
                         cfg =
-                            { viewItem = TypeHintItem.templateSuggestion
+                            { viewItem = TypeHintInputItem.templateSuggestion
                             , wrapMsg = DocumentTemplateTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = True
+                            , locale = appState.locale
                             }
 
                         typeHintInput =
-                            TypeHintInput.view appState cfg model.documentTemplateTypeHintInputModel
+                            TypeHintInput.view cfg model.documentTemplateTypeHintInputModel
                     in
                     FormGroup.formGroupCustom typeHintInput appState.locale model.form "basedOn"
 

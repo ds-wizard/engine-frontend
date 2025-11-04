@@ -1285,7 +1285,7 @@ viewEditQuestionDiff appState km event question =
             List.map Reference.getUuid references
 
         referenceNames =
-            Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName (KnowledgeModel.getAllResourcePages km) r )) references
+            Dict.fromList <| List.map (\r -> ( Reference.getUuid r, Reference.getVisibleName (KnowledgeModel.getAllQuestions km) (KnowledgeModel.getAllResourcePages km) r )) references
 
         referencesDiff =
             viewDiffChildren (gettext "References" appState.locale)
@@ -1405,7 +1405,7 @@ viewDeleteQuestionDiff appState km question =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewDeletedChildren (gettext "References" appState.locale) <| List.map (Reference.getVisibleName (KnowledgeModel.getAllResourcePages km)) references
+            viewDeletedChildren (gettext "References" appState.locale) <| List.map (Reference.getVisibleName (KnowledgeModel.getAllQuestions km) (KnowledgeModel.getAllResourcePages km)) references
 
         -- Experts
         experts =
@@ -1502,7 +1502,7 @@ viewMoveQuestion appState km question =
             KnowledgeModel.getQuestionReferences questionUuid km
 
         referencesDiff =
-            viewPlainChildren (gettext "References" appState.locale) <| List.map (Reference.getVisibleName (KnowledgeModel.getAllResourcePages km)) references
+            viewPlainChildren (gettext "References" appState.locale) <| List.map (Reference.getVisibleName (KnowledgeModel.getAllQuestions km) (KnowledgeModel.getAllResourcePages km)) references
 
         -- Experts
         experts =

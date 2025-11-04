@@ -6,7 +6,9 @@ module Common.Utils.RegexPatterns exposing
     , documentTemplateId
     , doi
     , email
+    , escapeRegex
     , fromString
+    , fromStringIC
     , jinjaSafe
     , kmId
     , kmSecret
@@ -115,3 +117,19 @@ fromString =
 fromStringIC : String -> Regex
 fromStringIC =
     Maybe.withDefault Regex.never << Regex.fromStringWith { caseInsensitive = True, multiline = False }
+
+
+escapeRegex : String -> String
+escapeRegex str =
+    let
+        specials =
+            [ "\\", ".", "+", "*", "?", "^", "$", "(", ")", "[", "]", "{", "}", "|" ]
+
+        escapeChar c =
+            if List.member (String.fromChar c) specials then
+                "\\" ++ String.fromChar c
+
+            else
+                String.fromChar c
+    in
+    String.concat (List.map escapeChar (String.toList str))

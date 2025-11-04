@@ -43,6 +43,7 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setResponseItemTemplateForSelection
     , setResponseListField
     , setTagUuids
+    , setTargetUuid
     , setTestQ
     , setTestResponse
     , setTestVariables
@@ -276,6 +277,11 @@ setResponseListField value data =
 setTagUuids : a -> { b | tagUuids : EventField a } -> { b | tagUuids : EventField a }
 setTagUuids value data =
     { data | tagUuids = EventField.create value True }
+
+
+setTargetUuid : a -> { b | targetUuid : EventField a } -> { b | targetUuid : EventField a }
+setTargetUuid value data =
+    { data | targetUuid = EventField.create value True }
 
 
 setTestQ : a -> { b | testQ : EventField a } -> { b | testQ : EventField a }

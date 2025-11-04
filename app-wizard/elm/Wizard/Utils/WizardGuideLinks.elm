@@ -31,6 +31,7 @@ module Wizard.Utils.WizardGuideLinks exposing
     , settingsAuthentication
     , settingsDashboardAndLoginScreen
     , settingsDocumentSubmission
+    , settingsFeatures
     , settingsKnowledgeModels
     , settingsLookAndFeel
     , settingsOrganization
@@ -77,6 +78,7 @@ default =
         , ( "settingsAuthentication", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/authentication.html" )
         , ( "settingsDashboardAndLoginScreen", "https://guide.ds-wizard.org/en/latest/application/administration/settings/user-interface/dashboard-and-login-screen.html" )
         , ( "settingsDocumentSubmission", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/document-submission.html" )
+        , ( "settingsFeatures", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/features.html" )
         , ( "settingsKnowledgeModels", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/knowledge-models.html" )
         , ( "settingsLookAndFeel", "https://guide.ds-wizard.org/en/latest/application/administration/settings/user-interface/look-and-feel.html" )
         , ( "settingsOrganization", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/organization.html" )
@@ -240,6 +242,11 @@ settingsDashboardAndLoginScreen =
 settingsDocumentSubmission : GuideLinks -> String
 settingsDocumentSubmission =
     GuideLinks.get "settingsDocumentSubmission"
+
+
+settingsFeatures : GuideLinks -> String
+settingsFeatures =
+    GuideLinks.get "settingsFeatures"
 
 
 settingsKnowledgeModels : GuideLinks -> String

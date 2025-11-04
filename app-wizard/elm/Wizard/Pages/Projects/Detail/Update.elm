@@ -743,7 +743,7 @@ update wrapMsg msg appState model =
             ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
 
         ShareModalCloseMsg ->
-            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire.resetUserSugggestionDropdownModels model.questionnaireModel }, Cmd.none )
+            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire.resetUserSuggestionDropdownModels model.questionnaireModel }, Cmd.none )
 
         ShareDropdownMsg dropdownState ->
             withSeed ( { model | shareDropdownState = dropdownState }, Cmd.none )

@@ -6,7 +6,6 @@ module Wizard.Components.Html exposing
 
 import Html exposing (Attribute, Html, a, div, p, text, textarea)
 import Html.Attributes exposing (class, rows, value)
-import Html.Attributes.Extensions exposing (disableGrammarly)
 import Wizard.Routes as Routes
 import Wizard.Utils.HtmlAttributesUtils exposing (linkToAttributes)
 
@@ -32,4 +31,4 @@ resizableTextarea minRows editValue attributes =
                 |> List.length
                 |> max minRows
     in
-    textarea ([ value editValue, rows textAreaRows, disableGrammarly ] ++ attributes)
+    textarea ([ value editValue, rows textAreaRows ] ++ attributes)

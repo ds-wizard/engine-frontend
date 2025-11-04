@@ -142,6 +142,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                     margin-bottom: .5rem;
                     display: flex;
                     justify-content: space-between;
+                    align-items: center;
 
                     &:hover {
                         background: $gray-300;
@@ -175,14 +176,23 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                 display: block;
                 margin-top: 1rem;
 
-                .TypeHintInput__TypeHints__ComplexItem {
+                .typehints-complex-item {
+                    display: flex;
                     border: 1px solid $gray-400;
                     @include border-radius($border-radius);
                     padding: .375rem .75rem;
+
+                    .ItemIcon {
+                      margin-right: 0.5rem;
+                    }
+
+                    .badge {
+                      margin-left: 0.5rem;
+                    }
                 }
 
                 &:hover {
-                    .TypeHintInput__TypeHints__ComplexItem {
+                    .typehints-complex-item {
                         background: $gray-200;
                     }
                 }

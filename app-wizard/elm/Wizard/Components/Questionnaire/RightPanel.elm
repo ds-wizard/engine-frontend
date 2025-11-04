@@ -10,6 +10,7 @@ import Json.Encode as E
 
 type RightPanel
     = None
+    | Search
     | TODOs
     | VersionHistory
     | CommentsOverview
@@ -25,6 +26,9 @@ decoder =
                 case str of
                     "None" ->
                         D.succeed None
+
+                    "Search" ->
+                        D.succeed Search
 
                     "TODOs" ->
                         D.succeed TODOs
@@ -52,6 +56,11 @@ encode rightPanel =
         None ->
             E.object
                 [ ( "type", E.string "None" )
+                ]
+
+        Search ->
+            E.object
+                [ ( "type", E.string "Search" )
                 ]
 
         TODOs ->

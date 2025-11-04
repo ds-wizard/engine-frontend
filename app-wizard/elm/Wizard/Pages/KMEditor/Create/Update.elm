@@ -5,6 +5,8 @@ module Wizard.Pages.KMEditor.Create.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Components.TypeHintInput as TypeHintInput
+import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -20,7 +22,6 @@ import Wizard.Api.Branches as BranchesApi
 import Wizard.Api.Models.Branch exposing (Branch)
 import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
 import Wizard.Api.Packages as PackagesApi
-import Wizard.Components.TypeHintInput as TypeHintInput
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
@@ -32,12 +33,16 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
-    case ( model.selectedPackage, model.edit ) of
-        ( Just packageId, True ) ->
-            PackagesApi.getPackage appState packageId GetPackageCompleted
+    let
+        fetchPackageCmd =
+            case ( model.selectedPackage, model.edit ) of
+                ( Just packageId, True ) ->
+                    PackagesApi.getPackage appState packageId GetPackageCompleted
 
-        _ ->
-            Cmd.none
+                _ ->
+                    Cmd.none
+    in
+    Cmd.batch [ fetchPackageCmd, Dom.focus "#name" ]
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

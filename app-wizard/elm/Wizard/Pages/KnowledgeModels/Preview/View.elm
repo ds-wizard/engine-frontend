@@ -42,8 +42,7 @@ viewProject appState model ( package, questionnaireModel ) =
                     }
                 , renderer =
                     DefaultQuestionnaireRenderer.create appState
-                        questionnaireModel.questionnaire.knowledgeModel
-                        (DefaultQuestionnaireRenderer.defaultResourcePageToRoute questionnaireModel.questionnaire.packageId)
+                        (DefaultQuestionnaireRenderer.config questionnaireModel.questionnaire)
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing

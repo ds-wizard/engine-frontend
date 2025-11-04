@@ -3,17 +3,14 @@ module Wizard.Pages.Settings.Generic.View exposing
     , view
     )
 
-import Common.Components.FormResult as FormResult
+import Common.Components.Form as Form
 import Common.Components.Page as Page
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.GuideLinks exposing (GuideLinks)
 import Form exposing (Form)
 import Gettext
-import Html exposing (Html, div, form)
-import Html.Attributes exposing (class)
-import Html.Events exposing (onSubmit)
-import Wizard.Components.FormActions as FormActions
+import Html exposing (Html, div)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Generic.Model exposing (Model)
 
@@ -35,18 +32,14 @@ view props appState model =
 viewForm : ViewProps form msg -> AppState -> Model form -> config -> Html msg
 viewForm props appState model _ =
     let
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.savingConfig
-            , formChanged = model.formRemoved || Form.containsChanges model.form
-            , wide = True
-            }
+        form =
+            Form.initDynamic appState (props.wrapMsg Form.Submit) model.savingConfig
+                |> Form.setFormView (props.formView appState model.form)
+                |> Form.setFormChanged (model.formRemoved || Form.containsChanges model.form)
+                |> Form.setWide
+                |> Form.viewDynamic
     in
     div []
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState props.guideLink) (props.locTitle appState.locale)
-        , form [ onSubmit (props.wrapMsg Form.Submit), class "pb-6" ]
-            [ FormResult.errorOnlyView model.savingConfig
-            , props.formView appState model.form
-            , FormActions.viewDynamic formActionsConfig appState
-            ]
+        , form
         ]

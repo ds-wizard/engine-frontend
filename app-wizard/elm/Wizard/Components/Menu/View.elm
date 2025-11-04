@@ -3,7 +3,7 @@ module Wizard.Components.Menu.View exposing (view, viewAboutModal, viewReportIss
 import ActionResult exposing (ActionResult)
 import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
-import Common.Components.FontAwesome exposing (fa, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLanguage, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
+import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
@@ -694,7 +694,7 @@ viewProfileMenu model =
                         [ dataCy "menu_languages"
                         , href "/admin/users/edit/current/language"
                         ]
-                        [ faMenuLanguage
+                        [ faChangeLanguage
                         , text (gettext "Change language" model.appState.locale)
                         ]
                     ]
@@ -704,7 +704,7 @@ viewProfileMenu model =
                     [ linkTo Routes.usersEditLanguageCurrent
                         [ dataCy "menu_languages"
                         ]
-                        [ faMenuLanguage
+                        [ faChangeLanguage
                         , text (gettext "Change language" model.appState.locale)
                         ]
                     ]

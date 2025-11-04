@@ -7,6 +7,7 @@ import Common.Components.FontAwesome exposing (faArrowRight)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
@@ -16,8 +17,7 @@ import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Tag as Tag
-import Wizard.Components.TypeHintInput as TypeHintInput
-import Wizard.Components.TypeHintInput.TypeHintItem as TypeHintItem
+import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Pages.Projects.CreateMigration.Msgs exposing (Msg(..))
@@ -55,14 +55,15 @@ createMigrationView appState model questionnaire =
                 ]
 
         cfg =
-            { viewItem = TypeHintItem.packageSuggestion False
+            { viewItem = TypeHintInputItem.packageSuggestion False
             , wrapMsg = PackageTypeHintInputMsg
             , nothingSelectedItem = text "--"
             , clearEnabled = False
+            , locale = appState.locale
             }
 
         typeHintInput =
-            TypeHintInput.view appState cfg model.packageTypeHintInputModel
+            TypeHintInput.view cfg model.packageTypeHintInputModel
 
         versionSelect =
             case model.selectedPackage of
@@ -85,7 +86,7 @@ createMigrationView appState model questionnaire =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
+                    (TypeHintInputItem.packageSuggestion False (PackageSuggestion.fromPackage questionnaire.package))
                     (gettext "Original Knowledge Model" appState.locale)
                 , FormGroup.codeView (Version.toString questionnaire.package.version) (gettext "Original Version" appState.locale)
                 , originalTagList

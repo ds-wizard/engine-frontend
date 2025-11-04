@@ -1,9 +1,9 @@
 module Wizard.Pages.Settings.LookAndFeel.View exposing (view)
 
 import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -11,15 +11,14 @@ import Common.Utils.Markdown as Markdown
 import Form exposing (Form)
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, form, hr, img, label, span, text)
+import Html exposing (Html, a, div, hr, img, label, span, text)
 import Html.Attributes exposing (attribute, class, placeholder, src)
-import Html.Events exposing (onClick, onSubmit)
+import Html.Events exposing (onClick)
 import Html.Extra as Html
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
-import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Common.FontAwesome as FontAwesome
 import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs exposing (Msg)
@@ -35,27 +34,23 @@ view appState model =
 viewForm : AppState -> Model -> config -> Html Msg
 viewForm appState model _ =
     let
-        formActionsConfig =
-            { text = Nothing
-            , actionResult = model.savingConfig
-            , formChanged = model.formRemoved || Form.containsChanges model.form
-            , wide = True
-            }
-
         headerTitle =
             if Admin.isEnabled appState.config.admin then
                 gettext "Menu" appState.locale
 
             else
                 gettext "Look & Feel" appState.locale
+
+        form =
+            Form.initDynamic appState (GenericMsgs.FormMsg Form.Submit) model.savingConfig
+                |> Form.setFormView (formView appState model.form)
+                |> Form.setFormChanged (model.formRemoved || Form.containsChanges model.form)
+                |> Form.setWide
+                |> Form.viewDynamic
     in
     div [ class "LookAndFeel" ]
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.settingsLookAndFeel) headerTitle
-        , form [ onSubmit (GenericMsgs.FormMsg Form.Submit) ]
-            [ FormResult.errorOnlyView model.savingConfig
-            , formView appState model.form
-            , FormActions.viewDynamic formActionsConfig appState
-            ]
+        , form
         ]
 
 

@@ -9,15 +9,20 @@ import Json.Decode.Pipeline as D
 
 
 type alias Navigator =
-    { pdf : Bool }
+    { pdf : Bool
+    , isMac : Bool
+    }
 
 
 default : Navigator
 default =
-    { pdf = True }
+    { pdf = True
+    , isMac = False
+    }
 
 
 decoder : Decoder Navigator
 decoder =
     D.succeed Navigator
         |> D.required "pdf" D.bool
+        |> D.required "isMac" D.bool

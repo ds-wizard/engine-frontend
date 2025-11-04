@@ -184,7 +184,18 @@ filterDeleted =
 
 filterDeletedWith : (a -> String) -> EditorBranch -> List a -> List a
 filterDeletedWith toUuid editorBranch =
-    List.filter (not << flip isDeleted editorBranch << toUuid)
+    let
+        allUuids =
+            getAllUuids editorBranch
+
+        isGood item =
+            let
+                uuid =
+                    toUuid item
+            in
+            List.member uuid allUuids && not (isDeleted uuid editorBranch)
+    in
+    List.filter isGood
 
 
 filterExistingChapters : EditorBranch -> List String -> List String
@@ -461,7 +472,7 @@ getEditorName appState uuid editorBranch =
             getEditorName_ (String.withDefault (gettext "Untitled choice" appState.locale) << .label) KnowledgeModel.getChoice
 
         getReferenceName =
-            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel)) KnowledgeModel.getReference
+            getEditorName_ (String.withDefault (gettext "Untitled reference" appState.locale) << Reference.getVisibleName (KnowledgeModel.getAllQuestions editorBranch.branch.knowledgeModel) (KnowledgeModel.getAllResourcePages editorBranch.branch.knowledgeModel)) KnowledgeModel.getReference
 
         getExpertName =
             getEditorName_ (String.withDefault (gettext "Untitled expert" appState.locale) << Expert.getVisibleName) KnowledgeModel.getExpert
@@ -627,6 +638,7 @@ getAllUuids editorBranch =
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.references
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.integrations
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourceCollections
+        ++ Dict.keys editorBranch.branch.knowledgeModel.entities.resourcePages
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.tags
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.metrics
         ++ Dict.keys editorBranch.branch.knowledgeModel.entities.phases

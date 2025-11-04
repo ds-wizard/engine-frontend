@@ -1,5 +1,7 @@
 module Common.Components.Page exposing
-    ( actionResultView
+    ( IllustratedMessageConfig
+    , IllustratedMessageHtmlConfig
+    , actionResultView
     , actionResultViewWithError
     , error
     , header
@@ -23,40 +25,29 @@ import Html.Extra as Html
 
 header : String -> List (Html msg) -> Html msg
 header title actions =
-    div [ class "header" ]
+    div [ class "d-flex justify-content-between align-items-center  mb-3" ]
         [ h2 [] [ text title ]
-        , headerActions actions
+        , div [] actions
         ]
 
 
 headerWithGuideLink : GuideLinkConfig -> String -> Html msg
 headerWithGuideLink guideLinkConfig title =
-    div [ class "header" ]
-        [ h2 [] [ text title ]
-        , div []
-            [ GuideLink.guideLink guideLinkConfig
-            ]
-        ]
-
-
-headerActions : List (Html msg) -> Html msg
-headerActions actions =
-    div [ class "actions" ]
-        actions
+    header title [ GuideLink.guideLink guideLinkConfig ]
 
 
 loader : { a | locale : Gettext.Locale } -> Html msg
 loader appState =
-    div [ class "full-page-loader" ]
+    div [ class "page-loader" ]
         [ faSpinner
         , div [] [ text (gettext "Loading..." appState.locale) ]
         ]
 
 
-error : { b | locale : Gettext.Locale } -> String -> Html msg
+error : { a | locale : Gettext.Locale } -> String -> Html msg
 error appState msg =
     illustratedMessage
-        { image = Undraw.cancel
+        { illustration = Undraw.cancel
         , heading = gettext "Error" appState.locale
         , lines = [ msg ]
         , cy = "error"
@@ -76,35 +67,49 @@ message icon cy msg =
         ]
 
 
-illustratedMessage :
-    { image : Html msg
+type alias IllustratedMessageConfig msg =
+    { illustration : Html msg
     , heading : String
     , lines : List String
     , cy : String
     }
-    -> Html msg
-illustratedMessage { image, heading, lines, cy } =
+
+
+illustratedMessage : IllustratedMessageConfig msg -> Html msg
+illustratedMessage cfg =
     let
         content =
-            lines
+            cfg.lines
                 |> List.map text
                 |> List.intersperse (br [] [])
     in
-    illustratedMessageHtml { image = image, heading = heading, content = [ p [] content ], cy = cy }
+    illustratedMessageHtml
+        { illustration = cfg.illustration
+        , heading = cfg.heading
+        , content = [ p [ class "font-lg" ] content ]
+        , cy = cfg.cy
+        }
 
 
-illustratedMessageHtml :
-    { image : Html msg
+type alias IllustratedMessageHtmlConfig msg =
+    { illustration : Html msg
     , heading : String
     , content : List (Html msg)
     , cy : String
     }
-    -> Html msg
-illustratedMessageHtml { image, heading, content, cy } =
-    div [ class "full-page-illustrated-message", dataCy ("illustrated-message_" ++ cy) ]
-        [ image
-        , div []
-            (h1 [] [ text heading ] :: content)
+
+
+illustratedMessageHtml : IllustratedMessageHtmlConfig msg -> Html msg
+illustratedMessageHtml cfg =
+    div
+        [ class "container container-max-xxl mt-5"
+        , dataCy ("illustrated-message_" ++ cfg.cy)
+        ]
+        [ div [ class "row justify-content-center" ]
+            [ div [ class "col-4 me-4" ] [ cfg.illustration ]
+            , div [ class "col-4 d-flex flex-column justify-content-center align-items-start" ]
+                (h1 [] [ text cfg.heading ] :: cfg.content)
+            ]
         ]
 
 
