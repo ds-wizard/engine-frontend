@@ -16,7 +16,7 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import String.Extra as String
 import String.Format as String exposing (format)
-import Wizard.Api.Models.Event as Event exposing (Event(..))
+import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.Event.AddAnswerEventData exposing (AddAnswerEventData)
 import Wizard.Api.Models.Event.AddChapterEventData exposing (AddChapterEventData)
 import Wizard.Api.Models.Event.AddChoiceEventData exposing (AddChoiceEventData)
@@ -48,6 +48,7 @@ import Wizard.Api.Models.Event.EditReferenceURLEventData exposing (EditReference
 import Wizard.Api.Models.Event.EditResourceCollectionEventData exposing (EditResourceCollectionEventData)
 import Wizard.Api.Models.Event.EditResourcePageEventData exposing (EditResourcePageEventData)
 import Wizard.Api.Models.Event.EditTagEventData exposing (EditTagEventData)
+import Wizard.Api.Models.Event.EventContent exposing (EventContent(..))
 import Wizard.Api.Models.Event.EventField as EventField
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
@@ -149,234 +150,234 @@ getEventView appState model migration event =
             div [ class "alert alert-danger" ]
                 [ text (gettext "The event is not connected to any entity in the Knowledge Model." appState.locale) ]
     in
-    case event of
-        AddKnowledgeModelEvent _ _ ->
+    case event.content of
+        AddKnowledgeModelEvent _ ->
             -- AddKnowledgeModelEvent should never appear in migrations
             Html.nothing
 
-        EditKnowledgeModelEvent eventData _ ->
+        EditKnowledgeModelEvent eventData ->
             migration.currentKnowledgeModel
                 |> viewEditKnowledgeModelDiff appState eventData
                 |> viewEvent appState model event (gettext "Edit knowledge model" appState.locale)
 
-        AddMetricEvent eventData _ ->
+        AddMetricEvent eventData ->
             viewAddMetricDiff appState eventData
                 |> viewEvent appState model event (gettext "Add metric" appState.locale)
 
-        EditMetricEvent eventData commonData ->
-            KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
+        EditMetricEvent eventData ->
+            KnowledgeModel.getMetric event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditMetricDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit metric" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteMetricEvent commonData ->
-            KnowledgeModel.getMetric commonData.entityUuid migration.currentKnowledgeModel
+        DeleteMetricEvent ->
+            KnowledgeModel.getMetric event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteMetricDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete metric" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddPhaseEvent eventData _ ->
+        AddPhaseEvent eventData ->
             viewAddPhaseDiff appState eventData
                 |> viewEvent appState model event (gettext "Add phase" appState.locale)
 
-        EditPhaseEvent eventData commonData ->
-            KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
+        EditPhaseEvent eventData ->
+            KnowledgeModel.getPhase event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditPhaseDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit phase" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeletePhaseEvent commonData ->
-            KnowledgeModel.getPhase commonData.entityUuid migration.currentKnowledgeModel
+        DeletePhaseEvent ->
+            KnowledgeModel.getPhase event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeletePhaseDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete phase" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddTagEvent eventData _ ->
+        AddTagEvent eventData ->
             viewAddTagDiff appState eventData
                 |> viewEvent appState model event (gettext "Add question tag" appState.locale)
 
-        EditTagEvent eventData commonData ->
-            KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
+        EditTagEvent eventData ->
+            KnowledgeModel.getTag event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditTagDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit question tag" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteTagEvent commonData ->
-            KnowledgeModel.getTag commonData.entityUuid migration.currentKnowledgeModel
+        DeleteTagEvent ->
+            KnowledgeModel.getTag event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteTagDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete question tag" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddIntegrationEvent eventData _ ->
+        AddIntegrationEvent eventData ->
             viewAddIntegrationDiff appState eventData
                 |> viewEvent appState model event (gettext "Add integration" appState.locale)
 
-        EditIntegrationEvent eventData commonData ->
-            KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
+        EditIntegrationEvent eventData ->
+            KnowledgeModel.getIntegration event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditIntegrationDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit integration" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteIntegrationEvent commonData ->
-            KnowledgeModel.getIntegration commonData.entityUuid migration.currentKnowledgeModel
+        DeleteIntegrationEvent ->
+            KnowledgeModel.getIntegration event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteIntegrationDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete integration" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddChapterEvent eventData _ ->
+        AddChapterEvent eventData ->
             viewAddChapterDiff appState eventData
                 |> viewEvent appState model event (gettext "Add chapter" appState.locale)
 
-        EditChapterEvent eventData commonData ->
-            KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
+        EditChapterEvent eventData ->
+            KnowledgeModel.getChapter event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditChapterDiff appState migration.currentKnowledgeModel eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit chapter" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteChapterEvent commonData ->
-            KnowledgeModel.getChapter commonData.entityUuid migration.currentKnowledgeModel
+        DeleteChapterEvent ->
+            KnowledgeModel.getChapter event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteChapterDiff appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete chapter" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddQuestionEvent eventData _ ->
+        AddQuestionEvent eventData ->
             viewAddQuestionDiff appState migration.currentKnowledgeModel eventData
                 |> viewEvent appState model event (gettext "Add question" appState.locale)
 
-        EditQuestionEvent eventData commonData ->
-            KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
+        EditQuestionEvent eventData ->
+            KnowledgeModel.getQuestion event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditQuestionDiff appState migration.currentKnowledgeModel eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit question" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteQuestionEvent commonData ->
-            KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
+        DeleteQuestionEvent ->
+            KnowledgeModel.getQuestion event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteQuestionDiff appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete question" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddAnswerEvent eventData _ ->
+        AddAnswerEvent eventData ->
             viewAddAnswerDiff appState migration.currentKnowledgeModel eventData
                 |> viewEvent appState model event (gettext "Add answer" appState.locale)
 
-        EditAnswerEvent eventData commonData ->
-            KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
+        EditAnswerEvent eventData ->
+            KnowledgeModel.getAnswer event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditAnswerDiff appState migration.currentKnowledgeModel eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit answer" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteAnswerEvent commonData ->
-            KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
+        DeleteAnswerEvent ->
+            KnowledgeModel.getAnswer event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteAnswerDiff appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete answer" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddChoiceEvent eventData _ ->
+        AddChoiceEvent eventData ->
             viewAddChoiceDiff appState eventData
                 |> viewEvent appState model event (gettext "Add choice" appState.locale)
 
-        EditChoiceEvent eventData commonData ->
-            KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
+        EditChoiceEvent eventData ->
+            KnowledgeModel.getChoice event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditChoiceDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit choice" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteChoiceEvent commonData ->
-            KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
+        DeleteChoiceEvent ->
+            KnowledgeModel.getChoice event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteChoiceDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete choice" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddReferenceEvent eventData _ ->
+        AddReferenceEvent eventData ->
             viewAddReferenceDiff appState eventData
                 |> viewEvent appState model event (gettext "Add reference" appState.locale)
 
-        EditReferenceEvent eventData commonData ->
-            KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
+        EditReferenceEvent eventData ->
+            KnowledgeModel.getReference event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditReferenceDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit reference" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteReferenceEvent commonData ->
-            KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
+        DeleteReferenceEvent ->
+            KnowledgeModel.getReference event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteReferenceDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete reference" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddExpertEvent eventData _ ->
+        AddExpertEvent eventData ->
             viewAddExpertDiff appState eventData
                 |> viewEvent appState model event (gettext "Add expert" appState.locale)
 
-        EditExpertEvent eventData commonData ->
-            KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
+        EditExpertEvent eventData ->
+            KnowledgeModel.getExpert event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditExpertDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit expert" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteExpertEvent commonData ->
-            KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
+        DeleteExpertEvent ->
+            KnowledgeModel.getExpert event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteExpertDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete expert" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddResourceCollectionEvent eventData _ ->
+        AddResourceCollectionEvent eventData ->
             viewAddResourceCollectionDiff appState eventData
                 |> viewEvent appState model event (gettext "Add resource collection" appState.locale)
 
-        EditResourceCollectionEvent eventData commonData ->
-            KnowledgeModel.getResourceCollection commonData.entityUuid migration.currentKnowledgeModel
+        EditResourceCollectionEvent eventData ->
+            KnowledgeModel.getResourceCollection event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditResourceCollectionDiff appState migration.currentKnowledgeModel eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit resource collection" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteResourceCollectionEvent commonData ->
-            KnowledgeModel.getResourceCollection commonData.entityUuid migration.currentKnowledgeModel
+        DeleteResourceCollectionEvent ->
+            KnowledgeModel.getResourceCollection event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteResourceCollectionDiff appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete resource collection" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        AddResourcePageEvent eventData _ ->
+        AddResourcePageEvent eventData ->
             viewAddResourcePageDiff appState eventData
                 |> viewEvent appState model event (gettext "Add resource page" appState.locale)
 
-        EditResourcePageEvent eventData commonData ->
-            KnowledgeModel.getResourcePage commonData.entityUuid migration.currentKnowledgeModel
+        EditResourcePageEvent eventData ->
+            KnowledgeModel.getResourcePage event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewEditResourcePageDiff appState eventData)
                 |> Maybe.map (viewEvent appState model event (gettext "Edit resource page" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        DeleteResourcePageEvent commonData ->
-            KnowledgeModel.getResourcePage commonData.entityUuid migration.currentKnowledgeModel
+        DeleteResourcePageEvent ->
+            KnowledgeModel.getResourcePage event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewDeleteResourcePageDiff appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Delete resource page" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        MoveQuestionEvent _ commonData ->
-            KnowledgeModel.getQuestion commonData.entityUuid migration.currentKnowledgeModel
+        MoveQuestionEvent _ ->
+            KnowledgeModel.getQuestion event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveQuestion appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model event (gettext "Move question" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        MoveAnswerEvent _ commonData ->
-            KnowledgeModel.getAnswer commonData.entityUuid migration.currentKnowledgeModel
+        MoveAnswerEvent _ ->
+            KnowledgeModel.getAnswer event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveAnswer appState migration.currentKnowledgeModel)
                 |> Maybe.map (viewEvent appState model event (gettext "Move answer" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        MoveChoiceEvent _ commonData ->
-            KnowledgeModel.getChoice commonData.entityUuid migration.currentKnowledgeModel
+        MoveChoiceEvent _ ->
+            KnowledgeModel.getChoice event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveChoice appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Move choice" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        MoveReferenceEvent _ commonData ->
-            KnowledgeModel.getReference commonData.entityUuid migration.currentKnowledgeModel
+        MoveReferenceEvent _ ->
+            KnowledgeModel.getReference event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveReference appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Move reference" appState.locale))
                 |> Maybe.withDefault errorMessage
 
-        MoveExpertEvent _ commonData ->
-            KnowledgeModel.getExpert commonData.entityUuid migration.currentKnowledgeModel
+        MoveExpertEvent _ ->
+            KnowledgeModel.getExpert event.entityUuid migration.currentKnowledgeModel
                 |> Maybe.map (viewMoveExpert appState)
                 |> Maybe.map (viewEvent appState model event (gettext "Move expert" appState.locale))
                 |> Maybe.withDefault errorMessage

@@ -285,7 +285,7 @@ update wrapMsg msg appState model =
             in
             withSeed ( { model | publishModalModel = publishModalModel }, publishModalCmd )
 
-        EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent ->
+        EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid eventContent ->
             let
                 ( kmEventUuid, newSeed1 ) =
                     Uuid.stepString appState.seed
@@ -302,12 +302,12 @@ update wrapMsg msg appState model =
                             Uuid.stepString newSeed2
 
                 event =
-                    createEvent
-                        { uuid = kmEventUuid
-                        , parentUuid = parentUuid
-                        , entityUuid = entityUuid
-                        , createdAt = appState.currentTime
-                        }
+                    { uuid = kmEventUuid
+                    , parentUuid = parentUuid
+                    , entityUuid = entityUuid
+                    , content = eventContent
+                    , createdAt = appState.currentTime
+                    }
 
                 newEditorContext =
                     ActionResult.map (EditorContext.applyEvent appState (getSecrets model) True event) model.editorContext
@@ -339,7 +339,7 @@ update wrapMsg msg appState model =
                                 event
 
                     wsEvent =
-                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorEvent
+                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent
                             { uuid = wsEventUuid
                             , event = squashedEvent
                             }
@@ -362,7 +362,7 @@ update wrapMsg msg appState model =
             else
                 let
                     wsEvent =
-                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorEvent
+                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent
                             { uuid = wsEventUuid
                             , event = event
                             }
@@ -480,7 +480,7 @@ handleWebSocketMsg websocketMsg appState model =
 
                         ServerKnowledgeModelEditorAction.SetContent setContentKnowledgeModelEditorAction ->
                             case setContentKnowledgeModelEditorAction of
-                                SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorEvent data ->
+                                SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent data ->
                                     updateModel data
 
                         ServerKnowledgeModelEditorAction.SetReplies event ->

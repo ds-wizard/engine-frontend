@@ -55,7 +55,6 @@ import String.Format as String
 import SyntaxHighlight
 import Task.Extra as Task
 import Uuid
-import Wizard.Api.Models.Event exposing (Event(..))
 import Wizard.Api.Models.Event.AddAnswerEventData as AddAnswerEventData
 import Wizard.Api.Models.Event.AddChapterEventData as AddChapterEventData
 import Wizard.Api.Models.Event.AddChoiceEventData as AddChoiceEventData
@@ -68,7 +67,6 @@ import Wizard.Api.Models.Event.AddReferenceEventData as AddReferenceEventData
 import Wizard.Api.Models.Event.AddResourceCollectionEventData as AddResourceCollectionEventData
 import Wizard.Api.Models.Event.AddResourcePageEventData as AddResourcePageEventData
 import Wizard.Api.Models.Event.AddTagEventData as AddTagEventData
-import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
 import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
 import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
@@ -96,6 +94,7 @@ import Wizard.Api.Models.Event.EditReferenceURLEventData as EditReferenceURLEven
 import Wizard.Api.Models.Event.EditResourceCollectionEventData as EditResourceCollectionEventData
 import Wizard.Api.Models.Event.EditResourcePageEventData as EditResourcePageEventData
 import Wizard.Api.Models.Event.EditTagEventData as EditTagEventData
+import Wizard.Api.Models.Event.EventContent exposing (EventContent(..))
 import Wizard.Api.Models.Event.EventField as EventField
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
@@ -249,7 +248,7 @@ type Msg
 
 
 type alias EventMsg msg =
-    Bool -> Maybe String -> Maybe Int -> String -> Maybe String -> (CommonEventData -> Event) -> msg
+    Bool -> Maybe String -> Maybe Int -> String -> Maybe String -> EventContent -> msg
 
 
 type alias UpdateConfig msg =

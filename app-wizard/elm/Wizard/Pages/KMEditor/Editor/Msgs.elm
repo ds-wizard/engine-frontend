@@ -5,8 +5,7 @@ import Common.Api.Models.Prefab exposing (Prefab)
 import Common.Api.WebSocket as WebSocket
 import Debounce
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.Event exposing (Event)
-import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
+import Wizard.Api.Models.Event.EventContent exposing (EventContent)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
@@ -33,7 +32,7 @@ type Msg
     | PreviewMsg Preview.Msg
     | SettingsMsg Settings.Msg
     | PublishModalMsg PublishModal.Msg
-    | EventMsg Bool (Maybe String) (Maybe Int) String (Maybe String) (CommonEventData -> Event)
+    | EventMsg Bool (Maybe String) (Maybe Int) String (Maybe String) EventContent
     | EventDebounceMsg String Debounce.Msg
     | EventAddSavingUuid Uuid String
     | SavePreviewReplies

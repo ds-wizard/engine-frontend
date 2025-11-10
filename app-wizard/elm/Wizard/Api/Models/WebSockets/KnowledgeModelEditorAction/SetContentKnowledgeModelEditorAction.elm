@@ -1,5 +1,5 @@
 module Wizard.Api.Models.WebSockets.KnowledgeModelEditorAction.SetContentKnowledgeModelEditorAction exposing
-    ( AddKnowledgeModelEditorEventData
+    ( AddKnowledgeModelEditorWebSocketEventData
     , SetContentKnowledgeModelEditorAction(..)
     , decoder
     , encode
@@ -14,10 +14,10 @@ import Wizard.Api.Models.Event as Event exposing (Event)
 
 
 type SetContentKnowledgeModelEditorAction
-    = AddKnowledgeModelEditorEvent AddKnowledgeModelEditorEventData
+    = AddKnowledgeModelEditorWebSocketEvent AddKnowledgeModelEditorWebSocketEventData
 
 
-type alias AddKnowledgeModelEditorEventData =
+type alias AddKnowledgeModelEditorWebSocketEventData =
     { uuid : Uuid
     , event : Event
     }
@@ -32,11 +32,11 @@ decoder =
 decoderByType : String -> Decoder SetContentKnowledgeModelEditorAction
 decoderByType actionType =
     case actionType of
-        "AddKnowledgeModelEditorEvent" ->
-            D.succeed AddKnowledgeModelEditorEventData
+        "AddKnowledgeModelEditorWebSocketEvent" ->
+            D.succeed AddKnowledgeModelEditorWebSocketEventData
                 |> D.required "uuid" Uuid.decoder
                 |> D.required "event" Event.decoder
-                |> D.map AddKnowledgeModelEditorEvent
+                |> D.map AddKnowledgeModelEditorWebSocketEvent
 
         _ ->
             D.fail <| "Unknown SetContentKnowledgeModelEditorAction: " ++ actionType
@@ -45,9 +45,9 @@ decoderByType actionType =
 encode : SetContentKnowledgeModelEditorAction -> E.Value
 encode action =
     case action of
-        AddKnowledgeModelEditorEvent data ->
+        AddKnowledgeModelEditorWebSocketEvent data ->
             E.object
-                [ ( "type", E.string "AddKnowledgeModelEditorEvent" )
+                [ ( "type", E.string "AddKnowledgeModelEditorWebSocketEvent" )
                 , ( "uuid", Uuid.encode data.uuid )
                 , ( "event", Event.encode data.event )
                 ]
@@ -56,5 +56,5 @@ encode action =
 getUuid : SetContentKnowledgeModelEditorAction -> Uuid
 getUuid action =
     case action of
-        AddKnowledgeModelEditorEvent data ->
+        AddKnowledgeModelEditorWebSocketEvent data ->
             data.uuid

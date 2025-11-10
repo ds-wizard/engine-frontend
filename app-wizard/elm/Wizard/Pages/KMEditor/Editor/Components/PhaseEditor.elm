@@ -9,8 +9,6 @@ import Html.Attributes exposing (checked, class, classList, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
 import String.Extra as String
-import Wizard.Api.Models.Event exposing (Event(..))
-import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.Event.EditEventSetters exposing (setRequiredPhaseUuid)
 import Wizard.Api.Models.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
 import Wizard.Api.Models.Event.EditQuestionFileEventData as EditQuestionFileEventData
@@ -20,6 +18,7 @@ import Wizard.Api.Models.Event.EditQuestionListEventData as EditQuestionListEven
 import Wizard.Api.Models.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
 import Wizard.Api.Models.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
 import Wizard.Api.Models.Event.EditQuestionValueEventData as EditQuestionValueEventData
+import Wizard.Api.Models.Event.EventContent exposing (EventContent(..))
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
@@ -55,7 +54,7 @@ update msg model =
 
 
 type alias EventMsg msg =
-    String -> Maybe String -> (CommonEventData -> Event) -> msg
+    String -> Maybe String -> EventContent -> msg
 
 
 type alias SetPhaseEventMsg msg =
