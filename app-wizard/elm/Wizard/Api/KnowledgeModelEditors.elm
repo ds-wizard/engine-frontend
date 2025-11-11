@@ -23,7 +23,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelEditor as KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.KnowledgeModelEditorDetail as KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
-import Wizard.Api.Models.Migration as Migration exposing (Migration)
+import Wizard.Api.Models.KnowledgeModelMigration as Migration exposing (KnowledgeModelMigration)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 
@@ -76,7 +76,7 @@ websocket appState uuid =
     WebSocket.url (AppState.toServerInfo appState) ("/knowledge-model-editors/" ++ Uuid.toString uuid ++ "/websocket")
 
 
-getMigration : AppState -> Uuid -> ToMsg Migration msg -> Cmd msg
+getMigration : AppState -> Uuid -> ToMsg KnowledgeModelMigration msg -> Cmd msg
 getMigration appState uuid =
     Request.get (AppState.toServerInfo appState) ("/knowledge-model-editors/" ++ Uuid.toString uuid ++ "/migrations/current") Migration.decoder
 

@@ -69,8 +69,8 @@ import Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing (URL
 import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCollection)
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
-import Wizard.Api.Models.Migration exposing (Migration)
-import Wizard.Api.Models.Migration.MigrationState.MigrationStateType exposing (MigrationStateType(..))
+import Wizard.Api.Models.KnowledgeModelMigration exposing (KnowledgeModelMigration)
+import Wizard.Api.Models.KnowledgeModelMigration.KnowledgeModelMigrationState as KnowledgeModelMigrationState
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
@@ -84,7 +84,7 @@ view appState model =
     Page.actionResultView appState (migrationView appState model) model.migration
 
 
-migrationView : AppState -> Model -> Migration -> Html Msg
+migrationView : AppState -> Model -> KnowledgeModelMigration -> Html Msg
 migrationView appState model migration =
     let
         errorMessage =
@@ -92,20 +92,20 @@ migrationView appState model migration =
                 [ text (gettext "Migration state is corrupted." appState.locale) ]
 
         currentView =
-            case migration.migrationState.stateType of
-                ConflictState ->
+            case migration.state of
+                KnowledgeModelMigrationState.Conflict mbTargetEvent ->
                     let
                         conflictView =
-                            migration.migrationState.targetEvent
+                            mbTargetEvent
                                 |> Maybe.map (getEventView appState model migration)
                                 |> Maybe.map (List.singleton >> div [ class "col-8" ])
                                 |> Maybe.withDefault (div [ class "col-12" ] [ errorMessage ])
 
                         kmName =
-                            ActionResult.unwrap "" .knowledgeModelEditorName model.migration
+                            ActionResult.unwrap "" .editorName model.migration
 
                         diffTree =
-                            migration.migrationState.targetEvent
+                            mbTargetEvent
                                 |> Maybe.map (DiffTree.view kmName migration.currentKnowledgeModel)
                                 |> Maybe.map (List.singleton >> div [ class "col-4" ])
                                 |> Maybe.withDefault Html.nothing
@@ -113,10 +113,10 @@ migrationView appState model migration =
                     div [ class "row" ]
                         [ migrationSummary appState migration, conflictView, diffTree ]
 
-                CompletedState ->
+                KnowledgeModelMigrationState.Completed ->
                     viewCompletedMigration appState model
 
-                RunningState ->
+                KnowledgeModelMigrationState.Running ->
                     div [ class "alert alert-warning" ]
                         [ text (gettext "Migration is still running, try again later." appState.locale) ]
 
@@ -130,20 +130,20 @@ migrationView appState model migration =
         ]
 
 
-migrationSummary : AppState -> Migration -> Html Msg
+migrationSummary : AppState -> KnowledgeModelMigration -> Html Msg
 migrationSummary appState migration =
     div [ class "col-12" ]
         [ p []
             (String.formatHtml (gettext "Migration of %s from %s to %s." appState.locale)
-                [ strong [] [ text migration.knowledgeModelEditorName ]
-                , code [] [ text migration.knowledgeModelEditorPreviousKnowledgeModelPackageId ]
+                [ strong [] [ text migration.editorName ]
+                , code [] [ text migration.editorPreviousPackageId ]
                 , code [] [ text migration.targetPackageId ]
                 ]
             )
         ]
 
 
-getEventView : AppState -> Model -> Migration -> Event -> Html Msg
+getEventView : AppState -> Model -> KnowledgeModelMigration -> Event -> Html Msg
 getEventView appState model migration event =
     let
         errorMessage =

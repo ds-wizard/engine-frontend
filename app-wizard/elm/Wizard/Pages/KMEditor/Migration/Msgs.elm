@@ -1,11 +1,11 @@
 module Wizard.Pages.KMEditor.Migration.Msgs exposing (Msg(..))
 
 import Common.Api.ApiError exposing (ApiError)
-import Wizard.Api.Models.Migration exposing (Migration)
+import Wizard.Api.Models.KnowledgeModelMigration exposing (KnowledgeModelMigration)
 
 
 type Msg
-    = GetMigrationCompleted (Result ApiError Migration)
+    = GetMigrationCompleted (Result ApiError KnowledgeModelMigration)
     | ApplyAll
     | ApplyEvent
     | RejectEvent
