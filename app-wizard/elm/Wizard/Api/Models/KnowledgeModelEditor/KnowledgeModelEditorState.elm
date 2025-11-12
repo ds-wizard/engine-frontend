@@ -21,23 +21,23 @@ decoder =
         |> D.andThen
             (\str ->
                 case str of
-                    "Default" ->
+                    "DefaultKnowledgeModelEditorState" ->
                         D.succeed Default
 
-                    "Edited" ->
+                    "EditedKnowledgeModelEditorState" ->
                         D.succeed Edited
 
-                    "Outdated" ->
+                    "OutdatedKnowledgeModelEditorState" ->
                         D.succeed Outdated
 
-                    "Migrating" ->
+                    "MigratingKnowledgeModelEditorState" ->
                         D.succeed Migrating
 
-                    "Migrated" ->
+                    "MigratedKnowledgeModelEditorState" ->
                         D.succeed Migrated
 
                     unknownState ->
-                        D.fail <| "Unknown knowledge model appState " ++ unknownState
+                        D.fail <| "Unknown knowledge model state " ++ unknownState
             )
 
 
