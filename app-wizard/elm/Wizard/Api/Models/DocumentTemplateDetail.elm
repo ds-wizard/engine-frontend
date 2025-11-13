@@ -20,7 +20,7 @@ import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (Organiza
 
 
 type alias DocumentTemplateDetail =
-    { allowedKnowledgeModelPackages : List DocumentTemplateAllowedPackage
+    { allowedPackages : List DocumentTemplateAllowedPackage
     , createdAt : Time.Posix
     , description : String
     , formats : List DocumentTemplateFormat
@@ -46,7 +46,7 @@ type alias DocumentTemplateDetail =
 decoder : Decoder DocumentTemplateDetail
 decoder =
     D.succeed DocumentTemplateDetail
-        |> D.required "allowedKnowledgeModelPackages" (D.list DocumentTemplateAllowedPackage.decoder)
+        |> D.required "allowedPackages" (D.list DocumentTemplateAllowedPackage.decoder)
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormat.decoder)
