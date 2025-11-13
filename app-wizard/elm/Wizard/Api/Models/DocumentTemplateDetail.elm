@@ -62,7 +62,7 @@ decoder =
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "state" DocumentTemplateState.decoder
         |> D.required "templateId" D.string
-        |> D.required "usableKnowledgeModelPackages" (D.list DocumentTemplatePackage.decoder)
+        |> D.required "usableKnowledgeModels" (D.list DocumentTemplatePackage.decoder)
         |> D.required "version" Version.decoder
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "nonEditable" D.bool
