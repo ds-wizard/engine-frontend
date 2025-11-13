@@ -163,7 +163,7 @@ sidePanelKmInfo appState kmPackage =
             ]
 
         parentInfo =
-            case kmPackage.forkOfKnowledgeModelPackageId of
+            case kmPackage.forkOfPackageId of
                 Just parentPackageId ->
                     [ ( gettext "Fork of" appState.locale
                       , "fork-of"

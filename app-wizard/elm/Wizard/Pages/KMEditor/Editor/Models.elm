@@ -97,7 +97,7 @@ initPageModel appState route model =
                         kmPackageId =
                             ActionResult.map .kmEditor model.editorContext
                                 |> ActionResult.toMaybe
-                                |> Maybe.andThen .previousKnowledgeModelPackageId
+                                |> Maybe.andThen .previousPackageId
                                 |> Maybe.withDefault ""
 
                         firstChapterUuid =

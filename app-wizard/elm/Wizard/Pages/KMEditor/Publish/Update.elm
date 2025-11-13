@@ -63,7 +63,7 @@ handleGetKnowledgeModelEditorCompleted wrapMsg appState model result =
         Ok kmEditor ->
             let
                 cmd =
-                    case kmEditor.previousKnowledgeModelPackageId of
+                    case kmEditor.previousPackageId of
                         Just previousKnowledgeModelPackageId ->
                             Cmd.map wrapMsg <|
                                 KnowledgeModelPackagesApi.getKnowledgeModelPackage appState previousKnowledgeModelPackageId GetPreviousKnowledgeModelPackageCompleted

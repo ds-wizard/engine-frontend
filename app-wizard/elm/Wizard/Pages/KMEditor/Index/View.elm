@@ -126,7 +126,7 @@ listingTitleBadge appState kmEditor =
         KnowledgeModelEditorState.Outdated ->
             a
                 ([ class Badge.warningClass
-                 , onClick (UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.withDefault "" kmEditor.forkOfKnowledgeModelPackageId)))
+                 , onClick (UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.withDefault "" kmEditor.forkOfPackageId)))
                  , dataCy "km-editor_list_outdated-badge"
                  ]
                     ++ tooltip (gettext "There is a new version of parent knowledge model" appState.locale)
@@ -155,7 +155,7 @@ listingDescription : AppState -> KnowledgeModelEditor -> Html Msg
 listingDescription appState kmEditor =
     let
         parent =
-            case kmEditor.forkOfKnowledgeModelPackageId of
+            case kmEditor.forkOfPackageId of
                 Just forkOfPackageId ->
                     let
                         elem =
@@ -197,7 +197,7 @@ listingActions appState kmEditor =
                 { extraClass = Nothing
                 , icon = faKmEditorListUpdate
                 , label = gettext "Update" appState.locale
-                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.withDefault "" kmEditor.forkOfKnowledgeModelPackageId))
+                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.withDefault "" kmEditor.forkOfPackageId))
                 , dataCy = "update"
                 }
 

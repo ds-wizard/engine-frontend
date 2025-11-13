@@ -24,9 +24,9 @@ type alias KnowledgeModelEditorDetail =
     , readme : String
     , version : Version
     , knowledgeModel : KnowledgeModel
-    , forkOfKnowledgeModelPackageId : Maybe String
-    , forkOfKnowledgeModelPackage : Maybe KnowledgeModelPackage
-    , previousKnowledgeModelPackageId : Maybe String
+    , forkOfPackageId : Maybe String
+    , forkOfPackage : Maybe KnowledgeModelPackage
+    , previousPackageId : Maybe String
     , events : List Event
     , state : KnowledgeModelEditorState
     , replies : Dict String Reply
@@ -44,9 +44,9 @@ decoder =
         |> D.required "readme" D.string
         |> D.required "version" Version.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
-        |> D.required "forkOfKnowledgeModelPackageId" (D.nullable D.string)
-        |> D.required "forkOfKnowledgeModelPackage" (D.nullable KnowledgeModelPackage.decoder)
-        |> D.required "previousKnowledgeModelPackageId" (D.nullable D.string)
+        |> D.required "forkOfPackageId" (D.nullable D.string)
+        |> D.required "forkOfPackage" (D.nullable KnowledgeModelPackage.decoder)
+        |> D.required "previousPackageId" (D.nullable D.string)
         |> D.required "events" (D.list Event.decoder)
         |> D.required "state" KnowledgeModelEditorState.decoder
         |> D.required "replies" (D.dict Reply.decoder)

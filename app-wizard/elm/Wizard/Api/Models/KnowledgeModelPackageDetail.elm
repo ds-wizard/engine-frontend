@@ -30,8 +30,8 @@ type alias KnowledgeModelPackageDetail =
     , readme : String
     , license : String
     , metamodelVersion : Int
-    , forkOfKnowledgeModelPackageId : Maybe String
-    , previousKnowledgeModelPackageId : Maybe String
+    , forkOfPackageId : Maybe String
+    , previousPackageId : Maybe String
     , versions : List Version
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
@@ -53,8 +53,8 @@ decoder =
         |> D.required "readme" D.string
         |> D.required "license" D.string
         |> D.required "metamodelVersion" D.int
-        |> D.required "forkOfKnowledgeModelPackageId" (D.maybe D.string)
-        |> D.required "previousKnowledgeModelPackageId" (D.maybe D.string)
+        |> D.required "forkOfPackageId" (D.maybe D.string)
+        |> D.required "previousPackageId" (D.maybe D.string)
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)

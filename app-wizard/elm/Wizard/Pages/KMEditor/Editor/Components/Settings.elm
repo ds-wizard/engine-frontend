@@ -154,7 +154,7 @@ view : AppState -> KnowledgeModelEditorDetail -> Model -> Html Msg
 view appState kmEditorDetail model =
     let
         parentKnowledgeModelView =
-            case kmEditorDetail.forkOfKnowledgeModelPackage of
+            case kmEditorDetail.forkOfPackage of
                 Just forkOfPackage ->
                     [ hr [ class "separator" ] []
                     , parentKnowledgeModel appState kmEditorDetail.state forkOfPackage kmEditorDetail
