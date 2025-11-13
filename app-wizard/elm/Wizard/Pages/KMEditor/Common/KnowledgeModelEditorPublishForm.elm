@@ -45,7 +45,7 @@ encode kmEditorUuid form =
             String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
     in
     E.object
-        [ ( "knowledgeModelEditorUuid", Uuid.encode kmEditorUuid )
+        [ ( "editorUuid", Uuid.encode kmEditorUuid )
         , ( "version", E.string version )
         , ( "description", E.string form.description )
         , ( "readme", E.string form.readme )
