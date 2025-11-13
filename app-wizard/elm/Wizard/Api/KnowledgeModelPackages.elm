@@ -105,9 +105,9 @@ postFromKnowledgeModelEditor : AppState -> Uuid -> ToMsg KnowledgeModelPackage m
 postFromKnowledgeModelEditor appState uuid =
     let
         body =
-            E.object [ ( "knowledgeModelEditorUuid", Uuid.encode uuid ) ]
+            E.object [ ( "editorUuid", Uuid.encode uuid ) ]
     in
-    Request.post (AppState.toServerInfo appState) "/knowledge-model-packages/from-knowledge-model-editor" KnowledgeModelPackage.decoder body
+    Request.post (AppState.toServerInfo appState) "/knowledge-model-packages/from-editor" KnowledgeModelPackage.decoder body
 
 
 postFromMigration : AppState -> E.Value -> ToMsg KnowledgeModelPackage msg -> Cmd msg
