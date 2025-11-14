@@ -149,7 +149,7 @@ handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg Kn
 handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         formMsg =
-            wrapMsg << FormMsg << Form.Input "previousKnowledgeModelPackageId" Form.Select << Field.String
+            wrapMsg << FormMsg << Form.Input "previousPackageId" Form.Select << Field.String
 
         cfg =
             { wrapMsg = wrapMsg << KnowledgeModelPackageTypeHintInputMsg
