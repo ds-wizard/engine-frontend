@@ -22,28 +22,28 @@ import Html.Extra as Html
 import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid exposing (Uuid)
-import Wizard.Api.Branches as BranchesApi
-import Wizard.Api.Models.PackageDetail as PackageDetail exposing (PackageDetail)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Common.BranchUpgradeForm as BranchUpgradeForm exposing (BranchUpgradeForm)
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUpgradeForm as KnowledgeModelEditorUpgradeForm exposing (KnowledgeModelEditorUpgradeForm)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 type alias Model =
-    { branch : Maybe ( Uuid, String )
-    , branchUpgradeForm : Form FormError BranchUpgradeForm
+    { kmEditor : Maybe ( Uuid, String )
+    , kmEditorUpgradeForm : Form FormError KnowledgeModelEditorUpgradeForm
     , creatingMigration : ActionResult String
-    , package : ActionResult PackageDetail
+    , kmPackage : ActionResult KnowledgeModelPackageDetail
     }
 
 
 initialModel : Model
 initialModel =
-    { branch = Nothing
-    , branchUpgradeForm = BranchUpgradeForm.init
+    { kmEditor = Nothing
+    , kmEditorUpgradeForm = KnowledgeModelEditorUpgradeForm.init
     , creatingMigration = ActionResult.Unset
-    , package = ActionResult.Unset
+    , kmPackage = ActionResult.Unset
     }
 
 
@@ -51,7 +51,7 @@ type Msg
     = Open Uuid String String
     | FormMsg Form.Msg
     | UpgradeComplete (Result ApiError ())
-    | GetPackageComplete (Result ApiError PackageDetail)
+    | GetKnowledgeModelPackageComplete (Result ApiError KnowledgeModelPackageDetail)
     | Close
 
 
@@ -71,26 +71,26 @@ update cfg appState msg model =
     case msg of
         Open uuid name forkOfPackageId ->
             ( { model
-                | branch = Just ( uuid, name )
+                | kmEditor = Just ( uuid, name )
                 , creatingMigration = ActionResult.Unset
-                , package = ActionResult.Loading
+                , kmPackage = ActionResult.Loading
               }
-            , Cmd.map cfg.wrapMsg <| PackagesApi.getPackage appState forkOfPackageId GetPackageComplete
+            , Cmd.map cfg.wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackage appState forkOfPackageId GetKnowledgeModelPackageComplete
             )
 
         FormMsg formMsg ->
-            case ( formMsg, Form.getOutput model.branchUpgradeForm, model.branch ) of
-                ( Form.Submit, Just branchUpgradeForm, Just ( uuid, _ ) ) ->
+            case ( formMsg, Form.getOutput model.kmEditorUpgradeForm, model.kmEditor ) of
+                ( Form.Submit, Just kmEditorUpgradeForm, Just ( uuid, _ ) ) ->
                     let
                         body =
-                            BranchUpgradeForm.encode branchUpgradeForm
+                            KnowledgeModelEditorUpgradeForm.encode kmEditorUpgradeForm
                     in
                     ( { model | creatingMigration = ActionResult.Loading }
-                    , Cmd.map cfg.wrapMsg <| BranchesApi.postMigration appState uuid body UpgradeComplete
+                    , Cmd.map cfg.wrapMsg <| KnowledgeModelEditorsApi.postMigration appState uuid body UpgradeComplete
                     )
 
                 _ ->
-                    ( { model | branchUpgradeForm = Form.update BranchUpgradeForm.validation formMsg model.branchUpgradeForm }
+                    ( { model | kmEditorUpgradeForm = Form.update KnowledgeModelEditorUpgradeForm.validation formMsg model.kmEditorUpgradeForm }
                     , Cmd.none
                     )
 
@@ -99,42 +99,42 @@ update cfg appState msg model =
                 Ok _ ->
                     let
                         kmUuid =
-                            Maybe.unwrap Uuid.nil Tuple.first model.branch
+                            Maybe.unwrap Uuid.nil Tuple.first model.kmEditor
                     in
-                    ( { model | branch = Nothing }, cfg.cmdUpgraded kmUuid )
+                    ( { model | kmEditor = Nothing }, cfg.cmdUpgraded kmUuid )
 
                 Err error ->
                     ( { model | creatingMigration = ApiError.toActionResult appState (gettext "Migration could not be created." appState.locale) error }
                     , Cmd.none
                     )
 
-        GetPackageComplete result ->
+        GetKnowledgeModelPackageComplete result ->
             case result of
-                Ok package ->
-                    ( { model | package = ActionResult.Success package }, Cmd.none )
+                Ok kmPackage ->
+                    ( { model | kmPackage = ActionResult.Success kmPackage }, Cmd.none )
 
                 Err error ->
-                    ( { model | package = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
+                    ( { model | kmPackage = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
                     , Cmd.none
                     )
 
         Close ->
-            ( { model | branch = Nothing }, Cmd.none )
+            ( { model | kmEditor = Nothing }, Cmd.none )
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
     let
         ( visible, name ) =
-            case model.branch of
-                Just ( _, branchName ) ->
-                    ( True, branchName )
+            case model.kmEditor of
+                Just ( _, kmEditorName ) ->
+                    ( True, kmEditorName )
 
                 Nothing ->
                     ( False, "" )
 
         modalContent =
-            case model.package of
+            case model.kmPackage of
                 Unset ->
                     [ Html.nothing ]
 
@@ -147,16 +147,16 @@ view appState model =
                 Success _ ->
                     let
                         options =
-                            case model.package of
-                                Success package ->
-                                    ( "", gettext "- select parent knowledge model -" appState.locale ) :: PackageDetail.createFormOptions package
+                            case model.kmPackage of
+                                Success kmPackage ->
+                                    ( "", gettext "- select parent knowledge model -" appState.locale ) :: KnowledgeModelPackageDetail.createFormOptions kmPackage
 
                                 _ ->
                                     []
                     in
                     [ p [ class "alert alert-info" ]
                         (String.formatHtml (gettext "Select the new parent knowledge model for %s." appState.locale) [ strong [] [ text name ] ])
-                    , FormGroup.select appState.locale options model.branchUpgradeForm "targetPackageId" (gettext "New parent knowledge model" appState.locale)
+                    , FormGroup.select appState.locale options model.kmEditorUpgradeForm "targetPackageId" (gettext "New parent knowledge model" appState.locale)
                         |> Html.map FormMsg
                     ]
 

@@ -437,8 +437,8 @@ kmEditorCreate mbKmId mbEdit =
 
 
 kmEditorEditor : Uuid -> Maybe Uuid -> Route
-kmEditorEditor branchUuid mbEntityUuid =
-    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid (Wizard.Pages.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
+kmEditorEditor kmEditorUuid mbEntityUuid =
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute kmEditorUuid (Wizard.Pages.KMEditor.Editor.KMEditorRoute.Edit mbEntityUuid))
 
 
 isKmEditorEditor : Uuid -> Route -> Bool
@@ -452,23 +452,23 @@ isKmEditorEditor uuid route =
 
 
 kmEditorEditorPhases : Uuid -> Route
-kmEditorEditorPhases branchUuid =
-    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Phases)
+kmEditorEditorPhases kmEditorUuid =
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute kmEditorUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Phases)
 
 
 kmEditorEditorQuestionTags : Uuid -> Route
-kmEditorEditorQuestionTags branchUuid =
-    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.QuestionTags)
+kmEditorEditorQuestionTags kmEditorUuid =
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute kmEditorUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.QuestionTags)
 
 
 kmEditorEditorPreview : Uuid -> Route
-kmEditorEditorPreview branchUuid =
-    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Preview)
+kmEditorEditorPreview kmEditorUuid =
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute kmEditorUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Preview)
 
 
 kmEditorEditorSettings : Uuid -> Route
-kmEditorEditorSettings branchUuid =
-    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute branchUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Settings)
+kmEditorEditorSettings kmEditorUuid =
+    KMEditorRoute (Wizard.Pages.KMEditor.Routes.EditorRoute kmEditorUuid Wizard.Pages.KMEditor.Editor.KMEditorRoute.Settings)
 
 
 kmEditorIndex : Route
@@ -536,8 +536,8 @@ isKnowledgeModelsIndex route =
 
 
 knowledgeModelsPreview : String -> Maybe String -> Route
-knowledgeModelsPreview packageId mbQuestionUuid =
-    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute packageId mbQuestionUuid
+knowledgeModelsPreview kmPackageId mbQuestionUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute kmPackageId mbQuestionUuid
 
 
 knowledgeModelsResourcePage : String -> String -> Route

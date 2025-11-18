@@ -7,5 +7,5 @@ import Wizard.Pages.KMEditor.Create.Msgs exposing (Msg(..))
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Sub.map PackageTypeHintInputMsg <|
-        TypeHintInput.subscriptions model.packageTypeHintInputModel
+    Sub.map KnowledgeModelPackageTypeHintInputMsg <|
+        TypeHintInput.subscriptions model.kmPackageTypeHintInputModel

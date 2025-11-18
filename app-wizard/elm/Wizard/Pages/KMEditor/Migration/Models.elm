@@ -6,12 +6,12 @@ module Wizard.Pages.KMEditor.Migration.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.Migration exposing (Migration)
+import Wizard.Api.Models.KnowledgeModelMigration exposing (KnowledgeModelMigration)
 
 
 type alias Model =
-    { branchUuid : Uuid
-    , migration : ActionResult Migration
+    { kmEditorUuid : Uuid
+    , migration : ActionResult KnowledgeModelMigration
     , conflict : ActionResult String
     , buttonClicked : Maybe ButtonClicked
     }
@@ -24,8 +24,8 @@ type ButtonClicked
 
 
 initialModel : Uuid -> Model
-initialModel branchUuid =
-    { branchUuid = branchUuid
+initialModel kmEditorUuid =
+    { kmEditorUuid = kmEditorUuid
     , migration = Loading
     , conflict = Unset
     , buttonClicked = Nothing

@@ -6,7 +6,8 @@ import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Wizard.Api.Models.Event as Event exposing (Event(..))
+import Wizard.Api.Models.Event as Event exposing (Event)
+import Wizard.Api.Models.Event.EventContent exposing (EventContent(..))
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration
 import Wizard.Api.Models.KnowledgeModel.Question as Question
@@ -110,149 +111,149 @@ viewEvent kmName km event =
         viewResourcePageNode_ =
             viewResourcePageNode kmName km
     in
-    case event of
-        AddKnowledgeModelEvent _ _ ->
+    case event.content of
+        AddKnowledgeModelEvent _ ->
             viewKnolwedgeModelNode_ stateClass.added eventEntityName
 
-        EditKnowledgeModelEvent _ _ ->
+        EditKnowledgeModelEvent _ ->
             viewKnolwedgeModelNode_ stateClass.edited (eventEntityNameOrDefault (Just kmName))
 
-        AddChapterEvent _ _ ->
+        AddChapterEvent _ ->
             viewChapterNode_ stateClass.added eventEntityName
 
-        EditChapterEvent _ commonData ->
-            viewChapterNode_ stateClass.edited (eventEntityNameOrDefault (getChapterTitle commonData))
+        EditChapterEvent _ ->
+            viewChapterNode_ stateClass.edited (eventEntityNameOrDefault (getChapterTitle event))
 
-        DeleteChapterEvent commonData ->
-            viewChapterNode_ stateClass.deleted (getChapterTitle commonData)
+        DeleteChapterEvent ->
+            viewChapterNode_ stateClass.deleted (getChapterTitle event)
 
-        AddMetricEvent _ _ ->
+        AddMetricEvent _ ->
             viewMetricNode_ stateClass.added eventEntityName
 
-        EditMetricEvent _ commonData ->
-            viewMetricNode_ stateClass.edited (eventEntityNameOrDefault (getMetricTitle commonData))
+        EditMetricEvent _ ->
+            viewMetricNode_ stateClass.edited (eventEntityNameOrDefault (getMetricTitle event))
 
-        DeleteMetricEvent commonData ->
-            viewMetricNode_ stateClass.deleted (getMetricTitle commonData)
+        DeleteMetricEvent ->
+            viewMetricNode_ stateClass.deleted (getMetricTitle event)
 
-        AddPhaseEvent _ _ ->
+        AddPhaseEvent _ ->
             viewPhaseNode_ stateClass.added eventEntityName
 
-        EditPhaseEvent _ commonData ->
-            viewMetricNode_ stateClass.edited (eventEntityNameOrDefault (getPhaseTitle commonData))
+        EditPhaseEvent _ ->
+            viewMetricNode_ stateClass.edited (eventEntityNameOrDefault (getPhaseTitle event))
 
-        DeletePhaseEvent commonData ->
-            viewPhaseNode_ stateClass.deleted (getPhaseTitle commonData)
+        DeletePhaseEvent ->
+            viewPhaseNode_ stateClass.deleted (getPhaseTitle event)
 
-        AddTagEvent _ _ ->
+        AddTagEvent _ ->
             viewTagNode_ stateClass.added eventEntityName
 
-        EditTagEvent _ commonData ->
-            viewTagNode_ stateClass.edited (eventEntityNameOrDefault (getTagName commonData))
+        EditTagEvent _ ->
+            viewTagNode_ stateClass.edited (eventEntityNameOrDefault (getTagName event))
 
-        DeleteTagEvent commonData ->
-            viewTagNode_ stateClass.deleted (getTagName commonData)
+        DeleteTagEvent ->
+            viewTagNode_ stateClass.deleted (getTagName event)
 
-        AddIntegrationEvent _ _ ->
+        AddIntegrationEvent _ ->
             viewIntegrationNode_ stateClass.added eventEntityName
 
-        EditIntegrationEvent _ commonData ->
-            viewIntegrationNode_ stateClass.edited (eventEntityNameOrDefault (getIntegrationName commonData))
+        EditIntegrationEvent _ ->
+            viewIntegrationNode_ stateClass.edited (eventEntityNameOrDefault (getIntegrationName event))
 
-        DeleteIntegrationEvent commonData ->
-            viewIntegrationNode_ stateClass.deleted (getIntegrationName commonData)
+        DeleteIntegrationEvent ->
+            viewIntegrationNode_ stateClass.deleted (getIntegrationName event)
 
-        AddQuestionEvent _ commonData ->
-            viewQuestionNode_ stateClass.added eventEntityName commonData.parentUuid
+        AddQuestionEvent _ ->
+            viewQuestionNode_ stateClass.added eventEntityName event.parentUuid
 
-        EditQuestionEvent _ commonData ->
-            viewQuestionNode_ stateClass.edited (eventEntityNameOrDefault (getQuestionTitle commonData)) commonData.parentUuid
+        EditQuestionEvent _ ->
+            viewQuestionNode_ stateClass.edited (eventEntityNameOrDefault (getQuestionTitle event)) event.parentUuid
 
-        DeleteQuestionEvent commonData ->
-            viewQuestionNode_ stateClass.deleted (getQuestionTitle commonData) commonData.parentUuid
+        DeleteQuestionEvent ->
+            viewQuestionNode_ stateClass.deleted (getQuestionTitle event) event.parentUuid
 
-        AddAnswerEvent _ commonData ->
-            viewAnswerNode_ stateClass.added eventEntityName commonData.parentUuid
+        AddAnswerEvent _ ->
+            viewAnswerNode_ stateClass.added eventEntityName event.parentUuid
 
-        EditAnswerEvent _ commonData ->
-            viewAnswerNode_ stateClass.edited (eventEntityNameOrDefault (getAnswerLabel commonData)) commonData.parentUuid
+        EditAnswerEvent _ ->
+            viewAnswerNode_ stateClass.edited (eventEntityNameOrDefault (getAnswerLabel event)) event.parentUuid
 
-        DeleteAnswerEvent commonData ->
-            viewAnswerNode_ stateClass.deleted (getAnswerLabel commonData) commonData.parentUuid
+        DeleteAnswerEvent ->
+            viewAnswerNode_ stateClass.deleted (getAnswerLabel event) event.parentUuid
 
-        AddChoiceEvent _ commonData ->
-            viewChoiceNode_ stateClass.added eventEntityName commonData.parentUuid
+        AddChoiceEvent _ ->
+            viewChoiceNode_ stateClass.added eventEntityName event.parentUuid
 
-        EditChoiceEvent _ commonData ->
-            viewChoiceNode_ stateClass.edited (eventEntityNameOrDefault (getChoiceLabel commonData)) commonData.parentUuid
+        EditChoiceEvent _ ->
+            viewChoiceNode_ stateClass.edited (eventEntityNameOrDefault (getChoiceLabel event)) event.parentUuid
 
-        DeleteChoiceEvent commonData ->
-            viewChoiceNode_ stateClass.deleted (getChoiceLabel commonData) commonData.parentUuid
+        DeleteChoiceEvent ->
+            viewChoiceNode_ stateClass.deleted (getChoiceLabel event) event.parentUuid
 
-        AddReferenceEvent _ commonData ->
-            viewReferenceNode_ stateClass.added eventEntityName commonData.parentUuid
+        AddReferenceEvent _ ->
+            viewReferenceNode_ stateClass.added eventEntityName event.parentUuid
 
-        EditReferenceEvent _ commonData ->
-            viewReferenceNode_ stateClass.edited (eventEntityNameOrDefault (getReferenceName commonData)) commonData.parentUuid
+        EditReferenceEvent _ ->
+            viewReferenceNode_ stateClass.edited (eventEntityNameOrDefault (getReferenceName event)) event.parentUuid
 
-        DeleteReferenceEvent commonData ->
-            viewReferenceNode_ stateClass.deleted (getReferenceName commonData) commonData.parentUuid
+        DeleteReferenceEvent ->
+            viewReferenceNode_ stateClass.deleted (getReferenceName event) event.parentUuid
 
-        AddExpertEvent _ commonData ->
-            viewExpertNode_ stateClass.added eventEntityName commonData.parentUuid
+        AddExpertEvent _ ->
+            viewExpertNode_ stateClass.added eventEntityName event.parentUuid
 
-        EditExpertEvent _ commonData ->
-            viewExpertNode_ stateClass.edited (eventEntityNameOrDefault (getExpertName commonData)) commonData.parentUuid
+        EditExpertEvent _ ->
+            viewExpertNode_ stateClass.edited (eventEntityNameOrDefault (getExpertName event)) event.parentUuid
 
-        DeleteExpertEvent commonData ->
-            viewExpertNode_ stateClass.deleted (getExpertName commonData) commonData.parentUuid
+        DeleteExpertEvent ->
+            viewExpertNode_ stateClass.deleted (getExpertName event) event.parentUuid
 
-        AddResourceCollectionEvent _ _ ->
+        AddResourceCollectionEvent _ ->
             viewResourceCollectionNode_ stateClass.added eventEntityName
 
-        EditResourceCollectionEvent _ _ ->
+        EditResourceCollectionEvent _ ->
             viewResourceCollectionNode_ stateClass.edited eventEntityName
 
-        DeleteResourceCollectionEvent commonData ->
-            viewResourceCollectionNode_ stateClass.deleted (getResourceCollectionName commonData)
+        DeleteResourceCollectionEvent ->
+            viewResourceCollectionNode_ stateClass.deleted (getResourceCollectionName event)
 
-        AddResourcePageEvent _ commonData ->
-            viewResourcePageNode_ stateClass.added eventEntityName commonData.parentUuid
+        AddResourcePageEvent _ ->
+            viewResourcePageNode_ stateClass.added eventEntityName event.parentUuid
 
-        EditResourcePageEvent _ commonData ->
-            viewResourcePageNode_ stateClass.edited (eventEntityNameOrDefault (getResourcePageName commonData)) commonData.parentUuid
+        EditResourcePageEvent _ ->
+            viewResourcePageNode_ stateClass.edited (eventEntityNameOrDefault (getResourcePageName event)) event.parentUuid
 
-        DeleteResourcePageEvent commonData ->
-            viewResourcePageNode_ stateClass.deleted (getResourcePageName commonData) commonData.parentUuid
+        DeleteResourcePageEvent ->
+            viewResourcePageNode_ stateClass.deleted (getResourcePageName event) event.parentUuid
 
-        MoveQuestionEvent eventData commonData ->
+        MoveQuestionEvent eventData ->
             div []
-                [ viewQuestionNode_ stateClass.deleted (getQuestionTitle commonData) commonData.parentUuid
-                , viewQuestionNode_ stateClass.added (getQuestionTitle commonData) eventData.targetUuid
+                [ viewQuestionNode_ stateClass.deleted (getQuestionTitle event) event.parentUuid
+                , viewQuestionNode_ stateClass.added (getQuestionTitle event) eventData.targetUuid
                 ]
 
-        MoveAnswerEvent eventData commonData ->
+        MoveAnswerEvent eventData ->
             div []
-                [ viewAnswerNode_ stateClass.deleted (getAnswerLabel commonData) commonData.parentUuid
-                , viewAnswerNode_ stateClass.added (getAnswerLabel commonData) eventData.targetUuid
+                [ viewAnswerNode_ stateClass.deleted (getAnswerLabel event) event.parentUuid
+                , viewAnswerNode_ stateClass.added (getAnswerLabel event) eventData.targetUuid
                 ]
 
-        MoveChoiceEvent eventData commonData ->
+        MoveChoiceEvent eventData ->
             div []
-                [ viewChoiceNode_ stateClass.deleted (getChoiceLabel commonData) commonData.parentUuid
-                , viewChoiceNode_ stateClass.added (getChoiceLabel commonData) eventData.targetUuid
+                [ viewChoiceNode_ stateClass.deleted (getChoiceLabel event) event.parentUuid
+                , viewChoiceNode_ stateClass.added (getChoiceLabel event) eventData.targetUuid
                 ]
 
-        MoveReferenceEvent eventData commonData ->
+        MoveReferenceEvent eventData ->
             div []
-                [ viewReferenceNode_ stateClass.deleted (getReferenceName commonData) commonData.parentUuid
-                , viewReferenceNode_ stateClass.added (getReferenceName commonData) eventData.targetUuid
+                [ viewReferenceNode_ stateClass.deleted (getReferenceName event) event.parentUuid
+                , viewReferenceNode_ stateClass.added (getReferenceName event) eventData.targetUuid
                 ]
 
-        MoveExpertEvent eventData commonData ->
+        MoveExpertEvent eventData ->
             div []
-                [ viewExpertNode_ stateClass.deleted (getExpertName commonData) commonData.parentUuid
-                , viewExpertNode_ stateClass.added (getExpertName commonData) eventData.targetUuid
+                [ viewExpertNode_ stateClass.deleted (getExpertName event) event.parentUuid
+                , viewExpertNode_ stateClass.added (getExpertName event) eventData.targetUuid
                 ]
 
 

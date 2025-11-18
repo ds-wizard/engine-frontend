@@ -247,7 +247,7 @@ update wrapMsg msg appState model =
                                     (Just Wizard.Msgs.SetFullscreen)
                                     appState
                                     { events = []
-                                    , branchUuid = Nothing
+                                    , kmEditorUuid = Nothing
                                     }
                                     questionnaireModel
 
@@ -584,7 +584,7 @@ update wrapMsg msg appState model =
                             NewDocument.update
                                 { wrapMsg = wrapMsg << NewDocumentMsg
                                 , questionnaireUuid = questionnaire.uuid
-                                , packageId = questionnaire.packageId
+                                , knowledgeModelPackageId = questionnaire.knowledgeModelPackageId
                                 , documentsNavigateCmd = cmdNavigate appState <| Routes.projectsDetailDocuments questionnaire.uuid
                                 }
                                 newDocumentMsg
@@ -760,7 +760,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
                     , redirectCmd = cmdNavigate appState (Routes.projectsIndex appState)
-                    , packageId = ActionResult.unwrap "" .packageId model.questionnaireCommon
+                    , knowledgeModelPackageId = ActionResult.unwrap "" .knowledgeModelPackageId model.questionnaireCommon
                     , questionnaireUuid = model.uuid
                     , permissions = ActionResult.unwrap [] .permissions model.questionnaireCommon
                     }

@@ -11,8 +11,8 @@ import Html.Attributes exposing (class, src, title)
 import Html.Extra as Html
 import String.Format as String
 import Version
-import Wizard.Api.Models.Package as Package exposing (Package)
-import Wizard.Api.Models.Package.PackagePhase as PackagePhase
+import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Data.AppState exposing (AppState)
@@ -47,14 +47,14 @@ importButton appState =
         Html.nothing
 
 
-listingConfig : AppState -> ViewConfig Package Msg
+listingConfig : AppState -> ViewConfig KnowledgeModelPackage Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
     , dropdownItems =
         KnowledgeModelActionsDropdown.actions appState
-            { exportMsg = ExportPackage
+            { exportMsg = ExportKnowledgeModelPackage
             , updatePhaseMsg = UpdatePhase
             , deleteMsg = ShowHideDeletePackage << Just
             , viewActionVisible = True
@@ -79,27 +79,27 @@ listingConfig appState =
     }
 
 
-listingTitle : AppState -> Package -> Html Msg
-listingTitle appState package =
+listingTitle : AppState -> KnowledgeModelPackage -> Html Msg
+listingTitle appState kmPackage =
     span []
-        [ linkTo (Routes.knowledgeModelsDetail package.id) [] [ text package.name ]
+        [ linkTo (Routes.knowledgeModelsDetail kmPackage.id) [] [ text kmPackage.name ]
         , Badge.light
             (tooltip <| gettext "Latest version" appState.locale)
-            [ text <| Version.toString package.version ]
-        , listingTitleNonEditableBadge appState package
-        , listingTitleDeprecatedBadge appState package
-        , listingTitleOutdatedBadge appState package
+            [ text <| Version.toString kmPackage.version ]
+        , listingTitleNonEditableBadge appState kmPackage
+        , listingTitleDeprecatedBadge appState kmPackage
+        , listingTitleOutdatedBadge appState kmPackage
         ]
 
 
-listingTitleOutdatedBadge : AppState -> Package -> Html Msg
-listingTitleOutdatedBadge appState package =
-    if Package.isOutdated package then
+listingTitleOutdatedBadge : AppState -> KnowledgeModelPackage -> Html Msg
+listingTitleOutdatedBadge appState kmPackage =
+    if KnowledgeModelPackage.isOutdated kmPackage then
         let
-            packageId =
-                Maybe.map ((++) (package.organizationId ++ ":" ++ package.kmId ++ ":") << Version.toString) package.remoteLatestVersion
+            kmPackageId =
+                Maybe.map ((++) (kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":") << Version.toString) kmPackage.remoteLatestVersion
         in
-        linkTo (Routes.knowledgeModelsImport packageId)
+        linkTo (Routes.knowledgeModelsImport kmPackageId)
             [ class Badge.warningClass ]
             [ text (gettext "update available" appState.locale) ]
 
@@ -107,29 +107,29 @@ listingTitleOutdatedBadge appState package =
         Html.nothing
 
 
-listingTitleDeprecatedBadge : AppState -> Package -> Html Msg
-listingTitleDeprecatedBadge appState package =
-    if package.phase == PackagePhase.Deprecated then
+listingTitleDeprecatedBadge : AppState -> KnowledgeModelPackage -> Html Msg
+listingTitleDeprecatedBadge appState kmPackage =
+    if kmPackage.phase == KnowledgeModelPackagePhase.Deprecated then
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
     else
         Html.nothing
 
 
-listingTitleNonEditableBadge : AppState -> Package -> Html Msg
-listingTitleNonEditableBadge appState package =
-    if package.nonEditable then
+listingTitleNonEditableBadge : AppState -> KnowledgeModelPackage -> Html Msg
+listingTitleNonEditableBadge appState kmPackage =
+    if kmPackage.nonEditable then
         Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
     else
         Html.nothing
 
 
-listingDescription : AppState -> Package -> Html Msg
-listingDescription appState package =
+listingDescription : AppState -> KnowledgeModelPackage -> Html Msg
+listingDescription appState kmPackage =
     let
         organizationFragment =
-            case package.organization of
+            case kmPackage.organization of
                 Just organization ->
                     let
                         logo =
@@ -149,9 +149,9 @@ listingDescription appState package =
                     Html.nothing
     in
     span []
-        [ code [ class "fragment" ] [ text package.id ]
+        [ code [ class "fragment" ] [ text kmPackage.id ]
         , organizationFragment
-        , span [ class "fragment" ] [ text package.description ]
+        , span [ class "fragment" ] [ text kmPackage.description ]
         ]
 
 
@@ -159,9 +159,9 @@ deleteModal : AppState -> Model -> Html Msg
 deleteModal appState model =
     let
         ( visible, version ) =
-            case model.packageToBeDeleted of
-                Just package ->
-                    ( True, package.organizationId ++ ":" ++ package.kmId )
+            case model.kmPackageToBeDeleted of
+                Just kmPackage ->
+                    ( True, kmPackage.organizationId ++ ":" ++ kmPackage.kmId )
 
                 Nothing ->
                     ( False, "" )
@@ -175,11 +175,11 @@ deleteModal appState model =
             ]
 
         modalConfig =
-            Modal.confirmConfig (gettext "Delete package" appState.locale)
+            Modal.confirmConfig (gettext "Delete knowledge model" appState.locale)
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingPackage
-                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeletePackage
+                |> Modal.confirmConfigActionResult model.deletingKmPackage
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteKnowledgeModelPackage
                 |> Modal.confirmConfigCancelMsg (ShowHideDeletePackage Nothing)
                 |> Modal.confirmConfigDangerous True
                 |> Modal.confirmConfigDataCy "km-delete"

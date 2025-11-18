@@ -20,9 +20,9 @@ import Html.Attributes.Extensions exposing (selectDataTour)
 import Maybe.Extra as Maybe
 import String.Extra as String
 import Uuid
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Questionnaires as QuestionnaireApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -60,7 +60,7 @@ fetchData appState model =
             case ( createCustom, model.selectedKnowledgeModelId ) of
                 ( True, Just kmId ) ->
                     Cmd.batch
-                        [ PackagesApi.getPackage appState kmId GetSelectedKnowledgeModelCompleted
+                        [ KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmId GetSelectedKnowledgeModelCompleted
                         , KnowledgeModelsApi.fetchPreview appState (Just kmId) [] [] GetKnowledgeModelPreviewCompleted
                         ]
 
@@ -76,7 +76,7 @@ fetchData appState model =
 
         loadKnowledgeModels =
             if createCustom && not anythingPreselected then
-                PackagesApi.getPackagesSuggestions appState Nothing PaginationQueryString.empty GetKnowledgeModelsCountCompleted
+                KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState Nothing PaginationQueryString.empty GetKnowledgeModelsCountCompleted
 
             else
                 Cmd.none
@@ -249,18 +249,18 @@ update wrapMsg msg appState model =
                             { model | form = Form.update (QuestionnaireCreateForm.validation validationMode) formMsg model.form }
 
                         selectedPackage =
-                            Maybe.andThen String.toMaybe (Form.getFieldAsString "packageId" newModel.form).value
+                            Maybe.andThen String.toMaybe (Form.getFieldAsString "knowledgeModelPackageId" newModel.form).value
                     in
                     case selectedPackage of
-                        Just packageId ->
-                            if newModel.lastFetchedPreview /= Just packageId then
+                        Just kmPackageId ->
+                            if newModel.lastFetchedPreview /= Just kmPackageId then
                                 ( { newModel
-                                    | lastFetchedPreview = Just packageId
+                                    | lastFetchedPreview = Just kmPackageId
                                     , knowledgeModelPreview = ActionResult.Loading
                                     , selectedTags = []
                                   }
                                 , Cmd.map wrapMsg <|
-                                    KnowledgeModelsApi.fetchPreview appState (Just packageId) [] [] GetKnowledgeModelPreviewCompleted
+                                    KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] GetKnowledgeModelPreviewCompleted
                                 )
 
                             else
@@ -336,11 +336,11 @@ update wrapMsg msg appState model =
         KnowledgeModelTypeHintInputMsg typeHintInputMsg ->
             let
                 formMsg =
-                    wrapMsg << FormMsg << Form.Input "packageId" Form.Select << Field.String
+                    wrapMsg << FormMsg << Form.Input "knowledgeModelPackageId" Form.Select << Field.String
 
                 cfg =
                     { wrapMsg = wrapMsg << KnowledgeModelTypeHintInputMsg
-                    , getTypeHints = PackagesApi.getPackagesSuggestions appState Nothing
+                    , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState Nothing
                     , getError = gettext "Unable to get knowledge models." appState.locale
                     , setReply = formMsg << .id
                     , clearReply = Just <| formMsg ""

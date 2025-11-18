@@ -36,7 +36,7 @@ type alias DocumentTemplateDetail =
     , remoteLatestVersion : Maybe Version
     , state : DocumentTemplateState
     , templateId : String
-    , usablePackages : List DocumentTemplatePackage
+    , usableKnowledgeModelPackages : List DocumentTemplatePackage
     , version : Version
     , versions : List Version
     , nonEditable : Bool
@@ -62,7 +62,7 @@ decoder =
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "state" DocumentTemplateState.decoder
         |> D.required "templateId" D.string
-        |> D.required "usablePackages" (D.list DocumentTemplatePackage.decoder)
+        |> D.required "usableKnowledgeModels" (D.list DocumentTemplatePackage.decoder)
         |> D.required "version" Version.decoder
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "nonEditable" D.bool

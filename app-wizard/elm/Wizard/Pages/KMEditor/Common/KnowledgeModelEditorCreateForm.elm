@@ -1,5 +1,5 @@
-module Wizard.Pages.KMEditor.Common.BranchCreateForm exposing
-    ( BranchCreateForm
+module Wizard.Pages.KMEditor.Common.KnowledgeModelEditorCreateForm exposing
+    ( KnowledgeModelEditorCreateForm
     , encode
     , init
     , validation
@@ -15,7 +15,7 @@ import Maybe.Extra as Maybe
 import Wizard.Data.AppState exposing (AppState)
 
 
-type alias BranchCreateForm =
+type alias KnowledgeModelEditorCreateForm =
     { name : String
     , kmId : String
     , versionMajor : Int
@@ -25,13 +25,13 @@ type alias BranchCreateForm =
     }
 
 
-init : AppState -> Maybe String -> Form FormError BranchCreateForm
-init appState selectedPackage =
+init : AppState -> Maybe String -> Form FormError KnowledgeModelEditorCreateForm
+init appState selectedKnowledgeModelPackage =
     let
         initials =
-            case selectedPackage of
-                Just packageId ->
-                    [ ( "previousPackageId", Field.string packageId ) ]
+            case selectedKnowledgeModelPackage of
+                Just kmPackageId ->
+                    [ ( "previousPackageId", Field.string kmPackageId ) ]
 
                 _ ->
                     []
@@ -39,9 +39,9 @@ init appState selectedPackage =
     Form.initial initials (validation appState)
 
 
-validation : AppState -> Validation FormError BranchCreateForm
+validation : AppState -> Validation FormError KnowledgeModelEditorCreateForm
 validation appState =
-    V.succeed BranchCreateForm
+    V.succeed KnowledgeModelEditorCreateForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "kmId" (V.kmId appState))
         |> V.andMap (V.field "versionMajor" V.versionNumber)
@@ -50,7 +50,7 @@ validation appState =
         |> V.andMap (V.field "previousPackageId" V.maybeString)
 
 
-encode : BranchCreateForm -> E.Value
+encode : KnowledgeModelEditorCreateForm -> E.Value
 encode form =
     let
         parentPackage =

@@ -1,5 +1,5 @@
-module Wizard.Api.Models.Package exposing
-    ( Package
+module Wizard.Api.Models.KnowledgeModelPackage exposing
+    ( KnowledgeModelPackage
     , decoder
     , dummy
     , isOutdated
@@ -10,11 +10,11 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Time
 import Version exposing (Version)
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
-import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
 
 
-type alias Package =
+type alias KnowledgeModelPackage =
     { id : String
     , name : String
     , organizationId : String
@@ -23,15 +23,15 @@ type alias Package =
     , description : String
     , organization : Maybe OrganizationInfo
     , remoteLatestVersion : Maybe Version
-    , phase : PackagePhase
+    , phase : KnowledgeModelPackagePhase
     , createdAt : Time.Posix
     , nonEditable : Bool
     }
 
 
-decoder : Decoder Package
+decoder : Decoder KnowledgeModelPackage
 decoder =
-    D.succeed Package
+    D.succeed KnowledgeModelPackage
         |> D.required "id" D.string
         |> D.required "name" D.string
         |> D.required "organizationId" D.string
@@ -40,12 +40,12 @@ decoder =
         |> D.required "description" D.string
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
-        |> D.required "phase" PackagePhase.decoder
+        |> D.required "phase" KnowledgeModelPackagePhase.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "nonEditable" D.bool
 
 
-dummy : Package
+dummy : KnowledgeModelPackage
 dummy =
     { id = ""
     , name = ""
@@ -55,17 +55,17 @@ dummy =
     , description = ""
     , organization = Nothing
     , remoteLatestVersion = Nothing
-    , phase = PackagePhase.Released
+    , phase = KnowledgeModelPackagePhase.Released
     , createdAt = Time.millisToPosix 0
     , nonEditable = True
     }
 
 
 isOutdated : { a | remoteLatestVersion : Maybe Version, version : Version } -> Bool
-isOutdated template =
-    case template.remoteLatestVersion of
+isOutdated kmPackage =
+    case kmPackage.remoteLatestVersion of
         Just remoteLatestVersion ->
-            Version.greaterThan template.version remoteLatestVersion
+            Version.greaterThan kmPackage.version remoteLatestVersion
 
         Nothing ->
             False

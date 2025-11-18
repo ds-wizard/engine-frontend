@@ -19,17 +19,17 @@ import Random exposing (Seed)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
-import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.KnowledgeModelSecrets as KnowledgeModelSecrets
-import Wizard.Api.Models.Branch.BranchState as BranchState
 import Wizard.Api.Models.Event as Event
-import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction as SetContentBranchAction exposing (SetContentBranchAction)
-import Wizard.Api.Models.WebSockets.ClientBranchAction as ClientBranchAction
-import Wizard.Api.Models.WebSockets.ServerBranchAction as ServerBranchAction
+import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
+import Wizard.Api.Models.WebSockets.ClientKnowledgeModelEditorAction as ClientKnowledgeModelEditorAction
+import Wizard.Api.Models.WebSockets.KnowledgeModelEditorAction.SetContentKnowledgeModelEditorAction as SetContentKnowledgeModelEditorAction exposing (SetContentKnowledgeModelEditorAction)
+import Wizard.Api.Models.WebSockets.ServerKnowledgeModelEditorAction as ServerKnowledgeModelEditorAction
 import Wizard.Api.Prefabs as PrefabsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.Pages.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.Pages.KMEditor.Editor.Components.Preview as Preview
@@ -47,7 +47,7 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Model -> Cmd Msg
 fetchData appState uuid model =
-    if ActionResult.unwrap False (.branch >> .uuid >> (==) uuid) model.branchModel then
+    if ActionResult.unwrap False (.kmEditor >> .uuid >> (==) uuid) model.editorContext then
         Cmd.batch
             [ fetchSubrouteData appState model
             , WebSocket.open model.websocket
@@ -55,7 +55,7 @@ fetchData appState uuid model =
 
     else
         Cmd.batch
-            [ BranchesApi.getBranch appState uuid GetBranchComplete
+            [ KnowledgeModelEditorsApi.getKnowledgeModelEditor appState uuid GetKnowledgeModelEditorComplete
             , PrefabsApi.getIntegrationPrefabs appState GetIntegrationPrefabsComplete
             , KnowledgeModelSecrets.getKnowledgeModelSecrets appState GetKnowledgeModelSecretsComplete
             ]
@@ -78,9 +78,9 @@ fetchSubrouteData appState model =
                 ]
 
         KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
-            case model.branchModel of
-                Success branchModel ->
-                    Dom.scrollIntoView ("#question-" ++ EditorBranch.getActiveQuestionUuid branchModel)
+            case model.editorContext of
+                Success editorContext ->
+                    Dom.scrollIntoView ("#question-" ++ EditorContext.getActiveQuestionUuid editorContext)
 
                 _ ->
                     Cmd.none
@@ -91,7 +91,7 @@ fetchSubrouteData appState model =
 
 fetchSubrouteDataFromAfter : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 fetchSubrouteDataFromAfter wrapMsg appState model =
-    case ( model.branchModel, appState.route ) of
+    case ( model.editorContext, appState.route ) of
         ( Success _, KMEditorRoute (EditorRoute _ route) ) ->
             let
                 ( newSeed, newModel ) =
@@ -149,17 +149,17 @@ update wrapMsg msg appState model =
         ResetModel ->
             ( appState.seed, { model | uuid = Uuid.nil }, Cmd.none )
 
-        GetBranchComplete result ->
+        GetKnowledgeModelEditorComplete result ->
             case result of
-                Ok branch ->
-                    if BranchState.isEditable branch.state then
+                Ok kmEditor ->
+                    if KnowledgeModelEditorState.isEditable kmEditor.state then
                         let
                             ( newSeed, newModel, fetchCmd ) =
                                 fetchSubrouteDataFromAfter wrapMsg
                                     appState
                                     { model
-                                        | branchModel = Success (EditorBranch.init appState (getSecrets model) branch model.mbEditorUuid)
-                                        , settingsModel = Settings.setBranchDetail appState branch model.settingsModel
+                                        | editorContext = Success (EditorContext.init appState (getSecrets model) kmEditor model.mbEditorUuid)
+                                        , settingsModel = Settings.setKnowledgeModelEditorDetail appState kmEditor model.settingsModel
                                     }
                         in
                         ( newSeed
@@ -175,7 +175,7 @@ update wrapMsg msg appState model =
 
                 Err error ->
                     withSeed <|
-                        ( { model | branchModel = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
+                        ( { model | editorContext = ApiError.toActionResult appState (gettext "Unable to get the knowledge model editor." appState.locale) error }
                         , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                         )
 
@@ -193,7 +193,7 @@ update wrapMsg msg appState model =
                     withSeed
                         ( { model
                             | kmSecrets = Success secrets
-                            , branchModel = ActionResult.map (EditorBranch.computeWarnings appState (List.map .name secrets)) model.branchModel
+                            , editorContext = ActionResult.map (EditorContext.computeWarnings appState (List.map .name secrets)) model.editorContext
                           }
                         , Cmd.none
                         )
@@ -217,8 +217,8 @@ update wrapMsg msg appState model =
             withSeed ( model, Window.refresh () )
 
         KMEditorMsg kmEditorMsg ->
-            case model.branchModel of
-                Success branchModel ->
+            case model.editorContext of
+                Success editorContext ->
                     let
                         updateConfig =
                             { setFullscreenMsg = Wizard.Msgs.SetFullscreen
@@ -226,10 +226,10 @@ update wrapMsg msg appState model =
                             , eventMsg = \shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent -> wrapMsg <| EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent
                             }
 
-                        ( editorBranch, kmEditorModel, cmd ) =
-                            KMEditor.update appState updateConfig kmEditorMsg ( branchModel, model.kmEditorModel )
+                        ( newEditorContext, newKmEditorModel, cmd ) =
+                            KMEditor.update appState updateConfig kmEditorMsg ( editorContext, model.kmEditorModel )
                     in
-                    withSeed ( { model | kmEditorModel = kmEditorModel, branchModel = Success editorBranch }, cmd )
+                    withSeed ( { model | kmEditorModel = newKmEditorModel, editorContext = Success newEditorContext }, cmd )
 
                 _ ->
                     withSeed ( model, Cmd.none )
@@ -249,11 +249,11 @@ update wrapMsg msg appState model =
             withSeed ( { model | tagEditorModel = tagEditorModel }, Cmd.map (wrapMsg << TagEditorMsg) cmd )
 
         PreviewMsg previewMsg ->
-            case model.branchModel of
-                Success editorBranch ->
+            case model.editorContext of
+                Success editorContext ->
                     let
                         ( newSeed, previewModel, cmd ) =
-                            Preview.update previewMsg appState editorBranch model.previewModel
+                            Preview.update previewMsg appState editorContext model.previewModel
                     in
                     ( newSeed, { model | previewModel = previewModel }, Cmd.map (wrapMsg << PreviewMsg) cmd )
 
@@ -265,7 +265,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
                     , cmdNavigate = cmdNavigate
-                    , branchUuid = model.uuid
+                    , kmEditorUuid = model.uuid
                     }
 
                 ( settingsModel, cmd ) =
@@ -277,7 +277,7 @@ update wrapMsg msg appState model =
             let
                 publishModalUpdateConfig =
                     { wrapMsg = wrapMsg << PublishModalMsg
-                    , branchUuid = model.uuid
+                    , kmEditorUuid = model.uuid
                     }
 
                 ( publishModalModel, publishModalCmd ) =
@@ -285,7 +285,7 @@ update wrapMsg msg appState model =
             in
             withSeed ( { model | publishModalModel = publishModalModel }, publishModalCmd )
 
-        EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid createEvent ->
+        EventMsg shouldDebounce mbFocusSelector mbFocusCaretPosition parentUuid mbEntityUuid eventContent ->
             let
                 ( kmEventUuid, newSeed1 ) =
                     Uuid.stepString appState.seed
@@ -302,15 +302,15 @@ update wrapMsg msg appState model =
                             Uuid.stepString newSeed2
 
                 event =
-                    createEvent
-                        { uuid = kmEventUuid
-                        , parentUuid = parentUuid
-                        , entityUuid = entityUuid
-                        , createdAt = appState.currentTime
-                        }
+                    { uuid = kmEventUuid
+                    , parentUuid = parentUuid
+                    , entityUuid = entityUuid
+                    , content = eventContent
+                    , createdAt = appState.currentTime
+                    }
 
-                newBranchModel =
-                    ActionResult.map (EditorBranch.applyEvent appState (getSecrets model) True event) model.branchModel
+                newEditorContext =
+                    ActionResult.map (EditorContext.applyEvent appState (getSecrets model) True event) model.editorContext
 
                 setUnloadMessageCmd =
                     Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
@@ -339,7 +339,7 @@ update wrapMsg msg appState model =
                                 event
 
                     wsEvent =
-                        SetContentBranchAction.AddBranchEvent
+                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent
                             { uuid = wsEventUuid
                             , event = squashedEvent
                             }
@@ -351,7 +351,7 @@ update wrapMsg msg appState model =
                 in
                 ( newSeed3
                 , { model
-                    | branchModel = newBranchModel
+                    | editorContext = newEditorContext
                     , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
                     , eventsWebsocketDebounce = Dict.insert entityUuid debounce model.eventsWebsocketDebounce
                     , eventsLastEvent = Dict.insert entityUuid squashedEvent model.eventsLastEvent
@@ -362,7 +362,7 @@ update wrapMsg msg appState model =
             else
                 let
                     wsEvent =
-                        SetContentBranchAction.AddBranchEvent
+                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent
                             { uuid = wsEventUuid
                             , event = event
                             }
@@ -372,16 +372,16 @@ update wrapMsg msg appState model =
 
                     wsCmd =
                         wsEvent
-                            |> ClientBranchAction.SetContent
-                            |> ClientBranchAction.encode
+                            |> ClientKnowledgeModelEditorAction.SetContent
+                            |> ClientKnowledgeModelEditorAction.encode
                             |> WebSocket.send model.websocket
 
                     navigateCmd =
-                        getNavigateCmd appState model.uuid model.branchModel newBranchModel
+                        getNavigateCmd appState model.uuid model.editorContext newEditorContext
                 in
                 ( newSeed3
                 , { newModel
-                    | branchModel = newBranchModel
+                    | editorContext = newEditorContext
                     , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
                   }
                 , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd, focusSelectorCmd ]
@@ -393,13 +393,13 @@ update wrapMsg msg appState model =
                     let
                         wsCmd =
                             event
-                                |> ClientBranchAction.SetContent
-                                |> ClientBranchAction.encode
+                                |> ClientKnowledgeModelEditorAction.SetContent
+                                |> ClientKnowledgeModelEditorAction.encode
                                 |> WebSocket.send model.websocket
                     in
                     Cmd.batch
                         [ wsCmd
-                        , Task.dispatch (EventAddSavingUuid (SetContentBranchAction.getUuid event) entityUuid)
+                        , Task.dispatch (EventAddSavingUuid (SetContentKnowledgeModelEditorAction.getUuid event) entityUuid)
                         ]
 
                 ( debounce, cmd ) =
@@ -426,8 +426,8 @@ update wrapMsg msg appState model =
 
                 wsCmd =
                     event
-                        |> ClientBranchAction.SetReplies
-                        |> ClientBranchAction.encode
+                        |> ClientKnowledgeModelEditorAction.SetReplies
+                        |> ClientKnowledgeModelEditorAction.encode
                         |> WebSocket.send model.websocket
             in
             ( newSeed, addSavingActionUuid eventUuid model, wsCmd )
@@ -450,7 +450,7 @@ handleWebSocketMsg websocketMsg appState model =
 
                 newModel2 =
                     if not removed then
-                        { newModel | branchModel = ActionResult.map (EditorBranch.applyEvent appState (getSecrets model) False eventData.event) newModel.branchModel }
+                        { newModel | editorContext = ActionResult.map (EditorContext.applyEvent appState (getSecrets model) False eventData.event) newModel.editorContext }
 
                     else
                         newModel
@@ -463,34 +463,34 @@ handleWebSocketMsg websocketMsg appState model =
                         Cmd.none
 
                 navigateCmd =
-                    getNavigateCmd appState model.uuid model.branchModel newModel2.branchModel
+                    getNavigateCmd appState model.uuid model.editorContext newModel2.editorContext
             in
             ( appState.seed
             , newModel2
             , Cmd.batch [ clearUnloadMessageCmd, navigateCmd ]
             )
     in
-    case WebSocket.receive (WebSocketServerAction.decoder ServerBranchAction.decoder) websocketMsg model.websocket of
+    case WebSocket.receive (WebSocketServerAction.decoder ServerKnowledgeModelEditorAction.decoder) websocketMsg model.websocket of
         WebSocket.Message serverAction ->
             case serverAction of
                 WebSocketServerAction.Success message ->
                     case message of
-                        ServerBranchAction.SetUserList users ->
+                        ServerKnowledgeModelEditorAction.SetUserList users ->
                             ( appState.seed, { model | onlineUsers = users }, Cmd.none )
 
-                        ServerBranchAction.SetContent setContentBranchAction ->
-                            case setContentBranchAction of
-                                SetContentBranchAction.AddBranchEvent data ->
+                        ServerKnowledgeModelEditorAction.SetContent setContentKnowledgeModelEditorAction ->
+                            case setContentKnowledgeModelEditorAction of
+                                SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent data ->
                                     updateModel data
 
-                        ServerBranchAction.SetReplies event ->
+                        ServerKnowledgeModelEditorAction.SetReplies event ->
                             let
                                 ( newModel, _ ) =
                                     removeSavingActionUuid event.uuid model
                             in
                             ( appState.seed
                             , { newModel
-                                | branchModel = ActionResult.map (EditorBranch.setReplies event.replies) newModel.branchModel
+                                | editorContext = ActionResult.map (EditorContext.setReplies event.replies) newModel.editorContext
                                 , previewModel = Preview.setReplies event.replies newModel.previewModel
                               }
                             , Cmd.none
@@ -506,14 +506,14 @@ handleWebSocketMsg websocketMsg appState model =
             ( appState.seed, model, Cmd.none )
 
 
-getNavigateCmd : AppState -> Uuid -> ActionResult EditorBranch -> ActionResult EditorBranch -> Cmd msg
-getNavigateCmd appState uuid oldEditorBranch newEditorBranch =
+getNavigateCmd : AppState -> Uuid -> ActionResult EditorContext -> ActionResult EditorContext -> Cmd msg
+getNavigateCmd appState uuid oldEditorContext newEditorContext =
     let
         originalActiveEditor =
-            ActionResult.unwrap "" .activeUuid oldEditorBranch
+            ActionResult.unwrap "" .activeUuid oldEditorContext
 
         newActiveEditor =
-            ActionResult.unwrap "" .activeUuid newEditorBranch
+            ActionResult.unwrap "" .activeUuid newEditorContext
     in
     if not (String.isEmpty newActiveEditor) && originalActiveEditor /= newActiveEditor then
         let
@@ -537,6 +537,6 @@ debounceConfig appState entityUuid =
     }
 
 
-getDebounceModel : String -> Model -> Debounce.Debounce SetContentBranchAction
+getDebounceModel : String -> Model -> Debounce.Debounce SetContentKnowledgeModelEditorAction
 getDebounceModel entityUuid model =
     Maybe.withDefault Debounce.init (Dict.get entityUuid model.eventsWebsocketDebounce)

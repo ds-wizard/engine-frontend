@@ -22,9 +22,9 @@ import Html.Events exposing (onClick)
 import String.Format as String
 import Uuid exposing (Uuid)
 import Version
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
-import Wizard.Api.Models.Package exposing (Package)
-import Wizard.Api.Packages as Packages
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Routes as Routes
@@ -56,7 +56,7 @@ initialModel =
 type Msg
     = SetOpen Bool
     | Publish
-    | PublishCompleted (Result ApiError Package)
+    | PublishCompleted (Result ApiError KnowledgeModelPackage)
 
 
 openMsg : Msg
@@ -70,7 +70,7 @@ openMsg =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , branchUuid : Uuid
+    , kmEditorUuid : Uuid
     }
 
 
@@ -82,13 +82,13 @@ update cfg appState msg model =
 
         Publish ->
             ( { model | publishing = ActionResult.Loading }
-            , Packages.postFromBranch appState cfg.branchUuid (cfg.wrapMsg << PublishCompleted)
+            , KnowledgeModelPackagesApi.postFromKnowledgeModelEditor appState cfg.kmEditorUuid (cfg.wrapMsg << PublishCompleted)
             )
 
         PublishCompleted result ->
             case result of
-                Ok package ->
-                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail package.id) )
+                Ok kmPackage ->
+                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.id) )
 
                 Err error ->
                     ( { model | publishing = ApiError.toActionResult appState (gettext "Unable to publish knowledge model" appState.locale) error }
@@ -101,7 +101,7 @@ update cfg appState msg model =
 
 
 type alias ViewConfig =
-    { branch : BranchDetail }
+    { kmEditor : KnowledgeModelEditorDetail }
 
 
 view : ViewConfig -> AppState -> Model -> Html Msg
@@ -110,7 +110,7 @@ view cfg appState model =
         info =
             div [ class "alert alert-info" ]
                 (String.formatHtml (gettext "Check the knowledge model's metadata before publishing. You change them in %s." appState.locale)
-                    [ linkTo (Routes.kmEditorEditorSettings cfg.branch.uuid)
+                    [ linkTo (Routes.kmEditorEditorSettings cfg.kmEditor.uuid)
                         [ onClick (SetOpen False), class "btn-link with-icon" ]
                         [ faSettings
                         , text (gettext "Settings" appState.locale)
@@ -120,12 +120,12 @@ view cfg appState model =
 
         modalContent =
             [ info
-            , FormGroup.readOnlyInput cfg.branch.name (gettext "Name" appState.locale)
-            , FormGroup.readOnlyInput cfg.branch.description (gettext "Description" appState.locale)
-            , FormGroup.readOnlyInput cfg.branch.kmId (gettext "Knowledge Model ID" appState.locale)
-            , FormGroup.readOnlyInput (Version.toString cfg.branch.version) (gettext "Version" appState.locale)
-            , FormGroup.readOnlyInput cfg.branch.license (gettext "License" appState.locale)
-            , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.branch.readme) (gettext "Readme" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.name (gettext "Name" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.description (gettext "Description" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.kmId (gettext "Knowledge Model ID" appState.locale)
+            , FormGroup.readOnlyInput (Version.toString cfg.kmEditor.version) (gettext "Version" appState.locale)
+            , FormGroup.readOnlyInput cfg.kmEditor.license (gettext "License" appState.locale)
+            , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.kmEditor.readme) (gettext "Readme" appState.locale)
             ]
 
         modalConfig =

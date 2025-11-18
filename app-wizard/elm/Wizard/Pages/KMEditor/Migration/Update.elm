@@ -9,10 +9,11 @@ import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setMigration)
 import Gettext exposing (gettext)
 import Uuid exposing (Uuid)
-import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.Models.Event as Event
-import Wizard.Api.Models.Migration exposing (Migration)
-import Wizard.Api.Models.MigrationResolution as MigrationResolution exposing (MigrationResolution)
+import Wizard.Api.Models.KnowledgeModelMigration exposing (KnowledgeModelMigration)
+import Wizard.Api.Models.KnowledgeModelMigration.KnowledgeModelMigrationState as KnowledgeModelMigrationState
+import Wizard.Api.Models.KnowledgeModelMigrationResolution as MigrationResolution exposing (KnowledgeModelMigrationResolution)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KMEditor.Migration.Models exposing (ButtonClicked(..), Model)
@@ -21,7 +22,7 @@ import Wizard.Pages.KMEditor.Migration.Msgs exposing (Msg(..))
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    BranchesApi.getMigration appState uuid GetMigrationCompleted
+    KnowledgeModelEditorsApi.getMigration appState uuid GetMigrationCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -47,7 +48,7 @@ update msg wrapMsg appState model =
 -- Handlers
 
 
-handleGetMigrationCompleted : AppState -> Model -> Result ApiError Migration -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetMigrationCompleted : AppState -> Model -> Result ApiError KnowledgeModelMigration -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetMigrationCompleted appState model result =
     RequestHelpers.applyResult
         { setResult = setMigration
@@ -64,7 +65,7 @@ handleApplyAll wrapMsg appState model =
     let
         cmd =
             Cmd.map wrapMsg <|
-                BranchesApi.postMigrationConflictApplyAll appState model.branchUuid PostMigrationConflictCompleted
+                KnowledgeModelEditorsApi.postMigrationConflictApplyAll appState model.kmEditorUuid PostMigrationConflictCompleted
     in
     ( { model | conflict = Loading, buttonClicked = Just ApplyAllButtonClicked }, cmd )
 
@@ -85,7 +86,7 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
         Ok _ ->
             let
                 cmd =
-                    Cmd.map wrapMsg <| fetchData model.branchUuid appState
+                    Cmd.map wrapMsg <| fetchData model.kmEditorUuid appState
             in
             ( { model | migration = Loading, conflict = Unset }, cmd )
 
@@ -99,17 +100,22 @@ handlePostMigrationConflictCompleted wrapMsg appState model result =
 -- Helpers
 
 
-resolveChange : (String -> MigrationResolution) -> ButtonClicked -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+resolveChange : (String -> KnowledgeModelMigrationResolution) -> ButtonClicked -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 resolveChange createMigrationResolution buttonClicked wrapMsg appState model =
     let
         cmd =
             case model.migration of
                 Success migration ->
-                    migration.migrationState.targetEvent
-                        |> Maybe.map Event.getUuid
-                        |> Maybe.map createMigrationResolution
-                        |> Maybe.map (postMigrationConflictCmd wrapMsg model.branchUuid appState)
-                        |> Maybe.withDefault Cmd.none
+                    case migration.state of
+                        KnowledgeModelMigrationState.Conflict targetEvent ->
+                            targetEvent
+                                |> Maybe.map Event.getUuid
+                                |> Maybe.map createMigrationResolution
+                                |> Maybe.map (postMigrationConflictCmd wrapMsg model.kmEditorUuid appState)
+                                |> Maybe.withDefault Cmd.none
+
+                        _ ->
+                            Cmd.none
 
                 _ ->
                     Cmd.none
@@ -117,11 +123,11 @@ resolveChange createMigrationResolution buttonClicked wrapMsg appState model =
     ( { model | conflict = Loading, buttonClicked = Just buttonClicked }, cmd )
 
 
-postMigrationConflictCmd : (Msg -> Wizard.Msgs.Msg) -> Uuid -> AppState -> MigrationResolution -> Cmd Wizard.Msgs.Msg
+postMigrationConflictCmd : (Msg -> Wizard.Msgs.Msg) -> Uuid -> AppState -> KnowledgeModelMigrationResolution -> Cmd Wizard.Msgs.Msg
 postMigrationConflictCmd wrapMsg uuid appState resolution =
     let
         body =
             MigrationResolution.encode resolution
     in
     Cmd.map wrapMsg <|
-        BranchesApi.postMigrationConflict appState uuid body PostMigrationConflictCompleted
+        KnowledgeModelEditorsApi.postMigrationConflict appState uuid body PostMigrationConflictCompleted

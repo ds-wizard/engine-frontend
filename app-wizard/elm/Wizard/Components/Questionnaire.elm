@@ -573,7 +573,7 @@ type alias QuestionnaireRenderer =
 
 type alias Context =
     { events : List Event
-    , branchUuid : Maybe Uuid
+    , kmEditorUuid : Maybe Uuid
     }
 
 
@@ -1855,9 +1855,9 @@ loadTypeHints appState ctx model path questionUuidStr value =
             Uuid.fromUuidString questionUuidStr
 
         typeHintRequest =
-            case ctx.branchUuid of
-                Just branchUuid ->
-                    TypeHintRequest.fromBranchQuestion branchUuid questionUuid value
+            case ctx.kmEditorUuid of
+                Just kmEditorUuid ->
+                    TypeHintRequest.fromKmEditorQuestion kmEditorUuid questionUuid value
 
                 Nothing ->
                     TypeHintRequest.fromQuestionnaire model.questionnaire.uuid questionUuid value
@@ -1868,7 +1868,7 @@ loadTypeHints appState ctx model path questionUuidStr value =
 loadTypeHintsLegacy : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
 loadTypeHintsLegacy appState ctx model path questionUuid value =
     TypeHintsApi.fetchTypeHintsLegacy appState
-        (Just model.questionnaire.packageId)
+        (Just model.questionnaire.knowledgeModelPackageId)
         ctx.events
         questionUuid
         value
@@ -4686,7 +4686,7 @@ viewFeedbackAction appState cfg model question =
     if feedbackEnabled then
         let
             openFeedbackModal =
-                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.packageId (Question.getUuid question))
+                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.knowledgeModelPackageId (Question.getUuid question))
         in
         a
             (class "action"

@@ -14,11 +14,11 @@ import Html.Attributes exposing (href, target)
 import Html.Attributes.Extensions exposing (dataCy)
 import String.Format as String
 import Version exposing (Version)
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Common.BranchPublishForm exposing (BranchPublishForm)
-import Wizard.Pages.KMEditor.Common.BranchUtils as BranchUtils
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm exposing (KnowledgeModelEditorPublishForm)
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUtils as KnowledgeModelEditorUtils
 import Wizard.Pages.KMEditor.Publish.Models exposing (Model)
 import Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.Utils.HtmlAttributesUtils exposing (wideDetailClass)
@@ -27,21 +27,21 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (contentView appState model) model.branch
+    Page.actionResultView appState (contentView appState model) model.kmEditor
 
 
-contentView : AppState -> Model -> BranchDetail -> Html Msg
-contentView appState model branch =
+contentView : AppState -> Model -> KnowledgeModelEditorDetail -> Html Msg
+contentView appState model kmEditor =
     div [ wideDetailClass "KMEditor__Publish" ]
         [ Page.header (gettext "Publish new version" appState.locale) []
         , div []
-            [ FormResult.view model.publishingBranch
-            , formView appState model.form branch
+            [ FormResult.view model.publishingKnowledgeModelEditor
+            , formView appState model.form kmEditor
             , FormActions.viewCustomButton appState
                 Cancel
                 (ActionButton.buttonWithAttrs
                     (ActionButton.ButtonWithAttrsConfig (gettext "Publish" appState.locale)
-                        model.publishingBranch
+                        model.publishingKnowledgeModelEditor
                         (FormMsg Form.Submit)
                         False
                         [ dataCy "km-publish_publish-button" ]
@@ -51,11 +51,11 @@ contentView appState model branch =
         ]
 
 
-formView : AppState -> Form FormError BranchPublishForm -> BranchDetail -> Html Msg
-formView appState form branch =
+formView : AppState -> Form FormError KnowledgeModelEditorPublishForm -> KnowledgeModelEditorDetail -> Html Msg
+formView appState form kmEditor =
     let
         mbVersion =
-            BranchUtils.lastVersion appState branch
+            KnowledgeModelEditorUtils.lastVersion appState kmEditor
 
         versionInputConfig =
             { label = gettext "New version" appState.locale
@@ -68,8 +68,8 @@ formView appState form branch =
             }
     in
     div []
-        [ Html.map FormMsg <| FormGroup.textView "name" branch.name <| gettext "Knowledge Model" appState.locale
-        , Html.map FormMsg <| FormGroup.codeView branch.kmId <| gettext "Knowledge Model ID" appState.locale
+        [ Html.map FormMsg <| FormGroup.textView "name" kmEditor.name <| gettext "Knowledge Model" appState.locale
+        , Html.map FormMsg <| FormGroup.codeView kmEditor.kmId <| gettext "Knowledge Model ID" appState.locale
         , lastVersion appState mbVersion
         , FormGroup.version appState.locale versionInputConfig form
         , Html.map FormMsg <| FormGroup.input appState.locale form "license" <| gettext "License" appState.locale
@@ -89,5 +89,5 @@ lastVersion : AppState -> Maybe Version -> Html msg
 lastVersion appState mbVersion =
     mbVersion
         |> Maybe.map Version.toString
-        |> Maybe.withDefault (gettext "No version of this package has been published yet." appState.locale)
+        |> Maybe.withDefault (gettext "No version of this knowledge model has been published yet." appState.locale)
         |> flip (FormGroup.textView "last-version") (gettext "Last version" appState.locale)

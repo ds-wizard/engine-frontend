@@ -1,5 +1,5 @@
-module Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedPackage exposing
-    ( AllowedPackage
+module Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedKnowledgeModelPackage exposing
+    ( AllowedKnowledgeModelPackage
     , decoder
     , encode
     , init
@@ -16,7 +16,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 
 
-type alias AllowedPackage =
+type alias AllowedKnowledgeModelPackage =
     { orgId : Maybe String
     , kmId : Maybe String
     , minVersion : Maybe String
@@ -24,16 +24,16 @@ type alias AllowedPackage =
     }
 
 
-decoder : Decoder AllowedPackage
+decoder : Decoder AllowedKnowledgeModelPackage
 decoder =
-    D.succeed AllowedPackage
+    D.succeed AllowedKnowledgeModelPackage
         |> D.required "orgId" (D.maybe D.string)
         |> D.required "kmId" (D.maybe D.string)
         |> D.required "minVersion" (D.maybe D.string)
         |> D.required "maxVersion" (D.maybe D.string)
 
 
-encode : AllowedPackage -> E.Value
+encode : AllowedKnowledgeModelPackage -> E.Value
 encode allowedPackage =
     E.object
         [ ( "orgId", E.maybe E.string allowedPackage.orgId )
@@ -43,7 +43,7 @@ encode allowedPackage =
         ]
 
 
-init : AllowedPackage -> Field
+init : AllowedKnowledgeModelPackage -> Field
 init allowedPackage =
     Field.group
         [ ( "orgId", Field.string (Maybe.withDefault "" allowedPackage.orgId) )
@@ -53,9 +53,9 @@ init allowedPackage =
         ]
 
 
-validation : Validation FormError AllowedPackage
+validation : Validation FormError AllowedKnowledgeModelPackage
 validation =
-    V.succeed AllowedPackage
+    V.succeed AllowedKnowledgeModelPackage
         |> V.andMap (V.field "orgId" V.maybeString)
         |> V.andMap (V.field "kmId" V.maybeString)
         |> V.andMap (V.field "minVersion" V.maybeString)

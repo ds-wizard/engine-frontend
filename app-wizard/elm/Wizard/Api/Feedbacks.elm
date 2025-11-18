@@ -8,10 +8,10 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getFeedbacks : AppState -> String -> String -> ToMsg (List Feedback) msg -> Cmd msg
-getFeedbacks appState packageId questionUuid =
+getFeedbacks appState kmPackageId questionUuid =
     let
         url =
-            "/feedbacks?packageId=" ++ packageId ++ "&questionUuid=" ++ questionUuid
+            "/feedbacks?knowledgeModelPackageId=" ++ kmPackageId ++ "&questionUuid=" ++ questionUuid
     in
     Request.get (AppState.toServerInfo appState) url (D.list Feedback.decoder)
 

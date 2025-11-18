@@ -49,13 +49,14 @@ import Test exposing (Test, describe, test)
 import TestUtils exposing (expectEncodeDecode, parametrized)
 import Time
 import Uuid
-import Wizard.Api.Models.Event as Event exposing (Event(..))
+import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.Event.AddIntegrationEventData exposing (AddIntegrationEventData(..))
 import Wizard.Api.Models.Event.AddQuestionEventData exposing (AddQuestionEventData(..))
 import Wizard.Api.Models.Event.AddReferenceEventData exposing (AddReferenceEventData(..))
 import Wizard.Api.Models.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
 import Wizard.Api.Models.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
 import Wizard.Api.Models.Event.EditReferenceEventData exposing (EditReferenceEventData(..))
+import Wizard.Api.Models.Event.EventContent exposing (EventContent(..))
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 
@@ -66,41 +67,42 @@ import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (Que
 
 editKnowledgeModelEvent : Event
 editKnowledgeModelEvent =
-    EditKnowledgeModelEvent
-        { chapterUuids =
-            { changed = False
-            , value = Nothing
+    { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
+    , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , parentUuid = Uuid.toString Uuid.nil
+    , content =
+        EditKnowledgeModelEvent
+            { chapterUuids =
+                { changed = False
+                , value = Nothing
+                }
+            , tagUuids =
+                { changed = False
+                , value = Nothing
+                }
+            , integrationUuids =
+                { changed = False
+                , value = Nothing
+                }
+            , metricUuids =
+                { changed = False
+                , value = Nothing
+                }
+            , phaseUuids =
+                { changed = False
+                , value = Nothing
+                }
+            , resourceCollectionUuids =
+                { changed = False
+                , value = Nothing
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , tagUuids =
-            { changed = False
-            , value = Nothing
-            }
-        , integrationUuids =
-            { changed = False
-            , value = Nothing
-            }
-        , metricUuids =
-            { changed = False
-            , value = Nothing
-            }
-        , phaseUuids =
-            { changed = False
-            , value = Nothing
-            }
-        , resourceCollectionUuids =
-            { changed = False
-            , value = Nothing
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "79d1e7b4-c2d8-49ff-8293-dfcfdb6da6ac"
-        , entityUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , parentUuid = Uuid.toString Uuid.nil
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editKnowledgeModelEventTest : Test
@@ -127,16 +129,17 @@ editKnowledgeModelEventTest =
 
 addChapterEvent : Event
 addChapterEvent =
-    AddChapterEvent
-        { title = "Design of Experiment"
-        , text = Just "This is a chapter about the designing of the experiment"
-        , annotations = []
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        AddChapterEvent
+            { title = "Design of Experiment"
+            , text = Just "This is a chapter about the designing of the experiment"
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addChapterEventTest : Test
@@ -156,29 +159,30 @@ addChapterEventTest =
 
 editChapterEvent : Event
 editChapterEvent =
-    EditChapterEvent
-        { title =
-            { changed = True
-            , value = Just "Design of Experiment"
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        EditChapterEvent
+            { title =
+                { changed = True
+                , value = Just "Design of Experiment"
+                }
+            , text =
+                { changed = False
+                , value = Nothing
+                }
+            , questionUuids =
+                { changed = True
+                , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , text =
-            { changed = False
-            , value = Nothing
-            }
-        , questionUuids =
-            { changed = True
-            , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editChapterEventTest : Test
@@ -194,29 +198,30 @@ editChapterEventTest =
             \_ ->
                 let
                     event =
-                        EditChapterEvent
-                            { title =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+                        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+                        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                        , content =
+                            EditChapterEvent
+                                { title =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , text =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , questionUuids =
+                                    { changed = True
+                                    , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , text =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , questionUuids =
-                                { changed = True
-                                , value = Just [ "2877dc7e-2df6-11e9-b210-d663bd873d93", "2877df94-2df6-11e9-b210-d663bd873d93" ]
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get entity visible name when changed" <|
@@ -227,12 +232,12 @@ editChapterEventTest =
 
 deleteChapterEvent : Event
 deleteChapterEvent =
-    DeleteChapterEvent
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content = DeleteChapterEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteChapterEventTest : Test
@@ -256,17 +261,18 @@ deleteChapterEventTest =
 
 addMetricEvent : Event
 addMetricEvent =
-    AddMetricEvent
-        { title = "Metric"
-        , abbreviation = Just "M"
-        , description = Nothing
-        , annotations = []
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        AddMetricEvent
+            { title = "Metric"
+            , abbreviation = Just "M"
+            , description = Nothing
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addMetricEventTest : Test
@@ -286,29 +292,30 @@ addMetricEventTest =
 
 editMetricEvent : Event
 editMetricEvent =
-    EditMetricEvent
-        { title =
-            { changed = True
-            , value = Just "Metric"
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        EditMetricEvent
+            { title =
+                { changed = True
+                , value = Just "Metric"
+                }
+            , abbreviation =
+                { changed = False
+                , value = Nothing
+                }
+            , description =
+                { changed = True
+                , value = Just (Just "This is a metric")
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , abbreviation =
-            { changed = False
-            , value = Nothing
-            }
-        , description =
-            { changed = True
-            , value = Just (Just "This is a metric")
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editMetricEventTest : Test
@@ -323,29 +330,30 @@ editMetricEventTest =
             \_ ->
                 let
                     event =
-                        EditMetricEvent
-                            { title =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+                        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+                        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                        , content =
+                            EditMetricEvent
+                                { title =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , abbreviation =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , description =
+                                    { changed = True
+                                    , value = Just (Just "This is a metric")
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , abbreviation =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , description =
-                                { changed = True
-                                , value = Just (Just "This is a metric")
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -356,12 +364,12 @@ editMetricEventTest =
 
 deleteMetricEvent : Event
 deleteMetricEvent =
-    DeleteMetricEvent
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content = DeleteMetricEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteMetricEventTest : Test
@@ -385,16 +393,17 @@ deleteMetricEventTest =
 
 addPhaseEvent : Event
 addPhaseEvent =
-    AddPhaseEvent
-        { title = "Phase"
-        , description = Nothing
-        , annotations = []
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        AddPhaseEvent
+            { title = "Phase"
+            , description = Nothing
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addPhaseEventTest : Test
@@ -414,25 +423,26 @@ addPhaseEventTest =
 
 editPhaseEvent : Event
 editPhaseEvent =
-    EditPhaseEvent
-        { title =
-            { changed = True
-            , value = Just "Phase"
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        EditPhaseEvent
+            { title =
+                { changed = True
+                , value = Just "Phase"
+                }
+            , description =
+                { changed = True
+                , value = Just (Just "This is an important phase")
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , description =
-            { changed = True
-            , value = Just (Just "This is an important phase")
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editPhaseEventTest : Test
@@ -447,25 +457,26 @@ editPhaseEventTest =
             \_ ->
                 let
                     event =
-                        EditPhaseEvent
-                            { title =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+                        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+                        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                        , content =
+                            EditPhaseEvent
+                                { title =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , description =
+                                    { changed = True
+                                    , value = Just (Just "This is an important phase")
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , description =
-                                { changed = True
-                                , value = Just (Just "This is an important phase")
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -476,12 +487,12 @@ editPhaseEventTest =
 
 deletePhaseEvent : Event
 deletePhaseEvent =
-    DeletePhaseEvent
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content = DeletePhaseEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deletePhaseEventTest : Test
@@ -505,17 +516,18 @@ deletePhaseEventTest =
 
 addTagEvent : Event
 addTagEvent =
-    AddTagEvent
-        { name = "Astronomy"
-        , description = Just "Questions connected to astronomy"
-        , color = "#F5A623"
-        , annotations = []
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        AddTagEvent
+            { name = "Astronomy"
+            , description = Just "Questions connected to astronomy"
+            , color = "#F5A623"
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addTagEventTest : Test
@@ -535,29 +547,30 @@ addTagEventTest =
 
 editTagEvent : Event
 editTagEvent =
-    EditTagEvent
-        { name =
-            { changed = True
-            , value = Just "Astronomy"
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        EditTagEvent
+            { name =
+                { changed = True
+                , value = Just "Astronomy"
+                }
+            , description =
+                { changed = False
+                , value = Nothing
+                }
+            , color =
+                { changed = True
+                , value = Just "#F5A623"
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , description =
-            { changed = False
-            , value = Nothing
-            }
-        , color =
-            { changed = True
-            , value = Just "#F5A623"
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editTagEventTest : Test
@@ -572,29 +585,30 @@ editTagEventTest =
             \_ ->
                 let
                     event =
-                        EditTagEvent
-                            { name =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+                        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+                        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+                        , content =
+                            EditTagEvent
+                                { name =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , description =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , color =
+                                    { changed = True
+                                    , value = Just "#F5A623"
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , description =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , color =
-                                { changed = True
-                                , value = Just "#F5A623"
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-                            , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-                            , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -605,12 +619,12 @@ editTagEventTest =
 
 deleteTagEvent : Event
 deleteTagEvent =
-    DeleteTagEvent
-        { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
-        , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "485bc170-2df3-11e9-b210-d663bd873d93"
+    , entityUuid = "1cf9c1f2-2df9-11e9-b210-d663bd873d93"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content = DeleteTagEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteTagEventTest : Test
@@ -634,49 +648,51 @@ deleteTagEventTest =
 
 addApiIntegrationEvent : Event
 addApiIntegrationEvent =
-    AddIntegrationEvent
-        (AddIntegrationApiLegacyEvent
-            { id = "service"
-            , name = "Service"
-            , variables = [ "kind", "category" ]
-            , logo = Just "data:image/png;base64,..."
-            , itemUrl = Just "http://example.com/${id}"
-            , requestMethod = "GET"
-            , requestUrl = "/api/search"
-            , requestHeaders = [ { key = "X_USER", value = "user" } ]
-            , requestBody = "{}"
-            , requestEmptySearch = True
-            , responseListField = Just "items"
-            , responseItemId = Just "uuid"
-            , responseItemTemplate = "title"
-            , annotations = []
-            }
-        )
-        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+    , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        AddIntegrationEvent
+            (AddIntegrationApiLegacyEvent
+                { id = "service"
+                , name = "Service"
+                , variables = [ "kind", "category" ]
+                , logo = Just "data:image/png;base64,..."
+                , itemUrl = Just "http://example.com/${id}"
+                , requestMethod = "GET"
+                , requestUrl = "/api/search"
+                , requestHeaders = [ { key = "X_USER", value = "user" } ]
+                , requestBody = "{}"
+                , requestEmptySearch = True
+                , responseListField = Just "items"
+                , responseItemId = Just "uuid"
+                , responseItemTemplate = "title"
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addWidgetIntegrationEvent : Event
 addWidgetIntegrationEvent =
-    AddIntegrationEvent
-        (AddIntegrationWidgetEvent
-            { id = "service"
-            , name = "Service"
-            , variables = [ "kind", "category" ]
-            , logo = Just "data:image/png;base64,..."
-            , itemUrl = Just "http://example.com/${id}"
-            , widgetUrl = "http://example.com"
-            , annotations = []
-            }
-        )
-        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+    , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        AddIntegrationEvent
+            (AddIntegrationWidgetEvent
+                { id = "service"
+                , name = "Service"
+                , variables = [ "kind", "category" ]
+                , logo = Just "data:image/png;base64,..."
+                , itemUrl = Just "http://example.com/${id}"
+                , widgetUrl = "http://example.com"
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addIntegrationEventTest : Test
@@ -704,49 +720,51 @@ addIntegrationEventTest =
 
 editApiIntegrationEvent : Event
 editApiIntegrationEvent =
-    EditIntegrationEvent
-        (EditIntegrationApiLegacyEvent
-            { id = { changed = True, value = Just "service" }
-            , name = { changed = True, value = Just "Service" }
-            , variables = { changed = True, value = Just [ "kind", "category" ] }
-            , logo = { changed = False, value = Nothing }
-            , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
-            , requestMethod = { changed = True, value = Just "GET" }
-            , requestUrl = { changed = False, value = Nothing }
-            , requestHeaders = { changed = True, value = Just <| [ { key = "X_SEARCH", value = "full" }, { key = "X_USER", value = "user" } ] }
-            , requestBody = { changed = True, value = Just "{}" }
-            , requestEmptySearch = { changed = True, value = Just False }
-            , responseListField = { changed = False, value = Nothing }
-            , responseItemId = { changed = False, value = Nothing }
-            , responseItemTemplate = { changed = True, value = Just "title" }
-            , annotations = { changed = False, value = Nothing }
-            }
-        )
-        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+    , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        EditIntegrationEvent
+            (EditIntegrationApiLegacyEvent
+                { id = { changed = True, value = Just "service" }
+                , name = { changed = True, value = Just "Service" }
+                , variables = { changed = True, value = Just [ "kind", "category" ] }
+                , logo = { changed = False, value = Nothing }
+                , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
+                , requestMethod = { changed = True, value = Just "GET" }
+                , requestUrl = { changed = False, value = Nothing }
+                , requestHeaders = { changed = True, value = Just <| [ { key = "X_SEARCH", value = "full" }, { key = "X_USER", value = "user" } ] }
+                , requestBody = { changed = True, value = Just "{}" }
+                , requestEmptySearch = { changed = True, value = Just False }
+                , responseListField = { changed = False, value = Nothing }
+                , responseItemId = { changed = False, value = Nothing }
+                , responseItemTemplate = { changed = True, value = Just "title" }
+                , annotations = { changed = False, value = Nothing }
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editWidgetIntegrationEvent : Event
 editWidgetIntegrationEvent =
-    EditIntegrationEvent
-        (EditIntegrationWidgetEvent
-            { id = { changed = True, value = Just "service" }
-            , name = { changed = True, value = Just "Service" }
-            , variables = { changed = True, value = Just [ "kind", "category" ] }
-            , logo = { changed = False, value = Nothing }
-            , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
-            , widgetUrl = { changed = False, value = Nothing }
-            , annotations = { changed = False, value = Nothing }
-            }
-        )
-        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+    , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content =
+        EditIntegrationEvent
+            (EditIntegrationWidgetEvent
+                { id = { changed = True, value = Just "service" }
+                , name = { changed = True, value = Just "Service" }
+                , variables = { changed = True, value = Just [ "kind", "category" ] }
+                , logo = { changed = False, value = Nothing }
+                , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
+                , widgetUrl = { changed = False, value = Nothing }
+                , annotations = { changed = False, value = Nothing }
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editIntegrationEventTest : Test
@@ -774,12 +792,12 @@ editIntegrationEventTest =
 
 deleteIntegrationEvent : Event
 deleteIntegrationEvent =
-    DeleteIntegrationEvent
-        { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-        , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
-        , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
+    , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
+    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
+    , content = DeleteIntegrationEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteIntegrationEventTest : Test
@@ -802,78 +820,82 @@ deleteIntegrationEventTest =
 
 addOptionsQuestionEvent : Event
 addOptionsQuestionEvent =
-    AddQuestionEvent
-        (AddQuestionOptionsEvent
-            { title = "Can you answer this question?"
-            , text = Nothing
-            , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
-            , tagUuids = []
-            , annotations = []
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        AddQuestionEvent
+            (AddQuestionOptionsEvent
+                { title = "Can you answer this question?"
+                , text = Nothing
+                , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
+                , tagUuids = []
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addListQuestionEvent : Event
 addListQuestionEvent =
-    AddQuestionEvent
-        (AddQuestionListEvent
-            { title = "Can you answer this question?"
-            , text = Just "Just answer the question!"
-            , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
-            , tagUuids = []
-            , annotations = []
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        AddQuestionEvent
+            (AddQuestionListEvent
+                { title = "Can you answer this question?"
+                , text = Just "Just answer the question!"
+                , requiredPhaseUuid = Just "0948bd26-d985-4549-b7c8-95e9061d6413"
+                , tagUuids = []
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addValueQuestionEvent : Event
 addValueQuestionEvent =
-    AddQuestionEvent
-        (AddQuestionValueEvent
-            { title = "Can you answer this question?"
-            , text = Nothing
-            , requiredPhaseUuid = Nothing
-            , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
-            , valueType = NumberQuestionValueType
-            , validations = []
-            , annotations = []
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        AddQuestionEvent
+            (AddQuestionValueEvent
+                { title = "Can you answer this question?"
+                , text = Nothing
+                , requiredPhaseUuid = Nothing
+                , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
+                , valueType = NumberQuestionValueType
+                , validations = []
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addIntegrationQuestionEvent : Event
 addIntegrationQuestionEvent =
-    AddQuestionEvent
-        (AddQuestionIntegrationEvent
-            { title = "Can you answer this question?"
-            , text = Nothing
-            , requiredPhaseUuid = Nothing
-            , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
-            , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
-            , variables = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
-            , annotations = []
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        AddQuestionEvent
+            (AddQuestionIntegrationEvent
+                { title = "Can you answer this question?"
+                , text = Nothing
+                , requiredPhaseUuid = Nothing
+                , tagUuids = [ "dc1dcc8a-3043-11e9-b210-d663bd873d93", "dc1dcf00-3043-11e9-b210-d663bd873d93" ]
+                , integrationUuid = "1d522339-e93b-44e9-bc2a-1df65fb97dc6"
+                , variables = Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ]
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addQuestionEventTest : Test
@@ -902,88 +924,92 @@ addQuestionEventTest =
 
 editOptionsQuestionEvent : Event
 editOptionsQuestionEvent =
-    EditQuestionEvent
-        (EditQuestionOptionsEvent
-            { title = { changed = False, value = Nothing }
-            , text = { changed = True, value = Just (Just "Answer this immediately") }
-            , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
-            , tagUuids = { changed = False, value = Nothing }
-            , referenceUuids = { changed = False, value = Nothing }
-            , expertUuids = { changed = True, value = Just [ "fe1b440e-3046-11e9-b210-d663bd873d93" ] }
-            , answerUuids = { changed = True, value = Just [ "5cb0bedc-3046-11e9-b210-d663bd873d93", "5cb0c15c-3046-11e9-b210-d663bd873d93" ] }
-            , annotations = { changed = False, value = Nothing }
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        EditQuestionEvent
+            (EditQuestionOptionsEvent
+                { title = { changed = False, value = Nothing }
+                , text = { changed = True, value = Just (Just "Answer this immediately") }
+                , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
+                , tagUuids = { changed = False, value = Nothing }
+                , referenceUuids = { changed = False, value = Nothing }
+                , expertUuids = { changed = True, value = Just [ "fe1b440e-3046-11e9-b210-d663bd873d93" ] }
+                , answerUuids = { changed = True, value = Just [ "5cb0bedc-3046-11e9-b210-d663bd873d93", "5cb0c15c-3046-11e9-b210-d663bd873d93" ] }
+                , annotations = { changed = False, value = Nothing }
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editListQuestionEvent : Event
 editListQuestionEvent =
-    EditQuestionEvent
-        (EditQuestionListEvent
-            { title = { changed = True, value = Just "This is a new title" }
-            , text = { changed = False, value = Nothing }
-            , requiredPhaseUuid = { changed = False, value = Nothing }
-            , tagUuids = { changed = False, value = Nothing }
-            , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
-            , expertUuids = { changed = False, value = Nothing }
-            , itemTemplateQuestionUuids = { changed = True, value = Just [ "b2c867fc-3046-11e9-b210-d663bd873d93" ] }
-            , annotations = { changed = False, value = Nothing }
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        EditQuestionEvent
+            (EditQuestionListEvent
+                { title = { changed = True, value = Just "This is a new title" }
+                , text = { changed = False, value = Nothing }
+                , requiredPhaseUuid = { changed = False, value = Nothing }
+                , tagUuids = { changed = False, value = Nothing }
+                , referenceUuids = { changed = True, value = Just [ "f749367c-3046-11e9-b210-d663bd873d93" ] }
+                , expertUuids = { changed = False, value = Nothing }
+                , itemTemplateQuestionUuids = { changed = True, value = Just [ "b2c867fc-3046-11e9-b210-d663bd873d93" ] }
+                , annotations = { changed = False, value = Nothing }
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editValueQuestionEvent : Event
 editValueQuestionEvent =
-    EditQuestionEvent
-        (EditQuestionValueEvent
-            { title = { changed = True, value = Just "What date is today?" }
-            , text = { changed = False, value = Nothing }
-            , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
-            , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
-            , referenceUuids = { changed = False, value = Nothing }
-            , expertUuids = { changed = False, value = Nothing }
-            , valueType = { changed = True, value = Just DateQuestionValueType }
-            , validations = { changed = True, value = Just [ QuestionValidation.FromDate { value = "2024-11-19" } ] }
-            , annotations = { changed = False, value = Nothing }
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        EditQuestionEvent
+            (EditQuestionValueEvent
+                { title = { changed = True, value = Just "What date is today?" }
+                , text = { changed = False, value = Nothing }
+                , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
+                , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
+                , referenceUuids = { changed = False, value = Nothing }
+                , expertUuids = { changed = False, value = Nothing }
+                , valueType = { changed = True, value = Just DateQuestionValueType }
+                , validations = { changed = True, value = Just [ QuestionValidation.FromDate { value = "2024-11-19" } ] }
+                , annotations = { changed = False, value = Nothing }
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editIntegrationQuestionEvent : Event
 editIntegrationQuestionEvent =
-    EditQuestionEvent
-        (EditQuestionIntegrationEvent
-            { title = { changed = True, value = Just "What database will you use?" }
-            , text = { changed = False, value = Nothing }
-            , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
-            , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
-            , referenceUuids = { changed = False, value = Nothing }
-            , expertUuids = { changed = False, value = Nothing }
-            , integrationUuid = { changed = True, value = Just "1d522339-e93b-44e9-bc2a-1df65fb97dc6" }
-            , variables = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
-            , annotations = { changed = False, value = Nothing }
-            }
-        )
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content =
+        EditQuestionEvent
+            (EditQuestionIntegrationEvent
+                { title = { changed = True, value = Just "What database will you use?" }
+                , text = { changed = False, value = Nothing }
+                , requiredPhaseUuid = { changed = True, value = Just (Just "0948bd26-d985-4549-b7c8-95e9061d6413") }
+                , tagUuids = { changed = True, value = Just [ "e734907e-3046-11e9-b210-d663bd873d93", "e73495ce-3046-11e9-b210-d663bd873d93", "e7349740-3046-11e9-b210-d663bd873d93" ] }
+                , referenceUuids = { changed = False, value = Nothing }
+                , expertUuids = { changed = False, value = Nothing }
+                , integrationUuid = { changed = True, value = Just "1d522339-e93b-44e9-bc2a-1df65fb97dc6" }
+                , variables = { changed = True, value = Just <| Dict.fromList [ ( "prop1", "value1" ), ( "prop2", "value2" ) ] }
+                , annotations = { changed = False, value = Nothing }
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editQuestionEventTest : Test
@@ -1016,12 +1042,12 @@ editQuestionEventTest =
 
 deleteQuestionEvent : Event
 deleteQuestionEvent =
-    DeleteQuestionEvent
-        { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
-        , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
-        , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "b09ed98c-3043-11e9-b210-d663bd873d93"
+    , entityUuid = "a5405e3a-3043-11e9-b210-d663bd873d93"
+    , parentUuid = "42d0bd1e-2df3-11e9-b210-d663bd873d93"
+    , content = DeleteQuestionEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteQuestionEventTest : Test
@@ -1041,13 +1067,14 @@ deleteQuestionEventTest =
 
 moveQuestionEvent : Event
 moveQuestionEvent =
-    MoveQuestionEvent
-        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        MoveQuestionEvent
+            { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 moveQuestionEventTest : Test
@@ -1070,22 +1097,23 @@ moveQuestionEventTest =
 
 addAnswerEvent : Event
 addAnswerEvent =
-    AddAnswerEvent
-        { label = "Yes"
-        , advice = Just "Good choice"
-        , metricMeasures =
-            [ { metricUuid = "1ca4da0a-2e00-11e9-b210-d663bd873d93"
-              , measure = 0.5
-              , weight = 1
-              }
-            ]
-        , annotations = []
-        }
-        { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
+    , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddAnswerEvent
+            { label = "Yes"
+            , advice = Just "Good choice"
+            , metricMeasures =
+                [ { metricUuid = "1ca4da0a-2e00-11e9-b210-d663bd873d93"
+                  , measure = 0.5
+                  , weight = 1
+                  }
+                ]
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addAnswerEventTest : Test
@@ -1105,38 +1133,39 @@ addAnswerEventTest =
 
 editAnswerEvent : Event
 editAnswerEvent =
-    EditAnswerEvent
-        { label =
-            { changed = True
-            , value = Just "No"
+    { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
+    , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditAnswerEvent
+            { label =
+                { changed = True
+                , value = Just "No"
+                }
+            , advice =
+                { changed = False
+                , value = Nothing
+                }
+            , metricMeasures =
+                { changed = False
+                , value = Nothing
+                }
+            , followUpUuids =
+                { changed = True
+                , value =
+                    Just
+                        [ "734afa38-2e00-11e9-b210-d663bd873d93"
+                        , "734afd12-2e00-11e9-b210-d663bd873d93"
+                        , "734b005a-2e00-11e9-b210-d663bd873d93"
+                        ]
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , advice =
-            { changed = False
-            , value = Nothing
-            }
-        , metricMeasures =
-            { changed = False
-            , value = Nothing
-            }
-        , followUpUuids =
-            { changed = True
-            , value =
-                Just
-                    [ "734afa38-2e00-11e9-b210-d663bd873d93"
-                    , "734afd12-2e00-11e9-b210-d663bd873d93"
-                    , "734b005a-2e00-11e9-b210-d663bd873d93"
-                    ]
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editAnswerEventTest : Test
@@ -1152,38 +1181,39 @@ editAnswerEventTest =
             \_ ->
                 let
                     event =
-                        EditAnswerEvent
-                            { label =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
+                        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+                        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                        , content =
+                            EditAnswerEvent
+                                { label =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , advice =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , metricMeasures =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , followUpUuids =
+                                    { changed = True
+                                    , value =
+                                        Just
+                                            [ "734afa38-2e00-11e9-b210-d663bd873d93"
+                                            , "734afd12-2e00-11e9-b210-d663bd873d93"
+                                            , "734b005a-2e00-11e9-b210-d663bd873d93"
+                                            ]
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , advice =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , metricMeasures =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            , followUpUuids =
-                                { changed = True
-                                , value =
-                                    Just
-                                        [ "734afa38-2e00-11e9-b210-d663bd873d93"
-                                        , "734afd12-2e00-11e9-b210-d663bd873d93"
-                                        , "734b005a-2e00-11e9-b210-d663bd873d93"
-                                        ]
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-                            , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get entity visible name when changed" <|
@@ -1194,12 +1224,12 @@ editAnswerEventTest =
 
 deleteAnswerEvent : Event
 deleteAnswerEvent =
-    DeleteAnswerEvent
-        { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
-        , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "efac9f6e-2e00-11e9-b210-d663bd873d93"
+    , entityUuid = "2bbe5372-2e00-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content = DeleteAnswerEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteAnswerEventTest : Test
@@ -1219,13 +1249,14 @@ deleteAnswerEventTest =
 
 moveAnswerEvent : Event
 moveAnswerEvent =
-    MoveAnswerEvent
-        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        MoveAnswerEvent
+            { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 moveAnswerEventTest : Test
@@ -1248,15 +1279,16 @@ moveAnswerEventTest =
 
 addChoiceEvent : Event
 addChoiceEvent =
-    AddChoiceEvent
-        { label = "Choice"
-        , annotations = []
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddChoiceEvent
+            { label = "Choice"
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addChoiceEventTest : Test
@@ -1275,21 +1307,22 @@ addChoiceEventTest =
 
 editChoiceEvent : Event
 editChoiceEvent =
-    EditChoiceEvent
-        { label =
-            { changed = True
-            , value = Just "New Choice"
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditChoiceEvent
+            { label =
+                { changed = True
+                , value = Just "New Choice"
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editChoiceEventTest : Test
@@ -1304,21 +1337,22 @@ editChoiceEventTest =
             \_ ->
                 let
                     event =
-                        EditChoiceEvent
-                            { label =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                        , content =
+                            EditChoiceEvent
+                                { label =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -1329,12 +1363,12 @@ editChoiceEventTest =
 
 deleteChoiceEvent : Event
 deleteChoiceEvent =
-    DeleteChoiceEvent
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content = DeleteChoiceEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteChoiceEventTest : Test
@@ -1354,13 +1388,14 @@ deleteChoiceEventTest =
 
 moveChoiceEvent : Event
 moveChoiceEvent =
-    MoveChoiceEvent
-        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        MoveChoiceEvent
+            { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 moveChoiceEventTest : Test
@@ -1383,49 +1418,52 @@ moveChoiceEventTest =
 
 addResourcePageReferenceEvent : Event
 addResourcePageReferenceEvent =
-    AddReferenceEvent
-        (AddReferenceResourcePageEvent
-            { resourcePageUuid = Just "ba931b74-6254-403e-a10e-ba14bd55e384"
-            , annotations = []
-            }
-        )
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddReferenceEvent
+            (AddReferenceResourcePageEvent
+                { resourcePageUuid = Just "ba931b74-6254-403e-a10e-ba14bd55e384"
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addURLReferenceEvent : Event
 addURLReferenceEvent =
-    AddReferenceEvent
-        (AddReferenceURLEvent
-            { url = "http://example.com"
-            , label = "Example"
-            , annotations = []
-            }
-        )
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddReferenceEvent
+            (AddReferenceURLEvent
+                { url = "http://example.com"
+                , label = "Example"
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addCrossReferenceEvent : Event
 addCrossReferenceEvent =
-    AddReferenceEvent
-        (AddReferenceCrossEvent
-            { targetUuid = "072af95a-2dfd-11e9-b210-d663bd873d93"
-            , description = "Related"
-            , annotations = []
-            }
-        )
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddReferenceEvent
+            (AddReferenceCrossEvent
+                { targetUuid = "072af95a-2dfd-11e9-b210-d663bd873d93"
+                , description = "Related"
+                , annotations = []
+                }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addReferenceEventTest : Test
@@ -1457,73 +1495,76 @@ addReferenceEventTest =
 
 editResourcePageReferenceEvent : Event
 editResourcePageReferenceEvent =
-    EditReferenceEvent
-        (EditReferenceResourcePageEvent
-            { resourcePageUuid =
-                { changed = True
-                , value = Just (Just "ba931b74-6254-403e-a10e-ba14bd55e384")
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditReferenceEvent
+            (EditReferenceResourcePageEvent
+                { resourcePageUuid =
+                    { changed = True
+                    , value = Just (Just "ba931b74-6254-403e-a10e-ba14bd55e384")
+                    }
+                , annotations =
+                    { changed = False
+                    , value = Nothing
+                    }
                 }
-            , annotations =
-                { changed = False
-                , value = Nothing
-                }
-            }
-        )
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "3f52e8fc-2dfc-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editURLReferenceEvent : Event
 editURLReferenceEvent =
-    EditReferenceEvent
-        (EditReferenceURLEvent
-            { url =
-                { changed = False
-                , value = Nothing
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditReferenceEvent
+            (EditReferenceURLEvent
+                { url =
+                    { changed = False
+                    , value = Nothing
+                    }
+                , label =
+                    { changed = True
+                    , value = Just "Example"
+                    }
+                , annotations =
+                    { changed = False
+                    , value = Nothing
+                    }
                 }
-            , label =
-                { changed = True
-                , value = Just "Example"
-                }
-            , annotations =
-                { changed = False
-                , value = Nothing
-                }
-            }
-        )
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "e559cf36-2dfc-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editCrossReferenceEvent : Event
 editCrossReferenceEvent =
-    EditReferenceEvent
-        (EditReferenceCrossEvent
-            { targetUuid =
-                { changed = False
-                , value = Nothing
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditReferenceEvent
+            (EditReferenceCrossEvent
+                { targetUuid =
+                    { changed = False
+                    , value = Nothing
+                    }
+                , description =
+                    { changed = True
+                    , value = Just "See also"
+                    }
+                , annotations =
+                    { changed = False
+                    , value = Nothing
+                    }
                 }
-            , description =
-                { changed = True
-                , value = Just "See also"
-                }
-            , annotations =
-                { changed = False
-                , value = Nothing
-                }
-            }
-        )
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "fe19113a-2dfc-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+            )
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editReferenceEventTest : Test
@@ -1555,12 +1596,12 @@ editReferenceEventTest =
 
 deleteReferenceEvent : Event
 deleteReferenceEvent =
-    DeleteReferenceEvent
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "6606ebf8-2dff-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "6606ebf8-2dff-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content = DeleteReferenceEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteReferenceEventTest : Test
@@ -1580,13 +1621,14 @@ deleteReferenceEventTest =
 
 moveReferenceEvent : Event
 moveReferenceEvent =
-    MoveReferenceEvent
-        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        MoveReferenceEvent
+            { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 moveReferenceEventTest : Test
@@ -1609,16 +1651,17 @@ moveReferenceEventTest =
 
 addExpertEvent : Event
 addExpertEvent =
-    AddExpertEvent
-        { name = "Albert Einstein"
-        , email = "albert.einstein@example.com"
-        , annotations = []
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddExpertEvent
+            { name = "Albert Einstein"
+            , email = "albert.einstein@example.com"
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addExpertEventTest : Test
@@ -1637,25 +1680,26 @@ addExpertEventTest =
 
 editExpertEvent : Event
 editExpertEvent =
-    EditExpertEvent
-        { name =
-            { changed = True
-            , value = Just "Nikola Tesla"
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditExpertEvent
+            { name =
+                { changed = True
+                , value = Just "Nikola Tesla"
+                }
+            , email =
+                { changed = False
+                , value = Nothing
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , email =
-            { changed = False
-            , value = Nothing
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editExpertEventTest : Test
@@ -1670,25 +1714,26 @@ editExpertEventTest =
             \_ ->
                 let
                     event =
-                        EditExpertEvent
-                            { name =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                        , content =
+                            EditExpertEvent
+                                { name =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , email =
+                                    { changed = True
+                                    , value = Just "nikola.tesla@example.com"
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , email =
-                                { changed = True
-                                , value = Just "nikola.tesla@example.com"
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -1699,12 +1744,12 @@ editExpertEventTest =
 
 deleteExpertEvent : Event
 deleteExpertEvent =
-    DeleteExpertEvent
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content = DeleteExpertEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteExpertEventTest : Test
@@ -1724,13 +1769,14 @@ deleteExpertEventTest =
 
 moveExpertEvent : Event
 moveExpertEvent =
-    MoveExpertEvent
-        { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        MoveExpertEvent
+            { targetUuid = "71268f6c-04bd-4d83-9418-318c619e7444" }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 moveExpertEventTest : Test
@@ -1753,15 +1799,16 @@ moveExpertEventTest =
 
 addResourceCollectionEvent : Event
 addResourceCollectionEvent =
-    AddResourceCollectionEvent
-        { title = "Collection"
-        , annotations = []
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddResourceCollectionEvent
+            { title = "Collection"
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addResourceCollectionEventTest : Test
@@ -1780,25 +1827,26 @@ addResourceCollectionEventTest =
 
 editResourceCollectionEvent : Event
 editResourceCollectionEvent =
-    EditResourceCollectionEvent
-        { title =
-            { changed = True
-            , value = Just "New Collection"
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditResourceCollectionEvent
+            { title =
+                { changed = True
+                , value = Just "New Collection"
+                }
+            , resourcePageUuids =
+                { changed = True
+                , value = Just [ "ba931b74-6254-403e-a10e-ba14bd55e384", "bf2e14ca-67b9-4c00-b02e-b75213952992" ]
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , resourcePageUuids =
-            { changed = True
-            , value = Just [ "ba931b74-6254-403e-a10e-ba14bd55e384", "bf2e14ca-67b9-4c00-b02e-b75213952992" ]
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editResourceCollectionEventTest : Test
@@ -1813,25 +1861,26 @@ editResourceCollectionEventTest =
             \_ ->
                 let
                     event =
-                        EditResourceCollectionEvent
-                            { title =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                        , content =
+                            EditResourceCollectionEvent
+                                { title =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , resourcePageUuids =
+                                    { changed = True
+                                    , value = Just [ "ba931b74-6254-403e-a10e-ba14bd55e384", "bf2e14ca-67b9-4c00-b02e-b75213952992" ]
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , resourcePageUuids =
-                                { changed = True
-                                , value = Just [ "ba931b74-6254-403e-a10e-ba14bd55e384", "bf2e14ca-67b9-4c00-b02e-b75213952992" ]
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -1842,12 +1891,12 @@ editResourceCollectionEventTest =
 
 deleteResourceCollectionEvent : Event
 deleteResourceCollectionEvent =
-    DeleteResourceCollectionEvent
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content = DeleteResourceCollectionEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteResourceCollectionEventTest : Test
@@ -1871,16 +1920,17 @@ deleteResourceCollectionEventTest =
 
 addResourcePageEvent : Event
 addResourcePageEvent =
-    AddResourcePageEvent
-        { title = "Page"
-        , content = "Content"
-        , annotations = []
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        AddResourcePageEvent
+            { title = "Page"
+            , content = "Content"
+            , annotations = []
+            }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 addResourcePageEventTest : Test
@@ -1899,25 +1949,26 @@ addResourcePageEventTest =
 
 editResourcePageEvent : Event
 editResourcePageEvent =
-    EditResourcePageEvent
-        { title =
-            { changed = True
-            , value = Just "New Page"
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content =
+        EditResourcePageEvent
+            { title =
+                { changed = True
+                , value = Just "New Page"
+                }
+            , content =
+                { changed = True
+                , value = Just "New Content"
+                }
+            , annotations =
+                { changed = False
+                , value = Nothing
+                }
             }
-        , content =
-            { changed = True
-            , value = Just "New Content"
-            }
-        , annotations =
-            { changed = False
-            , value = Nothing
-            }
-        }
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 editResourcePageEventTest : Test
@@ -1932,25 +1983,26 @@ editResourcePageEventTest =
             \_ ->
                 let
                     event =
-                        EditResourcePageEvent
-                            { title =
-                                { changed = False
-                                , value = Nothing
+                        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+                        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+                        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+                        , content =
+                            EditResourcePageEvent
+                                { title =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
+                                , content =
+                                    { changed = True
+                                    , value = Just "New Content"
+                                    }
+                                , annotations =
+                                    { changed = False
+                                    , value = Nothing
+                                    }
                                 }
-                            , content =
-                                { changed = True
-                                , value = Just "New Content"
-                                }
-                            , annotations =
-                                { changed = False
-                                , value = Nothing
-                                }
-                            }
-                            { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-                            , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-                            , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-                            , createdAt = Time.millisToPosix 1642607898
-                            }
+                        , createdAt = Time.millisToPosix 1642607898
+                        }
                 in
                 Expect.equal Nothing (Event.getEntityVisibleName event)
         , test "get event entity visible name when changed" <|
@@ -1961,12 +2013,12 @@ editResourcePageEventTest =
 
 deleteResourcePageEvent : Event
 deleteResourcePageEvent =
-    DeleteResourcePageEvent
-        { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
-        , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
-        , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
-        , createdAt = Time.millisToPosix 1642607898
-        }
+    { uuid = "349624f6-2dfc-11e9-b210-d663bd873d93"
+    , entityUuid = "bad22d1c-2e01-11e9-b210-d663bd873d93"
+    , parentUuid = "2f73c924-2dfc-11e9-b210-d663bd873d93"
+    , content = DeleteResourcePageEvent
+    , createdAt = Time.millisToPosix 1642607898
+    }
 
 
 deleteResourcePageEventTest : Test

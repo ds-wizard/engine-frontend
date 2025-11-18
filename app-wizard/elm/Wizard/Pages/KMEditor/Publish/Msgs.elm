@@ -3,15 +3,15 @@ module Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 import Common.Api.ApiError exposing (ApiError)
 import Form
 import Version exposing (Version)
-import Wizard.Api.Models.BranchDetail exposing (BranchDetail)
-import Wizard.Api.Models.Package exposing (Package)
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
+import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 
 
 type Msg
-    = GetBranchCompleted (Result ApiError BranchDetail)
-    | GetPreviousPackageCompleted (Result ApiError PackageDetail)
+    = GetKnowledgeModelEditorCompleted (Result ApiError KnowledgeModelEditorDetail)
+    | GetPreviousKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)
     | Cancel
     | FormMsg Form.Msg
     | FormSetVersion Version
-    | PutBranchCompleted (Result ApiError Package)
+    | PutKnowledgeModelEditorCompleted (Result ApiError KnowledgeModelPackage)

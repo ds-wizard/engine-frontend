@@ -43,7 +43,7 @@ view appState model =
                     , FormGroup.input appState.locale model.form "organizationId" (gettext "Organization ID" appState.locale)
                     , FormGroup.input appState.locale model.form "kmId" (gettext "Knowledge Model ID" appState.locale)
                     , FormGroup.input appState.locale model.form "version" (gettext "Version" appState.locale)
-                    , FormGroup.input appState.locale model.form "previousPackageId" (gettext "Previous Package ID" appState.locale)
+                    , FormGroup.input appState.locale model.form "previousKnowledgeModelPackageId" (gettext "Previous Knowledge Model Package ID" appState.locale)
                     , FormGroup.input appState.locale model.form "rootElement" (gettext "Root Element" appState.locale)
                     ]
 

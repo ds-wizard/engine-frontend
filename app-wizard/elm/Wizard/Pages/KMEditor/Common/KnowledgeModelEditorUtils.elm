@@ -1,4 +1,4 @@
-module Wizard.Pages.KMEditor.Common.BranchUtils exposing (lastVersion)
+module Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUtils exposing (lastVersion)
 
 import List.Extra as List
 import Version exposing (Version)
@@ -13,7 +13,7 @@ lastVersion :
             , previousPackageId : Maybe String
         }
     -> Maybe Version
-lastVersion appState branch =
+lastVersion appState kmEditor =
     let
         getVersion parent =
             let
@@ -22,7 +22,7 @@ lastVersion appState branch =
 
                 samePackage =
                     List.getAt 1 parts
-                        |> Maybe.map ((==) branch.kmId)
+                        |> Maybe.map ((==) kmEditor.kmId)
                         |> Maybe.withDefault False
 
                 sameOrganization =
@@ -37,4 +37,4 @@ lastVersion appState branch =
             else
                 Nothing
     in
-    Maybe.andThen getVersion branch.previousPackageId
+    Maybe.andThen getVersion kmEditor.previousPackageId

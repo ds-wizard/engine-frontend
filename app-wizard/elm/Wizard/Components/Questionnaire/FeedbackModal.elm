@@ -53,18 +53,18 @@ type Msg
 update : Msg -> AppState -> Model -> ( Model, Cmd Msg )
 update msg appState model =
     case msg of
-        OpenFeedback packageId questionUuid ->
+        OpenFeedback kmPackageId questionUuid ->
             let
                 newModel =
                     { model
-                        | target = Just ( packageId, questionUuid )
+                        | target = Just ( kmPackageId, questionUuid )
                         , feedbacks = Loading
                         , feedbackForm = FeedbackForm.initEmpty
                         , feedbackResult = Unset
                     }
 
                 cmd =
-                    FeedbacksApi.getFeedbacks appState packageId questionUuid GetFeedbacksComplete
+                    FeedbacksApi.getFeedbacks appState kmPackageId questionUuid GetFeedbacksComplete
             in
             ( newModel, cmd )
 
@@ -98,10 +98,10 @@ update msg appState model =
 
         FeedbackFormMsg formMsg ->
             case ( formMsg, Form.getOutput model.feedbackForm, model.target ) of
-                ( Form.Submit, Just feedbackForm, Just ( packageId, questionUuid ) ) ->
+                ( Form.Submit, Just feedbackForm, Just ( kmPackageId, questionUuid ) ) ->
                     let
                         body =
-                            FeedbackForm.encode questionUuid packageId feedbackForm
+                            FeedbackForm.encode questionUuid kmPackageId feedbackForm
 
                         cmd =
                             FeedbacksApi.postFeedback appState body PostFeedbackComplete

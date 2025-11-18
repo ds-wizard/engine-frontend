@@ -139,7 +139,7 @@ update appState msg model =
                             Nothing
                             appState
                             { events = []
-                            , branchUuid = Nothing
+                            , kmEditorUuid = Nothing
                             }
             in
             ( { model | questionnaireModel = ActionResult.map updateQuestionnaire model.questionnaireModel }
@@ -225,6 +225,6 @@ viewContent appState qm =
         , isKmEditor = False
         }
         { events = []
-        , branchUuid = Nothing
+        , kmEditorUuid = Nothing
         }
         qm

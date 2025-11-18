@@ -21,7 +21,7 @@ type alias QuestionnaireCommon =
     , sharing : QuestionnaireSharing
     , visibility : QuestionnaireVisibility
     , migrationUuid : Maybe Uuid
-    , packageId : String
+    , knowledgeModelPackageId : String
     , fileCount : Int
     }
 
@@ -36,7 +36,7 @@ decoder =
         |> D.required "sharing" QuestionnaireSharing.decoder
         |> D.required "visibility" QuestionnaireVisibility.decoder
         |> D.required "migrationUuid" (D.nullable Uuid.decoder)
-        |> D.required "packageId" D.string
+        |> D.required "knowledgeModelPackageId" D.string
         |> D.required "fileCount" D.int
 
 

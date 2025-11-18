@@ -1,5 +1,5 @@
-module Wizard.Pages.KMEditor.Common.BranchPublishForm exposing
-    ( BranchPublishForm
+module Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm exposing
+    ( KnowledgeModelEditorPublishForm
     , encode
     , init
     , validation
@@ -14,7 +14,7 @@ import String exposing (fromInt)
 import Uuid exposing (Uuid)
 
 
-type alias BranchPublishForm =
+type alias KnowledgeModelEditorPublishForm =
     { major : Int
     , minor : Int
     , patch : Int
@@ -23,14 +23,14 @@ type alias BranchPublishForm =
     }
 
 
-init : Form FormError BranchPublishForm
+init : Form FormError KnowledgeModelEditorPublishForm
 init =
     Form.initial [] validation
 
 
-validation : Validation FormError BranchPublishForm
+validation : Validation FormError KnowledgeModelEditorPublishForm
 validation =
-    Validate.map5 BranchPublishForm
+    Validate.map5 KnowledgeModelEditorPublishForm
         (Validate.field "major" Validate.versionNumber)
         (Validate.field "minor" Validate.versionNumber)
         (Validate.field "patch" Validate.versionNumber)
@@ -38,14 +38,14 @@ validation =
         (Validate.field "readme" Validate.string)
 
 
-encode : Uuid -> BranchPublishForm -> E.Value
-encode branchUuid form =
+encode : Uuid -> KnowledgeModelEditorPublishForm -> E.Value
+encode kmEditorUuid form =
     let
         version =
             String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
     in
     E.object
-        [ ( "branchUuid", Uuid.encode branchUuid )
+        [ ( "editorUuid", Uuid.encode kmEditorUuid )
         , ( "version", E.string version )
         , ( "description", E.string form.description )
         , ( "readme", E.string form.readme )

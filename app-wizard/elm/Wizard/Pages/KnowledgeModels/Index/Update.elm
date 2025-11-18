@@ -9,8 +9,8 @@ import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
-import Wizard.Api.Models.Package exposing (Package)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -28,20 +28,20 @@ fetchData =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        ShowHideDeletePackage package ->
-            ( { model | packageToBeDeleted = package, deletingPackage = Unset }, Cmd.none )
+        ShowHideDeletePackage kmPackage ->
+            ( { model | kmPackageToBeDeleted = kmPackage, deletingKmPackage = Unset }, Cmd.none )
 
-        DeletePackage ->
+        DeleteKnowledgeModelPackage ->
             handleDeletePackage wrapMsg appState model
 
-        DeletePackageCompleted result ->
+        DeleteKnowledgeModelPackageCompleted result ->
             deletePackageCompleted wrapMsg appState model result
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
-        UpdatePhase package phase ->
-            ( model, PackagesApi.putPackage appState { package | phase = phase } (wrapMsg << UpdatePhaseCompleted) )
+        UpdatePhase kmPackage phase ->
+            ( model, KnowledgeModelPackagesApi.putKnowledgeModelPackage appState { kmPackage | phase = phase } (wrapMsg << UpdatePhaseCompleted) )
 
         UpdatePhaseCompleted result ->
             case result of
@@ -51,12 +51,12 @@ update msg wrapMsg appState model =
                     )
 
                 Err error ->
-                    ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be updated." appState.locale) error }
+                    ( { model | deletingKmPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be updated." appState.locale) error }
                     , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
-        ExportPackage package ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (PackagesApi.exportPackageUrl package.id)) )
+        ExportKnowledgeModelPackage kmPackage ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.id)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -64,11 +64,11 @@ update msg wrapMsg appState model =
 
 handleDeletePackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeletePackage wrapMsg appState model =
-    case model.packageToBeDeleted of
-        Just package ->
-            ( { model | deletingPackage = Loading }
+    case model.kmPackageToBeDeleted of
+        Just kmPackage ->
+            ( { model | deletingKmPackage = Loading }
             , Cmd.map wrapMsg <|
-                PackagesApi.deletePackage appState package.organizationId package.kmId DeletePackageCompleted
+                KnowledgeModelPackagesApi.deleteKnowledgeModelPackage appState kmPackage.organizationId kmPackage.kmId DeleteKnowledgeModelPackageCompleted
             )
 
         Nothing ->
@@ -79,17 +79,17 @@ deletePackageCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result
 deletePackageCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
-            ( { model | packageToBeDeleted = Nothing }
+            ( { model | kmPackageToBeDeleted = Nothing }
             , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
             )
 
         Err error ->
-            ( { model | deletingPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be deleted." appState.locale) error }
+            ( { model | deletingKmPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be deleted." appState.locale) error }
             , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Package -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg KnowledgeModelPackage -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( packages, cmd ) =
@@ -104,9 +104,9 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Package
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig KnowledgeModelPackage
 listingUpdateConfig wrapMsg appState =
-    { getRequest = PackagesApi.getPackages appState
+    { getRequest = KnowledgeModelPackagesApi.getKnowledgeModelPackages appState
     , getError = gettext "Unable to get Knowledge Models." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.knowledgeModelsIndexWithFilters

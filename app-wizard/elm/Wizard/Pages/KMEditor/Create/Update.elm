@@ -18,13 +18,13 @@ import Maybe.Extra as Maybe
 import Result exposing (Result)
 import String.Normalize as Normalize
 import Version exposing (Version)
-import Wizard.Api.Branches as BranchesApi
-import Wizard.Api.Models.Branch exposing (Branch)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
-import Wizard.Api.Packages as PackagesApi
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.KMEditor.Common.BranchCreateForm as BranchCreateForm exposing (BranchCreateForm)
+import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorCreateForm as KnowledgeModelEditorCreateForm exposing (KnowledgeModelEditorCreateForm)
 import Wizard.Pages.KMEditor.Create.Models exposing (Model)
 import Wizard.Pages.KMEditor.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -35,9 +35,9 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         fetchPackageCmd =
-            case ( model.selectedPackage, model.edit ) of
-                ( Just packageId, True ) ->
-                    PackagesApi.getPackage appState packageId GetPackageCompleted
+            case ( model.selectedKmPackage, model.edit ) of
+                ( Just kmPackageId, True ) ->
+                    KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageCompleted
 
                 _ ->
                     Cmd.none
@@ -57,25 +57,25 @@ update msg wrapMsg appState model =
         FormSetVersion version ->
             handleFormSetVersion appState version model
 
-        PostBranchCompleted result ->
-            handlePostBranchCompleted appState model result
+        PostKmEditorCompleted result ->
+            handlePostKmEditorCompleted appState model result
 
-        PackageTypeHintInputMsg typeHintInputMsg ->
+        KnowledgeModelPackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
 
         GetPackageCompleted result ->
             case result of
-                Ok package ->
+                Ok kmPackage ->
                     let
                         form =
                             model.form
-                                |> setBranchCreateFormValue appState "name" package.name
-                                |> setBranchCreateFormValue appState "kmId" package.kmId
+                                |> setKmEditorCreateFormValue appState "name" kmPackage.name
+                                |> setKmEditorCreateFormValue appState "kmId" kmPackage.kmId
                     in
-                    ( { model | package = Success package, form = form }, Cmd.none )
+                    ( { model | kmPackage = Success kmPackage, form = form }, Cmd.none )
 
                 Err error ->
-                    ( { model | package = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }, Cmd.none )
+                    ( { model | kmPackage = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }, Cmd.none )
 
 
 handleFormMsg : (Msg -> Wizard.Msgs.Msg) -> Form.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -84,18 +84,18 @@ handleFormMsg wrapMsg formMsg appState model =
         ( Form.Submit, Just kmCreateForm ) ->
             let
                 body =
-                    BranchCreateForm.encode kmCreateForm
+                    KnowledgeModelEditorCreateForm.encode kmCreateForm
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        BranchesApi.postBranch appState body PostBranchCompleted
+                        KnowledgeModelEditorsApi.postKnowledgeModelEditor appState body PostKmEditorCompleted
             in
-            ( { model | savingBranch = Loading }, cmd )
+            ( { model | savingKmEditor = Loading }, cmd )
 
         _ ->
             let
                 newForm =
-                    Form.update (BranchCreateForm.validation appState) formMsg model.form
+                    Form.update (KnowledgeModelEditorCreateForm.validation appState) formMsg model.form
 
                 kmIdEmpty =
                     Maybe.unwrap True String.isEmpty (Form.getFieldAsString "kmId" model.form).value
@@ -108,7 +108,7 @@ handleFormMsg wrapMsg formMsg appState model =
                                     (Form.getFieldAsString "name" model.form).value
                                         |> Maybe.unwrap "" Normalize.slug
                             in
-                            setBranchCreateFormValue appState "kmId" suggestedKmId newForm
+                            setKmEditorCreateFormValue appState "kmId" suggestedKmId newForm
 
                         _ ->
                             newForm
@@ -121,39 +121,39 @@ handleFormSetVersion appState version model =
     let
         form =
             model.form
-                |> setBranchCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor version))
-                |> setBranchCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor version))
-                |> setBranchCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch version))
+                |> setKmEditorCreateFormValue appState "versionMajor" (String.fromInt (Version.getMajor version))
+                |> setKmEditorCreateFormValue appState "versionMinor" (String.fromInt (Version.getMinor version))
+                |> setKmEditorCreateFormValue appState "versionPatch" (String.fromInt (Version.getPatch version))
     in
     ( { model | form = form }, Cmd.none )
 
 
-handlePostBranchCompleted : AppState -> Model -> Result ApiError Branch -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePostBranchCompleted appState model result =
+handlePostKmEditorCompleted : AppState -> Model -> Result ApiError KnowledgeModelEditor -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostKmEditorCompleted appState model result =
     case result of
-        Ok km ->
+        Ok kmEditor ->
             ( model
-            , cmdNavigate appState (Routes.kmEditorEditor km.uuid Nothing)
+            , cmdNavigate appState (Routes.kmEditorEditor kmEditor.uuid Nothing)
             )
 
         Err error ->
             ( { model
                 | form = Form.setFormErrors appState error model.form
-                , savingBranch = ApiError.toActionResult appState (gettext "Knowledge model could not be created." appState.locale) error
+                , savingKmEditor = ApiError.toActionResult appState (gettext "Knowledge model could not be created." appState.locale) error
               }
             , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
             )
 
 
-handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg PackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg KnowledgeModelPackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         formMsg =
             wrapMsg << FormMsg << Form.Input "previousPackageId" Form.Select << Field.String
 
         cfg =
-            { wrapMsg = wrapMsg << PackageTypeHintInputMsg
-            , getTypeHints = PackagesApi.getPackagesSuggestions appState (Just False)
+            { wrapMsg = wrapMsg << KnowledgeModelPackageTypeHintInputMsg
+            , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState (Just False)
             , getError = gettext "Unable to get Knowledge Models." appState.locale
             , setReply = formMsg << .id
             , clearReply = Just <| formMsg ""
@@ -161,11 +161,11 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             }
 
         ( packageTypeHintInputModel, cmd ) =
-            TypeHintInput.update cfg typeHintInputMsg model.packageTypeHintInputModel
+            TypeHintInput.update cfg typeHintInputMsg model.kmPackageTypeHintInputModel
     in
-    ( { model | packageTypeHintInputModel = packageTypeHintInputModel }, cmd )
+    ( { model | kmPackageTypeHintInputModel = packageTypeHintInputModel }, cmd )
 
 
-setBranchCreateFormValue : AppState -> String -> String -> Form FormError BranchCreateForm -> Form FormError BranchCreateForm
-setBranchCreateFormValue appState field value =
-    Form.update (BranchCreateForm.validation appState) (Form.Input field Form.Text (Field.String value))
+setKmEditorCreateFormValue : AppState -> String -> String -> Form FormError KnowledgeModelEditorCreateForm -> Form FormError KnowledgeModelEditorCreateForm
+setKmEditorCreateFormValue appState field value =
+    Form.update (KnowledgeModelEditorCreateForm.validation appState) (Form.Input field Form.Text (Field.String value))
