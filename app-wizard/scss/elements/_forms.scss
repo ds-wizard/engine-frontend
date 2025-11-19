@@ -298,7 +298,7 @@ select {
         }
     }
 
-    .typehints {
+    & > .typehints {
         @include border-radius($border-radius);
         background: #fff;
         position: absolute;
