@@ -5,409 +5,422 @@
 $breadcrumbs-height: 40px;
 
 .KMEditor__Editor__KMEditor {
-    .editor-breadcrumbs {
-        width: 100%;
-        height: 40px;
-        background: $gray-100;
-        border-bottom: 1px solid $gray-400;
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        padding: 0 1rem;
+  .editor-breadcrumbs {
+    width: 100%;
+    height: 40px;
+    background: $gray-100;
+    border-bottom: 1px solid $gray-400;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    padding: 0 1rem;
 
-        .breadcrumb {
-            margin: 0;
-            background: none;
-            width: 100%;
-            padding-left: 0;
-            overflow: hidden;
-        }
-
-        .breadcrumb-button {
-            @include border-radius($border-radius);
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-            padding: 8px;
-            color: $gray-900 !important;
-            text-decoration: none !important;
-
-            &:hover {
-                background: $gray-200;
-            }
-        }
-
-        .breadcrumb-item {
-            max-width: 17%;
-            display: inline-block;
-            overflow: hidden;
-            white-space: nowrap;
-            text-overflow: ellipsis;
-
-            &.with-link {
-                color: var(--bs-primary);
-            }
-        }
-
-        .breadcrumb-item + .breadcrumb-item::before {
-            content: '〉';
-            padding: 0;
-        }
-
-        .item {
-            @include border-radius($border-radius);
-            transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
-            padding: 8px;
-            color: $gray-900 !important;
-            text-decoration: none !important;
-            display: flex;
-            align-items: center;
-            margin-right: 0.5rem;
-            white-space: nowrap;
-
-            &:hover, &:focus {
-                background: $gray-200;
-                box-shadow: none;
-            }
-
-            &.selected {
-                background: var(--bs-primary-bg);
-                color: var(--bs-primary) !important;
-            }
-
-            .badge {
-                margin-left: 0.5rem;
-            }
-        }
+    .breadcrumb {
+      margin: 0;
+      background: none;
+      width: 100%;
+      padding-left: 0;
+      overflow: hidden;
     }
 
-    .editor-body {
-        display: flex;
+    .breadcrumb-button {
+      @include border-radius($border-radius);
+      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+      padding: 8px;
+      color: $gray-900 !important;
+      text-decoration: none !important;
 
-        .editor-right-panel {
-            flex: 0 0 20rem;
-            overflow: auto;
-            padding: 1rem;
-            border-left: 1px solid $gray-400;
-            height: calc(100vh - #{$editor-header-height + $breadcrumbs-height}) !important;
-
-            .app-fullscreen & {
-                height: calc(100vh - #{$breadcrumbs-height}) !important;
-            }
-        }
-    }
-
-    .tree-col {
-        background: $gray-100;
-        overflow: auto;
-        padding: 0;
-        height: 100%;
-        width: 100%;
-    }
-
-    .editor-form-view {
-        overflow: auto;
-        padding: 25px;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-
-        .editor-content {
-            opacity: 0;
-            @include animation(fadeIn, ease-in, 1);
-            @include animation-duration(0.1s);
-            @include animation-fill-mode(forwards);
-        }
-    }
-
-    .editor-title {
-        margin-bottom: 30px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-
-        @include media-breakpoint-down(lg) {
-            display: block;
-
-            &-buttons {
-                display: flex;
-                justify-content: flex-end;
-            }
-        }
-
-
-        h3 {
-            margin: 0;
-        }
-
-        &-buttons {
-            .btn {
-                white-space: nowrap;
-            }
-
-            .btn-link {
-                color: $secondary;
-                text-decoration: none;
-
-                &:hover {
-                    color: $gray-700;
-                }
-            }
-
-            .btn:not(.btn-link):not(:last-child) {
-                margin-right: .75rem;
-            }
-        }
-    }
-
-    .pane-container {
-        height: calc(100vh - #{$editor-header-height + $breadcrumbs-height}) !important;
-
-        .app-fullscreen & {
-            height: calc(100vh - #{$breadcrumbs-height}) !important;
-        }
-    }
-
-    .form-group {
-        padding-bottom: 40px;
-    }
-
-    .foldable-group {
-        &:not(:last-child) {
-            margin-bottom: $spacer-5;
-        }
-
-        .foldable-group-content {
-            .form-group:last-child, .form-text:last-child {
-                padding-bottom: 0;
-                margin-bottom: 0;
-            }
-        }
-    }
-
-    .form-text {
-        margin-top: -50px;
-        margin-bottom: 0;
-        padding-bottom: 40px;
-
-        .fas, .far, .fab{
-            margin-right: 4px;
-        }
-    }
-
-    .card .form-group:last-child, .card .form-text:last-child {
-        margin-bottom: 0;
-        padding-bottom: 0;
-    }
-
-    textarea {
-        min-height: 150px;
-    }
-
-    .response-code {
-        height: 12rem;
-        overflow-y: auto;
-        resize: vertical;
-        background: $gray-100;
-    }
-
-    .input-children {
-        margin: 0;
-        padding: 0;
-    }
-
-    .input-child {
-        @include border-radius($border-radius);
-        padding: 8px 12px;
-        margin-bottom: 5px;
-        display: flex;
-        justify-content: space-between;
+      &:hover {
         background: $gray-200;
-        border: 1px solid $gray-400;
-        width: 100%;
-        cursor: move;
-        @include not-selectable();
+      }
+    }
 
-        .untitled {
-            font-style: italic;
+    .breadcrumb-item {
+      max-width: 17%;
+      display: inline-block;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+
+      &.with-link {
+        color: var(--bs-primary);
+      }
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+      content: '〉';
+      padding: 0;
+    }
+
+    .item {
+      @include border-radius($border-radius);
+      transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+      padding: 8px;
+      color: $gray-900 !important;
+      text-decoration: none !important;
+      display: flex;
+      align-items: center;
+      margin-right: 0.5rem;
+      white-space: nowrap;
+
+      &:hover, &:focus {
+        background: $gray-200;
+        box-shadow: none;
+      }
+
+      &.selected {
+        background: var(--bs-primary-bg);
+        color: var(--bs-primary) !important;
+      }
+
+      .badge {
+        margin-left: 0.5rem;
+      }
+    }
+  }
+
+  .editor-body {
+    display: flex;
+
+    .editor-right-panel {
+      flex: 0 0 20rem;
+      overflow: auto;
+      padding: 1rem;
+      border-left: 1px solid $gray-400;
+      height: calc(100vh - #{$editor-header-height + $breadcrumbs-height}) !important;
+
+      .app-fullscreen & {
+        height: calc(100vh - #{$breadcrumbs-height}) !important;
+      }
+    }
+  }
+
+  .tree-col {
+    background: $gray-100;
+    overflow: auto;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+  }
+
+  .editor-form-view {
+    overflow: auto;
+    padding: 25px;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+
+    .editor-content {
+      opacity: 0;
+      @include animation(fadeIn, ease-in, 1);
+      @include animation-duration(0.1s);
+      @include animation-fill-mode(forwards);
+    }
+  }
+
+  .editor-title {
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    @include media-breakpoint-down(lg) {
+      display: block;
+
+      &-buttons {
+        display: flex;
+        justify-content: flex-end;
+      }
+    }
+
+
+    h3 {
+      margin: 0;
+    }
+
+    &-buttons {
+      .btn {
+        white-space: nowrap;
+      }
+
+      .btn-link {
+        color: $secondary;
+        text-decoration: none;
+
+        &:hover {
+          color: $gray-700;
         }
+      }
+
+      .btn:not(.btn-link):not(:last-child) {
+        margin-right: .75rem;
+      }
+    }
+  }
+
+  .pane-container {
+    height: calc(100vh - #{$editor-header-height + $breadcrumbs-height}) !important;
+
+    .app-fullscreen & {
+      height: calc(100vh - #{$breadcrumbs-height}) !important;
+    }
+  }
+
+  .form-group {
+    padding-bottom: 40px;
+  }
+
+  .foldable-group {
+    &:not(:last-child) {
+      margin-bottom: $spacer-5;
+    }
+
+    .foldable-group-content {
+      .form-group:last-child, .form-text:last-child {
+        padding-bottom: 0;
+        margin-bottom: 0;
+      }
+    }
+  }
+
+  .form-text {
+    margin-top: -50px;
+    margin-bottom: 0;
+    padding-bottom: 40px;
+
+    .fas, .far, .fab {
+      margin-right: 4px;
+    }
+  }
+
+  .card .form-group:last-child, .card .form-text:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  textarea {
+    min-height: 150px;
+  }
+
+  .response-code + .alert {
+    margin-top: $spacer-3;
+  }
+
+  .response-code {
+    height: 12rem;
+    overflow-y: auto;
+    resize: vertical;
+    background: $gray-100;
+
+    .default-content {
+      code {
+        display: block;
+        padding: 1rem;
+        white-space: wrap;
+      }
+    }
+  }
+
+  .input-children {
+    margin: 0;
+    padding: 0;
+  }
+
+  .input-child {
+    @include border-radius($border-radius);
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    display: flex;
+    justify-content: space-between;
+    background: $gray-200;
+    border: 1px solid $gray-400;
+    width: 100%;
+    cursor: move;
+    @include not-selectable();
+
+    .untitled {
+      font-style: italic;
+    }
+
+    a {
+      text-decoration: underline;
+    }
+
+    .panel-input-child-actions {
+      a {
+        margin-left: 10px;
+      }
+    }
+  }
+
+  .input-child-placeholder {
+    border: 1px dashed var(--bs-primary);
+    background: $white;
+    color: $white;
+    @include not-selectable();
+  }
+
+  .link-add-child {
+    margin-top: 10px;
+    display: inline-block;
+  }
+
+  .card-item-template {
+    .card-header {
+      font-weight: bold;
+    }
+  }
+
+  .metric-view {
+    margin-bottom: .25rem;
+
+    .form-check {
+      margin-bottom: .5rem;
+    }
+
+    .metric-view-inputs {
+      height: 0;
+      overflow: hidden;
+      display: flex;
+      padding-left: 60px;
+      align-items: flex-start;
+      transition: height 0.3s ease-in-out;
+
+      .form-group {
+        display: flex;
+        margin: .25rem 1.5rem 0 0;
+        align-items: center;
+
+        label {
+          margin: 0 0.5rem 0 0;
+          font-weight: normal;
+        }
+
+        .invalid-feedback {
+          display: none;
+        }
+      }
+
+      &-enabled {
+        height: 60px;
+      }
+    }
+  }
+
+  .integration-question-form {
+    .alert {
+      margin-top: -30px;
+    }
+  }
+
+  .annotations-editor-item {
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+
+    &-inputs {
+      flex-grow: 1;
+
+      textarea {
+        min-height: auto;
+      }
+
+      .form-control:first-child {
+        border-bottom-left-radius: 0;
+        border-bottom-right-radius: 0;
+      }
+
+      .form-control:last-child {
+        border-top: 0;
+        border-top-left-radius: 0;
+        border-top-right-radius: 0;
+      }
+    }
+  }
+
+  .question-validations {
+    .card {
+      &:not(:last-child) {
+        margin-bottom: $spacer-3;
+      }
+
+      .card-body {
+        position: relative;
+
+        .delete {
+          position: absolute;
+          right: 0;
+          top: 0;
+          padding: 0 1rem;
+          margin-top: 0.5rem;
+        }
+      }
+    }
+  }
+
+  .prefab-selection {
+    background: $gray-100;
+    padding: .5rem 1rem;
+    margin-bottom: 2rem;
+
+    ul {
+      margin-top: 1rem;
+      padding: 0;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      grid-column-gap: .5rem;
+      grid-row-gap: .5rem;
+
+      li {
+        list-style: none;
 
         a {
-            text-decoration: underline;
-        }
+          display: flex;
+          flex-direction: column;
+          justify-content: space-between;
+          align-items: center;
+          @include border-radius($border-radius);
+          @include transition(all 0.2s ease-in-out);
+          border: 1px solid $gray-600;
+          text-align: center;
+          height: 100%;
+          padding-top: .5rem;
 
-        .panel-input-child-actions {
-            a {
-                margin-left: 10px;
-            }
-        }
-    }
+          span {
+            @include transition(all 0.2s ease-in-out);
+            display: block;
+            width: 100%;
+            background: $gray-600;
+            color: $white;
+            margin-top: .5rem
+          }
 
-    .input-child-placeholder {
-        border: 1px dashed var(--bs-primary);
-        background: $white;
-        color: $white;
-        @include not-selectable();
-    }
+          &:hover {
+            border-color: var(--bs-primary);
+            color: var(--bs-primary);
+            text-decoration: none;
 
-    .link-add-child {
-        margin-top: 10px;
-        display: inline-block;
-    }
-
-    .card-item-template {
-        .card-header {
-            font-weight: bold;
-        }
-    }
-
-    .metric-view {
-        margin-bottom: .25rem;
-
-        .form-check {
-            margin-bottom: .5rem;
-        }
-
-        .metric-view-inputs {
-            height: 0;
-            overflow: hidden;
-            display: flex;
-            padding-left: 60px;
-            align-items: flex-start;
-            transition: height 0.3s ease-in-out;
-
-            .form-group {
-                display: flex;
-                margin: .25rem 1.5rem 0 0;
-                align-items: center;
-
-                label {
-                    margin: 0 0.5rem 0 0;
-                    font-weight: normal;
-                }
-
-                .invalid-feedback {
-                    display: none;
-                }
+            span {
+              background: var(--bs-primary);
             }
 
-            &-enabled {
-                height: 60px;
+            .fas, .far, .fab {
+              color: var(--bs-primary);
             }
+          }
+
+          img {
+            height: 1.5rem;
+          }
+
+          .fas, .far, .fab {
+            @include transition(all 0.2s ease-in-out);
+            color: $gray-600;
+            margin-top: .25rem;
+          }
         }
+      }
     }
-
-    .integration-question-form {
-        .alert {
-            margin-top: -30px;
-        }
-    }
-
-    .annotations-editor-item {
-        display: flex;
-        justify-content: flex-start;
-        align-items: flex-start;
-        margin-bottom: 1rem;
-
-        &-inputs {
-            flex-grow: 1;
-
-            textarea {
-                min-height: auto;
-            }
-
-            .form-control:first-child {
-                border-bottom-left-radius: 0;
-                border-bottom-right-radius: 0;
-            }
-            .form-control:last-child {
-                border-top: 0;
-                border-top-left-radius: 0;
-                border-top-right-radius: 0;
-            }
-        }
-    }
-
-    .question-validations {
-        .card {
-            &:not(:last-child) {
-                margin-bottom: $spacer-3;
-            }
-
-            .card-body {
-                position: relative;
-
-                .delete {
-                    position: absolute;
-                    right: 0;
-                    top: 0;
-                    padding: 0 1rem;
-                    margin-top: 0.5rem;
-                }
-            }
-        }
-    }
-
-    .prefab-selection {
-        background: $gray-100;
-        padding: .5rem 1rem;
-        margin-bottom: 2rem;
-
-        ul {
-            margin-top: 1rem;
-            padding: 0;
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr 1fr;
-            grid-column-gap: .5rem;
-            grid-row-gap: .5rem;
-
-            li {
-                list-style: none;
-
-                a {
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    align-items: center;
-                    @include border-radius($border-radius);
-                    @include transition(all 0.2s ease-in-out);
-                    border: 1px solid $gray-600;
-                    text-align: center;
-                    height: 100%;
-                    padding-top: .5rem;
-
-                    span {
-                        @include transition(all 0.2s ease-in-out);
-                        display: block;
-                        width: 100%;
-                        background: $gray-600;
-                        color: $white;
-                        margin-top: .5rem
-                    }
-
-                    &:hover {
-                        border-color: var(--bs-primary);
-                        color: var(--bs-primary);
-                        text-decoration: none;
-
-                        span {
-                            background: var(--bs-primary);
-                        }
-
-                        .fas, .far, .fab{
-                            color: var(--bs-primary);
-                        }
-                    }
-
-                    img {
-                        height: 1.5rem;
-                    }
-
-                    .fas, .far, .fab{
-                        @include transition(all 0.2s ease-in-out);
-                        color: $gray-600;
-                        margin-top: .25rem;
-                    }
-                }
-            }
-        }
-    }
+  }
 }

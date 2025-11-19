@@ -6,6 +6,7 @@ module Common.Utils.Markdown exposing
 
 import Html exposing (Html, text)
 import Html.Attributes as Attr
+import Html.Lazy as Lazy
 import Markdown.Block as Block
 import Markdown.Html
 import Markdown.Parser as Markdown
@@ -19,24 +20,27 @@ sanitizeHtml html =
 
 
 toHtml : List (Html.Attribute msg) -> String -> Html msg
-toHtml attrs markdownInput =
+toHtml =
     let
         deadEndsToString deadEnds =
             deadEnds
                 |> List.map Markdown.deadEndToString
                 |> String.join "\n"
-    in
-    case
-        markdownInput
-            |> Markdown.parse
-            |> Result.mapError deadEndsToString
-            |> Result.andThen (Markdown.Renderer.render renderer)
-    of
-        Ok rendered ->
-            Html.div (Attr.class "Markdown" :: attrs) rendered
 
-        Err errors ->
-            Html.div (Attr.class "Markdown" :: attrs) [ text errors ]
+        view attrs markdownInput =
+            case
+                markdownInput
+                    |> Markdown.parse
+                    |> Result.mapError deadEndsToString
+                    |> Result.andThen (Markdown.Renderer.render renderer)
+            of
+                Ok rendered ->
+                    Html.div (Attr.class "Markdown" :: attrs) rendered
+
+                Err errors ->
+                    Html.div (Attr.class "Markdown" :: attrs) [ text errors ]
+    in
+    Lazy.lazy2 view
 
 
 toString : String -> String

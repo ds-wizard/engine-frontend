@@ -52,6 +52,7 @@ type alias Model =
     , publishModalModel : PublishModal.Model
     , eventsLastEvent : Dict String Event
     , eventsWebsocketDebounce : Dict String (Debounce SetContentKnowledgeModelEditorAction)
+    , warningsDebounce : Debounce ()
     }
 
 
@@ -76,6 +77,7 @@ init appState uuid mbEditorUuid =
     , publishModalModel = PublishModal.initialModel
     , eventsLastEvent = Dict.empty
     , eventsWebsocketDebounce = Dict.empty
+    , warningsDebounce = Debounce.init
     }
 
 

@@ -310,7 +310,7 @@ update wrapMsg msg appState model =
                     }
 
                 newEditorContext =
-                    ActionResult.map (EditorContext.applyEvent appState (getSecrets model) True event) model.editorContext
+                    ActionResult.map (EditorContext.applyEvent True event) model.editorContext
 
                 setUnloadMessageCmd =
                     Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
@@ -327,6 +327,9 @@ update wrapMsg msg appState model =
 
                         Nothing ->
                             Cmd.none
+
+                ( warningsDebounce, computeWarningsCmd ) =
+                    Debounce.push warningsDebounceConfig () model.warningsDebounce
             in
             if shouldDebounce then
                 let
@@ -355,8 +358,14 @@ update wrapMsg msg appState model =
                     , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
                     , eventsWebsocketDebounce = Dict.insert entityUuid debounce model.eventsWebsocketDebounce
                     , eventsLastEvent = Dict.insert entityUuid squashedEvent model.eventsLastEvent
+                    , warningsDebounce = warningsDebounce
                   }
-                , Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd, focusSelectorCmd ]
+                , Cmd.batch
+                    [ Cmd.map wrapMsg debounceCmd
+                    , setUnloadMessageCmd
+                    , focusSelectorCmd
+                    , Cmd.map wrapMsg computeWarningsCmd
+                    ]
                 )
 
             else
@@ -383,8 +392,15 @@ update wrapMsg msg appState model =
                 , { newModel
                     | editorContext = newEditorContext
                     , kmEditorModel = KMEditor.closeAllModals model.kmEditorModel
+                    , warningsDebounce = warningsDebounce
                   }
-                , Cmd.batch [ wsCmd, setUnloadMessageCmd, navigateCmd, focusSelectorCmd ]
+                , Cmd.batch
+                    [ wsCmd
+                    , setUnloadMessageCmd
+                    , navigateCmd
+                    , focusSelectorCmd
+                    , Cmd.map wrapMsg computeWarningsCmd
+                    ]
                 )
 
         EventDebounceMsg entityUuid debounceMsg ->
@@ -413,6 +429,24 @@ update wrapMsg msg appState model =
                 ( { model | eventsWebsocketDebounce = Dict.insert entityUuid debounce model.eventsWebsocketDebounce }
                 , Cmd.map wrapMsg cmd
                 )
+
+        ComputeWarnings ->
+            let
+                newEditorContext =
+                    ActionResult.map (EditorContext.computeWarnings appState (getSecrets model)) model.editorContext
+            in
+            withSeed ( { model | editorContext = newEditorContext }, Cmd.none )
+
+        ComputeWarningsDebounceMsg debounceMsg ->
+            let
+                ( debounce, cmd ) =
+                    Debounce.update
+                        warningsDebounceConfig
+                        (Debounce.takeLast (always (Task.dispatch ComputeWarnings)))
+                        debounceMsg
+                        model.warningsDebounce
+            in
+            withSeed ( { model | warningsDebounce = debounce }, Cmd.map wrapMsg cmd )
 
         SavePreviewReplies ->
             let
@@ -450,7 +484,7 @@ handleWebSocketMsg websocketMsg appState model =
 
                 newModel2 =
                     if not removed then
-                        { newModel | editorContext = ActionResult.map (EditorContext.applyEvent appState (getSecrets model) False eventData.event) newModel.editorContext }
+                        { newModel | editorContext = ActionResult.map (EditorContext.applyEvent False eventData.event) newModel.editorContext }
 
                     else
                         newModel
@@ -540,3 +574,10 @@ debounceConfig appState entityUuid =
 getDebounceModel : String -> Model -> Debounce.Debounce SetContentKnowledgeModelEditorAction
 getDebounceModel entityUuid model =
     Maybe.withDefault Debounce.init (Dict.get entityUuid model.eventsWebsocketDebounce)
+
+
+warningsDebounceConfig : Debounce.Config Msg
+warningsDebounceConfig =
+    { strategy = Debounce.later 1000
+    , transform = ComputeWarningsDebounceMsg
+    }

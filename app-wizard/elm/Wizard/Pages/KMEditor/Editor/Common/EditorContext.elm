@@ -140,7 +140,7 @@ init appState secrets kmEditor mbEditorUuid =
             , warnings = []
             }
     in
-    List.foldl (applyEvent appState secrets False) editorContext editorContext.kmEditor.events
+    List.foldl (applyEvent False) editorContext editorContext.kmEditor.events
         |> setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)
         |> computeWarnings appState secrets
 
@@ -708,8 +708,8 @@ isEmptyIntegrationEditorUuid uuid editorContext =
     Set.member uuid editorContext.emptyIntegrationEditorUuids
 
 
-applyEvent : AppState -> List String -> Bool -> Event -> EditorContext -> EditorContext
-applyEvent appState secrets local event originalEditorContext =
+applyEvent : Bool -> Event -> EditorContext -> EditorContext
+applyEvent local event originalEditorContext =
     let
         kmEditor =
             originalEditorContext.kmEditor
@@ -720,255 +720,254 @@ applyEvent appState secrets local event originalEditorContext =
         editorContext =
             { originalEditorContext | kmEditor = { kmEditor | events = kmEditor.events ++ [ event ] } }
     in
-    computeWarnings appState secrets <|
-        case event.content of
-            AddKnowledgeModelEvent _ ->
-                editorContext
+    case event.content of
+        AddKnowledgeModelEvent _ ->
+            editorContext
 
-            AddAnswerEvent eventData ->
-                let
-                    answer =
-                        AddAnswerEventData.toAnswer event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertAnswer answer event editorContext
+        AddAnswerEvent eventData ->
+            let
+                answer =
+                    AddAnswerEventData.toAnswer event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertAnswer answer event editorContext
 
-            AddChapterEvent eventData ->
-                let
-                    chapter =
-                        AddChapterEventData.toChapter event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertChapter chapter event editorContext
+        AddChapterEvent eventData ->
+            let
+                chapter =
+                    AddChapterEventData.toChapter event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertChapter chapter event editorContext
 
-            AddChoiceEvent eventData ->
-                let
-                    choice =
-                        AddChoiceEventData.toChoice event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertChoice choice event editorContext
+        AddChoiceEvent eventData ->
+            let
+                choice =
+                    AddChoiceEventData.toChoice event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertChoice choice event editorContext
 
-            AddExpertEvent eventData ->
-                let
-                    expert =
-                        AddExpertEventData.toExpert event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertExpert expert event editorContext
+        AddExpertEvent eventData ->
+            let
+                expert =
+                    AddExpertEventData.toExpert event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertExpert expert event editorContext
 
-            AddIntegrationEvent eventData ->
-                let
-                    integration =
-                        AddIntegrationEventData.toIntegration event.entityUuid eventData
+        AddIntegrationEvent eventData ->
+            let
+                integration =
+                    AddIntegrationEventData.toIntegration event.entityUuid eventData
 
-                    updatedEditorContext =
-                        addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorContext
-                in
-                applyAdd local KnowledgeModel.insertIntegration integration event updatedEditorContext
+                updatedEditorContext =
+                    addEmptyIntegrationEditorUuid (Integration.getUuid integration) editorContext
+            in
+            applyAdd local KnowledgeModel.insertIntegration integration event updatedEditorContext
 
-            AddMetricEvent eventData ->
-                let
-                    metric =
-                        AddMetricEventData.toMetric event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertMetric metric event editorContext
+        AddMetricEvent eventData ->
+            let
+                metric =
+                    AddMetricEventData.toMetric event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertMetric metric event editorContext
 
-            AddPhaseEvent eventData ->
-                let
-                    phase =
-                        AddPhaseEventData.toPhase event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertPhase phase event editorContext
+        AddPhaseEvent eventData ->
+            let
+                phase =
+                    AddPhaseEventData.toPhase event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertPhase phase event editorContext
 
-            AddQuestionEvent eventData ->
-                let
-                    question =
-                        AddQuestionEventData.toQuestion event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertQuestion question event editorContext
+        AddQuestionEvent eventData ->
+            let
+                question =
+                    AddQuestionEventData.toQuestion event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertQuestion question event editorContext
 
-            AddReferenceEvent eventData ->
-                let
-                    reference =
-                        AddReferenceEventData.toReference event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertReference reference event editorContext
+        AddReferenceEvent eventData ->
+            let
+                reference =
+                    AddReferenceEventData.toReference event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertReference reference event editorContext
 
-            AddResourceCollectionEvent eventData ->
-                let
-                    resourceCollection =
-                        AddResourceCollectionEventData.toResourceCollection event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertResourceCollection resourceCollection event editorContext
+        AddResourceCollectionEvent eventData ->
+            let
+                resourceCollection =
+                    AddResourceCollectionEventData.toResourceCollection event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertResourceCollection resourceCollection event editorContext
 
-            AddResourcePageEvent eventData ->
-                let
-                    resourcePage =
-                        AddResourcePageEventData.toResourcePage event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertResourcePage resourcePage event editorContext
+        AddResourcePageEvent eventData ->
+            let
+                resourcePage =
+                    AddResourcePageEventData.toResourcePage event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertResourcePage resourcePage event editorContext
 
-            AddTagEvent eventData ->
-                let
-                    tag =
-                        AddTagEventData.toTag event.entityUuid eventData
-                in
-                applyAdd local KnowledgeModel.insertTag tag event editorContext
+        AddTagEvent eventData ->
+            let
+                tag =
+                    AddTagEventData.toTag event.entityUuid eventData
+            in
+            applyAdd local KnowledgeModel.insertTag tag event editorContext
 
-            EditAnswerEvent eventData ->
-                let
-                    mbAnswer =
-                        KnowledgeModel.getAnswer event.entityUuid knowledgeModel
-                            |> Maybe.map (EditAnswerEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateAnswer mbAnswer event editorContext
+        EditAnswerEvent eventData ->
+            let
+                mbAnswer =
+                    KnowledgeModel.getAnswer event.entityUuid knowledgeModel
+                        |> Maybe.map (EditAnswerEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateAnswer mbAnswer event editorContext
 
-            EditChapterEvent eventData ->
-                let
-                    mbChapter =
-                        KnowledgeModel.getChapter event.entityUuid knowledgeModel
-                            |> Maybe.map (EditChapterEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateChapter mbChapter event editorContext
+        EditChapterEvent eventData ->
+            let
+                mbChapter =
+                    KnowledgeModel.getChapter event.entityUuid knowledgeModel
+                        |> Maybe.map (EditChapterEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateChapter mbChapter event editorContext
 
-            EditChoiceEvent eventData ->
-                let
-                    mbChoice =
-                        KnowledgeModel.getChoice event.entityUuid knowledgeModel
-                            |> Maybe.map (EditChoiceEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateChoice mbChoice event editorContext
+        EditChoiceEvent eventData ->
+            let
+                mbChoice =
+                    KnowledgeModel.getChoice event.entityUuid knowledgeModel
+                        |> Maybe.map (EditChoiceEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateChoice mbChoice event editorContext
 
-            EditExpertEvent eventData ->
-                let
-                    mbExpert =
-                        KnowledgeModel.getExpert event.entityUuid knowledgeModel
-                            |> Maybe.map (EditExpertEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateExpert mbExpert event editorContext
+        EditExpertEvent eventData ->
+            let
+                mbExpert =
+                    KnowledgeModel.getExpert event.entityUuid knowledgeModel
+                        |> Maybe.map (EditExpertEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateExpert mbExpert event editorContext
 
-            EditIntegrationEvent eventData ->
-                let
-                    mbIntegration =
-                        KnowledgeModel.getIntegration event.entityUuid knowledgeModel
-                            |> Maybe.map (EditIntegrationEvent.apply eventData)
+        EditIntegrationEvent eventData ->
+            let
+                mbIntegration =
+                    KnowledgeModel.getIntegration event.entityUuid knowledgeModel
+                        |> Maybe.map (EditIntegrationEvent.apply eventData)
 
-                    updatedEditorContext =
-                        removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorContext
-                in
-                applyEdit KnowledgeModel.updateIntegration mbIntegration event updatedEditorContext
+                updatedEditorContext =
+                    removeEmptyIntegrationEditorUuid (Maybe.unwrap "" Integration.getUuid mbIntegration) editorContext
+            in
+            applyEdit KnowledgeModel.updateIntegration mbIntegration event updatedEditorContext
 
-            EditKnowledgeModelEvent eventData ->
-                let
-                    newKnowledgeModel =
-                        EditKnowledgeModelEventData.apply eventData knowledgeModel
-                in
-                setKnowledgeModel newKnowledgeModel editorContext
-                    |> setEdited (Uuid.toString knowledgeModel.uuid)
+        EditKnowledgeModelEvent eventData ->
+            let
+                newKnowledgeModel =
+                    EditKnowledgeModelEventData.apply eventData knowledgeModel
+            in
+            setKnowledgeModel newKnowledgeModel editorContext
+                |> setEdited (Uuid.toString knowledgeModel.uuid)
 
-            EditMetricEvent eventData ->
-                let
-                    mbMetric =
-                        KnowledgeModel.getMetric event.entityUuid knowledgeModel
-                            |> Maybe.map (EditMetricEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateMetric mbMetric event editorContext
+        EditMetricEvent eventData ->
+            let
+                mbMetric =
+                    KnowledgeModel.getMetric event.entityUuid knowledgeModel
+                        |> Maybe.map (EditMetricEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateMetric mbMetric event editorContext
 
-            EditPhaseEvent eventData ->
-                let
-                    mbPhase =
-                        KnowledgeModel.getPhase event.entityUuid knowledgeModel
-                            |> Maybe.map (EditPhaseEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updatePhase mbPhase event editorContext
+        EditPhaseEvent eventData ->
+            let
+                mbPhase =
+                    KnowledgeModel.getPhase event.entityUuid knowledgeModel
+                        |> Maybe.map (EditPhaseEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updatePhase mbPhase event editorContext
 
-            EditQuestionEvent eventData ->
-                let
-                    mbQuestion =
-                        KnowledgeModel.getQuestion event.entityUuid knowledgeModel
-                            |> Maybe.map (EditQuestionEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateQuestion mbQuestion event editorContext
+        EditQuestionEvent eventData ->
+            let
+                mbQuestion =
+                    KnowledgeModel.getQuestion event.entityUuid knowledgeModel
+                        |> Maybe.map (EditQuestionEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateQuestion mbQuestion event editorContext
 
-            EditReferenceEvent eventData ->
-                let
-                    mbReference =
-                        KnowledgeModel.getReference event.entityUuid knowledgeModel
-                            |> Maybe.map (EditReferenceEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateReference mbReference event editorContext
+        EditReferenceEvent eventData ->
+            let
+                mbReference =
+                    KnowledgeModel.getReference event.entityUuid knowledgeModel
+                        |> Maybe.map (EditReferenceEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateReference mbReference event editorContext
 
-            EditResourceCollectionEvent eventData ->
-                let
-                    mbResourceCollection =
-                        KnowledgeModel.getResourceCollection event.entityUuid knowledgeModel
-                            |> Maybe.map (EditResourceCollectionEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateResourceCollection mbResourceCollection event editorContext
+        EditResourceCollectionEvent eventData ->
+            let
+                mbResourceCollection =
+                    KnowledgeModel.getResourceCollection event.entityUuid knowledgeModel
+                        |> Maybe.map (EditResourceCollectionEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateResourceCollection mbResourceCollection event editorContext
 
-            EditResourcePageEvent eventData ->
-                let
-                    mbResourcePage =
-                        KnowledgeModel.getResourcePage event.entityUuid knowledgeModel
-                            |> Maybe.map (EditResourcePageEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateResourcePage mbResourcePage event editorContext
+        EditResourcePageEvent eventData ->
+            let
+                mbResourcePage =
+                    KnowledgeModel.getResourcePage event.entityUuid knowledgeModel
+                        |> Maybe.map (EditResourcePageEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateResourcePage mbResourcePage event editorContext
 
-            EditTagEvent eventData ->
-                let
-                    mbTag =
-                        KnowledgeModel.getTag event.entityUuid knowledgeModel
-                            |> Maybe.map (EditTagEventData.apply eventData)
-                in
-                applyEdit KnowledgeModel.updateTag mbTag event editorContext
+        EditTagEvent eventData ->
+            let
+                mbTag =
+                    KnowledgeModel.getTag event.entityUuid knowledgeModel
+                        |> Maybe.map (EditTagEventData.apply eventData)
+            in
+            applyEdit KnowledgeModel.updateTag mbTag event editorContext
 
-            DeleteAnswerEvent ->
-                applyDelete event editorContext
+        DeleteAnswerEvent ->
+            applyDelete event editorContext
 
-            DeleteChapterEvent ->
-                applyDelete event editorContext
+        DeleteChapterEvent ->
+            applyDelete event editorContext
 
-            DeleteChoiceEvent ->
-                applyDelete event editorContext
+        DeleteChoiceEvent ->
+            applyDelete event editorContext
 
-            DeleteExpertEvent ->
-                applyDelete event editorContext
+        DeleteExpertEvent ->
+            applyDelete event editorContext
 
-            DeleteIntegrationEvent ->
-                applyDelete event editorContext
+        DeleteIntegrationEvent ->
+            applyDelete event editorContext
 
-            DeleteMetricEvent ->
-                applyDelete event editorContext
+        DeleteMetricEvent ->
+            applyDelete event editorContext
 
-            DeletePhaseEvent ->
-                applyDelete event editorContext
+        DeletePhaseEvent ->
+            applyDelete event editorContext
 
-            DeleteReferenceEvent ->
-                applyDelete event editorContext
+        DeleteReferenceEvent ->
+            applyDelete event editorContext
 
-            DeleteResourceCollectionEvent ->
-                applyDelete event editorContext
+        DeleteResourceCollectionEvent ->
+            applyDelete event editorContext
 
-            DeleteResourcePageEvent ->
-                applyDelete event editorContext
+        DeleteResourcePageEvent ->
+            applyDelete event editorContext
 
-            DeleteQuestionEvent ->
-                applyDelete event editorContext
+        DeleteQuestionEvent ->
+            applyDelete event editorContext
 
-            DeleteTagEvent ->
-                applyDelete event editorContext
+        DeleteTagEvent ->
+            applyDelete event editorContext
 
-            MoveQuestionEvent moveData ->
-                applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion event moveData editorContext
+        MoveQuestionEvent moveData ->
+            applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion event moveData editorContext
 
-            MoveAnswerEvent moveData ->
-                applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer event moveData editorContext
+        MoveAnswerEvent moveData ->
+            applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer event moveData editorContext
 
-            MoveChoiceEvent moveData ->
-                applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice event moveData editorContext
+        MoveChoiceEvent moveData ->
+            applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice event moveData editorContext
 
-            MoveReferenceEvent moveData ->
-                applyMove KnowledgeModel.moveReference KnowledgeModel.getReference event moveData editorContext
+        MoveReferenceEvent moveData ->
+            applyMove KnowledgeModel.moveReference KnowledgeModel.getReference event moveData editorContext
 
-            MoveExpertEvent moveData ->
-                applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert event moveData editorContext
+        MoveExpertEvent moveData ->
+            applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert event moveData editorContext
 
 
 applyAdd : Bool -> (a -> String -> KnowledgeModel -> KnowledgeModel) -> a -> Event -> EditorContext -> EditorContext

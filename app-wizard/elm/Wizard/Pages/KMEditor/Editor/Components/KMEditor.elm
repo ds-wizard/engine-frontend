@@ -43,6 +43,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onInput, onMouseLeave)
 import Html.Extra as Html
 import Html.Keyed
+import Html.Lazy as Lazy
 import Json.Print
 import Json.Value as JsonValue
 import List.Extra as List
@@ -2343,39 +2344,50 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                                         [ text ("Content Type: " ++ responseData.contentType) ]
 
                                                 defaultContent =
-                                                    pre [] [ code [] [ text responseData.body ] ]
+                                                    pre [ class "default-content" ] [ code [] [ text responseData.body ] ]
 
-                                                responseBody =
-                                                    case Json.Print.prettyString { indent = 4, columns = 100 } responseData.body of
-                                                        Ok jsonResult ->
-                                                            div []
-                                                                [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub
-                                                                , SyntaxHighlight.json jsonResult
-                                                                    |> Result.map (SyntaxHighlight.toBlockHtml (Just 1))
-                                                                    |> Result.withDefault defaultContent
-                                                                ]
+                                                ( responseBody, responseFlash ) =
+                                                    if String.length responseData.body > 10000 then
+                                                        ( defaultContent
+                                                        , Flash.info (gettext "The response body is too large to display with syntax highlight." appState.locale)
+                                                        )
 
-                                                        Err _ ->
-                                                            div []
-                                                                [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub
-                                                                , SyntaxHighlight.noLang responseData.body
-                                                                    |> Result.map (SyntaxHighlight.toBlockHtml (Just 1))
-                                                                    |> Result.withDefault defaultContent
-                                                                ]
+                                                    else
+                                                        case Json.Print.prettyString { indent = 4, columns = 100 } responseData.body of
+                                                            Ok jsonResult ->
+                                                                ( div []
+                                                                    [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub
+                                                                    , SyntaxHighlight.json jsonResult
+                                                                        |> Result.map (SyntaxHighlight.toBlockHtml (Just 1))
+                                                                        |> Result.withDefault defaultContent
+                                                                    ]
+                                                                , Html.nothing
+                                                                )
+
+                                                            Err _ ->
+                                                                ( div []
+                                                                    [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub
+                                                                    , SyntaxHighlight.noLang responseData.body
+                                                                        |> Result.map (SyntaxHighlight.toBlockHtml (Just 1))
+                                                                        |> Result.withDefault defaultContent
+                                                                    ]
+                                                                , Html.nothing
+                                                                )
                                             in
                                             div []
                                                 [ strong [ class "me-2" ] [ text (gettext "Response" appState.locale) ]
                                                 , statusBadge
                                                 , contentTypeBadge
                                                 , div [ class "mt-2 response-code" ] [ responseBody ]
+                                                , responseFlash
                                                 ]
                                     in
                                     case response.response of
                                         TypeHintTestResponse.SuccessTypeHintResponse responseData ->
-                                            showResponseData responseData
+                                            Lazy.lazy showResponseData responseData
 
                                         TypeHintTestResponse.RemoteErrorTypeHintResponse responseData ->
-                                            showResponseData responseData
+                                            Lazy.lazy showResponseData responseData
 
                                         TypeHintTestResponse.RequestFailedTypeHintResponse errorData ->
                                             Flash.error errorData.message
@@ -3001,7 +3013,7 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                                     )
 
                         resourcePageUuidOptions =
-                            KnowledgeModel.getResourceCollections (EditorContext.getFilteredKM editorContext)
+                            KnowledgeModel.getResourceCollections editorContext.kmEditor.knowledgeModel
                                 |> List.map (\rc -> ( rc.title, List.filterMap resourcePageOption rc.resourcePageUuids ))
 
                         resourcePageUuidSelect =
