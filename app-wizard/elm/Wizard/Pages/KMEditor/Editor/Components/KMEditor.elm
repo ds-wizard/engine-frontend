@@ -2444,7 +2444,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                         let
                                             viewListFieldSuggestion suggestion =
                                                 a
-                                                    [ class "btn btn-outline-primary btn-sm py-0"
+                                                    [ class "btn btn-outline-primary btn-sm py-0 me-1 mb-1"
                                                     , onClick (createTypeEditEventWithFocusSelector setResponseListField (Just "#responseListField") (String.toMaybe suggestion))
                                                     ]
                                                     [ text suggestion ]
