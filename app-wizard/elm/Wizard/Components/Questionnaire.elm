@@ -3897,8 +3897,8 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
         itemTitle =
             if isCollapsed then
                 Maybe.unwrap
-                    (i [ class "ms-2" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
-                    (strong [ class "ms-2" ] << List.singleton << text)
+                    (i [ class "ms-2 flex-grow-1" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
+                    (strong [ class "ms-2 flex-grow-1 overflow-hidden text-nowrap" ] << List.singleton << text)
                     (QuestionnaireQuestionnaire.getItemTitle model.questionnaire itemPath questions)
 
             else
@@ -3917,8 +3917,8 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
 
         itemHeader =
             div [ class "item-header d-flex justify-content-between align-items-center" ]
-                [ div (class "flex-grow-1 me-3 cursor-pointer" :: collapseAttributes) [ collapseIcon, itemTitle ]
-                , div [] (linkedItemsButton :: buttons)
+                [ div (class "flex-grow-1 d-flex me-3 cursor-pointer overflow-hidden" :: collapseAttributes) [ collapseIcon, itemTitle ]
+                , div [ class "d-flex" ] (linkedItemsButton :: buttons)
                 ]
 
         collapseFooterButton =
