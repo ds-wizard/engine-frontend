@@ -14,16 +14,8 @@
         color: $gray-900;
         text-decoration: none !important;
 
-        &:not([href]) {
-            color: $gray-900;
-
-            &:hover {
-                color: $gray-900;
-            }
-        }
-
-        &:active, &:not([href]):active {
-            color: $light;
+        &:active {
+            color: $light !important;
 
             &.text-danger {
                 background-color: $danger;
