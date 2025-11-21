@@ -3054,10 +3054,19 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                                 , onInput = createTypeEditEvent setUrl
                                 }
 
+                        viewUrlError error =
+                            FormExtra.blockAfter
+                                [ Flash.warningHtml <|
+                                    div [ class "ms-2" ]
+                                        [ small [ class "d-block" ] [ text (gettext "This URL failed the check:" appState.locale) ]
+                                        , text error
+                                        ]
+                                ]
+
                         urlError =
                             UrlChecker.getResultByUrl data.url model.urlChecker
                                 |> Maybe.andThen (UrlResult.toReadableErrorString appState.locale)
-                                |> Maybe.unwrap Html.nothing (FormExtra.blockAfter << List.singleton << Flash.error)
+                                |> Maybe.unwrap Html.nothing viewUrlError
 
                         labelInput =
                             Input.string
