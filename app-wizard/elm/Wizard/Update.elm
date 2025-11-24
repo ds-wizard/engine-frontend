@@ -240,6 +240,7 @@ update msg model =
                     updateConfig =
                         { serverInfo = AppState.toAIAssistantServerInfo model.appState
                         , seed = model.appState.seed
+                        , application = "wizard"
                         }
 
                     ( newSeed, aiAssistantState, aiAssistantCmd ) =
