@@ -10,11 +10,11 @@ import Common.Components.AIAssistant.Models.Question as Question exposing (Quest
 import Uuid exposing (Uuid)
 
 
-getLatestConversation : ServerInfo -> ToMsg Conversation msg -> Cmd msg
-getLatestConversation serverInfo =
-    Request.get serverInfo "/conversations/latest?application=wizard" Conversation.decoder
+getLatestConversation : ServerInfo -> String -> ToMsg Conversation msg -> Cmd msg
+getLatestConversation serverInfo application =
+    Request.get serverInfo ("/conversations/latest?application=" ++ application) Conversation.decoder
 
 
-postQuestion : ServerInfo -> Uuid -> Question -> ToMsg Answer msg -> Cmd msg
-postQuestion serverInfo uuid question =
-    Request.post serverInfo ("/conversations/" ++ Uuid.toString uuid ++ "?application=wizard") Answer.decoder (Question.encode question)
+postQuestion : ServerInfo -> String -> Uuid -> Question -> ToMsg Answer msg -> Cmd msg
+postQuestion serverInfo appName uuid question =
+    Request.post serverInfo ("/conversations/" ++ Uuid.toString uuid ++ "?application=" ++ appName) Answer.decoder (Question.encode question)
