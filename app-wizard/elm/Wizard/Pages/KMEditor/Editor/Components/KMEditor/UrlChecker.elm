@@ -159,7 +159,17 @@ viewBrokenReferences appState cfg urlCheckResponse =
         Flash.success (gettext "All URL references are valid." appState.locale)
 
     else
-        div [ class "list-group list-group-flush" ] brokenReferences
+        let
+            brokenCount =
+                List.length brokenReferences
+
+            message =
+                String.format (ngettext ( "Found 1 broken reference.", "Found %s broken references." ) brokenCount appState.locale) [ String.fromInt brokenCount ]
+        in
+        div []
+            [ Flash.warning message
+            , div [ class "list-group list-group-flush" ] brokenReferences
+            ]
 
 
 viewBrokenReference : AppState -> ViewConfig -> UrlCheckResponse -> URLReferenceData -> Maybe (Html msg)
