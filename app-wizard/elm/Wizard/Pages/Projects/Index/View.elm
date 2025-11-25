@@ -43,7 +43,7 @@ import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDesc
 import Wizard.Pages.Projects.Common.View exposing (visibilityIcon)
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
@@ -270,14 +270,14 @@ listingKMsFilter : AppState -> Model -> Listing.Filter Msg
 listingKMsFilter appState model =
     let
         filterMsg =
-            ListingMsgs.UpdatePaginationQueryFilters (Just indexRoutePackagesFilterId)
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteKnowledgeModelPackagesFilterId)
 
         updatePackagesMsg packageIds =
             if List.isEmpty packageIds then
-                filterMsg (PaginationQueryFilter.removeFilter indexRoutePackagesFilterId model.questionnaires.filters)
+                filterMsg (PaginationQueryFilter.removeFilter indexRouteKnowledgeModelPackagesFilterId model.questionnaires.filters)
 
             else
-                filterMsg (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
+                filterMsg (PaginationQueryFilter.insertValue indexRouteKnowledgeModelPackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
 
         removePackageMsg kmPackage =
             List.filter ((/=) (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id)) selectedPackageIds
@@ -307,7 +307,7 @@ listingKMsFilter appState model =
 
         selectedPackageIds =
             model.questionnaires.filters
-                |> PaginationQueryFilter.getValue indexRoutePackagesFilterId
+                |> PaginationQueryFilter.getValue indexRouteKnowledgeModelPackagesFilterId
                 |> Maybe.unwrap [] (String.split ",")
 
         selectedPackages =
@@ -369,7 +369,7 @@ listingKMsFilter appState model =
                 Nothing ->
                     gettext "Knowledge Models" appState.locale
     in
-    Listing.CustomFilter indexRoutePackagesFilterId
+    Listing.CustomFilter indexRouteKnowledgeModelPackagesFilterId
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
         , items = searchInputItem ++ selectedPackagesItems ++ foundPackagesItems
         }

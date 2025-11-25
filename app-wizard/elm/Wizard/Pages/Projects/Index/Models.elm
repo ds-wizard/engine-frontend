@@ -16,7 +16,7 @@ import Wizard.Components.Listing.Models as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg)
-import Wizard.Pages.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 
 
 type alias Model =
@@ -54,13 +54,13 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
             [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
             , ( indexRouteUsersFilterId, mbUser )
             , ( indexRouteProjectTagsFilterId, mbProjectTags )
-            , ( indexRoutePackagesFilterId, mbKmPackages )
+            , ( indexRouteKnowledgeModelPackagesFilterId, mbKmPackages )
             ]
 
         operators =
             [ ( indexRouteUsersFilterId, mbUserOp )
             , ( indexRouteProjectTagsFilterId, mbProjectTagsOp )
-            , ( indexRoutePackagesFilterId, mbKmPackagesOp )
+            , ( indexRouteKnowledgeModelPackagesFilterId, mbKmPackagesOp )
             ]
 
         paginationQueryFilters =
@@ -85,6 +85,6 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
     , userFilterSelectedUsers = selectedValue indexRouteUsersFilterId
     , userFilterUsers = ActionResult.Loading
     , kmPackagesFilterSearchValue = ""
-    , kmPackagesFilterSelectedPackages = selectedValue indexRoutePackagesFilterId
+    , kmPackagesFilterSelectedPackages = selectedValue indexRouteKnowledgeModelPackagesFilterId
     , kmPackagesFilterPackages = ActionResult.Loading
     }

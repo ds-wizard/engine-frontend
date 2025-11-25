@@ -748,8 +748,8 @@ projectsIndexWithFilters filters pagination =
             (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
             (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
-            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRoutePackagesFilterId filters)
-            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRoutePackagesFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteKnowledgeModelPackagesFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteKnowledgeModelPackagesFilterId filters)
         )
 
 

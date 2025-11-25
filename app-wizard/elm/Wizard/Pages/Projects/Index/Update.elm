@@ -30,7 +30,7 @@ import Wizard.Pages.Projects.Common.CloneProjectModal.Update as CloneProjectModa
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Utils.Driver as Driver
@@ -53,7 +53,7 @@ fetchData appState model =
                     Cmd.none
 
         selectedPackagesCmd =
-            case Dict.get indexRoutePackagesFilterId model.questionnaires.filters.values of
+            case Dict.get indexRouteKnowledgeModelPackagesFilterId model.questionnaires.filters.values of
                 Just packageIds ->
                     KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestionsWithOptions appState
                         PaginationQueryString.empty
@@ -270,7 +270,7 @@ update wrapMsg msg appState model =
 
                 selectedKMs =
                     model.questionnaires.filters.values
-                        |> Dict.get indexRoutePackagesFilterId
+                        |> Dict.get indexRouteKnowledgeModelPackagesFilterId
                         |> Maybe.unwrap [] (String.split ",")
 
                 cmd =

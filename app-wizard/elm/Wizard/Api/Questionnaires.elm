@@ -106,8 +106,8 @@ createListExtraParams filters =
         , ( "userUuidsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "userUuids" filters) )
         , ( "projectTags", PaginationQueryFilters.getValue "projectTags" filters )
         , ( "projectTagsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "projectTags" filters) )
-        , ( "packageIds", PaginationQueryFilters.getValue "packages" filters )
-        , ( "packageIdsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "packages" filters) )
+        , ( "knowledgeModelPackageIds", PaginationQueryFilters.getValue "knowledgeModelPackages" filters )
+        , ( "knowledgeModelPackageIdsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "knowledgeModelPackages" filters) )
         ]
 
 

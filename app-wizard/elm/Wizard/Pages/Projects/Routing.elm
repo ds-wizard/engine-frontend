@@ -16,7 +16,7 @@ import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Perm as Perm
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 
 
 moduleRoot : String
@@ -46,8 +46,8 @@ parsers wrapRoute =
                 (FilterOperator.queryParser indexRouteUsersFilterId)
                 (Query.string indexRouteProjectTagsFilterId)
                 (FilterOperator.queryParser indexRouteProjectTagsFilterId)
-                (Query.string indexRoutePackagesFilterId)
-                (FilterOperator.queryParser indexRoutePackagesFilterId)
+                (Query.string indexRouteKnowledgeModelPackagesFilterId)
+                (FilterOperator.queryParser indexRouteKnowledgeModelPackagesFilterId)
 
         projectDetailQuestionnaire projectUuid mbQuestionPath mbCommentThreadUuid =
             wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid)
@@ -149,8 +149,8 @@ toUrl route =
                         , FilterOperator.toUrlParam indexRouteUsersFilterId mbUserOp
                         , ( indexRouteProjectTagsFilterId, mbProjectTags )
                         , FilterOperator.toUrlParam indexRouteProjectTagsFilterId mbProjectTagsOp
-                        , ( indexRoutePackagesFilterId, mbPackages )
-                        , FilterOperator.toUrlParam indexRoutePackagesFilterId mbPackagesOp
+                        , ( indexRouteKnowledgeModelPackagesFilterId, mbPackages )
+                        , FilterOperator.toUrlParam indexRouteKnowledgeModelPackagesFilterId mbPackagesOp
                         ]
             in
             [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]
