@@ -3,8 +3,9 @@ module Wizard.Components.Menu.View exposing (view, viewAboutModal, viewReportIss
 import ActionResult exposing (ActionResult)
 import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
 import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
-import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
+import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuNews, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Common.Components.Modal as Modal
+import Common.Components.NewsModal as NewsModal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
 import Common.Data.Role as Role
@@ -749,6 +750,15 @@ viewProfileMenu model =
                         ]
                         [ faMenuAbout
                         , text (gettext "About" model.appState.locale)
+                        ]
+                    ]
+                , li [ class "dark" ]
+                    [ a
+                        [ onClick (Wizard.Msgs.NewsModalMsg NewsModal.open)
+                        , dataCy "menu_news"
+                        ]
+                        [ faMenuNews
+                        , text (gettext "What's new" model.appState.locale)
                         ]
                     ]
                 , li [ class "dark dark-last" ]

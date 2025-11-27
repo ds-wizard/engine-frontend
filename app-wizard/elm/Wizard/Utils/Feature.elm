@@ -38,6 +38,7 @@ module Wizard.Utils.Feature exposing
     , localeImport
     , localeSetDefault
     , localeView
+    , newsModal
     , projectActions
     , projectCancelMigration
     , projectClone
@@ -241,6 +242,15 @@ documentTemplatesExport =
 documentTemplatesDelete : AppState -> Bool
 documentTemplatesDelete =
     adminOr Perm.packageManagementWrite
+
+
+
+-- News
+
+
+newsModal : AppState -> Bool
+newsModal appState =
+    isAdmin appState || isDataSteward appState
 
 
 

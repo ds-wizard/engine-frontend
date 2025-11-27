@@ -78,6 +78,7 @@ function loadApp(config, locale) {
         cookieConsent: cookies.getCookieConsent(),
         guideLinks: appConfig.getGuideLinks(),
         maxUploadFileSize: appConfig.getMaxUploadFileSize(),
+        newsUrl: appConfig.getNewsUrl(),
         urlCheckerUrl: appConfig.getUrlCheckerUrl(),
     }
 

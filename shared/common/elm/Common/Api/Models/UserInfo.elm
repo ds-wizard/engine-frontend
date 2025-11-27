@@ -25,6 +25,7 @@ type alias UserInfo =
     , permissions : List String
     , imageUrl : Maybe String
     , userGroupUuids : List Uuid
+    , lastSeenNewsId : Maybe String
     }
 
 
@@ -39,6 +40,7 @@ decoder =
         |> D.required "permissions" (D.list D.string)
         |> D.required "imageUrl" (D.maybe D.string)
         |> D.optional "userGroupUuids" (D.list Uuid.decoder) []
+        |> D.optional "lastSeenNewsId" (D.maybe D.string) Nothing
 
 
 fullName : { a | firstName : String, lastName : String } -> String

@@ -82,6 +82,7 @@ module Common.Components.FontAwesome exposing
     , faMenuDev
     , faMenuKnowledgeModels
     , faMenuLogout
+    , faMenuNews
     , faMenuOpen
     , faMenuProfile
     , faMenuProjects
@@ -604,6 +605,11 @@ faMenuKnowledgeModels =
 faMenuLogout : Html msg
 faMenuLogout =
     fas "fa-sign-out-alt fa-fw"
+
+
+faMenuNews : Html msg
+faMenuNews =
+    far "fa-lightbulb fa-fw"
 
 
 faMenuOpen : Html msg

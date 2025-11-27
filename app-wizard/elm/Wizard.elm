@@ -2,7 +2,9 @@ module Wizard exposing (main)
 
 import Browser
 import Browser.Navigation exposing (Key)
+import Common.Api.Models.BuildInfo as BuildInfo
 import Common.Components.AIAssistant as AIAssistant
+import Common.Components.NewsModal as NewsModal
 import Common.Utils.Theme as Theme
 import Common.Utils.TimeUtils as TimeUtils
 import Json.Decode exposing (Value)
@@ -19,6 +21,7 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
 import Wizard.Subscriptions exposing (subscriptions)
 import Wizard.Update exposing (update)
+import Wizard.Utils.Feature as Feature
 import Wizard.View exposing (view)
 
 
@@ -27,6 +30,13 @@ init flags location key =
     let
         ( appState, appStateCmd ) =
             AppState.init flags key
+
+        ( newsModalModel, newsModalCmd ) =
+            if Feature.newsModal appState then
+                NewsModal.init appState.newsUrl BuildInfo.client.version
+
+            else
+                ( NewsModal.initialModel, Cmd.none )
 
         model =
             initLocalModel appState <| initialModel appState
@@ -66,7 +76,13 @@ init flags location key =
                     , TimeUtils.getTimeZone Wizard.Msgs.OnTimeZone
                     ]
     in
-    ( model, Cmd.batch [ cmd, appStateCmd ] )
+    ( { model | newsModalModel = newsModalModel }
+    , Cmd.batch
+        [ cmd
+        , appStateCmd
+        , Cmd.map Wizard.Msgs.NewsModalMsg newsModalCmd
+        ]
+    )
 
 
 decideInitialRoute : Model -> Url -> Routes.Route -> Routes.Route -> Cmd Msg

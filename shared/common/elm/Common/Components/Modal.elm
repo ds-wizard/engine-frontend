@@ -19,6 +19,7 @@ module Common.Components.Modal exposing
     , error
     , simple
     , simpleWithAttrs
+    , simpleWithAttrsAndShortcuts
     )
 
 import ActionResult exposing (ActionResult)
@@ -33,7 +34,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
-import Shortcut
+import Shortcut exposing (Shortcut)
 
 
 type alias SimpleConfig msg =
@@ -64,6 +65,28 @@ simpleWithAttrs attributes cfg =
                 []
     in
     Shortcut.shortcutElement shortcuts
+        ([ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
+        [ div [ class "modal-dialog" ]
+            [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]
+                cfg.modalContent
+            ]
+        ]
+
+
+simpleWithAttrsAndShortcuts : List (Attribute msg) -> List (Shortcut msg) -> SimpleConfig msg -> Html msg
+simpleWithAttrsAndShortcuts attributes additionalShortcuts cfg =
+    let
+        shortcuts =
+            if cfg.visible then
+                Maybe.values
+                    [ Maybe.map (Shortcut.simpleShortcut Shortcut.Enter) cfg.enterMsg
+                    , Maybe.map (Shortcut.simpleShortcut Shortcut.Escape) cfg.escMsg
+                    ]
+
+            else
+                []
+    in
+    Shortcut.shortcutElement (shortcuts ++ additionalShortcuts)
         ([ class "modal modal-cover", classList [ ( "visible", cfg.visible ) ] ] ++ attributes)
         [ div [ class "modal-dialog" ]
             [ div [ class "modal-content", dataCy ("modal_" ++ cfg.dataCy) ]

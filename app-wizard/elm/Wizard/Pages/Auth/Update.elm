@@ -1,6 +1,8 @@
 module Wizard.Pages.Auth.Update exposing (update)
 
 import Browser.Navigation as Navigation
+import Common.Api.Models.BuildInfo as BuildInfo
+import Common.Components.NewsModal as NewsModal
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Data.Session as Session
 import Wizard.Models exposing (Model, setSession)
@@ -9,6 +11,7 @@ import Wizard.Pages.Auth.Msgs as AuthMsgs
 import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
+import Wizard.Utils.Feature as Feature
 
 
 update : AuthMsgs.Msg -> Model -> ( Model, Cmd Msg )
@@ -26,11 +29,19 @@ update msg model =
 
                         Nothing ->
                             Routing.toUrl Routes.DashboardRoute
+
+                ( newsModalModel, newsModalCmd ) =
+                    if Feature.newsModal newModel.appState then
+                        NewsModal.init newModel.appState.newsUrl BuildInfo.client.version
+
+                    else
+                        ( NewsModal.initialModel, Cmd.none )
             in
-            ( newModel
+            ( { newModel | newsModalModel = newsModalModel }
             , Cmd.batch
                 [ Session.storeSession (Session.encode newModel.appState.session)
                 , Navigation.load redirectUrl
+                , Cmd.map Wizard.Msgs.NewsModalMsg newsModalCmd
                 ]
             )
 

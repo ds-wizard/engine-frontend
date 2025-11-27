@@ -10,6 +10,7 @@ module Wizard.Models exposing
     )
 
 import Common.Components.AIAssistant as AIAssistant
+import Common.Components.NewsModal as NewsModal
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Random exposing (Seed)
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig
@@ -61,6 +62,7 @@ type alias Model =
     , settingsModel : Wizard.Pages.Settings.Models.Model
     , tenantsModel : Wizard.Pages.Tenants.Models.Model
     , users : Wizard.Pages.Users.Models.Model
+    , newsModalModel : NewsModal.Model
     }
 
 
@@ -88,6 +90,7 @@ initialModel appState =
     , registryModel = Wizard.Pages.Registry.Models.initialModel
     , settingsModel = Wizard.Pages.Settings.Models.initialModel appState
     , users = Wizard.Pages.Users.Models.initialModel appState
+    , newsModalModel = NewsModal.initialModel
     }
 
 

@@ -3,10 +3,12 @@ module Wizard.Update exposing (update)
 import Browser
 import Browser.Navigation as Navigation exposing (load, pushUrl)
 import Common.Components.AIAssistant as AIAssistant
+import Common.Components.NewsModal as NewsModal
 import Common.Ports.Window as Window
 import Common.Utils.TimeUtils as TimeUtils
 import Url
 import Wizard.Api.Tours as ToursApi
+import Wizard.Api.Users as UsersApi
 import Wizard.Components.Menu.Update
 import Wizard.Data.AppState as AppState
 import Wizard.Data.Session as Session
@@ -440,4 +442,27 @@ update msg model =
                 )
 
             Wizard.Msgs.TourPutCompleted ->
+                ( model, Cmd.none )
+
+            Wizard.Msgs.NewsModalMsg newsModalMsg ->
+                let
+                    config =
+                        { lastSeenId = Maybe.andThen .lastSeenNewsId model.appState.config.user
+                        , setLastSeenMsg = Wizard.Msgs.SetLastSeenNewsId
+                        , wrapMsg = Wizard.Msgs.NewsModalMsg
+                        }
+
+                    ( newsModalModel, newsModalCmd ) =
+                        NewsModal.update config newsModalMsg model.newsModalModel
+                in
+                ( { model | newsModalModel = newsModalModel }
+                , newsModalCmd
+                )
+
+            Wizard.Msgs.SetLastSeenNewsId lastSeenId ->
+                ( model
+                , UsersApi.putLastSeenNewsId model.appState lastSeenId (always Wizard.Msgs.SetLastSeenNewsIdCompleted)
+                )
+
+            Wizard.Msgs.SetLastSeenNewsIdCompleted ->
                 ( model, Cmd.none )

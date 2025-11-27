@@ -6,6 +6,7 @@ module Wizard.Msgs exposing
 
 import Browser exposing (UrlRequest)
 import Common.Components.AIAssistant
+import Common.Components.NewsModal as NewsModal
 import Time
 import Url exposing (Url)
 import Wizard.Components.Menu.Msgs
@@ -67,6 +68,9 @@ type Msg
     | UsersMsg Wizard.Pages.Users.Msgs.Msg
     | TourDone String
     | TourPutCompleted
+    | NewsModalMsg NewsModal.Msg
+    | SetLastSeenNewsId String
+    | SetLastSeenNewsIdCompleted
 
 
 logoutMsg : Msg

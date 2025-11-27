@@ -7,6 +7,7 @@ module Wizard.Layouts.Layout exposing
 
 import Browser exposing (Document)
 import Common.Components.AIAssistant as AIAssistant
+import Common.Components.NewsModal as NewsModal
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Gettext exposing (gettext)
@@ -174,6 +175,7 @@ app model content =
                 , viewAboutModal model.appState model.menuModel.aboutOpen model.menuModel.recentlyCopied model.menuModel.apiBuildInfo
                 , SessionModal.expiresSoonModal model.appState
                 , SessionModal.expiredModal model.appState
+                , Html.map Wizard.Msgs.NewsModalMsg <| NewsModal.view model.appState.locale model.newsModalModel
                 ]
     in
     { title = LookAndFeelConfig.getAppTitle model.appState.config.lookAndFeel

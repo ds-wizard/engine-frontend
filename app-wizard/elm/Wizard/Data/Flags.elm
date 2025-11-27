@@ -28,6 +28,7 @@ type alias Flags =
     , guideLinks : GuideLinks
     , maxUploadFileSize : Maybe Int
     , urlCheckerUrl : Maybe String
+    , newsUrl : Maybe String
     , success : Bool
     }
 
@@ -48,6 +49,7 @@ decoder =
         |> D.required "guideLinks" GuideLinks.decoder
         |> D.optional "maxUploadFileSize" (D.maybe D.int) Nothing
         |> D.required "urlCheckerUrl" (D.maybe D.string)
+        |> D.required "newsUrl" (D.maybe D.string)
         |> D.hardcoded True
 
 
@@ -66,5 +68,6 @@ default =
     , guideLinks = WizardGuideLinks.default
     , maxUploadFileSize = Nothing
     , urlCheckerUrl = Nothing
+    , newsUrl = Nothing
     , success = False
     }
