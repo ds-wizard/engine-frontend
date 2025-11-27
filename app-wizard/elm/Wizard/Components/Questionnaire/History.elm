@@ -12,6 +12,7 @@ module Wizard.Components.Questionnaire.History exposing
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
+import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faDelete, faDetailShowAll, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
 import Common.Components.Page as Page
 import Common.Utils.FileIcon as FileIcon
@@ -57,7 +58,6 @@ type alias Model =
     { expandedDays : List String
     , dropdownStates : Dict String Dropdown.State
     , namedOnly : Bool
-    , viewAll : Bool
     }
 
 
@@ -79,7 +79,6 @@ init appState =
     { expandedDays = [ identifier ]
     , dropdownStates = Dict.empty
     , namedOnly = False
-    , viewAll = False
     }
 
 
@@ -97,7 +96,6 @@ type Msg
     | SetVersionDateCollapsed String
     | DropdownMsg String Dropdown.State
     | SetNamedOnly Bool
-    | SetViewAll Bool
 
 
 update : Msg -> Model -> Model
@@ -114,9 +112,6 @@ update msg model =
 
         SetNamedOnly namedOnly ->
             { model | namedOnly = namedOnly }
-
-        SetViewAll viewAll ->
-            { model | viewAll = viewAll }
 
 
 
@@ -148,6 +143,8 @@ type alias ViewConfig msg =
     , deleteVersionMsg : QuestionnaireVersion -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
     , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
+    , loadMoreMsg : Maybe msg
+    , loadingMore : ActionResult ()
     }
 
 
@@ -164,9 +161,6 @@ viewHistoryLazy appState cfg model data =
 viewHistory : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
 viewHistory appState cfg model ( versions, events ) =
     let
-        eventLimit =
-            100
-
         filterVersions =
             if model.namedOnly then
                 List.filter (isVersion versions)
@@ -177,16 +171,8 @@ viewHistory appState cfg model ( versions, events ) =
         filterEvents event =
             not (QuestionnaireEvent.isInvisible event)
 
-        takeEvents =
-            if model.viewAll then
-                identity
-
-            else
-                List.take eventLimit
-
         eventGroups =
             events
-                |> takeEvents
                 |> List.filter filterEvents
                 |> filterVersions
                 |> List.foldl (groupEvents appState) []
@@ -208,13 +194,21 @@ viewHistory appState cfg model ( versions, events ) =
                 ]
 
         viewAllButton =
-            Html.viewIf (not model.viewAll && List.length events > eventLimit) <|
-                div []
-                    [ a [ onClick (cfg.wrapMsg (SetViewAll True)), class "mt-2 with-icon" ]
-                        [ faDetailShowAll
-                        , text (gettext "View full history" appState.locale)
-                        ]
-                    ]
+            if ActionResult.isLoading cfg.loadingMore then
+                Flash.loader appState.locale
+
+            else
+                case cfg.loadMoreMsg of
+                    Nothing ->
+                        Html.nothing
+
+                    Just loadMoreMsg ->
+                        div []
+                            [ a [ onClick loadMoreMsg, class "with-icon" ]
+                                [ faDetailShowAll
+                                , text (gettext "Load older" appState.locale)
+                                ]
+                            ]
     in
     div [ class "history" ] (namedOnlySelect :: eventGroups ++ [ viewAllButton ])
 

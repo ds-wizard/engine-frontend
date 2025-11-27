@@ -170,9 +170,11 @@ getQuestionnaireVersions appState uuid =
     Request.get (AppState.toServerInfo appState) ("/questionnaires/" ++ Uuid.toString uuid ++ "/versions") (D.list QuestionnaireVersion.decoder)
 
 
-getQuestionnaireEvents : AppState -> Uuid -> ToMsg (List QuestionnaireEvent) msg -> Cmd msg
-getQuestionnaireEvents appState uuid =
-    Request.get (AppState.toServerInfo appState) ("/questionnaires/" ++ Uuid.toString uuid ++ "/events") (D.list QuestionnaireEvent.decoder)
+getQuestionnaireEvents : AppState -> Uuid -> Int -> ToMsg (Pagination QuestionnaireEvent) msg -> Cmd msg
+getQuestionnaireEvents appState uuid pageNumber =
+    Request.get (AppState.toServerInfo appState)
+        ("/questionnaires/" ++ Uuid.toString uuid ++ "/events?size=1000&sort=createdAt,desc&page=" ++ String.fromInt pageNumber)
+        (Pagination.decoder "questionnaireEvents" QuestionnaireEvent.decoder)
 
 
 getQuestionnaireEvent : AppState -> Uuid -> Uuid -> ToMsg QuestionnaireEvent msg -> Cmd msg

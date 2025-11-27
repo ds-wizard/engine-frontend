@@ -37,6 +37,7 @@ import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import CharIdentifier
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Models.UserInfo as UserInfo
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionResultBlock as ActionResultBlock
@@ -162,6 +163,9 @@ type alias Model =
     , questionnaire : QuestionnaireQuestionnaire
     , knowledgeModelParentMap : KnowledgeModel.ParentMap
     , questionnaireEvents : ActionResult (List QuestionnaireEvent)
+    , questionnaireEventsExtraLoading : ActionResult ()
+    , questionnaireEventsPage : Int
+    , questionnaireEventsLoadMore : Bool
     , questionnaireVersions : ActionResult (List QuestionnaireVersion)
     , phaseModalOpen : Bool
     , removeItem : Maybe ( String, String )
@@ -243,6 +247,9 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , questionnaire = questionnaire
             , knowledgeModelParentMap = KnowledgeModel.createParentMap questionnaire.knowledgeModel
             , questionnaireEvents = ActionResult.Unset
+            , questionnaireEventsExtraLoading = ActionResult.Unset
+            , questionnaireEventsPage = 0
+            , questionnaireEventsLoadMore = False
             , questionnaireVersions = ActionResult.Unset
             , phaseModalOpen = False
             , removeItem = Nothing
@@ -661,7 +668,8 @@ type Msg
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
-    | GetQuestionnaireEventsCompleted (Result ApiError (List QuestionnaireEvent))
+    | LoadMoreQuestionnaireEvents
+    | GetQuestionnaireEventsCompleted Int (Result ApiError (Pagination QuestionnaireEvent))
     | GetQuestionnaireVersionsCompleted (Result ApiError (List QuestionnaireVersion))
     | HistoryMsg History.Msg
     | VersionModalMsg VersionModal.Msg
@@ -782,7 +790,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.VersionHistory ->
                             Cmd.batch
-                                [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid GetQuestionnaireEventsCompleted
+                                [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid model.questionnaireEventsPage (GetQuestionnaireEventsCompleted 0)
                                 , QuestionnairesApi.getQuestionnaireVersions appState model.uuid GetQuestionnaireVersionsCompleted
                                 ]
 
@@ -793,7 +801,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             Cmd.none
 
                 newModel =
-                    { model | rightPanel = updatedRightPanel, questionnaireEvents = ActionResult.Loading }
+                    { model | rightPanel = updatedRightPanel, questionnaireEvents = ActionResult.Loading, questionnaireEventsPage = 0 }
             in
             withSeed
                 ( newModel
@@ -1093,11 +1101,30 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 , LocalStorage.setItem localStorageViewSettingsKey (QuestionnaireViewSettings.encode viewSettings)
                 )
 
-        GetQuestionnaireEventsCompleted result ->
+        LoadMoreQuestionnaireEvents ->
+            withSeed
+                ( { model | questionnaireEventsExtraLoading = ActionResult.Loading }
+                , QuestionnairesApi.getQuestionnaireEvents appState model.uuid model.questionnaireEventsPage (GetQuestionnaireEventsCompleted model.questionnaireEventsPage)
+                )
+
+        GetQuestionnaireEventsCompleted page result ->
             wrap <|
                 case result of
                     Ok questionnaireEvents ->
-                        { model | questionnaireEvents = Success questionnaireEvents }
+                        if page == questionnaireEvents.page.number then
+                            let
+                                currentItems =
+                                    ActionResult.withDefault [] model.questionnaireEvents
+                            in
+                            { model
+                                | questionnaireEvents = ActionResult.Success (List.reverse questionnaireEvents.items ++ currentItems)
+                                , questionnaireEventsExtraLoading = ActionResult.Unset
+                                , questionnaireEventsPage = page + 1
+                                , questionnaireEventsLoadMore = page + 1 < questionnaireEvents.page.totalPages
+                            }
+
+                        else
+                            model
 
                     Err _ ->
                         { model | questionnaireEvents = Error (gettext "Unable to get version history." appState.locale) }
@@ -2522,6 +2549,13 @@ viewQuestionnaireRightPanel appState cfg model =
 
         RightPanel.VersionHistory ->
             let
+                loadMoreMsg =
+                    if model.questionnaireEventsLoadMore then
+                        Just (cfg.wrapMsg LoadMoreQuestionnaireEvents)
+
+                    else
+                        Nothing
+
                 historyCfg =
                     { questionnaire = model.questionnaire
                     , wrapMsg = cfg.wrapMsg << HistoryMsg
@@ -2531,6 +2565,8 @@ viewQuestionnaireRightPanel appState cfg model =
                     , deleteVersionMsg = cfg.wrapMsg << DeleteVersion
                     , previewQuestionnaireEventMsg = cfg.previewQuestionnaireEventMsg
                     , revertQuestionnaireMsg = cfg.revertQuestionnaireMsg
+                    , loadMoreMsg = loadMoreMsg
+                    , loadingMore = model.questionnaireEventsExtraLoading
                     }
 
                 versionsAndEvents =
