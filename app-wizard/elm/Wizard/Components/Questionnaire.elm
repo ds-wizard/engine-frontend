@@ -37,6 +37,7 @@ import Bootstrap.Dropdown as Dropdown
 import Browser.Events
 import CharIdentifier
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Models.UserInfo as UserInfo
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionResultBlock as ActionResultBlock
@@ -69,6 +70,7 @@ import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
 import Html.Extra as Html
+import Html.Lazy as Lazy
 import Json.Decode as D exposing (decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
@@ -161,6 +163,9 @@ type alias Model =
     , questionnaire : QuestionnaireQuestionnaire
     , knowledgeModelParentMap : KnowledgeModel.ParentMap
     , questionnaireEvents : ActionResult (List QuestionnaireEvent)
+    , questionnaireEventsExtraLoading : ActionResult ()
+    , questionnaireEventsPage : Int
+    , questionnaireEventsLoadMore : Bool
     , questionnaireVersions : ActionResult (List QuestionnaireVersion)
     , phaseModalOpen : Bool
     , removeItem : Maybe ( String, String )
@@ -242,6 +247,9 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , questionnaire = questionnaire
             , knowledgeModelParentMap = KnowledgeModel.createParentMap questionnaire.knowledgeModel
             , questionnaireEvents = ActionResult.Unset
+            , questionnaireEventsExtraLoading = ActionResult.Unset
+            , questionnaireEventsPage = 0
+            , questionnaireEventsLoadMore = False
             , questionnaireVersions = ActionResult.Unset
             , phaseModalOpen = False
             , removeItem = Nothing
@@ -573,7 +581,7 @@ type alias QuestionnaireRenderer =
 
 type alias Context =
     { events : List Event
-    , branchUuid : Maybe Uuid
+    , kmEditorUuid : Maybe Uuid
     }
 
 
@@ -660,7 +668,8 @@ type Msg
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
-    | GetQuestionnaireEventsCompleted (Result ApiError (List QuestionnaireEvent))
+    | LoadMoreQuestionnaireEvents
+    | GetQuestionnaireEventsCompleted Int (Result ApiError (Pagination QuestionnaireEvent))
     | GetQuestionnaireVersionsCompleted (Result ApiError (List QuestionnaireVersion))
     | HistoryMsg History.Msg
     | VersionModalMsg VersionModal.Msg
@@ -781,7 +790,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.VersionHistory ->
                             Cmd.batch
-                                [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid GetQuestionnaireEventsCompleted
+                                [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid model.questionnaireEventsPage (GetQuestionnaireEventsCompleted 0)
                                 , QuestionnairesApi.getQuestionnaireVersions appState model.uuid GetQuestionnaireVersionsCompleted
                                 ]
 
@@ -792,7 +801,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             Cmd.none
 
                 newModel =
-                    { model | rightPanel = updatedRightPanel, questionnaireEvents = ActionResult.Loading }
+                    { model | rightPanel = updatedRightPanel, questionnaireEvents = ActionResult.Loading, questionnaireEventsPage = 0 }
             in
             withSeed
                 ( newModel
@@ -1092,11 +1101,30 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 , LocalStorage.setItem localStorageViewSettingsKey (QuestionnaireViewSettings.encode viewSettings)
                 )
 
-        GetQuestionnaireEventsCompleted result ->
+        LoadMoreQuestionnaireEvents ->
+            withSeed
+                ( { model | questionnaireEventsExtraLoading = ActionResult.Loading }
+                , QuestionnairesApi.getQuestionnaireEvents appState model.uuid model.questionnaireEventsPage (GetQuestionnaireEventsCompleted model.questionnaireEventsPage)
+                )
+
+        GetQuestionnaireEventsCompleted page result ->
             wrap <|
                 case result of
                     Ok questionnaireEvents ->
-                        { model | questionnaireEvents = Success questionnaireEvents }
+                        if page == questionnaireEvents.page.number then
+                            let
+                                currentItems =
+                                    ActionResult.withDefault [] model.questionnaireEvents
+                            in
+                            { model
+                                | questionnaireEvents = ActionResult.Success (List.reverse questionnaireEvents.items ++ currentItems)
+                                , questionnaireEventsExtraLoading = ActionResult.Unset
+                                , questionnaireEventsPage = page + 1
+                                , questionnaireEventsLoadMore = page + 1 < questionnaireEvents.page.totalPages
+                            }
+
+                        else
+                            model
 
                     Err _ ->
                         { model | questionnaireEvents = Error (gettext "Unable to get version history." appState.locale) }
@@ -1855,9 +1883,9 @@ loadTypeHints appState ctx model path questionUuidStr value =
             Uuid.fromUuidString questionUuidStr
 
         typeHintRequest =
-            case ctx.branchUuid of
-                Just branchUuid ->
-                    TypeHintRequest.fromBranchQuestion branchUuid questionUuid value
+            case ctx.kmEditorUuid of
+                Just kmEditorUuid ->
+                    TypeHintRequest.fromKmEditorQuestion kmEditorUuid questionUuid value
 
                 Nothing ->
                     TypeHintRequest.fromQuestionnaire model.questionnaire.uuid questionUuid value
@@ -1868,7 +1896,7 @@ loadTypeHints appState ctx model path questionUuidStr value =
 loadTypeHintsLegacy : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
 loadTypeHintsLegacy appState ctx model path questionUuid value =
     TypeHintsApi.fetchTypeHintsLegacy appState
-        (Just model.questionnaire.packageId)
+        (Just model.questionnaire.knowledgeModelPackageId)
         ctx.events
         questionUuid
         value
@@ -2001,7 +2029,7 @@ viewQuestionnaireToolbar appState cfg model =
 
                 hiddenOptionsTooltip =
                     if QuestionnaireViewSettings.anyHidden viewSettings then
-                        tooltipRight "Some options are hidden"
+                        tooltipRight (gettext "Some options are hidden" appState.locale)
 
                     else
                         []
@@ -2172,20 +2200,21 @@ viewQuestionnaireToolbar appState cfg model =
                     [ faSearch ]
                 ]
 
-        todosLength =
-            QuestionnaireQuestionnaire.todosLength model.questionnaire
-
-        todosBadge =
-            if todosLength > 0 then
-                Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
-
-            else
-                Html.nothing
-
         todosButtonVisible =
             Feature.projectTodos appState model.questionnaire
 
-        todosButton =
+        todosButton questionnaire =
+            let
+                todosLength =
+                    QuestionnaireQuestionnaire.todosLength questionnaire
+
+                todosBadge =
+                    if todosLength > 0 then
+                        Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
+
+                    else
+                        Html.nothing
+            in
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", todosOpen ) ], onClick (SetRightPanel todosPanel) ]
                     [ text (gettext "TODOs" appState.locale)
@@ -2193,20 +2222,21 @@ viewQuestionnaireToolbar appState cfg model =
                     ]
                 ]
 
-        commentsLength =
-            QuestionnaireQuestionnaire.commentsLength model.questionnaire
-
-        commentsBadge =
-            if commentsLength > 0 then
-                Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
-
-            else
-                Html.nothing
-
         commentsOverviewButtonVisible =
             Feature.projectCommentAdd appState model.questionnaire
 
-        commentsOverviewButton =
+        commentsOverviewButton questionnaire =
+            let
+                commentsLength =
+                    QuestionnaireQuestionnaire.commentsLength questionnaire
+
+                commentsBadge =
+                    if commentsLength > 0 then
+                        Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
+
+                    else
+                        Html.nothing
+            in
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", commentsOverviewOpen ) ], onClick (SetRightPanel commentsOverviewPanel) ]
                     [ text (gettext "Comments" appState.locale)
@@ -2252,8 +2282,8 @@ viewQuestionnaireToolbar appState cfg model =
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
-            , navButton todosButton todosButtonVisible
-            , navButton commentsOverviewButton commentsOverviewButtonVisible
+            , navButton (Lazy.lazy todosButton model.questionnaire) todosButtonVisible
+            , navButton (Lazy.lazy commentsOverviewButton model.questionnaire) commentsOverviewButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
             , navButton searchButton searchButtonVisible
             , div [ class "item-group" ]
@@ -2519,6 +2549,13 @@ viewQuestionnaireRightPanel appState cfg model =
 
         RightPanel.VersionHistory ->
             let
+                loadMoreMsg =
+                    if model.questionnaireEventsLoadMore then
+                        Just (cfg.wrapMsg LoadMoreQuestionnaireEvents)
+
+                    else
+                        Nothing
+
                 historyCfg =
                     { questionnaire = model.questionnaire
                     , wrapMsg = cfg.wrapMsg << HistoryMsg
@@ -2528,6 +2565,8 @@ viewQuestionnaireRightPanel appState cfg model =
                     , deleteVersionMsg = cfg.wrapMsg << DeleteVersion
                     , previewQuestionnaireEventMsg = cfg.previewQuestionnaireEventMsg
                     , revertQuestionnaireMsg = cfg.revertQuestionnaireMsg
+                    , loadMoreMsg = loadMoreMsg
+                    , loadingMore = model.questionnaireEventsExtraLoading
                     }
 
                 versionsAndEvents =
@@ -3894,8 +3933,8 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
         itemTitle =
             if isCollapsed then
                 Maybe.unwrap
-                    (i [ class "ms-2" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
-                    (strong [ class "ms-2" ] << List.singleton << text)
+                    (i [ class "ms-2 flex-grow-1" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
+                    (strong [ class "ms-2 flex-grow-1 overflow-hidden text-nowrap" ] << List.singleton << text)
                     (QuestionnaireQuestionnaire.getItemTitle model.questionnaire itemPath questions)
 
             else
@@ -3914,8 +3953,8 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
 
         itemHeader =
             div [ class "item-header d-flex justify-content-between align-items-center" ]
-                [ div (class "flex-grow-1 me-3 cursor-pointer" :: collapseAttributes) [ collapseIcon, itemTitle ]
-                , div [] (linkedItemsButton :: buttons)
+                [ div (class "flex-grow-1 d-flex me-3 cursor-pointer overflow-hidden" :: collapseAttributes) [ collapseIcon, itemTitle ]
+                , div [ class "d-flex" ] (linkedItemsButton :: buttons)
                 ]
 
         collapseFooterButton =
@@ -4686,7 +4725,7 @@ viewFeedbackAction appState cfg model question =
     if feedbackEnabled then
         let
             openFeedbackModal =
-                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.packageId (Question.getUuid question))
+                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.knowledgeModelPackageId (Question.getUuid question))
         in
         a
             (class "action"

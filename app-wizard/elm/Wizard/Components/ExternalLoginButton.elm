@@ -56,7 +56,7 @@ view cfg =
 
 badgeWrapper : Gettext.Locale -> BootstrapConfig -> String -> Html msg
 badgeWrapper locale config sourceId =
-    if sourceId == Uuid.toString Uuid.nil then
+    if sourceId == Uuid.toString Uuid.nil || sourceId == "internal" then
         Badge.light [] [ text (gettext "internal" locale) ]
 
     else

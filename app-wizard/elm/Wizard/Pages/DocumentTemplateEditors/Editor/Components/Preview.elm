@@ -6,7 +6,7 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Preview exposing
     , ViewConfig
     , initialModel
     , loadPreviewMsg
-    , setSelectedBranch
+    , setSelectedKmEditor
     , setSelectedQuestionnaire
     , subscriptions
     , update
@@ -26,7 +26,7 @@ import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Utils.ContentType as ContentType
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setBranchUuid, setFormatUuid, setQuestionnaireUuid, setSelected)
+import Common.Utils.Setters exposing (setFormatUuid, setKnowledgeModelEditorUuid, setQuestionnaireUuid, setSelected)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, iframe, option, p, pre, select, text)
 import Html.Attributes exposing (class, classList, href, id, name, selected, src, target, value)
@@ -40,11 +40,11 @@ import String.Format as String
 import Task
 import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Api.Branches as BranchesApi
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
-import Wizard.Api.Models.BranchSuggestion exposing (BranchSuggestion)
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
+import Wizard.Api.Models.KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
 import Wizard.Api.Models.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Components.Html exposing (linkTo)
@@ -58,7 +58,7 @@ import Wizard.Routes as Routes
 
 type alias Model =
     { questionnaireHintInputModel : TypeHintInput.Model QuestionnaireSuggestion
-    , branchTypeHintInputModal : TypeHintInput.Model BranchSuggestion
+    , kmEditorTypeHintInputModal : TypeHintInput.Model KnowledgeModelEditorSuggestion
     , urlResponse : ActionResult UrlResponse
     , mode : PreviewMode
     }
@@ -66,13 +66,13 @@ type alias Model =
 
 type PreviewMode
     = QuestionnaireMode
-    | BranchMode
+    | KMEditorMode
 
 
 initialModel : Model
 initialModel =
     { questionnaireHintInputModel = TypeHintInput.init "uuid"
-    , branchTypeHintInputModal = TypeHintInput.init "uuid"
+    , kmEditorTypeHintInputModal = TypeHintInput.init "uuid"
     , urlResponse = ActionResult.Unset
     , mode = QuestionnaireMode
     }
@@ -94,18 +94,18 @@ setSelectedQuestionnaire questionnaire model =
     }
 
 
-setSelectedBranch : Maybe BranchSuggestion -> Model -> Model
-setSelectedBranch branch model =
+setSelectedKmEditor : Maybe KnowledgeModelEditorSuggestion -> Model -> Model
+setSelectedKmEditor kmEditor model =
     let
         newMode =
-            if Maybe.isJust branch then
-                BranchMode
+            if Maybe.isJust kmEditor then
+                KMEditorMode
 
             else
                 model.mode
     in
     { model
-        | branchTypeHintInputModal = setSelected branch model.branchTypeHintInputModal
+        | kmEditorTypeHintInputModal = setSelected kmEditor model.kmEditorTypeHintInputModal
         , mode = newMode
     }
 
@@ -117,8 +117,8 @@ setSelectedBranch branch model =
 type Msg
     = QuestionnaireTypeHintInputMsg (TypeHintInput.Msg QuestionnaireSuggestion)
     | QuestionnaireTypeHintInputSelect Uuid
-    | BranchTypeHintInputMsg (TypeHintInput.Msg BranchSuggestion)
-    | BranchTypeHintInputSelect Uuid
+    | KnowledgeModelEditorTypeHintInputMsg (TypeHintInput.Msg KnowledgeModelEditorSuggestion)
+    | KnowledgeModelEditorTypeHintInputSelect Uuid
     | SetMode PreviewMode
     | FormatSelected String
     | PutPreviewSettingsCompleted (Result ApiError DocumentTemplateDraftPreviewSettings)
@@ -141,8 +141,8 @@ subscriptions model =
     Sub.batch
         [ Sub.map QuestionnaireTypeHintInputMsg <|
             TypeHintInput.subscriptions model.questionnaireHintInputModel
-        , Sub.map BranchTypeHintInputMsg <|
-            TypeHintInput.subscriptions model.branchTypeHintInputModal
+        , Sub.map KnowledgeModelEditorTypeHintInputMsg <|
+            TypeHintInput.subscriptions model.kmEditorTypeHintInputModal
         ]
 
 
@@ -198,32 +198,32 @@ update cfg appState msg model =
         QuestionnaireTypeHintInputSelect uuid ->
             ( model, updatePreviewSettings (setQuestionnaireUuid (Just uuid)) )
 
-        BranchTypeHintInputMsg typeHintInputMsg ->
+        KnowledgeModelEditorTypeHintInputMsg typeHintInputMsg ->
             let
                 updateCfg =
-                    { wrapMsg = cfg.wrapMsg << BranchTypeHintInputMsg
-                    , getTypeHints = BranchesApi.getBranchSuggestions appState PaginationQueryFilters.empty
+                    { wrapMsg = cfg.wrapMsg << KnowledgeModelEditorTypeHintInputMsg
+                    , getTypeHints = KnowledgeModelEditorsApi.getKnowledgeModelEditorSuggestions appState PaginationQueryFilters.empty
                     , getError = gettext "Unable to get knowledge model editors." appState.locale
-                    , setReply = cfg.wrapMsg << BranchTypeHintInputSelect << .uuid
+                    , setReply = cfg.wrapMsg << KnowledgeModelEditorTypeHintInputSelect << .uuid
                     , clearReply = Nothing
                     , filterResults = Nothing
                     }
 
                 ( typeHintInputModel, typeHintInputCmd ) =
-                    TypeHintInput.update updateCfg typeHintInputMsg model.branchTypeHintInputModal
+                    TypeHintInput.update updateCfg typeHintInputMsg model.kmEditorTypeHintInputModal
             in
-            ( { model | branchTypeHintInputModal = typeHintInputModel }, typeHintInputCmd )
+            ( { model | kmEditorTypeHintInputModal = typeHintInputModel }, typeHintInputCmd )
 
-        BranchTypeHintInputSelect uuid ->
-            ( model, updatePreviewSettings (setBranchUuid (Just uuid)) )
+        KnowledgeModelEditorTypeHintInputSelect uuid ->
+            ( model, updatePreviewSettings (setKnowledgeModelEditorUuid (Just uuid)) )
 
         SetMode mode ->
             ( { model
                 | mode = mode
                 , questionnaireHintInputModel = TypeHintInput.clear model.questionnaireHintInputModel
-                , branchTypeHintInputModal = TypeHintInput.clear model.branchTypeHintInputModal
+                , kmEditorTypeHintInputModal = TypeHintInput.clear model.kmEditorTypeHintInputModal
               }
-            , updatePreviewSettings DocumentTemplateDraftPreviewSettings.clearQuestionnaireAndBranch
+            , updatePreviewSettings DocumentTemplateDraftPreviewSettings.clearQuestionnaireAndKmEditor
             )
 
         FormatSelected uuidString ->
@@ -330,30 +330,30 @@ view cfg appState model =
                     in
                     ( projectTypeHintInput, projectLink )
 
-                BranchMode ->
+                KMEditorMode ->
                     let
-                        branchTypeHintInputCfg =
+                        kmEditorTypeHintInputCfg =
                             { viewItem = TypeHintInputItem.simple .name
-                            , wrapMsg = BranchTypeHintInputMsg
+                            , wrapMsg = KnowledgeModelEditorTypeHintInputMsg
                             , nothingSelectedItem = text "--"
                             , clearEnabled = False
                             , locale = appState.locale
                             }
 
-                        branchTypeHintInput =
-                            TypeHintInput.view branchTypeHintInputCfg model.branchTypeHintInputModal False
+                        kmEditorTypeHintInput =
+                            TypeHintInput.view kmEditorTypeHintInputCfg model.kmEditorTypeHintInputModal False
 
-                        branchLink =
-                            case model.branchTypeHintInputModal.selected of
-                                Just branchSuggestion ->
-                                    linkTo (Routes.kmEditorEditor branchSuggestion.uuid Nothing)
+                        kmEdtiorLink =
+                            case model.kmEditorTypeHintInputModal.selected of
+                                Just kmEditorSuggestion ->
+                                    linkTo (Routes.kmEditorEditor kmEditorSuggestion.uuid Nothing)
                                         (class "source-link" :: target "_blank" :: tooltip (gettext "Open KM editor" appState.locale))
                                         [ fa "fa-external-link-alt" ]
 
                                 Nothing ->
                                     Html.nothing
                     in
-                    ( branchTypeHintInput, branchLink )
+                    ( kmEditorTypeHintInput, kmEdtiorLink )
 
         content =
             if DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
@@ -377,10 +377,10 @@ view cfg appState model =
                 , button
                     [ class "btn"
                     , classList
-                        [ ( "btn-primary", model.mode == BranchMode )
-                        , ( "btn-outline-primary", model.mode /= BranchMode )
+                        [ ( "btn-primary", model.mode == KMEditorMode )
+                        , ( "btn-outline-primary", model.mode /= KMEditorMode )
                         ]
-                    , onClick (SetMode BranchMode)
+                    , onClick (SetMode KMEditorMode)
                     , dataCy "dt-editor_preview-mode_km-editor"
                     ]
                     [ text (gettext "KM editor" appState.locale) ]

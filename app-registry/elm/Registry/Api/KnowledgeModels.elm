@@ -9,9 +9,9 @@ import Registry.Data.AppState as AppState exposing (AppState)
 
 getKnowledgeModels : AppState -> ToMsg (List KnowledgeModel) msg -> Cmd msg
 getKnowledgeModels appState =
-    Requests.get (AppState.toServerInfo appState) "/packages" (D.list KnowledgeModel.decoder)
+    Requests.get (AppState.toServerInfo appState) "/knowledge-model-packages" (D.list KnowledgeModel.decoder)
 
 
 getKnowledgeModel : AppState -> String -> ToMsg KnowledgeModelDetail msg -> Cmd msg
 getKnowledgeModel appState packageId =
-    Requests.get (AppState.toServerInfo appState) ("/packages/" ++ packageId) KnowledgeModelDetail.decoder
+    Requests.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ packageId) KnowledgeModelDetail.decoder

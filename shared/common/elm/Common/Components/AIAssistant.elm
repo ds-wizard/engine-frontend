@@ -68,6 +68,7 @@ init =
 type alias UpdateConfig =
     { serverInfo : ServerInfo
     , seed : Seed
+    , application : String
     }
 
 
@@ -86,7 +87,7 @@ update cfg msg (State state) =
             in
             ( newSeed
             , State { state | conversation = ActionResult.Success conversation }
-            , Api.postQuestion cfg.serverInfo conversation.uuid { question = "" } NewConversationCompleted
+            , Api.postQuestion cfg.serverInfo cfg.application conversation.uuid { question = "" } NewConversationCompleted
             )
 
         submitMessage message =
@@ -104,7 +105,7 @@ update cfg msg (State state) =
                             , pendingMessage = Just message
                             , answer = ActionResult.Loading
                         }
-                    , Api.postQuestion cfg.serverInfo conversation.uuid question SubmitMessageCompleted
+                    , Api.postQuestion cfg.serverInfo cfg.application conversation.uuid question SubmitMessageCompleted
                     )
 
                 _ ->
@@ -117,7 +118,7 @@ update cfg msg (State state) =
         Init ->
             ( cfg.seed
             , State { state | conversation = ActionResult.Loading }
-            , Api.getLatestConversation cfg.serverInfo GetLatestConversationCompleted
+            , Api.getLatestConversation cfg.serverInfo cfg.application GetLatestConversationCompleted
             )
 
         GetLatestConversationCompleted result ->

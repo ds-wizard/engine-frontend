@@ -26,7 +26,7 @@ view appState model =
         content =
             case model.pulling of
                 Success _ ->
-                    viewImported appState model.packageId
+                    viewImported appState model.knwoledgeModelPackageId
 
                 _ ->
                     viewForm appState model
@@ -44,7 +44,7 @@ viewForm appState model =
                 [ input
                     [ onInput ChangePackageId
                     , type_ "text"
-                    , value model.packageId
+                    , value model.knwoledgeModelPackageId
                     , class "form-control"
                     , placeholder <| gettext "Knowledge Model ID" appState.locale
                     ]
@@ -77,16 +77,16 @@ viewRegistryText appState =
 
 
 viewImported : AppState -> String -> Html Msg
-viewImported appState packageId =
+viewImported appState kmPackageId =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
                 (gettext "Knowledge model %s has been imported!" appState.locale)
-                [ code [] [ text packageId ] ]
+                [ code [] [ text kmPackageId ] ]
             )
         , p [ class "lead" ]
-            [ linkTo (Routes.knowledgeModelsDetail packageId)
+            [ linkTo (Routes.knowledgeModelsDetail kmPackageId)
                 [ class "btn btn-primary" ]
                 [ text (gettext "View detail" appState.locale) ]
             ]

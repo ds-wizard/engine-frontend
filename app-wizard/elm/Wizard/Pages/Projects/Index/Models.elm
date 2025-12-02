@@ -10,13 +10,13 @@ import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperator)
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Debouncer.Extra as Debounce exposing (Debouncer)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Components.Listing.Models as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg)
-import Wizard.Pages.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 
 
 type alias Model =
@@ -31,9 +31,9 @@ type alias Model =
     , userFilterSearchValue : String
     , userFilterSelectedUsers : ActionResult (Pagination UserSuggestion)
     , userFilterUsers : ActionResult (Pagination UserSuggestion)
-    , packagesFilterSearchValue : String
-    , packagesFilterSelectedPackages : ActionResult (Pagination PackageSuggestion)
-    , packagesFilterPackages : ActionResult (Pagination PackageSuggestion)
+    , kmPackagesFilterSearchValue : String
+    , kmPackagesFilterSelectedPackages : ActionResult (Pagination KnowledgeModelPackageSuggestion)
+    , kmPackagesFilterPackages : ActionResult (Pagination KnowledgeModelPackageSuggestion)
     }
 
 
@@ -48,19 +48,19 @@ initialModel :
     -> Maybe FilterOperator
     -> Maybe Model
     -> Model
-initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp mbOldModel =
+initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbKmPackages mbKmPackagesOp mbOldModel =
     let
         values =
             [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
             , ( indexRouteUsersFilterId, mbUser )
             , ( indexRouteProjectTagsFilterId, mbProjectTags )
-            , ( indexRoutePackagesFilterId, mbPackages )
+            , ( indexRouteKnowledgeModelPackagesFilterId, mbKmPackages )
             ]
 
         operators =
             [ ( indexRouteUsersFilterId, mbUserOp )
             , ( indexRouteProjectTagsFilterId, mbProjectTagsOp )
-            , ( indexRoutePackagesFilterId, mbPackagesOp )
+            , ( indexRouteKnowledgeModelPackagesFilterId, mbKmPackagesOp )
             ]
 
         paginationQueryFilters =
@@ -84,7 +84,7 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
     , userFilterSearchValue = ""
     , userFilterSelectedUsers = selectedValue indexRouteUsersFilterId
     , userFilterUsers = ActionResult.Loading
-    , packagesFilterSearchValue = ""
-    , packagesFilterSelectedPackages = selectedValue indexRoutePackagesFilterId
-    , packagesFilterPackages = ActionResult.Loading
+    , kmPackagesFilterSearchValue = ""
+    , kmPackagesFilterSelectedPackages = selectedValue indexRouteKnowledgeModelPackagesFilterId
+    , kmPackagesFilterPackages = ActionResult.Loading
     }

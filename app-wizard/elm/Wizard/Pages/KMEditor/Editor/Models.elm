@@ -14,14 +14,14 @@ import Dict exposing (Dict)
 import Random exposing (Seed)
 import String.Extra as String
 import Uuid exposing (Uuid)
-import Wizard.Api.Branches as BranchesApi
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
-import Wizard.Api.Models.WebSockets.BranchAction.SetContentBranchAction exposing (SetContentBranchAction)
+import Wizard.Api.Models.WebSockets.KnowledgeModelEditorAction.SetContentKnowledgeModelEditorAction exposing (SetContentKnowledgeModelEditorAction)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor as KMEditor
 import Wizard.Pages.KMEditor.Editor.Components.PhaseEditor as PhaseEditor
 import Wizard.Pages.KMEditor.Editor.Components.Preview as Preview
@@ -41,7 +41,7 @@ type alias Model =
     , onlineUsers : List OnlineUserInfo
     , savingActionUuids : List Uuid
     , savingModel : ProjectSaving.Model
-    , branchModel : ActionResult EditorBranch
+    , editorContext : ActionResult EditorContext
     , kmEditorModel : KMEditor.Model
     , phaseEditorModel : PhaseEditor.Model
     , tagEditorModel : TagEditor.Model
@@ -51,7 +51,8 @@ type alias Model =
     , kmSecrets : ActionResult (List KnowledgeModelSecret)
     , publishModalModel : PublishModal.Model
     , eventsLastEvent : Dict String Event
-    , eventsWebsocketDebounce : Dict String (Debounce SetContentBranchAction)
+    , eventsWebsocketDebounce : Dict String (Debounce SetContentKnowledgeModelEditorAction)
+    , warningsDebounce : Debounce ()
     }
 
 
@@ -59,13 +60,13 @@ init : AppState -> Uuid -> Maybe Uuid -> Model
 init appState uuid mbEditorUuid =
     { uuid = uuid
     , mbEditorUuid = mbEditorUuid
-    , websocket = WebSocket.init (BranchesApi.websocket appState uuid)
+    , websocket = WebSocket.init (KnowledgeModelEditorsApi.websocket appState uuid)
     , offline = False
     , error = False
     , onlineUsers = []
     , savingActionUuids = []
     , savingModel = ProjectSaving.init
-    , branchModel = ActionResult.Loading
+    , editorContext = ActionResult.Loading
     , kmEditorModel = KMEditor.initialModel
     , phaseEditorModel = PhaseEditor.initialModel
     , tagEditorModel = TagEditor.initialModel
@@ -76,6 +77,7 @@ init appState uuid mbEditorUuid =
     , publishModalModel = PublishModal.initialModel
     , eventsLastEvent = Dict.empty
     , eventsWebsocketDebounce = Dict.empty
+    , warningsDebounce = Debounce.init
     }
 
 
@@ -84,44 +86,44 @@ initPageModel appState route model =
     case route of
         KMEditorRoute.Edit mbEditorUuid ->
             ( appState.seed
-            , { model | branchModel = ActionResult.map (EditorBranch.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.branchModel }
+            , { model | editorContext = ActionResult.map (EditorContext.setActiveEditor (Maybe.map Uuid.toString mbEditorUuid)) model.editorContext }
             )
 
         KMEditorRoute.Preview ->
-            case model.branchModel of
-                ActionResult.Success editorBranch ->
+            case model.editorContext of
+                ActionResult.Success editorContext ->
                     let
                         currentQuestionUuid =
-                            EditorBranch.getActiveQuestionUuid editorBranch
+                            EditorContext.getActiveQuestionUuid editorContext
 
-                        packageId =
-                            ActionResult.map .branch model.branchModel
+                        kmPackageId =
+                            ActionResult.map .kmEditor model.editorContext
                                 |> ActionResult.toMaybe
                                 |> Maybe.andThen .previousPackageId
                                 |> Maybe.withDefault ""
 
                         firstChapterUuid =
-                            editorBranch.branch.knowledgeModel.chapterUuids
-                                |> EditorBranch.filterDeleted editorBranch
+                            editorContext.kmEditor.knowledgeModel.chapterUuids
+                                |> EditorContext.filterDeleted editorContext
                                 |> List.head
                                 |> Maybe.withDefault ""
 
                         activeChapterUuid =
-                            EditorBranch.getChapterUuid editorBranch.activeUuid editorBranch
+                            EditorContext.getChapterUuid editorContext.activeUuid editorContext
 
                         selectedChapterUuid =
                             String.withDefault firstChapterUuid activeChapterUuid
 
                         defaultPhaseUuid =
-                            List.head editorBranch.branch.knowledgeModel.phaseUuids
+                            List.head editorContext.kmEditor.knowledgeModel.phaseUuids
                                 |> Maybe.andThen Uuid.fromString
 
                         ( newSeed, previewModel ) =
                             model.previewModel
-                                |> Preview.setPackageId appState packageId
-                                |> Preview.setKnowledgeModel (EditorBranch.getFilteredKM editorBranch)
-                                |> Preview.setReplies editorBranch.branch.replies
-                                |> Preview.generateReplies appState currentQuestionUuid editorBranch.branch.knowledgeModel
+                                |> Preview.setKnowledgeModelPackageId appState kmPackageId
+                                |> Preview.setKnowledgeModel (EditorContext.getFilteredKM editorContext)
+                                |> Preview.setReplies editorContext.kmEditor.replies
+                                |> Preview.generateReplies appState currentQuestionUuid editorContext.kmEditor.knowledgeModel
                                 |> Tuple.mapSecond (Preview.setActiveChapterIfNot selectedChapterUuid)
                                 |> Tuple.mapSecond (Preview.setPhase defaultPhaseUuid)
                     in

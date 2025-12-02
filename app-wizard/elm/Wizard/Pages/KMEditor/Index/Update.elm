@@ -6,8 +6,8 @@ import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Api.Branches as BranchesApi
-import Wizard.Api.Models.Branch exposing (Branch)
+import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
+import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState exposing (AppState)
@@ -51,7 +51,7 @@ update msg wrapMsg appState model =
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
-    , Cmd.map wrapMsg <| BranchesApi.deleteMigration appState uuid DeleteMigrationCompleted
+    , Cmd.map wrapMsg <| KnowledgeModelEditorsApi.deleteMigration appState uuid DeleteMigrationCompleted
     )
 
 
@@ -60,12 +60,12 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
     case result of
         Ok _ ->
             let
-                ( branches, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.branches
+                ( kmEditors, cmd ) =
+                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.kmEditors
             in
             ( { model
                 | deletingMigration = Success <| gettext "Migration was successfully canceled." appState.locale
-                , branches = branches
+                , kmEditors = kmEditors
               }
             , cmd
             )
@@ -76,13 +76,13 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
             )
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Branch -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg KnowledgeModelEditor -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
-        ( branches, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.branches
+        ( kmEditors, cmd ) =
+            Listing.update (listingUpdateConfig wrapMsg appState) appState listingMsg model.kmEditors
     in
-    ( { model | branches = branches }
+    ( { model | kmEditors = kmEditors }
     , cmd
     )
 
@@ -119,9 +119,9 @@ handleUpgradeModalMsg wrapMsg appState upgradeModalMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Branch
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig KnowledgeModelEditor
 listingUpdateConfig wrapMsg appState =
-    { getRequest = BranchesApi.getBranches appState
+    { getRequest = KnowledgeModelEditorsApi.getKnowledgeModelEditors appState
     , getError = gettext "Unable to get knowledge model editors." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.kmEditorIndexWithFilters

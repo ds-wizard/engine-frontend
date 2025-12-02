@@ -5,7 +5,7 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faQuestionnaire, faSpinner, faSuccess)
+import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faExternalLink, faQuestionnaire, faSpinner)
 import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
 import Common.Components.Modal as Modal
@@ -440,17 +440,15 @@ submitModal cfg appState model =
                                 Nothing ->
                                     Html.nothing
                     in
-                    div [ class "alert alert-success" ]
-                        [ faSuccess
-                        , text (gettext "The document was successfully submitted." appState.locale)
-                        , link
-                        ]
+                    Flash.successHtml
+                        (div [ class "ms-2" ]
+                            [ text (gettext "The document was successfully submitted." appState.locale)
+                            , link
+                            ]
+                        )
 
                 SubmissionState.Error ->
-                    div [ class "alert alert-danger" ]
-                        [ faError
-                        , text (gettext "The document submission failed." appState.locale)
-                        ]
+                    Flash.error (gettext "The document submission failed." appState.locale)
 
                 _ ->
                     Html.nothing

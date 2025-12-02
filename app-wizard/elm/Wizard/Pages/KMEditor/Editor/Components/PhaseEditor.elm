@@ -9,8 +9,6 @@ import Html.Attributes exposing (checked, class, classList, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onMouseOut, onMouseOver)
 import String.Extra as String
-import Wizard.Api.Models.Event exposing (Event(..))
-import Wizard.Api.Models.Event.CommonEventData exposing (CommonEventData)
 import Wizard.Api.Models.Event.EditEventSetters exposing (setRequiredPhaseUuid)
 import Wizard.Api.Models.Event.EditQuestionEventData exposing (EditQuestionEventData(..))
 import Wizard.Api.Models.Event.EditQuestionFileEventData as EditQuestionFileEventData
@@ -20,6 +18,7 @@ import Wizard.Api.Models.Event.EditQuestionListEventData as EditQuestionListEven
 import Wizard.Api.Models.Event.EditQuestionMultiChoiceEventData as EditQuestionMultiChoiceEventData
 import Wizard.Api.Models.Event.EditQuestionOptionsEventData as EditQuestionOptionsEventData
 import Wizard.Api.Models.Event.EditQuestionValueEventData as EditQuestionValueEventData
+import Wizard.Api.Models.Event.EventContent exposing (EventContent(..))
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
@@ -27,7 +26,7 @@ import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KMEditor.Editor.Common.EditorBranch as EditorBranch exposing (EditorBranch)
+import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 
 
 type alias Model =
@@ -55,15 +54,15 @@ update msg model =
 
 
 type alias EventMsg msg =
-    String -> Maybe String -> (CommonEventData -> Event) -> msg
+    String -> Maybe String -> EventContent -> msg
 
 
 type alias SetPhaseEventMsg msg =
     Question -> String -> Maybe String -> msg
 
 
-view : AppState -> (Msg -> msg) -> EventMsg msg -> EditorBranch -> Model -> Html msg
-view appState wrapMsg eventMsg editorBranch model =
+view : AppState -> (Msg -> msg) -> EventMsg msg -> EditorContext -> Model -> Html msg
+view appState wrapMsg eventMsg editorContext model =
     let
         setPhaseEventMsg question parentUuid mbPhaseUuid =
             eventMsg parentUuid (Just (Question.getUuid question)) <|
@@ -105,10 +104,10 @@ view appState wrapMsg eventMsg editorBranch model =
                                 |> EditQuestionFileEvent
 
         content =
-            if List.isEmpty editorBranch.branch.knowledgeModel.phaseUuids then
+            if List.isEmpty editorContext.kmEditor.knowledgeModel.phaseUuids then
                 Flash.info (gettext "There are no phases, create them first." appState.locale)
 
-            else if Dict.isEmpty editorBranch.branch.knowledgeModel.entities.questions then
+            else if Dict.isEmpty editorContext.kmEditor.knowledgeModel.entities.questions then
                 Flash.info (gettext "There are no questions, create them first." appState.locale)
 
             else
@@ -116,7 +115,7 @@ view appState wrapMsg eventMsg editorBranch model =
                     props =
                         { wrapMsg = wrapMsg
                         , setPhaseEventMsg = setPhaseEventMsg
-                        , editorBranch = editorBranch
+                        , editorContext = editorContext
                         }
                 in
                 phaseEditorTable appState props model
@@ -128,7 +127,7 @@ view appState wrapMsg eventMsg editorBranch model =
 type alias Props msg =
     { wrapMsg : Msg -> msg
     , setPhaseEventMsg : SetPhaseEventMsg msg
-    , editorBranch : EditorBranch
+    , editorContext : EditorContext
     }
 
 
@@ -136,8 +135,8 @@ phaseEditorTable : AppState -> Props msg -> Model -> Html msg
 phaseEditorTable appState props model =
     let
         phases =
-            EditorBranch.filterDeletedWith .uuid props.editorBranch <|
-                KnowledgeModel.getPhases props.editorBranch.branch.knowledgeModel
+            EditorContext.filterDeletedWith .uuid props.editorContext <|
+                KnowledgeModel.getPhases props.editorContext.kmEditor.knowledgeModel
     in
     div [ class "editor-table-container" ]
         [ table []
@@ -179,8 +178,8 @@ foldKMRows : AppState -> Props msg -> Model -> List Phase -> List (Html msg)
 foldKMRows appState props model phases =
     let
         chapters =
-            EditorBranch.filterDeletedWith .uuid props.editorBranch <|
-                KnowledgeModel.getChapters props.editorBranch.branch.knowledgeModel
+            EditorContext.filterDeletedWith .uuid props.editorContext <|
+                KnowledgeModel.getChapters props.editorContext.kmEditor.knowledgeModel
     in
     List.foldl (\c rows -> rows ++ foldChapter appState props model phases c) [] chapters
 
@@ -190,8 +189,8 @@ foldChapter appState props model phases chapter =
     if List.length chapter.questionUuids > 0 then
         let
             questions =
-                EditorBranch.filterDeletedWith Question.getUuid props.editorBranch <|
-                    KnowledgeModel.getChapterQuestions chapter.uuid props.editorBranch.branch.knowledgeModel
+                EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
+                    KnowledgeModel.getChapterQuestions chapter.uuid props.editorContext.kmEditor.knowledgeModel
         in
         List.foldl (\q rows -> rows ++ foldQuestion appState props model 1 phases q) [ trChapter appState props chapter phases ] questions
 
@@ -210,16 +209,16 @@ foldQuestion appState props model indent phase question =
             List.foldl
                 (\a rows -> rows ++ foldAnswer appState props model (indent + 1) phase a)
                 questionRow
-                (EditorBranch.filterDeletedWith .uuid props.editorBranch <|
-                    KnowledgeModel.getQuestionAnswers commonData.uuid props.editorBranch.branch.knowledgeModel
+                (EditorContext.filterDeletedWith .uuid props.editorContext <|
+                    KnowledgeModel.getQuestionAnswers commonData.uuid props.editorContext.kmEditor.knowledgeModel
                 )
 
         ListQuestion commonData _ ->
             List.foldl
                 (\q rows -> rows ++ foldQuestion appState props model (indent + 2) phase q)
                 (questionRow ++ [ trItemTemplate appState props (indent + 1) phase ])
-                (EditorBranch.filterDeletedWith Question.getUuid props.editorBranch <|
-                    KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid props.editorBranch.branch.knowledgeModel
+                (EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
+                    KnowledgeModel.getQuestionItemTemplateQuestions commonData.uuid props.editorContext.kmEditor.knowledgeModel
                 )
 
         ValueQuestion _ _ ->
@@ -242,8 +241,8 @@ foldAnswer : AppState -> Props msg -> Model -> Int -> List Phase -> Answer -> Li
 foldAnswer appState props model indent phases answer =
     let
         followUps =
-            EditorBranch.filterDeletedWith Question.getUuid props.editorBranch <|
-                KnowledgeModel.getAnswerFollowupQuestions answer.uuid props.editorBranch.branch.knowledgeModel
+            EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
+                KnowledgeModel.getAnswerFollowupQuestions answer.uuid props.editorContext.kmEditor.knowledgeModel
     in
     if List.length followUps > 0 then
         List.foldl (\q rows -> rows ++ foldQuestion appState props model (indent + 1) phases q) [ trAnswer appState props answer indent phases ] followUps
@@ -261,7 +260,7 @@ trQuestion appState props model indent phases question =
     tr []
         (th []
             [ div [ indentClass indent ]
-                [ linkTo (EditorBranch.editorRoute props.editorBranch (Question.getUuid question))
+                [ linkTo (EditorContext.editorRoute props.editorContext (Question.getUuid question))
                     []
                     [ faKmQuestion
                     , text questionTitle
@@ -286,7 +285,7 @@ tdQuestionTagCheckbox props model question phase =
                 Just phase.uuid
 
         parentUuid =
-            EditorBranch.getParentUuid (Question.getUuid question) props.editorBranch
+            EditorContext.getParentUuid (Question.getUuid question) props.editorContext
 
         msg =
             props.setPhaseEventMsg question parentUuid newPhase
@@ -354,7 +353,7 @@ trSeparator props { title, icon, mbExtraClass, mbEditorUuid } indent phases =
         createLink content =
             case mbEditorUuid of
                 Just editorUuid ->
-                    [ linkTo (EditorBranch.editorRoute props.editorBranch editorUuid)
+                    [ linkTo (EditorContext.editorRoute props.editorContext editorUuid)
                         []
                         content
                     ]

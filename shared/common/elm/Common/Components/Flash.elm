@@ -3,6 +3,7 @@ module Common.Components.Flash exposing
     , info
     , loader
     , success
+    , successHtml
     , tip
     , warning
     , warningHtml
@@ -28,13 +29,18 @@ warning =
 
 
 warningHtml : Html msg -> Html msg
-warningHtml content =
-    flashViewHtml "alert-warning" faWarning content
+warningHtml =
+    flashViewHtml "alert-warning" faWarning
 
 
 success : String -> Html msg
 success =
     flashView "alert-success" faSuccess
+
+
+successHtml : Html msg -> Html msg
+successHtml =
+    flashViewHtml "alert-success" faSuccess
 
 
 info : String -> Html msg

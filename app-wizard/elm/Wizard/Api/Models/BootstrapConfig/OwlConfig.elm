@@ -10,7 +10,7 @@ type alias OwlConfig =
     , organizationId : Maybe String
     , kmId : Maybe String
     , version : Maybe String
-    , previousPackageId : Maybe String
+    , previousKnowledgeModelPackageId : Maybe String
     , rootElement : Maybe String
     }
 
@@ -22,7 +22,7 @@ default =
     , organizationId = Nothing
     , kmId = Nothing
     , version = Nothing
-    , previousPackageId = Nothing
+    , previousKnowledgeModelPackageId = Nothing
     , rootElement = Nothing
     }
 
@@ -35,5 +35,5 @@ decoder =
         |> D.required "organizationId" (D.maybe D.string)
         |> D.required "kmId" (D.maybe D.string)
         |> D.required "version" (D.maybe D.string)
-        |> D.required "previousPackageId" (D.maybe D.string)
+        |> D.required "previousKnowledgeModelPackageId" (D.maybe D.string)
         |> D.required "rootElement" (D.maybe D.string)

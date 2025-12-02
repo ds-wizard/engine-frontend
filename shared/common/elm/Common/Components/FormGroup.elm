@@ -765,9 +765,9 @@ version locale cfg form =
                     in
                     p [ class "form-text text-muted version-suggestions" ]
                         [ text (gettext "Suggestions: " locale)
-                        , a [ onClick <| setVersionMsg nextMajor ] [ text <| Version.toString nextMajor ]
-                        , a [ onClick <| setVersionMsg nextMinor ] [ text <| Version.toString nextMinor ]
-                        , a [ onClick <| setVersionMsg nextPatch ] [ text <| Version.toString nextPatch ]
+                        , a [ onClick <| setVersionMsg nextMajor, class "color-primary" ] [ text <| Version.toString nextMajor ]
+                        , a [ onClick <| setVersionMsg nextMinor, class "color-primary" ] [ text <| Version.toString nextMinor ]
+                        , a [ onClick <| setVersionMsg nextPatch, class "color-primary" ] [ text <| Version.toString nextPatch ]
                         ]
 
                 Nothing ->

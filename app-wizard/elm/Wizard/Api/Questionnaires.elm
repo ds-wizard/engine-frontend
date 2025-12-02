@@ -106,8 +106,8 @@ createListExtraParams filters =
         , ( "userUuidsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "userUuids" filters) )
         , ( "projectTags", PaginationQueryFilters.getValue "projectTags" filters )
         , ( "projectTagsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "projectTags" filters) )
-        , ( "packageIds", PaginationQueryFilters.getValue "packages" filters )
-        , ( "packageIdsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "packages" filters) )
+        , ( "knowledgeModelPackageIds", PaginationQueryFilters.getValue "knowledgeModelPackages" filters )
+        , ( "knowledgeModelPackageIdsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "knowledgeModelPackages" filters) )
         ]
 
 
@@ -170,9 +170,11 @@ getQuestionnaireVersions appState uuid =
     Request.get (AppState.toServerInfo appState) ("/questionnaires/" ++ Uuid.toString uuid ++ "/versions") (D.list QuestionnaireVersion.decoder)
 
 
-getQuestionnaireEvents : AppState -> Uuid -> ToMsg (List QuestionnaireEvent) msg -> Cmd msg
-getQuestionnaireEvents appState uuid =
-    Request.get (AppState.toServerInfo appState) ("/questionnaires/" ++ Uuid.toString uuid ++ "/events") (D.list QuestionnaireEvent.decoder)
+getQuestionnaireEvents : AppState -> Uuid -> Int -> ToMsg (Pagination QuestionnaireEvent) msg -> Cmd msg
+getQuestionnaireEvents appState uuid pageNumber =
+    Request.get (AppState.toServerInfo appState)
+        ("/questionnaires/" ++ Uuid.toString uuid ++ "/events?size=1000&sort=createdAt,desc&page=" ++ String.fromInt pageNumber)
+        (Pagination.decoder "questionnaireEvents" QuestionnaireEvent.decoder)
 
 
 getQuestionnaireEvent : AppState -> Uuid -> Uuid -> ToMsg QuestionnaireEvent msg -> Cmd msg

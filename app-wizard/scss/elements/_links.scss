@@ -17,23 +17,6 @@ a {
         text-decoration: underline;
     }
 
-    &:not([href]):not([tabindex]) {
-        color: var(--bs-link-color);
-
-        &:hover, &:active, &:focus {
-            text-decoration: underline;
-            color: var(--bs-link-hover-color);
-        }
-
-        &.light-danger {
-            color: $gray-500;
-
-            &:hover {
-                color: $danger;
-            }
-        }
-    }
-
     &.disabled {
         text-decoration: none;
         color: $gray-500;

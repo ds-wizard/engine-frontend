@@ -922,6 +922,10 @@ $toolbar-height: 40px;
           margin-top: 0;
           margin-bottom: 0;
           @include border-radius-bottom($card-border-radius);
+
+          strong {
+            text-overflow: ellipsis;
+          }
         }
 
         .card {

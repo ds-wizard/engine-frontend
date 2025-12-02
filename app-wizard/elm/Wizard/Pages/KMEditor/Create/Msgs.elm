@@ -4,15 +4,15 @@ import Common.Api.ApiError exposing (ApiError)
 import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Version exposing (Version)
-import Wizard.Api.Models.Branch exposing (Branch)
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 
 
 type Msg
     = Cancel
     | FormMsg Form.Msg
     | FormSetVersion Version
-    | PostBranchCompleted (Result ApiError Branch)
-    | PackageTypeHintInputMsg (TypeHintInput.Msg PackageSuggestion)
-    | GetPackageCompleted (Result ApiError PackageDetail)
+    | PostKmEditorCompleted (Result ApiError KnowledgeModelEditor)
+    | KnowledgeModelPackageTypeHintInputMsg (TypeHintInput.Msg KnowledgeModelPackageSuggestion)
+    | GetPackageCompleted (Result ApiError KnowledgeModelPackageDetail)

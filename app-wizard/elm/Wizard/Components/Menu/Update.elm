@@ -5,6 +5,7 @@ import Browser.Dom as Dom
 import Common.Api.ApiError as ApiError
 import Common.Api.Models.BuildInfo as BuildInfo
 import Common.Ports.Copy as Copy
+import Common.Utils.UrlUtils as Url
 import Dict
 import Gettext exposing (gettext)
 import Task
@@ -40,7 +41,8 @@ update wrapMsg msg appState model =
                             name ++ "\nVersion: " ++ component.version ++ "\nBuilt at: " ++ component.builtAt
 
                         parts =
-                            componentToString (gettext "Client" appState.locale) BuildInfo.client
+                            ("Instance: " ++ Maybe.withDefault appState.apiUrl (Url.getDomain appState.apiUrl))
+                                :: componentToString (gettext "Client" appState.locale) BuildInfo.client
                                 :: componentToString (gettext "Server" appState.locale) apiBuildInfo
                                 :: List.map (\c -> componentToString c.name c) (List.sortBy .name apiBuildInfo.components)
 

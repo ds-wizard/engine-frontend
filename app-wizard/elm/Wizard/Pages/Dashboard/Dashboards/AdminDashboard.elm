@@ -14,7 +14,7 @@ import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setCommentThreads, setPackages, setTemplates, setUsage)
+import Common.Utils.Setters exposing (setCommentThreads, setDocumentTemplates, setKnowledgeModelPackages, setUsage)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
@@ -22,13 +22,13 @@ import List.Extensions as List
 import Maybe.Extra as Maybe
 import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
-import Wizard.Api.Models.Package exposing (Package)
+import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
 import Wizard.Api.Models.Usage exposing (Usage)
-import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Tenants as TenantsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.AddOpenIDWidget as AddOpenIDWidget
@@ -44,8 +44,8 @@ import Wizard.Pages.Dashboard.Widgets.WelcomeWidget as WelcomeWidget
 
 type alias Model =
     { usage : ActionResult Usage
-    , packages : ActionResult (List Package)
-    , templates : ActionResult (List DocumentTemplate)
+    , knowledgeModelPackages : ActionResult (List KnowledgeModelPackage)
+    , documentTemplates : ActionResult (List DocumentTemplate)
     , commentThreads : ActionResult (List QuestionnaireCommentThreadAssigned)
     }
 
@@ -53,32 +53,32 @@ type alias Model =
 initialModel : Model
 initialModel =
     { usage = ActionResult.Loading
-    , packages = ActionResult.Loading
-    , templates = ActionResult.Loading
+    , knowledgeModelPackages = ActionResult.Loading
+    , documentTemplates = ActionResult.Loading
     , commentThreads = ActionResult.Loading
     }
 
 
 type Msg
     = GetUsageCompleted (Result ApiErrorOld.ApiError Usage)
-    | GetPackagesCompleted (Result ApiError (Pagination Package))
-    | GetTemplatesCompleted (Result ApiError (Pagination DocumentTemplate))
+    | GetKnowledgeModelPackagesCompleted (Result ApiError (Pagination KnowledgeModelPackage))
+    | GetDocumentTemplatesCompleted (Result ApiError (Pagination DocumentTemplate))
     | GetCommentThreadsCompleted (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
 
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
     let
-        packagesCmd =
-            PackagesApi.getOutdatedPackages appState GetPackagesCompleted
+        kmPackagesCmd =
+            KnowledgeModelPackagesApi.getOutdatedKnowledgeModelPackages appState GetKnowledgeModelPackagesCompleted
 
-        templatesCmd =
-            DocumentTemplatesApi.getOutdatedTemplates appState GetTemplatesCompleted
+        documentTemplatesCmd =
+            DocumentTemplatesApi.getOutdatedTemplates appState GetDocumentTemplatesCompleted
 
         usageCmd =
             TenantsApi.getTenantUsage appState UuidOrCurrent.current GetUsageCompleted
     in
-    Cmd.batch [ packagesCmd, templatesCmd, usageCmd, fetchCommentThreads appState ]
+    Cmd.batch [ kmPackagesCmd, documentTemplatesCmd, usageCmd, fetchCommentThreads appState ]
 
 
 fetchCommentThreads : AppState -> Cmd Msg
@@ -114,9 +114,9 @@ update logoutMsg msg appState model =
                 , locale = appState.locale
                 }
 
-        GetPackagesCompleted result ->
+        GetKnowledgeModelPackagesCompleted result ->
             RequestHelpers.applyResultTransform
-                { setResult = setPackages
+                { setResult = setKnowledgeModelPackages
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
@@ -125,9 +125,9 @@ update logoutMsg msg appState model =
                 , locale = appState.locale
                 }
 
-        GetTemplatesCompleted result ->
+        GetDocumentTemplatesCompleted result ->
             RequestHelpers.applyResultTransform
-                { setResult = setTemplates
+                { setResult = setDocumentTemplates
                 , defaultError = gettext "Unable to get document templates." appState.locale
                 , model = model
                 , result = result
@@ -175,8 +175,8 @@ view appState model =
         [ div [ class "row gx-3" ]
             (WelcomeWidget.view appState
                 :: AssignedComments.view appState model.commentThreads
-                :: OutdatedPackagesWidget.view appState model.packages
-                :: OutdatedTemplatesWidget.view appState model.templates
+                :: OutdatedPackagesWidget.view appState model.knowledgeModelPackages
+                :: OutdatedTemplatesWidget.view appState model.documentTemplates
                 :: ctaWidgets
                 ++ [ UsageWidget.view appState model.usage
                    ]

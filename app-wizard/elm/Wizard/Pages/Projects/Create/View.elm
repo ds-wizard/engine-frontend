@@ -14,7 +14,7 @@ import Html.Attributes exposing (class, classList, tabindex)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
-import Wizard.Api.Models.PackageDetail as PackageDetail
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -99,7 +99,7 @@ formContentSelectedKnowledgeModel appState model =
     let
         viewKnowledgeModel packageDetail =
             div [ class "bg-light px-2 py-1 rounded" ]
-                [ TypeHintInputItem.packageSuggestionWithVersion (PackageDetail.toPackageSuggestion packageDetail) ]
+                [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageDetail.toPackageSuggestion packageDetail) ]
 
         viewFormContent ( packageDetail, _ ) =
             div []
@@ -211,7 +211,7 @@ knowledgeModelFormFields appState model =
                 typeHintInput =
                     TypeHintInput.view cfg model.knowledgeModelTypeHintInputModel
             in
-            FormGroup.formGroupCustom typeHintInput appState.locale model.form "packageId" (gettext "Knowledge Model" appState.locale)
+            FormGroup.formGroupCustom typeHintInput appState.locale model.form "knowledgeModelPackageId" (gettext "Knowledge Model" appState.locale)
     in
     div []
         [ knowledgeModelInput

@@ -5,8 +5,9 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faError, faExternalLink, faRemove, faSpinner, faSuccess)
+import Common.Components.FontAwesome exposing (fa, faDelete, faDocumentsDownload, faDocumentsSubmit, faDocumentsViewError, faExternalLink, faRemove, faSpinner)
 import Common.Components.FormResult as FormResult
+import Common.Components.GuideLink as GuideLink
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip, tooltipCustom)
@@ -435,17 +436,15 @@ submitModal appState model =
                                 Nothing ->
                                     Html.nothing
                     in
-                    div [ class "alert alert-success" ]
-                        [ faSuccess
-                        , text (gettext "The document was successfully submitted." appState.locale)
-                        , link
-                        ]
+                    Flash.successHtml
+                        (div [ class "ms-2" ]
+                            [ text (gettext "The document was successfully submitted." appState.locale)
+                            , link
+                            ]
+                        )
 
                 SubmissionState.Error ->
-                    div [ class "alert alert-danger" ]
-                        [ faError
-                        , text (gettext "The document submission failed." appState.locale)
-                        ]
+                    Flash.error (gettext "The document submission failed." appState.locale)
 
                 _ ->
                     Html.nothing
@@ -468,6 +467,7 @@ submitModal appState model =
         content =
             [ div [ class "modal-header" ]
                 [ h5 [ class "modal-title" ] [ text <| String.format (gettext "Submit %s" appState.locale) [ name ] ]
+                , GuideLink.guideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsDocumentSubmission)
                 ]
             , div [ class "modal-body" ]
                 [ body

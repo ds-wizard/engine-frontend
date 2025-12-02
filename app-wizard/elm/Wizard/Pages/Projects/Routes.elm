@@ -1,7 +1,7 @@
 module Wizard.Pages.Projects.Routes exposing
     ( Route(..)
     , indexRouteIsTemplateFilterId
-    , indexRoutePackagesFilterId
+    , indexRouteKnowledgeModelPackagesFilterId
     , indexRouteProjectTagsFilterId
     , indexRouteUsersFilterId
     )
@@ -38,6 +38,6 @@ indexRouteProjectTagsFilterId =
     "projectTags"
 
 
-indexRoutePackagesFilterId : String
-indexRoutePackagesFilterId =
-    "packages"
+indexRouteKnowledgeModelPackagesFilterId : String
+indexRouteKnowledgeModelPackagesFilterId =
+    "knowledgeModelPackages"

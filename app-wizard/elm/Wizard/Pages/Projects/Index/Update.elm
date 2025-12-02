@@ -17,9 +17,9 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
@@ -30,7 +30,7 @@ import Wizard.Pages.Projects.Common.CloneProjectModal.Update as CloneProjectModa
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Utils.Driver as Driver
@@ -53,9 +53,9 @@ fetchData appState model =
                     Cmd.none
 
         selectedPackagesCmd =
-            case Dict.get indexRoutePackagesFilterId model.questionnaires.filters.values of
+            case Dict.get indexRouteKnowledgeModelPackagesFilterId model.questionnaires.filters.values of
                 Just packageIds ->
-                    PackagesApi.getPackagesSuggestionsWithOptions appState
+                    KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestionsWithOptions appState
                         PaginationQueryString.empty
                         (String.split "," packageIds)
                         []
@@ -106,13 +106,13 @@ update wrapMsg msg appState model =
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
-        ListingFilterAddSelectedPackage package listingMsg ->
+        ListingFilterAddSelectedPackage kmPackage listingMsg ->
             let
-                updatePackages packages =
-                    { packages | items = List.uniqueBy (PackageSuggestion.packageIdAll << .id) (package :: packages.items) }
+                updatePackages kmPackages =
+                    { kmPackages | items = List.uniqueBy (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll << .id) (kmPackage :: kmPackages.items) }
 
                 newModel =
-                    { model | packagesFilterSelectedPackages = ActionResult.map updatePackages model.packagesFilterSelectedPackages }
+                    { model | kmPackagesFilterSelectedPackages = ActionResult.map updatePackages model.kmPackagesFilterSelectedPackages }
             in
             handleListingMsg wrapMsg appState listingMsg newModel
 
@@ -249,7 +249,7 @@ update wrapMsg msg appState model =
 
         PackagesFilterGetValuesComplete result ->
             RequestHelpers.applyResult
-                { setResult = \r m -> { m | packagesFilterSelectedPackages = r }
+                { setResult = \r m -> { m | kmPackagesFilterSelectedPackages = r }
                 , defaultError = gettext "Unable to get Knowledge Models." appState.locale
                 , model = model
                 , result = result
@@ -258,7 +258,7 @@ update wrapMsg msg appState model =
                 }
 
         PackagesFilterInput value ->
-            ( { model | packagesFilterSearchValue = value }
+            ( { model | kmPackagesFilterSearchValue = value }
             , Task.dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| PackagesFilterSearch value)
             )
 
@@ -270,18 +270,18 @@ update wrapMsg msg appState model =
 
                 selectedKMs =
                     model.questionnaires.filters.values
-                        |> Dict.get indexRoutePackagesFilterId
+                        |> Dict.get indexRouteKnowledgeModelPackagesFilterId
                         |> Maybe.unwrap [] (String.split ",")
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        PackagesApi.getPackagesSuggestionsWithOptions appState queryString [] selectedKMs PackagesFilterSearchComplete
+                        KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestionsWithOptions appState queryString [] selectedKMs PackagesFilterSearchComplete
             in
             ( model, cmd )
 
         PackagesFilterSearchComplete result ->
             RequestHelpers.applyResult
-                { setResult = \r m -> { m | packagesFilterPackages = r }
+                { setResult = \r m -> { m | kmPackagesFilterPackages = r }
                 , defaultError = gettext "Unable to get knowledge models." appState.locale
                 , model = model
                 , result = result

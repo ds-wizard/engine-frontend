@@ -72,6 +72,7 @@ module Wizard.Utils.Feature exposing
     , registry
     , settings
     , tenants
+    , urlChecker
     , userEdit
     , userEditActiveSessions
     , userEditApiKeys
@@ -88,11 +89,11 @@ import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Maybe.Extra as Maybe
 import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
-import Wizard.Api.Models.Branch as Branch exposing (Branch)
-import Wizard.Api.Models.Branch.BranchState as BranchState
 import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
-import Wizard.Api.Models.Package.PackagePhase as PackagePhase exposing (PackagePhase)
+import Wizard.Api.Models.KnowledgeModelEditor as KnowledgeModelEditor exposing (KnowledgeModelEditor)
+import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
+import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.Questionnaire as Questionnaire exposing (Questionnaire)
 import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
 import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState
@@ -133,37 +134,37 @@ knowledgeModelEditorsPublish =
     adminOr Perm.knowledgeModelPublish
 
 
-knowledgeModelEditorOpen : AppState -> Branch -> Bool
-knowledgeModelEditorOpen appState branch =
+knowledgeModelEditorOpen : AppState -> KnowledgeModelEditor -> Bool
+knowledgeModelEditorOpen appState knowledgeModelEditor =
     adminOr Perm.knowledgeModel appState
-        && Branch.matchState [ BranchState.Default, BranchState.Edited, BranchState.Outdated ] branch
+        && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Default, KnowledgeModelEditorState.Edited, KnowledgeModelEditorState.Outdated ] knowledgeModelEditor
 
 
-knowledgeModelEditorPublish : AppState -> Branch -> Bool
-knowledgeModelEditorPublish appState branch =
+knowledgeModelEditorPublish : AppState -> KnowledgeModelEditor -> Bool
+knowledgeModelEditorPublish appState knowledgeModelEditor =
     adminOr Perm.knowledgeModelPublish appState
-        && Branch.matchState [ BranchState.Edited, BranchState.Migrated ] branch
+        && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Edited, KnowledgeModelEditorState.Migrated ] knowledgeModelEditor
 
 
-knowledgeModelEditorUpgrade : AppState -> Branch -> Bool
-knowledgeModelEditorUpgrade appState branch =
+knowledgeModelEditorUpgrade : AppState -> KnowledgeModelEditor -> Bool
+knowledgeModelEditorUpgrade appState knowledgeModelEditor =
     adminOr Perm.knowledgeModelUpgrade appState
-        && Branch.matchState [ BranchState.Outdated ] branch
+        && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Outdated ] knowledgeModelEditor
 
 
-knowledgeModelEditorContinueMigration : AppState -> Branch -> Bool
-knowledgeModelEditorContinueMigration appState branch =
+knowledgeModelEditorContinueMigration : AppState -> KnowledgeModelEditor -> Bool
+knowledgeModelEditorContinueMigration appState knowledgeModelEditor =
     adminOr Perm.knowledgeModelUpgrade appState
-        && Branch.matchState [ BranchState.Migrating ] branch
+        && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Migrating ] knowledgeModelEditor
 
 
-knowledgeModelEditorCancelMigration : AppState -> Branch -> Bool
-knowledgeModelEditorCancelMigration appState branch =
+knowledgeModelEditorCancelMigration : AppState -> KnowledgeModelEditor -> Bool
+knowledgeModelEditorCancelMigration appState knowledgeModelEditor =
     adminOr Perm.knowledgeModelUpgrade appState
-        && Branch.matchState [ BranchState.Migrating, BranchState.Migrated ] branch
+        && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Migrating, KnowledgeModelEditorState.Migrated ] knowledgeModelEditor
 
 
-knowledgeModelEditorDelete : AppState -> Branch -> Bool
+knowledgeModelEditorDelete : AppState -> KnowledgeModelEditor -> Bool
 knowledgeModelEditorDelete appState _ =
     adminOr Perm.knowledgeModel appState
 
@@ -197,16 +198,16 @@ knowledgeModelsPreview _ =
     True
 
 
-knowledgeModelSetDeprecated : AppState -> { a | phase : PackagePhase } -> Bool
-knowledgeModelSetDeprecated appState package =
+knowledgeModelSetDeprecated : AppState -> { a | phase : KnowledgeModelPackagePhase } -> Bool
+knowledgeModelSetDeprecated appState kmPackage =
     adminOr Perm.packageManagementWrite appState
-        && (package.phase == PackagePhase.Released)
+        && (kmPackage.phase == KnowledgeModelPackagePhase.Released)
 
 
-knowledgeModelRestore : AppState -> { a | phase : PackagePhase } -> Bool
-knowledgeModelRestore appState package =
+knowledgeModelRestore : AppState -> { a | phase : KnowledgeModelPackagePhase } -> Bool
+knowledgeModelRestore appState kmPackage =
     adminOr Perm.packageManagementWrite appState
-        && (package.phase == PackagePhase.Deprecated)
+        && (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated)
 
 
 
@@ -583,6 +584,15 @@ localeDelete appState locale =
 tenants : AppState -> Bool
 tenants appState =
     Perm.hasPerm appState.config.user Perm.tenants
+
+
+
+-- Other
+
+
+urlChecker : AppState -> Bool
+urlChecker appState =
+    Maybe.isJust appState.urlCheckerUrl
 
 
 

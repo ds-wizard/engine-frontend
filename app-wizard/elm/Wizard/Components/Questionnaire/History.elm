@@ -12,7 +12,8 @@ module Wizard.Components.Questionnaire.History exposing
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
-import Common.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
+import Common.Components.Flash as Flash
+import Common.Components.FontAwesome exposing (fa, faDelete, faDetailShowAll, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
 import Common.Components.Page as Page
 import Common.Utils.FileIcon as FileIcon
 import Common.Utils.Markdown as Markdown
@@ -24,6 +25,7 @@ import Html exposing (Html, a, br, div, em, h5, img, input, label, li, span, str
 import Html.Attributes exposing (checked, class, src, type_)
 import Html.Events exposing (onCheck, onClick)
 import Html.Extra as Html
+import Html.Lazy as Lazy
 import List.Extra as List
 import Maybe.Extra as Maybe
 import String.Format as String
@@ -141,12 +143,19 @@ type alias ViewConfig msg =
     , deleteVersionMsg : QuestionnaireVersion -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
     , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
+    , loadMoreMsg : Maybe msg
+    , loadingMore : ActionResult ()
     }
 
 
 view : AppState -> ViewConfig msg -> Model -> ActionResult ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
 view appState cfg model versionsAndEvents =
-    Page.actionResultView appState (viewHistory appState cfg model) versionsAndEvents
+    Page.actionResultView appState (viewHistoryLazy appState cfg model) versionsAndEvents
+
+
+viewHistoryLazy : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+viewHistoryLazy appState cfg model data =
+    Lazy.lazy (always (viewHistory appState cfg model data)) data
 
 
 viewHistory : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
@@ -183,8 +192,25 @@ viewHistory appState cfg model ( versions, events ) =
                     , span [] [ text (gettext "Named versions only" appState.locale) ]
                     ]
                 ]
+
+        viewAllButton =
+            if ActionResult.isLoading cfg.loadingMore then
+                Flash.loader appState.locale
+
+            else
+                case cfg.loadMoreMsg of
+                    Nothing ->
+                        Html.nothing
+
+                    Just loadMoreMsg ->
+                        div []
+                            [ a [ onClick loadMoreMsg, class "with-icon" ]
+                                [ faDetailShowAll
+                                , text (gettext "Load older" appState.locale)
+                                ]
+                            ]
     in
-    div [ class "history" ] (namedOnlySelect :: eventGroups)
+    div [ class "history" ] (namedOnlySelect :: eventGroups ++ [ viewAllButton ])
 
 
 viewEventsMonthGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> EventsMonthGroup -> Html msg

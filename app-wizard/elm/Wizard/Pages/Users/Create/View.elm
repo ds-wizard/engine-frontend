@@ -22,12 +22,12 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 view : AppState -> Model -> Html Msg
 view appState model =
     Html.form [ onSubmit (FormMsg Form.Submit), detailClass "Users__Create" ]
-        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.usersCreate) (gettext "Create user" appState.locale)
+        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.usersCreate) (gettext "Create User" appState.locale)
         , FormResult.view model.savingUser
         , formView appState model.form |> Html.map FormMsg
         , FormActions.viewSubmit appState
             Cancel
-            (ActionButton.SubmitConfig (gettext "Save" appState.locale) model.savingUser)
+            (ActionButton.SubmitConfig (gettext "Create" appState.locale) model.savingUser)
         ]
 
 

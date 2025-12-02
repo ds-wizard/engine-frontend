@@ -139,7 +139,7 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                         (Just Wizard.Msgs.SetFullscreen)
                         appState
                         { events = []
-                        , branchUuid = Nothing
+                        , kmEditorUuid = Nothing
                         }
                         questionnaireModel
 

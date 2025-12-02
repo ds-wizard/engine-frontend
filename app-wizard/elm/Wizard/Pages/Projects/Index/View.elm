@@ -22,8 +22,8 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Uuid
 import Version
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Member as Member
-import Wizard.Api.Models.PackageSuggestion as PackageSuggestion
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Api.Models.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
 import Wizard.Api.Models.User as User
@@ -43,7 +43,7 @@ import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDesc
 import Wizard.Pages.Projects.Common.View exposing (visibilityIcon)
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRoutePackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
@@ -270,56 +270,56 @@ listingKMsFilter : AppState -> Model -> Listing.Filter Msg
 listingKMsFilter appState model =
     let
         filterMsg =
-            ListingMsgs.UpdatePaginationQueryFilters (Just indexRoutePackagesFilterId)
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteKnowledgeModelPackagesFilterId)
 
         updatePackagesMsg packageIds =
             if List.isEmpty packageIds then
-                filterMsg (PaginationQueryFilter.removeFilter indexRoutePackagesFilterId model.questionnaires.filters)
+                filterMsg (PaginationQueryFilter.removeFilter indexRouteKnowledgeModelPackagesFilterId model.questionnaires.filters)
 
             else
-                filterMsg (PaginationQueryFilter.insertValue indexRoutePackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
+                filterMsg (PaginationQueryFilter.insertValue indexRouteKnowledgeModelPackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
 
-        removePackageMsg package =
-            List.filter ((/=) (PackageSuggestion.packageIdAll package.id)) selectedPackageIds
+        removePackageMsg kmPackage =
+            List.filter ((/=) (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id)) selectedPackageIds
                 |> updatePackagesMsg
                 |> ListingMsg
 
-        addPackageMsg package =
-            ListingFilterAddSelectedPackage package
-                (updatePackagesMsg (PackageSuggestion.packageIdAll package.id :: selectedPackageIds))
+        addPackageMsg kmPackage =
+            ListingFilterAddSelectedPackage kmPackage
+                (updatePackagesMsg (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id :: selectedPackageIds))
 
-        viewPackageItem updateMsg icon package =
+        viewPackageItem updateMsg icon kmPackage =
             Dropdown.buttonItem
-                [ onClick (updateMsg package)
+                [ onClick (updateMsg kmPackage)
                 , class "dropdown-item-icon"
                 , dataCy "project_filter_packages_option"
                 ]
                 [ icon
-                , text package.name
+                , text kmPackage.name
                 ]
 
         selectedPackageItem =
             viewPackageItem removePackageMsg faListingFilterMultiSelected
 
         foundSelectedPackages =
-            ActionResult.unwrap [] .items model.packagesFilterSelectedPackages
+            ActionResult.unwrap [] .items model.kmPackagesFilterSelectedPackages
                 |> List.sortBy .name
 
         selectedPackageIds =
             model.questionnaires.filters
-                |> PaginationQueryFilter.getValue indexRoutePackagesFilterId
+                |> PaginationQueryFilter.getValue indexRouteKnowledgeModelPackagesFilterId
                 |> Maybe.unwrap [] (String.split ",")
 
         selectedPackages =
             selectedPackageIds
-                |> List.filterMap (\a -> List.find (PackageSuggestion.isSamePackage a << .id) foundSelectedPackages)
+                |> List.filterMap (\a -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage a << .id) foundSelectedPackages)
                 |> List.sortBy .name
 
         filterPackages =
-            List.filter (Maybe.isNothing << (\package -> List.find (PackageSuggestion.isSamePackage package.id) selectedPackageIds))
+            List.filter (Maybe.isNothing << (\kmPackage -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage kmPackage.id) selectedPackageIds))
 
         foundPackages =
-            model.packagesFilterPackages
+            model.kmPackagesFilterPackages
                 |> ActionResult.unwrap [] (List.sortBy .name << filterPackages << .items)
 
         badge =
@@ -332,9 +332,9 @@ listingKMsFilter appState model =
                         [ type_ "text"
                         , class "form-control"
                         , placeholder (gettext "Search knowledge models..." appState.locale)
-                        , onClickStopPropagation (PackagesFilterInput model.packagesFilterSearchValue)
+                        , onClickStopPropagation (PackagesFilterInput model.kmPackagesFilterSearchValue)
                         , onInput PackagesFilterInput
-                        , value model.packagesFilterSearchValue
+                        , value model.kmPackagesFilterSearchValue
                         ]
                         []
                     ]
@@ -352,7 +352,7 @@ listingKMsFilter appState model =
                 in
                 List.map addPackageItem foundPackages
 
-            else if not (String.isEmpty model.packagesFilterSearchValue) then
+            else if not (String.isEmpty model.kmPackagesFilterSearchValue) then
                 [ Dropdown.customItem <|
                     div [ class "dropdown-item-empty" ]
                         [ text (gettext "No knowledge models found" appState.locale) ]
@@ -369,7 +369,7 @@ listingKMsFilter appState model =
                 Nothing ->
                     gettext "Knowledge Models" appState.locale
     in
-    Listing.CustomFilter indexRoutePackagesFilterId
+    Listing.CustomFilter indexRouteKnowledgeModelPackagesFilterId
         { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
         , items = searchInputItem ++ selectedPackagesItems ++ foundPackagesItems
         }
@@ -572,13 +572,13 @@ listingDescription appState questionnaire =
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
-                Wizard.Pages.KnowledgeModels.Routes.DetailRoute questionnaire.package.id
+                Wizard.Pages.KnowledgeModels.Routes.DetailRoute questionnaire.knowledgeModelPackage.id
 
         kmLink =
             linkTo kmRoute
                 [ title <| gettext "Knowledge Model" appState.locale, class "fragment" ]
-                [ text questionnaire.package.name
-                , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.package.version ]
+                [ text questionnaire.knowledgeModelPackage.name
+                , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.knowledgeModelPackage.version ]
                 ]
     in
     span []

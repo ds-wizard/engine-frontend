@@ -7,20 +7,20 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError
 import Common.Ports.Dom as Dom
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setKnowledgeModel, setPackage)
+import Common.Utils.Setters exposing (setKnowledgeModel, setKnowledgeModelPackage)
 import Dict
 import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
 import Uuid.Extra as Uuid
+import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Api.Models.PackageDetail as PackageDetail
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail
 import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
 import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
 import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
 import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire
-import Wizard.Api.Packages as PackagesApi
 import Wizard.Api.Questionnaires as QuestionnairesApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Data.AppState exposing (AppState)
@@ -32,10 +32,10 @@ import Wizard.Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> String -> Cmd Msg
-fetchData appState packageId =
+fetchData appState kmPackageId =
     Cmd.batch
-        [ KnowledgeModelsApi.fetchPreview appState (Just packageId) [] [] FetchPreviewComplete
-        , PackagesApi.getPackage appState packageId GetPackageComplete
+        [ KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] FetchPreviewComplete
+        , KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageComplete
         ]
 
 
@@ -56,7 +56,7 @@ update msg wrapMsg appState model =
         GetPackageComplete result ->
             initQuestionnaireModel appState <|
                 RequestHelpers.applyResult
-                    { setResult = setPackage
+                    { setResult = setKnowledgeModelPackage
                     , defaultError = gettext "Unable to get knowledge models." appState.locale
                     , model = model
                     , result = result
@@ -68,13 +68,13 @@ update msg wrapMsg appState model =
             handleQuestionnaireMsg qtnMsg wrapMsg appState model
 
         CreateProjectMsg ->
-            case model.package of
-                Success package ->
+            case model.knowledgeModelPackage of
+                Success kmPackage ->
                     let
                         body =
                             E.object
-                                [ ( "name", E.string package.name )
-                                , ( "packageId", E.string package.id )
+                                [ ( "name", E.string kmPackage.name )
+                                , ( "knowledgeModelPackageId", E.string kmPackage.id )
                                 , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
                                 , ( "sharing", QuestionnaireSharing.encode QuestionnaireSharing.AnyoneWithLinkEditQuestionnaire )
                                 , ( "questionTagUuids", E.list E.string [] )
@@ -146,11 +146,11 @@ update msg wrapMsg appState model =
 
 initQuestionnaireModel : AppState -> ( Model, Cmd Wizard.Msgs.Msg ) -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 initQuestionnaireModel appState ( model, cmd ) =
-    case ActionResult.combine model.knowledgeModel model.package of
-        Success ( knowledgeModel, package ) ->
+    case ActionResult.combine model.knowledgeModel model.knowledgeModelPackage of
+        Success ( knowledgeModel, kmPackage ) ->
             let
                 questionnaire =
-                    QuestionnaireQuestionnaire.createQuestionnaireDetail (PackageDetail.toPackage package) knowledgeModel
+                    QuestionnaireQuestionnaire.createQuestionnaireDetail (KnowledgeModelPackageDetail.toPackage kmPackage) knowledgeModel
 
                 ( ( newSeed, mbChapterUuid, questionnaireWithReplies ), scrollCmd ) =
                     case model.mbQuestionUuid of
@@ -193,7 +193,7 @@ handleQuestionnaireMsg msg wrapMsg appState model =
                         Nothing
                         appState
                         { events = []
-                        , branchUuid = Nothing
+                        , kmEditorUuid = Nothing
                         }
                         questionnaireModel
             in

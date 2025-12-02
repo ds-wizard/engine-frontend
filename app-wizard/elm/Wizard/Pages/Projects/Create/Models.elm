@@ -15,8 +15,8 @@ import Form exposing (Form)
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
-import Wizard.Api.Models.PackageDetail exposing (PackageDetail)
-import Wizard.Api.Models.PackageSuggestion exposing (PackageSuggestion)
+import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
 import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
 import Wizard.Data.AppState exposing (AppState)
@@ -28,9 +28,9 @@ type alias Model =
     { selectedProjectTemplateUuid : Maybe Uuid
     , selectedKnowledgeModelId : Maybe String
     , selectedProjectTemplate : ActionResult QuestionnaireSettings
-    , selectedKnowledgeModel : ActionResult PackageDetail
+    , selectedKnowledgeModel : ActionResult KnowledgeModelPackageDetail
     , projectTemplateTypeHintInputModel : TypeHintInput.Model Questionnaire
-    , knowledgeModelTypeHintInputModel : TypeHintInput.Model PackageSuggestion
+    , knowledgeModelTypeHintInputModel : TypeHintInput.Model KnowledgeModelPackageSuggestion
     , anyProjectTemplates : ActionResult Bool
     , anyKnowledgeModels : ActionResult Bool
     , form : Form FormError QuestionnaireCreateForm
@@ -180,7 +180,7 @@ initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
     , selectedProjectTemplate = selectedProjectTemplate
     , selectedKnowledgeModel = selectedKnowledgeModel
     , projectTemplateTypeHintInputModel = TypeHintInput.init "templateId"
-    , knowledgeModelTypeHintInputModel = TypeHintInput.init "packageId"
+    , knowledgeModelTypeHintInputModel = TypeHintInput.init "knowledgeModelPackageId"
     , anyProjectTemplates = loadProjectTemplates
     , anyKnowledgeModels = loadKnowledgeModels
     , form = QuestionnaireCreateForm.init appState QuestionnaireCreateForm.TemplateValidationMode selectedProjectTemplateUuid selectedKnowledgeModelId

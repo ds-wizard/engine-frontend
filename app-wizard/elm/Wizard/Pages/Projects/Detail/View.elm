@@ -420,7 +420,7 @@ viewProjectContent appState route model questionnaire =
                         , isKmEditor = False
                         }
                         { events = []
-                        , branchUuid = Nothing
+                        , kmEditorUuid = Nothing
                         }
                         qm
             in
