@@ -12,7 +12,7 @@ module Wizard.Components.Questionnaire.History exposing
 import ActionResult exposing (ActionResult)
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
-import Common.Components.FontAwesome exposing (fa, faDelete, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
+import Common.Components.FontAwesome exposing (fa, faDelete, faDetailShowAll, faEdit, faKmAnswer, faKmChoice, faQuestionnaire, faQuestionnaireHistoryCreateDocument, faQuestionnaireHistoryRevert)
 import Common.Components.Page as Page
 import Common.Utils.FileIcon as FileIcon
 import Common.Utils.Markdown as Markdown
@@ -24,6 +24,7 @@ import Html exposing (Html, a, br, div, em, h5, img, input, label, li, span, str
 import Html.Attributes exposing (checked, class, src, type_)
 import Html.Events exposing (onCheck, onClick)
 import Html.Extra as Html
+import Html.Lazy as Lazy
 import List.Extra as List
 import Maybe.Extra as Maybe
 import String.Format as String
@@ -56,6 +57,7 @@ type alias Model =
     { expandedDays : List String
     , dropdownStates : Dict String Dropdown.State
     , namedOnly : Bool
+    , viewAll : Bool
     }
 
 
@@ -77,6 +79,7 @@ init appState =
     { expandedDays = [ identifier ]
     , dropdownStates = Dict.empty
     , namedOnly = False
+    , viewAll = False
     }
 
 
@@ -94,6 +97,7 @@ type Msg
     | SetVersionDateCollapsed String
     | DropdownMsg String Dropdown.State
     | SetNamedOnly Bool
+    | SetViewAll Bool
 
 
 update : Msg -> Model -> Model
@@ -110,6 +114,9 @@ update msg model =
 
         SetNamedOnly namedOnly ->
             { model | namedOnly = namedOnly }
+
+        SetViewAll viewAll ->
+            { model | viewAll = viewAll }
 
 
 
@@ -146,12 +153,20 @@ type alias ViewConfig msg =
 
 view : AppState -> ViewConfig msg -> Model -> ActionResult ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
 view appState cfg model versionsAndEvents =
-    Page.actionResultView appState (viewHistory appState cfg model) versionsAndEvents
+    Page.actionResultView appState (viewHistoryLazy appState cfg model) versionsAndEvents
+
+
+viewHistoryLazy : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+viewHistoryLazy appState cfg model data =
+    Lazy.lazy (always (viewHistory appState cfg model data)) data
 
 
 viewHistory : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
 viewHistory appState cfg model ( versions, events ) =
     let
+        eventLimit =
+            100
+
         filterVersions =
             if model.namedOnly then
                 List.filter (isVersion versions)
@@ -162,8 +177,16 @@ viewHistory appState cfg model ( versions, events ) =
         filterEvents event =
             not (QuestionnaireEvent.isInvisible event)
 
+        takeEvents =
+            if model.viewAll then
+                identity
+
+            else
+                List.take eventLimit
+
         eventGroups =
             events
+                |> takeEvents
                 |> List.filter filterEvents
                 |> filterVersions
                 |> List.foldl (groupEvents appState) []
@@ -183,8 +206,17 @@ viewHistory appState cfg model ( versions, events ) =
                     , span [] [ text (gettext "Named versions only" appState.locale) ]
                     ]
                 ]
+
+        viewAllButton =
+            Html.viewIf (not model.viewAll && List.length events > eventLimit) <|
+                div []
+                    [ a [ onClick (cfg.wrapMsg (SetViewAll True)), class "mt-2 with-icon" ]
+                        [ faDetailShowAll
+                        , text (gettext "View full history" appState.locale)
+                        ]
+                    ]
     in
-    div [ class "history" ] (namedOnlySelect :: eventGroups)
+    div [ class "history" ] (namedOnlySelect :: eventGroups ++ [ viewAllButton ])
 
 
 viewEventsMonthGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> EventsMonthGroup -> Html msg

@@ -69,6 +69,7 @@ import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
 import Html.Extra as Html
+import Html.Lazy as Lazy
 import Json.Decode as D exposing (decodeValue)
 import Json.Decode.Extra as D
 import Json.Encode as E
@@ -2001,7 +2002,7 @@ viewQuestionnaireToolbar appState cfg model =
 
                 hiddenOptionsTooltip =
                     if QuestionnaireViewSettings.anyHidden viewSettings then
-                        tooltipRight "Some options are hidden"
+                        tooltipRight (gettext "Some options are hidden" appState.locale)
 
                     else
                         []
@@ -2172,20 +2173,21 @@ viewQuestionnaireToolbar appState cfg model =
                     [ faSearch ]
                 ]
 
-        todosLength =
-            QuestionnaireQuestionnaire.todosLength model.questionnaire
-
-        todosBadge =
-            if todosLength > 0 then
-                Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
-
-            else
-                Html.nothing
-
         todosButtonVisible =
             Feature.projectTodos appState model.questionnaire
 
-        todosButton =
+        todosButton questionnaire =
+            let
+                todosLength =
+                    QuestionnaireQuestionnaire.todosLength questionnaire
+
+                todosBadge =
+                    if todosLength > 0 then
+                        Badge.danger [ class "rounded-pill" ] [ text (String.fromInt todosLength) ]
+
+                    else
+                        Html.nothing
+            in
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", todosOpen ) ], onClick (SetRightPanel todosPanel) ]
                     [ text (gettext "TODOs" appState.locale)
@@ -2193,20 +2195,21 @@ viewQuestionnaireToolbar appState cfg model =
                     ]
                 ]
 
-        commentsLength =
-            QuestionnaireQuestionnaire.commentsLength model.questionnaire
-
-        commentsBadge =
-            if commentsLength > 0 then
-                Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
-
-            else
-                Html.nothing
-
         commentsOverviewButtonVisible =
             Feature.projectCommentAdd appState model.questionnaire
 
-        commentsOverviewButton =
+        commentsOverviewButton questionnaire =
+            let
+                commentsLength =
+                    QuestionnaireQuestionnaire.commentsLength questionnaire
+
+                commentsBadge =
+                    if commentsLength > 0 then
+                        Badge.secondary [ class "rounded-pill", dataCy "questionnaire_toolbar_comments_count" ] [ text (String.fromInt commentsLength) ]
+
+                    else
+                        Html.nothing
+            in
             div [ class "item-group" ]
                 [ a [ class "item", classList [ ( "selected", commentsOverviewOpen ) ], onClick (SetRightPanel commentsOverviewPanel) ]
                     [ text (gettext "Comments" appState.locale)
@@ -2252,8 +2255,8 @@ viewQuestionnaireToolbar appState cfg model =
             ]
         , div [ class "questionnaire__toolbar__right" ]
             [ navButton warningsButton warningsButtonVisible
-            , navButton todosButton todosButtonVisible
-            , navButton commentsOverviewButton commentsOverviewButtonVisible
+            , navButton (Lazy.lazy todosButton model.questionnaire) todosButtonVisible
+            , navButton (Lazy.lazy commentsOverviewButton model.questionnaire) commentsOverviewButtonVisible
             , navButton versionHistoryButton versionHistoryButtonVisible
             , navButton searchButton searchButtonVisible
             , div [ class "item-group" ]
