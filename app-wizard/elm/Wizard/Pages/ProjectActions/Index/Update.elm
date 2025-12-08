@@ -6,8 +6,8 @@ module Wizard.Pages.ProjectActions.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
-import Wizard.Api.QuestionnaireActions as QuestionnaireActionsApi
+import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
+import Wizard.Api.ProjectActions as ProjectActionsApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState exposing (AppState)
@@ -31,7 +31,7 @@ update msg wrapMsg appState model =
         ToggleEnabled questionnaireAction ->
             ( { model | togglingEnabled = Loading }
             , Cmd.map wrapMsg <|
-                QuestionnaireActionsApi.putQuestionnaireAction appState
+                ProjectActionsApi.put appState
                     { questionnaireAction | enabled = not questionnaireAction.enabled }
                     ToggleEnabledComplete
             )
@@ -49,7 +49,7 @@ update msg wrapMsg appState model =
                 }
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireAction -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg ProjectAction -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( questionnaireActions, cmd ) =
@@ -64,9 +64,9 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireAction
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig ProjectAction
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnaireActionsApi.getQuestionnaireActions appState
+    { getRequest = ProjectActionsApi.getList appState
     , getError = gettext "Unable to get project actions." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectActionsIndexWithFilters

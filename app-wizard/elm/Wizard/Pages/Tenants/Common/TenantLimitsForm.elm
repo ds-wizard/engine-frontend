@@ -38,7 +38,7 @@ init tenantDetail =
             , ( "knowledgeModelEditors", Field.int tenantDetail.usage.knowledgeModelEditors.max )
             , ( "knowledgeModels", Field.int tenantDetail.usage.knowledgeModels.max )
             , ( "locales", Field.int tenantDetail.usage.locales.max )
-            , ( "questionnaires", Field.int tenantDetail.usage.questionnaires.max )
+            , ( "questionnaires", Field.int tenantDetail.usage.projects.max )
             , ( "storage", Field.int tenantDetail.usage.storage.max )
             , ( "users", Field.int tenantDetail.usage.users.max )
             ]

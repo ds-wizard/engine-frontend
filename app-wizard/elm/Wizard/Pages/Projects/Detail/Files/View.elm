@@ -9,8 +9,8 @@ import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import String.Format as String
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
+import Wizard.Api.Models.ProjectFile exposing (ProjectFile)
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -22,25 +22,25 @@ import Wizard.Pages.ProjectFiles.Routes exposing (Route(..))
 import Wizard.Pages.Projects.Detail.Files.Models exposing (Model)
 import Wizard.Pages.Projects.Detail.Files.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Utils.QuestionnaireUtils as QuestionnaireUtils
+import Wizard.Utils.ProjectUtils as ProjectUtils
 
 
-view : AppState -> QuestionnaireCommon -> Model -> Html Msg
-view appState questionnaire model =
+view : AppState -> ProjectCommon -> Model -> Html Msg
+view appState project model =
     div [ class "Projects__Detail__Content" ]
         [ div [ class "container my-4" ]
-            [ Listing.view appState (listingConfig appState questionnaire) model.questionnaireFiles
+            [ Listing.view appState (listingConfig appState project) model.projectFiles
             , deleteModal appState model
             ]
         ]
 
 
-listingConfig : AppState -> QuestionnaireCommon -> ViewConfig QuestionnaireFile Msg
-listingConfig appState questionnaire =
+listingConfig : AppState -> ProjectCommon -> ViewConfig ProjectFile Msg
+listingConfig appState project =
     { title = listingTitle
     , description = listingDescription appState
     , itemAdditionalData = always Nothing
-    , dropdownItems = listingActions appState questionnaire
+    , dropdownItems = listingActions appState project
     , textTitle = .fileName
     , emptyText = gettext "There are no project files." appState.locale
     , updated =
@@ -62,11 +62,11 @@ listingConfig appState questionnaire =
     }
 
 
-iconView : QuestionnaireFile -> Html msg
-iconView questionnaireFile =
+iconView : ProjectFile -> Html msg
+iconView projectFile =
     let
         icon =
-            FileIcon.getFileIcon questionnaireFile.fileName questionnaireFile.contentType
+            FileIcon.getFileIcon projectFile.fileName projectFile.contentType
     in
     ItemIcon.iconFa
         { icon = fa icon
@@ -74,19 +74,19 @@ iconView questionnaireFile =
         }
 
 
-listingTitle : QuestionnaireFile -> Html Msg
-listingTitle questionnaireFile =
+listingTitle : ProjectFile -> Html Msg
+listingTitle projectFile =
     span []
-        [ a [ onClick (DownloadFile questionnaireFile) ] [ text questionnaireFile.fileName ]
+        [ a [ onClick (DownloadFile projectFile) ] [ text projectFile.fileName ]
         ]
 
 
-listingDescription : AppState -> QuestionnaireFile -> Html Msg
-listingDescription appState questionnaireFile =
+listingDescription : AppState -> ProjectFile -> Html Msg
+listingDescription appState projectFile =
     let
         userFragment =
             span [ class "fragment" ] <|
-                case questionnaireFile.createdBy of
+                case projectFile.createdBy of
                     Just user ->
                         [ UserIcon.viewSmall user
                         , text (User.fullName user)
@@ -96,37 +96,37 @@ listingDescription appState questionnaireFile =
                         [ text (gettext "Anonymous user" appState.locale) ]
     in
     span []
-        [ span [ class "fragment" ] [ text (ByteUnits.toReadable questionnaireFile.fileSize) ]
+        [ span [ class "fragment" ] [ text (ByteUnits.toReadable projectFile.fileSize) ]
         , span [ class "fragment" ]
-            [ linkTo (Routes.projectsDetail questionnaireFile.questionnaire.uuid)
+            [ linkTo (Routes.projectsDetail projectFile.project.uuid)
                 []
-                [ text questionnaireFile.questionnaire.name ]
+                [ text projectFile.project.name ]
             ]
         , userFragment
         ]
 
 
-listingActions : AppState -> QuestionnaireCommon -> QuestionnaireFile -> List (ListingDropdownItem Msg)
-listingActions appState questionnaire questionnaireFile =
+listingActions : AppState -> ProjectCommon -> ProjectFile -> List (ListingDropdownItem Msg)
+listingActions appState project projectFile =
     let
         downloadFile =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faDownload
                 , label = gettext "Download" appState.locale
-                , msg = ListingActionMsg (DownloadFile questionnaireFile)
+                , msg = ListingActionMsg (DownloadFile projectFile)
                 , dataCy = "download"
                 }
 
         deleteFileVisible =
-            QuestionnaireUtils.isEditor appState questionnaire
+            ProjectUtils.isEditor appState project
 
         deleteFile =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faDelete
                 , label = gettext "Delete" appState.locale
-                , msg = ListingActionMsg (ShowHideDeleteFile (Just questionnaireFile))
+                , msg = ListingActionMsg (ShowHideDeleteFile (Just projectFile))
                 , dataCy = "delete"
                 }
 
@@ -142,7 +142,7 @@ deleteModal : AppState -> Model -> Html Msg
 deleteModal appState model =
     let
         ( visible, fileName ) =
-            case model.questionnaireFileToBeDeleted of
+            case model.projectFileToBeDeleted of
                 Just file ->
                     ( True, file.fileName )
 
@@ -161,7 +161,7 @@ deleteModal appState model =
             Modal.confirmConfig (gettext "Delete file" appState.locale)
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingQuestionnaireFile
+                |> Modal.confirmConfigActionResult model.deletingProjectFile
                 |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteFileConfirm
                 |> Modal.confirmConfigCancelMsg (ShowHideDeleteFile Nothing)
                 |> Modal.confirmConfigDangerous True

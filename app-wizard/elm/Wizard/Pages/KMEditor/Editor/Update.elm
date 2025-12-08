@@ -23,9 +23,9 @@ import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.KnowledgeModelSecrets as KnowledgeModelSecrets
 import Wizard.Api.Models.Event as Event
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
-import Wizard.Api.Models.WebSockets.ClientKnowledgeModelEditorAction as ClientKnowledgeModelEditorAction
-import Wizard.Api.Models.WebSockets.KnowledgeModelEditorAction.SetContentKnowledgeModelEditorAction as SetContentKnowledgeModelEditorAction exposing (SetContentKnowledgeModelEditorAction)
-import Wizard.Api.Models.WebSockets.ServerKnowledgeModelEditorAction as ServerKnowledgeModelEditorAction
+import Wizard.Api.Models.WebSockets.ClientKnowledgeModelEditorMessage as ClientKnowledgeModelEditorMessage
+import Wizard.Api.Models.WebSockets.KnowledgeModelEditorMessage.SetContentKnowledgeModelEditorMessage as SetContentKnowledgeModelEditorMessage exposing (SetContentKnowledgeModelEditorMessage)
+import Wizard.Api.Models.WebSockets.ServerKnowledgeModelEditorMessage as ServerKnowledgeModelEditorMessage
 import Wizard.Api.Prefabs as PrefabsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -342,7 +342,7 @@ update wrapMsg msg appState model =
                                 event
 
                     wsEvent =
-                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent
+                        SetContentKnowledgeModelEditorMessage.AddKnowledgeModelEditorWebSocketEvent
                             { uuid = wsEventUuid
                             , event = squashedEvent
                             }
@@ -371,7 +371,7 @@ update wrapMsg msg appState model =
             else
                 let
                     wsEvent =
-                        SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent
+                        SetContentKnowledgeModelEditorMessage.AddKnowledgeModelEditorWebSocketEvent
                             { uuid = wsEventUuid
                             , event = event
                             }
@@ -381,8 +381,8 @@ update wrapMsg msg appState model =
 
                     wsCmd =
                         wsEvent
-                            |> ClientKnowledgeModelEditorAction.SetContent
-                            |> ClientKnowledgeModelEditorAction.encode
+                            |> ClientKnowledgeModelEditorMessage.SetContent
+                            |> ClientKnowledgeModelEditorMessage.encode
                             |> WebSocket.send model.websocket
 
                     navigateCmd =
@@ -409,13 +409,13 @@ update wrapMsg msg appState model =
                     let
                         wsCmd =
                             event
-                                |> ClientKnowledgeModelEditorAction.SetContent
-                                |> ClientKnowledgeModelEditorAction.encode
+                                |> ClientKnowledgeModelEditorMessage.SetContent
+                                |> ClientKnowledgeModelEditorMessage.encode
                                 |> WebSocket.send model.websocket
                     in
                     Cmd.batch
                         [ wsCmd
-                        , Task.dispatch (EventAddSavingUuid (SetContentKnowledgeModelEditorAction.getUuid event) entityUuid)
+                        , Task.dispatch (EventAddSavingUuid (SetContentKnowledgeModelEditorMessage.getUuid event) entityUuid)
                         ]
 
                 ( debounce, cmd ) =
@@ -460,8 +460,8 @@ update wrapMsg msg appState model =
 
                 wsCmd =
                     event
-                        |> ClientKnowledgeModelEditorAction.SetReplies
-                        |> ClientKnowledgeModelEditorAction.encode
+                        |> ClientKnowledgeModelEditorMessage.SetReplies
+                        |> ClientKnowledgeModelEditorMessage.encode
                         |> WebSocket.send model.websocket
             in
             ( newSeed, addSavingActionUuid eventUuid model, wsCmd )
@@ -504,20 +504,20 @@ handleWebSocketMsg websocketMsg appState model =
             , Cmd.batch [ clearUnloadMessageCmd, navigateCmd ]
             )
     in
-    case WebSocket.receive (WebSocketServerAction.decoder ServerKnowledgeModelEditorAction.decoder) websocketMsg model.websocket of
+    case WebSocket.receive (WebSocketServerAction.decoder ServerKnowledgeModelEditorMessage.decoder) websocketMsg model.websocket of
         WebSocket.Message serverAction ->
             case serverAction of
                 WebSocketServerAction.Success message ->
                     case message of
-                        ServerKnowledgeModelEditorAction.SetUserList users ->
+                        ServerKnowledgeModelEditorMessage.SetUserList users ->
                             ( appState.seed, { model | onlineUsers = users }, Cmd.none )
 
-                        ServerKnowledgeModelEditorAction.SetContent setContentKnowledgeModelEditorAction ->
+                        ServerKnowledgeModelEditorMessage.SetContent setContentKnowledgeModelEditorAction ->
                             case setContentKnowledgeModelEditorAction of
-                                SetContentKnowledgeModelEditorAction.AddKnowledgeModelEditorWebSocketEvent data ->
+                                SetContentKnowledgeModelEditorMessage.AddKnowledgeModelEditorWebSocketEvent data ->
                                     updateModel data
 
-                        ServerKnowledgeModelEditorAction.SetReplies event ->
+                        ServerKnowledgeModelEditorMessage.SetReplies event ->
                             let
                                 ( newModel, _ ) =
                                     removeSavingActionUuid event.uuid model
@@ -571,7 +571,7 @@ debounceConfig appState entityUuid =
     }
 
 
-getDebounceModel : String -> Model -> Debounce.Debounce SetContentKnowledgeModelEditorAction
+getDebounceModel : String -> Model -> Debounce.Debounce SetContentKnowledgeModelEditorMessage
 getDebounceModel entityUuid model =
     Maybe.withDefault Debounce.init (Dict.get entityUuid model.eventsWebsocketDebounce)
 

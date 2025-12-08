@@ -31,7 +31,7 @@ import Wizard.Api.Models.KnowledgeModel.Reference exposing (Reference(..))
 import Wizard.Api.Models.KnowledgeModel.Reference.CrossReferenceData exposing (CrossReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData exposing (ResourcePageReferenceData)
 import Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing (URLReferenceData)
-import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Questionnaire as Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
@@ -45,12 +45,12 @@ type DefaultQuestionnaireRendererConfig
 
 type alias DefaultQuestionnaireRendererConfigData =
     { knowledgeModel : KnowledgeModel
-    , questionnaire : QuestionnaireQuestionnaire
+    , questionnaire : ProjectQuestionnaire
     , resourcePageToRoute : String -> Wizard.Routes.Route
     }
 
 
-config : QuestionnaireQuestionnaire -> DefaultQuestionnaireRendererConfig
+config : ProjectQuestionnaire -> DefaultQuestionnaireRendererConfig
 config questionnaire =
     DefaultQuestionnaireRendererConfig
         { knowledgeModel = questionnaire.knowledgeModel

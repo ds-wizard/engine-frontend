@@ -5,20 +5,20 @@ module Wizard.Pages.Projects.Detail.Files.Models exposing
 
 import ActionResult exposing (ActionResult)
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
-import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
+import Wizard.Api.Models.ProjectFile exposing (ProjectFile)
 import Wizard.Components.Listing.Models as Listing
 
 
 type alias Model =
-    { questionnaireFiles : Listing.Model QuestionnaireFile
-    , questionnaireFileToBeDeleted : Maybe QuestionnaireFile
-    , deletingQuestionnaireFile : ActionResult String
+    { projectFiles : Listing.Model ProjectFile
+    , projectFileToBeDeleted : Maybe ProjectFile
+    , deletingProjectFile : ActionResult String
     }
 
 
 initialModel : PaginationQueryString -> Model
 initialModel paginationQueryString =
-    { questionnaireFiles = Listing.initialModel paginationQueryString
-    , questionnaireFileToBeDeleted = Nothing
-    , deletingQuestionnaireFile = ActionResult.Unset
+    { projectFiles = Listing.initialModel paginationQueryString
+    , projectFileToBeDeleted = Nothing
+    , deletingProjectFile = ActionResult.Unset
     }

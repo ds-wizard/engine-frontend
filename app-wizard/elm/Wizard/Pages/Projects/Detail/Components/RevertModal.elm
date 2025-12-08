@@ -19,8 +19,8 @@ import Html exposing (Html, br, p, strong, text)
 import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
 
 
@@ -29,7 +29,7 @@ import Wizard.Data.AppState exposing (AppState)
 
 
 type alias Model =
-    { mbEvent : Maybe QuestionnaireEvent
+    { mbEvent : Maybe ProjectEvent
     , revertResult : ActionResult ()
     }
 
@@ -41,7 +41,7 @@ init =
     }
 
 
-setEvent : QuestionnaireEvent -> Model -> Model
+setEvent : ProjectEvent -> Model -> Model
 setEvent event model =
     { model
         | mbEvent = Just event
@@ -60,7 +60,7 @@ type Msg
 
 
 type alias UpdateConfig =
-    { questionnaireUuid : Uuid
+    { projectUuid : Uuid
     }
 
 
@@ -72,7 +72,7 @@ update cfg appState msg model =
                 Just event ->
                     let
                         cmd =
-                            QuestionnairesApi.postRevert appState cfg.questionnaireUuid (QuestionnaireEvent.getUuid event) PostRevertVersionComplete
+                            ProjectsApi.postRevert appState cfg.projectUuid (ProjectEvent.getUuid event) PostRevertVersionComplete
                     in
                     ( { model | revertResult = Loading }
                     , cmd
@@ -103,7 +103,7 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         datetime =
-            Maybe.unwrap "" (QuestionnaireEvent.getCreatedAt >> TimeUtils.toReadableDateTime appState.timeZone) model.mbEvent
+            Maybe.unwrap "" (ProjectEvent.getCreatedAt >> TimeUtils.toReadableDateTime appState.timeZone) model.mbEvent
 
         content =
             [ Flash.warning (gettext "Heads up! This action cannot be undone." appState.locale)

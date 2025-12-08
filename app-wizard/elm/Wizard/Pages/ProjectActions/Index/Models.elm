@@ -5,12 +5,12 @@ module Wizard.Pages.ProjectActions.Index.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
-import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
+import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
 import Wizard.Components.Listing.Models as Listing
 
 
 type alias Model =
-    { questionnaireActions : Listing.Model QuestionnaireAction
+    { questionnaireActions : Listing.Model ProjectAction
     , togglingEnabled : ActionResult String
     }
 

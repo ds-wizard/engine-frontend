@@ -11,7 +11,7 @@ import Common.Data.PaginationQueryFilters.FilterOperator exposing (FilterOperato
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Debouncer.Extra as Debounce exposing (Debouncer)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.Project exposing (Project)
 import Wizard.Components.Listing.Models as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Models as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Models as DeleteProjectModal
@@ -20,7 +20,7 @@ import Wizard.Pages.Projects.Routes exposing (indexRouteIsTemplateFilterId, inde
 
 
 type alias Model =
-    { questionnaires : Listing.Model Questionnaire
+    { questionnaires : Listing.Model Project
     , deletingMigration : ActionResult String
     , deleteModalModel : DeleteProjectModal.Model
     , cloneModalModel : CloneProjectModal.Model

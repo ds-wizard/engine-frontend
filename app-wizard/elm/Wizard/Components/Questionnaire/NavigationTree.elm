@@ -20,8 +20,8 @@ import Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Data.AppState exposing (AppState)
 
 
@@ -33,7 +33,7 @@ isOpen path collapsedItems =
 type alias ViewConfig msg =
     { activeChapterUuid : Maybe String
     , nonDesirableQuestions : Bool
-    , questionnaire : QuestionnaireQuestionnaire
+    , questionnaire : ProjectQuestionnaire
     , openChapter : String -> msg
     , scrollToPath : String -> msg
     , collapseItem : String -> msg
@@ -85,11 +85,11 @@ viewChapter appState cfg order chapter =
         ]
 
 
-viewChapterIndication : QuestionnaireQuestionnaire -> Chapter -> Html msg
+viewChapterIndication : ProjectQuestionnaire -> Chapter -> Html msg
 viewChapterIndication questionnaire chapter =
     let
         unanswered =
-            QuestionnaireQuestionnaire.calculateUnansweredQuestionsForChapter questionnaire chapter
+            ProjectQuestionnaire.calculateUnansweredQuestionsForChapter questionnaire chapter
     in
     if unanswered > 0 then
         Badge.light [ class "rounded-pill" ] [ text <| String.fromInt unanswered ]
@@ -219,7 +219,7 @@ viewListQuestionItem appState cfg itemTemplateQuestions currentPath index itemUu
                 ul [] (List.map (viewQuestion appState cfg (currentPath ++ [ itemUuid ])) itemTemplateQuestions)
 
         mbItemTitle =
-            QuestionnaireQuestionnaire.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
+            ProjectQuestionnaire.getItemTitle cfg.questionnaire itemPath itemTemplateQuestions
 
         defaultItemTitle =
             i [] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ]

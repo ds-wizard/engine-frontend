@@ -10,7 +10,7 @@ import Html exposing (Html, a, div, p, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import String.Format as String
-import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
+import Wizard.Api.Models.ProjectFile exposing (ProjectFile)
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -35,7 +35,7 @@ view appState model =
         ]
 
 
-listingConfig : AppState -> ViewConfig QuestionnaireFile Msg
+listingConfig : AppState -> ViewConfig ProjectFile Msg
 listingConfig appState =
     { title = listingTitle
     , description = listingDescription appState
@@ -62,7 +62,7 @@ listingConfig appState =
     }
 
 
-iconView : QuestionnaireFile -> Html msg
+iconView : ProjectFile -> Html msg
 iconView questionnaireFile =
     let
         icon =
@@ -74,14 +74,14 @@ iconView questionnaireFile =
         }
 
 
-listingTitle : QuestionnaireFile -> Html Msg
+listingTitle : ProjectFile -> Html Msg
 listingTitle questionnaireFile =
     span []
         [ a [ onClick (DownloadFile questionnaireFile) ] [ text questionnaireFile.fileName ]
         ]
 
 
-listingDescription : AppState -> QuestionnaireFile -> Html Msg
+listingDescription : AppState -> ProjectFile -> Html Msg
 listingDescription appState questionnaireFile =
     let
         userFragment =
@@ -98,15 +98,15 @@ listingDescription appState questionnaireFile =
     span []
         [ span [ class "fragment" ] [ text (ByteUnits.toReadable questionnaireFile.fileSize) ]
         , span [ class "fragment" ]
-            [ linkTo (Routes.projectsDetail questionnaireFile.questionnaire.uuid)
+            [ linkTo (Routes.projectsDetail questionnaireFile.project.uuid)
                 []
-                [ text questionnaireFile.questionnaire.name ]
+                [ text questionnaireFile.project.name ]
             ]
         , userFragment
         ]
 
 
-listingActions : AppState -> QuestionnaireFile -> List (ListingDropdownItem Msg)
+listingActions : AppState -> ProjectFile -> List (ListingDropdownItem Msg)
 listingActions appState questionnaireFile =
     let
         downloadFile =

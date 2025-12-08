@@ -3,7 +3,7 @@ module Wizard.Api.Models.TypeHintRequest exposing
     , encode
     , fromKmEditorIntegration
     , fromKmEditorQuestion
-    , fromQuestionnaire
+    , fromProject
     )
 
 import Json.Encode as E
@@ -13,7 +13,7 @@ import Uuid exposing (Uuid)
 type TypeHintRequest
     = KnowledgeModelEditorIntegration KnowledgeModelEditorIntegrationData
     | KnowledgeModelEditorQuestion KnowledgeModelEditorQuestionData
-    | Questionnaire QuestionnaireData
+    | Project ProjectData
 
 
 fromKmEditorIntegration : Uuid -> Uuid -> TypeHintRequest
@@ -26,9 +26,9 @@ fromKmEditorQuestion kmEditorUuid questionUuid q =
     KnowledgeModelEditorQuestion { knowledgeModelEditorUuid = kmEditorUuid, questionUuid = questionUuid, q = q }
 
 
-fromQuestionnaire : Uuid -> Uuid -> String -> TypeHintRequest
-fromQuestionnaire questionnaireUuid questionUuid q =
-    Questionnaire { questionnaireUuid = questionnaireUuid, questionUuid = questionUuid, q = q }
+fromProject : Uuid -> Uuid -> String -> TypeHintRequest
+fromProject projectUuid questionUuid q =
+    Project { projectUuid = projectUuid, questionUuid = questionUuid, q = q }
 
 
 type alias KnowledgeModelEditorIntegrationData =
@@ -44,8 +44,8 @@ type alias KnowledgeModelEditorQuestionData =
     }
 
 
-type alias QuestionnaireData =
-    { questionnaireUuid : Uuid
+type alias ProjectData =
+    { projectUuid : Uuid
     , questionUuid : Uuid
     , q : String
     }
@@ -69,10 +69,10 @@ encode typeHintRequest =
                 , ( "q", E.string data.q )
                 ]
 
-        Questionnaire data ->
+        Project data ->
             E.object
-                [ ( "requestType", E.string "QuestionnaireTypeHintRequest" )
-                , ( "questionnaireUuid", Uuid.encode data.questionnaireUuid )
+                [ ( "requestType", E.string "ProjectTypeHintRequest" )
+                , ( "projectUuid", Uuid.encode data.projectUuid )
                 , ( "questionUuid", Uuid.encode data.questionUuid )
                 , ( "q", E.string data.q )
                 ]

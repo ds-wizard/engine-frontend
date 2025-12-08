@@ -80,9 +80,9 @@ formContent appState model =
 formContentSelectedProjectTemplate : AppState -> Model -> Html Msg
 formContentSelectedProjectTemplate appState model =
     let
-        viewProjectTemplate questionnaire =
+        viewProjectTemplate project =
             div [ class "bg-light px-2 py-1 rounded" ]
-                [ TypeHintInputItem.questionnaireSuggestion questionnaire ]
+                [ TypeHintInputItem.projectSuggestion project ]
 
         projectTemplateBlock =
             ActionResultBlock.inlineView
@@ -180,7 +180,7 @@ projectTemplateFormFields appState model =
         projectTemplateInput =
             let
                 cfg =
-                    { viewItem = TypeHintInputItem.questionnaireSuggestion
+                    { viewItem = TypeHintInputItem.projectSuggestion
                     , wrapMsg = ProjectTemplateTypeHintInputMsg
                     , nothingSelectedItem = text "--"
                     , clearEnabled = True

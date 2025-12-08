@@ -17,13 +17,13 @@ import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
-import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
-import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
+import Wizard.Api.Models.ProjectMigration exposing (ProjectMigration)
+import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.Projects.Common.QuestionnaireMigrationCreateForm as QuestionnaireMigrationCreateForm
+import Wizard.Pages.Projects.Common.ProjectMigrationCreateForm as ProjectMigrationCreateForm
 import Wizard.Pages.Projects.CreateMigration.Models exposing (Model)
 import Wizard.Pages.Projects.CreateMigration.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -32,7 +32,7 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    QuestionnairesApi.getQuestionnaireSettings appState uuid GetQuestionnaireCompleted
+    ProjectsApi.getSettings appState uuid GetQuestionnaireCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -48,7 +48,7 @@ update wrapMsg msg appState model =
             ( { model | useAllQuestions = value }, Cmd.none )
 
         GetQuestionnaireCompleted result ->
-            handleGetQuestionnaireCompleted appState wrapMsg model result
+            handleGetProjectCompleted appState wrapMsg model result
 
         Cancel ->
             ( model, Window.historyBack (Routing.toUrl (Routes.projectsIndex appState)) )
@@ -91,21 +91,21 @@ handleRemoveTag model tagUuid =
         { model | selectedTags = List.filter (\t -> t /= tagUuid) model.selectedTags }
 
 
-handleGetQuestionnaireCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError (QuestionnaireDetailWrapper QuestionnaireSettings) -> ( Model, Cmd Wizard.Msgs.Msg )
-handleGetQuestionnaireCompleted appState wrapMsg model result =
+handleGetProjectCompleted : AppState -> (Msg -> Wizard.Msgs.Msg) -> Model -> Result ApiError (ProjectDetailWrapper ProjectSettings) -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetProjectCompleted appState wrapMsg model result =
     let
-        setResult : ActionResult (QuestionnaireDetailWrapper QuestionnaireSettings) -> Model -> Model
+        setResult : ActionResult (ProjectDetailWrapper ProjectSettings) -> Model -> Model
         setResult q m =
             case q of
-                Success questionnaire ->
+                Success project ->
                     { m
-                        | questionnaire = Success questionnaire.data
-                        , selectedTags = questionnaire.data.selectedQuestionTagUuids
-                        , useAllQuestions = List.isEmpty questionnaire.data.selectedQuestionTagUuids
+                        | project = Success project.data
+                        , selectedTags = project.data.selectedQuestionTagUuids
+                        , useAllQuestions = List.isEmpty project.data.selectedQuestionTagUuids
                     }
 
                 _ ->
-                    { m | questionnaire = ActionResult.map .data q }
+                    { m | project = ActionResult.map .data q }
     in
     loadCurrentPackage appState wrapMsg <|
         RequestHelpers.applyResult
@@ -165,18 +165,18 @@ handleForm wrapMsg formMsg appState model =
                         model.selectedTags
 
                 body =
-                    QuestionnaireMigrationCreateForm.encode selectedTags form
+                    ProjectMigrationCreateForm.encode selectedTags form
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        QuestionnairesApi.fetchQuestionnaireMigration appState model.questionnaireUuid body PostMigrationCompleted
+                        ProjectsApi.fetchMigration appState model.projectUuid body PostMigrationCompleted
             in
             ( { model | savingMigration = Loading }, cmd )
 
         _ ->
             let
                 newModel =
-                    { model | form = Form.update QuestionnaireMigrationCreateForm.validation formMsg model.form }
+                    { model | form = Form.update ProjectMigrationCreateForm.validation formMsg model.form }
             in
             case getSelectedPackageId newModel of
                 Just kmPackageId ->
@@ -212,17 +212,17 @@ handleSelectPackage wrapMsg appState model kmPackage =
         , selectedPackageDetail = Loading
         , knowledgeModelPreview = Unset
         , selectedTags = []
-        , form = Form.update QuestionnaireMigrationCreateForm.validation formMsg model.form
+        , form = Form.update ProjectMigrationCreateForm.validation formMsg model.form
       }
     , getSelectedPackageCmd
     )
 
 
-handlePostMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostMigrationCompleted : AppState -> Model -> Result ApiError ProjectMigration -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePostMigrationCompleted appState model result =
     case result of
         Ok migration ->
-            ( model, cmdNavigate appState <| Routes.projectsMigration migration.newQuestionnaire.uuid )
+            ( model, cmdNavigate appState <| Routes.projectsMigration migration.newProject.uuid )
 
         Err error ->
             ( { model | savingMigration = ApiError.toActionResult appState (gettext "Project migration could not be created." appState.locale) error }
@@ -271,12 +271,12 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
 
 loadCurrentPackage : AppState -> (Msg -> Wizard.Msgs.Msg) -> ( Model, Cmd Wizard.Msgs.Msg ) -> ( Model, Cmd Wizard.Msgs.Msg )
 loadCurrentPackage appState wrapMsg ( model, cmd ) =
-    case model.questionnaire of
-        Success questionnaire ->
+    case model.project of
+        Success project ->
             let
                 getCurrentPackageCmd =
                     Cmd.map wrapMsg <|
-                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState questionnaire.knowledgeModelPackage.id GetCurrentKnowledgeModelPackageCompleted
+                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState project.knowledgeModelPackage.id GetCurrentKnowledgeModelPackageCompleted
             in
             ( model, Cmd.batch [ cmd, getCurrentPackageCmd ] )
 
@@ -305,8 +305,8 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
 
                 form =
                     Maybe.unwrap
-                        QuestionnaireMigrationCreateForm.initEmpty
-                        QuestionnaireMigrationCreateForm.init
+                        ProjectMigrationCreateForm.initEmpty
+                        ProjectMigrationCreateForm.init
                         mbLatestPackageId
 
                 packageSuggestion =

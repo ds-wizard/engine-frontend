@@ -6,17 +6,17 @@ import Form
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
-import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
-import Wizard.Api.Models.QuestionnaireMigration exposing (QuestionnaireMigration)
-import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
+import Wizard.Api.Models.ProjectMigration exposing (ProjectMigration)
+import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 
 
 type Msg
-    = GetQuestionnaireCompleted (Result ApiError (QuestionnaireDetailWrapper QuestionnaireSettings))
+    = GetQuestionnaireCompleted (Result ApiError (ProjectDetailWrapper ProjectSettings))
     | Cancel
     | FormMsg Form.Msg
     | SelectKnowledgeModelPackage KnowledgeModelPackageSuggestion
-    | PostMigrationCompleted (Result ApiError QuestionnaireMigration)
+    | PostMigrationCompleted (Result ApiError ProjectMigration)
     | GetKnowledgeModelPreviewCompleted (Result ApiError KnowledgeModel)
     | GetCurrentKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)
     | GetSelectedKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)

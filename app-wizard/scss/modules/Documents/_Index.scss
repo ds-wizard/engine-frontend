@@ -1,7 +1,7 @@
 @import '../../variables';
 
 .Documents__Index {
-    .questionnaire-filter {
+    .project-filter {
         @include border-radius($border-radius);
         padding: .375rem .75rem;
         border: 1px solid #ced4da;
@@ -10,7 +10,7 @@
         justify-content: center;
         margin-right: 0 !important;
 
-        .questionnaire-name {
+        .project-name {
             flex: 1 1;
             overflow: hidden;
             text-overflow: ellipsis;

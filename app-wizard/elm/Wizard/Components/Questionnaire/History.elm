@@ -33,21 +33,21 @@ import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.ClearReplyData exposing (ClearReplyData)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetPhaseData exposing (SetPhaseData)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData exposing (SetReplyData)
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..))
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Wizard.Api.Models.QuestionnaireVersion as QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent.ClearReplyData exposing (ClearReplyData)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetPhaseData exposing (SetPhaseData)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData exposing (SetReplyData)
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue exposing (ReplyValue(..))
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
+import Wizard.Api.Models.ProjectVersion as ProjectVersion exposing (ProjectVersion)
 import Wizard.Api.Models.User as User
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..))
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
-import Wizard.Utils.QuestionnaireUtils as QuestionnaireUtils
+import Wizard.Utils.ProjectUtils as ProjectUtils
 
 
 
@@ -135,30 +135,30 @@ subscriptions model =
 
 
 type alias ViewConfig msg =
-    { questionnaire : QuestionnaireQuestionnaire
+    { questionnaire : ProjectQuestionnaire
     , wrapMsg : Msg -> msg
     , scrollMsg : String -> msg
     , createVersionMsg : Uuid -> msg
-    , renameVersionMsg : QuestionnaireVersion -> msg
-    , deleteVersionMsg : QuestionnaireVersion -> msg
+    , renameVersionMsg : ProjectVersion -> msg
+    , deleteVersionMsg : ProjectVersion -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
-    , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
+    , revertQuestionnaireMsg : Maybe (ProjectEvent -> msg)
     , loadMoreMsg : Maybe msg
     , loadingMore : ActionResult ()
     }
 
 
-view : AppState -> ViewConfig msg -> Model -> ActionResult ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+view : AppState -> ViewConfig msg -> Model -> ActionResult ( List ProjectVersion, List ProjectEvent ) -> Html msg
 view appState cfg model versionsAndEvents =
     Page.actionResultView appState (viewHistoryLazy appState cfg model) versionsAndEvents
 
 
-viewHistoryLazy : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+viewHistoryLazy : AppState -> ViewConfig msg -> Model -> ( List ProjectVersion, List ProjectEvent ) -> Html msg
 viewHistoryLazy appState cfg model data =
     Lazy.lazy (always (viewHistory appState cfg model data)) data
 
 
-viewHistory : AppState -> ViewConfig msg -> Model -> ( List QuestionnaireVersion, List QuestionnaireEvent ) -> Html msg
+viewHistory : AppState -> ViewConfig msg -> Model -> ( List ProjectVersion, List ProjectEvent ) -> Html msg
 viewHistory appState cfg model ( versions, events ) =
     let
         filterVersions =
@@ -169,7 +169,7 @@ viewHistory appState cfg model ( versions, events ) =
                 identity
 
         filterEvents event =
-            not (QuestionnaireEvent.isInvisible event)
+            not (ProjectEvent.isInvisible event)
 
         eventGroups =
             events
@@ -213,7 +213,7 @@ viewHistory appState cfg model ( versions, events ) =
     div [ class "history" ] (namedOnlySelect :: eventGroups ++ [ viewAllButton ])
 
 
-viewEventsMonthGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> EventsMonthGroup -> Html msg
+viewEventsMonthGroup : AppState -> ViewConfig msg -> Model -> List ProjectVersion -> List ProjectEvent -> EventsMonthGroup -> Html msg
 viewEventsMonthGroup appState cfg model versions events group =
     let
         yearString =
@@ -231,7 +231,7 @@ viewEventsMonthGroup appState cfg model versions events group =
         ]
 
 
-viewEventsDayGroup : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> Time.Month -> (EventsDayGroup -> String) -> EventsDayGroup -> Html msg
+viewEventsDayGroup : AppState -> ViewConfig msg -> Model -> List ProjectVersion -> List ProjectEvent -> Time.Month -> (EventsDayGroup -> String) -> EventsDayGroup -> Html msg
 viewEventsDayGroup appState cfg model versions events month getIdentifier group =
     let
         monthString =
@@ -266,7 +266,7 @@ viewEventsDayGroup appState cfg model versions events month getIdentifier group 
                 let
                     users =
                         group.events
-                            |> List.map QuestionnaireEvent.getCreatedBy
+                            |> List.map ProjectEvent.getCreatedBy
                             |> List.sortBy (Maybe.unwrap "{" User.fullName)
                             |> List.uniqueBy (Maybe.unwrap "" User.fullName)
                             |> List.map (viewEventUser appState)
@@ -281,24 +281,24 @@ viewEventsDayGroup appState cfg model versions events month getIdentifier group 
     div [ class "history-day" ] content
 
 
-viewEvent : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEvent : AppState -> ViewConfig msg -> Model -> List ProjectVersion -> List ProjectEvent -> ProjectEvent -> Html msg
 viewEvent appState cfg model versions events event =
     div [ class "history-event" ]
         [ viewEventHeader appState cfg model versions events event
         , viewEventBadges appState versions events event
         , viewEventDetail appState cfg event
-        , viewEventUser appState (QuestionnaireEvent.getCreatedBy event)
+        , viewEventUser appState (ProjectEvent.getCreatedBy event)
         ]
 
 
-viewEventHeader : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEventHeader : AppState -> ViewConfig msg -> Model -> List ProjectVersion -> List ProjectEvent -> ProjectEvent -> Html msg
 viewEventHeader appState cfg model versions events event =
     let
         dropdown =
             viewEventHeaderDropdown appState cfg model versions events event
 
         readableTime =
-            TimeUtils.toReadableTime appState.timeZone (QuestionnaireEvent.getCreatedAt event)
+            TimeUtils.toReadableTime appState.timeZone (ProjectEvent.getCreatedAt event)
     in
     div [ class "event-header" ]
         [ text readableTime
@@ -306,17 +306,17 @@ viewEventHeader appState cfg model versions events event =
         ]
 
 
-viewEventHeaderDropdown : AppState -> ViewConfig msg -> Model -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEventHeaderDropdown : AppState -> ViewConfig msg -> Model -> List ProjectVersion -> List ProjectEvent -> ProjectEvent -> Html msg
 viewEventHeaderDropdown appState cfg model versions events event =
     let
         eventUuid =
-            QuestionnaireEvent.getUuid event
+            ProjectEvent.getUuid event
 
         isOwner =
-            QuestionnaireUtils.isOwner appState cfg.questionnaire
+            ProjectUtils.isOwner appState cfg.questionnaire
 
         mbVersion =
-            QuestionnaireVersion.getVersionByEventUuid versions eventUuid
+            ProjectVersion.getVersionByEventUuid versions eventUuid
 
         versionGroup =
             case mbVersion of
@@ -354,7 +354,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                     ]
 
         previewGroup =
-            case ( cfg.previewQuestionnaireEventMsg, QuestionnaireQuestionnaire.isCurrentVersion events eventUuid ) of
+            case ( cfg.previewQuestionnaireEventMsg, ProjectQuestionnaire.isCurrentVersion events eventUuid ) of
                 ( Just viewMsg, False ) ->
                     let
                         viewQuestionnaireAction =
@@ -392,7 +392,7 @@ viewEventHeaderDropdown appState cfg model versions events event =
                             , msg = ListingActionMsg (revertMsg event)
                             , dataCy = "revert"
                             }
-                      , not (QuestionnaireQuestionnaire.isCurrentVersion events eventUuid) && isOwner
+                      , not (ProjectQuestionnaire.isCurrentVersion events eventUuid) && isOwner
                       )
                     ]
 
@@ -427,21 +427,21 @@ viewEventHeaderDropdown appState cfg model versions events event =
         Html.nothing
 
 
-viewEventBadges : AppState -> List QuestionnaireVersion -> List QuestionnaireEvent -> QuestionnaireEvent -> Html msg
+viewEventBadges : AppState -> List ProjectVersion -> List ProjectEvent -> ProjectEvent -> Html msg
 viewEventBadges appState versions events event =
     let
         eventUuid =
-            QuestionnaireEvent.getUuid event
+            ProjectEvent.getUuid event
 
         currentVersionBadge =
-            if QuestionnaireQuestionnaire.isCurrentVersion events eventUuid then
+            if ProjectQuestionnaire.isCurrentVersion events eventUuid then
                 QuestionnaireVersionTag.current appState
 
             else
                 Html.nothing
 
         versionNameBadge =
-            case QuestionnaireVersion.getVersionByEventUuid versions eventUuid of
+            case ProjectVersion.getVersionByEventUuid versions eventUuid of
                 Just version ->
                     QuestionnaireVersionTag.version version
 
@@ -451,22 +451,22 @@ viewEventBadges appState versions events event =
     div [ class "event-badges" ] [ currentVersionBadge, versionNameBadge ]
 
 
-viewEventDetail : AppState -> ViewConfig msg -> QuestionnaireEvent -> Html msg
+viewEventDetail : AppState -> ViewConfig msg -> ProjectEvent -> Html msg
 viewEventDetail appState cfg event =
     let
         mbQuestion =
             Maybe.unwrap Nothing
                 (flip KnowledgeModel.getQuestion cfg.questionnaire.knowledgeModel)
-                (QuestionnaireEvent.getQuestionUuid event)
+                (ProjectEvent.getQuestionUuid event)
     in
     case ( event, mbQuestion ) of
-        ( QuestionnaireEvent.SetReply data, Just question ) ->
+        ( ProjectEvent.SetReply data, Just question ) ->
             viewEventDetailSetReply appState cfg data question
 
-        ( QuestionnaireEvent.ClearReply data, Just question ) ->
+        ( ProjectEvent.ClearReply data, Just question ) ->
             viewEventDetailClearReply appState cfg data question
 
-        ( QuestionnaireEvent.SetPhase data, _ ) ->
+        ( ProjectEvent.SetPhase data, _ ) ->
             viewEventDetailSetLevel appState cfg data
 
         _ ->
@@ -522,12 +522,12 @@ viewEventDetailSetReply appState cfg data question =
         ItemSelectReply itemUuid ->
             let
                 itemLabel =
-                    QuestionnaireQuestionnaire.getItemSelectQuestionValueLabel appState cfg.questionnaire (Question.getUuid question) itemUuid
+                    ProjectQuestionnaire.getItemSelectQuestionValueLabel appState cfg.questionnaire (Question.getUuid question) itemUuid
             in
             eventView [ ( fa "far fa-square-caret-down", itemLabel ) ]
 
         FileReply fileUuid ->
-            case QuestionnaireQuestionnaire.getFile cfg.questionnaire fileUuid of
+            case ProjectQuestionnaire.getFile cfg.questionnaire fileUuid of
                 Just file ->
                     eventView
                         [ ( fa (FileIcon.getFileIcon file.fileName file.contentType)
@@ -601,7 +601,7 @@ type alias EventsMonthGroup =
 
 type alias EventsDayGroup =
     { day : Int
-    , events : List QuestionnaireEvent
+    , events : List ProjectEvent
     }
 
 
@@ -620,17 +620,17 @@ createEventsDayGroupIdentifier year month group =
     yearString ++ "-" ++ monthString ++ "-" ++ dayString
 
 
-groupEvents : AppState -> QuestionnaireEvent -> List EventsMonthGroup -> List EventsMonthGroup
+groupEvents : AppState -> ProjectEvent -> List EventsMonthGroup -> List EventsMonthGroup
 groupEvents appState event groups =
     let
         eventDay =
-            Time.toDay appState.timeZone <| QuestionnaireEvent.getCreatedAt event
+            Time.toDay appState.timeZone <| ProjectEvent.getCreatedAt event
 
         eventMonth =
-            Time.toMonth appState.timeZone <| QuestionnaireEvent.getCreatedAt event
+            Time.toMonth appState.timeZone <| ProjectEvent.getCreatedAt event
 
         eventYear =
-            Time.toYear appState.timeZone <| QuestionnaireEvent.getCreatedAt event
+            Time.toYear appState.timeZone <| ProjectEvent.getCreatedAt event
 
         newMonthGroup =
             { days = []
@@ -678,7 +678,7 @@ groupEvents appState event groups =
     monthGroups ++ [ currentMonthGroupWithEvent ]
 
 
-filterDayEvents : List QuestionnaireVersion -> List QuestionnaireEvent -> List QuestionnaireEvent
+filterDayEvents : List ProjectVersion -> List ProjectEvent -> List ProjectEvent
 filterDayEvents versions events =
     let
         defaultAcc =
@@ -687,15 +687,15 @@ filterDayEvents versions events =
             }
 
         fold event acc =
-            if QuestionnaireEvent.isInvisible event then
+            if ProjectEvent.isInvisible event then
                 acc
 
             else
-                case QuestionnaireEvent.getPath event of
+                case ProjectEvent.getPath event of
                     Just eventPath ->
                         let
                             createdBy =
-                                QuestionnaireEvent.getCreatedBy event
+                                ProjectEvent.getCreatedBy event
                         in
                         if not (isVersion versions event) && Maybe.unwrap False ((==) createdBy) (Dict.get eventPath acc.questions) then
                             acc
@@ -716,6 +716,6 @@ linkToQuestion cfg question path =
     a [ onClick <| cfg.scrollMsg path ] [ text (Question.getTitle question) ]
 
 
-isVersion : List QuestionnaireVersion -> QuestionnaireEvent -> Bool
+isVersion : List ProjectVersion -> ProjectEvent -> Bool
 isVersion questionnaireVersions event =
-    List.any (.eventUuid >> (==) (QuestionnaireEvent.getUuid event)) questionnaireVersions
+    List.any (.eventUuid >> (==) (ProjectEvent.getUuid event)) questionnaireVersions

@@ -10,9 +10,9 @@ import Html exposing (Html, div, hr)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Html.Keyed
-import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
-import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
+import Wizard.Api.Models.Project.ProjectCreation as ProjectCreation
+import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing
+import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Common.Forms.EditableQuestionnairesConfigForm exposing (EditableQuestionnairesConfigForm)
 import Wizard.Pages.Settings.Generic.Msgs exposing (Msg(..))
@@ -89,17 +89,17 @@ formView appState form =
         []
         ([ ( "questionnaireVisibilityEnabled", FormGroup.toggle form "questionnaireVisibilityEnabled" (gettext "Project Visibility" appState.locale) )
          , ( "questionnaireVisibilityEnabled-extra", FormExtra.mdAfter (gettext "If enabled, project visibility can be set for each project. Otherwise, all projects use the *Default Project Visibility*." appState.locale) )
-         , ( "questionnaireVisibilityDefaultValue", FormGroup.richRadioGroup appState.locale (QuestionnaireVisibility.richFormOptions appState) form "questionnaireVisibilityDefaultValue" (gettext "Default Project Visibility" appState.locale) )
+         , ( "questionnaireVisibilityDefaultValue", FormGroup.richRadioGroup appState.locale (ProjectVisibility.richFormOptions appState) form "questionnaireVisibilityDefaultValue" (gettext "Default Project Visibility" appState.locale) )
          , ( "questionnaireVisibilityDefaultValue-extra", FormExtra.mdAfter (gettext "If *Project Visibility* is enabled, this value is pre-selected when creating a new project. If *Project Visibility* is disabled, this value is used implicitly for new projects." appState.locale) )
          , ( "separator1", hr [] [] )
          , ( "questionnaireSharingEnabled", FormGroup.toggle form "questionnaireSharingEnabled" (gettext "Project Sharing" appState.locale) )
          , ( "questionnaireSharingEnabled-extra", FormExtra.mdAfter (gettext "If enabled, users can choose if project can be shared with people outside of the wizard or not. Otherwise, all projects use the *Default Project Sharing*." appState.locale) )
-         , ( "questionnaireSharingDefaultValue", FormGroup.richRadioGroup appState.locale (QuestionnaireSharing.richFormOptions appState) form "questionnaireSharingDefaultValue" (gettext "Default Project Sharing" appState.locale) )
+         , ( "questionnaireSharingDefaultValue", FormGroup.richRadioGroup appState.locale (ProjectSharing.richFormOptions appState) form "questionnaireSharingDefaultValue" (gettext "Default Project Sharing" appState.locale) )
          , ( "questionnaireSharingDefaultValue-extra", FormExtra.mdAfter (gettext "If *Project Sharing* is enabled, this value is pre-selected when creating a new project. If *Project Sharing* is disabled, this value is used implicitly for new projects." appState.locale) )
          ]
             ++ anonymousProjectEnabledInput
             ++ [ ( "separator2", hr [] [] )
-               , ( "questionnaireCreation", FormGroup.richRadioGroup appState.locale (QuestionnaireCreation.richFormOptions appState) form "questionnaireCreation" (gettext "Project Creation" appState.locale) )
+               , ( "questionnaireCreation", FormGroup.richRadioGroup appState.locale (ProjectCreation.richFormOptions appState) form "questionnaireCreation" (gettext "Project Creation" appState.locale) )
                , ( "separator3", hr [] [] )
                , ( "summaryReport", FormGroup.toggle form "summaryReport" (gettext "Summary Report" appState.locale) )
                , ( "summaryReport-extra", FormExtra.mdAfter (gettext "If enabled, users can view a summary report showing various metrics for the questionnaire." appState.locale) )

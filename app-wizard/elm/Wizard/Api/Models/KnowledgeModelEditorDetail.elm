@@ -12,7 +12,7 @@ import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState exposing (KnowledgeModelEditorState)
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
-import Wizard.Api.Models.QuestionnaireDetail.Reply as Reply exposing (Reply)
+import Wizard.Api.Models.ProjectDetail.Reply as Reply exposing (Reply)
 
 
 type alias KnowledgeModelEditorDetail =

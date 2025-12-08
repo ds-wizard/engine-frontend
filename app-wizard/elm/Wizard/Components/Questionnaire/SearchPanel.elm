@@ -29,9 +29,9 @@ import Task.Extra as Task
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question as Question
 import Wizard.Api.Models.KnowledgeModel.Reference as Reference
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Data.AppState exposing (AppState)
 
 
@@ -71,7 +71,7 @@ type Msg
     | SearchQuestionnaire String
 
 
-update : AppState -> QuestionnaireQuestionnaire -> Msg -> Model -> ( Model, Cmd Msg )
+update : AppState -> ProjectQuestionnaire -> Msg -> Model -> ( Model, Cmd Msg )
 update appState questionnaire msg model =
     case msg of
         SearchInput value ->
@@ -111,17 +111,17 @@ debounceConfig =
     }
 
 
-search : AppState -> String -> QuestionnaireQuestionnaire -> List SearchResult
+search : AppState -> String -> ProjectQuestionnaire -> List SearchResult
 search appState term questionnaire =
     searchReplies appState term questionnaire ++ searchKnowledgeModel appState term questionnaire
 
 
-searchReplies : AppState -> String -> QuestionnaireQuestionnaire -> List SearchResult
+searchReplies : AppState -> String -> ProjectQuestionnaire -> List SearchResult
 searchReplies appState term questionnaire =
     let
         tryCreateResult path value =
             if containsSearchTerm term value then
-                if QuestionnaireQuestionnaire.isPathVisible questionnaire path then
+                if ProjectQuestionnaire.isPathVisible questionnaire path then
                     Just
                         { type_ = gettext "Reply" appState.locale
                         , value = value
@@ -160,12 +160,12 @@ searchReplies appState term questionnaire =
     List.filterMap searchReply (Dict.toList questionnaire.replies)
 
 
-searchKnowledgeModel : AppState -> String -> QuestionnaireQuestionnaire -> List SearchResult
+searchKnowledgeModel : AppState -> String -> ProjectQuestionnaire -> List SearchResult
 searchKnowledgeModel appState term questionnaire =
     searchQuestions appState term questionnaire ++ searchChapters appState term questionnaire
 
 
-searchChapters : AppState -> String -> QuestionnaireQuestionnaire -> List SearchResult
+searchChapters : AppState -> String -> ProjectQuestionnaire -> List SearchResult
 searchChapters appState term questionnaire =
     let
         tryCreateResult chapterUuid value =
@@ -187,7 +187,7 @@ searchChapters appState term questionnaire =
         |> List.filterMap searchChapter
 
 
-searchQuestions : AppState -> String -> QuestionnaireQuestionnaire -> List SearchResult
+searchQuestions : AppState -> String -> ProjectQuestionnaire -> List SearchResult
 searchQuestions appState term questionnaire =
     let
         tryCreateResult type_ questionUuid value =
@@ -253,7 +253,7 @@ searchQuestions appState term questionnaire =
             in
             Maybe.values results
     in
-    QuestionnaireQuestionnaire.concatMapVisibleQuestions searchQuestion questionnaire
+    ProjectQuestionnaire.concatMapVisibleQuestions searchQuestion questionnaire
 
 
 containsSearchTerm : String -> String -> Bool

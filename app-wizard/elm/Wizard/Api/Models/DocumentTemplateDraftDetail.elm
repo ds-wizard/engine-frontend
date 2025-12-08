@@ -17,7 +17,7 @@ import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSetti
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedKnowledgeModelPackage exposing (AllowedKnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
-import Wizard.Api.Models.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
+import Wizard.Api.Models.ProjectSuggestion as ProjectSuggestion exposing (ProjectSuggestion)
 
 
 type alias DocumentTemplateDraftDetail =
@@ -32,8 +32,8 @@ type alias DocumentTemplateDraftDetail =
     , templateId : String
     , version : Version
     , formatUuid : Maybe Uuid
-    , questionnaireUuid : Maybe Uuid
-    , questionnaire : Maybe QuestionnaireSuggestion
+    , projectUuid : Maybe Uuid
+    , project : Maybe ProjectSuggestion
     , knowledgeModelEditorUuid : Maybe Uuid
     , knowledgeModelEditor : Maybe KnowledgeModelEditorSuggestion
     }
@@ -53,8 +53,8 @@ decoder =
         |> D.required "templateId" D.string
         |> D.required "version" Version.decoder
         |> D.optional "formatUuid" (D.maybe Uuid.decoder) Nothing
-        |> D.optional "questionnaireUuid" (D.maybe Uuid.decoder) Nothing
-        |> D.optional "questionnaire" (D.maybe QuestionnaireSuggestion.decoder) Nothing
+        |> D.optional "projectUuid" (D.maybe Uuid.decoder) Nothing
+        |> D.optional "project" (D.maybe ProjectSuggestion.decoder) Nothing
         |> D.optional "knowledgeModelEditorUuid" (D.maybe Uuid.decoder) Nothing
         |> D.optional "knowledgeModelEditor" (D.maybe KnowledgeModelEditorSuggestion.decoder) Nothing
 
@@ -62,8 +62,8 @@ decoder =
 getPreviewSettings : DocumentTemplateDraftDetail -> DocumentTemplateDraftPreviewSettings
 getPreviewSettings detail =
     { formatUuid = detail.formatUuid
-    , questionnaireUuid = detail.questionnaireUuid
-    , questionnaire = detail.questionnaire
+    , projectUuid = detail.projectUuid
+    , project = detail.project
     , knowledgeModelEditorUuid = detail.knowledgeModelEditorUuid
     , knowledgeModelEditor = detail.knowledgeModelEditor
     }
@@ -73,8 +73,8 @@ updatePreviewSettings : DocumentTemplateDraftPreviewSettings -> DocumentTemplate
 updatePreviewSettings previewSettings detail =
     { detail
         | formatUuid = previewSettings.formatUuid
-        , questionnaireUuid = previewSettings.questionnaireUuid
-        , questionnaire = previewSettings.questionnaire
+        , projectUuid = previewSettings.projectUuid
+        , project = previewSettings.project
         , knowledgeModelEditorUuid = previewSettings.knowledgeModelEditorUuid
         , knowledgeModelEditor = previewSettings.knowledgeModelEditor
     }

@@ -10,7 +10,7 @@ import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.Submission exposing (Submission)
 import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
 import Wizard.Components.Listing.Models as Listing
@@ -20,8 +20,8 @@ type alias Model =
     { documents : Listing.Model Document
     , documentToBeDeleted : Maybe Document
     , deletingDocument : ActionResult String
-    , questionnaireUuid : Maybe Uuid
-    , questionnaire : Maybe (ActionResult QuestionnaireCommon)
+    , projectUuid : Maybe Uuid
+    , project : Maybe (ActionResult ProjectCommon)
     , documentToBeSubmitted : Maybe Document
     , submittingDocument : ActionResult Submission
     , submissionServices : ActionResult (List SubmissionService)
@@ -32,12 +32,12 @@ type alias Model =
 
 
 initialModel : Maybe Uuid -> PaginationQueryString -> Model
-initialModel questionnaireUuid paginationQueryString =
+initialModel projectUuid paginationQueryString =
     { documents = Listing.initialModel paginationQueryString
     , documentToBeDeleted = Nothing
     , deletingDocument = Unset
-    , questionnaireUuid = questionnaireUuid
-    , questionnaire = Maybe.map (\_ -> Loading) questionnaireUuid
+    , projectUuid = projectUuid
+    , project = Maybe.map (\_ -> Loading) projectUuid
     , documentToBeSubmitted = Nothing
     , submittingDocument = Unset
     , submissionServices = Unset

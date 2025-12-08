@@ -6,8 +6,8 @@ module Wizard.Pages.Projects.Import.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
+import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.Importer exposing (ImporterResult)
 
@@ -16,9 +16,9 @@ type alias Model =
     { uuid : Uuid
     , sidePanel : SidePanel
     , importerId : String
-    , questionnaire : ActionResult QuestionnaireQuestionnaire
+    , questionnaire : ActionResult ProjectQuestionnaire
     , questionnaireModel : ActionResult Questionnaire.Model
-    , questionnaireImporter : ActionResult QuestionnaireImporter
+    , questionnaireImporter : ActionResult ProjectImporter
     , knowledgeModelString : ActionResult String
     , importResult : Maybe ImporterResult
     , importing : ActionResult ()

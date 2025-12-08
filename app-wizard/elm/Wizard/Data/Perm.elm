@@ -8,11 +8,11 @@ module Wizard.Data.Perm exposing
     , locale
     , packageManagementRead
     , packageManagementWrite
-    , questionnaire
-    , questionnaireAction
-    , questionnaireFile
-    , questionnaireImporter
-    , questionnaireTemplate
+    , project
+    , projectAction
+    , projectFile
+    , projectImporter
+    , projectTemplate
     , settings
     , submission
     , tenants
@@ -68,29 +68,29 @@ packageManagementWrite =
     "PM_WRITE_PERM"
 
 
-questionnaire : String
-questionnaire =
-    "QTN_PERM"
+project : String
+project =
+    "PRJ_PERM"
 
 
-questionnaireTemplate : String
-questionnaireTemplate =
-    "QTN_TML_PERM"
+projectTemplate : String
+projectTemplate =
+    "PRJ_TML_PERM"
 
 
-questionnaireAction : String
-questionnaireAction =
-    "QTN_ACTION_PERM"
+projectAction : String
+projectAction =
+    "PRJ_ACTION_PERM"
 
 
-questionnaireImporter : String
-questionnaireImporter =
-    "QTN_IMPORTER_PERM"
+projectImporter : String
+projectImporter =
+    "PRJ_IMPORTER_PERM"
 
 
-questionnaireFile : String
-questionnaireFile =
-    "QTN_FILE_PERM"
+projectFile : String
+projectFile =
+    "PRJ_FILE_PERM"
 
 
 settings : String

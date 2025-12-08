@@ -17,11 +17,11 @@ import Uuid.Extra as Uuid
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail
-import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing
-import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing
+import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility
+import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent(..))
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -75,15 +75,15 @@ update msg wrapMsg appState model =
                             E.object
                                 [ ( "name", E.string kmPackage.name )
                                 , ( "knowledgeModelPackageId", E.string kmPackage.id )
-                                , ( "visibility", QuestionnaireVisibility.encode appState.config.questionnaire.questionnaireVisibility.defaultValue )
-                                , ( "sharing", QuestionnaireSharing.encode QuestionnaireSharing.AnyoneWithLinkEditQuestionnaire )
+                                , ( "visibility", ProjectVisibility.encode appState.config.project.projectVisibility.defaultValue )
+                                , ( "sharing", ProjectSharing.encode ProjectSharing.AnyoneWithLinkEdit )
                                 , ( "questionTagUuids", E.list E.string [] )
                                 , ( "templateId", E.maybe E.string Nothing )
                                 ]
 
                         cmd =
                             Cmd.map wrapMsg <|
-                                QuestionnairesApi.postQuestionnaire appState body PostQuestionnaireCompleted
+                                ProjectsApi.post appState body PostQuestionnaireCompleted
                     in
                     ( appState.seed, { model | creatingQuestionnaire = Loading }, cmd )
 
@@ -119,7 +119,7 @@ update msg wrapMsg appState model =
 
                                 cmd =
                                     Cmd.map wrapMsg <|
-                                        QuestionnairesApi.putQuestionnaireContent appState questionnaire.uuid events (PutQuestionnaireContentComplete questionnaire.uuid)
+                                        ProjectsApi.putContent appState questionnaire.uuid events (PutQuestionnaireContentComplete questionnaire.uuid)
                             in
                             ( newSeed, model, cmd )
 
@@ -132,10 +132,10 @@ update msg wrapMsg appState model =
                     , Cmd.none
                     )
 
-        PutQuestionnaireContentComplete questionnaireUuid result ->
+        PutQuestionnaireContentComplete projectUuid result ->
             case result of
                 Ok _ ->
-                    ( appState.seed, model, cmdNavigate appState (Routes.projectsDetail questionnaireUuid) )
+                    ( appState.seed, model, cmdNavigate appState (Routes.projectsDetail projectUuid) )
 
                 Err error ->
                     ( appState.seed
@@ -150,12 +150,12 @@ initQuestionnaireModel appState ( model, cmd ) =
         Success ( knowledgeModel, kmPackage ) ->
             let
                 questionnaire =
-                    QuestionnaireQuestionnaire.createQuestionnaireDetail (KnowledgeModelPackageDetail.toPackage kmPackage) knowledgeModel
+                    ProjectQuestionnaire.createQuestionnaireDetail (KnowledgeModelPackageDetail.toPackage kmPackage) knowledgeModel
 
                 ( ( newSeed, mbChapterUuid, questionnaireWithReplies ), scrollCmd ) =
                     case model.mbQuestionUuid of
                         Just questionUuid ->
-                            ( QuestionnaireQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaire
+                            ( ProjectQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaire
                             , Dom.scrollIntoView ("#question-" ++ questionUuid)
                             )
 

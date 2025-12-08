@@ -8,7 +8,7 @@ import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
 import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
-import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
 import Wizard.Components.Questionnaire as Questionnaire exposing (QuestionnaireRenderer)
 import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
@@ -20,18 +20,18 @@ import Wizard.Pages.Projects.Common.QuestionnaireChanges exposing (Questionnaire
 import Wizard.Pages.Projects.Migration.Models exposing (areQuestionDetailsChanged)
 
 
-create : AppState -> QuestionnaireMigration -> QuestionnaireChanges -> KnowledgeModel -> Maybe QuestionChange -> QuestionnaireRenderer
+create : AppState -> ProjectMigration -> QuestionnaireChanges -> KnowledgeModel -> Maybe QuestionChange -> QuestionnaireRenderer
 create appState migration changes km mbSelectedChange =
     let
         defaultRenderer =
             DefaultQuestionnaireRenderer.create appState
-                (DefaultQuestionnaireRenderer.config migration.newQuestionnaire
+                (DefaultQuestionnaireRenderer.config migration.newProject
                     |> DefaultQuestionnaireRenderer.withKnowledgeModel km
                 )
 
         getExtraQuestionClass question =
             if Just (Question.getUuid question) == Maybe.map QuestionChange.getQuestionUuid mbSelectedChange then
-                if QuestionnaireMigration.isQuestionResolved (Question.getUuid question) migration then
+                if ProjectMigration.isQuestionResolved (Question.getUuid question) migration then
                     Just "highlighted highlighted-resolved"
 
                 else

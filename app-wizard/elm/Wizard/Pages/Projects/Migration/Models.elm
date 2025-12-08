@@ -16,9 +16,9 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel, ParentMap)
 import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
-import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
-import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue)
+import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
+import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Pages.Projects.Common.AnswerChange exposing (AnswerAddData, AnswerChange(..), AnswerChangeData)
 import Wizard.Pages.Projects.Common.ChoiceChange exposing (ChoiceAddData, ChoiceChange(..), ChoiceChangeData)
@@ -27,8 +27,8 @@ import Wizard.Pages.Projects.Common.QuestionnaireChanges as QuestionnaireChanges
 
 
 type alias Model =
-    { questionnaireUuid : Uuid
-    , questionnaireMigration : ActionResult QuestionnaireMigration
+    { projectUuid : Uuid
+    , projectMigration : ActionResult ProjectMigration
     , changes : QuestionnaireChanges
     , selectedChange : Maybe QuestionChange
     , questionnaireModel : Maybe Questionnaire.Model
@@ -36,9 +36,9 @@ type alias Model =
 
 
 initialModel : Uuid -> Model
-initialModel questionnaireUuid =
-    { questionnaireUuid = questionnaireUuid
-    , questionnaireMigration = Loading
+initialModel projectUuid =
+    { projectUuid = projectUuid
+    , projectMigration = Loading
     , changes = QuestionnaireChanges.empty
     , selectedChange = Nothing
     , questionnaireModel = Nothing
@@ -49,8 +49,8 @@ isSelectedChangeResolved : Model -> Bool
 isSelectedChangeResolved model =
     let
         isResolved questionUuid =
-            model.questionnaireMigration
-                |> ActionResult.map (QuestionnaireMigration.isQuestionResolved questionUuid)
+            model.projectMigration
+                |> ActionResult.map (ProjectMigration.isQuestionResolved questionUuid)
                 |> ActionResult.withDefault False
     in
     model.selectedChange
@@ -60,16 +60,16 @@ isSelectedChangeResolved model =
 
 initializeChangeList : Model -> Model
 initializeChangeList model =
-    case model.questionnaireMigration of
+    case model.projectMigration of
         Success migration ->
             let
                 context =
-                    { oldKM = migration.oldQuestionnaire.knowledgeModel
-                    , newKM = migration.newQuestionnaire.knowledgeModel
-                    , oldKmParentMap = KnowledgeModel.createParentMap migration.oldQuestionnaire.knowledgeModel
-                    , newKmParentMap = KnowledgeModel.createParentMap migration.newQuestionnaire.knowledgeModel
-                    , oldQuestionnaire = migration.oldQuestionnaire
-                    , newQuestionnaire = migration.newQuestionnaire
+                    { oldKM = migration.oldProject.knowledgeModel
+                    , newKM = migration.newProject.knowledgeModel
+                    , oldKmParentMap = KnowledgeModel.createParentMap migration.oldProject.knowledgeModel
+                    , newKmParentMap = KnowledgeModel.createParentMap migration.newProject.knowledgeModel
+                    , oldQuestionnaire = migration.oldProject
+                    , newQuestionnaire = migration.newProject
                     }
 
                 changes =
@@ -77,7 +77,7 @@ initializeChangeList model =
 
                 selectedChange =
                     changes.questions
-                        |> List.filter (QuestionChange.getQuestionUuid >> flip QuestionnaireMigration.isQuestionResolved migration >> not)
+                        |> List.filter (QuestionChange.getQuestionUuid >> flip ProjectMigration.isQuestionResolved migration >> not)
                         |> List.head
                         |> Maybe.orElse (List.head changes.questions)
             in
@@ -92,8 +92,8 @@ type alias ChangeListContext =
     , newKM : KnowledgeModel
     , oldKmParentMap : ParentMap
     , newKmParentMap : ParentMap
-    , oldQuestionnaire : QuestionnaireQuestionnaire
-    , newQuestionnaire : QuestionnaireQuestionnaire
+    , oldQuestionnaire : ProjectQuestionnaire
+    , newQuestionnaire : ProjectQuestionnaire
     }
 
 
@@ -170,14 +170,14 @@ getQuestionChanges context chapter question =
     QuestionnaireChanges.merge questionChange childChanges
 
 
-getReply : QuestionnaireQuestionnaire -> Question -> Maybe ReplyValue
+getReply : ProjectQuestionnaire -> Question -> Maybe ReplyValue
 getReply questionnaire question =
     Dict.toList questionnaire.replies
         |> List.find (Tuple.first >> getUuidFromPath >> (==) (Question.getUuid question))
         |> Maybe.map (Tuple.second >> .value)
 
 
-isNew : QuestionnaireQuestionnaire -> Question -> Bool
+isNew : ProjectQuestionnaire -> Question -> Bool
 isNew questionnaire question =
     Maybe.isNothing <| KnowledgeModel.getQuestion (Question.getUuid question) questionnaire.knowledgeModel
 
@@ -253,6 +253,6 @@ getUuidFromPath path =
         |> Maybe.withDefault ""
 
 
-isQuestionChangeResolved : QuestionnaireMigration -> QuestionChange -> Bool
+isQuestionChangeResolved : ProjectMigration -> QuestionChange -> Bool
 isQuestionChangeResolved migration change =
     List.member (QuestionChange.getQuestionUuid change) migration.resolvedQuestionUuids

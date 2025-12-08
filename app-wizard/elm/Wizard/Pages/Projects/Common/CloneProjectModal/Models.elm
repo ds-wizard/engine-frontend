@@ -4,17 +4,17 @@ module Wizard.Pages.Projects.Common.CloneProjectModal.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Pages.Projects.Common.ProjectDescriptor exposing (ProjectDescriptor)
 
 
 type alias Model =
-    { questionnaireToBeDeleted : Maybe QuestionnaireDescriptor
-    , cloningQuestionnaire : ActionResult String
+    { projectToBeDeleted : Maybe ProjectDescriptor
+    , cloningProject : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { questionnaireToBeDeleted = Nothing
-    , cloningQuestionnaire = Unset
+    { projectToBeDeleted = Nothing
+    , cloningProject = Unset
     }

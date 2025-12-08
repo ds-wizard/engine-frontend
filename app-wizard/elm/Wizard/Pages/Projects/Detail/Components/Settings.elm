@@ -46,15 +46,15 @@ import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSu
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Permission exposing (Permission)
-import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
-import Wizard.Pages.Projects.Common.QuestionnaireSettingsForm as QuestionnaireSettingsForm exposing (QuestionnaireSettingsForm)
+import Wizard.Pages.Projects.Common.ProjectDescriptor as ProjectDescriptor
+import Wizard.Pages.Projects.Common.ProjectSettingsForm as ProjectSettingsForm exposing (ProjectSettingsForm)
 import Wizard.Pages.Projects.Detail.Components.Settings.DeleteModal as DeleteModal
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
@@ -67,7 +67,7 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 type alias Model =
-    { form : Form FormError QuestionnaireSettingsForm
+    { form : Form FormError ProjectSettingsForm
     , templateTypeHintInputModel : TypeHintInput.Model DocumentTemplateSuggestion
     , savingQuestionnaire : ActionResult String
     , deleteModalModel : DeleteModal.Model
@@ -76,13 +76,13 @@ type alias Model =
     }
 
 
-init : AppState -> Maybe QuestionnaireSettings -> Model
+init : AppState -> Maybe ProjectSettings -> Model
 init appState mbQuestionnaire =
     let
         setSelectedTemplate =
             setSelected (Maybe.andThen .documentTemplate mbQuestionnaire)
     in
-    { form = Maybe.unwrap (QuestionnaireSettingsForm.initEmpty appState) (QuestionnaireSettingsForm.init appState) mbQuestionnaire
+    { form = Maybe.unwrap (ProjectSettingsForm.initEmpty appState) (ProjectSettingsForm.init appState) mbQuestionnaire
     , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "documentTemplateId"
     , savingQuestionnaire = Unset
     , deleteModalModel = DeleteModal.initialModel
@@ -110,7 +110,7 @@ type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , redirectCmd : Cmd msg
     , knowledgeModelPackageId : String
-    , questionnaireUuid : Uuid
+    , projectUuid : Uuid
     , permissions : List Permission
     }
 
@@ -149,11 +149,11 @@ handleFormMsg cfg formMsg appState model =
         ( Form.Submit, Just form ) ->
             let
                 body =
-                    QuestionnaireSettingsForm.encode form
+                    ProjectSettingsForm.encode form
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.putQuestionnaireSettings appState cfg.questionnaireUuid body PutQuestionnaireComplete
+                        ProjectsApi.putSettings appState cfg.projectUuid body PutQuestionnaireComplete
             in
             ( { model | savingQuestionnaire = Loading }
             , cmd
@@ -179,7 +179,7 @@ handleFormMsg cfg formMsg appState model =
                         _ ->
                             Cmd.none
             in
-            ( { model | form = Form.update (QuestionnaireSettingsForm.validation appState) formMsg model.form }
+            ( { model | form = Form.update (ProjectSettingsForm.validation appState) formMsg model.form }
             , cmd
             )
 
@@ -220,8 +220,8 @@ handleSetTemplateTypeHintInputReplyMsg appState model value =
 
         form =
             model.form
-                |> Form.update (QuestionnaireSettingsForm.validation appState) (formMsg "documentTemplateId" value)
-                |> Form.update (QuestionnaireSettingsForm.validation appState) (formMsg "formatUuid" "")
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateId" value)
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "formatUuid" "")
     in
     ( { model | form = form }, Cmd.none )
 
@@ -260,7 +260,7 @@ handleProjectTagsSearch cfg appState model value =
 
         cmd =
             Cmd.map cfg.wrapMsg <|
-                QuestionnairesApi.getProjectTagsSuggestions appState queryString selectedTags ProjectTagsSearchComplete
+                ProjectsApi.getProjectTagsSuggestions appState queryString selectedTags ProjectTagsSearchComplete
     in
     ( model, cmd )
 
@@ -308,23 +308,23 @@ subscriptions model =
 -- VIEW
 
 
-view : AppState -> QuestionnaireSettings -> Model -> Html Msg
-view appState questionnaire model =
+view : AppState -> ProjectSettings -> Model -> Html Msg
+view appState settings model =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Settings" ]
         [ div [ detailClass "" ]
             [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsSettings) (gettext "Settings" appState.locale)
-            , formView appState questionnaire model
+            , formView appState settings model
             , hr [ class "separator" ] []
-            , knowledgeModel appState questionnaire
+            , knowledgeModel appState settings
             , hr [ class "separator" ] []
-            , dangerZone appState questionnaire
+            , dangerZone appState settings
             ]
         , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
         ]
 
 
-formView : AppState -> QuestionnaireSettings -> Model -> Html Msg
-formView appState questionnaire model =
+formView : AppState -> ProjectSettings -> Model -> Html Msg
+formView appState settings model =
     let
         typeHintInputConfig =
             { viewItem = TypeHintInputItem.templateSuggestion
@@ -340,11 +340,11 @@ formView appState questionnaire model =
                     Maybe.map .id model.templateTypeHintInputModel.selected
 
                 questionnaireTemplateId =
-                    Maybe.map .id questionnaire.documentTemplate
+                    Maybe.map .id settings.documentTemplate
 
                 templateFlash =
                     if selectedTemplateId == questionnaireTemplateId then
-                        case ( questionnaire.documentTemplateState, questionnaire.documentTemplatePhase ) of
+                        case ( settings.documentTemplateState, settings.documentTemplatePhase ) of
                             ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
                                 Flash.error (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
 
@@ -388,7 +388,7 @@ formView appState questionnaire model =
                 Html.nothing
 
         originalTagCount =
-            List.length questionnaire.projectTags
+            List.length settings.projectTags
 
         currentTagCount =
             List.length (Form.getListIndexes "projectTags" model.form) - 1
@@ -442,7 +442,7 @@ projectTagsFormGroup appState model =
         ]
 
 
-projectTagView : Form FormError QuestionnaireSettingsForm -> Int -> Html Form.Msg
+projectTagView : Form FormError ProjectSettingsForm -> Int -> Html Form.Msg
 projectTagView form i =
     let
         value =
@@ -518,11 +518,11 @@ projectTagInput appState model =
     ]
 
 
-knowledgeModel : AppState -> QuestionnaireSettings -> Html Msg
-knowledgeModel appState questionnaire =
+knowledgeModel : AppState -> ProjectSettings -> Html Msg
+knowledgeModel appState settings =
     let
         tagList =
-            if List.isEmpty questionnaire.selectedQuestionTagUuids then
+            if List.isEmpty settings.selectedQuestionTagUuids then
                 div [ class "rounded bg-light px-3 py-2 fw-bold" ]
                     [ faQuestionnaireSettingsKmAllQuestions
                     , span [ class "ms-2" ] [ text (gettext "All questions are used" appState.locale) ]
@@ -534,11 +534,11 @@ knowledgeModel appState questionnaire =
                         [ faQuestionnaireSettingsKmFiltered
                         , span [ class "ms-2" ] [ text (gettext "Filtered by question tags" appState.locale) ]
                         ]
-                    , Tag.viewList { showDescription = True } questionnaire.knowledgeModelTags
+                    , Tag.viewList { showDescription = True } settings.knowledgeModelTags
                     ]
 
         deprecatedWarning =
-            if questionnaire.knowledgeModelPackage.phase == KnowledgeModelPackagePhase.Deprecated then
+            if settings.knowledgeModelPackage.phase == KnowledgeModelPackagePhase.Deprecated then
                 Flash.warning (gettext "This knowledge model is now deprecated." appState.locale)
 
             else
@@ -547,12 +547,12 @@ knowledgeModel appState questionnaire =
     div []
         [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
         , deprecatedWarning
-        , linkTo (Routes.knowledgeModelsDetail questionnaire.knowledgeModelPackage.id)
+        , linkTo (Routes.knowledgeModelsDetail settings.knowledgeModelPackage.id)
             [ class "package-link mb-2" ]
-            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage questionnaire.knowledgeModelPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage settings.knowledgeModelPackage) ]
         , tagList
         , div [ class "mt-3" ]
-            [ linkTo (Routes.projectsCreateMigration questionnaire.uuid)
+            [ linkTo (Routes.projectsCreateMigration settings.uuid)
                 [ class "btn btn-outline-secondary migration-link" ]
                 [ text (gettext "Create migration" appState.locale) ]
             ]
@@ -561,8 +561,8 @@ knowledgeModel appState questionnaire =
         ]
 
 
-dangerZone : AppState -> QuestionnaireSettings -> Html Msg
-dangerZone appState questionnaire =
+dangerZone : AppState -> ProjectSettings -> Html Msg
+dangerZone appState settings =
     div [ class "pb-6" ]
         [ h2 [] [ text (gettext "Danger Zone" appState.locale) ]
         , div [ class "card border-danger" ]
@@ -574,7 +574,7 @@ dangerZone appState questionnaire =
                     ]
                 , button
                     [ class "btn btn-outline-danger"
-                    , onClick (DeleteModalMsg (DeleteModal.open (QuestionnaireDescriptor.fromQuestionnaireSettings questionnaire)))
+                    , onClick (DeleteModalMsg (DeleteModal.open (ProjectDescriptor.fromProjectSettings settings)))
                     ]
                     [ text (gettext "Delete this project" appState.locale) ]
                 ]
@@ -586,7 +586,7 @@ dangerZone appState questionnaire =
 -- UTILS
 
 
-lastProjectTagFieldName : Form FormError QuestionnaireSettingsForm -> String
+lastProjectTagFieldName : Form FormError ProjectSettingsForm -> String
 lastProjectTagFieldName form =
     Form.getListIndexes "projectTags" form
         |> List.last

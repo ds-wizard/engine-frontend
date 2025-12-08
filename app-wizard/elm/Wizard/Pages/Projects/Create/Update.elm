@@ -22,11 +22,11 @@ import String.Extra as String
 import Uuid
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Questionnaires as QuestionnaireApi
+import Wizard.Api.Models.Project exposing (Project)
+import Wizard.Api.Projects as QuestionnaireApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm
+import Wizard.Pages.Projects.Common.ProjectCreateForm as ProjectCreateForm
 import Wizard.Pages.Projects.Create.Models exposing (Model, mapMode, updateDefaultMode)
 import Wizard.Pages.Projects.Create.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -51,7 +51,7 @@ fetchData appState model =
         fetchSelectedProjectTemplate =
             case ( createFromTemplate, model.selectedProjectTemplateUuid ) of
                 ( True, Just templateUuid ) ->
-                    QuestionnaireApi.getQuestionnaireSettings appState templateUuid GetSelectedProjectTemplateCompleted
+                    QuestionnaireApi.getSettings appState templateUuid GetSelectedProjectTemplateCompleted
 
                 _ ->
                     Cmd.none
@@ -98,7 +98,7 @@ fetchData appState model =
         ]
 
 
-getProjectTemplates : AppState -> PaginationQueryString -> ToMsg (Pagination Questionnaire) msg -> Cmd msg
+getProjectTemplates : AppState -> PaginationQueryString -> ToMsg (Pagination Project) msg -> Cmd msg
 getProjectTemplates appState pqs =
     let
         filters =
@@ -108,7 +108,7 @@ getProjectTemplates appState pqs =
                 ]
                 []
     in
-    QuestionnaireApi.getQuestionnaires appState filters pqs
+    QuestionnaireApi.getList appState filters pqs
 
 
 tour : AppState -> Bool -> Bool -> TourConfig
@@ -208,19 +208,19 @@ update wrapMsg msg appState model =
             let
                 validationMode =
                     mapMode model
-                        QuestionnaireCreateForm.TemplateValidationMode
-                        QuestionnaireCreateForm.PackageValidationMode
+                        ProjectCreateForm.TemplateValidationMode
+                        ProjectCreateForm.PackageValidationMode
 
                 formOutput =
                     -- Force validate to get output in the correct validation mode
-                    Form.getOutput (Form.update (QuestionnaireCreateForm.validation validationMode) Form.Validate model.form)
+                    Form.getOutput (Form.update (ProjectCreateForm.validation validationMode) Form.Validate model.form)
             in
             case ( formMsg, formOutput ) of
                 ( Form.Submit, Just form ) ->
                     let
                         projectTemplateModeRequest =
-                            ( QuestionnaireCreateForm.encodeFromTemplate form
-                            , QuestionnaireApi.postQuestionnaireFromTemplate
+                            ( ProjectCreateForm.encodeFromTemplate form
+                            , QuestionnaireApi.postFromTemplate
                             )
 
                         knowledgeModelModeRequest =
@@ -232,21 +232,21 @@ update wrapMsg msg appState model =
                                     else
                                         model.selectedTags
                             in
-                            ( QuestionnaireCreateForm.encodeFromPackage selectedTags form
-                            , QuestionnaireApi.postQuestionnaire
+                            ( ProjectCreateForm.encodeFromPackage selectedTags form
+                            , QuestionnaireApi.post
                             )
 
                         ( body, request ) =
                             mapMode model projectTemplateModeRequest knowledgeModelModeRequest
                     in
                     ( { model | savingQuestionnaire = ActionResult.Loading }
-                    , Cmd.map wrapMsg <| request appState body PostQuestionnaireCompleted
+                    , Cmd.map wrapMsg <| request appState body PostProjectCompleted
                     )
 
                 _ ->
                     let
                         newModel =
-                            { model | form = Form.update (QuestionnaireCreateForm.validation validationMode) formMsg model.form }
+                            { model | form = Form.update (ProjectCreateForm.validation validationMode) formMsg model.form }
 
                         selectedPackage =
                             Maybe.andThen String.toMaybe (Form.getFieldAsString "knowledgeModelPackageId" newModel.form).value
@@ -275,15 +275,15 @@ update wrapMsg msg appState model =
                             , Cmd.none
                             )
 
-        PostQuestionnaireCompleted result ->
+        PostProjectCompleted result ->
             case result of
-                Ok questionnaire ->
+                Ok project ->
                     ( model
-                    , cmdNavigate appState <| Routes.projectsDetail questionnaire.uuid
+                    , cmdNavigate appState <| Routes.projectsDetail project.uuid
                     )
 
                 Err error ->
-                    ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be created." appState.locale) error }
+                    ( { model | savingQuestionnaire = ApiError.toActionResult appState (gettext "Project could not be created." appState.locale) error }
                     , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 

@@ -14,9 +14,9 @@ import Random exposing (Seed)
 import Time
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
-import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectDetail.ProjectEvent as QuestionnaireEvent
+import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -29,7 +29,7 @@ import Wizard.Routing exposing (cmdNavigate)
 
 fetchData : AppState -> Uuid -> Cmd Msg
 fetchData appState uuid =
-    QuestionnairesApi.getQuestionnaireMigration appState uuid GetQuestionnaireMigrationCompleted
+    ProjectsApi.getMigration appState uuid GetQuestionnaireMigrationCompleted
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -74,7 +74,7 @@ update wrapMsg msg appState model =
 -- Handlers
 
 
-handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError QuestionnaireMigration -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireMigrationCompleted : AppState -> Model -> Result ApiError ProjectMigration -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireMigrationCompleted appState model result =
     let
         ( modelWithMigration, cmd ) =
@@ -160,8 +160,8 @@ handleQuestionnaireMsg wrapMsg appState model questionnaireMsg =
                                         }
                             in
                             ( newSeed2_
-                            , QuestionnairesApi.putQuestionnaireContent appState
-                                model.questionnaireUuid
+                            , ProjectsApi.putContent appState
+                                model.projectUuid
                                 [ event ]
                                 (always PutQuestionnaireContentCompleted)
                             )
@@ -187,13 +187,13 @@ handleResolveCurrentChange wrapMsg appState model =
         newQuestionnaireMigration =
             model.selectedChange
                 |> Maybe.map (QuestionChange.getQuestionUuid >> setQuestionUuid)
-                |> Maybe.withDefault model.questionnaireMigration
+                |> Maybe.withDefault model.projectMigration
 
         setQuestionUuid questionUuid =
-            ActionResult.map (QuestionnaireMigration.addResolvedQuestion questionUuid) model.questionnaireMigration
+            ActionResult.map (ProjectMigration.addResolvedQuestion questionUuid) model.projectMigration
 
         isResolved questionUuid =
-            ActionResult.map (QuestionnaireMigration.isQuestionResolved questionUuid) newQuestionnaireMigration
+            ActionResult.map (ProjectMigration.isQuestionResolved questionUuid) newQuestionnaireMigration
                 |> ActionResult.withDefault False
 
         nextChange =
@@ -203,7 +203,7 @@ handleResolveCurrentChange wrapMsg appState model =
                 |> Maybe.orElse model.selectedChange
 
         modelWithMigration =
-            { model | questionnaireMigration = newQuestionnaireMigration }
+            { model | projectMigration = newQuestionnaireMigration }
 
         ( newSeed, newModel, scrollCmd ) =
             handleSelectChange appState modelWithMigration nextChange
@@ -221,7 +221,7 @@ handleResolveAllChanges wrapMsg appState model =
             List.map QuestionChange.getQuestionUuid model.changes.questions
 
         newQuestionnaireMigration =
-            ActionResult.map (QuestionnaireMigration.addResolvedQuestions allQuestionUuids) model.questionnaireMigration
+            ActionResult.map (ProjectMigration.addResolvedQuestions allQuestionUuids) model.projectMigration
 
         lastChange =
             model.changes.questions
@@ -229,7 +229,7 @@ handleResolveAllChanges wrapMsg appState model =
                 |> Maybe.orElse model.selectedChange
 
         modelWithMigration =
-            { model | questionnaireMigration = newQuestionnaireMigration }
+            { model | projectMigration = newQuestionnaireMigration }
 
         ( newSeed, newModel, scrollCmd ) =
             handleSelectChange appState modelWithMigration lastChange
@@ -246,13 +246,13 @@ handleUndoResolveCurrentChange wrapMsg appState model =
         newQuestionnaireMigration =
             model.selectedChange
                 |> Maybe.map (QuestionChange.getQuestionUuid >> removeQuestionUuid)
-                |> Maybe.withDefault model.questionnaireMigration
+                |> Maybe.withDefault model.projectMigration
 
         removeQuestionUuid questionUuid =
-            ActionResult.map (QuestionnaireMigration.removeResolvedQuestion questionUuid) model.questionnaireMigration
+            ActionResult.map (ProjectMigration.removeResolvedQuestion questionUuid) model.projectMigration
 
         newModel =
-            { model | questionnaireMigration = newQuestionnaireMigration }
+            { model | projectMigration = newQuestionnaireMigration }
     in
     ( newModel, putCurrentResolvedIds wrapMsg appState newModel )
 
@@ -261,7 +261,7 @@ handleFinalizeMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Mod
 handleFinalizeMigration wrapMsg appState model =
     ( model
     , Cmd.map wrapMsg <|
-        QuestionnairesApi.completeQuestionnaireMigration appState model.questionnaireUuid FinalizeMigrationCompleted
+        ProjectsApi.postMigrationCompletion appState model.projectUuid FinalizeMigrationCompleted
     )
 
 
@@ -271,9 +271,9 @@ handleFinalizeMigrationCompleted appState model result =
         Ok _ ->
             let
                 route =
-                    case model.questionnaireMigration of
+                    case model.projectMigration of
                         Success questionnaireMigration ->
-                            Routes.projectsDetail questionnaireMigration.oldQuestionnaire.uuid
+                            Routes.projectsDetail questionnaireMigration.oldProject.uuid
 
                         _ ->
                             Routes.projectsIndex appState
@@ -293,30 +293,30 @@ putCurrentResolvedIds wrapMsg appState model =
     let
         createCmd migration =
             Cmd.map wrapMsg <|
-                QuestionnairesApi.putQuestionnaireMigration appState
-                    model.questionnaireUuid
-                    (QuestionnaireMigration.encode migration)
+                ProjectsApi.putMigration appState
+                    model.projectUuid
+                    (ProjectMigration.encode migration)
                     PutQuestionnaireMigrationCompleted
     in
-    model.questionnaireMigration
+    model.projectMigration
         |> ActionResult.map createCmd
         |> ActionResult.withDefault Cmd.none
 
 
-setResult : AppState -> ActionResult QuestionnaireMigration -> Model -> Model
+setResult : AppState -> ActionResult ProjectMigration -> Model -> Model
 setResult appState migration model =
     let
         questionnaireModel =
             case migration of
                 Success m ->
-                    Just <| Tuple.first <| Questionnaire.initSimple appState m.newQuestionnaire
+                    Just <| Tuple.first <| Questionnaire.initSimple appState m.newProject
 
                 _ ->
                     Nothing
     in
     initializeChangeList
         { model
-            | questionnaireMigration = migration
+            | projectMigration = migration
             , questionnaireModel = questionnaireModel
         }
 

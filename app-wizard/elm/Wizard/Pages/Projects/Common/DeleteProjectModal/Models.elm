@@ -4,17 +4,17 @@ module Wizard.Pages.Projects.Common.DeleteProjectModal.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Pages.Projects.Common.ProjectDescriptor exposing (ProjectDescriptor)
 
 
 type alias Model =
-    { questionnaireToBeDeleted : Maybe QuestionnaireDescriptor
-    , deletingQuestionnaire : ActionResult String
+    { projectToBeDeleted : Maybe ProjectDescriptor
+    , deletingProject : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { questionnaireToBeDeleted = Nothing
-    , deletingQuestionnaire = Unset
+    { projectToBeDeleted = Nothing
+    , deletingProject = Unset
     }

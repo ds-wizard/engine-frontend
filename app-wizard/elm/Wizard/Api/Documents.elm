@@ -24,11 +24,11 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getDocuments : AppState -> Maybe Uuid -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination Document) msg -> Cmd msg
-getDocuments appState questionnaireUuid _ qs =
+getDocuments appState projectUuid _ qs =
     let
         queryString =
             PaginationQueryString.toApiUrlWith
-                [ ( "questionnaireUuid", Maybe.unwrap "" Uuid.toString questionnaireUuid ) ]
+                [ ( "projectUuid", Maybe.unwrap "" Uuid.toString projectUuid ) ]
                 qs
 
         url =

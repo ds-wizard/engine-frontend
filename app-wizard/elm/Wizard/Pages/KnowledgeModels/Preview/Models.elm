@@ -6,7 +6,7 @@ module Wizard.Pages.KnowledgeModels.Preview.Models exposing
 import ActionResult exposing (ActionResult(..))
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.Project exposing (Project)
 import Wizard.Components.Questionnaire as Questionnaire
 
 
@@ -15,7 +15,7 @@ type alias Model =
     , knowledgeModelPackage : ActionResult KnowledgeModelPackageDetail
     , questionnaireModel : ActionResult Questionnaire.Model
     , mbQuestionUuid : Maybe String
-    , creatingQuestionnaire : ActionResult Questionnaire
+    , creatingQuestionnaire : ActionResult Project
     }
 
 
