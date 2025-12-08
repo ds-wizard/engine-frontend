@@ -271,6 +271,7 @@ select {
         text-decoration: none;
         cursor: pointer;
         font-weight: normal;
+        word-break: break-word;
 
         input {
             margin-right: $spacer-2;

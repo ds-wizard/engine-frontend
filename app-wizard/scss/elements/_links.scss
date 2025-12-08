@@ -5,6 +5,15 @@ a {
     cursor: pointer;
     text-decoration: none;
 
+    &:not([href]):not([class]) {
+        color: rgba(var(--bs-link-color-rgb), var(--bs-link-opacity, 1));
+
+        &:hover {
+            text-decoration: underline;
+            color: rgba(var(--bs-link-hover-color-rgb), var(--bs-link-opacity, 1));
+        }
+    }
+
     &.btn,
     &.dropdown-item,
     &.logo,
