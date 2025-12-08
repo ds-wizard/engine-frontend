@@ -203,7 +203,7 @@ update cfg appState msg model =
                     else
                         withSeed
                             ( model
-                            , cmdNavigate appState (Routes.documentTemplateEditorDetail documentTemplate.id)
+                            , cmdNavigate appState (Routes.documentTemplateEditorDetailSettings documentTemplate.id)
                             )
 
                 Err error ->
