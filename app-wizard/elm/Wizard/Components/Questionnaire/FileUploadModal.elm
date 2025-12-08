@@ -35,13 +35,13 @@ import Maybe.Extra as Maybe
 import String.Format as String
 import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
-import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
+import Wizard.Api.Models.ProjectFileSimple exposing (ProjectFileSimple)
+import Wizard.Api.ProjectFiles as ProjectFilesApi
 import Wizard.Data.AppState exposing (AppState)
 
 
 type alias Model =
-    { questionnaireUuid : Uuid
+    { projectUuid : Uuid
     , isOpen : Bool
     , questionPath : String
     , fileConfig : FileConfig
@@ -59,7 +59,7 @@ type alias FileConfig =
 
 init : Uuid -> Model
 init uuid =
-    { questionnaireUuid = uuid
+    { projectUuid = uuid
     , questionPath = ""
     , fileConfig =
         { fileTypes = Nothing
@@ -81,7 +81,7 @@ type Msg
     | GotFile File
     | ClearFile
     | Save
-    | SaveCompleted (Result ApiError QuestionnaireFileSimple)
+    | SaveCompleted (Result ApiError ProjectFileSimple)
 
 
 open : String -> FileConfig -> Msg
@@ -91,7 +91,7 @@ open =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , setFileMsg : String -> QuestionnaireFileSimple -> msg
+    , setFileMsg : String -> ProjectFileSimple -> msg
     }
 
 
@@ -155,7 +155,7 @@ update appState cfg msg model =
                                 |> Maybe.withDefault ""
                     in
                     ( { model | submitting = ActionResult.Loading }
-                    , QuestionnaireFilesApi.postFile appState model.questionnaireUuid questionUuidString file (cfg.wrapMsg << SaveCompleted)
+                    , ProjectFilesApi.post appState model.projectUuid questionUuidString file (cfg.wrapMsg << SaveCompleted)
                     )
 
                 Nothing ->

@@ -7,16 +7,16 @@ import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setQuestionnaire)
+import Common.Utils.Setters exposing (setProject)
 import Gettext exposing (gettext)
 import Task.Extra as Task
 import Uuid
 import Wizard.Api.Documents as DocumentsApi
 import Wizard.Api.Models.Document exposing (Document)
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.Submission exposing (Submission)
 import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
-import Wizard.Api.Questionnaires as QuestionnaireApi
+import Wizard.Api.Projects as QuestionnaireApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -30,9 +30,9 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         questionnaireCmd =
-            case model.questionnaireUuid of
-                Just questionnaireUuid ->
-                    QuestionnaireApi.getQuestionnaire appState questionnaireUuid GetQuestionnaireCompleted
+            case model.projectUuid of
+                Just projectUuid ->
+                    QuestionnaireApi.get appState projectUuid GetQuestionnaireCompleted
 
                 Nothing ->
                     Cmd.none
@@ -89,10 +89,10 @@ update wrapMsg msg appState model =
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
 
-handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError QuestionnaireCommon -> ( Model, Cmd Wizard.Msgs.Msg )
+handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError ProjectCommon -> ( Model, Cmd Wizard.Msgs.Msg )
 handleGetQuestionnaireCompleted appState model result =
     RequestHelpers.applyResult
-        { setResult = setQuestionnaire << Just
+        { setResult = setProject << Just
         , defaultError = gettext "Unable to get documents." appState.locale
         , model = model
         , result = result
@@ -111,14 +111,14 @@ handleShowHideDeleteDocument model mbDocument =
 handleDeleteDocument : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteDocument wrapMsg appState model =
     case model.documentToBeDeleted of
-        Just questionnaire ->
+        Just document ->
             let
                 newModel =
                     { model | deletingDocument = Loading }
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        DocumentsApi.deleteDocument appState (Uuid.toString questionnaire.uuid) DeleteDocumentCompleted
+                        DocumentsApi.deleteDocument appState (Uuid.toString document.uuid) DeleteDocumentCompleted
             in
             ( newModel, cmd )
 
@@ -243,8 +243,8 @@ handleSubmitDocumentCompleted appState model result =
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Listing.UpdateConfig Document
 listingUpdateConfig wrapMsg appState model =
-    { getRequest = DocumentsApi.getDocuments appState model.questionnaireUuid
+    { getRequest = DocumentsApi.getDocuments appState model.projectUuid
     , getError = gettext "Unable to get documents." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.documentsIndexWithFilters model.questionnaireUuid
+    , toRoute = Routes.documentsIndexWithFilters model.projectUuid
     }

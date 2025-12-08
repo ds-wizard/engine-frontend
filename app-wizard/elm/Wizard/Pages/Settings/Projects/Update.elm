@@ -16,7 +16,7 @@ update wrapMsg msg appState =
 
 updateProps : AppState -> GenericUpdate.UpdateProps EditableQuestionnairesConfigForm
 updateProps appState =
-    { initForm = .questionnaires >> EditableQuestionnairesConfigForm.init appState
-    , formToConfig = EditableQuestionnairesConfigForm.toEditableQuestionnaireConfig >> EditableConfig.updateQuestionnaires
+    { initForm = .project >> EditableQuestionnairesConfigForm.init appState
+    , formToConfig = EditableQuestionnairesConfigForm.toEditableQuestionnaireConfig >> EditableConfig.updateProject
     , formValidation = EditableQuestionnairesConfigForm.validation appState
     }

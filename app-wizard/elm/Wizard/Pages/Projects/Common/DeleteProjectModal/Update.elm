@@ -3,12 +3,12 @@ module Wizard.Pages.Projects.Common.DeleteProjectModal.Update exposing (UpdateCo
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Models exposing (Model)
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Pages.Projects.Common.ProjectDescriptor exposing (ProjectDescriptor)
 
 
 type alias UpdateConfig =
@@ -20,38 +20,38 @@ type alias UpdateConfig =
 update : UpdateConfig -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update cfg msg appState model =
     case msg of
-        ShowHideDeleteQuestionnaire mbQuestionnaire ->
-            handleShowHideDeleteQuestionnaire model mbQuestionnaire
+        ShowHideDeleteProject mbQuestionnaire ->
+            handleShowHideDeleteProject model mbQuestionnaire
 
-        DeleteQuestionnaire ->
-            handleDeleteQuestionnaire cfg appState model
+        DeleteProject ->
+            handleDeleteProject cfg appState model
 
-        DeleteQuestionnaireCompleted result ->
-            handleDeleteQuestionnaireCompleted cfg appState model result
+        DeleteProjectCompleted result ->
+            handleDeleteProjectCompleted cfg appState model result
 
 
 
 -- Handlers
 
 
-handleShowHideDeleteQuestionnaire : Model -> Maybe QuestionnaireDescriptor -> ( Model, Cmd Wizard.Msgs.Msg )
-handleShowHideDeleteQuestionnaire model mbQuestionnaire =
-    ( { model | questionnaireToBeDeleted = mbQuestionnaire, deletingQuestionnaire = Unset }
+handleShowHideDeleteProject : Model -> Maybe ProjectDescriptor -> ( Model, Cmd Wizard.Msgs.Msg )
+handleShowHideDeleteProject model mbQuestionnaire =
+    ( { model | projectToBeDeleted = mbQuestionnaire, deletingProject = Unset }
     , Cmd.none
     )
 
 
-handleDeleteQuestionnaire : UpdateConfig -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteQuestionnaire cfg appState model =
-    case model.questionnaireToBeDeleted of
-        Just questionnaire ->
+handleDeleteProject : UpdateConfig -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteProject cfg appState model =
+    case model.projectToBeDeleted of
+        Just project ->
             let
                 newModel =
-                    { model | deletingQuestionnaire = Loading }
+                    { model | deletingProject = Loading }
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.deleteQuestionnaire appState questionnaire.uuid DeleteQuestionnaireCompleted
+                        ProjectsApi.delete appState project.uuid DeleteProjectCompleted
             in
             ( newModel, cmd )
 
@@ -59,18 +59,18 @@ handleDeleteQuestionnaire cfg appState model =
             ( model, Cmd.none )
 
 
-handleDeleteQuestionnaireCompleted : UpdateConfig -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteQuestionnaireCompleted cfg appState model result =
+handleDeleteProjectCompleted : UpdateConfig -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteProjectCompleted cfg appState model result =
     case result of
         Ok _ ->
             ( { model
-                | deletingQuestionnaire = Unset
-                , questionnaireToBeDeleted = Nothing
+                | deletingProject = Unset
+                , projectToBeDeleted = Nothing
               }
             , cfg.deleteCompleteCmd
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (gettext "Project could not be deleted." appState.locale) error }
+            ( { model | deletingProject = ApiError.toActionResult appState (gettext "Project could not be deleted." appState.locale) error }
             , Cmd.none
             )

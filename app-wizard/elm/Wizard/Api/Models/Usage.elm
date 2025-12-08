@@ -13,7 +13,7 @@ type alias Usage =
     , knowledgeModelEditors : UsageValue
     , knowledgeModels : UsageValue
     , locales : UsageValue
-    , questionnaires : UsageValue
+    , projects : UsageValue
     , storage : UsageValue
     , users : UsageValue
     }
@@ -29,6 +29,6 @@ decoder =
         |> D.required "knowledgeModelEditors" UsageValue.decoder
         |> D.required "knowledgeModels" UsageValue.decoder
         |> D.required "locales" UsageValue.decoder
-        |> D.required "questionnaires" UsageValue.decoder
+        |> D.required "projects" UsageValue.decoder
         |> D.required "storage" UsageValue.decoder
         |> D.required "users" UsageValue.decoder

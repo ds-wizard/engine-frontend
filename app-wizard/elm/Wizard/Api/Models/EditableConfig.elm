@@ -9,7 +9,7 @@ module Wizard.Api.Models.EditableConfig exposing
     , updateLookAndFeel
     , updateOrganization
     , updatePrivacyAndSupport
-    , updateQuestionnaires
+    , updateProject
     , updateRegistry
     , updateSubmission
     )
@@ -24,7 +24,7 @@ import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig as Editable
 import Wizard.Api.Models.EditableConfig.EditableFeaturesConfig as EditableFeaturesConfig exposing (EditableFeaturesConfig)
 import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig as EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
 import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
-import Wizard.Api.Models.EditableConfig.EditableQuestionnairesConfig as EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
+import Wizard.Api.Models.EditableConfig.EditableProjectConfig as EditableProjectConfig exposing (EditableProjectConfig)
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
 import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 
@@ -37,7 +37,7 @@ type alias EditableConfig =
     , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
     , lookAndFeel : EditableLookAndFeelConfig
     , registry : EditableRegistryConfig
-    , questionnaires : EditableQuestionnairesConfig
+    , project : EditableProjectConfig
     , submission : EditableSubmissionConfig
     , knowledgeModel : EditableKnowledgeModelConfig
     }
@@ -78,9 +78,9 @@ updateRegistry registry config =
     { config | registry = registry }
 
 
-updateQuestionnaires : EditableQuestionnairesConfig -> EditableConfig -> EditableConfig
-updateQuestionnaires questionnaires config =
-    { config | questionnaires = questionnaires }
+updateProject : EditableProjectConfig -> EditableConfig -> EditableConfig
+updateProject project config =
+    { config | project = project }
 
 
 updateSubmission : EditableSubmissionConfig -> EditableConfig -> EditableConfig
@@ -107,7 +107,7 @@ decoder =
         |> D.required "dashboardAndLoginScreen" DashboardAndLoginScreenConfig.decoder
         |> D.required "lookAndFeel" EditableLookAndFeelConfig.decoder
         |> D.required "registry" EditableRegistryConfig.decoder
-        |> D.required "questionnaire" EditableQuestionnairesConfig.decoder
+        |> D.required "project" EditableProjectConfig.decoder
         |> D.required "submission" EditableSubmissionConfig.decoder
         |> D.required "knowledgeModel" EditableKnowledgeModelConfig.decoder
 
@@ -122,7 +122,7 @@ encode config =
         , ( "dashboardAndLoginScreen", DashboardAndLoginScreenConfig.encode config.dashboardAndLoginScreen )
         , ( "lookAndFeel", EditableLookAndFeelConfig.encode config.lookAndFeel )
         , ( "registry", EditableRegistryConfig.encode config.registry )
-        , ( "questionnaire", EditableQuestionnairesConfig.encode config.questionnaires )
+        , ( "project", EditableProjectConfig.encode config.project )
         , ( "submission", EditableSubmissionConfig.encode config.submission )
         , ( "knowledgeModel", EditableKnowledgeModelConfig.encode config.knowledgeModel )
         ]

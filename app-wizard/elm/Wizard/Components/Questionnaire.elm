@@ -106,26 +106,26 @@ import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
-import Wizard.Api.Models.QuestionnaireDetail.Comment as Comment exposing (Comment)
-import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
-import Wizard.Api.Models.QuestionnaireFileSimple exposing (QuestionnaireFileSimple)
-import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
-import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
+import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
+import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent)
+import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
+import Wizard.Api.Models.ProjectFileSimple exposing (ProjectFileSimple)
+import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
+import Wizard.Api.Models.ProjectVersion exposing (ProjectVersion)
 import Wizard.Api.Models.TypeHint exposing (TypeHint)
 import Wizard.Api.Models.TypeHintLegacy exposing (TypeHintLegacy)
 import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
-import Wizard.Api.Models.WebSockets.QuestionnaireAction.SetQuestionnaireData exposing (SetQuestionnaireData)
-import Wizard.Api.QuestionnaireActions as QuestionnaireActionsApi
-import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
-import Wizard.Api.QuestionnaireImporters as QuestionnaireImportersApi
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
+import Wizard.Api.ProjectActions as ProjectActionsApi
+import Wizard.Api.ProjectFiles as ProjectFilesApi
+import Wizard.Api.ProjectImporters as ProjectsImportersApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (illustratedMessage, resizableTextarea)
 import Wizard.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
@@ -144,7 +144,7 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Data.Integrations as Integrations
 import Wizard.Data.Session as Session
-import Wizard.Pages.Projects.Common.QuestionnaireTodoGroup as QuestionnaireTodoGroup
+import Wizard.Pages.Projects.Common.ProjectTodoGroup as ProjectTodoGroup
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
@@ -160,13 +160,13 @@ type alias Model =
     , mbCommentThreadUuid : Maybe Uuid
     , activePage : ActivePage
     , rightPanel : RightPanel
-    , questionnaire : QuestionnaireQuestionnaire
+    , questionnaire : ProjectQuestionnaire
     , knowledgeModelParentMap : KnowledgeModel.ParentMap
-    , questionnaireEvents : ActionResult (List QuestionnaireEvent)
-    , questionnaireEventsExtraLoading : ActionResult ()
-    , questionnaireEventsPage : Int
-    , questionnaireEventsLoadMore : Bool
-    , questionnaireVersions : ActionResult (List QuestionnaireVersion)
+    , projectEvents : ActionResult (List ProjectEvent)
+    , projectEventsExtraLoading : ActionResult ()
+    , projectEventsPage : Int
+    , projectEventsLoadMore : Bool
+    , projectVersions : ActionResult (List ProjectVersion)
     , phaseModalOpen : Bool
     , removeItem : Maybe ( String, String )
     , deleteFile : Maybe ( Uuid, String )
@@ -191,9 +191,9 @@ type alias Model =
     , commentDropdownStates : Dict String Dropdown.State
     , splitPane : SplitPane.State
     , questionnaireImportersDropdown : Dropdown.State
-    , questionnaireImporters : ActionResult (List QuestionnaireImporter)
+    , questionnaireImporters : ActionResult (List ProjectImporter)
     , questionnaireActionsDropdown : Dropdown.State
-    , questionnaireActions : ActionResult (List QuestionnaireAction)
+    , questionnaireActions : ActionResult (List ProjectAction)
     , questionnaireActionResult : Maybe Integrations.ActionResult
     , collapsedItems : Set String
     , recentlyCopied : Bool
@@ -225,12 +225,12 @@ type ActivePage
     | PageChapter String
 
 
-initSimple : AppState -> QuestionnaireQuestionnaire -> ( Model, Cmd Msg )
+initSimple : AppState -> ProjectQuestionnaire -> ( Model, Cmd Msg )
 initSimple appState questionnaire =
     init appState questionnaire Nothing Nothing
 
 
-init : AppState -> QuestionnaireQuestionnaire -> Maybe String -> Maybe Uuid -> ( Model, Cmd Msg )
+init : AppState -> ProjectQuestionnaire -> Maybe String -> Maybe Uuid -> ( Model, Cmd Msg )
 init appState questionnaire mbPath mbCommentThreadUuid =
     let
         mbChapterUuid =
@@ -246,11 +246,11 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , rightPanel = RightPanel.None
             , questionnaire = questionnaire
             , knowledgeModelParentMap = KnowledgeModel.createParentMap questionnaire.knowledgeModel
-            , questionnaireEvents = ActionResult.Unset
-            , questionnaireEventsExtraLoading = ActionResult.Unset
-            , questionnaireEventsPage = 0
-            , questionnaireEventsLoadMore = False
-            , questionnaireVersions = ActionResult.Unset
+            , projectEvents = ActionResult.Unset
+            , projectEventsExtraLoading = ActionResult.Unset
+            , projectEventsPage = 0
+            , projectEventsLoadMore = False
+            , projectVersions = ActionResult.Unset
             , phaseModalOpen = False
             , removeItem = Nothing
             , deleteFile = Nothing
@@ -320,9 +320,9 @@ init appState questionnaire mbPath mbCommentThreadUuid =
     )
 
 
-addEvent : QuestionnaireEvent -> Model -> Model
+addEvent : ProjectEvent -> Model -> Model
 addEvent event model =
-    { model | questionnaireEvents = ActionResult.map (\events -> events ++ [ event ]) model.questionnaireEvents }
+    { model | projectEvents = ActionResult.map (\events -> events ++ [ event ]) model.projectEvents }
 
 
 setActiveChapterUuid : String -> Model -> Model
@@ -330,11 +330,11 @@ setActiveChapterUuid uuid model =
     { model | activePage = PageChapter uuid }
 
 
-updateWithQuestionnaireData : AppState -> SetQuestionnaireData -> Model -> Model
+updateWithQuestionnaireData : AppState -> SetProjectData -> Model -> Model
 updateWithQuestionnaireData appState data model =
     let
         updatedQuestionnaire =
-            QuestionnaireQuestionnaire.updateWithQuestionnaireData data model.questionnaire
+            ProjectQuestionnaire.updateWithQuestionnaireData data model.questionnaire
 
         setNewPanel panel allowed =
             if allowed then
@@ -372,22 +372,22 @@ updateWithQuestionnaireData appState data model =
 
 setPhaseUuid : Maybe Uuid -> Model -> Model
 setPhaseUuid phaseUuid =
-    updateQuestionnaire <| QuestionnaireQuestionnaire.setPhaseUuid phaseUuid
+    updateQuestionnaire <| ProjectQuestionnaire.setPhaseUuid phaseUuid
 
 
 setReply : String -> Reply -> Model -> Model
 setReply path reply =
-    updateQuestionnaire <| QuestionnaireQuestionnaire.setReply path reply
+    updateQuestionnaire <| ProjectQuestionnaire.setReply path reply
 
 
 clearReply : String -> Model -> Model
 clearReply path =
-    updateQuestionnaire <| QuestionnaireQuestionnaire.clearReplyValue path
+    updateQuestionnaire <| ProjectQuestionnaire.clearReplyValue path
 
 
 setLabels : String -> List String -> Model -> Model
 setLabels path value =
-    updateQuestionnaire <| QuestionnaireQuestionnaire.setLabels path value
+    updateQuestionnaire <| ProjectQuestionnaire.setLabels path value
 
 
 resolveCommentThread : String -> Uuid -> Int -> Model -> Model
@@ -398,7 +398,7 @@ resolveCommentThread path threadUuid commentCount model =
     in
     model
         |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.addResolvedCommentThreadToCount path threadUuid commentCount)
+        |> updateQuestionnaire (ProjectQuestionnaire.addResolvedCommentThreadToCount path threadUuid commentCount)
 
 
 reopenCommentThread : String -> Uuid -> Int -> Model -> Model
@@ -409,14 +409,14 @@ reopenCommentThread path threadUuid commentCount model =
     in
     model
         |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.addReopenedCommentThreadToCount path threadUuid commentCount)
+        |> updateQuestionnaire (ProjectQuestionnaire.addReopenedCommentThreadToCount path threadUuid commentCount)
 
 
 deleteCommentThread : String -> Uuid -> Model -> Model
 deleteCommentThread path threadUuid model =
     model
         |> mapCommentThreads path (List.filter (\t -> t.uuid /= threadUuid))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.removeCommentThreadFromCount path threadUuid)
+        |> updateQuestionnaire (ProjectQuestionnaire.removeCommentThreadFromCount path threadUuid)
 
 
 assignCommentThread : String -> Uuid -> Maybe UserSuggestion -> Model -> Model
@@ -450,7 +450,7 @@ addComment path threadUuid private comment model =
     in
     questionnaireWithThread
         |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.addCommentCount path threadUuid)
+        |> updateQuestionnaire (ProjectQuestionnaire.addCommentCount path threadUuid)
 
 
 addCommentThread : String -> Uuid -> Bool -> Comment -> Model -> Model
@@ -500,7 +500,7 @@ deleteComment path threadUuid commentUuid model =
     in
     model
         |> mapCommentThreads path (List.map (wrapMapCommentThread threadUuid mapCommentThread))
-        |> updateQuestionnaire (QuestionnaireQuestionnaire.subCommentCount path threadUuid)
+        |> updateQuestionnaire (ProjectQuestionnaire.subCommentCount path threadUuid)
 
 
 mapCommentThreads : String -> (List CommentThread -> List CommentThread) -> Model -> Model
@@ -532,7 +532,7 @@ resetUserSuggestionDropdownModels model =
     { model | userSuggestionDropdownModels = Dict.empty }
 
 
-updateQuestionnaire : (QuestionnaireQuestionnaire -> QuestionnaireQuestionnaire) -> Model -> Model
+updateQuestionnaire : (ProjectQuestionnaire -> ProjectQuestionnaire) -> Model -> Model
 updateQuestionnaire fn model =
     { model | questionnaire = fn model.questionnaire }
 
@@ -543,9 +543,9 @@ isQuestionDesirable model =
         (Uuid.toString (Maybe.withDefault Uuid.nil model.questionnaire.phaseUuid))
 
 
-addFile : QuestionnaireFileSimple -> Model -> Model
+addFile : ProjectFileSimple -> Model -> Model
 addFile file model =
-    { model | questionnaire = QuestionnaireQuestionnaire.addFile file model.questionnaire }
+    { model | questionnaire = ProjectQuestionnaire.addFile file model.questionnaire }
 
 
 type alias Config msg =
@@ -553,7 +553,7 @@ type alias Config msg =
     , renderer : QuestionnaireRenderer
     , wrapMsg : Msg -> msg
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
-    , revertQuestionnaireMsg : Maybe (QuestionnaireEvent -> msg)
+    , revertQuestionnaireMsg : Maybe (ProjectEvent -> msg)
     , isKmEditor : Bool
     }
 
@@ -649,7 +649,7 @@ type Msg
     | FileUploadModalMsg FileUploadModal.Msg
     | PhaseModalUpdate Bool (Maybe Uuid)
     | SetReply String Reply
-    | SetFile String QuestionnaireFileSimple
+    | SetFile String ProjectFileSimple
     | ClearReply String
     | AddItem String (List String)
     | RemoveItem String String
@@ -669,17 +669,17 @@ type Msg
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
     | LoadMoreQuestionnaireEvents
-    | GetQuestionnaireEventsCompleted Int (Result ApiError (Pagination QuestionnaireEvent))
-    | GetQuestionnaireVersionsCompleted (Result ApiError (List QuestionnaireVersion))
+    | GetQuestionnaireEventsCompleted Int (Result ApiError (Pagination ProjectEvent))
+    | GetQuestionnaireVersionsCompleted (Result ApiError (List ProjectVersion))
     | HistoryMsg History.Msg
     | VersionModalMsg VersionModal.Msg
     | DeleteVersionModalMsg DeleteVersionModal.Msg
     | CreateNamedVersion Uuid
-    | RenameVersion QuestionnaireVersion
-    | DeleteVersion QuestionnaireVersion
-    | AddQuestionnaireVersion QuestionnaireVersion
-    | UpdateQuestionnaireVersion QuestionnaireVersion
-    | DeleteQuestionnaireVersion QuestionnaireVersion
+    | RenameVersion ProjectVersion
+    | DeleteVersion ProjectVersion
+    | AddQuestionnaireVersion ProjectVersion
+    | UpdateQuestionnaireVersion ProjectVersion
+    | DeleteQuestionnaireVersion ProjectVersion
     | OpenComments Bool String
     | CommentInput String (Maybe Uuid) String
     | CommentSubmit String (Maybe Uuid) String Bool
@@ -701,7 +701,7 @@ type Msg
     | ActionsDropdownMsg Dropdown.State
     | GotActionResult (Result D.Error Integrations.ActionResult)
     | CloseActionResult
-    | OpenAction QuestionnaireAction
+    | OpenAction ProjectAction
     | CollapseItem String
     | ExpandItem String
     | CollapseItems (List String)
@@ -710,8 +710,8 @@ type Msg
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
     | GetCommentThreadsCompleted String (Result ApiError (Dict String (List CommentThread)))
-    | GetQuestionnaireImportersComplete (Result ApiError (List QuestionnaireImporter))
-    | GetQuestionnaireActionsComplete (Result ApiError (List QuestionnaireAction))
+    | GetQuestionnaireImportersComplete (Result ApiError (List ProjectImporter))
+    | GetQuestionnaireActionsComplete (Result ApiError (List ProjectAction))
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
     | LinkedItemsDropdownMsg String Dropdown.State
     | SearchPanelMsg SearchPanel.Msg
@@ -733,7 +733,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 )
 
         loadComments path =
-            QuestionnairesApi.getQuestionnaireComments appState model.uuid path (GetCommentThreadsCompleted path)
+            ProjectsApi.getCommentThreads appState model.uuid path (GetCommentThreadsCompleted path)
     in
     case msg of
         SetActivePage activePage ->
@@ -780,7 +780,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.Warnings ->
                             showRightPanel
-                                (QuestionnaireQuestionnaire.warningsLength model.questionnaire > 0)
+                                (ProjectQuestionnaire.warningsLength model.questionnaire > 0)
                                 RightPanel.Warnings
 
                 panelCmd =
@@ -790,8 +790,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.VersionHistory ->
                             Cmd.batch
-                                [ QuestionnairesApi.getQuestionnaireEvents appState model.uuid model.questionnaireEventsPage (GetQuestionnaireEventsCompleted 0)
-                                , QuestionnairesApi.getQuestionnaireVersions appState model.uuid GetQuestionnaireVersionsCompleted
+                                [ ProjectsApi.getEvents appState model.uuid model.projectEventsPage (GetQuestionnaireEventsCompleted 0)
+                                , ProjectsApi.getVersions appState model.uuid GetQuestionnaireVersionsCompleted
                                 ]
 
                         RightPanel.Comments path ->
@@ -801,7 +801,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             Cmd.none
 
                 newModel =
-                    { model | rightPanel = updatedRightPanel, questionnaireEvents = ActionResult.Loading, questionnaireEventsPage = 0 }
+                    { model | rightPanel = updatedRightPanel, projectEvents = ActionResult.Loading, projectEventsPage = 0 }
             in
             withSeed
                 ( newModel
@@ -823,7 +823,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             withSeed <| handleScrollToPath model False path
 
         ScrollToQuestion questionUuid ->
-            case QuestionnaireQuestionnaire.getClosestQuestionParentPath model.questionnaire model.knowledgeModelParentMap questionUuid of
+            case ProjectQuestionnaire.getClosestQuestionParentPath model.questionnaire model.knowledgeModelParentMap questionUuid of
                 Just path ->
                     withSeed <| handleScrollToPath model True path
 
@@ -930,7 +930,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         SetFile path file ->
             let
                 modelWithFile =
-                    updateQuestionnaire (QuestionnaireQuestionnaire.addFile file) model
+                    updateQuestionnaire (ProjectQuestionnaire.addFile file) model
 
                 reply =
                     createReply appState (FileReply file.uuid)
@@ -983,7 +983,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 Just ( fileUuid, path ) ->
                     let
                         deleteFileCmd =
-                            QuestionnaireFilesApi.deleteFile appState model.uuid fileUuid (DeleteFileCompleted path)
+                            ProjectFilesApi.delete appState model.uuid fileUuid (DeleteFileCompleted path)
 
                         modelWithDeletingFile =
                             { model | deletingFile = ActionResult.Loading }
@@ -1008,7 +1008,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap <| { model | deleteFile = Nothing }
 
         DownloadFile uuid ->
-            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl model.uuid uuid)) )
+            withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.fetchFile (AppState.toServerInfo appState) (ProjectFilesApi.fileUrl model.uuid uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             withSeed ( model, Cmd.map FileDownloaderMsg (FileDownloader.update fileDownloaderMsg) )
@@ -1103,8 +1103,8 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
         LoadMoreQuestionnaireEvents ->
             withSeed
-                ( { model | questionnaireEventsExtraLoading = ActionResult.Loading }
-                , QuestionnairesApi.getQuestionnaireEvents appState model.uuid model.questionnaireEventsPage (GetQuestionnaireEventsCompleted model.questionnaireEventsPage)
+                ( { model | projectEventsExtraLoading = ActionResult.Loading }
+                , ProjectsApi.getEvents appState model.uuid model.projectEventsPage (GetQuestionnaireEventsCompleted model.projectEventsPage)
                 )
 
         GetQuestionnaireEventsCompleted page result ->
@@ -1114,29 +1114,29 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         if page == questionnaireEvents.page.number then
                             let
                                 currentItems =
-                                    ActionResult.withDefault [] model.questionnaireEvents
+                                    ActionResult.withDefault [] model.projectEvents
                             in
                             { model
-                                | questionnaireEvents = ActionResult.Success (List.reverse questionnaireEvents.items ++ currentItems)
-                                , questionnaireEventsExtraLoading = ActionResult.Unset
-                                , questionnaireEventsPage = page + 1
-                                , questionnaireEventsLoadMore = page + 1 < questionnaireEvents.page.totalPages
+                                | projectEvents = ActionResult.Success (List.reverse questionnaireEvents.items ++ currentItems)
+                                , projectEventsExtraLoading = ActionResult.Unset
+                                , projectEventsPage = page + 1
+                                , projectEventsLoadMore = page + 1 < questionnaireEvents.page.totalPages
                             }
 
                         else
                             model
 
                     Err _ ->
-                        { model | questionnaireEvents = Error (gettext "Unable to get version history." appState.locale) }
+                        { model | projectEvents = Error (gettext "Unable to get version history." appState.locale) }
 
         GetQuestionnaireVersionsCompleted result ->
             wrap <|
                 case result of
                     Ok questionnaireVersions ->
-                        { model | questionnaireVersions = Success questionnaireVersions }
+                        { model | projectVersions = Success questionnaireVersions }
 
                     Err _ ->
-                        { model | questionnaireVersions = Error (gettext "Unable to get version history." appState.locale) }
+                        { model | projectVersions = Error (gettext "Unable to get version history." appState.locale) }
 
         HistoryMsg historyMsg ->
             let
@@ -1157,7 +1157,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             let
                 cfg =
                     { wrapMsg = VersionModalMsg
-                    , questionnaireUuid = model.questionnaire.uuid
+                    , projectUuid = model.questionnaire.uuid
                     , addVersionCmd = Task.dispatch << AddQuestionnaireVersion
                     , renameVersionCmd = Task.dispatch << UpdateQuestionnaireVersion
                     }
@@ -1174,7 +1174,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             let
                 cfg =
                     { wrapMsg = DeleteVersionModalMsg
-                    , questionnaireUuid = model.questionnaire.uuid
+                    , projectUuid = model.questionnaire.uuid
                     , deleteVersionCmd = Task.dispatch << DeleteQuestionnaireVersion
                     }
 
@@ -1198,9 +1198,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
         AddQuestionnaireVersion questionnaireVersion ->
             let
                 questionnaireVersions =
-                    ActionResult.map ((::) questionnaireVersion) model.questionnaireVersions
+                    ActionResult.map ((::) questionnaireVersion) model.projectVersions
             in
-            wrap { model | questionnaireVersions = questionnaireVersions }
+            wrap { model | projectVersions = questionnaireVersions }
 
         UpdateQuestionnaireVersion questionnaireVersion ->
             let
@@ -1212,17 +1212,17 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                         version
 
                 questionnaireVersions =
-                    ActionResult.map (List.map updateVersion) model.questionnaireVersions
+                    ActionResult.map (List.map updateVersion) model.projectVersions
             in
-            wrap { model | questionnaireVersions = questionnaireVersions }
+            wrap { model | projectVersions = questionnaireVersions }
 
         DeleteQuestionnaireVersion questionnaireVersion ->
             let
                 questionnaireVersions =
-                    ActionResult.map (List.filter (not << (==) questionnaireVersion.uuid << .uuid)) model.questionnaireVersions
+                    ActionResult.map (List.filter (not << (==) questionnaireVersion.uuid << .uuid)) model.projectVersions
             in
             wrap
-                { model | questionnaireVersions = questionnaireVersions }
+                { model | projectVersions = questionnaireVersions }
 
         OpenComments immediate path ->
             let
@@ -1306,7 +1306,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( questionnaireImporters, cmd ) =
                     if ActionResult.isUnset model.questionnaireImporters then
                         ( Loading
-                        , QuestionnaireImportersApi.getQuestionnaireImportersFor appState model.uuid GetQuestionnaireImportersComplete
+                        , ProjectsImportersApi.getListFor appState model.uuid GetQuestionnaireImportersComplete
                         )
 
                     else
@@ -1325,7 +1325,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 ( questionnaireActions, cmd ) =
                     if ActionResult.isUnset model.questionnaireActions then
                         ( Loading
-                        , QuestionnaireActionsApi.getQuestionnaireActionsFor appState model.uuid GetQuestionnaireActionsComplete
+                        , ProjectActionsApi.getListFor appState model.uuid GetQuestionnaireActionsComplete
                         )
 
                     else
@@ -1888,7 +1888,7 @@ loadTypeHints appState ctx model path questionUuidStr value =
                     TypeHintRequest.fromKmEditorQuestion kmEditorUuid questionUuid value
 
                 Nothing ->
-                    TypeHintRequest.fromQuestionnaire model.questionnaire.uuid questionUuid value
+                    TypeHintRequest.fromProject model.questionnaire.uuid questionUuid value
     in
     TypeHintsApi.fetchTypeHints appState typeHintRequest (TypeHintsLoaded path value)
 
@@ -2206,7 +2206,7 @@ viewQuestionnaireToolbar appState cfg model =
         todosButton questionnaire =
             let
                 todosLength =
-                    QuestionnaireQuestionnaire.todosLength questionnaire
+                    ProjectQuestionnaire.todosLength questionnaire
 
                 todosBadge =
                     if todosLength > 0 then
@@ -2228,7 +2228,7 @@ viewQuestionnaireToolbar appState cfg model =
         commentsOverviewButton questionnaire =
             let
                 commentsLength =
-                    QuestionnaireQuestionnaire.commentsLength questionnaire
+                    ProjectQuestionnaire.commentsLength questionnaire
 
                 commentsBadge =
                     if commentsLength > 0 then
@@ -2245,7 +2245,7 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
 
         warningsLength =
-            QuestionnaireQuestionnaire.warningsLength model.questionnaire
+            ProjectQuestionnaire.warningsLength model.questionnaire
 
         warningsButton =
             div [ class "item-group" ]
@@ -2377,7 +2377,7 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
                     [ text selectedPhaseTitle ]
 
             currentPhaseIndex =
-                QuestionnaireQuestionnaire.getCurrentPhaseIndex model.questionnaire
+                ProjectQuestionnaire.getCurrentPhaseIndex model.questionnaire
 
             progress =
                 toFloat currentPhaseIndex / toFloat (List.length phases - 1)
@@ -2424,7 +2424,7 @@ viewPhaseModal appState model =
             KnowledgeModel.getPhases model.questionnaire.knowledgeModel
 
         currentPhaseIndex =
-            QuestionnaireQuestionnaire.getCurrentPhaseIndex model.questionnaire
+            ProjectQuestionnaire.getCurrentPhaseIndex model.questionnaire
 
         viewPhase : Int -> Phase -> Html Msg
         viewPhase index phase =
@@ -2550,7 +2550,7 @@ viewQuestionnaireRightPanel appState cfg model =
         RightPanel.VersionHistory ->
             let
                 loadMoreMsg =
-                    if model.questionnaireEventsLoadMore then
+                    if model.projectEventsLoadMore then
                         Just (cfg.wrapMsg LoadMoreQuestionnaireEvents)
 
                     else
@@ -2566,11 +2566,11 @@ viewQuestionnaireRightPanel appState cfg model =
                     , previewQuestionnaireEventMsg = cfg.previewQuestionnaireEventMsg
                     , revertQuestionnaireMsg = cfg.revertQuestionnaireMsg
                     , loadMoreMsg = loadMoreMsg
-                    , loadingMore = model.questionnaireEventsExtraLoading
+                    , loadingMore = model.projectEventsExtraLoading
                     }
 
                 versionsAndEvents =
-                    ActionResult.combine model.questionnaireVersions model.questionnaireEvents
+                    ActionResult.combine model.projectVersions model.projectEvents
             in
             Html.viewIf (Feature.projectVersionHistory appState model.questionnaire) <|
                 wrapPanel
@@ -2580,7 +2580,7 @@ viewQuestionnaireRightPanel appState cfg model =
                     ]
 
         RightPanel.Warnings ->
-            if QuestionnaireQuestionnaire.warningsLength model.questionnaire > 0 then
+            if ProjectQuestionnaire.warningsLength model.questionnaire > 0 then
                 wrapPanel <|
                     [ Html.map cfg.wrapMsg <| viewQuestionnaireRightPanelWarnings model ]
 
@@ -2596,7 +2596,7 @@ viewQuestionnaireRightPanelTodos : AppState -> Model -> Html Msg
 viewQuestionnaireRightPanelTodos appState model =
     let
         todos =
-            QuestionnaireQuestionnaire.getTodos model.questionnaire
+            ProjectQuestionnaire.getTodos model.questionnaire
 
         viewTodoGroup group =
             div []
@@ -2616,7 +2616,7 @@ viewQuestionnaireRightPanelTodos appState model =
 
     else
         div [ class "todos" ] <|
-            List.map viewTodoGroup (QuestionnaireTodoGroup.groupTodos todos)
+            List.map viewTodoGroup (ProjectTodoGroup.groupTodos todos)
 
 
 
@@ -2627,7 +2627,7 @@ viewQuestionnaireRightPanelWarnings : Model -> Html Msg
 viewQuestionnaireRightPanelWarnings model =
     let
         warnings =
-            QuestionnaireQuestionnaire.getWarnings model.questionnaire
+            ProjectQuestionnaire.getWarnings model.questionnaire
 
         viewWarningGroup group =
             div []
@@ -2642,7 +2642,7 @@ viewQuestionnaireRightPanelWarnings model =
                 ]
     in
     div [ class "todos" ] <|
-        List.map viewWarningGroup (QuestionnaireTodoGroup.groupTodos warnings)
+        List.map viewWarningGroup (ProjectTodoGroup.groupTodos warnings)
 
 
 
@@ -2713,7 +2713,7 @@ viewQuestionnaireRightPanelCommentsOverview appState model =
             List.foldl fold [] comments
 
         questionnaireComments =
-            QuestionnaireQuestionnaire.getComments model.questionnaire
+            ProjectQuestionnaire.getComments model.questionnaire
 
         commentsEmpty =
             if model.commentsViewResolved then
@@ -2745,7 +2745,7 @@ viewCommentsResolvedSelect : AppState -> Model -> Html Msg
 viewCommentsResolvedSelect appState model =
     let
         questionnaireComments =
-            QuestionnaireQuestionnaire.getComments model.questionnaire
+            ProjectQuestionnaire.getComments model.questionnaire
 
         anyResolvedComments =
             List.any ((<) 0 << .resolvedComments) questionnaireComments
@@ -2783,7 +2783,7 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
                 \group -> group.unresolvedComments > 0
 
         questionnaireComments =
-            QuestionnaireQuestionnaire.getComments model.questionnaire
+            ProjectQuestionnaire.getComments model.questionnaire
 
         comments =
             questionnaireComments
@@ -3510,7 +3510,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
 
         ( questionClass, questionState ) =
             case
-                ( QuestionnaireQuestionnaire.hasReply (pathToString newPath) model.questionnaire
+                ( ProjectQuestionnaire.hasReply (pathToString newPath) model.questionnaire
                 , isQuestionDesirable model question
                 )
             of
@@ -3906,7 +3906,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 [ moveUpButton, moveDownButton, deleteButton ]
 
         linkedItems =
-            QuestionnaireQuestionnaire.getItemUsageInItemSelectQuestions model.questionnaire uuid
+            ProjectQuestionnaire.getItemUsageInItemSelectQuestions model.questionnaire uuid
 
         linkedItemsButton =
             if List.isEmpty linkedItems then
@@ -3935,7 +3935,7 @@ viewQuestionListItem appState cfg ctx model question path humanIdentifiers itemC
                 Maybe.unwrap
                     (i [ class "ms-2 flex-grow-1" ] [ text (String.format (gettext "Item %s" appState.locale) [ String.fromInt (index + 1) ]) ])
                     (strong [ class "ms-2 flex-grow-1 overflow-hidden text-nowrap" ] << List.singleton << text)
-                    (QuestionnaireQuestionnaire.getItemTitle model.questionnaire itemPath questions)
+                    (ProjectQuestionnaire.getItemTitle model.questionnaire itemPath questions)
 
             else
                 Html.nothing
@@ -4405,7 +4405,7 @@ viewQuestionItemSelect appState cfg model path question =
                                 |> List.indexedMap
                                     (\i itemUuid ->
                                         ( itemUuid
-                                        , QuestionnaireQuestionnaire.getItemTitle model.questionnaire (String.split "." itemQuestionPath ++ [ itemUuid ]) itemTemplateQuestions
+                                        , ProjectQuestionnaire.getItemTitle model.questionnaire (String.split "." itemQuestionPath ++ [ itemUuid ]) itemTemplateQuestions
                                             |> Maybe.withDefault (String.format (gettext "Item %s" appState.locale) [ String.fromInt (i + 1) ])
                                         )
                                     )
@@ -4447,7 +4447,7 @@ viewQuestionItemSelect appState cfg model path question =
                 [ text optionLabel ]
 
         itemMissing =
-            QuestionnaireQuestionnaire.itemSelectQuestionItemMissing model.questionnaire mbListQuestionUuid (pathToString path)
+            ProjectQuestionnaire.itemSelectQuestionItemMissing model.questionnaire mbListQuestionUuid (pathToString path)
 
         options =
             List.map itemToOption items
@@ -4460,7 +4460,7 @@ viewQuestionItemSelect appState cfg model path question =
                 itemToOption ( "", gettext "- select -" appState.locale ) :: options
 
         itemLink =
-            case QuestionnaireQuestionnaire.itemSelectQuestionItemPath model.questionnaire mbListQuestionUuid (pathToString path) of
+            case ProjectQuestionnaire.itemSelectQuestionItemPath model.questionnaire mbListQuestionUuid (pathToString path) of
                 Just itemPath ->
                     div [ class "question-item-select-link" ]
                         [ a [ onClick (ScrollToPath itemPath) ]
@@ -4500,7 +4500,7 @@ viewQuestionFile appState cfg model path question =
                 |> Maybe.andThen ReplyValue.getFileUuid
 
         fileView fileUuid =
-            case QuestionnaireQuestionnaire.getFile model.questionnaire fileUuid of
+            case ProjectQuestionnaire.getFile model.questionnaire fileUuid of
                 Just file ->
                     div [ class "questionnaire-file" ]
                         [ fa ("me-2 " ++ FileIcon.getFileIcon file.fileName file.contentType)
@@ -4639,7 +4639,7 @@ viewCommentAction appState cfg model path =
                 pathToString path
 
             commentCount =
-                QuestionnaireQuestionnaire.getUnresolvedCommentCount pathString model.questionnaire
+                ProjectQuestionnaire.getUnresolvedCommentCount pathString model.questionnaire
 
             isOpen =
                 case model.rightPanel of
@@ -4691,7 +4691,7 @@ viewTodoAction appState cfg model path =
             hasTodo =
                 model.questionnaire.labels
                     |> Dict.get currentPath
-                    |> Maybe.unwrap False (List.member QuestionnaireQuestionnaire.todoUuid)
+                    |> Maybe.unwrap False (List.member ProjectQuestionnaire.todoUuid)
         in
         if hasTodo then
             a
@@ -4706,7 +4706,7 @@ viewTodoAction appState cfg model path =
         else
             a
                 [ class "action action-add-todo"
-                , onClick <| SetLabels currentPath [ QuestionnaireQuestionnaire.todoUuid ]
+                , onClick <| SetLabels currentPath [ ProjectQuestionnaire.todoUuid ]
                 ]
                 [ faAdd
                 , span [] [ span [] [ text (gettext "Add TODO" appState.locale) ] ]
@@ -4720,7 +4720,7 @@ viewFeedbackAction : AppState -> Config msg -> Model -> Question -> Html Msg
 viewFeedbackAction appState cfg model question =
     let
         feedbackEnabled =
-            appState.config.questionnaire.feedback.enabled && cfg.features.feedbackEnabled
+            appState.config.project.feedback.enabled && cfg.features.feedbackEnabled
     in
     if feedbackEnabled then
         let
@@ -4778,7 +4778,7 @@ viewRemoveItemModal appState model =
 
         items =
             Maybe.map Tuple.second model.removeItem
-                |> Maybe.unwrap [] (QuestionnaireQuestionnaire.getItemUsageInItemSelectQuestions model.questionnaire)
+                |> Maybe.unwrap [] (ProjectQuestionnaire.getItemUsageInItemSelectQuestions model.questionnaire)
                 |> List.map viewLink
                 |> wrapItemLinks
 
@@ -4805,7 +4805,7 @@ viewFileDeleteModal appState model =
         fileName =
             case model.deleteFile of
                 Just ( fileUuid, _ ) ->
-                    case QuestionnaireQuestionnaire.getFile model.questionnaire fileUuid of
+                    case ProjectQuestionnaire.getFile model.questionnaire fileUuid of
                         Just file ->
                             file.fileName
 
@@ -4852,7 +4852,7 @@ actionsAvailable : AppState -> Config a -> Model -> Bool
 actionsAvailable appState cfg model =
     Session.exists appState.session
         && not cfg.features.readonly
-        && model.questionnaire.questionnaireActionsAvailable
+        && model.questionnaire.projectActionsAvailable
         > 0
 
 
@@ -4860,5 +4860,5 @@ importersAvailable : AppState -> Config a -> Model -> Bool
 importersAvailable appState cfg model =
     Session.exists appState.session
         && not cfg.features.readonly
-        && model.questionnaire.questionnaireImportersAvailable
+        && model.questionnaire.projectImportersAvailable
         > 0

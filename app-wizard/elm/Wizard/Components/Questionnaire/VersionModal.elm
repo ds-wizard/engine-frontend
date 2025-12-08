@@ -19,8 +19,8 @@ import Gettext exposing (gettext)
 import Html exposing (Html)
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectVersion exposing (ProjectVersion)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire.VersionForm as VersionForm exposing (VersionForm)
 import Wizard.Data.AppState exposing (AppState)
 
@@ -32,7 +32,7 @@ import Wizard.Data.AppState exposing (AppState)
 type alias Model =
     { form : Form FormError VersionForm
     , mbEventUuid : Maybe Uuid
-    , mbQuestionnaireVersion : Maybe QuestionnaireVersion
+    , mbQuestionnaireVersion : Maybe ProjectVersion
     , versionResult : ActionResult ()
     }
 
@@ -56,7 +56,7 @@ setEventUuid eventUuid model =
     }
 
 
-setVersion : QuestionnaireVersion -> Model -> Model
+setVersion : ProjectVersion -> Model -> Model
 setVersion version model =
     { model
         | mbEventUuid = Just version.eventUuid
@@ -72,16 +72,16 @@ setVersion version model =
 
 type Msg
     = FormMsg Form.Msg
-    | PostVersionComplete (Result ApiError QuestionnaireVersion)
-    | PutVersionComplete (Result ApiError QuestionnaireVersion)
+    | PostVersionComplete (Result ApiError ProjectVersion)
+    | PutVersionComplete (Result ApiError ProjectVersion)
     | Close
 
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , questionnaireUuid : Uuid
-    , addVersionCmd : QuestionnaireVersion -> Cmd msg
-    , renameVersionCmd : QuestionnaireVersion -> Cmd msg
+    , projectUuid : Uuid
+    , addVersionCmd : ProjectVersion -> Cmd msg
+    , renameVersionCmd : ProjectVersion -> Cmd msg
     }
 
 
@@ -98,10 +98,10 @@ update cfg appState msg model =
                         cmd =
                             case model.mbQuestionnaireVersion of
                                 Just version ->
-                                    QuestionnairesApi.putVersion appState cfg.questionnaireUuid version.uuid body PutVersionComplete
+                                    ProjectsApi.putVersion appState cfg.projectUuid version.uuid body PutVersionComplete
 
                                 Nothing ->
-                                    QuestionnairesApi.postVersion appState cfg.questionnaireUuid body PostVersionComplete
+                                    ProjectsApi.postVersion appState cfg.projectUuid body PostVersionComplete
                     in
                     ( { model
                         | form = Form.update VersionForm.validation formMsg model.form

@@ -74,8 +74,8 @@ initLocalModel appState route model =
         ImportRoute uuid importerId ->
             { model | importModel = Wizard.Pages.Projects.Import.Models.initialModel uuid importerId }
 
-        DocumentDownloadRoute questionnaireUuid fileUuid ->
-            { model | documentDownload = Wizard.Pages.Projects.DocumentDownload.Models.initialModel questionnaireUuid fileUuid }
+        DocumentDownloadRoute projectUuid fileUuid ->
+            { model | documentDownload = Wizard.Pages.Projects.DocumentDownload.Models.initialModel projectUuid fileUuid }
 
-        FileDownloadRoute questionnaireUuid fileUuid ->
-            { model | fileDownload = Wizard.Pages.Projects.FileDownload.Models.initialModel questionnaireUuid fileUuid }
+        FileDownloadRoute projectUuid fileUuid ->
+            { model | fileDownload = Wizard.Pages.Projects.FileDownload.Models.initialModel projectUuid fileUuid }

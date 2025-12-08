@@ -137,7 +137,7 @@ update appState wrapMsg msg model =
                             , settingsModel = Settings.setDocumentTemplate appState documentTemplate model.settingsModel
                             , previewModel =
                                 model.previewModel
-                                    |> Preview.setSelectedQuestionnaire documentTemplate.questionnaire
+                                    |> Preview.setSelectedProject documentTemplate.project
                                     |> Preview.setSelectedKmEditor documentTemplate.knowledgeModelEditor
                           }
                         , Cmd.none

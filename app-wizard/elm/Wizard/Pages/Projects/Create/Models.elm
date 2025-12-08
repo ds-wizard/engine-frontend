@@ -17,23 +17,23 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Models.Project exposing (Project)
+import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Projects.Common.QuestionnaireCreateForm as QuestionnaireCreateForm exposing (QuestionnaireCreateForm)
+import Wizard.Pages.Projects.Common.ProjectCreateForm as ProjectCreateForm exposing (ProjectCreateForm)
 import Wizard.Utils.Feature as Feature
 
 
 type alias Model =
     { selectedProjectTemplateUuid : Maybe Uuid
     , selectedKnowledgeModelId : Maybe String
-    , selectedProjectTemplate : ActionResult QuestionnaireSettings
+    , selectedProjectTemplate : ActionResult ProjectSettings
     , selectedKnowledgeModel : ActionResult KnowledgeModelPackageDetail
-    , projectTemplateTypeHintInputModel : TypeHintInput.Model Questionnaire
+    , projectTemplateTypeHintInputModel : TypeHintInput.Model Project
     , knowledgeModelTypeHintInputModel : TypeHintInput.Model KnowledgeModelPackageSuggestion
     , anyProjectTemplates : ActionResult Bool
     , anyKnowledgeModels : ActionResult Bool
-    , form : Form FormError QuestionnaireCreateForm
+    , form : Form FormError ProjectCreateForm
     , mode : Mode
     , savingQuestionnaire : ActionResult ()
     , selectedTags : List String
@@ -183,7 +183,7 @@ initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
     , knowledgeModelTypeHintInputModel = TypeHintInput.init "knowledgeModelPackageId"
     , anyProjectTemplates = loadProjectTemplates
     , anyKnowledgeModels = loadKnowledgeModels
-    , form = QuestionnaireCreateForm.init appState QuestionnaireCreateForm.TemplateValidationMode selectedProjectTemplateUuid selectedKnowledgeModelId
+    , form = ProjectCreateForm.init appState ProjectCreateForm.TemplateValidationMode selectedProjectTemplateUuid selectedKnowledgeModelId
     , mode = mode
     , savingQuestionnaire = ActionResult.Unset
     , selectedTags = []

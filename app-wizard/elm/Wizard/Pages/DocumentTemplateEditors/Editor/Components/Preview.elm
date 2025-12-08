@@ -7,7 +7,7 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Components.Preview exposing
     , initialModel
     , loadPreviewMsg
     , setSelectedKmEditor
-    , setSelectedQuestionnaire
+    , setSelectedProject
     , subscriptions
     , update
     , view
@@ -26,7 +26,7 @@ import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Utils.ContentType as ContentType
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setFormatUuid, setKnowledgeModelEditorUuid, setQuestionnaireUuid, setSelected)
+import Common.Utils.Setters exposing (setFormatUuid, setKnowledgeModelEditorUuid, setProjectUuid, setSelected)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, iframe, option, p, pre, select, text)
 import Html.Attributes exposing (class, classList, href, id, name, selected, src, target, value)
@@ -45,8 +45,8 @@ import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Api.Models.KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
-import Wizard.Api.Models.QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectSuggestion exposing (ProjectSuggestion)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes
@@ -57,7 +57,7 @@ import Wizard.Routes as Routes
 
 
 type alias Model =
-    { questionnaireHintInputModel : TypeHintInput.Model QuestionnaireSuggestion
+    { projectTypeHintInputModel : TypeHintInput.Model ProjectSuggestion
     , kmEditorTypeHintInputModal : TypeHintInput.Model KnowledgeModelEditorSuggestion
     , urlResponse : ActionResult UrlResponse
     , mode : PreviewMode
@@ -65,31 +65,31 @@ type alias Model =
 
 
 type PreviewMode
-    = QuestionnaireMode
+    = ProjectMode
     | KMEditorMode
 
 
 initialModel : Model
 initialModel =
-    { questionnaireHintInputModel = TypeHintInput.init "uuid"
+    { projectTypeHintInputModel = TypeHintInput.init "uuid"
     , kmEditorTypeHintInputModal = TypeHintInput.init "uuid"
     , urlResponse = ActionResult.Unset
-    , mode = QuestionnaireMode
+    , mode = ProjectMode
     }
 
 
-setSelectedQuestionnaire : Maybe QuestionnaireSuggestion -> Model -> Model
-setSelectedQuestionnaire questionnaire model =
+setSelectedProject : Maybe ProjectSuggestion -> Model -> Model
+setSelectedProject project model =
     let
         newMode =
-            if Maybe.isJust questionnaire then
-                QuestionnaireMode
+            if Maybe.isJust project then
+                ProjectMode
 
             else
                 model.mode
     in
     { model
-        | questionnaireHintInputModel = setSelected questionnaire model.questionnaireHintInputModel
+        | projectTypeHintInputModel = setSelected project model.projectTypeHintInputModel
         , mode = newMode
     }
 
@@ -115,7 +115,7 @@ setSelectedKmEditor kmEditor model =
 
 
 type Msg
-    = QuestionnaireTypeHintInputMsg (TypeHintInput.Msg QuestionnaireSuggestion)
+    = QuestionnaireTypeHintInputMsg (TypeHintInput.Msg ProjectSuggestion)
     | QuestionnaireTypeHintInputSelect Uuid
     | KnowledgeModelEditorTypeHintInputMsg (TypeHintInput.Msg KnowledgeModelEditorSuggestion)
     | KnowledgeModelEditorTypeHintInputSelect Uuid
@@ -140,7 +140,7 @@ subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
         [ Sub.map QuestionnaireTypeHintInputMsg <|
-            TypeHintInput.subscriptions model.questionnaireHintInputModel
+            TypeHintInput.subscriptions model.projectTypeHintInputModel
         , Sub.map KnowledgeModelEditorTypeHintInputMsg <|
             TypeHintInput.subscriptions model.kmEditorTypeHintInputModal
         ]
@@ -183,7 +183,7 @@ update cfg appState msg model =
             let
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << QuestionnaireTypeHintInputMsg
-                    , getTypeHints = QuestionnairesApi.getQuestionnaireSuggestions appState PaginationQueryFilters.empty
+                    , getTypeHints = ProjectsApi.getSuggestions appState PaginationQueryFilters.empty
                     , getError = gettext "Unable to get projects." appState.locale
                     , setReply = cfg.wrapMsg << QuestionnaireTypeHintInputSelect << .uuid
                     , clearReply = Nothing
@@ -191,12 +191,12 @@ update cfg appState msg model =
                     }
 
                 ( typeHintInputModel, typeHintInputCmd ) =
-                    TypeHintInput.update updateCfg typeHintInputMsg model.questionnaireHintInputModel
+                    TypeHintInput.update updateCfg typeHintInputMsg model.projectTypeHintInputModel
             in
-            ( { model | questionnaireHintInputModel = typeHintInputModel }, typeHintInputCmd )
+            ( { model | projectTypeHintInputModel = typeHintInputModel }, typeHintInputCmd )
 
         QuestionnaireTypeHintInputSelect uuid ->
-            ( model, updatePreviewSettings (setQuestionnaireUuid (Just uuid)) )
+            ( model, updatePreviewSettings (setProjectUuid (Just uuid)) )
 
         KnowledgeModelEditorTypeHintInputMsg typeHintInputMsg ->
             let
@@ -220,7 +220,7 @@ update cfg appState msg model =
         SetMode mode ->
             ( { model
                 | mode = mode
-                , questionnaireHintInputModel = TypeHintInput.clear model.questionnaireHintInputModel
+                , projectTypeHintInputModel = TypeHintInput.clear model.projectTypeHintInputModel
                 , kmEditorTypeHintInputModal = TypeHintInput.clear model.kmEditorTypeHintInputModal
               }
             , updatePreviewSettings DocumentTemplateDraftPreviewSettings.clearQuestionnaireAndKmEditor
@@ -305,7 +305,7 @@ view cfg appState model =
 
         ( typeHintInput, link ) =
             case model.mode of
-                QuestionnaireMode ->
+                ProjectMode ->
                     let
                         projectTypeHintInputCfg =
                             { viewItem = TypeHintInputItem.simple .name
@@ -316,10 +316,10 @@ view cfg appState model =
                             }
 
                         projectTypeHintInput =
-                            TypeHintInput.view projectTypeHintInputCfg model.questionnaireHintInputModel False
+                            TypeHintInput.view projectTypeHintInputCfg model.projectTypeHintInputModel False
 
                         projectLink =
-                            case model.questionnaireHintInputModel.selected of
+                            case model.projectTypeHintInputModel.selected of
                                 Just questionnaireSuggestion ->
                                     linkTo (Routes.projectsDetail questionnaireSuggestion.uuid)
                                         (class "source-link" :: target "_blank" :: tooltip (gettext "Open project" appState.locale))
@@ -367,10 +367,10 @@ view cfg appState model =
                 [ button
                     [ class "btn"
                     , classList
-                        [ ( "btn-primary", model.mode == QuestionnaireMode )
-                        , ( "btn-outline-primary", model.mode /= QuestionnaireMode )
+                        [ ( "btn-primary", model.mode == ProjectMode )
+                        , ( "btn-outline-primary", model.mode /= ProjectMode )
                         ]
-                    , onClick (SetMode QuestionnaireMode)
+                    , onClick (SetMode ProjectMode)
                     , dataCy "dt-editor_preview-mode_project"
                     ]
                     [ text (gettext "Project" appState.locale) ]

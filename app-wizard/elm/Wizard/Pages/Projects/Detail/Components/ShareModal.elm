@@ -45,19 +45,19 @@ import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Wizard.Api.Models.QuestionnairePermission as QuestionnairePermission
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
+import Wizard.Api.Models.ProjectPermission as ProjectPermission
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion exposing (UserGroupSuggestion)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Api.UserGroups as UserGroupsApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.MemberIcon as MemberIcon
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInput
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.Projects.Common.QuestionnaireShareForm as QuestionnaireShareForm exposing (QuestionnaireShareForm)
-import Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberPermType as QuestionnaireEditFormMemberPerms
-import Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberType as QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
+import Wizard.Pages.Projects.Common.ProjectShareForm as ProjectShareForm exposing (ProjectShareForm)
+import Wizard.Pages.Projects.Common.ProjectShareFormMemberPermType as QuestionnaireEditFormMemberPerms
+import Wizard.Pages.Projects.Common.ProjectShareFormMemberType as ProjectShareFormMemberType exposing (ProjectShareFormMemberType(..))
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Pages.Projects.Routes as ProjectsRoutes
 import Wizard.Routes as Routes
@@ -75,8 +75,8 @@ type alias Model =
     { visible : Bool
     , savingSharing : ActionResult String
     , lastSavingSharing : Time.Posix
-    , questionnaireEditForm : Form FormError QuestionnaireShareForm
-    , questionnaireUuid : Uuid
+    , projectShareForm : Form FormError ProjectShareForm
+    , projectUuid : Uuid
     , userTypeHintInputModel : TypeHintInput.Model UserSuggestion
     , userGroupTypeHintInputModel : TypeHintInput.Model UserGroupSuggestion
     , users : List UserSuggestion
@@ -90,8 +90,8 @@ init =
     { visible = False
     , savingSharing = Unset
     , lastSavingSharing = Time.millisToPosix 0
-    , questionnaireEditForm = QuestionnaireShareForm.initEmpty
-    , questionnaireUuid = Uuid.nil
+    , projectShareForm = ProjectShareForm.initEmpty
+    , projectUuid = Uuid.nil
     , userTypeHintInputModel = TypeHintInput.init "memberId"
     , userGroupTypeHintInputModel = TypeHintInput.init "userGroupUuid"
     , users = []
@@ -100,13 +100,13 @@ init =
     }
 
 
-setQuestionnaire : QuestionnaireCommon -> Model -> Model
-setQuestionnaire questionnaire model =
+setProject : ProjectCommon -> Model -> Model
+setProject project model =
     { model
-        | questionnaireEditForm = QuestionnaireShareForm.init questionnaire
-        , questionnaireUuid = questionnaire.uuid
-        , users = List.filterMap (.member >> Member.toUserSuggestion) questionnaire.permissions
-        , userGroups = List.filterMap (.member >> Member.toUserGroupSuggestion) questionnaire.permissions
+        | projectShareForm = ProjectShareForm.init project
+        , projectUuid = project.uuid
+        , users = List.filterMap (.member >> Member.toUserSuggestion) project.permissions
+        , userGroups = List.filterMap (.member >> Member.toUserGroupSuggestion) project.permissions
     }
 
 
@@ -115,7 +115,7 @@ setQuestionnaire questionnaire model =
 
 
 type Msg
-    = Open QuestionnaireCommon
+    = Open ProjectCommon
     | Close
     | UserTypeHintInputMsg (TypeHintInput.Msg UserSuggestion)
     | UserGroupTypeHintInputMsg (TypeHintInput.Msg UserGroupSuggestion)
@@ -127,7 +127,7 @@ type Msg
     | ClearCopiedLink
 
 
-openMsg : QuestionnaireCommon -> Msg
+openMsg : ProjectCommon -> Msg
 openMsg =
     Open
 
@@ -154,7 +154,7 @@ tour appState =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , questionnaireUuid : Uuid
+    , projectUuid : Uuid
     , permissions : List Permission
     , onCloseMsg : msg
     }
@@ -163,9 +163,9 @@ type alias UpdateConfig msg =
 update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Seed, Model, Cmd msg )
 update cfg msg appState model =
     case msg of
-        Open questionnaire ->
+        Open project ->
             ( appState.seed
-            , setQuestionnaire questionnaire { model | visible = True }
+            , setProject project { model | visible = True }
             , Driver.init (tour appState)
             )
 
@@ -212,7 +212,7 @@ handleUserTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserSuggestio
 handleUserTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         projectMemberUuids =
-            QuestionnaireShareForm.getMemberUuids model.questionnaireEditForm
+            ProjectShareForm.getMemberUuids model.projectShareForm
 
         filterResults userSuggestion =
             not <| List.member (Uuid.toString userSuggestion.uuid) projectMemberUuids
@@ -236,7 +236,7 @@ handleUserGroupTypeHintInputMsg : UpdateConfig msg -> TypeHintInput.Msg UserGrou
 handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         projectMemberUuids =
-            QuestionnaireShareForm.getMemberUuids model.questionnaireEditForm
+            ProjectShareForm.getMemberUuids model.projectShareForm
 
         filterResults userGroupSuggestion =
             not <| List.member (Uuid.toString userGroupSuggestion.uuid) projectMemberUuids
@@ -263,10 +263,10 @@ handleAddUser appState cfg model user =
             TypeHintInput.clear model.userTypeHintInputModel
 
         permissionsLength =
-            List.length <| Form.getListIndexes "permissions" model.questionnaireEditForm
+            List.length <| Form.getListIndexes "permissions" model.projectShareForm
 
         formUpdate =
-            Form.update QuestionnaireShareForm.validation
+            Form.update ProjectShareForm.validation
 
         createInputMessage field value =
             Form.Input field Form.Text (Field.String value)
@@ -278,17 +278,17 @@ handleAddUser appState cfg model user =
             [ Form.Append "permissions"
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".uuid") (Uuid.toString newUuid)
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberUuid") (Uuid.toString user.uuid)
-            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberType") (QuestionnaireShareFormMemberType.toString UserQuestionnairePermType)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberType") (ProjectShareFormMemberType.toString UserProjectPermType)
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".perms") (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Viewer)
             ]
 
         newForm =
-            List.foldl formUpdate model.questionnaireEditForm msgs
+            List.foldl formUpdate model.projectShareForm msgs
 
         newModel =
             { model
                 | userTypeHintInputModel = userTypeHintInputModel
-                , questionnaireEditForm = newForm
+                , projectShareForm = newForm
                 , users = List.uniqueBy (Uuid.toString << .uuid) (user :: model.users)
             }
     in
@@ -304,10 +304,10 @@ handleAddUserGroup appState cfg model userGroup =
             TypeHintInput.clear model.userGroupTypeHintInputModel
 
         permissionsLength =
-            List.length <| Form.getListIndexes "permissions" model.questionnaireEditForm
+            List.length <| Form.getListIndexes "permissions" model.projectShareForm
 
         formUpdate =
-            Form.update QuestionnaireShareForm.validation
+            Form.update ProjectShareForm.validation
 
         createInputMessage field value =
             Form.Input field Form.Text (Field.String value)
@@ -319,17 +319,17 @@ handleAddUserGroup appState cfg model userGroup =
             [ Form.Append "permissions"
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".uuid") (Uuid.toString newUuid)
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberUuid") (Uuid.toString userGroup.uuid)
-            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberType") (QuestionnaireShareFormMemberType.toString UserGroupQuestionnairePermType)
+            , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".memberType") (ProjectShareFormMemberType.toString UserGroupProjectPermType)
             , createInputMessage ("permissions." ++ String.fromInt permissionsLength ++ ".perms") (QuestionnaireEditFormMemberPerms.toString QuestionnaireEditFormMemberPerms.Viewer)
             ]
 
         newForm =
-            List.foldl formUpdate model.questionnaireEditForm msgs
+            List.foldl formUpdate model.projectShareForm msgs
 
         newModel =
             { model
                 | userGroupTypeHintInputModel = userGroupTypeHintInputModel
-                , questionnaireEditForm = newForm
+                , projectShareForm = newForm
                 , userGroups = List.uniqueBy (Uuid.toString << .uuid) (userGroup :: model.userGroups)
             }
     in
@@ -342,7 +342,7 @@ handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cm
 handleFormMsg cfg formMsg appState model =
     let
         newModel =
-            { model | questionnaireEditForm = Form.update QuestionnaireShareForm.validation formMsg model.questionnaireEditForm }
+            { model | projectShareForm = Form.update ProjectShareForm.validation formMsg model.projectShareForm }
 
         shouldSave =
             case formMsg of
@@ -378,17 +378,17 @@ handlePutQuestionnaireComplete appState model time result =
 
 saveSharing : AppState -> UpdateConfig msg -> Model -> ( Model, Cmd msg )
 saveSharing appState cfg model =
-    case Form.getOutput model.questionnaireEditForm of
+    case Form.getOutput model.projectShareForm of
         Just form ->
             let
                 body =
-                    QuestionnaireShareForm.encode form
+                    ProjectShareForm.encode form
             in
             ( { model
                 | savingSharing = Loading
                 , lastSavingSharing = appState.currentTime
               }
-            , QuestionnairesApi.putQuestionnaireShare appState cfg.questionnaireUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete appState.currentTime)
+            , ProjectsApi.putShare appState cfg.projectUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete appState.currentTime)
             )
 
         Nothing ->
@@ -424,7 +424,7 @@ view appState model =
             [ FormResult.view model.savingSharing
             , Html.viewIf (Admin.isEnabled appState.config.admin) <| userGroupsView appState model
             , usersView appState model
-            , formView appState model.questionnaireEditForm
+            , formView appState model.projectShareForm
             ]
 
         shortcuts =
@@ -471,7 +471,7 @@ copyLinkButton appState model =
                 []
 
         publicLink =
-            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.questionnaireUuid (ProjectDetailRoute.Questionnaire Nothing Nothing))))
+            appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.projectUuid (ProjectDetailRoute.Questionnaire Nothing Nothing))))
 
         copyLinkIcon =
             if model.copiedLink then
@@ -510,12 +510,12 @@ userGroupsView appState model =
             [ strong [] [ text (gettext "User Groups" appState.locale) ]
             , userGroupTypeHintInput
             ]
-        , Html.map FormMsg <| FormGroup.viewList appState.locale (userGroupView appState model.userGroups) model.questionnaireEditForm "permissions" ""
+        , Html.map FormMsg <| FormGroup.viewList appState.locale (userGroupView appState model.userGroups) model.projectShareForm "permissions" ""
         , hr [] []
         ]
 
 
-userGroupView : AppState -> List UserGroupSuggestion -> Form FormError QuestionnaireShareForm -> Int -> Html Form.Msg
+userGroupView : AppState -> List UserGroupSuggestion -> Form FormError ProjectShareForm -> Int -> Html Form.Msg
 userGroupView appState userGroups form i =
     let
         memberUuid =
@@ -576,7 +576,7 @@ usersView appState model =
             TypeHintInput.view userTypeHintInputCfg model.userTypeHintInputModel False
 
         separator =
-            if appState.config.questionnaire.questionnaireVisibility.enabled || appState.config.questionnaire.questionnaireSharing.enabled then
+            if appState.config.project.projectVisibility.enabled || appState.config.project.projectSharing.enabled then
                 hr [] []
 
             else
@@ -587,12 +587,12 @@ usersView appState model =
             [ strong [] [ text (gettext "Users" appState.locale) ]
             , userTypeHintInput
             ]
-        , Html.map FormMsg <| FormGroup.viewList appState.locale (userView appState model.users) model.questionnaireEditForm "permissions" ""
+        , Html.map FormMsg <| FormGroup.viewList appState.locale (userView appState model.users) model.projectShareForm "permissions" ""
         , separator
         ]
 
 
-userView : AppState -> List UserSuggestion -> Form FormError QuestionnaireShareForm -> Int -> Html Form.Msg
+userView : AppState -> List UserSuggestion -> Form FormError ProjectShareForm -> Int -> Html Form.Msg
 userView appState users form i =
     let
         memberUuid =
@@ -656,14 +656,14 @@ userView appState users form i =
             Html.nothing
 
 
-formView : AppState -> Form FormError QuestionnaireShareForm -> Html Msg
+formView : AppState -> Form FormError ProjectShareForm -> Html Msg
 formView appState form =
     let
         sharingEnabled =
             Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
 
         visibilityInputs =
-            if appState.config.questionnaire.questionnaireVisibility.enabled then
+            if appState.config.project.projectVisibility.enabled then
                 let
                     visibilitySelect =
                         let
@@ -674,7 +674,7 @@ formView appState form =
                                 else
                                     Nothing
                         in
-                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState mbFilterPerm) form "visibilityPermission" False
+                        FormExtra.inlineSelect (ProjectPermission.formOptions appState mbFilterPerm) form "visibilityPermission" False
 
                     visibilityEnabled =
                         Maybe.withDefault False (Form.getFieldAsBool "visibilityEnabled" form).value
@@ -700,10 +700,10 @@ formView appState form =
                 []
 
         sharingInputs =
-            if appState.config.questionnaire.questionnaireSharing.enabled then
+            if appState.config.project.projectSharing.enabled then
                 let
                     sharingSelect =
-                        FormExtra.inlineSelect (QuestionnairePermission.formOptions appState Nothing) form "sharingPermission" False
+                        FormExtra.inlineSelect (ProjectPermission.formOptions appState Nothing) form "sharingPermission" False
 
                     sharingPermissionInput =
                         div

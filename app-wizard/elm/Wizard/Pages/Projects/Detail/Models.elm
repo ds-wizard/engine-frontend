@@ -15,18 +15,18 @@ import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent)
-import Wizard.Api.Models.QuestionnairePreview exposing (QuestionnairePreview)
-import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent)
+import Wizard.Api.Models.ProjectPreview exposing (ProjectPreview)
+import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
-import Wizard.Api.Questionnaires as QuestionnaireApi
+import Wizard.Api.Projects as QuestionnaireApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Pages.Projects.Detail.Components.Preview as Preview
 import Wizard.Pages.Projects.Detail.Components.ProjectSaving as ProjectSaving
-import Wizard.Pages.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
+import Wizard.Pages.Projects.Detail.Components.ProjectVersionViewModal as ProjectVersionViewModal
 import Wizard.Pages.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Pages.Projects.Detail.Components.Settings as Settings
 import Wizard.Pages.Projects.Detail.Components.ShareModal as ShareModal
@@ -51,17 +51,17 @@ type alias Model =
     , previewModel : Preview.Model
     , questionnaireModel : ActionResult Questionnaire.Model
     , questionnaireSummaryReport : ActionResult SummaryReport
-    , questionnairePreview : ActionResult QuestionnairePreview
-    , questionnaireSettings : ActionResult QuestionnaireSettings
-    , questionnaireWebSocketDebounce : Dict String (Debounce QuestionnaireEvent)
+    , questionnairePreview : ActionResult ProjectPreview
+    , questionnaireSettings : ActionResult ProjectSettings
+    , questionnaireWebSocketDebounce : Dict String (Debounce ProjectEvent)
     , documentsModel : Documents.Model
     , filesModel : Files.Model
     , settingsModel : Settings.Model
     , newDocumentModel : NewDocument.Model
-    , questionnaireVersionViewModalModel : QuestionnaireVersionViewModal.Model
+    , questionnaireVersionViewModalModel : ProjectVersionViewModal.Model
     , revertModalModel : RevertModal.Model
     , addingToMyProjects : ActionResult ()
-    , questionnaireCommon : ActionResult QuestionnaireCommon
+    , questionnaireCommon : ActionResult ProjectCommon
     }
 
 
@@ -89,7 +89,7 @@ init appState uuid mbSelectedPath mbCommentThreadUuid =
     , filesModel = Files.initialModel PaginationQueryString.empty
     , newDocumentModel = NewDocument.initEmpty
     , settingsModel = Settings.init appState Nothing
-    , questionnaireVersionViewModalModel = QuestionnaireVersionViewModal.initEmpty
+    , questionnaireVersionViewModalModel = ProjectVersionViewModal.initEmpty
     , revertModalModel = RevertModal.init
     , addingToMyProjects = Unset
     , questionnaireCommon = Loading
@@ -123,7 +123,7 @@ addSavingActionUuid uuid model =
     }
 
 
-addQuestionnaireEvent : QuestionnaireEvent -> Model -> Model
+addQuestionnaireEvent : ProjectEvent -> Model -> Model
 addQuestionnaireEvent event model =
     { model | questionnaireModel = ActionResult.map (Questionnaire.addEvent event) model.questionnaireModel }
 

@@ -2,7 +2,7 @@ module Wizard.Components.TypeHintInput.TypeHintInputItem exposing
     ( memberSuggestion
     , packageSuggestion
     , packageSuggestionWithVersion
-    , questionnaireSuggestion
+    , projectSuggestion
     , templateSuggestion
     , userGroupSuggestion
     )
@@ -32,15 +32,15 @@ memberSuggestion user =
         ]
 
 
-questionnaireSuggestion : { a | name : String, description : Maybe String } -> Html msg
-questionnaireSuggestion questionnaire =
+projectSuggestion : { a | name : String, description : Maybe String } -> Html msg
+projectSuggestion project =
     TypeHintInputItem.complex
-        [ div [] [ ItemIcon.view { text = questionnaire.name, image = Nothing } ]
+        [ div [] [ ItemIcon.view { text = project.name, image = Nothing } ]
         , div []
             [ div []
-                [ strong [] [ text questionnaire.name ]
+                [ strong [] [ text project.name ]
                 ]
-            , div [] [ text <| Maybe.withDefault "" questionnaire.description ]
+            , div [] [ text <| Maybe.withDefault "" project.description ]
             ]
         ]
 

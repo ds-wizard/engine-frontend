@@ -97,7 +97,7 @@ import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCol
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
-import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
+import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes

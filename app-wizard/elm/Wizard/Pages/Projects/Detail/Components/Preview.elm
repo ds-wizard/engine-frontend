@@ -25,13 +25,13 @@ import Process
 import String.Format as String
 import Task
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnairePreview exposing (QuestionnairePreview)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectPreview exposing (ProjectPreview)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
 import Wizard.Routes as Routes
-import Wizard.Utils.QuestionnaireUtils as QuestionnaireUtils
+import Wizard.Utils.ProjectUtils as ProjectUtils
 
 
 
@@ -39,7 +39,7 @@ import Wizard.Utils.QuestionnaireUtils as QuestionnaireUtils
 
 
 type alias Model =
-    { questionnaireUuid : Uuid
+    { projectUuid : Uuid
     , previewState : PreviewState
     }
 
@@ -52,7 +52,7 @@ type PreviewState
 
 init : Uuid -> PreviewState -> Model
 init uuid previewState =
-    { questionnaireUuid = uuid
+    { projectUuid = uuid
     , previewState = previewState
     }
 
@@ -67,9 +67,9 @@ type Msg
 
 
 fetchData : AppState -> Uuid -> Bool -> Cmd Msg
-fetchData appState questionnaireUuid hasTemplate =
+fetchData appState projectUuid hasTemplate =
     if hasTemplate then
-        QuestionnairesApi.getDocumentPreview appState questionnaireUuid GetDocumentPreviewComplete
+        ProjectsApi.getDocumentPreview appState projectUuid GetDocumentPreviewComplete
 
     else
         Cmd.none
@@ -82,7 +82,7 @@ update msg appState model =
             handleHeadDocumentPreviewComplete appState model result
 
         HeadRequest ->
-            ( model, fetchData appState model.questionnaireUuid True )
+            ( model, fetchData appState model.projectUuid True )
 
 
 handleHeadDocumentPreviewComplete : AppState -> Model -> Result ApiError ( Http.Metadata, Maybe UrlResponse ) -> ( Model, Cmd Msg )
@@ -126,17 +126,17 @@ handleHeadDocumentPreviewComplete appState model result =
 -- VIEW
 
 
-view : AppState -> QuestionnairePreview -> Model -> Html Msg
-view appState questionnaire model =
+view : AppState -> ProjectPreview -> Model -> Html Msg
+view appState project model =
     case model.previewState of
         Preview preview ->
             Page.actionResultViewWithError appState (viewContent appState) viewError preview
 
         TemplateNotSet ->
-            viewTemplateNotSet appState questionnaire
+            viewTemplateNotSet appState project
 
         TemplateUnsupported ->
-            viewTemplateUnsupported appState questionnaire
+            viewTemplateUnsupported appState project
 
 
 viewContent : AppState -> UrlResponse -> Html Msg
@@ -174,18 +174,18 @@ viewNotSupported appState documentUrl =
         }
 
 
-viewTemplateNotSet : AppState -> QuestionnairePreview -> Html msg
-viewTemplateNotSet appState questionnaire =
+viewTemplateNotSet : AppState -> ProjectPreview -> Html msg
+viewTemplateNotSet appState project =
     let
         content =
             if not (Session.exists appState.session) then
                 [ p [] [ text (gettext "Log in to set a default document template and format." appState.locale) ]
                 ]
 
-            else if QuestionnaireUtils.isOwner appState questionnaire then
+            else if ProjectUtils.isOwner appState project then
                 [ p [] [ text (gettext "Before you can use preview you need to set a default document template and format." appState.locale) ]
                 , p []
-                    [ linkTo (Routes.projectsDetailSettings questionnaire.uuid)
+                    [ linkTo (Routes.projectsDetailSettings project.uuid)
                         [ class "btn btn-primary btn-lg with-icon-after" ]
                         [ text (gettext "Go to settings" appState.locale)
                         , faArrowRight
@@ -205,18 +205,18 @@ viewTemplateNotSet appState questionnaire =
         }
 
 
-viewTemplateUnsupported : AppState -> QuestionnairePreview -> Html msg
-viewTemplateUnsupported appState questionnaire =
+viewTemplateUnsupported : AppState -> ProjectPreview -> Html msg
+viewTemplateUnsupported appState project =
     let
         content =
             if not (Session.exists appState.session) then
                 [ p [] [ text (gettext "Log in to update the default document template." appState.locale) ]
                 ]
 
-            else if QuestionnaireUtils.isOwner appState questionnaire then
+            else if ProjectUtils.isOwner appState project then
                 [ p [] [ text (gettext "Before you can use preview you need to update the default document template." appState.locale) ]
                 , p []
-                    [ linkTo (Routes.projectsDetailSettings questionnaire.uuid)
+                    [ linkTo (Routes.projectsDetailSettings project.uuid)
                         [ class "btn btn-primary btn-lg with-icon-after" ]
                         [ text (gettext "Go to settings" appState.locale)
                         , faArrowRight

@@ -28,8 +28,8 @@ import Set exposing (Set)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage
-import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
-import Wizard.Api.Models.QuestionnaireQuestionnaire as QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
+import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.Questionnaire as Questionnaire exposing (ActivePage(..))
 import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Components.Tag as Tag
@@ -55,7 +55,7 @@ initialModel appState kmPackageId =
     }
 
 
-initQuestionnaireModel : AppState -> QuestionnaireQuestionnaire -> Questionnaire.Model
+initQuestionnaireModel : AppState -> ProjectQuestionnaire -> Questionnaire.Model
 initQuestionnaireModel appState questionnaire =
     let
         ( questionnaireModel, _ ) =
@@ -124,7 +124,7 @@ generateReplies appState questionUuid knowledgeModel model =
             model.questionnaireModel
 
         ( newSeed, mbChapterUuid, questionnaireDetail ) =
-            QuestionnaireQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaireModel.questionnaire
+            ProjectQuestionnaire.generateReplies appState.currentTime appState.seed questionUuid knowledgeModel questionnaireModel.questionnaire
 
         activePage =
             Maybe.unwrap questionnaireModel.activePage PageChapter mbChapterUuid
@@ -140,13 +140,13 @@ generateReplies appState questionUuid knowledgeModel model =
     )
 
 
-createQuestionnaireDetail : String -> KnowledgeModel -> QuestionnaireQuestionnaire
+createQuestionnaireDetail : String -> KnowledgeModel -> ProjectQuestionnaire
 createQuestionnaireDetail kmPackageId km =
     let
         kmPackage =
             KnowledgeModelPackage.dummy
     in
-    QuestionnaireQuestionnaire.createQuestionnaireDetail { kmPackage | id = kmPackageId } km
+    ProjectQuestionnaire.createQuestionnaireDetail { kmPackage | id = kmPackageId } km
 
 
 questionnaireModelWithKnowledgeModel : KnowledgeModel -> Questionnaire.Model -> Questionnaire.Model

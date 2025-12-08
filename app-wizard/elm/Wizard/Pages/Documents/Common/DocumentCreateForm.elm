@@ -20,7 +20,7 @@ type alias DocumentCreateForm =
     { name : String
     , documentTemplateId : String
     , formatUuid : String
-    , questionnaireEventUuid : Maybe String
+    , projectEventUuid : Maybe String
     }
 
 
@@ -28,12 +28,12 @@ init :
     { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid }
     -> Maybe Uuid
     -> Form FormError DocumentCreateForm
-init questionnaire mbEventUuid =
+init project mbEventUuid =
     Form.initial
-        [ ( "name", Field.string questionnaire.name )
-        , ( "documentTemplateId", Field.string (Maybe.unwrap "" .id questionnaire.documentTemplate) )
-        , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString questionnaire.formatUuid) )
-        , ( "questionnaireEventUuid", Field.string (Maybe.unwrap "" Uuid.toString mbEventUuid) )
+        [ ( "name", Field.string project.name )
+        , ( "documentTemplateId", Field.string (Maybe.unwrap "" .id project.documentTemplate) )
+        , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString project.formatUuid) )
+        , ( "projectEventUuid", Field.string (Maybe.unwrap "" Uuid.toString mbEventUuid) )
         ]
         validation
 
@@ -44,15 +44,15 @@ validation =
         (Validate.field "name" Validate.string)
         (Validate.field "documentTemplateId" Validate.string)
         (Validate.field "formatUuid" Validate.string)
-        (Validate.field "questionnaireEventUuid" (Validate.maybe Validate.string))
+        (Validate.field "projectEventUuid" (Validate.maybe Validate.string))
 
 
 encode : Uuid -> DocumentCreateForm -> E.Value
-encode questionnaireUuid form =
+encode projectUuid form =
     E.object
         [ ( "name", E.string form.name )
-        , ( "questionnaireUuid", E.string (Uuid.toString questionnaireUuid) )
+        , ( "projectUuid", E.string (Uuid.toString projectUuid) )
         , ( "documentTemplateId", E.string form.documentTemplateId )
         , ( "formatUuid", E.string form.formatUuid )
-        , ( "questionnaireEventUuid", E.maybe E.string form.questionnaireEventUuid )
+        , ( "projectEventUuid", E.maybe E.string form.projectEventUuid )
         ]

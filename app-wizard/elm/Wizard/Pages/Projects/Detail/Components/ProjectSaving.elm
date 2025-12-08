@@ -125,7 +125,7 @@ viewSaved appState =
 
 viewHelper : List (Html.Attribute Msg) -> Html Msg -> String -> Html Msg
 viewHelper attrs icon label =
-    span (class "questionnaire-header__saving" :: attrs)
+    span (class "project-header__saving" :: attrs)
         [ icon
         , text label
         ]

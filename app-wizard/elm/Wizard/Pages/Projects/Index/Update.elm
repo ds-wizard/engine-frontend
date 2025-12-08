@@ -19,8 +19,8 @@ import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.Project exposing (Project)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
@@ -173,7 +173,7 @@ update wrapMsg msg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        QuestionnairesApi.getProjectTagsSuggestions appState queryString selectedTags (ProjectTagsFilterSearchComplete value)
+                        ProjectsApi.getProjectTagsSuggestions appState queryString selectedTags (ProjectTagsFilterSearchComplete value)
             in
             ( model, cmd )
 
@@ -306,7 +306,7 @@ update wrapMsg msg appState model =
 handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteMigration wrapMsg appState model uuid =
     ( { model | deletingMigration = Loading }
-    , QuestionnairesApi.deleteQuestionnaireMigration appState uuid (wrapMsg << DeleteQuestionnaireMigrationCompleted)
+    , ProjectsApi.deleteMigration appState uuid (wrapMsg << DeleteQuestionnaireMigrationCompleted)
     )
 
 
@@ -331,7 +331,7 @@ handleDeleteMigrationCompleted wrapMsg appState model result =
             )
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Questionnaire -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Project -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( questionnaires, cmd ) =
@@ -346,9 +346,9 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Questionnaire
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig Project
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnairesApi.getQuestionnaires appState
+    { getRequest = ProjectsApi.getList appState
     , getError = gettext "Unable to get projects." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectsIndexWithFilters

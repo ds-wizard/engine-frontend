@@ -13,7 +13,7 @@ import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
+import Wizard.Api.Models.ProjectVersion exposing (ProjectVersion)
 
 
 type alias VersionForm =
@@ -27,7 +27,7 @@ initEmpty =
     Form.initial [] validation
 
 
-init : QuestionnaireVersion -> Form.Form FormError VersionForm
+init : ProjectVersion -> Form.Form FormError VersionForm
 init version =
     let
         initials =

@@ -6,8 +6,8 @@ module Wizard.Pages.ProjectImporters.Index.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
-import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
-import Wizard.Api.QuestionnaireImporters as QuestionnaireImportersApi
+import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
+import Wizard.Api.ProjectImporters as ProjectsImportersApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState exposing (AppState)
@@ -31,7 +31,7 @@ update msg wrapMsg appState model =
         ToggleEnabled questionnaireImporter ->
             ( { model | togglingEnabled = Loading }
             , Cmd.map wrapMsg <|
-                QuestionnaireImportersApi.putQuestionnaireImporter appState
+                ProjectsImportersApi.put appState
                     { questionnaireImporter | enabled = not questionnaireImporter.enabled }
                     ToggleEnabledComplete
             )
@@ -49,7 +49,7 @@ update msg wrapMsg appState model =
                 }
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireImporter -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg ProjectImporter -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( questionnaireImporters, cmd ) =
@@ -64,9 +64,9 @@ handleListingMsg wrapMsg appState listingMsg model =
 -- Utils
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireImporter
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig ProjectImporter
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnaireImportersApi.getQuestionnaireImporters appState
+    { getRequest = ProjectsImportersApi.getList appState
     , getError = gettext "Unable to get project importers." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectImportersIndexWithFilters

@@ -28,7 +28,7 @@ import Html.Events.Extra exposing (onClickStopPropagation)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState exposing (AppState)
 
@@ -92,7 +92,7 @@ update appState msg model =
 
         Search value ->
             ( { model | users = ActionResult.Loading }
-            , QuestionnairesApi.getQuestionnaireUserSuggestions appState model.uuid model.editorNote value SearchCompleted
+            , ProjectsApi.getUserSuggestions appState model.uuid model.editorNote value SearchCompleted
             )
 
         SearchCompleted result ->

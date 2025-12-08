@@ -35,11 +35,11 @@ import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Documents as DocumentsApi
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent exposing (QuestionnaireEvent)
-import Wizard.Api.Models.QuestionnaireDetailWrapper exposing (QuestionnaireDetailWrapper)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
+import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
 import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.SummaryReport exposing (viewIndications)
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
@@ -56,7 +56,7 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 type alias Model =
     { summaryReport : ActionResult SummaryReport
-    , event : ActionResult QuestionnaireEvent
+    , event : ActionResult ProjectEvent
     , form : Form FormError DocumentCreateForm
     , templateTypeHintInputModel : TypeHintInput.Model DocumentTemplateSuggestion
     , savingDocument : ActionResult String
@@ -67,11 +67,11 @@ initialModel :
     { q | name : String, documentTemplate : Maybe DocumentTemplateSuggestion, formatUuid : Maybe Uuid }
     -> Maybe Uuid
     -> Model
-initialModel questionnaire mbEventUuid =
+initialModel project mbEventUuid =
     { summaryReport = Loading
     , event = Maybe.unwrap Unset (always Loading) mbEventUuid
-    , form = DocumentCreateForm.init questionnaire mbEventUuid
-    , templateTypeHintInputModel = setSelected questionnaire.documentTemplate <| TypeHintInput.init "documentTemplateId"
+    , form = DocumentCreateForm.init project mbEventUuid
+    , templateTypeHintInputModel = setSelected project.documentTemplate <| TypeHintInput.init "documentTemplateId"
     , savingDocument = Unset
     }
 
@@ -86,8 +86,8 @@ initEmpty =
 
 
 type Msg
-    = GetSummaryReportComplete (Result ApiError (QuestionnaireDetailWrapper SummaryReport))
-    | GetQuestionnaireEventComplete (Result ApiError QuestionnaireEvent)
+    = GetSummaryReportComplete (Result ApiError (ProjectDetailWrapper SummaryReport))
+    | GetProjectEventComplete (Result ApiError ProjectEvent)
     | Cancel
     | FormMsg Form.Msg
     | SetTemplateTypeHintInputReply String
@@ -96,18 +96,18 @@ type Msg
 
 
 fetchData : AppState -> Uuid -> Maybe Uuid -> Cmd Msg
-fetchData appState questionnaireUuid mbEventUuid =
+fetchData appState projectUuid mbEventUuid =
     let
         eventCmd =
             case mbEventUuid of
                 Just eventUuid ->
-                    QuestionnairesApi.getQuestionnaireEvent appState questionnaireUuid eventUuid GetQuestionnaireEventComplete
+                    ProjectsApi.getEvent appState projectUuid eventUuid GetProjectEventComplete
 
                 Nothing ->
                     Cmd.none
 
         summaryReportCmd =
-            QuestionnairesApi.getSummaryReport appState questionnaireUuid GetSummaryReportComplete
+            ProjectsApi.getSummaryReport appState projectUuid GetSummaryReportComplete
     in
     Cmd.batch
         [ eventCmd
@@ -118,7 +118,7 @@ fetchData appState questionnaireUuid mbEventUuid =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , questionnaireUuid : Uuid
+    , projectUuid : Uuid
     , knowledgeModelPackageId : String
     , documentsNavigateCmd : Cmd msg
     }
@@ -130,11 +130,11 @@ update cfg msg appState model =
         GetSummaryReportComplete result ->
             handleGetSummaryReportCompleted appState model result
 
-        GetQuestionnaireEventComplete result ->
-            handleGetQuestionnaireEventCompleted appState model result
+        GetProjectEventComplete result ->
+            handleGetProjectEventCompleted appState model result
 
         Cancel ->
-            ( model, Window.historyBack (Routing.toUrl (Routes.projectsDetailDocuments cfg.questionnaireUuid)) )
+            ( model, Window.historyBack (Routing.toUrl (Routes.projectsDetailDocuments cfg.projectUuid)) )
 
         FormMsg formMsg ->
             handleForm cfg formMsg appState model
@@ -149,7 +149,7 @@ update cfg msg appState model =
             handlePostDocumentCompleted cfg appState model result
 
 
-handleGetSummaryReportCompleted : AppState -> Model -> Result ApiError (QuestionnaireDetailWrapper SummaryReport) -> ( Model, Cmd msg )
+handleGetSummaryReportCompleted : AppState -> Model -> Result ApiError (ProjectDetailWrapper SummaryReport) -> ( Model, Cmd msg )
 handleGetSummaryReportCompleted appState model result =
     let
         newSummaryReport =
@@ -163,8 +163,8 @@ handleGetSummaryReportCompleted appState model result =
     ( { model | summaryReport = newSummaryReport }, Cmd.none )
 
 
-handleGetQuestionnaireEventCompleted : AppState -> Model -> Result ApiError QuestionnaireEvent -> ( Model, Cmd msg )
-handleGetQuestionnaireEventCompleted appState model result =
+handleGetProjectEventCompleted : AppState -> Model -> Result ApiError ProjectEvent -> ( Model, Cmd msg )
+handleGetProjectEventCompleted appState model result =
     let
         newEvent =
             case result of
@@ -172,7 +172,7 @@ handleGetQuestionnaireEventCompleted appState model result =
                     Success event
 
                 Err error ->
-                    ApiError.toActionResult appState (gettext "Unable to get questionnaire event." appState.locale) error
+                    ApiError.toActionResult appState (gettext "Unable to get project event." appState.locale) error
     in
     ( { model | event = newEvent }, Cmd.none )
 
@@ -183,7 +183,7 @@ handleForm cfg formMsg appState model =
         ( Form.Submit, Just form ) ->
             let
                 body =
-                    DocumentCreateForm.encode cfg.questionnaireUuid form
+                    DocumentCreateForm.encode cfg.projectUuid form
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
@@ -265,8 +265,8 @@ subscriptions model =
 -- VIEW
 
 
-view : AppState -> QuestionnaireCommon -> Model -> Html Msg
-view appState questionnaire model =
+view : AppState -> ProjectCommon -> Model -> Html Msg
+view appState project model =
     let
         eventActionResult =
             if ActionResult.isUnset model.event then
@@ -278,17 +278,17 @@ view appState questionnaire model =
         actionResult =
             ActionResult.combine model.summaryReport eventActionResult
     in
-    Page.actionResultView appState (viewFormState appState questionnaire model) actionResult
+    Page.actionResultView appState (viewFormState appState project model) actionResult
 
 
-viewFormState : AppState -> QuestionnaireCommon -> Model -> ( SummaryReport, Maybe QuestionnaireEvent ) -> Html Msg
-viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
+viewFormState : AppState -> ProjectCommon -> Model -> ( SummaryReport, Maybe ProjectEvent ) -> Html Msg
+viewFormState appState project model ( summaryReport, mbEvent ) =
     Container.simpleForm
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsNewDocument) (gettext "New Document" appState.locale)
         , Form.viewSimple
             { formMsg = FormMsg
             , formResult = model.savingDocument
-            , formView = formView appState questionnaire mbEvent model summaryReport
+            , formView = formView appState project mbEvent model summaryReport
             , submitLabel = gettext "Create" appState.locale
             , cancelMsg = Just Cancel
             , locale = appState.locale
@@ -297,8 +297,8 @@ viewFormState appState questionnaire model ( summaryReport, mbEvent ) =
         ]
 
 
-formView : AppState -> QuestionnaireCommon -> Maybe QuestionnaireEvent -> Model -> SummaryReport -> Html Msg
-formView appState questionnaire mbEvent model summaryReport =
+formView : AppState -> ProjectCommon -> Maybe ProjectEvent -> Model -> SummaryReport -> Html Msg
+formView appState project mbEvent model summaryReport =
     let
         cfg =
             { viewItem = TypeHintInputItem.templateSuggestion
@@ -327,11 +327,11 @@ formView appState questionnaire mbEvent model summaryReport =
                 Just event ->
                     let
                         datetime =
-                            QuestionnaireEvent.getCreatedAt event
+                            ProjectEvent.getCreatedAt event
                                 |> TimeUtils.toReadableDateTime appState.timeZone
 
                         currentLink =
-                            linkTo (Routes.projectsDetailDocumentsNew questionnaire.uuid Nothing)
+                            linkTo (Routes.projectsDetailDocumentsNew project.uuid Nothing)
                                 []
                                 [ text (gettext "Create for current version" appState.locale) ]
                     in

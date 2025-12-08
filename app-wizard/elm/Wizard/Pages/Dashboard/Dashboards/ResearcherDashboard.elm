@@ -14,15 +14,15 @@ import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Utils.Bool as Bool
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setCommentThreads, setQuestionnaires)
+import Common.Utils.Setters exposing (setCommentThreads, setProjects)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Uuid
-import Wizard.Api.CommentThreads as CommentThreadsApi
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.Project exposing (Project)
+import Wizard.Api.Models.ProjectCommentThreadAssigned exposing (ProjectCommentThreadAssigned)
+import Wizard.Api.ProjectCommentThreads as ProjectCommentThreadsApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.AssignedComments as AssignedComments
 import Wizard.Pages.Dashboard.Widgets.CreateProjectWidget as CreateProjectWidget
@@ -31,30 +31,30 @@ import Wizard.Pages.Dashboard.Widgets.WelcomeWidget as WelcomeWidget
 
 
 type alias Model =
-    { questionnaires : ActionResult (List Questionnaire)
-    , commentThreads : ActionResult (List QuestionnaireCommentThreadAssigned)
+    { projects : ActionResult (List Project)
+    , commentThreads : ActionResult (List ProjectCommentThreadAssigned)
     }
 
 
 initialModel : Model
 initialModel =
-    { questionnaires = ActionResult.Loading
+    { projects = ActionResult.Loading
     , commentThreads = ActionResult.Loading
     }
 
 
 type Msg
-    = GetQuestionnairesComplete (Result ApiError (Pagination Questionnaire))
-    | GetCommentThreadsComplete (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
+    = GetProjectsComplete (Result ApiError (Pagination Project))
+    | GetCommentThreadsComplete (Result ApiError (Pagination ProjectCommentThreadAssigned))
 
 
 fetchData : AppState -> Cmd Msg
 fetchData appState =
-    Cmd.batch [ fetchQuestionnaires appState, fetchCommentThreads appState ]
+    Cmd.batch [ fetchProjects appState, fetchProjectCommentThreads appState ]
 
 
-fetchQuestionnaires : AppState -> Cmd Msg
-fetchQuestionnaires appState =
+fetchProjects : AppState -> Cmd Msg
+fetchProjects appState =
     let
         pagination =
             PaginationQueryString.empty
@@ -71,14 +71,14 @@ fetchQuestionnaires appState =
                 ]
                 []
     in
-    QuestionnairesApi.getQuestionnaires appState
+    ProjectsApi.getList appState
         filters
         pagination
-        GetQuestionnairesComplete
+        GetProjectsComplete
 
 
-fetchCommentThreads : AppState -> Cmd Msg
-fetchCommentThreads appState =
+fetchProjectCommentThreads : AppState -> Cmd Msg
+fetchProjectCommentThreads appState =
     let
         pagination =
             PaginationQueryString.empty
@@ -90,7 +90,7 @@ fetchCommentThreads appState =
                 [ ( "resolved", Just "false" ) ]
                 []
     in
-    CommentThreadsApi.getCommentThreads
+    ProjectCommentThreadsApi.getCommentThreads
         appState
         filters
         pagination
@@ -100,9 +100,9 @@ fetchCommentThreads appState =
 update : msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
 update logoutMsg msg appState model =
     case msg of
-        GetQuestionnairesComplete result ->
+        GetProjectsComplete result ->
             RequestHelpers.applyResultTransform
-                { setResult = setQuestionnaires
+                { setResult = setProjects
                 , defaultError = gettext "Unable to get projects." appState.locale
                 , model = model
                 , result = result
@@ -129,7 +129,7 @@ view appState model =
         [ div [ class "row gx-3" ]
             [ WelcomeWidget.view appState
             , AssignedComments.view appState model.commentThreads
-            , RecentProjectsWidget.view appState model.questionnaires
+            , RecentProjectsWidget.view appState model.projects
             , CreateProjectWidget.view appState
             ]
         ]

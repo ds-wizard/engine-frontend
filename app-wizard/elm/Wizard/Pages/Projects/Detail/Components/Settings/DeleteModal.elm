@@ -6,33 +6,33 @@ import Common.Components.Modal as Modal
 import Gettext exposing (gettext)
 import Html exposing (Html, p, strong, text)
 import String.Format as String
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Pages.Projects.Common.ProjectDescriptor exposing (ProjectDescriptor)
 
 
 type alias Model =
-    { questionnaireToBeDeleted : Maybe QuestionnaireDescriptor
-    , deletingQuestionnaire : ActionResult String
+    { projectToBeDeleted : Maybe ProjectDescriptor
+    , deletingProject : ActionResult String
     }
 
 
 initialModel : Model
 initialModel =
-    { questionnaireToBeDeleted = Nothing
-    , deletingQuestionnaire = Unset
+    { projectToBeDeleted = Nothing
+    , deletingProject = Unset
     }
 
 
 type Msg
-    = ShowHideDeleteQuestionnaire (Maybe QuestionnaireDescriptor)
-    | DeleteQuestionnaire
-    | DeleteQuestionnaireCompleted (Result ApiError ())
+    = ShowHideDeleteProject (Maybe ProjectDescriptor)
+    | DeleteProject
+    | DeleteProjectCompleted (Result ApiError ())
 
 
-open : QuestionnaireDescriptor -> Msg
+open : ProjectDescriptor -> Msg
 open =
-    ShowHideDeleteQuestionnaire << Just
+    ShowHideDeleteProject << Just
 
 
 type alias UpdateConfig msg =
@@ -44,34 +44,34 @@ type alias UpdateConfig msg =
 update : UpdateConfig msg -> Msg -> AppState -> Model -> ( Model, Cmd msg )
 update cfg msg appState model =
     case msg of
-        ShowHideDeleteQuestionnaire mbQuestionnaire ->
-            handleShowHideDeleteQuestionnaire model mbQuestionnaire
+        ShowHideDeleteProject mbProject ->
+            handleShowHideDeleteProject model mbProject
 
-        DeleteQuestionnaire ->
-            handleDeleteQuestionnaire cfg appState model
+        DeleteProject ->
+            handleDeleteProject cfg appState model
 
-        DeleteQuestionnaireCompleted result ->
-            handleDeleteQuestionnaireCompleted cfg appState model result
+        DeleteProjectCompleted result ->
+            handleDeleteProjectCompleted cfg appState model result
 
 
-handleShowHideDeleteQuestionnaire : Model -> Maybe QuestionnaireDescriptor -> ( Model, Cmd msg )
-handleShowHideDeleteQuestionnaire model mbQuestionnaire =
-    ( { model | questionnaireToBeDeleted = mbQuestionnaire, deletingQuestionnaire = Unset }
+handleShowHideDeleteProject : Model -> Maybe ProjectDescriptor -> ( Model, Cmd msg )
+handleShowHideDeleteProject model mbQuestionnaire =
+    ( { model | projectToBeDeleted = mbQuestionnaire, deletingProject = Unset }
     , Cmd.none
     )
 
 
-handleDeleteQuestionnaire : UpdateConfig msg -> AppState -> Model -> ( Model, Cmd msg )
-handleDeleteQuestionnaire cfg appState model =
-    case model.questionnaireToBeDeleted of
-        Just questionnaire ->
+handleDeleteProject : UpdateConfig msg -> AppState -> Model -> ( Model, Cmd msg )
+handleDeleteProject cfg appState model =
+    case model.projectToBeDeleted of
+        Just project ->
             let
                 newModel =
-                    { model | deletingQuestionnaire = Loading }
+                    { model | deletingProject = Loading }
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.deleteQuestionnaire appState questionnaire.uuid DeleteQuestionnaireCompleted
+                        ProjectsApi.delete appState project.uuid DeleteProjectCompleted
             in
             ( newModel, cmd )
 
@@ -79,19 +79,19 @@ handleDeleteQuestionnaire cfg appState model =
             ( model, Cmd.none )
 
 
-handleDeleteQuestionnaireCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError () -> ( Model, Cmd msg )
-handleDeleteQuestionnaireCompleted cfg appState model result =
+handleDeleteProjectCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError () -> ( Model, Cmd msg )
+handleDeleteProjectCompleted cfg appState model result =
     case result of
         Ok _ ->
             ( { model
-                | deletingQuestionnaire = Success <| gettext "Questionnaire was successfully deleted." appState.locale
-                , questionnaireToBeDeleted = Nothing
+                | deletingProject = Success <| gettext "Questionnaire was successfully deleted." appState.locale
+                , projectToBeDeleted = Nothing
               }
             , cfg.deleteCompleteCmd
             )
 
         Err error ->
-            ( { model | deletingQuestionnaire = ApiError.toActionResult appState (gettext "Questionnaire could not be deleted." appState.locale) error }
+            ( { model | deletingProject = ApiError.toActionResult appState (gettext "Questionnaire could not be deleted." appState.locale) error }
             , Cmd.none
             )
 
@@ -100,9 +100,9 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         ( visible, name ) =
-            case model.questionnaireToBeDeleted of
-                Just questionnaire ->
-                    ( True, questionnaire.name )
+            case model.projectToBeDeleted of
+                Just project ->
+                    ( True, project.name )
 
                 Nothing ->
                     ( False, "" )
@@ -119,9 +119,9 @@ view appState model =
             Modal.confirmConfig (gettext "Delete Project" appState.locale)
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingQuestionnaire
-                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteQuestionnaire
-                |> Modal.confirmConfigCancelMsg (ShowHideDeleteQuestionnaire Nothing)
+                |> Modal.confirmConfigActionResult model.deletingProject
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteProject
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteProject Nothing)
                 |> Modal.confirmConfigDangerous True
                 |> Modal.confirmConfigDataCy "project-delete"
     in

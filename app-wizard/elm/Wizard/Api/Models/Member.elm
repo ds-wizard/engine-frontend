@@ -17,7 +17,7 @@ import Json.Decode as D exposing (Decoder)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.UserGroupSuggestion as UserGroupSuggestion exposing (UserGroupSuggestion)
-import Wizard.Pages.Projects.Common.QuestionnaireShareFormMemberType exposing (QuestionnaireShareFormMemberType(..))
+import Wizard.Pages.Projects.Common.ProjectShareFormMemberType exposing (ProjectShareFormMemberType(..))
 
 
 type Member
@@ -123,11 +123,11 @@ toUserGroupSuggestion member =
             Nothing
 
 
-toQuestionnaireEditFormMemberType : Member -> QuestionnaireShareFormMemberType
+toQuestionnaireEditFormMemberType : Member -> ProjectShareFormMemberType
 toQuestionnaireEditFormMemberType member =
     case member of
         UserMember _ ->
-            UserQuestionnairePermType
+            UserProjectPermType
 
         UserGroupMember _ ->
-            UserGroupQuestionnairePermType
+            UserGroupProjectPermType

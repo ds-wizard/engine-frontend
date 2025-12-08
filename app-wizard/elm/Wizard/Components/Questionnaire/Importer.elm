@@ -12,16 +12,16 @@ import Random exposing (Seed)
 import Uuid.Extra as Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question exposing (Question(..))
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent exposing (QuestionnaireEvent(..))
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue exposing (ReplyValue(..), getItemUuids)
-import Wizard.Api.Models.QuestionnaireDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Wizard.Api.Models.QuestionnaireQuestionnaire exposing (QuestionnaireQuestionnaire)
+import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent(..))
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue exposing (ReplyValue(..), getItemUuids)
+import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
+import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.Questionnaire.Importer.ImporterEvent exposing (ImporterEvent(..))
 import Wizard.Data.AppState exposing (AppState)
 
 
 type alias ImporterResult =
-    { questionnaireEvents : List QuestionnaireEvent
+    { questionnaireEvents : List ProjectEvent
     , errors : List String
     }
 
@@ -33,7 +33,7 @@ initialResult =
     }
 
 
-convertToQuestionnaireEvents : AppState -> QuestionnaireQuestionnaire -> Result D.Error (List ImporterEvent) -> ( Seed, ImporterResult )
+convertToQuestionnaireEvents : AppState -> ProjectQuestionnaire -> Result D.Error (List ImporterEvent) -> ( Seed, ImporterResult )
 convertToQuestionnaireEvents appState questionnaire importerEventsResult =
     case importerEventsResult of
         Ok importerEvents ->
@@ -49,7 +49,7 @@ convertToQuestionnaireEvents appState questionnaire importerEventsResult =
 
 foldCreateEvent :
     AppState
-    -> QuestionnaireQuestionnaire
+    -> ProjectQuestionnaire
     -> ImporterEvent
     -> ( Seed, Dict String (List String), ImporterResult )
     -> ( Seed, Dict String (List String), ImporterResult )
@@ -59,7 +59,7 @@ foldCreateEvent appState questionnaire importerEvent result =
 
 createEvent :
     AppState
-    -> QuestionnaireQuestionnaire
+    -> ProjectQuestionnaire
     -> ImporterEvent
     -> ( Seed, Dict String (List String), ImporterResult )
     -> ( Seed, Dict String (List String), ImporterResult )
