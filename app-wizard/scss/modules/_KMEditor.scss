@@ -30,6 +30,7 @@
     .inner {
         min-width: 100%;
         position: absolute;
+        padding-bottom: 1.5rem;
     }
 
     &-input {
@@ -56,7 +57,7 @@
     }
 
     ul {
-        margin: 0;
+        margin: 0 0 1.5rem;
         padding: 0;
 
         li {
