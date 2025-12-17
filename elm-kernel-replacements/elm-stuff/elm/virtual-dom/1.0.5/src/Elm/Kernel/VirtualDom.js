@@ -423,7 +423,11 @@ function _VirtualDom_noJavaScriptOrHtmlUri(value)
 
 function _VirtualDom_noJavaScriptOrHtmlJson(value)
 {
-	return (typeof __Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(__Json_unwrap(value)))
+	return (
+		(typeof __Json_unwrap(value) === 'string' && _VirtualDom_RE_js_html.test(__Json_unwrap(value)))
+		||
+		(Array.isArray(__Json_unwrap(value)) && _VirtualDom_RE_js_html.test(String(__Json_unwrap(value))))
+	)
 		? __Json_wrap(
 			/**__PROD/''//*//**__DEBUG/'javascript:alert("This is an XSS vector. Please use ports or web components instead.")'//*/
 		) : value;
@@ -560,7 +564,7 @@ function _VirtualDom_render(vNode, eventNode, tNode)
 
 	if (tag === __2_TAGGER)
 	{
-		return _VirtualDom_render(vNode.__node, function (msg) { return eventNode(vNode.__tagger(msg)) }, tNode);
+		return _VirtualDom_render(vNode.__node, function (msg, isSync) { return eventNode(vNode.__tagger(msg), isSync) }, tNode);
 	}
 
 	if (tag === __2_TEXT)
@@ -632,7 +636,7 @@ function _VirtualDom_renderTranslated(vNode, eventNode, tNode)
 
 	if (tag === __2_TAGGER)
 	{
-		return _VirtualDom_renderTranslated(vNode.__node, function (msg) { return eventNode(vNode.__tagger(msg)) }, tNode);
+		return _VirtualDom_renderTranslated(vNode.__node, function (msg, isSync) { return eventNode(vNode.__tagger(msg), isSync) }, tNode);
 	}
 
 	if (tag === __2_TEXT)
@@ -1059,7 +1063,7 @@ function _VirtualDom_diffHelp(x, y, eventNode, tNode)
 
 	if (y.$ === __2_TAGGER)
 	{
-		return _VirtualDom_diffHelp(x, y.__node, function (msg) { return eventNode(y.__tagger(msg)) }, tNode);
+		return _VirtualDom_diffHelp(x, y.__node, function (msg, isSync) { return eventNode(y.__tagger(msg), isSync) }, tNode);
 	}
 
 	if (x.$ === __2_THUNK)
@@ -1199,7 +1203,7 @@ function _VirtualDom_quickVisit(x, y, eventNode, tNode)
 	switch (y.$)
 	{
 		case __2_TAGGER:
-			return _VirtualDom_quickVisit(x.__node, y.__node, function (msg) { return eventNode(y.__tagger(msg)) }, tNode);
+			return _VirtualDom_quickVisit(x.__node, y.__node, function (msg, isSync) { return eventNode(y.__tagger(msg), isSync) }, tNode);
 
 		case __2_THUNK:
 			return _VirtualDom_quickVisit(x.__node, y.__node, eventNode, tNode);

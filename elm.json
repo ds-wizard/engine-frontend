@@ -19,7 +19,7 @@
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
             "elm/file": "1.0.5",
-            "elm/html": "1.0.0",
+            "elm/html": "1.0.1",
             "elm/http": "2.0.0",
             "elm/json": "1.1.4",
             "elm/random": "1.0.0",
@@ -53,7 +53,7 @@
         "indirect": {
             "elm/bytes": "1.0.8",
             "elm/parser": "1.1.0",
-            "elm/virtual-dom": "1.0.4",
+            "elm/virtual-dom": "1.0.5",
             "elm-community/basics-extra": "4.1.0",
             "fredcy/elm-parseint": "2.0.1",
             "justinmimbs/date": "4.0.1",
