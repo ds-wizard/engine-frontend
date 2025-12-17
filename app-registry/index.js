@@ -57,6 +57,7 @@ function loadApp(config) {
 window.onload = function () {
     axios.get(configUrl())
         .then(function (config) {
+            document.body.innerHTML = ''
             loadApp(config.data)
         })
         .catch(function (err) {
