@@ -19,6 +19,7 @@ import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Html.Extra as Html
 import Json.Decode as D
 import Json.Decode.Extra as D
+import Maybe.Extra as Maybe
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
@@ -752,15 +753,16 @@ viewProfileMenu model =
                         , text (gettext "About" model.appState.locale)
                         ]
                     ]
-                , li [ class "dark" ]
-                    [ a
-                        [ onClick (Wizard.Msgs.NewsModalMsg NewsModal.open)
-                        , dataCy "menu_news"
+                , Html.viewIf (Maybe.isJust model.appState.newsUrl) <|
+                    li [ class "dark" ]
+                        [ a
+                            [ onClick (Wizard.Msgs.NewsModalMsg NewsModal.open)
+                            , dataCy "menu_news"
+                            ]
+                            [ faMenuNews
+                            , text (gettext "What's new" model.appState.locale)
+                            ]
                         ]
-                        [ faMenuNews
-                        , text (gettext "What's new" model.appState.locale)
-                        ]
-                    ]
                 , li [ class "dark dark-last" ]
                     [ a
                         [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Components.Menu.Msgs.SetReportIssueOpen True)
