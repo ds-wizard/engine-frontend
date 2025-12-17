@@ -2,7 +2,7 @@ module Wizard.Components.Menu.View exposing (view, viewAboutModal, viewReportIss
 
 import ActionResult exposing (ActionResult)
 import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
-import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
+import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo, MetamodelVersionInfo)
 import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuNews, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.NewsModal as NewsModal
@@ -896,6 +896,9 @@ viewAboutModalContent appState serverBuildInfo =
             , ( gettext "API Docs" appState.locale, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
             ]
 
+        metamodelVersions =
+            Maybe.unwrap Html.nothing (viewMetamodelVersions appState) serverBuildInfo.metamodelVersions
+
         viewComponentVersion component =
             viewBuildInfo appState component.name component []
 
@@ -907,6 +910,7 @@ viewAboutModalContent appState serverBuildInfo =
          , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
          ]
             ++ componentVersions
+            ++ [ metamodelVersions ]
         )
 
 
@@ -940,5 +944,25 @@ viewBuildInfo appState name buildInfo extra =
                 ]
              ]
                 ++ List.map viewExtraRow extra
+            )
+        ]
+
+
+viewMetamodelVersions : AppState -> List MetamodelVersionInfo -> Html msg
+viewMetamodelVersions appState metamodelVersions =
+    table [ class "table table-borderless table-build-info" ]
+        [ thead []
+            [ tr []
+                [ th [ colspan 2 ] [ text (gettext "Metamodel Versions" appState.locale) ] ]
+            ]
+        , tbody []
+            (List.map
+                (\metamodelVersionInfo ->
+                    tr []
+                        [ td [ class "w-50" ] [ text metamodelVersionInfo.name ]
+                        , td [] [ text metamodelVersionInfo.version ]
+                        ]
+                )
+                metamodelVersions
             )
         ]

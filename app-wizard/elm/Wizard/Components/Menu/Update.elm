@@ -40,11 +40,21 @@ update wrapMsg msg appState model =
                         componentToString name component =
                             name ++ "\nVersion: " ++ component.version ++ "\nBuilt at: " ++ component.builtAt
 
+                        metamodelVersionsString =
+                            case apiBuildInfo.metamodelVersions of
+                                Just versions ->
+                                    "Metamodel Versions\n"
+                                        ++ String.join "\n" (List.map (\v -> "- " ++ v.name ++ ": " ++ v.version) versions)
+
+                                Nothing ->
+                                    ""
+
                         parts =
                             ("Instance: " ++ Maybe.withDefault appState.apiUrl (Url.getDomain appState.apiUrl))
                                 :: componentToString (gettext "Client" appState.locale) BuildInfo.client
                                 :: componentToString (gettext "Server" appState.locale) apiBuildInfo
                                 :: List.map (\c -> componentToString c.name c) (List.sortBy .name apiBuildInfo.components)
+                                ++ [ metamodelVersionsString ]
 
                         aboutString =
                             String.join "\n---\n" parts
