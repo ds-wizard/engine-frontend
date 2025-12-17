@@ -25,6 +25,9 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
 
+      - name: '[app] Elm Kernel Replacements'
+        run: npm run replace-kernel-packages
+
       - name: '[app] Install'
         run: npm ci
 
