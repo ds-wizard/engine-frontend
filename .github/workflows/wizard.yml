@@ -51,7 +51,7 @@ jobs:
 
       - name: '[app] Build'
         run: |
-          ./scripts/build.sh
+          npm run build:$COMPONENT
 
       - name: '[docker] Meta (default)'
         id: meta-default
