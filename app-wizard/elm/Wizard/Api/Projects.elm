@@ -252,7 +252,7 @@ websocket appState projectUuid =
                 queryParams =
                     List.filterMap identity
                         [ token
-                        , Just "subscription=Questionnaire"
+                        , Just "subscription=Project"
                         , Just ("identifier=" ++ Uuid.toString projectUuid)
                         ]
 
