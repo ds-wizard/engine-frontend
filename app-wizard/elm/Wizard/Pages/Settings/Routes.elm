@@ -9,6 +9,7 @@ type Route
     | AuthenticationRoute
     | PrivacyAndSupportRoute
     | FeaturesRoute
+    | PluginsRoute
     | DashboardAndLoginScreenRoute
     | LookAndFeelRoute
     | RegistryRoute

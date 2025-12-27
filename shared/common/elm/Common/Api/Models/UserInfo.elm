@@ -4,12 +4,9 @@ module Common.Api.Models.UserInfo exposing
     , fullName
     , isAdmin
     , isDataSteward
-    , toUserSuggestion
     )
 
-import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Data.Role as Role exposing (Role)
-import Gravatar
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
@@ -24,8 +21,6 @@ type alias UserInfo =
     , role : Role
     , permissions : List String
     , imageUrl : Maybe String
-    , userGroupUuids : List Uuid
-    , lastSeenNewsId : Maybe String
     }
 
 
@@ -39,8 +34,6 @@ decoder =
         |> D.required "role" Role.decoder
         |> D.required "permissions" (D.list D.string)
         |> D.required "imageUrl" (D.maybe D.string)
-        |> D.optional "userGroupUuids" (D.list Uuid.decoder) []
-        |> D.optional "lastSeenNewsId" (D.maybe D.string) Nothing
 
 
 fullName : { a | firstName : String, lastName : String } -> String
@@ -48,21 +41,11 @@ fullName userInfo =
     userInfo.firstName ++ " " ++ userInfo.lastName
 
 
-isAdmin : Maybe UserInfo -> Bool
+isAdmin : Maybe { a | role : Role } -> Bool
 isAdmin =
     Maybe.unwrap False (Role.isAdmin << .role)
 
 
-isDataSteward : Maybe UserInfo -> Bool
+isDataSteward : Maybe { a | role : Role } -> Bool
 isDataSteward =
     Maybe.unwrap False (Role.isDataSteward << .role)
-
-
-toUserSuggestion : UserInfo -> UserSuggestion
-toUserSuggestion userInfo =
-    { uuid = userInfo.uuid
-    , firstName = userInfo.firstName
-    , lastName = userInfo.lastName
-    , gravatarHash = Gravatar.hashEmail userInfo.email
-    , imageUrl = userInfo.imageUrl
-    }

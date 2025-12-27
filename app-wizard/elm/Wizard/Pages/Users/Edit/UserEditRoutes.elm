@@ -1,5 +1,7 @@
 module Wizard.Pages.Users.Edit.UserEditRoutes exposing (UserEditRoute(..))
 
+import Uuid exposing (Uuid)
+
 
 type UserEditRoute
     = Profile
@@ -10,3 +12,4 @@ type UserEditRoute
     | AppKeys
     | ActiveSessions
     | SubmissionSettings
+    | PluginSettings Uuid

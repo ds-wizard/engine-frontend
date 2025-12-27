@@ -12,6 +12,7 @@ import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
 import Wizard.Api.Models.Submission exposing (Submission)
 import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
 import Wizard.Components.Listing.Models as Listing
+import Wizard.Components.PluginModal as PluginModal
 
 
 type alias Model =
@@ -24,6 +25,7 @@ type alias Model =
     , selectedSubmissionServiceId : Maybe String
     , documentErrorModal : Maybe String
     , submissionErrorModal : Maybe String
+    , pluginModal : PluginModal.Model Document
     }
 
 
@@ -38,6 +40,7 @@ initialModel paginationQueryString =
     , selectedSubmissionServiceId = Nothing
     , documentErrorModal = Nothing
     , submissionErrorModal = Nothing
+    , pluginModal = PluginModal.initialModel
     }
 
 

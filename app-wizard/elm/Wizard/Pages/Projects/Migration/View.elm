@@ -157,6 +157,7 @@ questionnaireView appState model migration =
                     { feedbackEnabled = False
                     , todosEnabled = True
                     , commentsEnabled = False
+                    , pluginsEnabled = False
                     , readonly = True
                     , toolbarEnabled = False
                     , questionLinksEnabled = False
@@ -166,6 +167,7 @@ questionnaireView appState model migration =
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
                 , isKmEditor = False
+                , projectCommon = Nothing
                 }
                 { events = []
                 , kmEditorUuid = Nothing

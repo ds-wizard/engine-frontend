@@ -3,20 +3,17 @@ module Wizard.Pages.Projects.Import.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError
 import Common.Utils.RequestHelpers as RequestHelpers
-import Common.Utils.Setters exposing (setKnowledgeModelString, setQuestionnaireImporter)
+import Common.Utils.Setters exposing (setKnowledgeModelString)
 import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
-import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent
 import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData as SetReplyData
-import Wizard.Api.ProjectImporters as ProjectsImportersApi
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.Importer as Importer
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Integrations as Integrations
 import Wizard.Msgs
 import Wizard.Pages.Projects.Import.Models exposing (Model)
 import Wizard.Pages.Projects.Import.Msgs exposing (Msg(..))
@@ -24,12 +21,9 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> Uuid -> String -> Cmd Msg
-fetchData appState uuid importerId =
-    Cmd.batch
-        [ ProjectsApi.getQuestionnaire appState uuid GetQuestionnaireComplete
-        , ProjectsImportersApi.get appState importerId GetQuestionnaireImporterComplete
-        ]
+fetchData : AppState -> Uuid -> Cmd Msg
+fetchData appState uuid =
+    ProjectsApi.getQuestionnaire appState uuid GetQuestionnaireComplete
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
@@ -37,27 +31,13 @@ update wrapMsg msg appState model =
     let
         withSeed ( m, c ) =
             ( appState.seed, m, c )
-
-        openImporter newModel =
-            case ( newModel.knowledgeModelString, newModel.questionnaireImporter ) of
-                ( Success knowledgeModelString, Success importer ) ->
-                    Integrations.openImporter
-                        { url = importer.url
-                        , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
-                        , data =
-                            { knowledgeModel = knowledgeModelString
-                            }
-                        }
-
-                _ ->
-                    Cmd.none
     in
     case msg of
         GetQuestionnaireComplete result ->
             let
                 setResult r m =
                     { m
-                        | questionnaire = ActionResult.map .data r
+                        | project = ActionResult.map .data r
                         , questionnaireModel = ActionResult.map (Tuple.first << Questionnaire.initSimple appState << .data) r
                     }
 
@@ -72,7 +52,7 @@ update wrapMsg msg appState model =
                         }
 
                 fetchCmd =
-                    case newModel.questionnaire of
+                    case newModel.project of
                         Success questionnaire ->
                             KnowledgeModelsApi.fetchAsString appState questionnaire.knowledgeModelPackageId questionnaire.selectedQuestionTagUuids (wrapMsg << FetchKnowledgeModelStringComplete)
 
@@ -82,44 +62,23 @@ update wrapMsg msg appState model =
             withSeed <|
                 ( newModel, Cmd.batch [ cmd, fetchCmd ] )
 
-        GetQuestionnaireImporterComplete result ->
-            case result of
-                Ok importer ->
-                    let
-                        newModel =
-                            setQuestionnaireImporter (Success importer) model
-                    in
-                    withSeed <|
-                        ( newModel
-                        , openImporter newModel
-                        )
-
-                Err error ->
-                    withSeed <|
-                        ( setQuestionnaireImporter (ApiError.toActionResult appState (gettext "Unable to get importer." appState.locale) error) model
-                        , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
-                        )
-
         FetchKnowledgeModelStringComplete result ->
-            let
-                ( newModel, cmd ) =
-                    RequestHelpers.applyResult
-                        { setResult = setKnowledgeModelString
-                        , defaultError = gettext "Unable to get the project." appState.locale
-                        , model = model
-                        , result = result
-                        , logoutMsg = Wizard.Msgs.logoutMsg
-                        , locale = appState.locale
-                        }
-            in
-            withSeed ( newModel, Cmd.batch [ cmd, openImporter newModel ] )
+            withSeed <|
+                RequestHelpers.applyResult
+                    { setResult = setKnowledgeModelString
+                    , defaultError = gettext "Unable to get the project." appState.locale
+                    , model = model
+                    , result = result
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    , locale = appState.locale
+                    }
 
         GotImporterData data ->
-            case ( model.questionnaire, model.questionnaireModel ) of
+            case ( model.project, model.questionnaireModel ) of
                 ( Success questionnaire, Success questionnaireModel ) ->
                     let
                         ( newSeed, importResult ) =
-                            Importer.convertToQuestionnaireEvents appState questionnaire data
+                            Importer.convertToQuestionnaireEvents appState questionnaire (Ok data)
 
                         updateQuestionnaire event qm =
                             case event of

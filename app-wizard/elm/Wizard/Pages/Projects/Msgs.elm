@@ -6,6 +6,7 @@ import Wizard.Pages.Projects.Detail.Msgs as Detail
 import Wizard.Pages.Projects.DocumentDownload.Msgs
 import Wizard.Pages.Projects.FileDownload.Msgs
 import Wizard.Pages.Projects.Import.Msgs
+import Wizard.Pages.Projects.ImportLegacy.Msgs
 import Wizard.Pages.Projects.Index.Msgs
 import Wizard.Pages.Projects.Migration.Msgs
 
@@ -17,5 +18,6 @@ type Msg
     | IndexMsg Wizard.Pages.Projects.Index.Msgs.Msg
     | MigrationMsg Wizard.Pages.Projects.Migration.Msgs.Msg
     | ImportMsg Wizard.Pages.Projects.Import.Msgs.Msg
+    | ImportLegacyMsg Wizard.Pages.Projects.ImportLegacy.Msgs.Msg
     | DocumentDownloadMsg Wizard.Pages.Projects.DocumentDownload.Msgs.Msg
     | FileDownloadMsg Wizard.Pages.Projects.FileDownload.Msgs.Msg

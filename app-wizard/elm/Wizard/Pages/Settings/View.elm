@@ -5,7 +5,7 @@ import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Components.Html exposing (linkTo)
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Authentication.View
 import Wizard.Pages.Settings.DashboardAndLoginScreen.View
 import Wizard.Pages.Settings.Features.View
@@ -14,6 +14,7 @@ import Wizard.Pages.Settings.LookAndFeel.View
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
 import Wizard.Pages.Settings.Organization.View
+import Wizard.Pages.Settings.Plugins.View
 import Wizard.Pages.Settings.PrivacyAndSupport.View
 import Wizard.Pages.Settings.Projects.View
 import Wizard.Pages.Settings.Registry.View
@@ -45,6 +46,10 @@ view route appState model =
                 FeaturesRoute ->
                     Html.map FeaturesMsg <|
                         Wizard.Pages.Settings.Features.View.view appState model.featuresModel
+
+                PluginsRoute ->
+                    Html.map PluginsMsg <|
+                        Wizard.Pages.Settings.Plugins.View.view appState model.pluginsModel
 
                 DashboardAndLoginScreenRoute ->
                     Html.map DashboardMsg <|
@@ -83,13 +88,16 @@ view route appState model =
 navigation : AppState -> Route -> Html Msg
 navigation appState currentRoute =
     let
+        systemSettingsLinks =
+            navigationSystemLinks appState
+
         systemSettings =
-            if Admin.isEnabled appState.config.admin then
+            if List.isEmpty systemSettingsLinks then
                 []
 
             else
                 strong [] [ text (gettext "System Settings" appState.locale) ]
-                    :: List.map (navigationLink currentRoute) (navigationSystemLinks appState)
+                    :: List.map (navigationLink currentRoute) systemSettingsLinks
 
         userInterfaceTitle =
             [ strong [] [ text (gettext "User Interface Settings" appState.locale) ] ]
@@ -113,11 +121,26 @@ navigation appState currentRoute =
 
 navigationSystemLinks : AppState -> List ( Route, String )
 navigationSystemLinks appState =
-    [ ( OrganizationRoute, gettext "Organization" appState.locale )
-    , ( AuthenticationRoute, gettext "Authentication" appState.locale )
-    , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
-    , ( FeaturesRoute, gettext "Features" appState.locale )
-    ]
+    let
+        wizardLinks =
+            if Admin.isEnabled appState.config.admin then
+                []
+
+            else
+                [ ( OrganizationRoute, gettext "Organization" appState.locale )
+                , ( AuthenticationRoute, gettext "Authentication" appState.locale )
+                , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
+                , ( FeaturesRoute, gettext "Features" appState.locale )
+                ]
+
+        pluginsLink =
+            if AppState.anyPluginsAvailable appState then
+                [ ( PluginsRoute, gettext "Plugins" appState.locale ) ]
+
+            else
+                []
+    in
+    wizardLinks ++ pluginsLink
 
 
 navigationUserInterfaceLinks : AppState -> List ( Route, String )

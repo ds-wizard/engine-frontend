@@ -17,11 +17,13 @@ import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
+import List.Extra as List
 import String.Format as String
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Components.ActionResultView as ActionResultView
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Components.Html exposing (linkTo)
+import Wizard.Components.PluginView as PluginView
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Components.SummaryReport as SummaryReport
@@ -41,6 +43,8 @@ import Wizard.Pages.Projects.Detail.Models exposing (Model)
 import Wizard.Pages.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute exposing (ProjectDetailRoute)
 import Wizard.Pages.Projects.Routes as PlansRoutes
+import Wizard.Plugins.Plugin as Plugin
+import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.ProjectUtils as ProjectUtils
@@ -273,7 +277,7 @@ viewProjectNavigationShareButton appState model questionnaire =
 
 
 viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> ProjectCommon -> Html Msg
-viewProjectNavigationNav appState route model questionnaire =
+viewProjectNavigationNav appState route model projectCommon =
     let
         projectRoute subroute =
             Wizard.Routes.ProjectsRoute (PlansRoutes.DetailRoute model.uuid subroute)
@@ -346,7 +350,7 @@ viewProjectNavigationNav appState route model questionnaire =
                 |> ActionResult.unwrap 0 (List.length << .files << .questionnaire)
 
         filesVisible =
-            questionnaire.fileCount > 0 || questionnaireFiles > 0
+            projectCommon.fileCount > 0 || questionnaireFiles > 0
 
         filesLink =
             { route = projectRoute (ProjectDetailRoute.Files PaginationQueryString.empty)
@@ -362,9 +366,30 @@ viewProjectNavigationNav appState route model questionnaire =
             , label = gettext "Settings" appState.locale
             , icon = faSettings
             , isActive = route == ProjectDetailRoute.Settings
-            , isVisible = Features.projectSettings appState questionnaire
+            , isVisible = Features.projectSettings appState projectCommon
             , dataCy = "project_nav_settings"
             }
+
+        pluginLink ( _, connector ) =
+            { route = projectRoute (ProjectDetailRoute.Plugin connector.url)
+            , label = gettext connector.tab.name appState.locale
+            , icon = fa connector.tab.icon
+            , isActive =
+                case route of
+                    ProjectDetailRoute.Plugin pluginId ->
+                        pluginId == connector.url
+
+                    _ ->
+                        False
+            , isVisible = True
+            , dataCy = "project_nav_plugin_" ++ connector.url
+            }
+
+        pluginLinks =
+            AppState.getPluginsByConnector appState .projectTabs
+                |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                |> List.sortBy (.name << .tab << Tuple.second)
+                |> List.map pluginLink
 
         links =
             [ questionnaireLink
@@ -372,8 +397,10 @@ viewProjectNavigationNav appState route model questionnaire =
             , previewLink
             , documentsLink
             , filesLink
-            , settingsLink
             ]
+                ++ pluginLinks
+                ++ [ settingsLink
+                   ]
     in
     DetailNavigation.navigation links
 
@@ -383,10 +410,10 @@ viewProjectNavigationNav appState route model questionnaire =
 
 
 viewProjectContent : AppState -> ProjectDetailRoute -> Model -> ProjectCommon -> Html Msg
-viewProjectContent appState route model questionnaire =
+viewProjectContent appState route model projectCommon =
     let
         isEditable =
-            ProjectUtils.isEditor appState questionnaire
+            ProjectUtils.isEditor appState projectCommon
 
         isAuthenticated =
             Session.exists appState.session
@@ -407,6 +434,7 @@ viewProjectContent appState route model questionnaire =
                             { feedbackEnabled = True
                             , todosEnabled = isEditable
                             , commentsEnabled = True
+                            , pluginsEnabled = True
                             , readonly = not isEditable || isMigrating
                             , toolbarEnabled = True
                             , questionLinksEnabled = True
@@ -418,6 +446,7 @@ viewProjectContent appState route model questionnaire =
                         , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
                         , revertQuestionnaireMsg = Just OpenRevertModal
                         , isKmEditor = False
+                        , projectCommon = Just projectCommon
                         }
                         { events = []
                         , kmEditorUuid = Nothing
@@ -444,28 +473,28 @@ viewProjectContent appState route model questionnaire =
 
         ProjectDetailRoute.Documents _ ->
             Documents.view appState
-                { project = questionnaire
+                { project = projectCommon
                 , projectEditable = isEditable
                 , wrapMsg = DocumentsMsg
-                , previewProjectEventMsg = Just (OpenVersionPreview questionnaire.uuid)
+                , previewProjectEventMsg = Just (OpenVersionPreview projectCommon.uuid)
                 }
                 model.documentsModel
 
         ProjectDetailRoute.NewDocument _ ->
             if isEditable && isAuthenticated then
                 Html.map NewDocumentMsg <|
-                    NewDocument.view appState questionnaire model.newDocumentModel
+                    NewDocument.view appState projectCommon model.newDocumentModel
 
             else
                 forbiddenPage
 
         ProjectDetailRoute.Files _ ->
-            Html.map FilesMsg <| Files.view appState questionnaire model.filesModel
+            Html.map FilesMsg <| Files.view appState projectCommon model.filesModel
 
         ProjectDetailRoute.Settings ->
             let
                 isOwner =
-                    ProjectUtils.isOwner appState questionnaire
+                    ProjectUtils.isOwner appState projectCommon
 
                 viewContent questionnaireSettings =
                     Html.map SettingsMsg <|
@@ -476,3 +505,19 @@ viewProjectContent appState route model questionnaire =
 
             else
                 forbiddenPage
+
+        ProjectDetailRoute.Plugin pluginId ->
+            let
+                mbPluginData =
+                    AppState.getPluginsByConnector appState .projectTabs
+                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> List.find (\( _, connector ) -> connector.url == pluginId)
+            in
+            case mbPluginData of
+                Just ( plugin, connector ) ->
+                    div [ class "Projects__Detail__Content" ]
+                        [ PluginView.view appState plugin.uuid connector.element [ PluginElement.projectValue projectCommon ]
+                        ]
+
+                Nothing ->
+                    Page.error appState (gettext "Plugin not found" appState.locale)

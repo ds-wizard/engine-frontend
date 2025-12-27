@@ -5,6 +5,7 @@ import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
+import Wizard.Pages.Users.Edit.Components.PluginSettings as PluginSettings
 import Wizard.Pages.Users.Edit.Components.Profile as Profile
 import Wizard.Pages.Users.Edit.Components.SubmissionSettings as SubmissionSettings
 import Wizard.Pages.Users.Edit.Components.Tours as Tours
@@ -19,3 +20,4 @@ type Msg
     | AppKeysMsg AppKeys.Msg
     | ActiveSessionsMsg ActiveSessions.Msg
     | SubmissionSettingsMsg SubmissionSettings.Msg
+    | PluginSettingsMsg PluginSettings.Msg

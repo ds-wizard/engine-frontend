@@ -6,7 +6,6 @@ module Wizard.Pages.Projects.Import.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
 import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.Importer exposing (ImporterResult)
@@ -15,10 +14,9 @@ import Wizard.Components.Questionnaire.Importer exposing (ImporterResult)
 type alias Model =
     { uuid : Uuid
     , sidePanel : SidePanel
-    , importerId : String
-    , questionnaire : ActionResult ProjectQuestionnaire
+    , importerUrl : String
+    , project : ActionResult ProjectQuestionnaire
     , questionnaireModel : ActionResult Questionnaire.Model
-    , questionnaireImporter : ActionResult ProjectImporter
     , knowledgeModelString : ActionResult String
     , importResult : Maybe ImporterResult
     , importing : ActionResult ()
@@ -31,13 +29,12 @@ type SidePanel
 
 
 initialModel : Uuid -> String -> Model
-initialModel uuid importerId =
+initialModel uuid importerUrl =
     { uuid = uuid
     , sidePanel = ChangesSidePanel
-    , importerId = importerId
-    , questionnaire = Loading
+    , importerUrl = importerUrl
+    , project = Loading
     , questionnaireModel = Loading
-    , questionnaireImporter = Loading
     , knowledgeModelString = Loading
     , importResult = Nothing
     , importing = Unset

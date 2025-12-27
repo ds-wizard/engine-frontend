@@ -5,7 +5,7 @@ module Wizard.Api.Models.Project exposing
     , isOwner
     )
 
-import Common.Api.Models.UserInfo as UserInfo exposing (UserInfo)
+import Common.Api.Models.UserInfo as UserInfo
 import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
@@ -90,7 +90,7 @@ decoder =
         |> D.required "updatedAt" D.datetime
 
 
-matchMember : Project -> Maybe UserInfo -> Bool
+matchMember : Project -> Maybe { a | uuid : Uuid, userGroupUuids : List Uuid } -> Bool
 matchMember project mbUser =
     case mbUser of
         Just user ->

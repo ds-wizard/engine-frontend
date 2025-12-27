@@ -6,6 +6,7 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     , addItemTemplateQuestionUuids
     , addReferenceUuid
     , decoder
+    , encode
     , getAnnotations
     , getAnswerUuids
     , getChoiceUuids
@@ -40,6 +41,7 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
 import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
+import Json.Encode as E
 import List.Extra as List
 import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Question.CommonQuestionData as CommonQuestionData exposing (CommonQuestionData)
@@ -115,6 +117,63 @@ itemSelectQuestionDecoder =
 fileQuestionDecoder : Decoder Question
 fileQuestionDecoder =
     D.map2 FileQuestion CommonQuestionData.decoder FileQuestionData.decoder
+
+
+
+-- Encoders
+
+
+encode : Question -> E.Value
+encode question =
+    case question of
+        OptionsQuestion commonQuestionData optionQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString OptionsQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ OptionsQuestionData.encodeValues optionQuestionData
+                )
+
+        ListQuestion commonQuestionData listQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString ListQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ ListQuestionData.encodeValues listQuestionData
+                )
+
+        ValueQuestion commonQuestionData valueQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString ValueQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ ValueQuestionData.encodeValues valueQuestionData
+                )
+
+        IntegrationQuestion commonQuestionData integrationQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString IntegrationQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ IntegrationQuestionData.encodeValues integrationQuestionData
+                )
+
+        MultiChoiceQuestion commonQuestionData multiChoiceQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString MultiChoiceQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ MultiChoiceQuestionData.encodeValues multiChoiceQuestionData
+                )
+
+        ItemSelectQuestion commonQuestionData itemSelectQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString ItemSelectQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ ItemSelectQuestionData.encodeValues itemSelectQuestionData
+                )
+
+        FileQuestion commonQuestionData fileQuestionData ->
+            E.object
+                (( "questionType", E.string (QuestionType.toString FileQuestionType) )
+                    :: CommonQuestionData.encodeValues commonQuestionData
+                    ++ FileQuestionData.encodeValues fileQuestionData
+                )
 
 
 
