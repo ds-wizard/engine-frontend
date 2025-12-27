@@ -19,11 +19,10 @@ module Wizard.Data.Perm exposing
     , userManagement
     )
 
-import Common.Api.Models.UserInfo exposing (UserInfo)
 import Maybe.Extra as Maybe
 
 
-hasPerm : Maybe UserInfo -> String -> Bool
+hasPerm : Maybe { a | permissions : List String } -> String -> Bool
 hasPerm mbUserInfo perm =
     List.member perm (Maybe.unwrap [] .permissions mbUserInfo)
 

@@ -36,6 +36,7 @@ viewProject appState model ( kmPackage, questionnaireModel ) =
                     { feedbackEnabled = False
                     , todosEnabled = False
                     , commentsEnabled = False
+                    , pluginsEnabled = False
                     , readonly = True
                     , toolbarEnabled = False
                     , questionLinksEnabled = False
@@ -47,6 +48,7 @@ viewProject appState model ( kmPackage, questionnaireModel ) =
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
                 , isKmEditor = False
+                , projectCommon = Nothing
                 }
                 { events = []
                 , kmEditorUuid = Nothing

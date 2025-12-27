@@ -76,7 +76,6 @@ import Wizard.Api.Models.ProjectDetail.Reply as Reply exposing (Reply)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Wizard.Api.Models.ProjectFileSimple as ProjectFileSimple exposing (ProjectFileSimple)
 import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
-import Wizard.Data.AppState exposing (AppState)
 
 
 type alias ProjectQuestionnaire =
@@ -499,7 +498,7 @@ itemSelectQuestionItemPath questionnaire itemSelectQuestionListQuestionUuid path
             Nothing
 
 
-getItemSelectQuestionValueLabel : AppState -> ProjectQuestionnaire -> String -> String -> String
+getItemSelectQuestionValueLabel : { a | locale : Gettext.Locale } -> ProjectQuestionnaire -> String -> String -> String
 getItemSelectQuestionValueLabel appState questionnaire itemSelectQuestionUuid itemUuid =
     let
         mbItemSelectQuestion =

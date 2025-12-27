@@ -8,6 +8,7 @@ import Wizard.Pages.Projects.Detail.View as Detail
 import Wizard.Pages.Projects.DocumentDownload.View
 import Wizard.Pages.Projects.FileDownload.View
 import Wizard.Pages.Projects.Import.View
+import Wizard.Pages.Projects.ImportLegacy.View
 import Wizard.Pages.Projects.Index.View
 import Wizard.Pages.Projects.Migration.View
 import Wizard.Pages.Projects.Models exposing (Model)
@@ -41,6 +42,10 @@ view route appState model =
         ImportRoute _ _ ->
             Html.map ImportMsg <|
                 Wizard.Pages.Projects.Import.View.view appState model.importModel
+
+        ImportLegacyRoute _ _ ->
+            Html.map ImportLegacyMsg <|
+                Wizard.Pages.Projects.ImportLegacy.View.view appState model.importLegacyModel
 
         DocumentDownloadRoute _ _ ->
             Html.map FileDownloadMsg <|

@@ -1,7 +1,13 @@
 module Wizard.Data.AppState exposing
     ( AppState
     , acceptCookies
+    , anyPluginsAvailable
     , getClientUrlRoot
+    , getPlugin
+    , getPluginSettings
+    , getPluginUserSettings
+    , getPlugins
+    , getPluginsByConnector
     , getUserRole
     , init
     , isFullscreen
@@ -22,11 +28,14 @@ import Common.Data.Navigator exposing (Navigator)
 import Common.Data.Role exposing (Role)
 import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Common.Utils.Theme exposing (Theme)
+import Dict
 import Gettext
 import Json.Decode as D exposing (Error(..))
+import List.Extra as List
 import Random exposing (Seed)
 import String.Extra as String
 import Time
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Data.Flags as Flags
@@ -35,6 +44,8 @@ import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
 import Wizard.Pages.Projects.Routes
+import Wizard.Plugins.Plugin as Plugin exposing (Connectors, Plugin)
+import Wizard.Plugins.PluginMetadata exposing (PluginMetadata)
 import Wizard.Ports.Console as Console
 import Wizard.Routes as Routes
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -63,6 +74,8 @@ type alias AppState =
     , maxUploadFileSize : Int
     , urlCheckerUrl : Maybe String
     , newsUrl : Maybe String
+    , pluginMetadata : List PluginMetadata
+    , plugins : List Plugin
     }
 
 
@@ -120,6 +133,8 @@ init flagsValue key =
       , maxUploadFileSize = Maybe.withDefault 100000000 flags.maxUploadFileSize
       , urlCheckerUrl = flags.urlCheckerUrl
       , newsUrl = flags.newsUrl
+      , pluginMetadata = flags.pluginMetadata
+      , plugins = List.filter Plugin.isApiVersionSupported flags.plugins
       }
     , flagsCmd
     )
@@ -228,3 +243,47 @@ sessionRemainingTime appState =
 getAIAssistantApiUrl : AppState -> String
 getAIAssistantApiUrl appState =
     String.replace "/wizard" "/ai-assistant" appState.apiUrl
+
+
+anyPluginsAvailable : AppState -> Bool
+anyPluginsAvailable appState =
+    not (List.isEmpty appState.pluginMetadata)
+
+
+getPlugins : AppState -> List Plugin
+getPlugins appState =
+    appState.plugins
+
+
+getPluginsByConnector : AppState -> (Connectors -> Maybe (List a)) -> List ( Plugin, a )
+getPluginsByConnector appState connectorGetter =
+    appState.plugins
+        |> List.filterMap
+            (\plugin ->
+                case connectorGetter plugin.connectors of
+                    Just connector ->
+                        Just (List.map (\connectorItem -> ( plugin, connectorItem )) connector)
+
+                    Nothing ->
+                        Nothing
+            )
+        |> List.concat
+
+
+getPlugin : AppState -> Uuid -> Maybe Plugin
+getPlugin appState pluginUuid =
+    List.find ((==) pluginUuid << .uuid) appState.plugins
+
+
+getPluginUserSettings : AppState -> Uuid -> String
+getPluginUserSettings appState pluginUuid =
+    appState.config.user
+        |> Maybe.map .pluginSettings
+        |> Maybe.andThen (Dict.get (Uuid.toString pluginUuid))
+        |> Maybe.withDefault ""
+
+
+getPluginSettings : AppState -> Uuid -> String
+getPluginSettings appState pluginUuid =
+    Dict.get (Uuid.toString pluginUuid) appState.config.pluginSettings
+        |> Maybe.withDefault ""

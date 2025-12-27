@@ -1,11 +1,14 @@
 module Wizard.Components.Questionnaire.RightPanel exposing
-    ( RightPanel(..)
+    ( PluginQuestionActionData
+    , RightPanel(..)
     , decoder
     , encode
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
+import Wizard.Api.Models.KnowledgeModel.Question exposing (Question)
+import Wizard.Plugins.Plugin exposing (Plugin, ProjectQuestionActionConnector)
 
 
 type RightPanel
@@ -16,6 +19,15 @@ type RightPanel
     | CommentsOverview
     | Comments String
     | Warnings
+    | PluginQuestionAction PluginQuestionActionData
+
+
+type alias PluginQuestionActionData =
+    { plugin : Plugin
+    , connector : ProjectQuestionActionConnector
+    , question : Question
+    , questionPath : String
+    }
 
 
 decoder : Decoder RightPanel
@@ -87,4 +99,9 @@ encode rightPanel =
         Warnings ->
             E.object
                 [ ( "type", E.string "Warnings" )
+                ]
+
+        PluginQuestionAction _ ->
+            E.object
+                [ ( "type", E.string "None" )
                 ]
