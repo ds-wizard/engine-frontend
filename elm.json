@@ -22,6 +22,7 @@
             "elm/html": "1.0.1",
             "elm/http": "2.0.0",
             "elm/json": "1.1.4",
+            "elm/parser": "1.1.0",
             "elm/random": "1.0.0",
             "elm/regex": "1.0.0",
             "elm/svg": "1.0.1",
@@ -52,7 +53,6 @@
         },
         "indirect": {
             "elm/bytes": "1.0.8",
-            "elm/parser": "1.1.0",
             "elm/virtual-dom": "1.0.5",
             "elm-community/basics-extra": "4.1.0",
             "fredcy/elm-parseint": "2.0.1",

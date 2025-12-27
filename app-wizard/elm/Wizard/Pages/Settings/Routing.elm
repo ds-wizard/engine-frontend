@@ -7,7 +7,7 @@ module Wizard.Pages.Settings.Routing exposing
 import List.Extensions as List
 import Url.Parser exposing ((</>), Parser, map, s)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
 
@@ -22,12 +22,16 @@ parsers appState wrapRoute =
     let
         adminDisabled =
             not (Admin.isEnabled appState.config.admin)
+
+        pluginsAvilable =
+            AppState.anyPluginsAvailable appState
     in
     []
         |> List.insertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s "organization")) adminDisabled
         |> List.insertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s "authentication")) adminDisabled
         |> List.insertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
         |> List.insertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| PluginsRoute) (s moduleRoot </> s "plugins")) pluginsAvilable
         |> List.insertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s "dashboard")) True
         |> List.insertIf (map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s "look-and-feel")) True
         |> List.insertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s "registry")) (Feature.registry appState)
@@ -51,6 +55,9 @@ toUrl route =
 
         FeaturesRoute ->
             [ moduleRoot, "features" ]
+
+        PluginsRoute ->
+            [ moduleRoot, "plugins" ]
 
         DashboardAndLoginScreenRoute ->
             [ moduleRoot, "dashboard" ]

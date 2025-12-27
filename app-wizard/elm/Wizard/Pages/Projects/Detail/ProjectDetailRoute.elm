@@ -12,3 +12,4 @@ type ProjectDetailRoute
     | NewDocument (Maybe Uuid)
     | Files PaginationQueryString
     | Settings
+    | Plugin String

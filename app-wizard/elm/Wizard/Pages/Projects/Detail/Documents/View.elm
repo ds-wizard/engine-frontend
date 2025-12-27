@@ -33,14 +33,17 @@ import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Components.PluginModal as PluginModal
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.Session as Session
+import Wizard.Pages.Documents.Common.DocumentPluginActions as DocumentPluginActions
 import Wizard.Pages.Projects.Detail.Documents.Models exposing (Model)
 import Wizard.Pages.Projects.Detail.Documents.Msgs exposing (Msg(..))
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as PlanDetailRoute
 import Wizard.Pages.Projects.Routes exposing (Route(..))
+import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -64,6 +67,7 @@ view appState cfg model =
             , submitModal cfg appState model
             , documentErrorModal cfg appState model
             , submissionErrorModal cfg appState model
+            , pluginModal cfg appState model
             ]
         ]
 
@@ -150,12 +154,7 @@ listingDescription document =
                 ]
 
         formatFragment =
-            case document.format of
-                Just format ->
-                    span [ class "fragment" ] [ fa format.icon, text format.name ]
-
-                Nothing ->
-                    Html.nothing
+            span [ class "fragment" ] [ fa document.format.icon, text document.format.name ]
 
         fileSizeFragment =
             case document.fileSize of
@@ -231,6 +230,9 @@ listingActions appState cfg document =
                 , dataCy = "view-error"
                 }
 
+        pluginActions =
+            DocumentPluginActions.documentPluginActions appState document (cfg.wrapMsg << PluginModalMsg)
+
         deleteEnabled =
             cfg.projectEditable && Session.exists appState.session
 
@@ -249,6 +251,7 @@ listingActions appState cfg document =
               ]
             , [ ( viewError, viewErrorEnabled ) ]
             , [ ( viewQuestionnaire, viewQuestionnaireEnabled ) ]
+            , pluginActions
             , [ ( delete, deleteEnabled ) ]
             ]
     in
@@ -544,3 +547,17 @@ submissionErrorModal cfg appState model =
             }
     in
     Modal.error modalConfig
+
+
+pluginModal : ViewConfig msg -> AppState -> Model -> Html msg
+pluginModal cfg appState model =
+    let
+        pluginModalViewConfig =
+            { attributes =
+                \document ->
+                    [ PluginElement.documentValue document
+                    ]
+            , wrapMsg = cfg.wrapMsg << PluginModalMsg
+            }
+    in
+    PluginModal.view appState pluginModalViewConfig model.pluginModal

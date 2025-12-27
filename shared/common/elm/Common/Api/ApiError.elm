@@ -1,5 +1,6 @@
 module Common.Api.ApiError exposing
     ( ApiError(..)
+    , isNotFound
     , toActionResult
     , toServerError
     )
@@ -32,6 +33,16 @@ toServerError error =
 
         _ ->
             Nothing
+
+
+isNotFound : ApiError -> Bool
+isNotFound error =
+    case error of
+        BadStatus 404 _ ->
+            True
+
+        _ ->
+            False
 
 
 

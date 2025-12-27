@@ -116,6 +116,7 @@ module Wizard.Routes exposing
     , usersEditLanguage
     , usersEditLanguageCurrent
     , usersEditPassword
+    , usersEditPluginSettings
     , usersEditSubmissionSettings
     , usersEditTours
     , usersIndex
@@ -973,6 +974,11 @@ usersEditActiveSessions =
 usersEditSubmissionSettings : UuidOrCurrent -> Route
 usersEditSubmissionSettings =
     UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.SubmissionSettings
+
+
+usersEditPluginSettings : UuidOrCurrent -> Uuid -> Route
+usersEditPluginSettings uuidOrCurrent pluginUuid =
+    UsersRoute (Wizard.Pages.Users.Routes.EditRoute uuidOrCurrent (UserEditRoute.PluginSettings pluginUuid))
 
 
 usersEditCurrent : Route

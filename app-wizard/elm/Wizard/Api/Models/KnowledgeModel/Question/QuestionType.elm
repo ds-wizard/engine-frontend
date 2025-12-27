@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Question.QuestionType exposing
     ( QuestionType(..)
     , decoder
+    , toString
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -46,3 +47,28 @@ decoder =
                     valueType ->
                         D.fail <| "Unknown question type: " ++ valueType
             )
+
+
+toString : QuestionType -> String
+toString questionType =
+    case questionType of
+        OptionsQuestionType ->
+            "OptionsQuestion"
+
+        ListQuestionType ->
+            "ListQuestion"
+
+        ValueQuestionType ->
+            "ValueQuestion"
+
+        IntegrationQuestionType ->
+            "IntegrationQuestion"
+
+        MultiChoiceQuestionType ->
+            "MultiChoiceQuestion"
+
+        ItemSelectQuestionType ->
+            "ItemSelectQuestion"
+
+        FileQuestionType ->
+            "FileQuestion"

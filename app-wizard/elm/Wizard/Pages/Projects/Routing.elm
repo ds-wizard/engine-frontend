@@ -52,7 +52,6 @@ parsers wrapRoute =
         projectDetailQuestionnaire projectUuid mbQuestionPath mbCommentThreadUuid =
             wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Questionnaire mbQuestionPath mbCommentThreadUuid)
 
-        -- Project Import
         projectImportRoute uuid string =
             wrapRoute <| ImportRoute uuid string
 
@@ -61,6 +60,9 @@ parsers wrapRoute =
 
         fileDownloadRoute projectUuid documentUuid =
             wrapRoute <| FileDownloadRoute projectUuid documentUuid
+
+        projectTabPluginRoute projectUuid pluginTabId =
+            wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Plugin pluginTabId)
     in
     [ map projectCreateRoute (s moduleRoot </> s "create" <?> Query.uuid "selectedProjectTemplate" <?> Query.string "selectedKnowledgeModel")
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s "create-migration" </> uuid)
@@ -76,6 +78,7 @@ parsers wrapRoute =
     , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
     , map documentDownloadRoute (s moduleRoot </> uuid </> s "documents" </> uuid </> s "download")
     , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
+    , map projectTabPluginRoute (s moduleRoot </> uuid </> s "plugin" </> string)
     ]
 
 
@@ -139,6 +142,9 @@ toUrl route =
 
                 ProjectDetailRoute.Settings ->
                     [ moduleRoot, Uuid.toString uuid, "settings" ]
+
+                ProjectDetailRoute.Plugin pluginTabId ->
+                    [ moduleRoot, Uuid.toString uuid, "plugin", pluginTabId ]
 
         IndexRoute paginationQueryString mbIsTemplate mbUserUuid mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
             let

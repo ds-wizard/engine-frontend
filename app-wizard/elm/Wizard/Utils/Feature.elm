@@ -79,6 +79,7 @@ module Wizard.Utils.Feature exposing
     , userEditApiKeys
     , userEditAppKeys
     , userEditLanguage
+    , userEditPlugins
     , userEditSubmissionSettings
     , userEditTours
     , usersCreate
@@ -526,6 +527,11 @@ userEditActiveSessions appState uuidOrCurrent =
 userEditSubmissionSettings : AppState -> UuidOrCurrent -> Bool
 userEditSubmissionSettings appState uuidOrCurrent =
     appState.config.submission.enabled && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
+
+
+userEditPlugins : AppState -> UuidOrCurrent -> Bool
+userEditPlugins appState uuidOrCurrent =
+    UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user)
 
 
 
