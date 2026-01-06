@@ -12,20 +12,20 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Wizard.Api.Models.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
-import Wizard.Api.Models.EditableConfig.EditableQuestionnairesConfig exposing (EditableQuestionnairesConfig)
-import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation exposing (QuestionnaireCreation)
-import Wizard.Api.Models.Questionnaire.QuestionnaireSharing as QuestionnaireSharing exposing (QuestionnaireSharing)
-import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility)
+import Wizard.Api.Models.EditableConfig.EditableProjectConfig exposing (EditableProjectConfig)
+import Wizard.Api.Models.Project.ProjectCreation as ProjectCreation exposing (ProjectCreation)
+import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing)
+import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility)
 import Wizard.Data.AppState exposing (AppState)
 
 
 type alias EditableQuestionnairesConfigForm =
     { questionnaireVisibilityEnabled : Bool
-    , questionnaireVisibilityDefaultValue : QuestionnaireVisibility
+    , questionnaireVisibilityDefaultValue : ProjectVisibility
     , questionnaireSharingEnabled : Bool
-    , questionnaireSharingDefaultValue : QuestionnaireSharing
+    , questionnaireSharingDefaultValue : ProjectSharing
     , questionnaireSharingAnonymousEnabled : Bool
-    , questionnaireCreation : QuestionnaireCreation
+    , questionnaireCreation : ProjectCreation
     , feedbackEnabled : Bool
     , feedbackToken : String
     , feedbackOwner : String
@@ -41,16 +41,16 @@ initEmpty appState =
     Form.initial [] (validation appState)
 
 
-init : AppState -> EditableQuestionnairesConfig -> Form FormError EditableQuestionnairesConfigForm
+init : AppState -> EditableProjectConfig -> Form FormError EditableQuestionnairesConfigForm
 init appState config =
     let
         fields =
-            [ ( "questionnaireVisibilityEnabled", Field.bool config.questionnaireVisibility.enabled )
-            , ( "questionnaireVisibilityDefaultValue", QuestionnaireVisibility.field config.questionnaireVisibility.defaultValue )
-            , ( "questionnaireSharingEnabled", Field.bool config.questionnaireSharing.enabled )
-            , ( "questionnaireSharingDefaultValue", QuestionnaireSharing.field config.questionnaireSharing.defaultValue )
-            , ( "questionnaireSharingAnonymousEnabled", Field.bool config.questionnaireSharing.anonymousEnabled )
-            , ( "questionnaireCreation", QuestionnaireCreation.field config.questionnaireCreation )
+            [ ( "questionnaireVisibilityEnabled", Field.bool config.projectVisibility.enabled )
+            , ( "questionnaireVisibilityDefaultValue", ProjectVisibility.field config.projectVisibility.defaultValue )
+            , ( "questionnaireSharingEnabled", Field.bool config.projectSharing.enabled )
+            , ( "questionnaireSharingDefaultValue", ProjectSharing.field config.projectSharing.defaultValue )
+            , ( "questionnaireSharingAnonymousEnabled", Field.bool config.projectSharing.anonymousEnabled )
+            , ( "questionnaireCreation", ProjectCreation.field config.projectCreation )
             , ( "feedbackEnabled", Field.bool config.feedback.enabled )
             , ( "feedbackToken", Field.string config.feedback.token )
             , ( "feedbackOwner", Field.string config.feedback.owner )
@@ -67,11 +67,11 @@ validation : AppState -> Validation FormError EditableQuestionnairesConfigForm
 validation appState =
     V.succeed EditableQuestionnairesConfigForm
         |> V.andMap (V.field "questionnaireVisibilityEnabled" V.bool)
-        |> V.andMap (V.field "questionnaireVisibilityDefaultValue" QuestionnaireVisibility.validation)
+        |> V.andMap (V.field "questionnaireVisibilityDefaultValue" ProjectVisibility.validation)
         |> V.andMap (V.field "questionnaireSharingEnabled" V.bool)
-        |> V.andMap (V.field "questionnaireSharingDefaultValue" QuestionnaireSharing.validation)
+        |> V.andMap (V.field "questionnaireSharingDefaultValue" ProjectSharing.validation)
         |> V.andMap (V.field "questionnaireSharingAnonymousEnabled" V.bool)
-        |> V.andMap (V.field "questionnaireCreation" QuestionnaireCreation.validation)
+        |> V.andMap (V.field "questionnaireCreation" ProjectCreation.validation)
         |> V.andMap (V.field "feedbackEnabled" V.bool)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackToken" V.string V.optionalString)
         |> V.andMap (V.field "feedbackEnabled" V.bool |> V.ifElse "feedbackOwner" V.string V.optionalString)
@@ -81,7 +81,7 @@ validation appState =
         |> V.andMap (V.field "projectTaggingTags" (V.projectTags appState))
 
 
-toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableQuestionnairesConfig
+toEditableQuestionnaireConfig : EditableQuestionnairesConfigForm -> EditableProjectConfig
 toEditableQuestionnaireConfig form =
     let
         tags =
@@ -95,16 +95,16 @@ toEditableQuestionnaireConfig form =
                 Nothing ->
                     []
     in
-    { questionnaireVisibility =
+    { projectVisibility =
         { enabled = form.questionnaireVisibilityEnabled
         , defaultValue = form.questionnaireVisibilityDefaultValue
         }
-    , questionnaireSharing =
+    , projectSharing =
         { enabled = form.questionnaireSharingEnabled
         , defaultValue = form.questionnaireSharingDefaultValue
         , anonymousEnabled = form.questionnaireSharingAnonymousEnabled
         }
-    , questionnaireCreation = form.questionnaireCreation
+    , projectCreation = form.questionnaireCreation
     , feedback =
         { enabled = form.feedbackEnabled
         , token = form.feedbackToken

@@ -3,7 +3,6 @@ module Wizard.Components.FormActions exposing
     , view
     , viewCustomButton
     , viewDynamic
-    , viewSubmit
     )
 
 import ActionResult exposing (ActionResult)
@@ -30,14 +29,6 @@ viewCustomButton appState cancelMsg actionButton =
     div [ class "form-actions" ]
         [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
         , actionButton
-        ]
-
-
-viewSubmit : AppState -> msg -> ActionButton.SubmitConfig a -> Html msg
-viewSubmit appState cancelMsg submitConfig =
-    div [ class "form-actions" ]
-        [ button [ class "btn btn-secondary", onClick cancelMsg ] [ text (gettext "Cancel" appState.locale) ]
-        , ActionButton.submit submitConfig
         ]
 
 

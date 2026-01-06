@@ -9,8 +9,8 @@ import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
-import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
-import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
+import Wizard.Api.Models.ProjectFile exposing (ProjectFile)
+import Wizard.Api.ProjectFiles as ProjectFilesApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -34,7 +34,7 @@ update msg wrapMsg appState model =
         DownloadFile file ->
             ( model
             , Cmd.map (wrapMsg << FileDownloaderMsg)
-                (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl file.questionnaire.uuid file.uuid))
+                (FileDownloader.fetchFile (AppState.toServerInfo appState) (ProjectFilesApi.fileUrl file.project.uuid file.uuid))
             )
 
         FileDownloaderMsg fileDownloaderMsg ->
@@ -47,7 +47,7 @@ update msg wrapMsg appState model =
             case model.questionnaireFileToBeDeleted of
                 Just file ->
                     ( { model | deletingQuestionnaireFile = ActionResult.Loading }
-                    , QuestionnaireFilesApi.deleteFile appState file.questionnaire.uuid file.uuid (wrapMsg << DeleteFileCompleted)
+                    , ProjectFilesApi.delete appState file.project.uuid file.uuid (wrapMsg << DeleteFileCompleted)
                     )
 
                 Nothing ->
@@ -66,7 +66,7 @@ update msg wrapMsg appState model =
                     )
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireFile -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg ProjectFile -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleListingMsg wrapMsg appState listingMsg model =
     let
         ( questionnaireFiles, cmd ) =
@@ -77,9 +77,9 @@ handleListingMsg wrapMsg appState listingMsg model =
     )
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig QuestionnaireFile
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Listing.UpdateConfig ProjectFile
 listingUpdateConfig wrapMsg appState =
-    { getRequest = QuestionnaireFilesApi.getQuestionnaireFiles appState
+    { getRequest = ProjectFilesApi.getList appState
     , getError = gettext "Unable to get project files." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
     , toRoute = Routes.projectFilesIndexWithFilters

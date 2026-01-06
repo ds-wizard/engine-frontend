@@ -7,13 +7,13 @@ import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
-import Wizard.Api.Models.QuestionnaireSuggestion as QuestionnaireSuggestion exposing (QuestionnaireSuggestion)
+import Wizard.Api.Models.ProjectSuggestion as ProjectSuggestion exposing (ProjectSuggestion)
 
 
 type alias DocumentTemplateDraftPreviewSettings =
     { formatUuid : Maybe Uuid
-    , questionnaireUuid : Maybe Uuid
-    , questionnaire : Maybe QuestionnaireSuggestion
+    , projectUuid : Maybe Uuid
+    , project : Maybe ProjectSuggestion
     , knowledgeModelEditorUuid : Maybe Uuid
     , knowledgeModelEditor : Maybe KnowledgeModelEditorSuggestion
     }
@@ -22,8 +22,8 @@ type alias DocumentTemplateDraftPreviewSettings =
 init : DocumentTemplateDraftPreviewSettings
 init =
     { formatUuid = Nothing
-    , questionnaireUuid = Nothing
-    , questionnaire = Nothing
+    , projectUuid = Nothing
+    , project = Nothing
     , knowledgeModelEditorUuid = Nothing
     , knowledgeModelEditor = Nothing
     }
@@ -31,15 +31,15 @@ init =
 
 clearQuestionnaireAndKmEditor : DocumentTemplateDraftPreviewSettings -> DocumentTemplateDraftPreviewSettings
 clearQuestionnaireAndKmEditor settings =
-    { settings | questionnaireUuid = Nothing, questionnaire = Nothing, knowledgeModelEditorUuid = Nothing, knowledgeModelEditor = Nothing }
+    { settings | projectUuid = Nothing, project = Nothing, knowledgeModelEditorUuid = Nothing, knowledgeModelEditor = Nothing }
 
 
 decoder : Decoder DocumentTemplateDraftPreviewSettings
 decoder =
     D.succeed DocumentTemplateDraftPreviewSettings
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
-        |> D.required "questionnaireUuid" (D.maybe Uuid.decoder)
-        |> D.required "questionnaire" (D.maybe QuestionnaireSuggestion.decoder)
+        |> D.required "projectUuid" (D.maybe Uuid.decoder)
+        |> D.required "project" (D.maybe ProjectSuggestion.decoder)
         |> D.required "knowledgeModelEditorUuid" (D.maybe Uuid.decoder)
         |> D.required "knowledgeModelEditor" (D.maybe KnowledgeModelEditorSuggestion.decoder)
 
@@ -48,7 +48,7 @@ encode : DocumentTemplateDraftPreviewSettings -> E.Value
 encode settings =
     E.object
         [ ( "formatUuid", E.maybe Uuid.encode settings.formatUuid )
-        , ( "questionnaireUuid", E.maybe Uuid.encode settings.questionnaireUuid )
+        , ( "projectUuid", E.maybe Uuid.encode settings.projectUuid )
         , ( "knowledgeModelEditorUuid", E.maybe Uuid.encode settings.knowledgeModelEditorUuid )
         ]
 
@@ -56,4 +56,4 @@ encode settings =
 isPreviewSet : DocumentTemplateDraftPreviewSettings -> Bool
 isPreviewSet settings =
     Maybe.isJust settings.formatUuid
-        && (Maybe.isJust settings.questionnaireUuid || Maybe.isJust settings.knowledgeModelEditorUuid)
+        && (Maybe.isJust settings.projectUuid || Maybe.isJust settings.knowledgeModelEditorUuid)

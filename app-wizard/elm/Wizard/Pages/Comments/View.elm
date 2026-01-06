@@ -6,7 +6,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
-import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Models.ProjectCommentThreadAssigned exposing (ProjectCommentThreadAssigned)
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
@@ -26,7 +26,7 @@ view appState model =
         ]
 
 
-listingConfig : AppState -> ViewConfig QuestionnaireCommentThreadAssigned Msg
+listingConfig : AppState -> ViewConfig ProjectCommentThreadAssigned Msg
 listingConfig appState =
     let
         resolvedFilter =
@@ -42,7 +42,7 @@ listingConfig appState =
     , description = listingDescription
     , itemAdditionalData = always Nothing
     , dropdownItems = always []
-    , textTitle = .questionnaireName
+    , textTitle = .projectName
     , emptyText = gettext "No comments have been assigned to you." appState.locale
     , updated =
         Just
@@ -53,7 +53,7 @@ listingConfig appState =
     , iconView = Nothing
     , searchPlaceholderText = Just (gettext "Search comments..." appState.locale)
     , sortOptions =
-        [ ( "questionnaireUuid", gettext "Project" appState.locale )
+        [ ( "projectUuid", gettext "Project" appState.locale )
         , ( "updatedAt", gettext "Updated" appState.locale )
         ]
     , filters = [ resolvedFilter ]
@@ -62,7 +62,7 @@ listingConfig appState =
     }
 
 
-listingTitle : AppState -> QuestionnaireCommentThreadAssigned -> Html Msg
+listingTitle : AppState -> ProjectCommentThreadAssigned -> Html Msg
 listingTitle appState commentThread =
     let
         resolvedBadge =
@@ -73,18 +73,18 @@ listingTitle appState commentThread =
                 Html.nothing
     in
     span []
-        [ linkTo (Routes.projectsDetailQuestionnaire commentThread.questionnaireUuid (Just commentThread.path) (Just commentThread.commentThreadUuid))
+        [ linkTo (Routes.projectsDetailQuestionnaire commentThread.projectUuid (Just commentThread.path) (Just commentThread.commentThreadUuid))
             []
             [ text commentThread.text ]
         , resolvedBadge
         ]
 
 
-listingDescription : QuestionnaireCommentThreadAssigned -> Html Msg
+listingDescription : ProjectCommentThreadAssigned -> Html Msg
 listingDescription commentThread =
     let
         questionnaireNameFragment =
-            span [ class "fragment" ] [ text commentThread.questionnaireName ]
+            span [ class "fragment" ] [ text commentThread.projectName ]
 
         userFragment =
             case commentThread.createdBy of

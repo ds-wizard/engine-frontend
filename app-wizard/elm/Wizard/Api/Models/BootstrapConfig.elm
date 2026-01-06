@@ -18,7 +18,7 @@ import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig 
 import Wizard.Api.Models.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Api.Models.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
 import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
-import Wizard.Api.Models.BootstrapConfig.QuestionnaireConfig as QuestionnaireConfig exposing (QuestionnaireConfig)
+import Wizard.Api.Models.BootstrapConfig.ProjectConfig as ProjectConfig exposing (ProjectConfig)
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig)
 import Wizard.Api.Models.BootstrapConfig.SignalBridgeConfig as SignalBridgeConfig exposing (SignalBridgeConfig)
 import Wizard.Api.Models.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
@@ -33,7 +33,7 @@ type alias BootstrapConfig =
     , lookAndFeel : LookAndFeelConfig
     , organization : OrganizationConfig
     , privacyAndSupport : PrivacyAndSupportConfig
-    , questionnaire : QuestionnaireConfig
+    , project : ProjectConfig
     , submission : SubmissionConfig
     , cloud : CloudConfig
     , owl : OwlConfig
@@ -54,7 +54,7 @@ default =
     , lookAndFeel = LookAndFeelConfig.default
     , organization = OrganizationConfig.default
     , privacyAndSupport = PrivacyAndSupportConfig.default
-    , questionnaire = QuestionnaireConfig.default
+    , project = ProjectConfig.default
     , submission = SubmissionConfig.default
     , cloud = CloudConfig.default
     , owl = OwlConfig.default
@@ -76,7 +76,7 @@ decoder =
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "organization" OrganizationConfig.decoder
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
-        |> D.required "questionnaire" QuestionnaireConfig.decoder
+        |> D.required "project" ProjectConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
         |> D.required "cloud" CloudConfig.decoder
         |> D.required "owl" OwlConfig.decoder

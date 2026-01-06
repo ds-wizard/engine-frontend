@@ -2,9 +2,10 @@ module Wizard.Components.Menu.View exposing (view, viewAboutModal, viewReportIss
 
 import ActionResult exposing (ActionResult)
 import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
-import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo)
-import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
+import Common.Api.Models.BuildInfo as BuildInfo exposing (BuildInfo, MetamodelVersionInfo)
+import Common.Components.FontAwesome exposing (fa, faChangeLanguage, faCopy, faMenuAbout, faMenuAdministration, faMenuAssignedComments, faMenuCollapse, faMenuDashboard, faMenuDev, faMenuKnowledgeModels, faMenuLogout, faMenuNews, faMenuOpen, faMenuProfile, faMenuProjects, faMenuReportIssue, faMenuTemplates, faMenuTenants, faWarning)
 import Common.Components.Modal as Modal
+import Common.Components.NewsModal as NewsModal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
 import Common.Data.Role as Role
@@ -18,6 +19,7 @@ import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Html.Extra as Html
 import Json.Decode as D
 import Json.Decode.Extra as D
+import Maybe.Extra as Maybe
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
@@ -751,6 +753,16 @@ viewProfileMenu model =
                         , text (gettext "About" model.appState.locale)
                         ]
                     ]
+                , Html.viewIf (Maybe.isJust model.appState.newsUrl) <|
+                    li [ class "dark" ]
+                        [ a
+                            [ onClick (Wizard.Msgs.NewsModalMsg NewsModal.open)
+                            , dataCy "menu_news"
+                            ]
+                            [ faMenuNews
+                            , text (gettext "What's new" model.appState.locale)
+                            ]
+                        ]
                 , li [ class "dark dark-last" ]
                     [ a
                         [ onClick (Wizard.Msgs.MenuMsg <| Wizard.Components.Menu.Msgs.SetReportIssueOpen True)
@@ -884,6 +896,9 @@ viewAboutModalContent appState serverBuildInfo =
             , ( gettext "API Docs" appState.locale, a [ href swaggerUrl, target "_blank" ] [ text swaggerUrl ] )
             ]
 
+        metamodelVersions =
+            Maybe.unwrap Html.nothing (viewMetamodelVersions appState) serverBuildInfo.metamodelVersions
+
         viewComponentVersion component =
             viewBuildInfo appState component.name component []
 
@@ -895,6 +910,7 @@ viewAboutModalContent appState serverBuildInfo =
          , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
          ]
             ++ componentVersions
+            ++ [ metamodelVersions ]
         )
 
 
@@ -928,5 +944,25 @@ viewBuildInfo appState name buildInfo extra =
                 ]
              ]
                 ++ List.map viewExtraRow extra
+            )
+        ]
+
+
+viewMetamodelVersions : AppState -> List MetamodelVersionInfo -> Html msg
+viewMetamodelVersions appState metamodelVersions =
+    table [ class "table table-borderless table-build-info" ]
+        [ thead []
+            [ tr []
+                [ th [ colspan 2 ] [ text (gettext "Metamodel Versions" appState.locale) ] ]
+            ]
+        , tbody []
+            (List.map
+                (\metamodelVersionInfo ->
+                    tr []
+                        [ td [ class "w-50" ] [ text metamodelVersionInfo.name ]
+                        , td [] [ text metamodelVersionInfo.version ]
+                        ]
+                )
+                metamodelVersions
             )
         ]

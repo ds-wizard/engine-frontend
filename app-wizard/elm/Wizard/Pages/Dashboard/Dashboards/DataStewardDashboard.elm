@@ -17,12 +17,12 @@ import Common.Utils.Setters exposing (setCommentThreads, setDocumentTemplates, s
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)
-import Wizard.Api.CommentThreads as CommentThreadsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
-import Wizard.Api.Models.QuestionnaireCommentThreadAssigned exposing (QuestionnaireCommentThreadAssigned)
+import Wizard.Api.Models.ProjectCommentThreadAssigned exposing (ProjectCommentThreadAssigned)
+import Wizard.Api.ProjectCommentThreads as ProjectCommentThreadsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.AssignedComments as AssignedComments
 import Wizard.Pages.Dashboard.Widgets.CreateKnowledgeModelWidget as CreateKnowledgeModelWidget
@@ -37,7 +37,7 @@ import Wizard.Pages.Dashboard.Widgets.WelcomeWidget as WelcomeWidget
 type alias Model =
     { knowledgeModelPackages : ActionResult (List KnowledgeModelPackage)
     , documentTemplates : ActionResult (List DocumentTemplate)
-    , commentThreads : ActionResult (List QuestionnaireCommentThreadAssigned)
+    , commentThreads : ActionResult (List ProjectCommentThreadAssigned)
     }
 
 
@@ -52,7 +52,7 @@ initialModel =
 type Msg
     = GetPackagesCompleted (Result ApiError (Pagination KnowledgeModelPackage))
     | GetDocumentTemplatesCompleted (Result ApiError (Pagination DocumentTemplate))
-    | GetCommentThreadsCompleted (Result ApiError (Pagination QuestionnaireCommentThreadAssigned))
+    | GetCommentThreadsCompleted (Result ApiError (Pagination ProjectCommentThreadAssigned))
 
 
 fetchData : AppState -> Cmd Msg
@@ -80,7 +80,7 @@ fetchCommentThreads appState =
                 [ ( "resolved", Just "false" ) ]
                 []
     in
-    CommentThreadsApi.getCommentThreads
+    ProjectCommentThreadsApi.getCommentThreads
         appState
         filters
         pagination

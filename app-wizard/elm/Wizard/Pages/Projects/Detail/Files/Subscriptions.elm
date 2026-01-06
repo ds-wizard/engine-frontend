@@ -8,4 +8,4 @@ import Wizard.Pages.Projects.Detail.Files.Msgs exposing (Msg(..))
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.map ListingMsg <|
-        Listing.subscriptions model.questionnaireFiles
+        Listing.subscriptions model.projectFiles

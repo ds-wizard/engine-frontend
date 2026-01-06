@@ -5,15 +5,15 @@ import Uuid exposing (Uuid)
 
 
 type alias Model =
-    { questionnaireUuid : Uuid
+    { projectUuid : Uuid
     , fileUuid : Uuid
     , urlResponse : ActionResult ()
     }
 
 
 initialModel : Uuid -> Uuid -> Model
-initialModel questionnaireUuid fileUuid =
-    { questionnaireUuid = questionnaireUuid
+initialModel projectUuid fileUuid =
+    { projectUuid = projectUuid
     , fileUuid = fileUuid
     , urlResponse = ActionResult.Loading
     }

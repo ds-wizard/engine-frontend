@@ -13,7 +13,7 @@ import Wizard.Api.Documents as DocumentsApi
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.Submission exposing (Submission)
 import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -29,7 +29,7 @@ fetchData =
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Uuid -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update wrapMsg msg appState questionnaireUuid model =
+update wrapMsg msg appState projectUuid model =
     case msg of
         ShowHideDeleteDocument mbDocument ->
             handleShowHideDeleteDocument model mbDocument
@@ -38,10 +38,10 @@ update wrapMsg msg appState questionnaireUuid model =
             handleDeleteDocument wrapMsg appState model
 
         DeleteDocumentCompleted result ->
-            handleDeleteDocumentCompleted wrapMsg appState questionnaireUuid model result
+            handleDeleteDocumentCompleted wrapMsg appState projectUuid model result
 
         ListingMsg listingMsg ->
-            handleListingMsg wrapMsg appState listingMsg questionnaireUuid model
+            handleListingMsg wrapMsg appState listingMsg projectUuid model
 
         ShowHideSubmitDocument mbDocument ->
             handleShowHideSubmitDocument wrapMsg appState model mbDocument
@@ -81,14 +81,14 @@ handleShowHideDeleteDocument model mbDocument =
 handleDeleteDocument : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handleDeleteDocument wrapMsg appState model =
     case model.documentToBeDeleted of
-        Just questionnaire ->
+        Just document ->
             let
                 newModel =
                     { model | deletingDocument = Loading }
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        DocumentsApi.deleteDocument appState (Uuid.toString questionnaire.uuid) DeleteDocumentCompleted
+                        DocumentsApi.deleteDocument appState (Uuid.toString document.uuid) DeleteDocumentCompleted
             in
             ( newModel, cmd )
 
@@ -97,12 +97,12 @@ handleDeleteDocument wrapMsg appState model =
 
 
 handleDeleteDocumentCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Uuid -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteDocumentCompleted wrapMsg appState questionnaireUuid model result =
+handleDeleteDocumentCompleted wrapMsg appState projectUuid model result =
     case result of
         Ok _ ->
             let
                 ( documents, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState questionnaireUuid) appState ListingMsgs.Reload model.documents
+                    Listing.update (listingUpdateConfig wrapMsg appState projectUuid) appState ListingMsgs.Reload model.documents
             in
             ( { model
                 | deletingDocument = Success <| gettext "Document was successfully deleted." appState.locale
@@ -119,10 +119,10 @@ handleDeleteDocumentCompleted wrapMsg appState questionnaireUuid model result =
 
 
 handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Document -> Uuid -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleListingMsg wrapMsg appState listingMsg questionnaireUuid model =
+handleListingMsg wrapMsg appState listingMsg projectUuid model =
     let
         ( documents, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState questionnaireUuid) appState listingMsg model.documents
+            Listing.update (listingUpdateConfig wrapMsg appState projectUuid) appState listingMsg model.documents
     in
     ( { model | documents = documents }
     , cmd
@@ -220,9 +220,9 @@ handleSubmitDocumentCompleted appState model result =
 
 
 listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Uuid -> Listing.UpdateConfig Document
-listingUpdateConfig wrapMsg appState questionnaireUuid =
-    { getRequest = QuestionnairesApi.getDocuments appState questionnaireUuid
+listingUpdateConfig wrapMsg appState projectUuid =
+    { getRequest = ProjectsApi.getDocuments appState projectUuid
     , getError = gettext "Unable to get documents." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.projectsDetailDocumentsWithFilters questionnaireUuid
+    , toRoute = Routes.projectsDetailDocumentsWithFilters projectUuid
     }

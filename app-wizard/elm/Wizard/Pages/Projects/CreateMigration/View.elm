@@ -14,7 +14,7 @@ import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
 import Version
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
-import Wizard.Api.Models.QuestionnaireSettings exposing (QuestionnaireSettings)
+import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
@@ -27,11 +27,11 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (createMigrationView appState model) model.questionnaire
+    Page.actionResultView appState (createMigrationView appState model) model.project
 
 
-createMigrationView : AppState -> Model -> QuestionnaireSettings -> Html Msg
-createMigrationView appState model questionnaire =
+createMigrationView : AppState -> Model -> ProjectSettings -> Html Msg
+createMigrationView appState model project =
     let
         createVersionOption kmPackage version =
             let
@@ -51,7 +51,7 @@ createMigrationView appState model questionnaire =
         originalTagList =
             div [ class "form-group form-group-tags" ]
                 [ label [] [ text (gettext "Original question tags" appState.locale) ]
-                , div [] [ Tag.readOnlyList appState questionnaire.selectedQuestionTagUuids questionnaire.knowledgeModelTags ]
+                , div [] [ Tag.readOnlyList appState project.selectedQuestionTagUuids project.knowledgeModelTags ]
                 ]
 
         cfg =
@@ -82,13 +82,13 @@ createMigrationView appState model questionnaire =
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsMigration) (gettext "Create Migration" appState.locale)
         , Flash.info <| gettext "A new project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
         , FormResult.view model.savingMigration
-        , FormGroup.textView "project" questionnaire.name <| gettext "Project" appState.locale
+        , FormGroup.textView "project" project.name <| gettext "Project" appState.locale
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage questionnaire.knowledgeModelPackage))
+                    (TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage project.knowledgeModelPackage))
                     (gettext "Original Knowledge Model" appState.locale)
-                , FormGroup.codeView (Version.toString questionnaire.knowledgeModelPackage.version) (gettext "Original Version" appState.locale)
+                , FormGroup.codeView (Version.toString project.knowledgeModelPackage.version) (gettext "Original Version" appState.locale)
                 , originalTagList
                 ]
             , faArrowRight

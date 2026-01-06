@@ -1,0 +1,16 @@
+.modal-news {
+  .modal-content {
+    .modal-body {
+      img {
+        width: calc(100% + var(--bs-modal-padding) * 2);
+        margin: calc(-1 * var(--bs-modal-padding)) calc(-1 * var(--bs-modal-padding)) var(--bs-modal-padding);
+      }
+
+      .Markdown {
+        p:last-child {
+          margin-bottom: 0;
+        }
+      }
+    }
+  }
+}

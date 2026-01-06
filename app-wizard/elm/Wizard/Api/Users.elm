@@ -10,6 +10,7 @@ module Wizard.Api.Users exposing
     , postUserPublic
     , putCurrentUserLocale
     , putCurrentUserSubmissionProps
+    , putLastSeenNewsId
     , putUser
     , putUserActivation
     , putUserPassword
@@ -140,3 +141,8 @@ putCurrentUserSubmissionProps appState body =
 deleteUser : AppState -> String -> ToMsg () msg -> Cmd msg
 deleteUser appState uuid =
     Request.delete (AppState.toServerInfo appState) ("/users/" ++ uuid)
+
+
+putLastSeenNewsId : AppState -> String -> ToMsg () msg -> Cmd msg
+putLastSeenNewsId appState lastSeenNewsId =
+    Request.putEmpty (AppState.toServerInfo appState) ("/users/current/news/" ++ lastSeenNewsId)

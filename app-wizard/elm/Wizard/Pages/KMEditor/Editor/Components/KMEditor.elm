@@ -2373,11 +2373,29 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                                                     ]
                                                                 , Html.nothing
                                                                 )
+
+                                                tooltipText =
+                                                    if model.lastCopiedString == Just responseData.body then
+                                                        gettext "Copied!" appState.locale
+
+                                                    else
+                                                        gettext "Copy response" appState.locale
                                             in
                                             div []
-                                                [ strong [ class "me-2" ] [ text (gettext "Response" appState.locale) ]
-                                                , statusBadge
-                                                , contentTypeBadge
+                                                [ div [ class "d-flex align-items-center justify-content-between" ]
+                                                    [ div []
+                                                        [ strong [ class "me-2" ] [ text (gettext "Response" appState.locale) ]
+                                                        , statusBadge
+                                                        , contentTypeBadge
+                                                        ]
+                                                    , span
+                                                        (class "btn btn-link"
+                                                            :: onClick (wrapMsg (CopyString responseData.body))
+                                                            :: onMouseLeave (wrapMsg ClearLastCopiedString)
+                                                            :: tooltipLeft tooltipText
+                                                        )
+                                                        [ faCopy ]
+                                                    ]
                                                 , div [ class "mt-2 response-code" ] [ responseBody ]
                                                 , responseFlash
                                                 ]

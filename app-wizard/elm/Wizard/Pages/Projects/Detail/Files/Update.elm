@@ -10,9 +10,9 @@ import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireFile exposing (QuestionnaireFile)
-import Wizard.Api.QuestionnaireFiles as QuestionnaireFilesApi
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectFile exposing (ProjectFile)
+import Wizard.Api.ProjectFiles as ProjectFilesApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -28,28 +28,28 @@ fetchData =
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Uuid -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update msg wrapMsg appState questionnaireUuid model =
+update msg wrapMsg appState projectUuid model =
     case msg of
         ListingMsg listingMsg ->
-            handleListingMsg wrapMsg appState listingMsg questionnaireUuid model
+            handleListingMsg wrapMsg appState listingMsg projectUuid model
 
         DownloadFile file ->
             ( model
             , Cmd.map (wrapMsg << FileDownloaderMsg)
-                (FileDownloader.fetchFile (AppState.toServerInfo appState) (QuestionnaireFilesApi.fileUrl file.questionnaire.uuid file.uuid))
+                (FileDownloader.fetchFile (AppState.toServerInfo appState) (ProjectFilesApi.fileUrl file.project.uuid file.uuid))
             )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
         ShowHideDeleteFile file ->
-            ( { model | questionnaireFileToBeDeleted = file, deletingQuestionnaireFile = ActionResult.Unset }, Cmd.none )
+            ( { model | projectFileToBeDeleted = file, deletingProjectFile = ActionResult.Unset }, Cmd.none )
 
         DeleteFileConfirm ->
-            case model.questionnaireFileToBeDeleted of
+            case model.projectFileToBeDeleted of
                 Just file ->
-                    ( { model | deletingQuestionnaireFile = ActionResult.Loading }
-                    , QuestionnaireFilesApi.deleteFile appState file.questionnaire.uuid file.uuid (wrapMsg << DeleteFileCompleted)
+                    ( { model | deletingProjectFile = ActionResult.Loading }
+                    , ProjectFilesApi.delete appState file.project.uuid file.uuid (wrapMsg << DeleteFileCompleted)
                     )
 
                 Nothing ->
@@ -58,31 +58,31 @@ update msg wrapMsg appState questionnaireUuid model =
         DeleteFileCompleted result ->
             case result of
                 Ok _ ->
-                    ( { model | questionnaireFileToBeDeleted = Nothing, deletingQuestionnaireFile = ActionResult.Unset }
+                    ( { model | projectFileToBeDeleted = Nothing, deletingProjectFile = ActionResult.Unset }
                     , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
                     )
 
                 Err error ->
-                    ( { model | deletingQuestionnaireFile = ApiError.toActionResult appState (gettext "File could not be deleted." appState.locale) error }
+                    ( { model | deletingProjectFile = ApiError.toActionResult appState (gettext "File could not be deleted." appState.locale) error }
                     , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
 
-handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg QuestionnaireFile -> Uuid -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleListingMsg wrapMsg appState listingMsg questionnaireUuid model =
+handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg ProjectFile -> Uuid -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleListingMsg wrapMsg appState listingMsg projectUuid model =
     let
         ( questionnaireFiles, cmd ) =
-            Listing.update (listingUpdateConfig wrapMsg appState questionnaireUuid) appState listingMsg model.questionnaireFiles
+            Listing.update (listingUpdateConfig wrapMsg appState projectUuid) appState listingMsg model.projectFiles
     in
-    ( { model | questionnaireFiles = questionnaireFiles }
+    ( { model | projectFiles = questionnaireFiles }
     , cmd
     )
 
 
-listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Uuid -> Listing.UpdateConfig QuestionnaireFile
-listingUpdateConfig wrapMsg appState questionnaireUuid =
-    { getRequest = QuestionnairesApi.getFiles appState questionnaireUuid
+listingUpdateConfig : (Msg -> Wizard.Msgs.Msg) -> AppState -> Uuid -> Listing.UpdateConfig ProjectFile
+listingUpdateConfig wrapMsg appState projectUuid =
+    { getRequest = ProjectsApi.getFiles appState projectUuid
     , getError = gettext "Unable to get project files." appState.locale
     , wrapMsg = wrapMsg << ListingMsg
-    , toRoute = Routes.projectsDetailFilesWithFilters questionnaireUuid
+    , toRoute = Routes.projectsDetailFilesWithFilters projectUuid
     }

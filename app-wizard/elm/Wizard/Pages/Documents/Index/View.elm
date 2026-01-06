@@ -26,7 +26,7 @@ import String.Format as String
 import Time.Distance as TimeDistance
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)
 import Wizard.Api.Models.Submission.SubmissionState as SubmissionState
 import Wizard.Api.Models.User as User
@@ -47,36 +47,36 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 view : AppState -> Model -> Html Msg
 view appState model =
     let
-        questionnaireActionResult =
-            case model.questionnaire of
-                Just questionnaire ->
-                    ActionResult.map Just questionnaire
+        projectActionResult =
+            case model.project of
+                Just project ->
+                    ActionResult.map Just project
 
                 Nothing ->
                     Success Nothing
     in
-    Page.actionResultView appState (viewDocuments appState model) questionnaireActionResult
+    Page.actionResultView appState (viewDocuments appState model) projectActionResult
 
 
-viewDocuments : AppState -> Model -> Maybe QuestionnaireCommon -> Html Msg
-viewDocuments appState model mbQuestionnaire =
+viewDocuments : AppState -> Model -> Maybe ProjectCommon -> Html Msg
+viewDocuments appState model mbProject =
     let
-        questionnaireFilterView questionnaire =
-            div [ class "listing-toolbar-extra questionnaire-filter" ]
-                [ linkTo (Routes.projectsDetail questionnaire.uuid)
-                    [ class "questionnaire-name" ]
-                    [ text questionnaire.name ]
+        projectFilterView project =
+            div [ class "listing-toolbar-extra project-filter" ]
+                [ linkTo (Routes.projectsDetail project.uuid)
+                    [ class "project-name" ]
+                    [ text project.name ]
                 , linkTo Routes.documentsIndex
                     [ class "text-danger" ]
                     [ faRemove ]
                 ]
 
-        mbQuestionnaireFilterView =
-            Maybe.map questionnaireFilterView mbQuestionnaire
+        mbProjectFilterView =
+            Maybe.map projectFilterView mbProject
     in
     div [ listClass "Documents__Index" ]
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsDocuments) (gettext "Project Documents" appState.locale)
-        , Listing.view appState (listingConfig appState model mbQuestionnaireFilterView) model.documents
+        , Listing.view appState (listingConfig appState model mbProjectFilterView) model.documents
         , deleteModal appState model
         , submitModal appState model
         , documentErrorModal appState model
@@ -119,7 +119,7 @@ listingConfig appState model mbQuestionnaireFilterView =
         , ( "createdAt", gettext "Created" appState.locale )
         ]
     , filters = []
-    , toRoute = \_ -> Routes.DocumentsRoute << IndexRoute model.questionnaireUuid
+    , toRoute = \_ -> Routes.DocumentsRoute << IndexRoute model.projectUuid
     , toolbarExtra = mbQuestionnaireFilterView
     }
 
@@ -147,13 +147,13 @@ listingTitle appState document =
 listingDescription : Document -> Html Msg
 listingDescription document =
     let
-        questionnaireLink =
-            case document.questionnaire of
-                Just questionnaire ->
+        projectLink =
+            case document.project of
+                Just project ->
                     span [ class "fragment" ]
-                        [ linkTo (Routes.projectsDetail questionnaire.uuid)
+                        [ linkTo (Routes.projectsDetail project.uuid)
                             []
-                            [ text questionnaire.name ]
+                            [ text project.name ]
                         ]
 
                 Nothing ->
@@ -185,7 +185,7 @@ listingDescription document =
     span []
         [ formatFragment
         , fileSizeFragment
-        , questionnaireLink
+        , projectLink
         , documentTemplateLink
         ]
 

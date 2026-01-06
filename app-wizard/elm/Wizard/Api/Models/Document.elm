@@ -11,7 +11,7 @@ import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document.DocumentState as DocumentState exposing (DocumentState)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
-import Wizard.Api.Models.QuestionnaireInfo as QuestionnaireInfo exposing (QuestionnaireInfo)
+import Wizard.Api.Models.ProjectInfo as ProjectInfo exposing (ProjectInfo)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)
 import Wizard.Data.AppState exposing (AppState)
 
@@ -20,9 +20,9 @@ type alias Document =
     { uuid : Uuid
     , name : String
     , createdAt : Time.Posix
-    , questionnaire : Maybe QuestionnaireInfo
-    , questionnaireEventUuid : Maybe Uuid
-    , questionnaireVersion : Maybe String
+    , project : Maybe ProjectInfo
+    , projectEventUuid : Maybe Uuid
+    , projectVersion : Maybe String
     , documentTemplateId : String
     , documentTemplateName : String
     , format : Maybe DocumentTemplateFormat
@@ -47,9 +47,9 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "createdAt" D.datetime
-        |> D.optional "questionnaire" (D.maybe QuestionnaireInfo.decoder) Nothing
-        |> D.required "questionnaireEventUuid" (D.maybe Uuid.decoder)
-        |> D.required "questionnaireVersion" (D.maybe D.string)
+        |> D.optional "project" (D.maybe ProjectInfo.decoder) Nothing
+        |> D.required "projectEventUuid" (D.maybe Uuid.decoder)
+        |> D.required "projectVersion" (D.maybe D.string)
         |> D.required "documentTemplateId" D.string
         |> D.required "documentTemplateName" D.string
         |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)

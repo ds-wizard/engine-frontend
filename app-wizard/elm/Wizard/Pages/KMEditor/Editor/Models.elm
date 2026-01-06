@@ -19,7 +19,7 @@ import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 import Wizard.Api.Models.KnowledgeModelSecret exposing (KnowledgeModelSecret)
 import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
-import Wizard.Api.Models.WebSockets.KnowledgeModelEditorAction.SetContentKnowledgeModelEditorAction exposing (SetContentKnowledgeModelEditorAction)
+import Wizard.Api.Models.WebSockets.KnowledgeModelEditorMessage.SetContentKnowledgeModelEditorMessage exposing (SetContentKnowledgeModelEditorMessage)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor as KMEditor
@@ -51,7 +51,7 @@ type alias Model =
     , kmSecrets : ActionResult (List KnowledgeModelSecret)
     , publishModalModel : PublishModal.Model
     , eventsLastEvent : Dict String Event
-    , eventsWebsocketDebounce : Dict String (Debounce SetContentKnowledgeModelEditorAction)
+    , eventsWebsocketDebounce : Dict String (Debounce SetContentKnowledgeModelEditorMessage)
     , warningsDebounce : Debounce ()
     }
 

@@ -1,0 +1,19 @@
+@import '../../../variables';
+
+.ProjectVersionViewModal {
+    .modal-dialog {
+        max-width: 100%;
+        width: 100%;
+        margin: 0 2rem;
+
+        .modal-header {
+            background-color: $gray-200;
+            border-bottom: 1px solid $gray-400;
+            padding: .5rem 1rem;
+
+            .badge {
+                margin-left: 0.5rem;
+            }
+        }
+    }
+}

@@ -7,8 +7,8 @@ import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, div, span, text)
 import Html.Attributes exposing (class)
-import Wizard.Api.Models.QuestionnaireAction exposing (QuestionnaireAction)
-import Wizard.Api.Models.QuestionnaireImporter exposing (QuestionnaireImporter)
+import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
+import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
@@ -29,7 +29,7 @@ view appState model =
         ]
 
 
-listingConfig : AppState -> ViewConfig QuestionnaireAction Msg
+listingConfig : AppState -> ViewConfig ProjectAction Msg
 listingConfig appState =
     { title = listingTitle appState
     , description = listingDescription
@@ -50,7 +50,7 @@ listingConfig appState =
     }
 
 
-listingTitle : AppState -> QuestionnaireImporter -> Html Msg
+listingTitle : AppState -> ProjectImporter -> Html Msg
 listingTitle appState questionnaireImporter =
     span []
         [ text questionnaireImporter.name
@@ -58,7 +58,7 @@ listingTitle appState questionnaireImporter =
         ]
 
 
-listingTitleBadge : AppState -> QuestionnaireImporter -> Html Msg
+listingTitleBadge : AppState -> ProjectImporter -> Html Msg
 listingTitleBadge appState questionnaireImporter =
     if questionnaireImporter.enabled then
         Badge.success [] [ text (gettext "enabled" appState.locale) ]
@@ -67,14 +67,14 @@ listingTitleBadge appState questionnaireImporter =
         Badge.danger [] [ text (gettext "disabled" appState.locale) ]
 
 
-listingDescription : QuestionnaireImporter -> Html Msg
+listingDescription : ProjectImporter -> Html Msg
 listingDescription questionnaireImporter =
     span []
         [ span [ class "fragment" ] [ text questionnaireImporter.description ]
         ]
 
 
-listingActions : AppState -> QuestionnaireImporter -> List (ListingDropdownItem Msg)
+listingActions : AppState -> ProjectImporter -> List (ListingDropdownItem Msg)
 listingActions appState questionnaireImporter =
     let
         ( actionIcon, actionLabel ) =

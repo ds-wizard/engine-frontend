@@ -8,7 +8,7 @@ import Html exposing (Html, br, div, h2, p, strong, text)
 import Html.Attributes exposing (class)
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.Project exposing (Project)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
@@ -16,10 +16,10 @@ import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
 
 
-view : AppState -> ActionResult (List Questionnaire) -> Html msg
-view appState questionnaires =
+view : AppState -> ActionResult (List Project) -> Html msg
+view appState projects =
     WidgetHelpers.widget <|
-        case questionnaires of
+        case projects of
             Unset ->
                 []
 
@@ -29,36 +29,36 @@ view appState questionnaires =
             Error error ->
                 [ WidgetHelpers.widgetError error ]
 
-            Success questionnaireList ->
-                if List.isEmpty questionnaireList then
+            Success projectList ->
+                if List.isEmpty projectList then
                     viewRecentProjectsEmpty appState
 
                 else
-                    viewRecentProjects appState questionnaireList
+                    viewRecentProjects appState projectList
 
 
-viewRecentProjects : AppState -> List Questionnaire -> List (Html msg)
-viewRecentProjects appState questionnaires =
+viewRecentProjects : AppState -> List Project -> List (Html msg)
+viewRecentProjects appState projects =
     [ div [ class "RecentProjectsWidget d-flex flex-column h-100" ]
         [ h2 [ class "fs-4 fw-bold mb-4" ] [ text (gettext "Recent Projects" appState.locale) ]
-        , div [ class "Dashboard__ItemList flex-grow-1" ] (List.map (viewProject appState) questionnaires)
+        , div [ class "Dashboard__ItemList flex-grow-1" ] (List.map (viewProject appState) projects)
         , div [ class "mt-4" ]
             [ linkTo (Routes.projectsIndex appState) [] [ text (gettext "View all" appState.locale) ] ]
         ]
     ]
 
 
-viewProject : AppState -> Questionnaire -> Html msg
-viewProject appState questionnaire =
+viewProject : AppState -> Project -> Html msg
+viewProject appState project =
     let
         updatedText =
-            inWordsWithConfig { withAffix = True } (locale appState.locale) questionnaire.updatedAt appState.currentTime
+            inWordsWithConfig { withAffix = True } (locale appState.locale) project.updatedAt appState.currentTime
     in
-    linkTo (Routes.projectsDetail questionnaire.uuid)
+    linkTo (Routes.projectsDetail project.uuid)
         [ class "p-2 py-3 d-flex rounded-3" ]
-        [ ItemIcon.view { text = questionnaire.name, image = Nothing }
+        [ ItemIcon.view { text = project.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]
-            [ strong [] [ text questionnaire.name ]
+            [ strong [] [ text project.name ]
             , div [ class "d-flex align-items-center" ]
                 [ div [ class "flex-grow-1 text-lighter fst-italic" ] [ text (String.format (gettext "Updated %s" appState.locale) [ updatedText ]) ]
                 ]

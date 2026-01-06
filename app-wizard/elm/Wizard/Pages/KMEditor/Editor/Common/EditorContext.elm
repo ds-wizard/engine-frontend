@@ -97,7 +97,7 @@ import Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing (ResourceCol
 import Wizard.Api.Models.KnowledgeModel.ResourcePage exposing (ResourcePage)
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
-import Wizard.Api.Models.QuestionnaireDetail.Reply exposing (Reply)
+import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes
@@ -955,19 +955,19 @@ applyEvent local event originalEditorContext =
             applyDelete event editorContext
 
         MoveQuestionEvent moveData ->
-            applyMove KnowledgeModel.moveQuestion KnowledgeModel.getQuestion event moveData editorContext
+            applyMove local KnowledgeModel.moveQuestion KnowledgeModel.getQuestion event moveData editorContext
 
         MoveAnswerEvent moveData ->
-            applyMove KnowledgeModel.moveAnswer KnowledgeModel.getAnswer event moveData editorContext
+            applyMove local KnowledgeModel.moveAnswer KnowledgeModel.getAnswer event moveData editorContext
 
         MoveChoiceEvent moveData ->
-            applyMove KnowledgeModel.moveChoice KnowledgeModel.getChoice event moveData editorContext
+            applyMove local KnowledgeModel.moveChoice KnowledgeModel.getChoice event moveData editorContext
 
         MoveReferenceEvent moveData ->
-            applyMove KnowledgeModel.moveReference KnowledgeModel.getReference event moveData editorContext
+            applyMove local KnowledgeModel.moveReference KnowledgeModel.getReference event moveData editorContext
 
         MoveExpertEvent moveData ->
-            applyMove KnowledgeModel.moveExpert KnowledgeModel.getExpert event moveData editorContext
+            applyMove local KnowledgeModel.moveExpert KnowledgeModel.getExpert event moveData editorContext
 
 
 applyAdd : Bool -> (a -> String -> KnowledgeModel -> KnowledgeModel) -> a -> Event -> EditorContext -> EditorContext
@@ -1010,15 +1010,23 @@ applyDelete { entityUuid } editorContext =
         |> updateActiveEditor
 
 
-applyMove : (a -> String -> String -> KnowledgeModel -> KnowledgeModel) -> (String -> KnowledgeModel -> Maybe a) -> Event -> MoveEventData -> EditorContext -> EditorContext
-applyMove updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorContext =
+applyMove : Bool -> (a -> String -> String -> KnowledgeModel -> KnowledgeModel) -> (String -> KnowledgeModel -> Maybe a) -> Event -> MoveEventData -> EditorContext -> EditorContext
+applyMove local updateKm getEntity { entityUuid, parentUuid } { targetUuid } editorContext =
     case getEntity entityUuid editorContext.kmEditor.knowledgeModel of
         Just entity ->
+            let
+                setActiveEditorIfLocal =
+                    if local then
+                        setActiveEditor (Just entityUuid)
+
+                    else
+                        identity
+            in
             editorContext
                 |> setKnowledgeModel (updateKm entity parentUuid targetUuid editorContext.kmEditor.knowledgeModel)
                 |> setParent entityUuid targetUuid
                 |> setEdited entityUuid
-                |> setActiveEditor (Just entityUuid)
+                |> setActiveEditorIfLocal
 
         Nothing ->
             editorContext

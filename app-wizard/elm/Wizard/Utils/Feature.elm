@@ -38,6 +38,7 @@ module Wizard.Utils.Feature exposing
     , localeImport
     , localeSetDefault
     , localeView
+    , newsModal
     , projectActions
     , projectCancelMigration
     , projectClone
@@ -94,15 +95,15 @@ import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
 import Wizard.Api.Models.KnowledgeModelEditor as KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
-import Wizard.Api.Models.Questionnaire as Questionnaire exposing (Questionnaire)
-import Wizard.Api.Models.Questionnaire.QuestionnaireCreation as QuestionnaireCreation
-import Wizard.Api.Models.Questionnaire.QuestionnaireState as QuestionnaireState
-import Wizard.Api.Models.QuestionnaireDetail.Comment as Comment exposing (Comment)
-import Wizard.Api.Models.QuestionnaireDetail.CommentThread as CommentThread exposing (CommentThread)
+import Wizard.Api.Models.Project as Project exposing (Project)
+import Wizard.Api.Models.Project.ProjectCreation as ProjectCreation
+import Wizard.Api.Models.Project.ProjectState as ProjectState
+import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
+import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Perm as Perm
 import Wizard.Data.Session as Session
-import Wizard.Utils.QuestionnaireUtils as QuestionnaireUtils exposing (QuestionnaireLike)
+import Wizard.Utils.ProjectUtils as ProjectUtils exposing (ProjectLike)
 
 
 
@@ -244,86 +245,95 @@ documentTemplatesDelete =
 
 
 
+-- News
+
+
+newsModal : AppState -> Bool
+newsModal appState =
+    isAdmin appState || isDataSteward appState
+
+
+
 -- Projects
 
 
 projectsView : AppState -> Bool
 projectsView =
-    adminOr Perm.questionnaire
+    adminOr Perm.project
 
 
 projectsCreateCustom : AppState -> Bool
 projectsCreateCustom appState =
     let
         canCreateCustomProjects =
-            QuestionnaireCreation.customEnabled appState.config.questionnaire.questionnaireCreation
+            ProjectCreation.customEnabled appState.config.project.projectCreation
 
         canCreateProjectTemplates =
-            adminOr Perm.questionnaireTemplate appState
+            adminOr Perm.projectTemplate appState
 
         canCreateAnonymousProjects =
-            appState.config.questionnaire.questionnaireSharing.anonymousEnabled
+            appState.config.project.projectSharing.anonymousEnabled
     in
-    (canCreateAnonymousProjects || adminOr Perm.questionnaire appState) && (canCreateCustomProjects || canCreateProjectTemplates)
+    (canCreateAnonymousProjects || adminOr Perm.project appState) && (canCreateCustomProjects || canCreateProjectTemplates)
 
 
 projectsCreateFromTemplate : AppState -> Bool
 projectsCreateFromTemplate appState =
     let
         canCreateFromTemplates =
-            QuestionnaireCreation.fromTemplateEnabled appState.config.questionnaire.questionnaireCreation
+            ProjectCreation.fromTemplateEnabled appState.config.project.projectCreation
     in
-    adminOr Perm.questionnaire appState && canCreateFromTemplates
+    adminOr Perm.project appState && canCreateFromTemplates
 
 
 projectTemplatesCreate : AppState -> Bool
 projectTemplatesCreate =
-    adminOr Perm.questionnaireTemplate
+    adminOr Perm.projectTemplate
 
 
-projectOpen : AppState -> Questionnaire -> Bool
-projectOpen _ questionnaire =
-    questionnaire.state /= QuestionnaireState.Migrating
+projectOpen : AppState -> Project -> Bool
+projectOpen _ project =
+    project.state /= ProjectState.Migrating
 
 
-projectCreateFromTemplate : AppState -> Questionnaire -> Bool
-projectCreateFromTemplate appState questionnaire =
-    projectsCreateFromTemplate appState && questionnaire.isTemplate && questionnaire.state /= QuestionnaireState.Migrating
+projectCreateFromTemplate : AppState -> Project -> Bool
+projectCreateFromTemplate appState project =
+    projectsCreateFromTemplate appState && project.isTemplate && project.state /= ProjectState.Migrating
 
 
-projectClone : AppState -> Questionnaire -> Bool
-projectClone _ questionnaire =
-    questionnaire.state /= QuestionnaireState.Migrating
+projectClone : AppState -> Project -> Bool
+projectClone _ project =
+    project.state /= ProjectState.Migrating
 
 
-projectCreateMigration : AppState -> Questionnaire -> Bool
-projectCreateMigration appState questionnaire =
-    Questionnaire.isEditable appState questionnaire && questionnaire.state /= QuestionnaireState.Migrating
+projectCreateMigration : AppState -> Project -> Bool
+projectCreateMigration appState project =
+    Project.isEditable appState project && project.state /= ProjectState.Migrating
 
 
-projectContinueMigration : AppState -> Questionnaire -> Bool
-projectContinueMigration appState questionnaire =
-    Questionnaire.isEditable appState questionnaire && questionnaire.state == QuestionnaireState.Migrating
+projectContinueMigration : AppState -> Project -> Bool
+projectContinueMigration appState project =
+    Project.isEditable appState project && project.state == ProjectState.Migrating
 
 
-projectCancelMigration : AppState -> Questionnaire -> Bool
-projectCancelMigration appState questionnaire =
-    Questionnaire.isEditable appState questionnaire && questionnaire.state == QuestionnaireState.Migrating
+projectCancelMigration : AppState -> Project -> Bool
+projectCancelMigration appState project =
+    Project.isEditable appState project && project.state == ProjectState.Migrating
 
 
-projectDelete : AppState -> Questionnaire -> Bool
-projectDelete appState questionnaire =
-    Questionnaire.isOwner appState questionnaire
+projectDelete : AppState -> Project -> Bool
+projectDelete appState project =
+    Project.isOwner appState project
 
 
 projectTagging : AppState -> Bool
 projectTagging appState =
-    appState.config.questionnaire.projectTagging.enabled
+    appState.config.project.projectTagging.enabled
 
 
 projectMetrics : AppState -> Bool
 projectMetrics appState =
-    appState.config.questionnaire.summaryReport.enabled
+    appState.config.project.summaryReport.enabled
 
 
 projectPreview : AppState -> Bool
@@ -336,69 +346,69 @@ projectDocumentsView _ =
     True
 
 
-projectSearch : AppState -> QuestionnaireLike q -> Bool
-projectSearch _ questionnaire =
-    not (QuestionnaireUtils.isMigrating questionnaire)
+projectSearch : AppState -> ProjectLike q -> Bool
+projectSearch _ project =
+    not (ProjectUtils.isMigrating project)
 
 
-projectTodos : AppState -> QuestionnaireLike q -> Bool
-projectTodos appState questionnaire =
-    QuestionnaireUtils.isEditor appState questionnaire && not (QuestionnaireUtils.isMigrating questionnaire)
+projectTodos : AppState -> ProjectLike q -> Bool
+projectTodos appState project =
+    ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
 
 
-projectVersionHistory : AppState -> QuestionnaireLike q -> Bool
-projectVersionHistory appState questionnaire =
-    QuestionnaireUtils.isEditor appState questionnaire && not (QuestionnaireUtils.isMigrating questionnaire)
+projectVersionHistory : AppState -> ProjectLike q -> Bool
+projectVersionHistory appState project =
+    ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
 
 
-projectSettings : AppState -> QuestionnaireLike q -> Bool
-projectSettings appState questionnaire =
-    QuestionnaireUtils.isOwner appState questionnaire
+projectSettings : AppState -> ProjectLike q -> Bool
+projectSettings appState project =
+    ProjectUtils.isOwner appState project
 
 
-projectCommentAdd : AppState -> QuestionnaireLike q -> Bool
-projectCommentAdd appState questionnaire =
-    QuestionnaireUtils.canComment appState questionnaire
+projectCommentAdd : AppState -> ProjectLike q -> Bool
+projectCommentAdd appState project =
+    ProjectUtils.canComment appState project
 
 
-projectCommentEdit : AppState -> QuestionnaireLike q -> CommentThread -> Comment -> Bool
-projectCommentEdit appState questionnaire commentThread comment =
-    QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
+projectCommentEdit : AppState -> ProjectLike q -> CommentThread -> Comment -> Bool
+projectCommentEdit appState project commentThread comment =
+    ProjectUtils.canComment appState project && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
-projectCommentDelete : AppState -> QuestionnaireLike q -> CommentThread -> Comment -> Bool
-projectCommentDelete appState questionnaire commentThread comment =
-    QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved && Comment.isAuthor appState.config.user comment
+projectCommentDelete : AppState -> ProjectLike q -> CommentThread -> Comment -> Bool
+projectCommentDelete appState project commentThread comment =
+    ProjectUtils.canComment appState project && not commentThread.resolved && Comment.isAuthor appState.config.user comment
 
 
-projectCommentThreadResolve : AppState -> QuestionnaireLike q -> CommentThread -> Bool
-projectCommentThreadResolve appState questionnaire commentThread =
-    QuestionnaireUtils.canComment appState questionnaire && not commentThread.resolved
+projectCommentThreadResolve : AppState -> ProjectLike q -> CommentThread -> Bool
+projectCommentThreadResolve appState project commentThread =
+    ProjectUtils.canComment appState project && not commentThread.resolved
 
 
-projectCommentThreadAssign : AppState -> QuestionnaireLike q -> CommentThread -> Bool
-projectCommentThreadAssign appState questionnaire commentThread =
-    Session.exists appState.session && QuestionnaireUtils.canComment appState questionnaire && not (CommentThread.isAssigned commentThread)
+projectCommentThreadAssign : AppState -> ProjectLike q -> CommentThread -> Bool
+projectCommentThreadAssign appState project commentThread =
+    Session.exists appState.session && ProjectUtils.canComment appState project && not (CommentThread.isAssigned commentThread)
 
 
-projectCommentThreadRemoveAssign : AppState -> QuestionnaireLike q -> CommentThread -> Bool
-projectCommentThreadRemoveAssign appState questionnaire commentThread =
-    QuestionnaireUtils.canComment appState questionnaire && CommentThread.isAssigned commentThread
+projectCommentThreadRemoveAssign : AppState -> ProjectLike q -> CommentThread -> Bool
+projectCommentThreadRemoveAssign appState project commentThread =
+    ProjectUtils.canComment appState project && CommentThread.isAssigned commentThread
 
 
-projectCommentThreadReopen : AppState -> QuestionnaireLike q -> CommentThread -> Bool
-projectCommentThreadReopen appState questionnaire commentThread =
-    QuestionnaireUtils.canComment appState questionnaire && commentThread.resolved
+projectCommentThreadReopen : AppState -> ProjectLike q -> CommentThread -> Bool
+projectCommentThreadReopen appState project commentThread =
+    ProjectUtils.canComment appState project && commentThread.resolved
 
 
-projectCommentThreadDelete : AppState -> QuestionnaireLike q -> CommentThread -> Bool
-projectCommentThreadDelete appState questionnaire commentThread =
-    QuestionnaireUtils.canComment appState questionnaire && CommentThread.isAuthor appState.config.user commentThread
+projectCommentThreadDelete : AppState -> ProjectLike q -> CommentThread -> Bool
+projectCommentThreadDelete appState project commentThread =
+    ProjectUtils.canComment appState project && CommentThread.isAuthor appState.config.user commentThread
 
 
-projectCommentPrivate : AppState -> QuestionnaireLike q -> Bool
-projectCommentPrivate appState questionnaire =
-    QuestionnaireUtils.isEditor appState questionnaire
+projectCommentPrivate : AppState -> ProjectLike q -> Bool
+projectCommentPrivate appState project =
+    ProjectUtils.isEditor appState project
 
 
 
@@ -407,7 +417,7 @@ projectCommentPrivate appState questionnaire =
 
 projectFiles : AppState -> Bool
 projectFiles =
-    adminOr Perm.questionnaireFile
+    adminOr Perm.projectFile
 
 
 
@@ -416,7 +426,7 @@ projectFiles =
 
 projectActions : AppState -> Bool
 projectActions =
-    adminOr Perm.questionnaireAction
+    adminOr Perm.projectAction
 
 
 
@@ -425,7 +435,7 @@ projectActions =
 
 projectImporters : AppState -> Bool
 projectImporters =
-    adminOr Perm.questionnaireImporter
+    adminOr Perm.projectImporter
 
 
 

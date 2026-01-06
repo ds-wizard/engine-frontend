@@ -24,8 +24,8 @@ import Uuid
 import Version
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Member as Member
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Models.Questionnaire.QuestionnaireState exposing (QuestionnaireState(..))
+import Wizard.Api.Models.Project exposing (Project)
+import Wizard.Api.Models.Project.ProjectState exposing (ProjectState(..))
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.Msgs as ListingMsgs
@@ -39,7 +39,7 @@ import Wizard.Pages.Projects.Common.CloneProjectModal.Msgs as CloneProjectModalM
 import Wizard.Pages.Projects.Common.CloneProjectModal.View as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModalMsg
 import Wizard.Pages.Projects.Common.DeleteProjectModal.View as DeleteProjectModal
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor as QuestionnaireDescriptor
+import Wizard.Pages.Projects.Common.ProjectDescriptor as ProjectDescriptor
 import Wizard.Pages.Projects.Common.View exposing (visibilityIcon)
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
@@ -84,7 +84,7 @@ createButton appState =
         [ text (gettext "Create" appState.locale) ]
 
 
-listingConfig : AppState -> Model -> ViewConfig Questionnaire Msg
+listingConfig : AppState -> Model -> ViewConfig Project Msg
 listingConfig appState model =
     let
         templateFilter =
@@ -520,29 +520,29 @@ filterBadge items =
             Badge.dark [ class "rounded-pill" ] [ text ("+" ++ String.fromInt (n - 1)) ]
 
 
-listingTitle : AppState -> Questionnaire -> Html Msg
-listingTitle appState questionnaire =
+listingTitle : AppState -> Project -> Html Msg
+listingTitle appState project =
     let
         linkRoute =
-            if questionnaire.state == Migrating then
+            if project.state == Migrating then
                 Routes.projectsMigration
 
             else
                 Routes.projectsDetail
     in
     span []
-        [ linkTo (linkRoute questionnaire.uuid) [] [ text questionnaire.name ]
-        , templateBadge appState questionnaire
-        , visibilityIcon appState questionnaire
-        , stateBadge appState questionnaire
+        [ linkTo (linkRoute project.uuid) [] [ text project.name ]
+        , templateBadge appState project
+        , visibilityIcon appState project
+        , stateBadge appState project
         ]
 
 
-listingDescription : AppState -> Questionnaire -> Html Msg
-listingDescription appState questionnaire =
+listingDescription : AppState -> Project -> Html Msg
+listingDescription appState project =
     let
         collaborators =
-            case questionnaire.permissions of
+            case project.permissions of
                 [] ->
                     Html.nothing
 
@@ -572,45 +572,45 @@ listingDescription appState questionnaire =
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
-                Wizard.Pages.KnowledgeModels.Routes.DetailRoute questionnaire.knowledgeModelPackage.id
+                Wizard.Pages.KnowledgeModels.Routes.DetailRoute project.knowledgeModelPackage.id
 
         kmLink =
             linkTo kmRoute
                 [ title <| gettext "Knowledge Model" appState.locale, class "fragment" ]
-                [ text questionnaire.knowledgeModelPackage.name
-                , Badge.light [ class "ms-1" ] [ text <| Version.toString questionnaire.knowledgeModelPackage.version ]
+                [ text project.knowledgeModelPackage.name
+                , Badge.light [ class "ms-1" ] [ text <| Version.toString project.knowledgeModelPackage.version ]
                 ]
     in
     span []
         [ collaborators, kmLink ]
 
 
-listingActions : AppState -> Questionnaire -> List (ListingDropdownItem Msg)
-listingActions appState questionnaire =
+listingActions : AppState -> Project -> List (ListingDropdownItem Msg)
+listingActions appState project =
     let
         openProject =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faOpen
                 , label = gettext "Open project" appState.locale
-                , msg = ListingActionLink (Routes.projectsDetail questionnaire.uuid)
+                , msg = ListingActionLink (Routes.projectsDetail project.uuid)
                 , dataCy = "open"
                 }
 
         openProjectVisible =
-            Features.projectOpen appState questionnaire
+            Features.projectOpen appState project
 
         createProjectFromTemplate =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faQuestionnaireListCreateProjectFromTemplate
                 , label = gettext "Create project from this template" appState.locale
-                , msg = ListingActionLink (Routes.projectsCreateFromProjectTemplate questionnaire.uuid)
+                , msg = ListingActionLink (Routes.projectsCreateFromProjectTemplate project.uuid)
                 , dataCy = "create-project-from-template"
                 }
 
         createProjectFromTemplateVisible =
-            Features.projectCreateFromTemplate appState questionnaire
+            Features.projectCreateFromTemplate appState project
 
         clone =
             ListingDropdown.dropdownAction
@@ -618,52 +618,52 @@ listingActions appState questionnaire =
                 , icon = faQuestionnaireListClone
                 , label = gettext "Clone" appState.locale
                 , msg =
-                    QuestionnaireDescriptor.fromQuestionnaire questionnaire
+                    ProjectDescriptor.fromProject project
                         |> Just
-                        |> CloneProjectModalMsg.ShowHideCloneQuestionnaire
+                        |> CloneProjectModalMsg.ShowHideCloneProject
                         |> CloneQuestionnaireModalMsg
                         |> ListingActionMsg
                 , dataCy = "clone"
                 }
 
         cloneVisible =
-            Features.projectClone appState questionnaire
+            Features.projectClone appState project
 
         createMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faQuestionnaireListCreateMigration
                 , label = gettext "Create migration" appState.locale
-                , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute questionnaire.uuid)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute project.uuid)
                 , dataCy = "create-migration"
                 }
 
         createMigrationVisible =
-            Features.projectCreateMigration appState questionnaire
+            Features.projectCreateMigration appState project
 
         continueMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faQuestionnaireListCreateMigration
                 , label = gettext "Continue migration" appState.locale
-                , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute questionnaire.uuid)
+                , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute project.uuid)
                 , dataCy = "continue-migration"
                 }
 
         continueMigrationVisible =
-            Features.projectContinueMigration appState questionnaire
+            Features.projectContinueMigration appState project
 
         cancelMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
                 , icon = faCancel
                 , label = gettext "Cancel migration" appState.locale
-                , msg = ListingActionMsg (DeleteQuestionnaireMigration questionnaire.uuid)
+                , msg = ListingActionMsg (DeleteQuestionnaireMigration project.uuid)
                 , dataCy = "cancel-migration"
                 }
 
         cancelMigrationVisible =
-            Features.projectCancelMigration appState questionnaire
+            Features.projectCancelMigration appState project
 
         delete =
             ListingDropdown.dropdownAction
@@ -671,16 +671,16 @@ listingActions appState questionnaire =
                 , icon = faDelete
                 , label = gettext "Delete" appState.locale
                 , msg =
-                    QuestionnaireDescriptor.fromQuestionnaire questionnaire
+                    ProjectDescriptor.fromProject project
                         |> Just
-                        |> DeleteProjectModalMsg.ShowHideDeleteQuestionnaire
+                        |> DeleteProjectModalMsg.ShowHideDeleteProject
                         |> DeleteQuestionnaireModalMsg
                         |> ListingActionMsg
                 , dataCy = "delete"
                 }
 
         deleteVisible =
-            Features.projectDelete appState questionnaire
+            Features.projectDelete appState project
 
         groups =
             [ [ ( openProject, openProjectVisible ) ]
@@ -696,18 +696,18 @@ listingActions appState questionnaire =
     ListingDropdown.itemsFromGroups groups
 
 
-stateBadge : AppState -> Questionnaire -> Html msg
-stateBadge appState questionnaire =
-    case questionnaire.state of
+stateBadge : AppState -> Project -> Html msg
+stateBadge appState project =
+    case project.state of
         Migrating ->
-            linkTo (Routes.projectsMigration questionnaire.uuid)
+            linkTo (Routes.projectsMigration project.uuid)
                 [ class Badge.infoClass, dataCy "badge_project_migrating" ]
                 [ faQuestionnaireListCreateMigration
                 , text (gettext "migrating" appState.locale)
                 ]
 
         Outdated ->
-            linkTo (Routes.projectsCreateMigration questionnaire.uuid)
+            linkTo (Routes.projectsCreateMigration project.uuid)
                 [ class Badge.warningClass, dataCy "badge_project_update-available" ]
                 [ text (gettext "update available" appState.locale) ]
 
@@ -715,9 +715,9 @@ stateBadge appState questionnaire =
             Html.nothing
 
 
-templateBadge : AppState -> Questionnaire -> Html msg
-templateBadge appState questionnaire =
-    if questionnaire.isTemplate then
+templateBadge : AppState -> Project -> Html msg
+templateBadge appState project =
+    if project.isTemplate then
         Badge.info [] [ text (gettext "Template" appState.locale) ]
 
     else

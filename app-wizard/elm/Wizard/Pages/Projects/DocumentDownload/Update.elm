@@ -35,7 +35,7 @@ update appState msg model =
                         redirectCmd =
                             case ( Session.exists appState.session, err ) of
                                 ( False, ApiError.BadStatus 403 _ ) ->
-                                    Routes.projectDocumentDownload model.questionnaireUuid model.fileUuid
+                                    Routes.projectDocumentDownload model.projectUuid model.fileUuid
                                         |> toUrl
                                         |> Just
                                         |> Routes.publicLogin

@@ -1,5 +1,5 @@
 module Wizard.Pages.Projects.Common.View exposing
-    ( QuestionnaireLike
+    ( ProjectLike
     , shareIcon
     , shareTooltipHtml
     , visibilityIcon
@@ -13,40 +13,40 @@ import Html.Attributes exposing (class)
 import String.Format as String
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
-import Wizard.Api.Models.Questionnaire.QuestionnaireSharing exposing (QuestionnaireSharing(..))
-import Wizard.Api.Models.Questionnaire.QuestionnaireVisibility as QuestionnaireVisibility exposing (QuestionnaireVisibility(..))
+import Wizard.Api.Models.Project.ProjectSharing exposing (ProjectSharing(..))
+import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility(..))
 import Wizard.Data.AppState exposing (AppState)
 
 
-visibilityIcon : AppState -> QuestionnaireLike q -> Html msg
-visibilityIcon appState questionnaire =
-    span (tooltipCustom "with-tooltip-wide with-tooltip-right" <| shareTooltipString appState questionnaire)
-        [ shareIcon questionnaire ]
+visibilityIcon : AppState -> ProjectLike p -> Html msg
+visibilityIcon appState project =
+    span (tooltipCustom "with-tooltip-wide with-tooltip-right" <| shareTooltipString appState project)
+        [ shareIcon project ]
 
 
-shareIcon : QuestionnaireLike q -> Html msg
-shareIcon questionnaire =
-    if isPublic questionnaire then
+shareIcon : ProjectLike p -> Html msg
+shareIcon project =
+    if isPublic project then
         faProjectSharingPublic
 
-    else if isPrivate questionnaire then
+    else if isPrivate project then
         faProjectSharingPrivate
 
     else
         faProjectSharingInternal
 
 
-shareTooltipHtml : AppState -> QuestionnaireLike q -> List (Html msg)
-shareTooltipHtml appState questionnaire =
-    if isPublic questionnaire then
+shareTooltipHtml : AppState -> ProjectLike p -> List (Html msg)
+shareTooltipHtml appState project =
+    if isPublic project then
         [ small [ class "d-block fw-bold" ] [ text <| gettext "Public link" appState.locale ]
         , small [] [ text <| gettext "Anyone with the link can access the project. No login is required." appState.locale ]
         ]
 
-    else if isPrivate questionnaire then
+    else if isPrivate project then
         [ small [] [ text <| gettext "Private project accessible only by you." appState.locale ] ]
 
-    else if questionnaire.visibility /= QuestionnaireVisibility.PrivateQuestionnaire then
+    else if project.visibility /= ProjectVisibility.Private then
         [ small [ class "d-block fw-bold" ] [ text <| gettext "Visible by all other logged-in users" appState.locale ]
         , small [] [ text <| gettext "Other logged-in users can access the project. No explicit permission is required." appState.locale ]
         ]
@@ -54,7 +54,7 @@ shareTooltipHtml appState questionnaire =
     else
         let
             ( userCount, userGroupCount ) =
-                memberCounts questionnaire
+                memberCounts project
         in
         if userCount > 0 && userGroupCount > 0 then
             [ small [] <|
@@ -83,21 +83,21 @@ shareTooltipHtml appState questionnaire =
             ]
 
 
-shareTooltipString : AppState -> QuestionnaireLike q -> String
-shareTooltipString appState questionnaire =
-    if isPublic questionnaire then
+shareTooltipString : AppState -> ProjectLike p -> String
+shareTooltipString appState project =
+    if isPublic project then
         gettext "Anyone with the link can access the project." appState.locale
 
-    else if isPrivate questionnaire then
+    else if isPrivate project then
         gettext "Private project accessible only by you." appState.locale
 
-    else if questionnaire.visibility /= QuestionnaireVisibility.PrivateQuestionnaire then
+    else if project.visibility /= ProjectVisibility.Private then
         gettext "Other logged-in users can access the project." appState.locale
 
     else
         let
             ( userCount, userGroupCount ) =
-                memberCounts questionnaire
+                memberCounts project
         in
         if userCount > 0 && userGroupCount > 0 then
             String.format (gettext "Shared with %s and %s." appState.locale)
@@ -114,21 +114,21 @@ shareTooltipString appState questionnaire =
                 [ String.fromInt userCount ]
 
 
-type alias QuestionnaireLike q =
-    { q
+type alias ProjectLike p =
+    { p
         | permissions : List Permission
-        , sharing : QuestionnaireSharing
-        , visibility : QuestionnaireVisibility
+        , sharing : ProjectSharing
+        , visibility : ProjectVisibility
     }
 
 
-isPrivate : QuestionnaireLike q -> Bool
-isPrivate questionnaire =
-    if questionnaire.sharing /= RestrictedQuestionnaire || questionnaire.visibility /= PrivateQuestionnaire then
+isPrivate : ProjectLike p -> Bool
+isPrivate project =
+    if project.sharing /= Restricted || project.visibility /= Private then
         False
 
     else
-        case questionnaire.permissions of
+        case project.permissions of
             perm :: [] ->
                 Member.isUserMember perm.member
 
@@ -136,14 +136,14 @@ isPrivate questionnaire =
                 False
 
 
-isPublic : QuestionnaireLike q -> Bool
-isPublic questionnaire =
-    questionnaire.sharing /= RestrictedQuestionnaire
+isPublic : ProjectLike p -> Bool
+isPublic project =
+    project.sharing /= Restricted
 
 
-memberCounts : QuestionnaireLike q -> ( Int, Int )
-memberCounts questionnaire =
-    questionnaire.permissions
+memberCounts : ProjectLike p -> ( Int, Int )
+memberCounts project =
+    project.permissions
         |> List.map .member
         |> List.partition Member.isUserMember
         |> Tuple.mapBoth List.length List.length

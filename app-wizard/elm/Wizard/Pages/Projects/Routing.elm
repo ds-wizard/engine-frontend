@@ -80,13 +80,13 @@ parsers wrapRoute =
 
 
 detailDocumentsRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
-detailDocumentsRoute wrapRoute questionnaireUuid =
-    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Documents) (Just "createdAt,desc")
+detailDocumentsRoute wrapRoute projectUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute projectUuid << ProjectDetailRoute.Documents) (Just "createdAt,desc")
 
 
 detailFilesRoute : (Route -> a) -> Uuid -> Maybe Int -> Maybe String -> Maybe String -> a
-detailFilesRoute wrapRoute questionnaireUuid =
-    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute questionnaireUuid << ProjectDetailRoute.Files) (Just "createdAt,desc")
+detailFilesRoute wrapRoute projectUuid =
+    PaginationQueryString.wrapRoute (wrapRoute << DetailRoute projectUuid << ProjectDetailRoute.Files) (Just "createdAt,desc")
 
 
 toUrl : Route -> List String
@@ -181,4 +181,4 @@ isAllowed route appState =
             True
 
         _ ->
-            Perm.hasPerm appState.config.user Perm.questionnaire
+            Perm.hasPerm appState.config.user Perm.project

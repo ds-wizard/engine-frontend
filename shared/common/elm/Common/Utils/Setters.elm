@@ -21,6 +21,8 @@ module Common.Utils.Setters exposing
     , setLocale
     , setMigration
     , setPlans
+    , setProject
+    , setProjectUuid
     , setProjects
     , setPublic
     , setPulling
@@ -162,9 +164,19 @@ setPlans value record =
     { record | plans = value }
 
 
+setProject : v -> { a | project : v } -> { a | project : v }
+setProject value record =
+    { record | project = value }
+
+
 setProjects : v -> { a | projects : v } -> { a | projects : v }
 setProjects value record =
     { record | projects = value }
+
+
+setProjectUuid : v -> { a | projectUuid : v } -> { a | projectUuid : v }
+setProjectUuid value record =
+    { record | projectUuid = value }
 
 
 setPublic : v -> { a | public : v } -> { a | public : v }

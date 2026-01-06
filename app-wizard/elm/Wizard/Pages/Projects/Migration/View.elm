@@ -13,7 +13,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Question as Question
-import Wizard.Api.Models.QuestionnaireMigration as QuestionnaireMigration exposing (QuestionnaireMigration)
+import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.DiffQuestionnaireRenderer as DiffQuestionnaireRenderer
@@ -26,10 +26,10 @@ import Wizard.Routes as Routes
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (contentView appState model) model.questionnaireMigration
+    Page.actionResultView appState (contentView appState model) model.projectMigration
 
 
-contentView : AppState -> Model -> QuestionnaireMigration -> Html Msg
+contentView : AppState -> Model -> ProjectMigration -> Html Msg
 contentView appState model migration =
     let
         finalizeAction =
@@ -79,18 +79,18 @@ contentView appState model migration =
         ]
 
 
-migrationInfo : AppState -> QuestionnaireMigration -> Html Msg
+migrationInfo : AppState -> ProjectMigration -> Html Msg
 migrationInfo appState migration =
     div [ class "migration-info" ]
-        [ strong [] [ text migration.newQuestionnaire.name ]
+        [ strong [] [ text migration.newProject.name ]
         , table []
             [ tr []
                 [ th [] [ text (gettext "Source knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.oldQuestionnaire.knowledgeModelPackageId ]
+                , td [] [ packageInfo migration.oldProject.knowledgeModelPackageId ]
                 ]
             , tr []
                 [ th [] [ text (gettext "Target knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.newQuestionnaire.knowledgeModelPackageId ]
+                , td [] [ packageInfo migration.newProject.knowledgeModelPackageId ]
                 ]
             ]
         ]
@@ -105,7 +105,7 @@ packageInfo kmPackageId =
         ]
 
 
-changeView : AppState -> Model -> QuestionnaireMigration -> Html Msg
+changeView : AppState -> Model -> ProjectMigration -> Html Msg
 changeView appState model migration =
     let
         resolvedCount =
@@ -148,7 +148,7 @@ changeView appState model migration =
         ]
 
 
-questionnaireView : AppState -> Model -> QuestionnaireMigration -> Html Msg
+questionnaireView : AppState -> Model -> ProjectMigration -> Html Msg
 questionnaireView appState model migration =
     case model.questionnaireModel of
         Just questionnaireModel ->
@@ -161,7 +161,7 @@ questionnaireView appState model migration =
                     , toolbarEnabled = False
                     , questionLinksEnabled = False
                     }
-                , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newQuestionnaire.knowledgeModel model.selectedChange
+                , renderer = DiffQuestionnaireRenderer.create appState migration model.changes migration.newProject.knowledgeModel model.selectedChange
                 , wrapMsg = QuestionnaireMsg
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
@@ -176,13 +176,13 @@ questionnaireView appState model migration =
             Html.nothing
 
 
-viewChanges : AppState -> Model -> QuestionnaireMigration -> Html Msg
+viewChanges : AppState -> Model -> ProjectMigration -> Html Msg
 viewChanges appState model migration =
     div [ class "list-group" ]
         (List.map (viewChange appState model migration) <| List.sortBy (Bool.toInt << isQuestionChangeResolved migration) model.changes.questions)
 
 
-viewChange : AppState -> Model -> QuestionnaireMigration -> QuestionChange -> Html Msg
+viewChange : AppState -> Model -> ProjectMigration -> QuestionChange -> Html Msg
 viewChange appState model migration change =
     let
         ( eventLabel, question ) =
@@ -219,8 +219,8 @@ viewChange appState model migration change =
         ]
 
 
-allResolved : Model -> QuestionnaireMigration -> Bool
+allResolved : Model -> ProjectMigration -> Bool
 allResolved model migration =
     model.changes.questions
-        |> List.map (QuestionChange.getQuestionUuid >> flip QuestionnaireMigration.isQuestionResolved migration)
+        |> List.map (QuestionChange.getQuestionUuid >> flip ProjectMigration.isQuestionResolved migration)
         |> List.all ((==) True)

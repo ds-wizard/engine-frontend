@@ -13,9 +13,9 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         ( visible, name ) =
-            case model.questionnaireToBeDeleted of
-                Just questionnaire ->
-                    ( True, questionnaire.name )
+            case model.projectToBeDeleted of
+                Just project ->
+                    ( True, project.name )
 
                 Nothing ->
                     ( False, "" )
@@ -32,9 +32,9 @@ view appState model =
             Modal.confirmConfig (gettext "Delete Project" appState.locale)
                 |> Modal.confirmConfigContent modalContent
                 |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingQuestionnaire
-                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteQuestionnaire
-                |> Modal.confirmConfigCancelMsg (ShowHideDeleteQuestionnaire Nothing)
+                |> Modal.confirmConfigActionResult model.deletingProject
+                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteProject
+                |> Modal.confirmConfigCancelMsg (ShowHideDeleteProject Nothing)
                 |> Modal.confirmConfigDangerous True
                 |> Modal.confirmConfigDataCy "project-delete"
     in

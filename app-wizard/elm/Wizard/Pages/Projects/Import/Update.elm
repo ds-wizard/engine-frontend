@@ -9,10 +9,10 @@ import Random exposing (Seed)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent as QuestionnaireEvent
-import Wizard.Api.Models.QuestionnaireDetail.QuestionnaireEvent.SetReplyData as SetReplyData
-import Wizard.Api.QuestionnaireImporters as QuestionnaireImportersApi
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent
+import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData as SetReplyData
+import Wizard.Api.ProjectImporters as ProjectsImportersApi
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.Importer as Importer
 import Wizard.Data.AppState exposing (AppState)
@@ -27,8 +27,8 @@ import Wizard.Routing exposing (cmdNavigate)
 fetchData : AppState -> Uuid -> String -> Cmd Msg
 fetchData appState uuid importerId =
     Cmd.batch
-        [ QuestionnairesApi.getQuestionnaireQuestionnaire appState uuid GetQuestionnaireComplete
-        , QuestionnaireImportersApi.getQuestionnaireImporter appState importerId GetQuestionnaireImporterComplete
+        [ ProjectsApi.getQuestionnaire appState uuid GetQuestionnaireComplete
+        , ProjectsImportersApi.get appState importerId GetQuestionnaireImporterComplete
         ]
 
 
@@ -123,7 +123,7 @@ update wrapMsg msg appState model =
 
                         updateQuestionnaire event qm =
                             case event of
-                                QuestionnaireEvent.SetReply setReplyData ->
+                                ProjectEvent.SetReply setReplyData ->
                                     qm
                                         |> Questionnaire.addEvent event
                                         |> Questionnaire.setReply setReplyData.path (SetReplyData.toReply setReplyData)
@@ -172,7 +172,7 @@ update wrapMsg msg appState model =
                 Just importResult ->
                     withSeed
                         ( { model | importing = Loading }
-                        , Cmd.map wrapMsg <| QuestionnairesApi.putQuestionnaireContent appState model.uuid importResult.questionnaireEvents PutImporterDataComplete
+                        , Cmd.map wrapMsg <| ProjectsApi.putContent appState model.uuid importResult.questionnaireEvents PutImporterDataComplete
                         )
 
                 Nothing ->

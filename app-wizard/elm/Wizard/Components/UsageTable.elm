@@ -21,7 +21,7 @@ view appState showSoftLimits usage =
             , viewUsageRowSimple appState showSoftLimits (gettext "Knowledge Models" appState.locale) usage.knowledgeModels
             , viewUsageRowSimple appState showSoftLimits (gettext "Document Template Editors" appState.locale) usage.documentTemplateDrafts
             , viewUsageRowSimple appState showSoftLimits (gettext "Document Templates" appState.locale) usage.documentTemplates
-            , viewUsageRowSimple appState showSoftLimits (gettext "Projects" appState.locale) usage.questionnaires
+            , viewUsageRowSimple appState showSoftLimits (gettext "Projects" appState.locale) usage.projects
             , viewUsageRowSimple appState showSoftLimits (gettext "Documents" appState.locale) usage.documents
             , viewUsageRowSimple appState showSoftLimits (gettext "Locales" appState.locale) usage.locales
             , viewUsageRowBytes appState showSoftLimits (gettext "Storage" appState.locale) usage.storage

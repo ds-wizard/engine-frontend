@@ -18,7 +18,7 @@ import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import String.Format as String
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Components.ActionResultView as ActionResultView
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Components.Html exposing (linkTo)
@@ -31,7 +31,7 @@ import Wizard.Pages.Projects.Common.View exposing (shareIcon, shareTooltipHtml)
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Pages.Projects.Detail.Components.Preview as Preview
 import Wizard.Pages.Projects.Detail.Components.ProjectSaving as ProjectSaving
-import Wizard.Pages.Projects.Detail.Components.QuestionnaireVersionViewModal as QuestionnaireVersionViewModal
+import Wizard.Pages.Projects.Detail.Components.ProjectVersionViewModal as ProjectVersionViewModal
 import Wizard.Pages.Projects.Detail.Components.RevertModal as RevertModal
 import Wizard.Pages.Projects.Detail.Components.Settings as Settings
 import Wizard.Pages.Projects.Detail.Components.ShareModal as ShareModal
@@ -43,7 +43,7 @@ import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute exp
 import Wizard.Pages.Projects.Routes as PlansRoutes
 import Wizard.Routes
 import Wizard.Utils.Feature as Features
-import Wizard.Utils.QuestionnaireUtils as QuestionnaireUtils
+import Wizard.Utils.ProjectUtils as ProjectUtils
 
 
 view : ProjectDetailRoute -> AppState -> Model -> Html Msg
@@ -92,7 +92,7 @@ viewError appState =
 -- PROJECT
 
 
-viewProject : ProjectDetailRoute -> AppState -> Model -> QuestionnaireCommon -> Html Msg
+viewProject : ProjectDetailRoute -> AppState -> Model -> ProjectCommon -> Html Msg
 viewProject route appState model questionnaire =
     let
         ( migrationWarning, migrationWarningEnabled ) =
@@ -123,11 +123,11 @@ viewProject route appState model questionnaire =
         modalConfig =
             { events =
                 model.questionnaireModel
-                    |> ActionResult.andThen .questionnaireEvents
+                    |> ActionResult.andThen .projectEvents
                     |> ActionResult.withDefault []
             , versions =
                 model.questionnaireModel
-                    |> ActionResult.andThen .questionnaireVersions
+                    |> ActionResult.andThen .projectVersions
                     |> ActionResult.withDefault []
             }
     in
@@ -139,7 +139,7 @@ viewProject route appState model questionnaire =
         , navigation
         , viewProjectContent appState route model questionnaire
         , Html.map ShareModalMsg <| ShareModal.view appState model.shareModalModel
-        , Html.map QuestionnaireVersionViewModalMsg <| QuestionnaireVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
+        , Html.map QuestionnaireVersionViewModalMsg <| ProjectVersionViewModal.view modalConfig appState model.questionnaireVersionViewModalModel
         , Html.map RevertModalMsg <| RevertModal.view appState model.revertModalModel
         , disconnectedModal appState model
         ]
@@ -167,7 +167,7 @@ disconnectedModal appState model =
 -- PROJECT - NAVIGATION
 
 
-viewProjectNavigation : AppState -> ProjectDetailRoute -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigation : AppState -> ProjectDetailRoute -> Model -> ProjectCommon -> Html Msg
 viewProjectNavigation appState route model questionnaire =
     DetailNavigation.container
         [ viewProjectNavigationTitleRow appState model questionnaire
@@ -179,11 +179,11 @@ viewProjectNavigation appState route model questionnaire =
 -- PROJECT - NAVIGATION - TITLE ROW
 
 
-viewProjectNavigationTitleRow : AppState -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigationTitleRow : AppState -> Model -> ProjectCommon -> Html Msg
 viewProjectNavigationTitleRow appState model questionnaire =
     let
         isTooltipLeft =
-            not (QuestionnaireUtils.isAnonymousProject questionnaire && Session.exists appState.session) && not (QuestionnaireUtils.isOwner appState questionnaire)
+            not (ProjectUtils.isAnonymousProject questionnaire && Session.exists appState.session) && not (ProjectUtils.isOwner appState questionnaire)
     in
     DetailNavigation.row
         [ DetailNavigation.section
@@ -198,7 +198,7 @@ viewProjectNavigationTitleRow appState model questionnaire =
         ]
 
 
-templateBadge : AppState -> QuestionnaireCommon -> Html msg
+templateBadge : AppState -> ProjectCommon -> Html msg
 templateBadge appState questionnaire =
     if questionnaire.isTemplate then
         Badge.info [] [ text (gettext "Template" appState.locale) ]
@@ -213,9 +213,9 @@ viewProjectNavigationProjectSaving appState model =
         ProjectSaving.view appState model.projectSavingModel
 
 
-viewProjectNavigationActions : AppState -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigationActions : AppState -> Model -> ProjectCommon -> Html Msg
 viewProjectNavigationActions appState model questionnaire =
-    if QuestionnaireUtils.isAnonymousProject questionnaire && Session.exists appState.session then
+    if ProjectUtils.isAnonymousProject questionnaire && Session.exists appState.session then
         DetailNavigation.sectionActions
             [ ActionResultView.error model.addingToMyProjects
             , ActionButton.buttonCustom
@@ -229,7 +229,7 @@ viewProjectNavigationActions appState model questionnaire =
                 }
             ]
 
-    else if QuestionnaireUtils.isOwner appState questionnaire then
+    else if ProjectUtils.isOwner appState questionnaire then
         DetailNavigation.sectionActions
             [ viewProjectNavigationShareButton appState model questionnaire ]
 
@@ -237,7 +237,7 @@ viewProjectNavigationActions appState model questionnaire =
         Html.nothing
 
 
-viewProjectNavigationShareButton : AppState -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigationShareButton : AppState -> Model -> ProjectCommon -> Html Msg
 viewProjectNavigationShareButton appState model questionnaire =
     div [ class "btn-group", dataTour "project_detail_share" ]
         [ button
@@ -272,7 +272,7 @@ viewProjectNavigationShareButton appState model questionnaire =
 -- PROJECT - NAVIGATION - NAV ROW
 
 
-viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectNavigationNav : AppState -> ProjectDetailRoute -> Model -> ProjectCommon -> Html Msg
 viewProjectNavigationNav appState route model questionnaire =
     let
         projectRoute subroute =
@@ -382,11 +382,11 @@ viewProjectNavigationNav appState route model questionnaire =
 -- PROJECT - CONTENT
 
 
-viewProjectContent : AppState -> ProjectDetailRoute -> Model -> QuestionnaireCommon -> Html Msg
+viewProjectContent : AppState -> ProjectDetailRoute -> Model -> ProjectCommon -> Html Msg
 viewProjectContent appState route model questionnaire =
     let
         isEditable =
-            QuestionnaireUtils.isEditor appState questionnaire
+            ProjectUtils.isEditor appState questionnaire
 
         isAuthenticated =
             Session.exists appState.session
@@ -400,7 +400,7 @@ viewProjectContent appState route model questionnaire =
                 viewContent qm =
                     let
                         isMigrating =
-                            QuestionnaireUtils.isMigrating qm.questionnaire
+                            ProjectUtils.isMigrating qm.questionnaire
                     in
                     Questionnaire.view appState
                         { features =
@@ -444,10 +444,10 @@ viewProjectContent appState route model questionnaire =
 
         ProjectDetailRoute.Documents _ ->
             Documents.view appState
-                { questionnaire = questionnaire
-                , questionnaireEditable = isEditable
+                { project = questionnaire
+                , projectEditable = isEditable
                 , wrapMsg = DocumentsMsg
-                , previewQuestionnaireEventMsg = Just (OpenVersionPreview questionnaire.uuid)
+                , previewProjectEventMsg = Just (OpenVersionPreview questionnaire.uuid)
                 }
                 model.documentsModel
 
@@ -465,7 +465,7 @@ viewProjectContent appState route model questionnaire =
         ProjectDetailRoute.Settings ->
             let
                 isOwner =
-                    QuestionnaireUtils.isOwner appState questionnaire
+                    ProjectUtils.isOwner appState questionnaire
 
                 viewContent questionnaireSettings =
                     Html.map SettingsMsg <|

@@ -6,7 +6,7 @@ import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Debouncer.Extra as Debouncer
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
+import Wizard.Api.Models.Project exposing (Project)
 import Wizard.Components.Listing.Msgs as Listing
 import Wizard.Pages.Projects.Common.CloneProjectModal.Msgs as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModal
@@ -15,9 +15,9 @@ import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModa
 type Msg
     = DeleteQuestionnaireMigration Uuid
     | DeleteQuestionnaireMigrationCompleted (Result ApiError ())
-    | ListingMsg (Listing.Msg Questionnaire)
-    | ListingFilterAddSelectedPackage KnowledgeModelPackageSuggestion (Listing.Msg Questionnaire)
-    | ListingFilterAddSelectedUser UserSuggestion (Listing.Msg Questionnaire)
+    | ListingMsg (Listing.Msg Project)
+    | ListingFilterAddSelectedPackage KnowledgeModelPackageSuggestion (Listing.Msg Project)
+    | ListingFilterAddSelectedUser UserSuggestion (Listing.Msg Project)
     | DeleteQuestionnaireModalMsg DeleteProjectModal.Msg
     | CloneQuestionnaireModalMsg CloneProjectModal.Msg
     | ProjectTagsFilterInput String

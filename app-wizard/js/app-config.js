@@ -4,6 +4,7 @@ module.exports = {
     getDefaultApiUrl,
     getGuideLinks,
     getMaxUploadFileSize,
+    getNewsUrl,
     getUrlCheckerUrl,
     getWebSocketThrottleDelay,
     isAdminEnabled
@@ -27,6 +28,10 @@ function getGuideLinks() {
 
 function getMaxUploadFileSize() {
     return getConfigProp('maxUploadFileSize')
+}
+
+function getNewsUrl() {
+    return getConfigProp('newsUrl', null)
 }
 
 function getUrlCheckerUrl() {

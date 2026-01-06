@@ -21,7 +21,7 @@ moduleRoot =
 
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
-    [ map (indexRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot <?> Query.uuid "questionnaireUuid"))
+    [ map (indexRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot <?> Query.uuid "projectUuid"))
     ]
 
 
@@ -33,11 +33,11 @@ indexRoute wrapRoute documentUuid =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        IndexRoute questionnaireUuid paginationQueryString ->
+        IndexRoute projectUuid paginationQueryString ->
             let
                 queryString =
                     PaginationQueryString.toUrlWith
-                        [ ( "questionnaireUuid", Maybe.unwrap "" Uuid.toString questionnaireUuid )
+                        [ ( "projectUuid", Maybe.unwrap "" Uuid.toString projectUuid )
                         ]
                         paginationQueryString
             in

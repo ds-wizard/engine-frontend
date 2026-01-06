@@ -3,56 +3,56 @@ module Wizard.Pages.Projects.Common.CloneProjectModal.Update exposing (UpdateCon
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Gettext exposing (gettext)
-import Wizard.Api.Models.Questionnaire exposing (Questionnaire)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.Project exposing (Project)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Projects.Common.CloneProjectModal.Models exposing (Model)
 import Wizard.Pages.Projects.Common.CloneProjectModal.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Common.QuestionnaireDescriptor exposing (QuestionnaireDescriptor)
+import Wizard.Pages.Projects.Common.ProjectDescriptor exposing (ProjectDescriptor)
 
 
 type alias UpdateConfig =
     { wrapMsg : Msg -> Wizard.Msgs.Msg
-    , cloneCompleteCmd : Questionnaire -> Cmd Wizard.Msgs.Msg
+    , cloneCompleteCmd : Project -> Cmd Wizard.Msgs.Msg
     }
 
 
 update : UpdateConfig -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update cfg msg appState model =
     case msg of
-        ShowHideCloneQuestionnaire mbQuestionnaire ->
-            handleShowHideDeleteQuestionnaire model mbQuestionnaire
+        ShowHideCloneProject mbProject ->
+            handleShowHideDeleteProject model mbProject
 
-        CloneQuestionnaire ->
-            handleDeleteQuestionnaire cfg appState model
+        CloneProject ->
+            handleDeleteProject cfg appState model
 
-        CloneQuestionnaireCompleted result ->
-            handleDeleteQuestionnaireCompleted cfg appState model result
+        CloneProjectCompleted result ->
+            handleDeleteProjectCompleted cfg appState model result
 
 
 
 -- Handlers
 
 
-handleShowHideDeleteQuestionnaire : Model -> Maybe QuestionnaireDescriptor -> ( Model, Cmd Wizard.Msgs.Msg )
-handleShowHideDeleteQuestionnaire model mbQuestionnaire =
-    ( { model | questionnaireToBeDeleted = mbQuestionnaire, cloningQuestionnaire = Unset }
+handleShowHideDeleteProject : Model -> Maybe ProjectDescriptor -> ( Model, Cmd Wizard.Msgs.Msg )
+handleShowHideDeleteProject model mbProject =
+    ( { model | projectToBeDeleted = mbProject, cloningProject = Unset }
     , Cmd.none
     )
 
 
-handleDeleteQuestionnaire : UpdateConfig -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteQuestionnaire cfg appState model =
-    case model.questionnaireToBeDeleted of
-        Just questionnaire ->
+handleDeleteProject : UpdateConfig -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteProject cfg appState model =
+    case model.projectToBeDeleted of
+        Just project ->
             let
                 newModel =
-                    { model | cloningQuestionnaire = Loading }
+                    { model | cloningProject = Loading }
 
                 cmd =
                     Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.cloneQuestionnaire appState questionnaire.uuid CloneQuestionnaireCompleted
+                        ProjectsApi.clone appState project.uuid CloneProjectCompleted
             in
             ( newModel, cmd )
 
@@ -60,18 +60,18 @@ handleDeleteQuestionnaire cfg appState model =
             ( model, Cmd.none )
 
 
-handleDeleteQuestionnaireCompleted : UpdateConfig -> AppState -> Model -> Result ApiError Questionnaire -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteQuestionnaireCompleted cfg appState model result =
+handleDeleteProjectCompleted : UpdateConfig -> AppState -> Model -> Result ApiError Project -> ( Model, Cmd Wizard.Msgs.Msg )
+handleDeleteProjectCompleted cfg appState model result =
     case result of
-        Ok questionnaire ->
+        Ok project ->
             ( { model
-                | cloningQuestionnaire = Success <| gettext "%s has been created." appState.locale
-                , questionnaireToBeDeleted = Nothing
+                | cloningProject = Success <| gettext "%s has been created." appState.locale
+                , projectToBeDeleted = Nothing
               }
-            , cfg.cloneCompleteCmd questionnaire
+            , cfg.cloneCompleteCmd project
             )
 
         Err error ->
-            ( { model | cloningQuestionnaire = ApiError.toActionResult appState (gettext "Unable to clone project." appState.locale) error }
+            ( { model | cloningProject = ApiError.toActionResult appState (gettext "Unable to clone project." appState.locale) error }
             , Cmd.none
             )

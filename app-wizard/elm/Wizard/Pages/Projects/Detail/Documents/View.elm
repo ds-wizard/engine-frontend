@@ -26,7 +26,7 @@ import Time.Distance as TimeDistance
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
-import Wizard.Api.Models.QuestionnaireCommon exposing (QuestionnaireCommon)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)
 import Wizard.Api.Models.Submission.SubmissionState as SubmissionState
 import Wizard.Api.Models.User as User
@@ -47,10 +47,10 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 type alias ViewConfig msg =
-    { questionnaire : QuestionnaireCommon
-    , questionnaireEditable : Bool
+    { project : ProjectCommon
+    , projectEditable : Bool
     , wrapMsg : Msg -> msg
-    , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
+    , previewProjectEventMsg : Maybe (Uuid -> msg)
     }
 
 
@@ -108,11 +108,11 @@ listingConfig cfg appState =
         , ( "createdAt", gettext "Created" appState.locale )
         ]
     , filters = []
-    , toRoute = \_ -> Routes.ProjectsRoute << DetailRoute cfg.questionnaire.uuid << PlanDetailRoute.Documents
+    , toRoute = \_ -> Routes.ProjectsRoute << DetailRoute cfg.project.uuid << PlanDetailRoute.Documents
     , toolbarExtra =
-        if cfg.questionnaireEditable && Session.exists appState.session then
+        if cfg.projectEditable && Session.exists appState.session then
             Just <|
-                linkTo (Routes.projectsDetailDocumentsNew cfg.questionnaire.uuid Nothing)
+                linkTo (Routes.projectsDetailDocumentsNew cfg.project.uuid Nothing)
                     [ class "btn btn-primary" ]
                     [ text (gettext "New document" appState.locale) ]
 
@@ -166,7 +166,7 @@ listingDescription document =
                     Html.nothing
 
         versionFragment =
-            Maybe.unwrap Html.nothing viewVersion document.questionnaireVersion
+            Maybe.unwrap Html.nothing viewVersion document.projectVersion
     in
     span []
         [ formatFragment
@@ -192,7 +192,7 @@ listingActions appState cfg document =
                 }
 
         submitEnabled =
-            Feature.documentSubmit appState document && cfg.questionnaireEditable
+            Feature.documentSubmit appState document && cfg.projectEditable
 
         submit =
             ListingDropdown.dropdownAction
@@ -204,7 +204,7 @@ listingActions appState cfg document =
                 }
 
         ( viewQuestionnaire, viewQuestionnaireEnabled ) =
-            case ( document.questionnaireEventUuid, cfg.previewQuestionnaireEventMsg ) of
+            case ( document.projectEventUuid, cfg.previewProjectEventMsg ) of
                 ( Just questionnaireEventUuid, Just previewQuestionnaireEventMsg ) ->
                     ( ListingDropdown.dropdownAction
                         { extraClass = Nothing
@@ -232,7 +232,7 @@ listingActions appState cfg document =
                 }
 
         deleteEnabled =
-            cfg.questionnaireEditable && Session.exists appState.session
+            cfg.projectEditable && Session.exists appState.session
 
         delete =
             ListingDropdown.dropdownAction

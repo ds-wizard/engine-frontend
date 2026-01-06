@@ -17,8 +17,8 @@ import Html exposing (Html, p, strong, text)
 import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.QuestionnaireVersion exposing (QuestionnaireVersion)
-import Wizard.Api.Questionnaires as QuestionnairesApi
+import Wizard.Api.Models.ProjectVersion exposing (ProjectVersion)
+import Wizard.Api.Projects as ProjectsApi
 import Wizard.Data.AppState exposing (AppState)
 
 
@@ -27,7 +27,7 @@ import Wizard.Data.AppState exposing (AppState)
 
 
 type alias Model =
-    { mbQuestionnaireVersion : Maybe QuestionnaireVersion
+    { mbQuestionnaireVersion : Maybe ProjectVersion
     , deleteResult : ActionResult ()
     }
 
@@ -39,7 +39,7 @@ init =
     }
 
 
-setVersion : QuestionnaireVersion -> Model -> Model
+setVersion : ProjectVersion -> Model -> Model
 setVersion version model =
     { model
         | mbQuestionnaireVersion = Just version
@@ -59,8 +59,8 @@ type Msg
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , questionnaireUuid : Uuid
-    , deleteVersionCmd : QuestionnaireVersion -> Cmd msg
+    , projectUuid : Uuid
+    , deleteVersionCmd : ProjectVersion -> Cmd msg
     }
 
 
@@ -74,7 +74,7 @@ update cfg appState msg model =
                         | deleteResult = Loading
                       }
                     , Cmd.map cfg.wrapMsg <|
-                        QuestionnairesApi.deleteVersion appState cfg.questionnaireUuid version.uuid DeleteComplete
+                        ProjectsApi.deleteVersion appState cfg.projectUuid version.uuid DeleteComplete
                     )
 
                 Nothing ->

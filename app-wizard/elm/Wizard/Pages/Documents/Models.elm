@@ -19,5 +19,5 @@ initialModel =
 initLocalModel : Route -> Model -> Model
 initLocalModel route model =
     case route of
-        IndexRoute questionnaireUuid paginationQueryString ->
-            { model | indexModel = Wizard.Pages.Documents.Index.Models.initialModel questionnaireUuid paginationQueryString }
+        IndexRoute projectUuid paginationQueryString ->
+            { model | indexModel = Wizard.Pages.Documents.Index.Models.initialModel projectUuid paginationQueryString }
