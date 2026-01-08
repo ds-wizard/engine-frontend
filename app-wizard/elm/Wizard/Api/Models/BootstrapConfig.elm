@@ -6,8 +6,9 @@ module Wizard.Api.Models.BootstrapConfig exposing
     )
 
 import Common.Api.Models.AppSwitcherItem as AppSwitcherItem exposing (AppSwitcherItem)
-import Common.Api.Models.UserInfo as UserInfo exposing (UserInfo)
+import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
+import Json.Decode.Extensions as D
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.BootstrapConfig.Admin as AdminConfig exposing (Admin)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
@@ -17,11 +18,13 @@ import Wizard.Api.Models.BootstrapConfig.FeaturesConfig as FeaturesConfig exposi
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig exposing (LookAndFeelConfig)
 import Wizard.Api.Models.BootstrapConfig.OrganizationConfig as OrganizationConfig exposing (OrganizationConfig)
 import Wizard.Api.Models.BootstrapConfig.OwlConfig as OwlConfig exposing (OwlConfig)
+import Wizard.Api.Models.BootstrapConfig.PluginInfo as PluginInfo exposing (PluginInfo)
 import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Api.Models.BootstrapConfig.ProjectConfig as ProjectConfig exposing (ProjectConfig)
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig exposing (RegistryConfig)
 import Wizard.Api.Models.BootstrapConfig.SignalBridgeConfig as SignalBridgeConfig exposing (SignalBridgeConfig)
 import Wizard.Api.Models.BootstrapConfig.SubmissionConfig as SubmissionConfig exposing (SubmissionConfig)
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig exposing (UserConfig)
 
 
 type alias BootstrapConfig =
@@ -32,6 +35,8 @@ type alias BootstrapConfig =
     , registry : RegistryConfig
     , lookAndFeel : LookAndFeelConfig
     , organization : OrganizationConfig
+    , pluginSettings : Dict String String
+    , plugins : List PluginInfo
     , privacyAndSupport : PrivacyAndSupportConfig
     , project : ProjectConfig
     , submission : SubmissionConfig
@@ -40,7 +45,7 @@ type alias BootstrapConfig =
     , modules : List AppSwitcherItem
     , signalBridge : SignalBridgeConfig
     , tours : List String
-    , user : Maybe UserInfo
+    , user : Maybe UserConfig
     }
 
 
@@ -53,6 +58,8 @@ default =
     , registry = RegistryConfig.default
     , lookAndFeel = LookAndFeelConfig.default
     , organization = OrganizationConfig.default
+    , pluginSettings = Dict.empty
+    , plugins = []
     , privacyAndSupport = PrivacyAndSupportConfig.default
     , project = ProjectConfig.default
     , submission = SubmissionConfig.default
@@ -75,6 +82,8 @@ decoder =
         |> D.required "registry" RegistryConfig.decoder
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "organization" OrganizationConfig.decoder
+        |> D.required "pluginSettings" (D.dict D.valueAsString)
+        |> D.required "plugins" (D.list PluginInfo.decoder)
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
         |> D.required "project" ProjectConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
@@ -83,7 +92,7 @@ decoder =
         |> D.required "modules" (D.list AppSwitcherItem.decoder)
         |> D.required "signalBridge" SignalBridgeConfig.decoder
         |> D.required "tours" (D.list D.string)
-        |> D.required "user" (D.maybe UserInfo.decoder)
+        |> D.required "user" (D.maybe UserConfig.decoder)
 
 
 addTour : String -> BootstrapConfig -> BootstrapConfig

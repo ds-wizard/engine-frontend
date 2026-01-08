@@ -65,7 +65,7 @@ function getLocaleUrl(apiUrl) {
 }
 
 
-function loadApp(config, locale) {
+function loadApp(config, locale, plugins) {
     const flags = {
         seed: Math.floor(Math.random() * 0xFFFFFFFF),
         session: JSON.parse(localStorage.getItem(sessionKey)),
@@ -80,6 +80,7 @@ function loadApp(config, locale) {
         maxUploadFileSize: appConfig.getMaxUploadFileSize(),
         newsUrl: appConfig.getNewsUrl(),
         urlCheckerUrl: appConfig.getUrlCheckerUrl(),
+        plugins: plugins.map(p => initPlugin(config, p))
     }
 
     if (Object.keys(locale).length > 0) {
@@ -127,6 +128,33 @@ function createLocaleRequest() {
     return axios.get(getLocaleUrl(apiUrl), requestConfig)
 }
 
+function initPlugin(config, plugin) {
+    const pluginSettings = (config.pluginSettings && config.pluginSettings[plugin.uuid]) || null
+    const pluginUserSettings = (config.user && config.user.pluginSettings && config.user.pluginSettings[plugin.uuid]) || null
+    return plugin.init(pluginSettings, pluginUserSettings)
+}
+
+async function importPlugin(plugin) {
+    const file = plugin.enabled ? 'plugin.js' : 'manifest.js'
+    const url = plugin.url + file
+    const module = await import(/* webpackIgnore: true */ url)
+    return {
+        uuid: plugin.uuid,
+        init: module.default
+    }
+}
+
+async function loadPlugins(config) {
+    const plugins = config.plugins || []
+    const modules = await Promise.allSettled(plugins.map(importPlugin))
+
+    const loaded = []
+    for (const r of modules) {
+        if (r.status === 'fulfilled') loaded.push(r.value);
+        else console.error('Error loading plugin:', r.reason);
+    }
+    return loaded
+}
 
 window.onload = function () {
     const session = JSON.parse(localStorage.getItem(sessionKey))
@@ -161,7 +189,16 @@ window.onload = function () {
                     document.body.innerHTML = ''
                     const config = results[0].data
                     const locale = results[1].data
-                    loadApp(config, locale)
+
+                    loadPlugins(config)
+                        .then(plugins => {
+                            loadApp(config, locale, plugins)
+                        })
+                        .catch(err => {
+                            console.error("Error loading plugins:", err);
+                            loadApp(config, locale, [])
+                        })
+
                 }
             })
             .catch(function (err) {

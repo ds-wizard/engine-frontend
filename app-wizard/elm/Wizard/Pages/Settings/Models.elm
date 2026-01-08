@@ -7,6 +7,7 @@ import Wizard.Pages.Settings.Features.Models
 import Wizard.Pages.Settings.KnowledgeModels.Models
 import Wizard.Pages.Settings.LookAndFeel.Models
 import Wizard.Pages.Settings.Organization.Models
+import Wizard.Pages.Settings.Plugins.Models
 import Wizard.Pages.Settings.PrivacyAndSupport.Models
 import Wizard.Pages.Settings.Projects.Models
 import Wizard.Pages.Settings.Registry.Models
@@ -20,6 +21,7 @@ type alias Model =
     , authenticationModel : Wizard.Pages.Settings.Authentication.Models.Model
     , privacyAndSupportModel : Wizard.Pages.Settings.PrivacyAndSupport.Models.Model
     , featuresModel : Wizard.Pages.Settings.Features.Models.Model
+    , pluginsModel : Wizard.Pages.Settings.Plugins.Models.Model
     , dashboardModel : Wizard.Pages.Settings.DashboardAndLoginScreen.Models.Model
     , lookAndFeelModel : Wizard.Pages.Settings.LookAndFeel.Models.Model
     , registryModel : Wizard.Pages.Settings.Registry.Models.Model
@@ -36,6 +38,7 @@ initialModel appState =
     , authenticationModel = Wizard.Pages.Settings.Authentication.Models.initialModel appState
     , privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel
     , featuresModel = Wizard.Pages.Settings.Features.Models.initialModel
+    , pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState
     , dashboardModel = Wizard.Pages.Settings.DashboardAndLoginScreen.Models.initialModel
     , lookAndFeelModel = Wizard.Pages.Settings.LookAndFeel.Models.initialModel
     , registryModel = Wizard.Pages.Settings.Registry.Models.initialModel appState
@@ -60,6 +63,9 @@ initLocalModel appState route model =
 
         FeaturesRoute ->
             { model | featuresModel = Wizard.Pages.Settings.Features.Models.initialModel }
+
+        PluginsRoute ->
+            { model | pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState }
 
         DashboardAndLoginScreenRoute ->
             { model | privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel }

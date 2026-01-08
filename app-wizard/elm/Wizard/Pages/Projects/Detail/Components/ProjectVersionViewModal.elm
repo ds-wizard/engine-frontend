@@ -212,6 +212,7 @@ viewContent appState qm =
             { feedbackEnabled = False
             , todosEnabled = False
             , commentsEnabled = False
+            , pluginsEnabled = False
             , readonly = True
             , toolbarEnabled = False
             , questionLinksEnabled = False
@@ -223,6 +224,7 @@ viewContent appState qm =
         , previewQuestionnaireEventMsg = Nothing
         , revertQuestionnaireMsg = Nothing
         , isKmEditor = False
+        , projectCommon = Nothing
         }
         { events = []
         , kmEditorUuid = Nothing

@@ -7,7 +7,6 @@ module Wizard.Pages.Projects.Detail.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError(..))
-import Common.Api.Models.UserInfo as UserInfo
 import Common.Api.Models.WebSockets.WebSocketServerAction as WebSocketServerAction
 import Common.Api.WebSocket as WebSocket
 import Common.Ports.Copy as Ports
@@ -24,6 +23,7 @@ import Random exposing (Seed)
 import Task.Extra as Task
 import Triple
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.ProjectCommon as ProjectCommon
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread
@@ -130,6 +130,9 @@ fetchSubrouteData appState model =
 
                 ProjectDetailRoute.Settings ->
                     ProjectsApi.getSettings appState uuid GetQuestionnaireSettingsCompleted
+
+                ProjectDetailRoute.Plugin _ ->
+                    ProjectsApi.get appState uuid GetQuestionnaireCommonCompleted
 
         _ ->
             Cmd.none
@@ -315,7 +318,7 @@ update wrapMsg msg appState model =
                     appState.currentTime
 
                 createdBy =
-                    Maybe.map UserInfo.toUserSuggestion appState.config.user
+                    Maybe.map UserConfig.toUserSuggestion appState.config.user
 
                 ( newSeed, newModel, newCmd ) =
                     case questionnaireMsg of

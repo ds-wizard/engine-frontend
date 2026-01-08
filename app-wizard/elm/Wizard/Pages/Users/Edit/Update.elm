@@ -8,6 +8,7 @@ import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
+import Wizard.Pages.Users.Edit.Components.PluginSettings as PluginSettings
 import Wizard.Pages.Users.Edit.Components.Profile as Profile
 import Wizard.Pages.Users.Edit.Components.SubmissionSettings as SubmissionSettings
 import Wizard.Pages.Users.Edit.Components.Tours as Tours
@@ -42,6 +43,9 @@ fetchData appState uuidOrCurrent subroute =
 
         UserEditRoute.SubmissionSettings ->
             Cmd.map SubmissionSettingsMsg (SubmissionSettings.fetchData appState)
+
+        UserEditRoute.PluginSettings pluginUuid ->
+            Cmd.map PluginSettingsMsg (PluginSettings.fetchData appState pluginUuid)
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -142,3 +146,15 @@ update msg wrapMsg appState model =
                     SubmissionSettings.update updateConfig appState submissionSettingsMsg model.submissionSettingsModel
             in
             ( { model | submissionSettingsModel = submissionSettingsModel }, submissionSettingsCmd )
+
+        PluginSettingsMsg pluginSettingsMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << PluginSettingsMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( pluginSettingsModel, submissionSettingsCmd ) =
+                    PluginSettings.update updateConfig appState pluginSettingsMsg model.pluginSettingsModel
+            in
+            ( { model | pluginSettingsModel = pluginSettingsModel }, submissionSettingsCmd )

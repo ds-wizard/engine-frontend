@@ -33,11 +33,14 @@ import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
+import Wizard.Components.PluginModal as PluginModal
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
+import Wizard.Pages.Documents.Common.DocumentPluginActions as DocumentPluginActions
 import Wizard.Pages.Documents.Index.Models exposing (Model)
 import Wizard.Pages.Documents.Index.Msgs exposing (Msg(..))
 import Wizard.Pages.Documents.Routes exposing (Route(..))
+import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
@@ -81,6 +84,7 @@ viewDocuments appState model mbProject =
         , submitModal appState model
         , documentErrorModal appState model
         , submissionErrorModal appState model
+        , pluginModal appState model
         ]
 
 
@@ -160,12 +164,7 @@ listingDescription document =
                     Html.nothing
 
         formatFragment =
-            case document.format of
-                Just format ->
-                    span [ class "fragment" ] [ fa format.icon, text format.name ]
-
-                Nothing ->
-                    Html.nothing
+            span [ class "fragment" ] [ fa document.format.icon, text document.format.name ]
 
         fileSizeFragment =
             case document.fileSize of
@@ -229,6 +228,9 @@ listingActions appState document =
                 , dataCy = "view-error"
                 }
 
+        pluginActions =
+            DocumentPluginActions.documentPluginActions appState document PluginModalMsg
+
         deleteEnabled =
             Feature.documentDelete appState document
 
@@ -246,6 +248,7 @@ listingActions appState document =
               , ( submit, submitEnabled )
               , ( viewError, viewErrorEnabled )
               ]
+            , pluginActions
             , [ ( delete, deleteEnabled )
               ]
             ]
@@ -540,3 +543,17 @@ submissionErrorModal appState model =
             }
     in
     Modal.error modalConfig
+
+
+pluginModal : AppState -> Model -> Html Msg
+pluginModal appState model =
+    let
+        pluginModalViewConfig =
+            { attributes =
+                \document ->
+                    [ PluginElement.documentValue document
+                    ]
+            , wrapMsg = PluginModalMsg
+            }
+    in
+    PluginModal.view appState pluginModalViewConfig model.pluginModal

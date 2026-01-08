@@ -19,6 +19,7 @@ import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
 import Wizard.Api.Projects as QuestionnaireApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
+import Wizard.Components.PluginModal as PluginModal
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Documents.Index.Models exposing (Model, addDocumentSubmission)
@@ -87,6 +88,9 @@ update wrapMsg msg appState model =
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
+
+        PluginModalMsg pluginModalMsg ->
+            ( { model | pluginModal = PluginModal.update pluginModalMsg model.pluginModal }, Cmd.none )
 
 
 handleGetQuestionnaireCompleted : AppState -> Model -> Result ApiError ProjectCommon -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -30,8 +30,8 @@ initLocalModel appState route model =
         CreateRoute ->
             { model | createModel = Wizard.Pages.Users.Create.Models.initialModel appState }
 
-        EditRoute uuidOrCurrent _ ->
-            { model | editModel = Wizard.Pages.Users.Edit.Models.initialModel appState uuidOrCurrent }
+        EditRoute uuidOrCurrent userEditRoute ->
+            { model | editModel = Wizard.Pages.Users.Edit.Models.initLocalModel appState userEditRoute uuidOrCurrent model.editModel }
 
         IndexRoute paginationQueryString mbRoute ->
             { model | indexModel = Wizard.Pages.Users.Index.Models.initialModel paginationQueryString mbRoute }

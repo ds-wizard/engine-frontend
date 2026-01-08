@@ -1,10 +1,13 @@
 module Wizard.Api.Tenants exposing
     ( getCurrentConfig
+    , getCurrentPluginSettingsDetail
     , getTenant
     , getTenantUsage
     , getTenants
     , postTenant
     , putCurrentConfig
+    , putCurrentPluginSettings
+    , putCurrentPluginSettingsDetail
     , putTenant
     , putTenantLimits
     )
@@ -14,6 +17,7 @@ import Common.Api.Request as Request exposing (ToMsg)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Dict exposing (Dict)
 import Json.Encode as E
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConfig)
@@ -74,3 +78,22 @@ getTenantUsage appState tenantUuid =
 putTenantLimits : AppState -> Uuid -> E.Value -> ToMsg () msg -> Cmd msg
 putTenantLimits appState tenantUuid body =
     Request.putWhatever (AppState.toServerInfo appState) ("/tenants/" ++ Uuid.toString tenantUuid ++ "/limits") body
+
+
+putCurrentPluginSettings : AppState -> Dict String Bool -> ToMsg () msg -> Cmd msg
+putCurrentPluginSettings appState pluginSettings =
+    let
+        body =
+            E.dict identity E.bool pluginSettings
+    in
+    Request.putWhatever (AppState.toServerInfo appState) "/tenants/current/plugin-settings" body
+
+
+getCurrentPluginSettingsDetail : AppState -> Uuid -> ToMsg String msg -> Cmd msg
+getCurrentPluginSettingsDetail appState pluginUuid =
+    Request.getString (AppState.toServerInfo appState) ("/tenants/current/plugin-settings/" ++ Uuid.toString pluginUuid)
+
+
+putCurrentPluginSettingsDetail : AppState -> Uuid -> String -> ToMsg () msg -> Cmd msg
+putCurrentPluginSettingsDetail appState pluginUuid =
+    Request.putString (AppState.toServerInfo appState) ("/tenants/current/plugin-settings/" ++ Uuid.toString pluginUuid) "application/json"
