@@ -2963,7 +2963,7 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
             if model.commentsViewPrivate then
                 div [ class "alert alert-editor-notes" ]
                     [ i [ class "fa fas fa-lock" ] []
-                    , span [] [ text (gettext "Editor notes are only visible to project Editors and Owners." appState.locale) ]
+                    , span [ class "ms-2" ] [ text (gettext "Editor notes are only visible to project Editors and Owners." appState.locale) ]
                     ]
 
             else
