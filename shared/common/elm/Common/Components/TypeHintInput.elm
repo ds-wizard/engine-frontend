@@ -364,8 +364,10 @@ viewTypeHints cfg model =
 
                     Loading ->
                         div [ class "typehints-loading" ]
-                            [ faSpinner
-                            , text (gettext "Loading..." cfg.locale)
+                            [ div [ class "loader" ]
+                                [ faSpinner
+                                , text (gettext "Loading..." cfg.locale)
+                                ]
                             ]
 
                     Error err ->

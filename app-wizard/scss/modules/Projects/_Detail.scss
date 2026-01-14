@@ -150,16 +150,8 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                 }
 
                 .project-tags-suggestions {
-                    background: #fff;
-                    position: absolute;
-                    width: 100%;
-                    border: 1px solid $gray-400;
-                    @include border-radius($border-radius);
-                    z-index: 10;
-                    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
                     max-height: 200px;
                     overflow: auto;
-                    margin-top: 0;
                 }
             }
 
