@@ -10,6 +10,7 @@ import Bootstrap.Dropdown as Dropdown
 import Common.Components.FontAwesome exposing (faDelete, faDisable, faEnable, faExport, faLocaleDefault, faView)
 import Gettext exposing (gettext)
 import Html exposing (Html)
+import Uuid exposing (Uuid)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Routes as Routes
@@ -18,7 +19,7 @@ import Wizard.Utils.Feature as Feature
 
 type alias LocaleLike a =
     { a
-        | id : String
+        | uuid : Uuid
         , localeId : String
         , organizationId : String
         , defaultLocale : Bool
@@ -49,7 +50,7 @@ actions appState cfg locale =
                 { extraClass = Nothing
                 , icon = faView
                 , label = gettext "View detail" appState.locale
-                , msg = ListingActionLink (Routes.localesDetail locale.id)
+                , msg = ListingActionLink (Routes.localesDetail locale.uuid)
                 , dataCy = "view"
                 }
 

@@ -5,8 +5,10 @@ module Wizard.Pages.Locales.Routing exposing
     )
 
 import Common.Data.PaginationQueryString as PaginationQueryString
-import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
+import Url.Parser exposing ((</>), (<?>), Parser, map, s)
+import Url.Parser.Extensions exposing (uuid)
 import Url.Parser.Query as Query
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Locales.Routes exposing (Route(..))
@@ -26,14 +28,14 @@ parsers appState wrapRoute =
     else
         [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
         , map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "localeId")
-        , map (detail wrapRoute) (s moduleRoot </> string)
+        , map (detail wrapRoute) (s moduleRoot </> uuid)
         , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
         ]
 
 
-detail : (Route -> a) -> String -> a
-detail wrapRoute localeId =
-    DetailRoute localeId |> wrapRoute
+detail : (Route -> a) -> Uuid -> a
+detail wrapRoute localeUuid =
+    DetailRoute localeUuid |> wrapRoute
 
 
 toUrl : Route -> List String
@@ -42,8 +44,8 @@ toUrl route =
         CreateRoute ->
             [ moduleRoot, "create" ]
 
-        DetailRoute localeId ->
-            [ moduleRoot, localeId ]
+        DetailRoute localeUuid ->
+            [ moduleRoot, Uuid.toString localeUuid ]
 
         ImportRoute mbLocaleId ->
             case mbLocaleId of

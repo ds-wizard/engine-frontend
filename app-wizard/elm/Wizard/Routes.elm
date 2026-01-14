@@ -1049,7 +1049,7 @@ localesIndexWithFilters _ pagination =
     LocalesRoute (Wizard.Pages.Locales.Routes.IndexRoute pagination)
 
 
-localesDetail : String -> Route
+localesDetail : Uuid -> Route
 localesDetail =
     LocalesRoute << Wizard.Pages.Locales.Routes.DetailRoute
 

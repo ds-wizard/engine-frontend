@@ -19,8 +19,10 @@ import Common.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import File exposing (File)
 import Http
 import Json.Decode as D
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.Locale as Locale exposing (Locale)
 import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
+import Wizard.Api.Models.LocaleInfo as LocaleInfo exposing (LocaleInfo)
 import Wizard.Api.Models.LocaleSuggestion as LocaleSuggestion exposing (LocaleSuggestion)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
@@ -46,27 +48,27 @@ getLocalesSuggestions appState =
     Request.get (AppState.toServerInfo appState) "/locales/suggestions" decoder
 
 
-getLocale : AppState -> String -> ToMsg LocaleDetail msg -> Cmd msg
-getLocale appState localeId =
-    Request.get (AppState.toServerInfo appState) ("/locales/" ++ localeId) LocaleDetail.decoder
+getLocale : AppState -> Uuid -> ToMsg LocaleDetail msg -> Cmd msg
+getLocale appState localeUuid =
+    Request.get (AppState.toServerInfo appState) ("/locales/" ++ Uuid.toString localeUuid) LocaleDetail.decoder
 
 
-setDefaultLocale : AppState -> { b | id : String, enabled : Bool, defaultLocale : Bool } -> ToMsg () msg -> Cmd msg
+setDefaultLocale : AppState -> { b | uuid : Uuid, enabled : Bool, defaultLocale : Bool } -> ToMsg () msg -> Cmd msg
 setDefaultLocale appState locale =
     let
         body =
             LocaleDetail.encode { locale | defaultLocale = True }
     in
-    Request.putWhatever (AppState.toServerInfo appState) ("/locales/" ++ locale.id) body
+    Request.putWhatever (AppState.toServerInfo appState) ("/locales/" ++ Uuid.toString locale.uuid) body
 
 
-setEnabled : AppState -> { b | id : String, enabled : Bool, defaultLocale : Bool } -> Bool -> ToMsg () msg -> Cmd msg
+setEnabled : AppState -> { b | uuid : Uuid, enabled : Bool, defaultLocale : Bool } -> Bool -> ToMsg () msg -> Cmd msg
 setEnabled appState locale enabled =
     let
         body =
             LocaleDetail.encode { locale | enabled = enabled }
     in
-    Request.putWhatever (AppState.toServerInfo appState) ("/locales/" ++ locale.id) body
+    Request.putWhatever (AppState.toServerInfo appState) ("/locales/" ++ Uuid.toString locale.uuid) body
 
 
 createFromPO : AppState -> List ( String, String ) -> File -> File -> ToMsg () msg -> Cmd msg
@@ -85,14 +87,14 @@ deleteLocale appState organizationId localeId =
     Request.delete (AppState.toServerInfo appState) ("/locales/?organizationId=" ++ organizationId ++ "&localeId=" ++ localeId)
 
 
-deleteLocaleVersion : AppState -> String -> ToMsg () msg -> Cmd msg
-deleteLocaleVersion appState localeId =
-    Request.delete (AppState.toServerInfo appState) ("/locales/" ++ localeId)
+deleteLocaleVersion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
+deleteLocaleVersion appState localeUuid =
+    Request.delete (AppState.toServerInfo appState) ("/locales/" ++ Uuid.toString localeUuid)
 
 
-pullLocale : AppState -> String -> ToMsg () msg -> Cmd msg
+pullLocale : AppState -> String -> ToMsg LocaleInfo msg -> Cmd msg
 pullLocale appState localeId =
-    Request.postEmpty (AppState.toServerInfo appState) ("/locales/" ++ localeId ++ "/pull")
+    Request.postEmptyBody (AppState.toServerInfo appState) ("/locales/" ++ localeId ++ "/pull") LocaleInfo.decoder
 
 
 importLocale : AppState -> File -> ToMsg () msg -> Cmd msg
@@ -100,6 +102,6 @@ importLocale appState file =
     Request.postFile (AppState.toServerInfo appState) "/locales/bundle" file
 
 
-exportLocaleUrl : String -> String
-exportLocaleUrl localeId =
-    "/locales/" ++ localeId ++ "/bundle"
+exportLocaleUrl : Uuid -> String
+exportLocaleUrl localeUuid =
+    "/locales/" ++ Uuid.toString localeUuid ++ "/bundle"

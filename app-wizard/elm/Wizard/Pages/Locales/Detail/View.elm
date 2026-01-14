@@ -10,7 +10,7 @@ import Html exposing (Html, a, code, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import String.Format as String
-import Version
+import Version exposing (Version)
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Api.Models.Locale as Locale
 import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
@@ -158,7 +158,7 @@ sidePanelLocaleInfo appState locale =
                 [ ( gettext "Wizard Version" appState.locale, "dsw-version", text <| Version.toString locale.recommendedAppVersion ) ]
 
         localeInfoList =
-            [ ( gettext "ID" appState.locale, "id", text locale.id )
+            [ ( gettext "ID" appState.locale, "id", text (locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString locale.version) )
             , ( gettext "Language Code" appState.locale, "code", code [] [ text locale.code ] )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString locale.version )
             ]
@@ -175,7 +175,7 @@ sidePanelOtherVersions appState locale =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.localesDetail <| locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.localesDetail locale.uuid)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -225,14 +225,14 @@ sidePanelRegistryLink appState locale =
     Maybe.map toRegistryLinkInfo locale.registryLink
 
 
-deleteVersionModal : AppState -> Model -> { a | id : String } -> Html Msg
+deleteVersionModal : AppState -> Model -> { a | localeId : String, organizationId : String, version : Version } -> Html Msg
 deleteVersionModal appState model locale =
     let
         modalContent =
             [ p []
                 (String.formatHtml
                     (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                    [ strong [] [ text locale.id ] ]
+                    [ strong [] [ text (locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString locale.version) ] ]
                 )
             ]
 

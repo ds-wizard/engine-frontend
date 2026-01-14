@@ -10,6 +10,7 @@ import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setLocale)
 import Gettext exposing (gettext)
+import Uuid exposing (Uuid)
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs
@@ -19,9 +20,9 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : String -> AppState -> Cmd Msg
-fetchData localeId appState =
-    LocalesApi.getLocale appState localeId GetLocaleCompleted
+fetchData : Uuid -> AppState -> Cmd Msg
+fetchData localeUuid appState =
+    LocalesApi.getLocale appState localeUuid GetLocaleCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -76,7 +77,7 @@ update msg wrapMsg appState model =
             ( model, Window.refresh () )
 
         ExportLocale locale ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (LocalesApi.exportLocaleUrl locale.id)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (LocalesApi.exportLocaleUrl locale.uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -87,7 +88,7 @@ handleDeleteVersion wrapMsg appState model =
     case model.locale of
         Success locale ->
             ( { model | deletingVersion = Loading }
-            , Cmd.map wrapMsg <| LocalesApi.deleteLocaleVersion appState locale.id DeleteVersionCompleted
+            , Cmd.map wrapMsg <| LocalesApi.deleteLocaleVersion appState locale.uuid DeleteVersionCompleted
             )
 
         _ ->

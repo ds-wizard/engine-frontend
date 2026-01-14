@@ -13,6 +13,7 @@ import Html.Extra as Html
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
+import Wizard.Api.Models.LocaleInfo exposing (LocaleInfo)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Locales.Import.RegistryImport.Models exposing (Model)
@@ -24,9 +25,9 @@ view : AppState -> Model -> Html Msg
 view appState model =
     let
         content =
-            case model.pulling of
-                Success _ ->
-                    viewImported appState model.localeId
+            case model.locale of
+                Success locale ->
+                    viewImported appState locale
 
                 _ ->
                     viewForm appState model
@@ -38,7 +39,7 @@ view appState model =
 viewForm : AppState -> Model -> Html Msg
 viewForm appState model =
     div []
-        [ FormResult.errorOnlyView model.pulling
+        [ FormResult.errorOnlyView model.locale
         , div [ class "px-4 py-5 bg-light rounded-3" ]
             [ Html.form [ onSubmit Submit, class "input-group" ]
                 [ input
@@ -51,7 +52,7 @@ viewForm appState model =
                     []
                 , ActionButton.submit
                     { label = gettext "Import" appState.locale
-                    , result = model.pulling
+                    , result = model.locale
                     }
                 ]
             , hr [] []
@@ -75,17 +76,17 @@ viewRegistryText appState =
             Html.nothing
 
 
-viewImported : AppState -> String -> Html Msg
-viewImported appState localeId =
+viewImported : AppState -> LocaleInfo -> Html Msg
+viewImported appState locale =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSuccess ]
         , p [ class "lead" ]
             (String.formatHtml
                 (gettext "Locale %s has been imported!" appState.locale)
-                [ code [] [ text localeId ] ]
+                [ code [] [ text locale.name ] ]
             )
         , p [ class "lead" ]
-            [ linkTo (Routes.localesDetail localeId)
+            [ linkTo (Routes.localesDetail locale.uuid)
                 [ class "btn btn-primary" ]
                 [ text (gettext "View detail" appState.locale) ]
             ]

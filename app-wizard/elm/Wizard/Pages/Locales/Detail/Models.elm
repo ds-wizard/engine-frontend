@@ -5,11 +5,12 @@ module Wizard.Pages.Locales.Detail.Models exposing
 
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.LocaleDetail exposing (LocaleDetail)
 
 
 type alias Model =
-    { id : String
+    { uuid : Uuid
     , locale : ActionResult LocaleDetail
     , dropdownState : Dropdown.State
     , deletingVersion : ActionResult String
@@ -17,9 +18,9 @@ type alias Model =
     }
 
 
-initialModel : String -> Model
-initialModel id =
-    { id = id
+initialModel : Uuid -> Model
+initialModel localeUuid =
+    { uuid = localeUuid
     , locale = Loading
     , dropdownState = Dropdown.initialState
     , deletingVersion = Unset
