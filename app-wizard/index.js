@@ -197,8 +197,8 @@ window.onload = function () {
                         .catch(err => {
                             console.error("Error loading plugins:", err);
                             loadApp(config, locale, [])
+                            window.dispatchEvent(new CustomEvent('bootstrapConfigLoad', {detail: config}))
                         })
-
                 }
             })
             .catch(function (err) {
