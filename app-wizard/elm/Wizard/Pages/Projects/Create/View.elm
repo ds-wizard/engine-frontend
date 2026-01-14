@@ -81,8 +81,10 @@ formContentSelectedProjectTemplate : AppState -> Model -> Html Msg
 formContentSelectedProjectTemplate appState model =
     let
         viewProjectTemplate project =
-            div [ class "bg-light px-2 py-1 rounded" ]
-                [ TypeHintInputItem.projectSuggestion project ]
+            div [ class "typehint-input" ]
+                [ div [ class "typehint-input-value form-control bg-light cursor-default" ]
+                    [ TypeHintInputItem.projectSuggestion project ]
+                ]
 
         projectTemplateBlock =
             ActionResultBlock.inlineView
@@ -98,8 +100,10 @@ formContentSelectedKnowledgeModel : AppState -> Model -> Html Msg
 formContentSelectedKnowledgeModel appState model =
     let
         viewKnowledgeModel packageDetail =
-            div [ class "bg-light px-2 py-1 rounded" ]
-                [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageDetail.toPackageSuggestion packageDetail) ]
+            div [ class "typehint-input" ]
+                [ div [ class "typehint-input-value form-control bg-light cursor-default" ]
+                    [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageDetail.toPackageSuggestion packageDetail) ]
+                ]
 
         viewFormContent ( packageDetail, _ ) =
             div []
