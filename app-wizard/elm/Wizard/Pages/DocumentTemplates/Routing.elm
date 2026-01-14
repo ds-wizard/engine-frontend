@@ -34,7 +34,7 @@ toUrl route =
         ImportRoute kmPackageId ->
             case kmPackageId of
                 Just id ->
-                    [ moduleRoot, "import", "?" ++ "documentTemplateId" ++ "=" ++ id ]
+                    [ moduleRoot, "import", "?documentTemplateId=" ++ id ]
 
                 Nothing ->
                     [ moduleRoot, "import" ]

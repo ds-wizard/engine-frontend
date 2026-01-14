@@ -256,7 +256,7 @@ authorizedUrl serverInfo url =
         token =
             case serverInfo.token of
                 Just tokenString ->
-                    "?" ++ "Authorization=Bearer%20" ++ tokenString
+                    "?Authorization=Bearer%20" ++ tokenString
 
                 Nothing ->
                     ""

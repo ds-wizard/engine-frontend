@@ -186,16 +186,16 @@ foldKMRows appState props model phases =
 
 foldChapter : AppState -> Props msg -> Model -> List Phase -> Chapter -> List (Html msg)
 foldChapter appState props model phases chapter =
-    if List.length chapter.questionUuids > 0 then
+    if List.isEmpty chapter.questionUuids then
+        []
+
+    else
         let
             questions =
                 EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
                     KnowledgeModel.getChapterQuestions chapter.uuid props.editorContext.kmEditor.knowledgeModel
         in
         List.foldl (\q rows -> rows ++ foldQuestion appState props model 1 phases q) [ trChapter appState props chapter phases ] questions
-
-    else
-        []
 
 
 foldQuestion : AppState -> Props msg -> Model -> Int -> List Phase -> Question -> List (Html msg)
@@ -244,11 +244,11 @@ foldAnswer appState props model indent phases answer =
             EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
                 KnowledgeModel.getAnswerFollowupQuestions answer.uuid props.editorContext.kmEditor.knowledgeModel
     in
-    if List.length followUps > 0 then
-        List.foldl (\q rows -> rows ++ foldQuestion appState props model (indent + 1) phases q) [ trAnswer appState props answer indent phases ] followUps
+    if List.isEmpty followUps then
+        []
 
     else
-        []
+        List.foldl (\q rows -> rows ++ foldQuestion appState props model (indent + 1) phases q) [ trAnswer appState props answer indent phases ] followUps
 
 
 trQuestion : AppState -> Props msg -> Model -> Int -> List Phase -> Question -> Html msg
@@ -301,7 +301,7 @@ tdQuestionTagCheckbox props model question phase =
                 [ type_ "checkbox"
                 , checked hasPhase
                 , onClick msg
-                , dataCy ("km-editor_phase-editor_row_question-" ++ Question.getUuid question ++ "_" ++ "phase-" ++ phase.uuid)
+                , dataCy ("km-editor_phase-editor_row_question-" ++ Question.getUuid question ++ "_phase-" ++ phase.uuid)
                 ]
                 []
             ]

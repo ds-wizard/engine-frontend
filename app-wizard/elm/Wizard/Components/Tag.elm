@@ -36,11 +36,11 @@ list : AppState -> TagListConfig msg -> List Tag -> Html msg
 list appState config tags =
     let
         content =
-            if List.length tags > 0 then
-                List.map (tagView appState config) (List.sortBy .name tags)
+            if List.isEmpty tags then
+                [ Flash.info <| gettext "There are no question tags configured for the knowledge model." appState.locale ]
 
             else
-                [ Flash.info <| gettext "There are no question tags configured for the knowledge model." appState.locale ]
+                List.map (tagView appState config) (List.sortBy .name tags)
     in
     div [ class "tag-list" ] content
 
@@ -126,7 +126,12 @@ selection appState selectionConfig knowledgeModelResult =
                 tags =
                     KnowledgeModel.getTags knowledgeModel
             in
-            if List.length tags > 0 then
+            if List.isEmpty tags then
+                viewContent <|
+                    Flash.info <|
+                        gettext "No need to choose question tags for this knowledge model." appState.locale
+
+            else
                 viewContent <|
                     div [ class "tag-selection tag-selection-form" ]
                         [ FormExtra.text <| gettext "You can either use all questions from the knowledge model or filter them by question tags." appState.locale
@@ -151,11 +156,6 @@ selection appState selectionConfig knowledgeModelResult =
                         , Html.viewIf (not selectionConfig.useAllQuestions) <|
                             list appState selectionConfig.tagListConfig tags
                         ]
-
-            else
-                viewContent <|
-                    Flash.info <|
-                        gettext "No need to choose question tags for this knowledge model." appState.locale
 
 
 readOnlyList : AppState -> List String -> List Tag -> Html msg

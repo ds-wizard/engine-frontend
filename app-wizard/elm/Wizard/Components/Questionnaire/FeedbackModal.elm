@@ -161,15 +161,12 @@ feedbackModalContent appState model =
         feedbackList =
             case model.feedbacks of
                 Success feedbacks ->
-                    if List.length feedbacks > 0 then
+                    Html.viewIf (not (List.isEmpty feedbacks)) <|
                         div []
                             [ div []
                                 [ text (gettext "There are already some issues reported with this question." appState.locale) ]
                             , ul [] (List.map feedbackIssue feedbacks)
                             ]
-
-                    else
-                        Html.nothing
 
                 _ ->
                     Html.nothing

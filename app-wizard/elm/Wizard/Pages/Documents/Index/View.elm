@@ -410,12 +410,12 @@ submitModal appState model =
                 ]
 
         options submissionServices =
-            if List.length submissionServices > 0 then
-                div [ class "form-radio-group" ]
-                    (List.map viewOption submissionServices)
+            if List.isEmpty submissionServices then
+                Flash.info <| gettext "There are no submission services configured for this type of document." appState.locale
 
             else
-                Flash.info <| gettext "There are no submission services configured for this type of document." appState.locale
+                div [ class "form-radio-group" ]
+                    (List.map viewOption submissionServices)
 
         submissionBody submissionServices =
             div []

@@ -1562,7 +1562,7 @@ localStorageCollapsedItemsCmd : Uuid -> Set String -> Cmd msg
 localStorageCollapsedItemsCmd uuid items =
     LocalStorage.setItem
         (localStorageCollapsedItemKey uuid)
-        (E.list E.string (Set.toList items))
+        (E.set E.string items)
 
 
 localStorageRightPanelCmd : Model -> Cmd msg
@@ -2431,70 +2431,66 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
     let
         phases =
             KnowledgeModel.getPhases model.questionnaire.knowledgeModel
-    in
-    if List.length phases > 0 then
-        let
-            selectedPhaseTitle =
-                List.find ((==) (Maybe.map Uuid.toString model.questionnaire.phaseUuid) << Just << .uuid) phases
-                    |> Maybe.orElse (List.head phases)
-                    |> Maybe.unwrap "" .title
 
-            phaseButtonOnClick =
-                if cfg.features.readonly then
-                    []
+        selectedPhaseTitle =
+            List.find ((==) (Maybe.map Uuid.toString model.questionnaire.phaseUuid) << Just << .uuid) phases
+                |> Maybe.orElse (List.head phases)
+                |> Maybe.unwrap "" .title
 
-                else
-                    [ onClick (PhaseModalUpdate True Nothing) ]
+        phaseButtonOnClick =
+            if cfg.features.readonly then
+                []
 
-            phaseButton =
-                button
-                    ([ class "btn btn-input w-100"
-                     , dataCy "phase-selection"
-                     , disabled cfg.features.readonly
-                     ]
-                        ++ phaseButtonOnClick
-                    )
-                    [ text selectedPhaseTitle ]
+            else
+                [ onClick (PhaseModalUpdate True Nothing) ]
 
-            currentPhaseIndex =
-                ProjectQuestionnaire.getCurrentPhaseIndex model.questionnaire
+        phaseButton =
+            button
+                ([ class "btn btn-input w-100"
+                 , dataCy "phase-selection"
+                 , disabled cfg.features.readonly
+                 ]
+                    ++ phaseButtonOnClick
+                )
+                [ text selectedPhaseTitle ]
 
-            progress =
-                toFloat currentPhaseIndex / toFloat (List.length phases - 1)
+        currentPhaseIndex =
+            ProjectQuestionnaire.getCurrentPhaseIndex model.questionnaire
 
-            phaseProgressPoint i _ =
-                div
-                    [ class "phase-progress__point"
-                    , classList
-                        [ ( "phase-progress__point--active", i <= currentPhaseIndex )
-                        , ( "phase-progress__point--current", i == currentPhaseIndex )
-                        ]
+        progress =
+            toFloat currentPhaseIndex / toFloat (List.length phases - 1)
+
+        phaseProgressPoint i _ =
+            div
+                [ class "phase-progress__point"
+                , classList
+                    [ ( "phase-progress__point--active", i <= currentPhaseIndex )
+                    , ( "phase-progress__point--current", i == currentPhaseIndex )
                     ]
-                    []
+                ]
+                []
 
-            phaseProgressPoints =
-                List.indexedMap phaseProgressPoint phases
+        phaseProgressPoints =
+            List.indexedMap phaseProgressPoint phases
 
-            phaseProgress =
-                div (class "phase-progress" :: phaseButtonOnClick)
-                    (div [ class "phase-progress__bar" ]
-                        [ div
-                            [ class "phase-progress__fill"
-                            , style "width" (String.fromFloat (progress * 100) ++ "%")
-                            ]
-                            []
+        phaseProgress =
+            div (class "phase-progress" :: phaseButtonOnClick)
+                (div [ class "phase-progress__bar" ]
+                    [ div
+                        [ class "phase-progress__fill"
+                        , style "width" (String.fromFloat (progress * 100) ++ "%")
                         ]
-                        :: phaseProgressPoints
-                    )
-        in
+                        []
+                    ]
+                    :: phaseProgressPoints
+                )
+    in
+    Html.viewIf (not (List.isEmpty phases)) <|
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ text (gettext "Current phase" appState.locale) ]
             , phaseButton
             , phaseProgress
             ]
-
-    else
-        Html.nothing
 
 
 viewPhaseModal : AppState -> Model -> Html Msg

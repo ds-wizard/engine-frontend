@@ -65,7 +65,7 @@ toUrl route =
         LoginRoute mbOriginalUrl ->
             case mbOriginalUrl of
                 Just originalUrl ->
-                    [ "/?" ++ "originalUrl" ++ "=" ++ percentEncode originalUrl ]
+                    [ "/?originalUrl=" ++ percentEncode originalUrl ]
 
                 Nothing ->
                     []

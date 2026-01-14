@@ -50,7 +50,7 @@ toUrl route =
         ImportRoute mbLocaleId ->
             case mbLocaleId of
                 Just localeId ->
-                    [ moduleRoot, "import", "?" ++ "localeId" ++ "=" ++ localeId ]
+                    [ moduleRoot, "import", "?localeId=" ++ localeId ]
 
                 Nothing ->
                     [ moduleRoot, "import" ]

@@ -236,11 +236,11 @@ toQueryString params =
                 |> List.map (\( k, v ) -> k ++ "=" ++ v)
                 |> String.join "&"
     in
-    if String.length queryString > 0 then
-        "?" ++ queryString
+    if String.isEmpty queryString then
+        ""
 
     else
-        ""
+        "?" ++ queryString
 
 
 parseSort : Maybe String -> Maybe String -> ( Maybe String, SortDirection )

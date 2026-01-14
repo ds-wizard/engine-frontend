@@ -50,7 +50,7 @@ toUrl route =
         ImportRoute kmPackageId ->
             case kmPackageId of
                 Just id ->
-                    [ moduleRoot, "import", "?" ++ "knowledgeModelPackageId" ++ "=" ++ id ]
+                    [ moduleRoot, "import", "?knowledgeModelPackageId=" ++ id ]
 
                 Nothing ->
                     [ moduleRoot, "import" ]
@@ -61,7 +61,7 @@ toUrl route =
         PreviewRoute kmPackageId mbQuestionUuid ->
             case mbQuestionUuid of
                 Just uuid ->
-                    [ moduleRoot, kmPackageId, "preview", "?" ++ "questionUuid" ++ "=" ++ uuid ]
+                    [ moduleRoot, kmPackageId, "preview", "?questionUuid=" ++ uuid ]
 
                 Nothing ->
                     [ moduleRoot, kmPackageId, "preview" ]

@@ -79,7 +79,7 @@ readme : AppState -> KnowledgeModelPackageDetail -> Html msg
 readme appState kmPackage =
     let
         containsNewerVersions =
-            (List.length <| List.filter (Version.greaterThan kmPackage.version) kmPackage.versions) > 0
+            List.any (Version.greaterThan kmPackage.version) kmPackage.versions
 
         nonEditableInfo =
             if kmPackage.nonEditable then
@@ -202,7 +202,10 @@ sidePanelOtherVersions appState model kmPackage =
                 |> takeFirstVersions
                 |> List.map versionLink
     in
-    if List.length versionLinks > 0 then
+    if List.isEmpty versionLinks then
+        Nothing
+
+    else
         let
             showAllLink =
                 if model.showAllVersions || List.length kmPackage.versions <= 10 then
@@ -217,9 +220,6 @@ sidePanelOtherVersions appState model kmPackage =
                         ]
         in
         Just ( gettext "Other versions" appState.locale, "other-versions", ul [] (versionLinks ++ [ showAllLink ]) )
-
-    else
-        Nothing
 
 
 sidePanelOrganizationInfo : AppState -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html msg )

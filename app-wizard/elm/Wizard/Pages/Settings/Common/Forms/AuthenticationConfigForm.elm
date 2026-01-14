@@ -132,7 +132,7 @@ fillOpenIDServiceConfig appState index openIDServiceConfig form =
             ]
 
         parametersMsgs =
-            List.foldr (++) [] <|
+            List.concat <|
                 List.indexedMap toParameterMsgs openIDServiceConfig.parameters
 
         msgs =

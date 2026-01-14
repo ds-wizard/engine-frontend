@@ -315,7 +315,7 @@ toolbar appState wrapMsg saveRepliesMsg model =
 
 tagSelectionVisible : Model -> Bool
 tagSelectionVisible model =
-    List.length model.questionnaireModel.questionnaire.knowledgeModel.tagUuids > 0
+    not (List.isEmpty model.questionnaireModel.questionnaire.knowledgeModel.tagUuids)
 
 
 tagSelection : AppState -> Model -> Html Msg

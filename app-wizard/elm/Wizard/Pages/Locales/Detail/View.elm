@@ -187,11 +187,11 @@ sidePanelOtherVersions appState locale =
                 |> List.reverse
                 |> List.map versionLink
     in
-    if List.length versionLinks > 0 then
-        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
+    if List.isEmpty versionLinks then
+        Nothing
 
     else
-        Nothing
+        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
 
 
 sidePanelOrganizationInfo : AppState -> LocaleDetail -> Maybe ( String, String, Html msg )

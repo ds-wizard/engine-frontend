@@ -18,13 +18,13 @@ update msg wrapMsg appState model =
             ( { model | knwoledgeModelPackageId = kmPackageId }, Cmd.none )
 
         Submit ->
-            if String.length model.knwoledgeModelPackageId > 0 then
+            if String.isEmpty model.knwoledgeModelPackageId then
+                ( model, Cmd.none )
+
+            else
                 ( { model | pulling = Loading }
                 , KnowledgeModelPackagesApi.pullKnowledgeModelPackage appState model.knwoledgeModelPackageId (wrapMsg << PullPackageCompleted)
                 )
-
-            else
-                ( model, Cmd.none )
 
         PullPackageCompleted result ->
             RequestHelpers.applyResult

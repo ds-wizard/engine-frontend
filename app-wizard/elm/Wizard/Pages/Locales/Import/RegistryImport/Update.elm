@@ -18,13 +18,13 @@ update msg wrapMsg appState model =
             ( { model | localeId = localeId }, Cmd.none )
 
         Submit ->
-            if String.length model.localeId > 0 then
+            if String.isEmpty model.localeId then
+                ( model, Cmd.none )
+
+            else
                 ( { model | locale = Loading }
                 , LocalesApi.pullLocale appState model.localeId (wrapMsg << PullLocaleCompleted)
                 )
-
-            else
-                ( model, Cmd.none )
 
         PullLocaleCompleted result ->
             RequestHelpers.applyResult
