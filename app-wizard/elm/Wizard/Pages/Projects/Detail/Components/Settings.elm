@@ -29,7 +29,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Input as Input
 import Gettext exposing (gettext)
-import Html exposing (Html, br, button, div, form, h2, hr, label, li, p, span, strong, text, ul)
+import Html exposing (Html, a, br, button, div, form, h2, hr, label, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, classList, disabled, id, name, style, type_)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onMouseDown, onSubmit)
@@ -486,35 +486,42 @@ projectTagInput appState model =
             Form.Input (lastProjectTagFieldName model.form) Form.Text << Field.String
 
         typehintView tagName =
-            li [ onMouseDown <| typehintMessage tagName, dataCy "project_settings_tag-suggestion" ]
-                [ text tagName ]
+            li
+                [ class "typehint-item"
+                , dataCy "project_settings_tag-suggestion"
+                ]
+                [ a [ onMouseDown <| typehintMessage tagName ] [ text tagName ] ]
 
         typehintsView hasFocus =
             if List.isEmpty typehints || not hasFocus || hasError then
                 Html.nothing
 
             else
-                ul [ class "typehints" ]
-                    (List.map typehintView typehints)
+                div [ class "typehints project-tags-suggestions" ]
+                    [ ul []
+                        (List.map typehintView typehints)
+                    ]
     in
-    [ form [ class "input-group", onSubmit (Form.Append "projectTags") ]
-        [ Input.textInput field
-            [ class "form-control"
-            , classList [ ( "is-invalid", hasError ) ]
-            , id "projectTag"
-            , name "projectTag"
+    [ div [ class "typehint-input" ]
+        [ form [ class "input-group", onSubmit (Form.Append "projectTags") ]
+            [ Input.textInput field
+                [ class "form-control"
+                , classList [ ( "is-invalid", hasError ) ]
+                , id "projectTag"
+                , name "projectTag"
+                ]
+            , button
+                [ class "btn btn-secondary"
+                , disabled (isEmpty || hasError)
+                , onClick (Form.Append "projectTags")
+                , dataCy "project_settings_add-tag-button"
+                , type_ "button"
+                ]
+                [ text (gettext "Add" appState.locale) ]
             ]
-        , button
-            [ class "btn btn-secondary"
-            , disabled (isEmpty || hasError)
-            , onClick (Form.Append "projectTags")
-            , dataCy "project_settings_add-tag-button"
-            , type_ "button"
-            ]
-            [ text (gettext "Add" appState.locale) ]
+        , errorView
+        , typehintsView field.hasFocus
         ]
-    , errorView
-    , typehintsView field.hasFocus
     ]
 
 
