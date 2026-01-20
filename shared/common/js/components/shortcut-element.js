@@ -10,14 +10,14 @@ export class ShortcutElement extends HTMLElement {
             this.shortcuts
                 .filter(
                     ({ baseKey, alt, shift, ctrl, meta }) =>
-                        event.key.toLowerCase() === baseKey.toLowerCase() &&
+                        event.key?.toLowerCase() === baseKey?.toLowerCase() &&
                         (alt == null || alt === event.altKey) &&
                         (shift == null || shift === event.shiftKey) &&
                         (ctrl == null || ctrl === event.ctrlKey) &&
                         (meta == null || meta === event.metaKey)
                 ) // now we have all the shortcuts that match the current event
                 .map(({ name, ctrl, meta, baseKey }) => {
-                    const isSubmitShortcut = (ctrl === true || meta === true) && baseKey.toLowerCase() === 'enter'
+                    const isSubmitShortcut = (ctrl === true || meta === true) && baseKey?.toLowerCase() === 'enter'
 
                     if (!isSubmitShortcut && event.target instanceof HTMLTextAreaElement) {
                         return
