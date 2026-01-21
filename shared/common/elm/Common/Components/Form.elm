@@ -2,8 +2,10 @@ module Common.Components.Form exposing
     ( AppStateLike
     , CustomFormConfig
     , DynamicFormConfig
+    , FormActionsDynamicConfig
     , SimpleFormConfig
     , custom
+    , formActionsDynamic
     , initDynamic
     , setClass
     , setFormChanged

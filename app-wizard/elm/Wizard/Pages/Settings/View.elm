@@ -14,11 +14,12 @@ import Wizard.Pages.Settings.LookAndFeel.View
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
 import Wizard.Pages.Settings.Organization.View
+import Wizard.Pages.Settings.PluginSettings.View
 import Wizard.Pages.Settings.Plugins.View
 import Wizard.Pages.Settings.PrivacyAndSupport.View
 import Wizard.Pages.Settings.Projects.View
 import Wizard.Pages.Settings.Registry.View
-import Wizard.Pages.Settings.Routes exposing (Route(..))
+import Wizard.Pages.Settings.Routes as SettingsRoutes exposing (Route(..))
 import Wizard.Pages.Settings.Submission.View
 import Wizard.Pages.Settings.Usage.View
 import Wizard.Routes as Routes
@@ -50,6 +51,10 @@ view route appState model =
                 PluginsRoute ->
                     Html.map PluginsMsg <|
                         Wizard.Pages.Settings.Plugins.View.view appState model.pluginsModel
+
+                PluginSettingsRoute _ ->
+                    Html.map PluginSettingsMsg <|
+                        Wizard.Pages.Settings.PluginSettings.View.view appState model.pluginSettingsModel
 
                 DashboardAndLoginScreenRoute ->
                     Html.map DashboardMsg <|
@@ -119,7 +124,7 @@ navigation appState currentRoute =
         )
 
 
-navigationSystemLinks : AppState -> List ( Route, String )
+navigationSystemLinks : AppState -> List ( Route, String, Route -> Bool )
 navigationSystemLinks appState =
     let
         wizardLinks =
@@ -127,15 +132,15 @@ navigationSystemLinks appState =
                 []
 
             else
-                [ ( OrganizationRoute, gettext "Organization" appState.locale )
-                , ( AuthenticationRoute, gettext "Authentication" appState.locale )
-                , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale )
-                , ( FeaturesRoute, gettext "Features" appState.locale )
+                [ ( OrganizationRoute, gettext "Organization" appState.locale, (==) OrganizationRoute )
+                , ( AuthenticationRoute, gettext "Authentication" appState.locale, (==) AuthenticationRoute )
+                , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale, (==) PrivacyAndSupportRoute )
+                , ( FeaturesRoute, gettext "Features" appState.locale, (==) FeaturesRoute )
                 ]
 
         pluginsLink =
             if AppState.anyPluginsAvailable appState then
-                [ ( PluginsRoute, gettext "Plugins" appState.locale ) ]
+                [ ( PluginsRoute, gettext "Plugins" appState.locale, SettingsRoutes.isPluginsSubroute ) ]
 
             else
                 []
@@ -143,7 +148,7 @@ navigationSystemLinks appState =
     wizardLinks ++ pluginsLink
 
 
-navigationUserInterfaceLinks : AppState -> List ( Route, String )
+navigationUserInterfaceLinks : AppState -> List ( Route, String, Route -> Bool )
 navigationUserInterfaceLinks appState =
     let
         dashboardAndLoginScreenTitle =
@@ -160,35 +165,35 @@ navigationUserInterfaceLinks appState =
             else
                 gettext "Look & Feel" appState.locale
     in
-    [ ( DashboardAndLoginScreenRoute, dashboardAndLoginScreenTitle )
-    , ( LookAndFeelRoute, lookAndFeelTitle )
+    [ ( DashboardAndLoginScreenRoute, dashboardAndLoginScreenTitle, (==) DashboardAndLoginScreenRoute )
+    , ( LookAndFeelRoute, lookAndFeelTitle, (==) LookAndFeelRoute )
     ]
 
 
-navigationContentLinks : AppState -> List ( Route, String )
+navigationContentLinks : AppState -> List ( Route, String, Route -> Bool )
 navigationContentLinks appState =
     let
         items =
-            [ ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale )
-            , ( ProjectsRoute, gettext "Projects" appState.locale )
-            , ( SubmissionRoute, gettext "Document Submission" appState.locale )
+            [ ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale, (==) KnowledgeModelsRoute )
+            , ( ProjectsRoute, gettext "Projects" appState.locale, (==) ProjectsRoute )
+            , ( SubmissionRoute, gettext "Document Submission" appState.locale, (==) SubmissionRoute )
             ]
     in
     if Feature.registry appState then
-        ( RegistryRoute, gettext "DSW Registry" appState.locale ) :: items
+        ( RegistryRoute, gettext "DSW Registry" appState.locale, (==) RegistryRoute ) :: items
 
     else
         items
 
 
-navigationStatisticsLinks : AppState -> List ( Route, String )
+navigationStatisticsLinks : AppState -> List ( Route, String, Route -> Bool )
 navigationStatisticsLinks appState =
-    [ ( UsageRoute, gettext "Usage" appState.locale )
+    [ ( UsageRoute, gettext "Usage" appState.locale, (==) UsageRoute )
     ]
 
 
-navigationLink : Route -> ( Route, String ) -> Html Msg
-navigationLink currentRoute ( route, title ) =
+navigationLink : Route -> ( Route, String, Route -> Bool ) -> Html Msg
+navigationLink currentRoute ( route, title, isActive ) =
     linkTo (Routes.SettingsRoute route)
-        [ class "nav-link", classList [ ( "active", currentRoute == route ) ] ]
+        [ class "nav-link", classList [ ( "active", isActive currentRoute ) ] ]
         [ text title ]

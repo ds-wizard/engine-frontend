@@ -1,7 +1,10 @@
 module Wizard.Pages.Settings.Routes exposing
     ( Route(..)
     , defaultRoute
+    , isPluginsSubroute
     )
+
+import Uuid exposing (Uuid)
 
 
 type Route
@@ -10,6 +13,7 @@ type Route
     | PrivacyAndSupportRoute
     | FeaturesRoute
     | PluginsRoute
+    | PluginSettingsRoute Uuid
     | DashboardAndLoginScreenRoute
     | LookAndFeelRoute
     | RegistryRoute
@@ -26,3 +30,16 @@ defaultRoute adminEnabled =
 
     else
         OrganizationRoute
+
+
+isPluginsSubroute : Route -> Bool
+isPluginsSubroute route =
+    case route of
+        PluginsRoute ->
+            True
+
+        PluginSettingsRoute _ ->
+            True
+
+        _ ->
+            False

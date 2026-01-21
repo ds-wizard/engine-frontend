@@ -1,30 +1,28 @@
 module Wizard.Pages.Settings.Plugins.View exposing (view)
 
-import ActionResult
-import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faSettingsAlt)
 import Common.Components.Form as Form
-import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltipLeft)
 import Dict
 import Gettext exposing (gettext)
-import Html exposing (Html, button, div, input, label, p, span, text)
+import Html exposing (Html, div, input, label, p, span, text)
 import Html.Attributes exposing (checked, class, disabled, type_)
-import Html.Events exposing (onCheck, onClick)
+import Html.Events exposing (onCheck)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid
 import Version
+import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Plugins.Models exposing (Model)
 import Wizard.Pages.Settings.Plugins.Msgs exposing (Msg(..))
 import Wizard.Plugins.Plugin as Plugin
-import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Plugins.PluginMetadata exposing (PluginMetadata)
+import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
@@ -40,7 +38,6 @@ view appState model =
     div []
         [ Page.header (gettext "Plugins" appState.locale) []
         , form
-        , pluginSettingsModal appState model
         ]
 
 
@@ -64,17 +61,15 @@ viewPlugin appState model pluginMetadata =
                 |> Maybe.andThen .settings
 
         settingsButton =
-            case ( mbSettingsConnector, isEnabled ) of
-                ( Just settingsConnector, True ) ->
-                    button
-                        (class "btn btn-link btn-lg"
-                            :: onClick (OpenPluginSettings pluginMetadata.uuid settingsConnector.element)
-                            :: tooltipLeft (gettext "Plugin settings" appState.locale)
-                        )
-                        [ faSettingsAlt ]
+            if Maybe.isJust mbSettingsConnector && isEnabled then
+                linkTo (Routes.settingsPluginSettings pluginMetadata.uuid)
+                    (class "btn btn-link btn-lg"
+                        :: tooltipLeft (gettext "Plugin settings" appState.locale)
+                    )
+                    [ faSettingsAlt ]
 
-                _ ->
-                    Html.nothing
+            else
+                Html.nothing
 
         wasLoaded =
             appState.config.plugins
@@ -127,38 +122,3 @@ viewPlugin appState model pluginMetadata =
             ]
         , settingsButton
         ]
-
-
-pluginSettingsModal : AppState -> Model -> Html Msg
-pluginSettingsModal appState model =
-    let
-        content =
-            case model.pluginSettingsElement of
-                Nothing ->
-                    div [] [ text (gettext "No plugin selected." appState.locale) ]
-
-                Just pluginSettingsElement ->
-                    ActionResultBlock.view
-                        { viewContent =
-                            \settings ->
-                                div []
-                                    [ PluginElement.element pluginSettingsElement
-                                        [ PluginElement.settingValue settings
-                                        , PluginElement.onSettingsValueChange UpdatePluginSettings
-                                        ]
-                                    ]
-                        , actionResult = model.pluginSettings
-                        , locale = appState.locale
-                        }
-
-        config =
-            Modal.confirmConfig (gettext "Plugin Settings" appState.locale)
-                |> Modal.confirmConfigExtraClass "modal-wide"
-                |> Modal.confirmConfigVisible (not (ActionResult.isUnset model.pluginSettings))
-                |> Modal.confirmConfigContent [ content ]
-                |> Modal.confirmConfigCancelMsg ClosePluginSettings
-                |> Modal.confirmConfigCancelShortcutMsg ClosePluginSettings
-                |> Modal.confirmConfigActionResult model.savingPluginSettings
-                |> Modal.confirmConfigAction (gettext "Save" appState.locale) SavePluginSettings
-    in
-    Modal.confirm appState config

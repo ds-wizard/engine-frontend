@@ -103,6 +103,7 @@ module Wizard.Routes exposing
     , settingsDefault
     , settingsLookAndFeel
     , settingsOrganization
+    , settingsPluginSettings
     , settingsRegistry
     , tenantsCreate
     , tenantsDetail
@@ -888,6 +889,11 @@ settingsOrganization =
 settingsRegistry : Route
 settingsRegistry =
     SettingsRoute Wizard.Pages.Settings.Routes.RegistryRoute
+
+
+settingsPluginSettings : Uuid -> Route
+settingsPluginSettings pluginUuid =
+    SettingsRoute (Wizard.Pages.Settings.Routes.PluginSettingsRoute pluginUuid)
 
 
 

@@ -1,5 +1,6 @@
 module Wizard.Pages.Settings.Models exposing (Model, initLocalModel, initialModel)
 
+import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Authentication.Models
 import Wizard.Pages.Settings.DashboardAndLoginScreen.Models
@@ -7,6 +8,7 @@ import Wizard.Pages.Settings.Features.Models
 import Wizard.Pages.Settings.KnowledgeModels.Models
 import Wizard.Pages.Settings.LookAndFeel.Models
 import Wizard.Pages.Settings.Organization.Models
+import Wizard.Pages.Settings.PluginSettings.Model
 import Wizard.Pages.Settings.Plugins.Models
 import Wizard.Pages.Settings.PrivacyAndSupport.Models
 import Wizard.Pages.Settings.Projects.Models
@@ -22,6 +24,7 @@ type alias Model =
     , privacyAndSupportModel : Wizard.Pages.Settings.PrivacyAndSupport.Models.Model
     , featuresModel : Wizard.Pages.Settings.Features.Models.Model
     , pluginsModel : Wizard.Pages.Settings.Plugins.Models.Model
+    , pluginSettingsModel : Wizard.Pages.Settings.PluginSettings.Model.Model
     , dashboardModel : Wizard.Pages.Settings.DashboardAndLoginScreen.Models.Model
     , lookAndFeelModel : Wizard.Pages.Settings.LookAndFeel.Models.Model
     , registryModel : Wizard.Pages.Settings.Registry.Models.Model
@@ -39,6 +42,7 @@ initialModel appState =
     , privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel
     , featuresModel = Wizard.Pages.Settings.Features.Models.initialModel
     , pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState
+    , pluginSettingsModel = Wizard.Pages.Settings.PluginSettings.Model.initialModel Uuid.nil
     , dashboardModel = Wizard.Pages.Settings.DashboardAndLoginScreen.Models.initialModel
     , lookAndFeelModel = Wizard.Pages.Settings.LookAndFeel.Models.initialModel
     , registryModel = Wizard.Pages.Settings.Registry.Models.initialModel appState
@@ -66,6 +70,9 @@ initLocalModel appState route model =
 
         PluginsRoute ->
             { model | pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState }
+
+        PluginSettingsRoute pluginUuid ->
+            { model | pluginSettingsModel = Wizard.Pages.Settings.PluginSettings.Model.initialModel pluginUuid }
 
         DashboardAndLoginScreenRoute ->
             { model | privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel }

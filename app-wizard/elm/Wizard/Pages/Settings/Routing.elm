@@ -6,6 +6,8 @@ module Wizard.Pages.Settings.Routing exposing
 
 import List.Extensions as List
 import Url.Parser exposing ((</>), Parser, map, s)
+import Url.Parser.Extensions as Parser
+import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Routes exposing (Route(..))
@@ -32,6 +34,7 @@ parsers appState wrapRoute =
         |> List.insertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
         |> List.insertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
         |> List.insertIf (map (wrapRoute <| PluginsRoute) (s moduleRoot </> s "plugins")) pluginsAvilable
+        |> List.insertIf (map (wrapRoute << PluginSettingsRoute) (s moduleRoot </> s "plugins" </> Parser.uuid)) pluginsAvilable
         |> List.insertIf (map (wrapRoute <| DashboardAndLoginScreenRoute) (s moduleRoot </> s "dashboard")) True
         |> List.insertIf (map (wrapRoute <| LookAndFeelRoute) (s moduleRoot </> s "look-and-feel")) True
         |> List.insertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s "registry")) (Feature.registry appState)
@@ -58,6 +61,9 @@ toUrl route =
 
         PluginsRoute ->
             [ moduleRoot, "plugins" ]
+
+        PluginSettingsRoute pluginUuid ->
+            [ moduleRoot, "plugins", Uuid.toString pluginUuid ]
 
         DashboardAndLoginScreenRoute ->
             [ moduleRoot, "dashboard" ]

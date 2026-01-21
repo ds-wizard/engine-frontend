@@ -14,6 +14,7 @@ import Wizard.Pages.Settings.LookAndFeel.Update
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
 import Wizard.Pages.Settings.Organization.Update
+import Wizard.Pages.Settings.PluginSettings.Update
 import Wizard.Pages.Settings.Plugins.Update
 import Wizard.Pages.Settings.PrivacyAndSupport.Update
 import Wizard.Pages.Settings.Projects.Update
@@ -47,6 +48,10 @@ fetchData route appState _ =
         PluginsRoute ->
             Cmd.map PluginsMsg <|
                 Wizard.Pages.Settings.Plugins.Update.fetchData appState
+
+        PluginSettingsRoute pluginUuid ->
+            Cmd.map PluginSettingsMsg <|
+                Wizard.Pages.Settings.PluginSettings.Update.fetchData appState pluginUuid
 
         DashboardAndLoginScreenRoute ->
             genericFetch DashboardMsg
@@ -110,6 +115,13 @@ update wrapMsg msg appState model =
                     Wizard.Pages.Settings.Plugins.Update.update (wrapMsg << PluginsMsg) pluginsMsg appState model.pluginsModel
             in
             ( { model | pluginsModel = pluginsModel }, cmd )
+
+        PluginSettingsMsg pluginSettingsMsg ->
+            let
+                ( pluginSettingsModel, cmd ) =
+                    Wizard.Pages.Settings.PluginSettings.Update.update appState pluginSettingsMsg model.pluginSettingsModel
+            in
+            ( { model | pluginSettingsModel = pluginSettingsModel }, Cmd.map (wrapMsg << PluginSettingsMsg) cmd )
 
         DashboardMsg dashboardMsg ->
             let
