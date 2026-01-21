@@ -238,7 +238,7 @@ debounceConfig =
 subscriptions : Model a -> Sub (Msg a)
 subscriptions model =
     if Maybe.isJust model.typehints then
-        Browser.Events.onClick <| D.map (always HideTypeHints) (succeedIfClickOutside model.fieldId)
+        Browser.Events.onMouseDown <| D.map (always HideTypeHints) (succeedIfClickOutside model.fieldId)
 
     else
         Sub.none
