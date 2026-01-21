@@ -2141,7 +2141,7 @@ viewQuestionnaireToolbar appState cfg model =
                         , toggleMsg = ImportersDropdownMsg
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                                [ text (gettext "Import replies" appState.locale) ]
+                                [ text (gettext "Import" appState.locale) ]
                         , items = importerItems
                         }
                     ]
