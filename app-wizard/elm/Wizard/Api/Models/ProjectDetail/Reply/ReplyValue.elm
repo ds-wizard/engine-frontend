@@ -3,7 +3,7 @@ module Wizard.Api.Models.ProjectDetail.Reply.ReplyValue exposing
     , decoder
     , encode
     , getAnswerUuid
-    , getChoiceUuid
+    , getChoiceUuids
     , getFileUuid
     , getItemUuids
     , getSelectedItemUuid
@@ -152,8 +152,8 @@ getAnswerUuid replyValue =
             ""
 
 
-getChoiceUuid : ReplyValue -> List String
-getChoiceUuid replyValue =
+getChoiceUuids : ReplyValue -> List String
+getChoiceUuids replyValue =
     case replyValue of
         MultiChoiceReply uuids ->
             uuids

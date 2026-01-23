@@ -1,0 +1,115 @@
+@import '../../../../mixins';
+@import '../../../../variables';
+
+.questionnaireHistory {
+  .fa-ul {
+    margin-left: $spacer-4;
+    margin-bottom: 0;
+
+    .fa-li {
+      color: $gray-600;
+    }
+
+    .fa-li-content {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
+      display: inline-block;
+    }
+  }
+
+  &__month {
+    margin-bottom: $spacer-4;
+
+    h5 {
+      padding: $spacer-2;
+      margin-top: $spacer-3;
+    }
+  }
+
+  &__day {
+    border-top: 1px solid $gray-400;
+
+    &:last-child {
+      border-bottom: 1px solid $gray-400;
+    }
+  }
+
+  &__date {
+    display: block;
+    background: $gray-100;
+    color: $body-color;
+    text-decoration: none !important;
+    padding: 0.25rem 0.5rem 0.25rem 1.25rem;
+    position: relative;
+
+    &--namedOnlyOpen {
+      padding-left: 0.5rem;
+    }
+
+    &--open {
+      .fas, .far, .fab {
+        position: absolute;
+        left: 8px;
+        top: 8px;
+      }
+    }
+
+    &--closed {
+      .fas, .far, .fab {
+        position: absolute;
+        left: 9px;
+        top: 8px;
+      }
+    }
+  }
+
+  &__dayUsers {
+    border-top: 1px solid $gray-400;
+    padding: 0.5rem 0.5rem 1rem;
+  }
+
+  &__event {
+    border-top: 1px solid $gray-400;
+    padding: 0.5rem;
+  }
+
+  &__eventHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: $gray-600;
+  }
+
+  &__eventBadges {
+    .badge {
+      margin-right: 0.5rem;
+    }
+  }
+
+  &__eventDetail {
+    margin: .5rem -.5rem .5rem 0;
+    padding: 0.5rem;
+    background-color: $gray-100;
+    border-top-left-radius: $border-radius;
+    border-bottom-left-radius: $border-radius;
+
+    strong {
+      font-weight: 600;
+    }
+
+    .answer {
+      display: flex;
+      margin-top: 0.5rem;
+      align-items: flex-start;
+
+      .fas, .far, .fab {
+        width: 2rem;
+        margin-top: 0.25rem;
+        color: $gray-600;
+      }
+    }
+  }
+
+
+}

@@ -66,3 +66,5 @@ config =
             |> Rule.ignoreErrorsForDirectories [ "app-registry", "app-wizard", "tests" ]
     ]
         |> List.map (Rule.ignoreErrorsForDirectories [ "shared/vendor/" ])
+        -- TODO: Remove when old Questionnaire is removed
+        |> List.map (Rule.ignoreErrorsForFiles [ "app-wizard/elm/Wizard/Components/Questionnaire.elm" ])

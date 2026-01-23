@@ -125,8 +125,8 @@ initPageModel appState route model =
                                 |> Preview.setKnowledgeModel (EditorContext.getFilteredKM editorContext)
                                 |> Preview.setReplies editorContext.kmEditor.replies
                                 |> Preview.generateReplies appState currentQuestionUuid editorContext.kmEditor.knowledgeModel
-                                |> Tuple.mapSecond (Preview.setActiveChapterIfNot selectedChapterUuid)
-                                |> Tuple.mapSecond (Preview.setPhase defaultPhaseUuid)
+                                |> Tuple.mapSecond (Preview.setActiveChapterIfNot appState selectedChapterUuid)
+                                |> Tuple.mapSecond (Preview.setPhase appState defaultPhaseUuid)
                     in
                     ( newSeed, { model | previewModel = previewModel } )
 

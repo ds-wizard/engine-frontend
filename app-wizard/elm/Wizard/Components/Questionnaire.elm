@@ -3678,7 +3678,7 @@ viewQuestionMultiChoice appState cfg model path question =
 
         selectedChoicesUuids =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap [] (.value >> ReplyValue.getChoiceUuid)
+                |> Maybe.unwrap [] (.value >> ReplyValue.getChoiceUuids)
 
         clearReplyButton =
             viewQuestionClearButton appState cfg path (not (List.isEmpty selectedChoicesUuids))

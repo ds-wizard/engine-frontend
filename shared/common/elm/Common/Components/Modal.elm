@@ -27,7 +27,6 @@ import ActionResult exposing (ActionResult)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
-import Common.Utils.GuideLinks exposing (GuideLinks)
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, button, div, h5, pre, text)
 import Html.Attributes exposing (class, classList, disabled)
@@ -195,10 +194,7 @@ confirmConfigDataCy dataCy (ConfirmConfig data) =
 
 
 type alias AppStateLike a =
-    { a
-        | guideLinks : GuideLinks
-        , locale : Gettext.Locale
-    }
+    { a | locale : Gettext.Locale }
 
 
 confirm : AppStateLike a -> ConfirmConfig msg -> Html msg

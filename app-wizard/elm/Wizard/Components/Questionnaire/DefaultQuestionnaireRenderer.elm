@@ -3,7 +3,6 @@ module Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer exposing
     , config
     , create
     , withKnowledgeModel
-    , withResourcePageToRoute
     )
 
 import Common.Components.Badge as Badge
@@ -65,9 +64,10 @@ withKnowledgeModel km (DefaultQuestionnaireRendererConfig cfg) =
     DefaultQuestionnaireRendererConfig { cfg | knowledgeModel = km }
 
 
-withResourcePageToRoute : (String -> Wizard.Routes.Route) -> DefaultQuestionnaireRendererConfig -> DefaultQuestionnaireRendererConfig
-withResourcePageToRoute f (DefaultQuestionnaireRendererConfig cfg) =
-    DefaultQuestionnaireRendererConfig { cfg | resourcePageToRoute = f }
+
+--withResourcePageToRoute : (String -> Wizard.Routes.Route) -> DefaultQuestionnaireRendererConfig -> DefaultQuestionnaireRendererConfig
+--withResourcePageToRoute f (DefaultQuestionnaireRendererConfig cfg) =
+--    DefaultQuestionnaireRendererConfig { cfg | resourcePageToRoute = f }
 
 
 create : AppState -> DefaultQuestionnaireRendererConfig -> QuestionnaireRenderer

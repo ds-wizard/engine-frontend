@@ -18,7 +18,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
     .public--app & {
         height: calc(100vh - #{$public-header-height});
 
-        .questionnaire {
+        .questionnaire, .questionnaire2 {
             height: $public-content-height;
         }
 
@@ -27,7 +27,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
                 height: $public-content-with-warning-height !important;
             }
 
-            .questionnaire {
+            .questionnaire, .questionnaire2 {
                 height: $public-content-with-warning-height !important;
             }
         }
@@ -36,7 +36,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
     .app-fullscreen & {
         height: 100vh;
 
-        .questionnaire {
+        .questionnaire, .questionnaire2 {
             height: 100vh;
         }
     }
@@ -46,7 +46,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
             height: $content-with-warning-height !important;
         }
 
-        .questionnaire {
+        .questionnaire, .questionnaire2 {
             height: $content-with-warning-height !important;
         }
     }
@@ -207,7 +207,7 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
         }
     }
 
-    .questionnaire {
+    .questionnaire, .questionnaire2 {
         height: $content-height;
     }
 

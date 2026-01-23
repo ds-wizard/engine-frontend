@@ -80,7 +80,8 @@ fetchSubrouteData appState model =
         KMEditorRoute (EditorRoute _ KMEditorRoute.Preview) ->
             case model.editorContext of
                 Success editorContext ->
-                    Dom.scrollIntoView ("#question-" ++ EditorContext.getActiveQuestionUuid editorContext)
+                    Cmd.map PreviewMsg <|
+                        Preview.scrollToQuestion (EditorContext.getActiveQuestionUuid editorContext)
 
                 _ ->
                     Cmd.none

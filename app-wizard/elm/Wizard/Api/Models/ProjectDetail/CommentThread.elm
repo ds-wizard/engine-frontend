@@ -1,4 +1,4 @@
-module Wizard.Api.Models.ProjectDetail.CommentThread exposing (CommentThread, commentCount, compare, decoder, isAssigned, isAuthor)
+module Wizard.Api.Models.ProjectDetail.CommentThread exposing (CommentThread, compare, decoder, isAssigned, isAuthor)
 
 import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Json.Decode as D exposing (Decoder)
@@ -46,11 +46,6 @@ isAuthor user commentThread =
 compare : CommentThread -> CommentThread -> Order
 compare a b =
     Time.compare a.createdAt b.createdAt
-
-
-commentCount : CommentThread -> Int
-commentCount =
-    List.length << .comments
 
 
 isAssigned : CommentThread -> Bool

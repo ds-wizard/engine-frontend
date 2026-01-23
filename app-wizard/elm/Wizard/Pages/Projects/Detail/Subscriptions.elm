@@ -3,7 +3,7 @@ module Wizard.Pages.Projects.Detail.Subscriptions exposing (subscriptions)
 import ActionResult exposing (ActionResult(..))
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.WebSocket as WebSocket
-import Wizard.Components.Questionnaire as Questionnaire
+import Wizard.Components.Questionnaire2 as Questionnaire2
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Pages.Projects.Detail.Components.ProjectSaving as ProjectSaving
 import Wizard.Pages.Projects.Detail.Components.Settings as Settings
@@ -24,7 +24,7 @@ subscriptions route model =
                     case model.questionnaireModel of
                         Success questionnaireModel ->
                             Sub.map QuestionnaireMsg <|
-                                Questionnaire.subscriptions questionnaireModel
+                                Questionnaire2.subscriptions questionnaireModel
 
                         _ ->
                             Sub.none
