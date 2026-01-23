@@ -1,0 +1,90 @@
+@import '../../../../mixins';
+@import '../../../../variables';
+
+
+$toolbar-height: 40px;
+
+.questionnaireToolbar {
+  width: 100%;
+  height: $toolbar-height;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: $gray-100;
+  border-bottom: 1px solid $gray-400;
+
+  .badge {
+    margin-left: $spacer-2;
+  }
+
+  .item-group {
+    display: flex;
+    align-items: center;
+  }
+
+  .item {
+    @include border-radius($border-radius);
+    transition: color 0.15s ease-in-out, background-color 0.15s ease-in-out;
+    padding: 8px;
+    color: $gray-900 !important;
+    text-decoration: none !important;
+
+    &:hover, &:focus {
+      background: $gray-200;
+      box-shadow: none;
+    }
+
+    &.selected {
+      background: var(--bs-primary-bg);
+      color: var(--bs-primary) !important;
+    }
+
+    &-actions {
+      display: flex;
+      align-items: center;
+
+      .icon {
+        display: inline-block;
+        background: url(../assets/icons/sparkles.svg) center center no-repeat;
+        width: 1.2em;
+        height: 1.2em;
+        margin-right: $spacer-1;
+      }
+    }
+  }
+
+  &__left {
+    display: flex;
+    margin-left: 16px;
+    align-items: center;
+
+    .item-group {
+      margin-right: $spacer-2;
+    }
+  }
+
+  &__right {
+    display: flex;
+    margin-right: 16px;
+    align-items: center;
+
+    .item-group {
+      margin-left: $spacer-2;
+    }
+  }
+
+  .dropdown-toggle {
+    &::after {
+      display: none;
+    }
+  }
+
+  .dropdown-item {
+    color: $body-color !important;
+    text-decoration: none !important;
+
+    &:active {
+      background-color: $gray-100 !important;
+    }
+  }
+}

@@ -3,7 +3,7 @@
 .KnowledgeModels__Preview {
     width: 100%;
 
-    .questionnaire {
+    .questionnaire2 {
         height: calc(100vh - #{$top-header-height});
         margin-top: $top-header-height;
     }
@@ -11,7 +11,7 @@
 
 .public--app {
     .KnowledgeModels__Preview {
-        .questionnaire {
+        .questionnaire2 {
             height: calc(100vh - #{$public-header-height} - #{$top-header-height});
         }
     }

@@ -1,0 +1,30 @@
+@import '../../../../variables';
+
+.questionnaireRightPanelList {
+  width: 100%;
+  min-height: 100%;
+  padding: $spacer-3;
+  overflow: auto;
+
+  &--empty {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  &--noPadding {
+    padding: 0;
+  }
+
+  .fa-ul {
+    margin-left: $spacer-4;
+
+    li {
+      margin-top: $spacer-2;
+    }
+
+    .fa-li {
+      color: $gray-600;
+    }
+  }
+}

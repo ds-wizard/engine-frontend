@@ -29,7 +29,7 @@ $toolbar-height-with-tags: 90px;
 
     }
 
-    .questionnaire {
+    .questionnaire2 {
         height: calc(100vh - #{$editor-header-height} - #{$toolbar-height});
     }
 
@@ -38,7 +38,7 @@ $toolbar-height-with-tags: 90px;
             height: $toolbar-height-with-tags;
         }
 
-        .questionnaire {
+        .questionnaire2 {
             height: calc(100vh - #{$editor-header-height} - #{$toolbar-height-with-tags});
         }
 

@@ -93,7 +93,6 @@ module.exports = function (app) {
                     selector: elementSelector,
                     scrollTop: $element.scrollTop
                 })
-
             })
         })
     }

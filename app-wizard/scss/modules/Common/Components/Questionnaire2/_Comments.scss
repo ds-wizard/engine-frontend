@@ -1,0 +1,201 @@
+@import '../../../../mixins';
+@import '../../../../variables';
+
+.questionnaireComments {
+  &__navigation {
+    position: sticky;
+    z-index: 200;
+    background: $gray-100;
+    padding: 0;
+    border-bottom: 1px solid $gray-400;
+    display: grid;
+    grid-template-columns: 2fr 1fr 2fr;
+
+    span {
+      padding: $spacer-2 $spacer-3;
+      text-align: center;
+    }
+
+    a {
+      @include not-selectable;
+      padding: $spacer-2 $spacer-3;
+      text-align: center;
+      text-decoration: none !important;
+      white-space: nowrap;
+
+      &:hover {
+        background: $gray-200;
+      }
+    }
+  }
+
+  .nav-underline-tabs {
+    border-bottom: 1px solid $gray-400;
+    max-width: none;
+    margin-top: $spacer-3;
+
+    .nav-item {
+      flex: 1 1 0;
+      width: 0;
+    }
+
+    .nav-link-editor-notes.active {
+      border-bottom-color: $comments-private-primary;
+    }
+  }
+
+  .alert-editor-notes {
+    color: $comments-private-color;
+    background-color: $comments-private-bg;
+    border-color: $comments-private-border;
+    padding: 0.75rem;
+    display: flex;
+    align-items: baseline;
+    margin: $spacer-3;
+  }
+
+  &__commentThread {
+    --background: #{$gray-100};
+    --background-assigned: rgba(0, 0, 0, 0.075);
+    --background-assigned-you: rgba(0, 0, 0, 0.15);
+    --border-color: #{$gray-400};
+    --color: #{$body-color};
+    --color-lighter: var(--bs-secondary);
+
+    color: var(--color);
+    background: var(--background);
+    margin-bottom: $spacer-4;
+    padding: $spacer-3;
+    border-top: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
+    position: relative;
+
+    &--resolved {
+      color: $gray-500;
+    }
+
+    &--private {
+      --background: #{$comments-private-bg};
+      --background-assigned: #{rgba($comments-private-primary, 0.1)};
+      --background-assigned-you: #{rgba($comments-private-primary, 0.2)};
+      --border-color: #{$comments-private-border};
+      --color: #{$comments-private-color};
+      --color-lighter: #{$comments-private-color-lighter};
+    }
+  }
+
+  &__commentThreadAssignedHeader {
+    margin: (-$spacer-3) (-$spacer-3) $spacer-3;
+    padding: $spacer-2 $spacer-3;
+    font-size: $font-size-sm;
+    display: flex;
+    align-items: baseline;
+    background: var(--background-assigned);
+
+    &--you {
+      font-weight: bold;
+      background: var(--background-assigned-you);
+    }
+  }
+
+  &__comment {
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: $spacer-3;
+    margin-bottom: $spacer-3;
+    position: relative;
+
+    .questionnaireComments__commentThread--resolved & {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+
+  &__commentHeader {
+    display: flex;
+    align-items: center;
+    margin-bottom: .5rem;
+    max-width: 100%;
+
+    .ItemIcon {
+      margin-right: .5rem;
+    }
+
+    .user {
+      min-width: 0;
+      flex-basis: 0;
+      flex-grow: 1;
+    }
+
+    .text-muted {
+      color: var(--color-lighter) !important;
+    }
+
+    .dropdown-toggle {
+      padding: 0.5rem;
+      margin-right: -0.5rem;
+      color: $gray-600;
+      outline: none;
+      box-shadow: none;
+
+      &:hover {
+        color: $body-color;
+      }
+
+      &::after {
+        display: none;
+      }
+    }
+  }
+
+  &__commentText {
+    & > *:last-child {
+      margin-bottom: 0;
+    }
+
+    h1, h2, h3, h4, h5, h6 {
+      font-size: $font-size-base;
+      font-weight: bold;
+    }
+  }
+
+  &__commentReplyForm {
+    textarea {
+      margin-bottom: 0.5rem;
+    }
+
+    &--private {
+      textarea {
+        &:focus {
+          border-color: $comments-private-primary;
+          box-shadow: 0 0 0 $input-btn-focus-width rgba($comments-private-primary, 0.25);
+        }
+      }
+
+      .btn-primary {
+        @include button-variant($comments-private-primary, $comments-private-primary);
+      }
+    }
+  }
+
+  &__deleteOverlay {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(0, 0, 0, 0.8);
+    color: $white;
+    display: flex;
+    justify-content: center;
+
+    &--thread {
+      padding-top: $spacer-5;
+    }
+
+    &--comment {
+      margin: (-$spacer-3) (-$spacer-3);
+      align-items: center;
+    }
+  }
+}

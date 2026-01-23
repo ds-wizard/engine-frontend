@@ -1,0 +1,106 @@
+@import '../../../../mixins';
+@import '../../../../variables';
+
+$point-size: 0.75rem;
+$bar-height: 0.25rem;
+
+.questionnairePhaseProgress {
+  margin-top: $spacer-2;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+
+  &__point {
+    @include border-radius(100%);
+    width: $point-size;
+    height: $point-size;
+    background: $gray-300;
+    z-index: 1;
+
+    &--active {
+      background: var(--bs-primary);
+    }
+
+    &--current {
+      box-shadow: 0 0 $focus-ring-blur $focus-ring-width #{rgba(var(--bs-focus-ring-color), $focus-ring-opacity)};
+    }
+  }
+
+  &__bar {
+    position: absolute;
+    height: $bar-height;
+    left: calc($point-size / 2);
+    right: calc($point-size / 2);
+    top: 50%;
+    transform: translateY(-50%);
+    background: $gray-300;
+    box-sizing: border-box;
+    z-index: 0;
+  }
+
+  &__fill {
+    position: absolute;
+    height: 100%;
+    background: var(--bs-primary);
+  }
+}
+
+.questionnaireModalPhase {
+  @include border-radius($border-radius-lg);
+  border: 1px solid $white;
+  padding: $spacer-2 $spacer-3;
+  cursor: pointer;
+  margin-left: $spacer-5;
+  position: relative;
+
+  &::before {
+    @include border-radius(100%);
+    content: ' ';
+    position: absolute;
+    left: -2rem;
+    top: $spacer-2;
+    width: 1rem;
+    height: 1rem;
+    background: $gray-300;
+  }
+
+  &:not(:last-child)::after {
+    content: ' ';
+    position: absolute;
+    width: 0.25rem;
+    left: -1.625rem;
+    top: $spacer-2 + 1rem;
+    bottom: -$spacer-2 - $spacer-3 - .2rem;
+    background: $gray-300;
+  }
+
+  &--done {
+    .phase-title, .phase-description {
+      opacity: 0.7;
+    }
+
+    &::before, &::after {
+      background: var(--bs-primary) !important;
+    }
+  }
+
+  &--active {
+    border-color: var(--bs-primary) !important;
+    cursor: default !important;
+
+    &::before {
+      background: var(--bs-primary) !important;
+    }
+  }
+
+  &:not(&--active):hover {
+    background: $gray-100;
+    border-color: $gray-400;
+    opacity: 1;
+  }
+
+  &:not(:last-child) {
+    margin-bottom: $spacer-3;
+  }
+}

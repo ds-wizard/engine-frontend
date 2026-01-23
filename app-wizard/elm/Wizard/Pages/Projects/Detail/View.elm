@@ -25,8 +25,7 @@ import Wizard.Components.ActionResultView as ActionResultView
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.PluginView as PluginView
-import Wizard.Components.Questionnaire as Questionnaire
-import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Components.Questionnaire2 as Questionnaire2
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.Session as Session
@@ -128,11 +127,11 @@ viewProject route appState model questionnaire =
         modalConfig =
             { events =
                 model.questionnaireModel
-                    |> ActionResult.andThen .projectEvents
+                    |> ActionResult.andThen (.projectEvents << .versionHistoryRightPanelModel)
                     |> ActionResult.withDefault []
             , versions =
                 model.questionnaireModel
-                    |> ActionResult.andThen .projectVersions
+                    |> ActionResult.andThen (.projectVersions << .versionHistoryRightPanelModel)
                     |> ActionResult.withDefault []
             }
     in
@@ -430,27 +429,13 @@ viewProjectContent appState route model projectCommon =
                         isMigrating =
                             ProjectUtils.isMigrating qm.questionnaire
                     in
-                    Questionnaire.view appState
-                        { features =
-                            { feedbackEnabled = True
-                            , todosEnabled = isEditable
-                            , commentsEnabled = True
-                            , pluginsEnabled = True
-                            , readonly = not isEditable || isMigrating
-                            , toolbarEnabled = True
-                            , questionLinksEnabled = True
-                            }
-                        , renderer =
-                            DefaultQuestionnaireRenderer.create appState
-                                (DefaultQuestionnaireRenderer.config qm.questionnaire)
-                        , wrapMsg = QuestionnaireMsg
+                    Questionnaire2.view appState
+                        { wrapMsg = QuestionnaireMsg
+                        , readonly = not isEditable || isMigrating
+                        , toolbarEnabled = True
+                        , actionsEnabled = True
                         , previewQuestionnaireEventMsg = Just (OpenVersionPreview qm.questionnaire.uuid)
                         , revertQuestionnaireMsg = Just OpenRevertModal
-                        , isKmEditor = False
-                        , projectCommon = Just projectCommon
-                        }
-                        { events = []
-                        , kmEditorUuid = Nothing
                         }
                         qm
             in

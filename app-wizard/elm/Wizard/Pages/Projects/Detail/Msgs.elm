@@ -12,7 +12,7 @@ import Wizard.Api.Models.ProjectPreview exposing (ProjectPreview)
 import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
-import Wizard.Components.Questionnaire as Questionnaire
+import Wizard.Components.Questionnaire2 as Questionnaire2
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Pages.Projects.Detail.Components.Preview as Preview
@@ -37,7 +37,7 @@ type Msg
     | WebSocketPing
     | ProjectSavingMsg ProjectSaving.Msg
     | PreviewMsg Preview.Msg
-    | QuestionnaireMsg Questionnaire.Msg
+    | QuestionnaireMsg Questionnaire2.Msg
     | SummaryReportMsg SummaryReport.Msg
     | DocumentsMsg Documents.Msg
     | NewDocumentMsg NewDocument.Msg

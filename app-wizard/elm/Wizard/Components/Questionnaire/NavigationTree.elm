@@ -89,7 +89,7 @@ viewChapterIndication : ProjectQuestionnaire -> Chapter -> Html msg
 viewChapterIndication questionnaire chapter =
     let
         unanswered =
-            ProjectQuestionnaire.calculateUnansweredQuestionsForChapter questionnaire chapter
+            ProjectQuestionnaire.calculateUnansweredQuestionsForChapter questionnaire chapter.uuid
     in
     if unanswered > 0 then
         Badge.light [ class "rounded-pill" ] [ text <| String.fromInt unanswered ]

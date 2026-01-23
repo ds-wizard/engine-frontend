@@ -20,10 +20,12 @@ import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
 import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail
 import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing
 import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility
+import Wizard.Api.Models.ProjectCommon as ProjectCommon
 import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent(..))
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.Questionnaire as Questionnaire
+import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire2.QuestionnaireUpdateReturnData as QuestionnaireReturnData
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KnowledgeModels.Preview.Models exposing (Model)
@@ -164,17 +166,23 @@ initQuestionnaireModel appState ( model, cmd ) =
                             ( ( appState.seed, Nothing, questionnaire ), Cmd.none )
 
                 ( questionnaireModel, _ ) =
-                    Questionnaire.initSimple appState questionnaireWithReplies
+                    Questionnaire2.initSimple appState questionnaireWithReplies
 
-                questionnaireModelWithChapter =
+                questionnaireReturnData =
                     case mbChapterUuid of
                         Just chapterUuid ->
-                            Questionnaire.setActiveChapterUuid chapterUuid questionnaireModel
+                            Questionnaire2.update appState
+                                { wrapMsg = QuestionnaireMsg
+                                , mbSetFullScreenMsg = Nothing
+                                , projectCommon = ProjectCommon.dummy
+                                }
+                                (Questionnaire2.openChapterMsg chapterUuid)
+                                questionnaireModel
 
                         Nothing ->
-                            questionnaireModel
+                            QuestionnaireReturnData.fromModel appState questionnaireModel
             in
-            ( newSeed, { model | questionnaireModel = Success questionnaireModelWithChapter }, Cmd.batch [ cmd, scrollCmd ] )
+            ( newSeed, { model | questionnaireModel = Success questionnaireReturnData.model }, Cmd.batch [ cmd, scrollCmd ] )
 
         Error err ->
             ( appState.seed, { model | questionnaireModel = Error err }, cmd )
@@ -183,22 +191,24 @@ initQuestionnaireModel appState ( model, cmd ) =
             ( appState.seed, model, cmd )
 
 
-handleQuestionnaireMsg : Questionnaire.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
+handleQuestionnaireMsg : Questionnaire2.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleQuestionnaireMsg msg wrapMsg appState model =
     case model.questionnaireModel of
         Success questionnaireModel ->
             let
-                ( newSeed, qm, qtnCmd ) =
-                    Questionnaire.update msg
-                        QuestionnaireMsg
-                        Nothing
-                        appState
-                        { events = []
-                        , kmEditorUuid = Nothing
+                questionnaireReturnData =
+                    Questionnaire2.update appState
+                        { wrapMsg = QuestionnaireMsg
+                        , mbSetFullScreenMsg = Nothing
+                        , projectCommon = ProjectCommon.dummy
                         }
+                        msg
                         questionnaireModel
             in
-            ( newSeed, { model | questionnaireModel = Success qm }, Cmd.map wrapMsg qtnCmd )
+            ( questionnaireReturnData.seed
+            , { model | questionnaireModel = Success questionnaireReturnData.model }
+            , Cmd.map wrapMsg questionnaireReturnData.cmd
+            )
 
         _ ->
             ( appState.seed, model, Cmd.none )

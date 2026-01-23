@@ -82,8 +82,9 @@ decoder =
         |> D.required "registry" RegistryConfig.decoder
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "organization" OrganizationConfig.decoder
-        |> D.required "pluginSettings" (D.dict D.valueAsString)
-        |> D.required "plugins" (D.list PluginInfo.decoder)
+        -- TODO remove optional
+        |> D.optional "pluginSettings" (D.dict D.valueAsString) Dict.empty
+        |> D.optional "plugins" (D.list PluginInfo.decoder) []
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
         |> D.required "project" ProjectConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder
