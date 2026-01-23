@@ -295,10 +295,6 @@ view appState cfg model =
         }
 
 
-
---Page.actionResultView appState (viewVersionHistory appState cfg model) versionsAndEvents
-
-
 viewVersionHistory : AppState -> ViewConfig msg -> Model -> ( List ProjectVersion, List ProjectEvent ) -> Html msg
 viewVersionHistory appState cfg model ( versions, events ) =
     let
