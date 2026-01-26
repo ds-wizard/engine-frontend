@@ -1,6 +1,7 @@
 module Registry.Api.Models.LocaleDetail exposing
     ( LocaleDetail
     , decoder
+    , getId
     , otherVersionId
     )
 
@@ -9,11 +10,12 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Registry.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 
 
 type alias LocaleDetail =
-    { id : String
+    { uuid : Uuid
     , name : String
     , code : String
     , localeId : String
@@ -30,7 +32,7 @@ type alias LocaleDetail =
 decoder : Decoder LocaleDetail
 decoder =
     D.succeed LocaleDetail
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "code" D.string
         |> D.required "localeId" D.string
@@ -43,6 +45,11 @@ decoder =
         |> D.required "createdAt" D.datetime
 
 
+getId : LocaleDetail -> String
+getId locale =
+    locale.organization.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString locale.version
+
+
 otherVersionId : LocaleDetail -> Version -> String
-otherVersionId documentTemplate version =
-    documentTemplate.organization.organizationId ++ ":" ++ documentTemplate.localeId ++ ":" ++ Version.toString version
+otherVersionId locale version =
+    locale.organization.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString version
