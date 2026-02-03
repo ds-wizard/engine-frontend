@@ -175,7 +175,7 @@ fillStep appState formatIndex stepIndex step form =
             ]
 
         optionsMsgs =
-            List.foldr (++) [] <|
+            List.concat <|
                 List.indexedMap toOptionMsg (Dict.toList step.options)
     in
     List.foldl applyFormMsg form (formMsgs ++ optionsMsgs)

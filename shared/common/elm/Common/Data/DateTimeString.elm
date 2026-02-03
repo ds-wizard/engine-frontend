@@ -33,28 +33,28 @@ date str =
 
 dateGte : Date -> Date -> Bool
 dateGte (Date y1 m1 d1) (Date y2 m2 d2) =
-    (y1 > y1)
+    (y1 > y2)
         || (y1 == y2 && m1 > m2)
         || (y1 == y2 && m1 == m2 && d1 >= d2)
 
 
 dateGt : Date -> Date -> Bool
 dateGt (Date y1 m1 d1) (Date y2 m2 d2) =
-    (y1 > y1)
+    (y1 > y2)
         || (y1 == y2 && m1 > m2)
         || (y1 == y2 && m1 == m2 && d1 > d2)
 
 
 dateLte : Date -> Date -> Bool
 dateLte (Date y1 m1 d1) (Date y2 m2 d2) =
-    (y1 < y1)
+    (y1 < y2)
         || (y1 == y2 && m1 < m2)
         || (y1 == y2 && m1 == m2 && d1 <= d2)
 
 
 dateLt : Date -> Date -> Bool
 dateLt (Date y1 m1 d1) (Date y2 m2 d2) =
-    (y1 < y1)
+    (y1 < y2)
         || (y1 == y2 && m1 < m2)
         || (y1 == y2 && m1 == m2 && d1 < d2)
 

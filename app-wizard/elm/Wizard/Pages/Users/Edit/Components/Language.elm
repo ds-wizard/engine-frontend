@@ -21,6 +21,7 @@ import Html exposing (Html, div, form, input, label, text)
 import Html.Attributes exposing (checked, class, classList, name, type_)
 import Html.Events exposing (onClick, onSubmit)
 import Html.Extra as Html
+import Uuid exposing (Uuid)
 import Wizard.Api.Locales as LocalesApi
 import Wizard.Api.Models.LocaleSuggestion exposing (LocaleSuggestion)
 import Wizard.Api.Models.UserLocale exposing (UserLocale)
@@ -32,7 +33,7 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 type alias Model =
     { userLocale : ActionResult UserLocale
     , locales : ActionResult (List LocaleSuggestion)
-    , selectedLocale : Maybe String
+    , selectedLocale : Maybe Uuid
     , savingLocale : ActionResult ()
     }
 
@@ -49,7 +50,7 @@ initialModel =
 type Msg
     = GetUserLocaleCompleted (Result ApiError UserLocale)
     | GetLocalesCompleted (Result ApiError (List LocaleSuggestion))
-    | SelectLocale String
+    | SelectLocale Uuid
     | SaveLocale
     | SaveLocaleCompleted (Result ApiError ())
 
@@ -76,7 +77,7 @@ update cfg appState msg model =
                 Ok userLocale ->
                     ( { model
                         | userLocale = ActionResult.Success userLocale
-                        , selectedLocale = userLocale.id
+                        , selectedLocale = userLocale.uuid
                       }
                     , Cmd.none
                     )
@@ -98,13 +99,13 @@ update cfg appState msg model =
                     , RequestHelpers.getResultCmd cfg.logoutMsg result
                     )
 
-        SelectLocale localeId ->
-            ( { model | selectedLocale = Just localeId }, Cmd.none )
+        SelectLocale localeUuid ->
+            ( { model | selectedLocale = Just localeUuid }, Cmd.none )
 
         SaveLocale ->
             let
                 locale =
-                    { id = model.selectedLocale }
+                    { uuid = model.selectedLocale }
             in
             ( { model | savingLocale = ActionResult.Loading }
             , UsersApi.putCurrentUserLocale appState locale (cfg.wrapMsg << SaveLocaleCompleted)
@@ -149,7 +150,7 @@ languageFormView appState model locales =
         viewLocale locale =
             let
                 isSelected =
-                    Just locale.id == model.selectedLocale
+                    Just locale.uuid == model.selectedLocale
 
                 defaultBadge =
                     if locale.defaultLocale then
@@ -158,12 +159,12 @@ languageFormView appState model locales =
                     else
                         Html.nothing
             in
-            label [ classList [ ( "selected", Just locale.id == model.selectedLocale ) ] ]
+            label [ classList [ ( "selected", isSelected ) ] ]
                 [ input
                     [ type_ "radio"
                     , name "language"
                     , checked isSelected
-                    , onClick (SelectLocale locale.id)
+                    , onClick (SelectLocale locale.uuid)
                     ]
                     []
                 , div []

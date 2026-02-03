@@ -9,7 +9,9 @@ import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Flip exposing (flip)
 import List.Extensions as List
 import Url.Parser exposing ((</>), Parser, map, s)
+import Url.Parser.Extensions exposing (uuid)
 import Url.Parser.Query as Query
+import Uuid
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.UserEditRoutes as UserEditRoute
@@ -28,6 +30,9 @@ parsers appState wrapRoute =
         wrappedIndexRoute pqs q =
             wrapRoute <| IndexRoute pqs q
 
+        wrappedPluginRoute uuidOrCurrent pluginUuid =
+            wrapRoute (EditRoute uuidOrCurrent (UserEditRoute.PluginSettings pluginUuid))
+
         userRoutes =
             if Admin.isEnabled appState.config.admin then
                 []
@@ -45,6 +50,7 @@ parsers appState wrapRoute =
     , map (wrapRoute << flip EditRoute UserEditRoute.AppKeys) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "app-keys")
     , map (wrapRoute << flip EditRoute UserEditRoute.ActiveSessions) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "active-sessions")
     , map (wrapRoute << flip EditRoute UserEditRoute.SubmissionSettings) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "submission-settings")
+    , map wrappedPluginRoute (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "plugins" </> uuid)
     ]
         ++ userRoutes
 
@@ -84,6 +90,9 @@ toUrl route =
 
                 UserEditRoute.SubmissionSettings ->
                     editBase ++ [ "submission-settings" ]
+
+                UserEditRoute.PluginSettings pluginUuid ->
+                    editBase ++ [ "plugins", Uuid.toString pluginUuid ]
 
         IndexRoute paginationQueryString mbRole ->
             let

@@ -97,7 +97,7 @@ viewKnowledgeModel appState model locale =
         , sidebar =
             [ SidebarRow.viewId appState
                 { title = gettext "Locale ID" appState.locale
-                , id = locale.id
+                , id = Locale.getId locale
                 , wrapMsg = ItemIdBoxMsg
                 , itemIdBoxState = model.itemIdBoxState
                 }

@@ -8,9 +8,12 @@ import Common.Data.Navigator as Navigator exposing (Navigator)
 import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Gettext
 import Json.Decode as D exposing (Decoder)
+import Json.Decode.Extensions as D
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.BootstrapConfig as BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Data.Session as Session exposing (Session)
+import Wizard.Plugins.Plugin as Plugin exposing (Plugin)
+import Wizard.Plugins.PluginMetadata as PluginMetadata exposing (PluginMetadata)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -29,6 +32,8 @@ type alias Flags =
     , maxUploadFileSize : Maybe Int
     , urlCheckerUrl : Maybe String
     , newsUrl : Maybe String
+    , pluginMetadata : List PluginMetadata
+    , plugins : List Plugin
     , success : Bool
     }
 
@@ -50,6 +55,8 @@ decoder =
         |> D.optional "maxUploadFileSize" (D.maybe D.int) Nothing
         |> D.required "urlCheckerUrl" (D.maybe D.string)
         |> D.required "newsUrl" (D.maybe D.string)
+        |> D.required "plugins" (D.listIgnoreInvalid PluginMetadata.decoder)
+        |> D.required "plugins" (D.listIgnoreInvalid Plugin.decoder)
         |> D.hardcoded True
 
 
@@ -69,5 +76,7 @@ default =
     , maxUploadFileSize = Nothing
     , urlCheckerUrl = Nothing
     , newsUrl = Nothing
+    , pluginMetadata = []
+    , plugins = []
     , success = False
     }

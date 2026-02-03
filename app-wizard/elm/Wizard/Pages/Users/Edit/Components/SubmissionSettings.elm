@@ -189,12 +189,12 @@ formView appState model =
                     Form.getListIndexes (field "values") model.form
 
                 sectionContent =
-                    if List.length valueIndexes > 0 then
-                        div []
-                            (List.map (submissionSettingsSectionProp (field "values")) valueIndexes)
+                    if List.isEmpty valueIndexes then
+                        p [ class "text-muted" ] [ text <| String.format (gettext "There is no settings for %s." appState.locale) [ sectionName ] ]
 
                     else
-                        p [ class "text-muted" ] [ text <| String.format (gettext "There is no settings for %s." appState.locale) [ sectionName ] ]
+                        div []
+                            (List.map (submissionSettingsSectionProp (field "values")) valueIndexes)
             in
             div [ class "mb-4" ]
                 [ strong [ class "d-block mb-1" ] [ text sectionName ]

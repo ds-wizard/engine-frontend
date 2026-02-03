@@ -32,8 +32,15 @@
         padding-left: 1rem;
 
         li {
+            padding-top: 0.075rem;
+            padding-bottom: 0.075rem;
+
             input[type=checkbox] {
                 margin-right: 0.25rem;
+            }
+
+            p {
+                margin: 0;
             }
         }
     }

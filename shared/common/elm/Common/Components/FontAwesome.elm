@@ -142,6 +142,7 @@ module Common.Components.FontAwesome exposing
     , faSecretHide
     , faSecretShow
     , faSettings
+    , faSettingsAlt
     , faSortAsc
     , faSortDesc
     , faSpinner
@@ -905,6 +906,11 @@ faSecretShow =
 faSettings : Html msg
 faSettings =
     fas "fa-cogs"
+
+
+faSettingsAlt : Html msg
+faSettingsAlt =
+    fas "fa-gear"
 
 
 faSortAsc : Html msg

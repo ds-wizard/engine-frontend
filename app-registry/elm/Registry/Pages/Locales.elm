@@ -13,7 +13,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Registry.Api.Locales as LocalesApi
-import Registry.Api.Models.Locale exposing (Locale)
+import Registry.Api.Models.Locale as Locale exposing (Locale)
 import Registry.Components.ListItem as ListItem
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
@@ -64,12 +64,12 @@ view appState model =
 
 
 viewLocales : AppState -> List Locale -> Html Msg
-viewLocales appState documentTemplates =
+viewLocales appState locales =
     let
         localeView =
-            documentTemplates
+            locales
                 |> List.sortBy ((*) -1 << Time.posixToMillis << .createdAt)
-                |> List.map (ListItem.view appState { toRoute = Routes.localeDetail << .id })
+                |> List.map (ListItem.view appState { toRoute = Routes.localeDetail << .id } << Locale.toItem)
                 |> div []
     in
     div [ class "my-5" ]

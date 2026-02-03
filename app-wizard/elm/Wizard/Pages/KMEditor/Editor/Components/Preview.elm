@@ -235,6 +235,7 @@ view appState { editorContext, wrapMsg, saveRepliesMsg } model =
                     { feedbackEnabled = False
                     , todosEnabled = False
                     , commentsEnabled = False
+                    , pluginsEnabled = False
                     , readonly = False
                     , toolbarEnabled = False
                     , questionLinksEnabled = False
@@ -248,6 +249,7 @@ view appState { editorContext, wrapMsg, saveRepliesMsg } model =
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
                 , isKmEditor = True
+                , projectCommon = Nothing
                 }
                 { events = []
                 , kmEditorUuid = Just editorContext.kmEditor.uuid
@@ -313,7 +315,7 @@ toolbar appState wrapMsg saveRepliesMsg model =
 
 tagSelectionVisible : Model -> Bool
 tagSelectionVisible model =
-    List.length model.questionnaireModel.questionnaire.knowledgeModel.tagUuids > 0
+    not (List.isEmpty model.questionnaireModel.questionnaire.knowledgeModel.tagUuids)
 
 
 tagSelection : AppState -> Model -> Html Msg

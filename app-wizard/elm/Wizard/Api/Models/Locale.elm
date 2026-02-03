@@ -8,12 +8,13 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 
 
 type alias Locale =
-    { id : String
+    { uuid : Uuid
     , localeId : String
     , name : String
     , description : String
@@ -31,7 +32,7 @@ type alias Locale =
 decoder : Decoder Locale
 decoder =
     D.succeed Locale
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "localeId" D.string
         |> D.required "name" D.string
         |> D.required "description" D.string

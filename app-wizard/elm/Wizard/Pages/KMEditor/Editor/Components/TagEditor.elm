@@ -196,16 +196,16 @@ foldKMRows appState props model tags =
 
 foldChapter : AppState -> Props msg -> Model -> List Tag -> Chapter -> List (Html msg)
 foldChapter appState props model tags chapter =
-    if List.length chapter.questionUuids > 0 then
+    if List.isEmpty chapter.questionUuids then
+        []
+
+    else
         let
             questions =
                 EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
                     KnowledgeModel.getChapterQuestions chapter.uuid props.editorContext.kmEditor.knowledgeModel
         in
         List.foldl (\q rows -> rows ++ foldQuestion appState props model 1 tags q) [ trChapter appState props chapter tags ] questions
-
-    else
-        []
 
 
 foldQuestion : AppState -> Props msg -> Model -> Int -> List Tag -> Question -> List (Html msg)
@@ -254,11 +254,11 @@ foldAnswer appState props model indent tags answer =
             EditorContext.filterDeletedWith Question.getUuid props.editorContext <|
                 KnowledgeModel.getAnswerFollowupQuestions answer.uuid props.editorContext.kmEditor.knowledgeModel
     in
-    if List.length followUps > 0 then
-        List.foldl (\q rows -> rows ++ foldQuestion appState props model (indent + 1) tags q) [ trAnswer appState props answer indent tags ] followUps
+    if List.isEmpty followUps then
+        []
 
     else
-        []
+        List.foldl (\q rows -> rows ++ foldQuestion appState props model (indent + 1) tags q) [ trAnswer appState props answer indent tags ] followUps
 
 
 trQuestion : AppState -> Props msg -> Model -> Int -> List Tag -> Question -> Html msg
@@ -312,7 +312,7 @@ tdQuestionTagCheckbox props model question tag =
                 [ type_ "checkbox"
                 , checked hasTag
                 , onClick msg
-                , dataCy ("km-editor_tag-editor_row_question-" ++ Question.getUuid question ++ "_" ++ "tag-" ++ tag.uuid)
+                , dataCy ("km-editor_tag-editor_row_question-" ++ Question.getUuid question ++ "_tag-" ++ tag.uuid)
                 ]
                 []
             ]

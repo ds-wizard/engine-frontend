@@ -5,7 +5,6 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
 import Common.Components.Page as Page
-import Common.Components.Undraw as Undraw
 import Common.Utils.Markdown as Markdown
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
@@ -22,41 +21,54 @@ import Wizard.Api.Models.ProjectDetail.ProjectEvent as QuestionnaireEvent exposi
 import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData exposing (SetReplyData)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType as IntegrationReplyType
-import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
 import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Components.Html exposing (linkTo)
+import Wizard.Components.PluginView as PluginView
 import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Components.Questionnaire.Importer exposing (ImporterResult)
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Import.Models exposing (Model, SidePanel(..))
 import Wizard.Pages.Projects.Import.Msgs exposing (Msg(..))
+import Wizard.Plugins.Plugin as Plugin
+import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
     Page.actionResultView appState (viewContent appState model) <|
-        ActionResult.combine3 model.questionnaire model.questionnaireModel model.questionnaireImporter
+        ActionResult.combine3 model.project model.questionnaireModel model.knowledgeModelString
 
 
-viewContent : AppState -> Model -> ( ProjectQuestionnaire, Questionnaire.Model, ProjectImporter ) -> Html Msg
-viewContent appState model ( questionnaire, questionnaireModel, _ ) =
+viewContent : AppState -> Model -> ( ProjectQuestionnaire, Questionnaire.Model, String ) -> Html Msg
+viewContent appState model ( project, questionnaireModel, kmString ) =
     Maybe.unwrap
-        (viewContentBeforeImport appState)
-        (viewContentImportResult appState model questionnaire questionnaireModel)
+        (viewContentBeforeImport appState model project kmString)
+        (viewContentImportResult appState model project questionnaireModel)
         model.importResult
 
 
-viewContentBeforeImport : AppState -> Html msg
-viewContentBeforeImport appState =
-    Page.illustratedMessage
-        { illustration = Undraw.addInformation
-        , heading = gettext "Import" appState.locale
-        , lines = [ gettext "Follow the instructions in the importer window." appState.locale ]
-        , cy = "import"
-        }
+viewContentBeforeImport : AppState -> Model -> ProjectQuestionnaire -> String -> Html Msg
+viewContentBeforeImport appState model project kmString =
+    let
+        mbPluginData =
+            AppState.getPluginsByConnector appState .projectImporters
+                |> Plugin.filterByKmPatterns project.knowledgeModelPackageId
+                |> List.find (\( _, connector ) -> connector.url == model.importerUrl)
+    in
+    case mbPluginData of
+        Just ( plugin, connector ) ->
+            PluginView.view appState
+                plugin.uuid
+                connector.element
+                [ PluginElement.knowledgeModelValue kmString
+                , PluginElement.onImport GotImporterData
+                ]
+
+        Nothing ->
+            Page.error appState (gettext "Importer not found" appState.locale)
 
 
 viewContentImportResult : AppState -> Model -> ProjectQuestionnaire -> Questionnaire.Model -> ImporterResult -> Html Msg
@@ -160,6 +172,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
                 { feedbackEnabled = False
                 , todosEnabled = False
                 , commentsEnabled = False
+                , pluginsEnabled = False
                 , readonly = True
                 , toolbarEnabled = False
                 , questionLinksEnabled = False
@@ -171,6 +184,7 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
             , previewQuestionnaireEventMsg = Nothing
             , revertQuestionnaireMsg = Nothing
             , isKmEditor = False
+            , projectCommon = Nothing
             }
             { events = []
             , kmEditorUuid = Nothing

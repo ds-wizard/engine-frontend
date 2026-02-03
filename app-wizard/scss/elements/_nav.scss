@@ -27,10 +27,6 @@
       color: var(--bs-primary) !important;
       background: var(--bs-primary-bg);
     }
-
-    &.active {
-      cursor: default;
-    }
   }
 
   &.flex-column {

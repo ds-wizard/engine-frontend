@@ -8,20 +8,21 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Uuid exposing (Uuid)
 
 
 type alias UserLocale =
-    { id : Maybe String }
+    { uuid : Maybe Uuid }
 
 
 decoder : Decoder UserLocale
 decoder =
     D.succeed UserLocale
-        |> D.required "id" (D.maybe D.string)
+        |> D.required "uuid" (D.maybe Uuid.decoder)
 
 
 encode : UserLocale -> E.Value
 encode userLocale =
     E.object
-        [ ( "id", E.maybe E.string userLocale.id )
+        [ ( "uuid", E.maybe Uuid.encode userLocale.uuid )
         ]

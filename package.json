@@ -1,6 +1,6 @@
 {
   "name": "engine-frontend",
-  "version": "4.26.1",
+  "version": "4.27.0",
   "repository": "https://github.com/ds-wizard/engine-frontend",
   "license": "Apache-2.0",
   "scripts": {
@@ -38,19 +38,19 @@
     "sass-loader": "^16.0.6",
     "terser-webpack-plugin": "^5.3.16",
     "uglify-js": "^3.19.3",
-    "webpack": "^5.103.0",
+    "webpack": "^5.104.1",
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "^5.2.2"
   },
   "dependencies": {
-    "@codemirror/commands": "^6.10.0",
+    "@codemirror/commands": "^6.10.1",
     "@codemirror/lang-css": "^6.3.1",
     "@codemirror/lang-html": "^6.4.11",
     "@codemirror/lang-xml": "^6.1.0",
-    "@codemirror/language": "^6.11.3",
+    "@codemirror/language": "^6.12.1",
     "@codemirror/legacy-modes": "^6.5.2",
     "@codemirror/state": "^6.5.2",
-    "@codemirror/view": "^6.39.4",
+    "@codemirror/view": "^6.39.7",
     "@fortawesome/fontawesome-free": "^6.7.2",
     "@lezer/lr": "^1.4.5",
     "axios": "1.13.2",

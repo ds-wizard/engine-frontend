@@ -407,24 +407,20 @@ viewEventHeaderDropdown appState cfg model versions events event =
 
         items =
             ListingDropdown.itemsFromGroups groups
-    in
-    if List.length items > 0 then
-        let
-            eventUuidString =
-                Uuid.toString eventUuid
 
-            dropdownState =
-                Maybe.withDefault Dropdown.initialState <|
-                    Dict.get eventUuidString model.dropdownStates
-        in
+        eventUuidString =
+            Uuid.toString eventUuid
+
+        dropdownState =
+            Maybe.withDefault Dropdown.initialState <|
+                Dict.get eventUuidString model.dropdownStates
+    in
+    Html.viewIf (not (List.isEmpty items)) <|
         ListingDropdown.dropdown
             { dropdownState = dropdownState
             , toggleMsg = cfg.wrapMsg << DropdownMsg eventUuidString
             , items = items
             }
-
-    else
-        Html.nothing
 
 
 viewEventBadges : AppState -> List ProjectVersion -> List ProjectEvent -> ProjectEvent -> Html msg

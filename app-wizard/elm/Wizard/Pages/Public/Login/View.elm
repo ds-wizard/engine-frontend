@@ -95,7 +95,7 @@ loginFormView appState model =
             ]
 
         externalLogin =
-            if List.length appState.config.authentication.external.services > 0 then
+            if not (List.isEmpty appState.config.authentication.external.services) then
                 let
                     viewExternalLoginButton service =
                         ExternalLoginButton.view

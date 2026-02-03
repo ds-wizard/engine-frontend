@@ -487,6 +487,18 @@ select {
         }
     }
 
+    input:disabled + span {
+        cursor: not-allowed !important;
+
+        &:before {
+            background: $gray-200;
+        }
+
+        &:after {
+            background: $gray-100;
+        }
+    }
+
     input {
         &:checked + span {
             &:after {

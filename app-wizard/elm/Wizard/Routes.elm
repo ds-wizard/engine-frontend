@@ -90,6 +90,7 @@ module Wizard.Routes exposing
     , projectsDetailSettings
     , projectsFileDownload
     , projectsImport
+    , projectsImportLegacy
     , projectsIndex
     , projectsIndexWithFilters
     , projectsMigration
@@ -102,6 +103,7 @@ module Wizard.Routes exposing
     , settingsDefault
     , settingsLookAndFeel
     , settingsOrganization
+    , settingsPluginSettings
     , settingsRegistry
     , tenantsCreate
     , tenantsDetail
@@ -116,6 +118,7 @@ module Wizard.Routes exposing
     , usersEditLanguage
     , usersEditLanguageCurrent
     , usersEditPassword
+    , usersEditPluginSettings
     , usersEditSubmissionSettings
     , usersEditTours
     , usersIndex
@@ -769,8 +772,13 @@ projectsMigration =
 
 
 projectsImport : Uuid -> String -> Route
-projectsImport uuid importerId =
-    ProjectsRoute <| Wizard.Pages.Projects.Routes.ImportRoute uuid importerId
+projectsImport uuid importerUrl =
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.ImportRoute uuid importerUrl
+
+
+projectsImportLegacy : Uuid -> String -> Route
+projectsImportLegacy uuid importerId =
+    ProjectsRoute <| Wizard.Pages.Projects.Routes.ImportLegacyRoute uuid importerId
 
 
 isProjectSubroute : Route -> Bool
@@ -883,6 +891,11 @@ settingsRegistry =
     SettingsRoute Wizard.Pages.Settings.Routes.RegistryRoute
 
 
+settingsPluginSettings : Uuid -> Route
+settingsPluginSettings pluginUuid =
+    SettingsRoute (Wizard.Pages.Settings.Routes.PluginSettingsRoute pluginUuid)
+
+
 
 -- Tenants
 
@@ -975,6 +988,11 @@ usersEditSubmissionSettings =
     UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.SubmissionSettings
 
 
+usersEditPluginSettings : UuidOrCurrent -> Uuid -> Route
+usersEditPluginSettings uuidOrCurrent pluginUuid =
+    UsersRoute (Wizard.Pages.Users.Routes.EditRoute uuidOrCurrent (UserEditRoute.PluginSettings pluginUuid))
+
+
 usersEditCurrent : Route
 usersEditCurrent =
     usersEdit UuidOrCurrent.current
@@ -1037,7 +1055,7 @@ localesIndexWithFilters _ pagination =
     LocalesRoute (Wizard.Pages.Locales.Routes.IndexRoute pagination)
 
 
-localesDetail : String -> Route
+localesDetail : Uuid -> Route
 localesDetail =
     LocalesRoute << Wizard.Pages.Locales.Routes.DetailRoute
 

@@ -1,6 +1,7 @@
 module Wizard.Api.Users exposing
     ( deleteUser
     , getCurrentUserLocale
+    , getCurrentUserPluginSettings
     , getCurrentUserSubmissionProps
     , getUser
     , getUsers
@@ -8,6 +9,7 @@ module Wizard.Api.Users exposing
     , getUsersSuggestionsWithOptions
     , postUser
     , postUserPublic
+    , putCurrentPluginSettings
     , putCurrentUserLocale
     , putCurrentUserSubmissionProps
     , putLastSeenNewsId
@@ -25,6 +27,7 @@ import Common.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Json.Decode as D
 import Json.Encode as E
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.SubmissionProps as SubmissionProps exposing (SubmissionProps)
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Models.UserLocale as UserLocale exposing (UserLocale)
@@ -146,3 +149,13 @@ deleteUser appState uuid =
 putLastSeenNewsId : AppState -> String -> ToMsg () msg -> Cmd msg
 putLastSeenNewsId appState lastSeenNewsId =
     Request.putEmpty (AppState.toServerInfo appState) ("/users/current/news/" ++ lastSeenNewsId)
+
+
+getCurrentUserPluginSettings : AppState -> Uuid -> ToMsg String msg -> Cmd msg
+getCurrentUserPluginSettings appState pluginUuid =
+    Request.getString (AppState.toServerInfo appState) ("/users/current/plugin-settings/" ++ Uuid.toString pluginUuid)
+
+
+putCurrentPluginSettings : AppState -> Uuid -> String -> ToMsg () msg -> Cmd msg
+putCurrentPluginSettings appState pluginUuid =
+    Request.putString (AppState.toServerInfo appState) ("/users/current/plugin-settings/" ++ Uuid.toString pluginUuid) "application/json"

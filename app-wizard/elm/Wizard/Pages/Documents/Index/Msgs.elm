@@ -7,6 +7,7 @@ import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.Submission exposing (Submission)
 import Wizard.Api.Models.SubmissionService exposing (SubmissionService)
 import Wizard.Components.Listing.Msgs as Listing
+import Wizard.Components.PluginModal as PluginModal
 
 
 type Msg
@@ -24,3 +25,4 @@ type Msg
     | SetSubmissionErrorModal (Maybe String)
     | DownloadDocument Document
     | FileDownloaderMsg FileDownloader.Msg
+    | PluginModalMsg (PluginModal.Msg Document)

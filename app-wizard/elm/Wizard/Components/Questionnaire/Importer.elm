@@ -5,10 +5,12 @@ module Wizard.Components.Questionnaire.Importer exposing
 
 import Dict exposing (Dict)
 import Flip exposing (flip)
+import Gettext exposing (gettext)
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
+import String.Format as String
 import Uuid.Extra as Uuid
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question exposing (Question(..))
@@ -83,10 +85,13 @@ createEvent appState questionnaire importerEvent ( seed, items, importerResult )
                 }
 
         questionNotFound path =
-            ( seed, items, { importerResult | errors = importerResult.errors ++ [ "Question not found at: " ++ path ] } )
+            ( seed, items, { importerResult | errors = importerResult.errors ++ [ String.format (gettext "Question not found at: %s" appState.locale) [ path ] ] } )
 
         replyTypeUnexpected path =
-            ( seed, items, { importerResult | errors = importerResult.errors ++ [ "Unexpected reply type at: " ++ path ] } )
+            ( seed, items, { importerResult | errors = importerResult.errors ++ [ String.format (gettext "Unexpected reply type at: %s" appState.locale) [ path ] ] } )
+
+        answerUuidUnexpected answerUuid path =
+            ( seed, items, { importerResult | errors = importerResult.errors ++ [ String.format (gettext "Unexpected answer UUID \"%s\" at: %s" appState.locale) [ answerUuid, path ] ] } )
 
         wrap event =
             ( seed2, items, { importerResult | questionnaireEvents = importerResult.questionnaireEvents ++ [ event ] } )
@@ -96,8 +101,12 @@ createEvent appState questionnaire importerEvent ( seed, items, importerResult )
             case getQuestionFromPath data.path of
                 Just question ->
                     case question of
-                        OptionsQuestion _ _ ->
-                            wrap <| setReply data.path <| AnswerReply data.value
+                        OptionsQuestion _ optionsQuestionData ->
+                            if List.member data.value optionsQuestionData.answerUuids then
+                                wrap <| setReply data.path <| AnswerReply data.value
+
+                            else
+                                answerUuidUnexpected data.value data.path
 
                         IntegrationQuestion _ _ ->
                             wrap <| setReply data.path <| IntegrationReply <| IntegrationReplyType.PlainType data.value

@@ -28,19 +28,17 @@
 
   .typehints {
     position: absolute;
-    margin-top: -0.25rem;
     width: 100%;
     z-index: 100;
+    background: var(--bs-white);
     border: 1px solid var(--bs-border-color);
-    border-top: none;
-    border-bottom-left-radius: var(--bs-border-radius);
-    border-bottom-right-radius: var(--bs-border-radius);
+    border-radius: var(--bs-border-radius);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 
     &-search {
       position: relative;
       padding: .35rem .75rem;
       margin-top: 0.25rem;
-      background: var(--bs-white);
 
       .fas {
         position: absolute;
@@ -80,7 +78,6 @@
     }
 
     .typehints-loading, .typehints-error, .typehints-empty {
-      background: var(--bs-white);
       padding: .5rem .75rem;
 
       .fa, .fas, .far {
@@ -93,8 +90,10 @@
     }
 
     .typehints-loading {
-      @include fade-in;
-      color: var(--bs-gray-500);
+      .loader {
+        @include fade-in;
+        color: var(--bs-gray-500);
+      }
     }
 
     .typehints-error {
@@ -104,7 +103,6 @@
     ul {
       margin: 0;
       padding: 0;
-      background: var(--bs-white);
       max-height: 250px;
       overflow-y: auto;
       border-bottom-left-radius: 0.25rem;

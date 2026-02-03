@@ -2488,20 +2488,14 @@ viewAddedAndDeletedChildren fieldName originalChildren newChildren =
         else
             let
                 original =
-                    if List.length originalChildren > 0 then
+                    Html.viewIf (not (List.isEmpty originalChildren)) <|
                         ul [ class "del" ]
                             (List.map (\child -> li [] [ text child ]) originalChildren)
 
-                    else
-                        Html.nothing
-
                 new =
-                    if List.length newChildren > 0 then
+                    Html.viewIf (not (List.isEmpty newChildren)) <|
                         ul [ class "ins" ]
                             (List.map (\child -> li [] [ text child ]) newChildren)
-
-                    else
-                        Html.nothing
             in
             div [] [ original, new ]
 

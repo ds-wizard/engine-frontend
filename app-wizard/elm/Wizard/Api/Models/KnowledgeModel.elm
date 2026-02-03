@@ -639,7 +639,7 @@ createParentMap km =
                 |> insert_ .integrationUuids
                 |> insert_ .resourceCollectionUuids
 
-        processChapter chapter dict =
+        processChapter _ chapter dict =
             let
                 insert_ getChildUuids =
                     insert chapter.uuid (getChildUuids chapter)
@@ -647,7 +647,7 @@ createParentMap km =
             dict
                 |> insert_ .questionUuids
 
-        processQuestion question dict =
+        processQuestion _ question dict =
             let
                 insert_ getChildUuids =
                     insert (Question.getUuid question) (getChildUuids question)
@@ -659,7 +659,7 @@ createParentMap km =
                 |> insert_ Question.getItemTemplateQuestionUuids
                 |> insert_ Question.getChoiceUuids
 
-        processAnswer answer dict =
+        processAnswer _ answer dict =
             let
                 insert_ getChildUuids =
                     insert answer.uuid (getChildUuids answer)
@@ -667,7 +667,7 @@ createParentMap km =
             dict
                 |> insert_ .followUpUuids
 
-        processResourceCollection resourceCollection dict =
+        processResourceCollection _ resourceCollection dict =
             let
                 insert_ getChildUuids =
                     insert resourceCollection.uuid (getChildUuids resourceCollection)
@@ -676,16 +676,16 @@ createParentMap km =
                 |> insert_ .resourcePageUuids
 
         processChapters chapters dict =
-            List.foldl processChapter dict <| Dict.values chapters
+            Dict.foldl processChapter dict chapters
 
         processQuestions questions dict =
-            List.foldl processQuestion dict <| Dict.values questions
+            Dict.foldl processQuestion dict questions
 
         processAnswers answers dict =
-            List.foldl processAnswer dict <| Dict.values answers
+            Dict.foldl processAnswer dict answers
 
         processResourceCollections resourceCollections dict =
-            List.foldl processResourceCollection dict <| Dict.values resourceCollections
+            Dict.foldl processResourceCollection dict resourceCollections
     in
     Dict.empty
         |> processKM km

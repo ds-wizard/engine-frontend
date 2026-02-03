@@ -11,12 +11,12 @@ module Common.Components.TypeHintInput exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Browser.Dom as Dom
 import Browser.Events
 import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Components.FontAwesome exposing (faError, faRemove, faSearch, faSpinner)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Common.Ports.Dom as Dom
 import Debounce exposing (Debounce)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, li, text, ul)
@@ -27,7 +27,6 @@ import Json.Decode as D exposing (Decoder)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shortcut
-import Task
 import Task.Extra as Task
 
 
@@ -76,7 +75,6 @@ type Msg a
     | SetTypehintFocusNext
     | SetTypehintFocusPrev
     | SelectTypehintByFocus
-    | NoOp
 
 
 type alias UpdateCofnig a msg =
@@ -96,7 +94,7 @@ update cfg msg model =
             ( { model | typehints = Just Loading }
             , Cmd.batch
                 [ Cmd.map cfg.wrapMsg (loadTypeHints cfg model.q)
-                , Task.attempt (always (cfg.wrapMsg NoOp)) (Dom.focus (model.fieldId ++ "-search"))
+                , Dom.focus ("#" ++ model.fieldId ++ "_search")
                 ]
             )
 
@@ -220,9 +218,6 @@ update cfg msg model =
                 _ ->
                     ( model, Cmd.none )
 
-        NoOp ->
-            ( model, Cmd.none )
-
 
 loadTypeHints : UpdateCofnig a msg -> String -> Cmd (Msg a)
 loadTypeHints cfg q =
@@ -243,7 +238,7 @@ debounceConfig =
 subscriptions : Model a -> Sub (Msg a)
 subscriptions model =
     if Maybe.isJust model.typehints then
-        Browser.Events.onClick <| D.map (always HideTypeHints) (succeedIfClickOutside model.fieldId)
+        Browser.Events.onMouseDown <| D.map (always HideTypeHints) (succeedIfClickOutside model.fieldId)
 
     else
         Sub.none
@@ -364,8 +359,10 @@ viewTypeHints cfg model =
 
                     Loading ->
                         div [ class "typehints-loading" ]
-                            [ faSpinner
-                            , text (gettext "Loading..." cfg.locale)
+                            [ div [ class "loader" ]
+                                [ faSpinner
+                                , text (gettext "Loading..." cfg.locale)
+                                ]
                             ]
 
                     Error err ->

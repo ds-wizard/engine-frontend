@@ -122,12 +122,9 @@ listingDescription appState user =
                     []
 
         sources =
-            if List.length user.sources > 0 then
+            Html.viewIf (not (List.isEmpty user.sources)) <|
                 span [ class "fragment" ]
                     (List.map (ExternalLoginButton.badgeWrapper appState.locale appState.config) user.sources)
-
-            else
-                Html.nothing
     in
     span []
         ([ a [ class "fragment", href <| "mailto:" ++ user.email ]

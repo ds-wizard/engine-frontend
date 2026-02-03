@@ -1,6 +1,7 @@
 module Wizard.Pages.Locales.Models exposing (Model, initLocalModel, initialModel)
 
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Locales.Create.Models
 import Wizard.Pages.Locales.Detail.Models
@@ -20,7 +21,7 @@ type alias Model =
 initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Pages.Locales.Create.Models.initialModel appState
-    , detailModel = Wizard.Pages.Locales.Detail.Models.initialModel ""
+    , detailModel = Wizard.Pages.Locales.Detail.Models.initialModel Uuid.nil
     , importModel = Wizard.Pages.Locales.Import.Models.initialModel appState Nothing
     , indexModel = Wizard.Pages.Locales.Index.Models.initialModel PaginationQueryString.empty
     }
@@ -32,8 +33,8 @@ initLocalModel appState route model =
         CreateRoute ->
             { model | createModel = Wizard.Pages.Locales.Create.Models.initialModel appState }
 
-        DetailRoute id ->
-            { model | detailModel = Wizard.Pages.Locales.Detail.Models.initialModel id }
+        DetailRoute localeUuid ->
+            { model | detailModel = Wizard.Pages.Locales.Detail.Models.initialModel localeUuid }
 
         ImportRoute mbLocaleId ->
             { model | importModel = Wizard.Pages.Locales.Import.Models.initialModel appState mbLocaleId }

@@ -18,13 +18,13 @@ update msg wrapMsg appState model =
             ( { model | documentTemplateId = documentTemplateId }, Cmd.none )
 
         Submit ->
-            if String.length model.documentTemplateId > 0 then
+            if String.isEmpty model.documentTemplateId then
+                ( model, Cmd.none )
+
+            else
                 ( { model | pulling = Loading }
                 , DocumentTemplatesApi.pullTemplate appState model.documentTemplateId (wrapMsg << PullTemplateCompleted)
                 )
-
-            else
-                ( model, Cmd.none )
 
         PullTemplateCompleted result ->
             RequestHelpers.applyResult

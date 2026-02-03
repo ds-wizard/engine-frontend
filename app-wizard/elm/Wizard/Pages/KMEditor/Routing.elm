@@ -62,13 +62,13 @@ toUrl route =
                     in
                     [ moduleRoot
                     , "create"
-                    , "?" ++ "selected" ++ "=" ++ id ++ "&" ++ "edit" ++ "=" ++ editString
+                    , "?selected=" ++ id ++ "&edit=" ++ editString
                     ]
 
                 ( Just id, Nothing ) ->
                     [ moduleRoot
                     , "create"
-                    , "?" ++ "selected" ++ "=" ++ id
+                    , "?selected=" ++ id
                     ]
 
                 _ ->

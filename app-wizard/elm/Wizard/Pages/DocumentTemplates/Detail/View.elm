@@ -246,11 +246,11 @@ sidePanelFormats appState template =
                 |> List.sortBy .name
                 |> List.map formatView
     in
-    if List.length formats > 0 then
-        Just ( gettext "Formats" appState.locale, "formats", ul [ class "fa-ul" ] formats )
+    if List.isEmpty formats then
+        Nothing
 
     else
-        Nothing
+        Just ( gettext "Formats" appState.locale, "formats", ul [ class "fa-ul" ] formats )
 
 
 sidePanelOtherVersions : AppState -> DocumentTemplateDetail -> Maybe ( String, String, Html msg )
@@ -270,11 +270,11 @@ sidePanelOtherVersions appState template =
                 |> List.reverse
                 |> List.map versionLink
     in
-    if List.length versionLinks > 0 then
-        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
+    if List.isEmpty versionLinks then
+        Nothing
 
     else
-        Nothing
+        Just ( gettext "Other versions" appState.locale, "other-versions", ul [] versionLinks )
 
 
 sidePanelOrganizationInfo : AppState -> DocumentTemplateDetail -> Maybe ( String, String, Html msg )
@@ -324,7 +324,10 @@ sidePanelUsableWith appState model template =
                 |> takeFirstPackages
                 |> List.map packageLink
     in
-    if List.length kmPackageLinks > 0 then
+    if List.isEmpty kmPackageLinks then
+        Nothing
+
+    else
         let
             showAllLink =
                 if model.showAllKms || List.length template.usableKnowledgeModelPackages <= 10 then
@@ -339,9 +342,6 @@ sidePanelUsableWith appState model template =
                         ]
         in
         Just ( gettext "Usable with" appState.locale, "usable-with", ul [] (kmPackageLinks ++ [ showAllLink ]) )
-
-    else
-        Nothing
 
 
 viewOrganization : OrganizationInfo -> Html msg

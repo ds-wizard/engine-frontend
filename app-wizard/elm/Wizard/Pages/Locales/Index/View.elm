@@ -100,7 +100,7 @@ listingTitle appState locale =
                 Html.nothing
     in
     span []
-        [ linkTo (Routes.localesDetail locale.id) [] [ text locale.name ]
+        [ linkTo (Routes.localesDetail locale.uuid) [] [ text locale.name ]
         , Badge.light (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString locale.version ]
         , Badge.dark []
@@ -135,7 +135,7 @@ listingDescription appState locale =
                     Html.nothing
     in
     span []
-        [ code [ class "fragment" ] [ text locale.id ]
+        [ code [ class "fragment" ] [ text (locale.organizationId ++ ":" ++ locale.localeId ++ ":" ++ Version.toString locale.version) ]
         , organizationFragment
         , span [ class "fragment" ] [ text locale.description ]
         ]

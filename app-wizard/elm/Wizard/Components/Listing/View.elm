@@ -357,15 +357,15 @@ viewFilter appState cfg model filterId label items =
 
 viewList : AppState -> ViewConfig a msg -> Model a -> Pagination a -> Html msg
 viewList appState cfg model pagination =
-    if List.length pagination.items > 0 then
+    if List.isEmpty pagination.items then
+        viewEmpty appState cfg model
+
+    else
         div []
             [ div [ class "list-group list-group-flush", dataCy "listing_list" ]
                 (List.indexedMap (viewItem appState cfg) model.items)
             , viewPagination appState cfg model pagination.page
             ]
-
-    else
-        viewEmpty appState cfg model
 
 
 viewPagination : AppState -> ViewConfig a msg -> Model a -> Page -> Html msg
@@ -409,61 +409,57 @@ viewPagination appState cfg model page =
 
             else
                 ( page.totalPages, Html.nothing )
+
+        lastLink =
+            if currentPage < page.totalPages then
+                viewPageLink page.totalPages
+                    [ class "icon-right" ]
+                    [ text (gettext "Last" appState.locale)
+                    , fa "fas fa-angle-double-right"
+                    ]
+
+            else
+                Html.nothing
+
+        nextLink =
+            viewPageLink (currentPage + 1)
+                [ class "icon-right"
+                , classList [ ( "disabled", currentPage == page.totalPages ) ]
+                , dataCy "listing_page-link_next"
+                ]
+                [ text (gettext "Next" appState.locale)
+                , fa "fas fa-angle-right"
+                ]
+
+        pageLinks =
+            List.map viewNavLink (List.range left right)
+
+        prevLink =
+            viewPageLink (currentPage - 1)
+                [ class "icon-left"
+                , classList [ ( "disabled", currentPage == 1 ) ]
+                , dataCy "listing_page-link_prev"
+                ]
+                [ fa "fas fa-angle-left"
+                , text (gettext "Prev" appState.locale)
+                ]
+
+        firstLink =
+            if currentPage > 1 then
+                viewPageLink 1
+                    [ class "icon-left" ]
+                    [ fa "fas fa-angle-double-left"
+                    , text (gettext "First" appState.locale)
+                    ]
+
+            else
+                Html.nothing
+
+        links =
+            [ firstLink, prevLink, leftDots ] ++ pageLinks ++ [ rightDots, nextLink, lastLink ]
     in
-    if page.totalPages > 1 then
-        let
-            lastLink =
-                if currentPage < page.totalPages then
-                    viewPageLink page.totalPages
-                        [ class "icon-right" ]
-                        [ text (gettext "Last" appState.locale)
-                        , fa "fas fa-angle-double-right"
-                        ]
-
-                else
-                    Html.nothing
-
-            nextLink =
-                viewPageLink (currentPage + 1)
-                    [ class "icon-right"
-                    , classList [ ( "disabled", currentPage == page.totalPages ) ]
-                    , dataCy "listing_page-link_next"
-                    ]
-                    [ text (gettext "Next" appState.locale)
-                    , fa "fas fa-angle-right"
-                    ]
-
-            pageLinks =
-                List.map viewNavLink (List.range left right)
-
-            prevLink =
-                viewPageLink (currentPage - 1)
-                    [ class "icon-left"
-                    , classList [ ( "disabled", currentPage == 1 ) ]
-                    , dataCy "listing_page-link_prev"
-                    ]
-                    [ fa "fas fa-angle-left"
-                    , text (gettext "Prev" appState.locale)
-                    ]
-
-            firstLink =
-                if currentPage > 1 then
-                    viewPageLink 1
-                        [ class "icon-left" ]
-                        [ fa "fas fa-angle-double-left"
-                        , text (gettext "First" appState.locale)
-                        ]
-
-                else
-                    Html.nothing
-
-            links =
-                [ firstLink, prevLink, leftDots ] ++ pageLinks ++ [ rightDots, nextLink, lastLink ]
-        in
+    Html.viewIf (page.totalPages > 1) <|
         nav [] [ ul [ class "pagination" ] links ]
-
-    else
-        Html.nothing
 
 
 viewEmpty : AppState -> ViewConfig a msg -> Model a -> Html msg
@@ -494,15 +490,12 @@ viewItem appState config index item =
             config.dropdownItems item.item
 
         dropdown =
-            if List.length actions > 0 then
+            Html.viewIf (not (List.isEmpty actions)) <|
                 ListingDropdown.dropdown
                     { dropdownState = item.dropdownState
                     , toggleMsg = config.wrapMsg << ItemDropdownMsg index
                     , items = actions
                     }
-
-            else
-                Html.nothing
 
         icon =
             config.iconView

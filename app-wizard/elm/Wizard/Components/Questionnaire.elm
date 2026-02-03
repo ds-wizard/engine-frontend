@@ -38,7 +38,6 @@ import Browser.Events
 import CharIdentifier
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
-import Common.Api.Models.UserInfo as UserInfo
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
@@ -70,6 +69,7 @@ import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
 import Html.Extra as Html
+import Html.Keyed
 import Html.Lazy as Lazy
 import Json.Decode as D exposing (decodeValue)
 import Json.Decode.Extra as D
@@ -92,6 +92,7 @@ import Time.Distance as Time
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
@@ -107,6 +108,7 @@ import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent exposing (ProjectEvent)
@@ -128,6 +130,8 @@ import Wizard.Api.ProjectImporters as ProjectsImportersApi
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (illustratedMessage, resizableTextarea)
+import Wizard.Components.PluginModal as PluginModal
+import Wizard.Components.PluginView as PluginView
 import Wizard.Components.Questionnaire.DeleteVersionModal as DeleteVersionModal
 import Wizard.Components.Questionnaire.FeedbackModal as FeedbackModal
 import Wizard.Components.Questionnaire.FileUploadModal as FileUploadModal
@@ -145,6 +149,8 @@ import Wizard.Data.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Data.Integrations as Integrations
 import Wizard.Data.Session as Session
 import Wizard.Pages.Projects.Common.ProjectTodoGroup as ProjectTodoGroup
+import Wizard.Plugins.Plugin as Plugin exposing (ProjectQuestionActionConnectorType(..))
+import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
@@ -203,6 +209,8 @@ type alias Model =
     , linkedItemsDropdownStates : Dict String Dropdown.State
     , searchPanelModel : SearchPanel.Model
     , mbHighlightedPath : Maybe String
+    , pluginProjectActionModal : PluginModal.Model ProjectCommon
+    , pluginProjectQuestionActionModal : PluginModal.Model ( ProjectCommon, Question, String )
     }
 
 
@@ -287,6 +295,8 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , linkedItemsDropdownStates = Dict.empty
             , searchPanelModel = SearchPanel.init
             , mbHighlightedPath = Nothing
+            , pluginProjectActionModal = PluginModal.initialModel
+            , pluginProjectQuestionActionModal = PluginModal.initialModel
             }
 
         ( model, scrollCmd ) =
@@ -555,6 +565,7 @@ type alias Config msg =
     , previewQuestionnaireEventMsg : Maybe (Uuid -> msg)
     , revertQuestionnaireMsg : Maybe (ProjectEvent -> msg)
     , isKmEditor : Bool
+    , projectCommon : Maybe ProjectCommon
     }
 
 
@@ -562,6 +573,7 @@ type alias FeaturesConfig =
     { feedbackEnabled : Bool
     , todosEnabled : Bool
     , commentsEnabled : Bool
+    , pluginsEnabled : Bool
     , readonly : Bool
     , toolbarEnabled : Bool
     , questionLinksEnabled : Bool
@@ -715,6 +727,8 @@ type Msg
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
     | LinkedItemsDropdownMsg String Dropdown.State
     | SearchPanelMsg SearchPanel.Msg
+    | PluginProjectActionModalMsg (PluginModal.Msg ProjectCommon)
+    | PluginProjectQuestionActionModalMsg (PluginModal.Msg ( ProjectCommon, Question, String ))
 
 
 update : Msg -> (Msg -> msg) -> Maybe (Bool -> msg) -> AppState -> Context -> Model -> ( Seed, Model, Cmd msg )
@@ -782,6 +796,9 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                             showRightPanel
                                 (ProjectQuestionnaire.warningsLength model.questionnaire > 0)
                                 RightPanel.Warnings
+
+                        RightPanel.PluginQuestionAction data ->
+                            showRightPanel True (RightPanel.PluginQuestionAction data)
 
                 panelCmd =
                     case updatedRightPanel of
@@ -1531,6 +1548,12 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             in
             withSeed ( { model | searchPanelModel = searchPanelModel }, Cmd.map SearchPanelMsg searchPanelCmd )
 
+        PluginProjectActionModalMsg pluginModalMsg ->
+            wrap { model | pluginProjectActionModal = PluginModal.update pluginModalMsg model.pluginProjectActionModal }
+
+        PluginProjectQuestionActionModalMsg pluginModalMsg ->
+            wrap { model | pluginProjectQuestionActionModal = PluginModal.update pluginModalMsg model.pluginProjectQuestionActionModal }
+
         _ ->
             wrap model
 
@@ -1539,7 +1562,7 @@ localStorageCollapsedItemsCmd : Uuid -> Set String -> Cmd msg
 localStorageCollapsedItemsCmd uuid items =
     LocalStorage.setItem
         (localStorageCollapsedItemKey uuid)
-        (E.list E.string (Set.toList items))
+        (E.set E.string items)
 
 
 localStorageRightPanelCmd : Model -> Cmd msg
@@ -2005,6 +2028,8 @@ view appState cfg ctx model =
         , Html.map (cfg.wrapMsg << FileUploadModalMsg) <| FileUploadModal.view appState cfg.isKmEditor model.fileUploadModalModel
         , Html.map cfg.wrapMsg <| viewRemoveItemModal appState model
         , Html.map cfg.wrapMsg <| viewFileDeleteModal appState model
+        , Html.map cfg.wrapMsg <| viewPluginProjectActionModal appState model
+        , Html.map cfg.wrapMsg <| viewPluginProjectQuestionActionModal appState model
         ]
 
 
@@ -2080,34 +2105,97 @@ viewQuestionnaireToolbar appState cfg model =
                     }
                 ]
 
-        importersDropdown =
+        importerPlugins =
+            AppState.getPluginsByConnector appState .projectImporters
+                |> Plugin.filterByKmPatterns model.questionnaire.knowledgeModelPackageId
+                |> List.sortBy (.name << Tuple.second)
+                |> List.map pluginImporter
+
+        pluginImporter ( _, connector ) =
+            Dropdown.anchorItem
+                (class "dropdown-item" :: linkToAttributes (Routes.projectsImport model.uuid connector.url))
+                [ text connector.name ]
+
+        importers =
             if importersAvailable appState cfg model then
+                ActionResultBlock.dropdownView
+                    { viewContent = importerDropdownItem
+                    , actionResult = model.questionnaireImporters
+                    , locale = appState.locale
+                    }
+
+            else
+                []
+
+        importerItems =
+            importerPlugins ++ importers
+
+        importersDropdown =
+            if List.isEmpty importerItems then
+                Html.nothing
+
+            else
                 div [ class "item-group" ]
                     [ Dropdown.dropdown model.questionnaireImportersDropdown
                         { options = []
                         , toggleMsg = ImportersDropdownMsg
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
-                                [ text (gettext "Import replies" appState.locale) ]
-                        , items =
-                            ActionResultBlock.dropdownView
-                                { viewContent = importerDropdownItem
-                                , actionResult = model.questionnaireImporters
-                                , locale = appState.locale
-                                }
+                                [ text (gettext "Import" appState.locale) ]
+                        , items = importerItems
                         }
                     ]
 
-            else
-                Html.nothing
-
         importerDropdownItem importer =
             Dropdown.anchorItem
-                (class "dropdown-item" :: linkToAttributes (Routes.projectsImport model.uuid importer.id))
+                (class "dropdown-item" :: linkToAttributes (Routes.projectsImportLegacy model.uuid importer.id))
                 [ text importer.name ]
 
-        actionsDropdown =
+        projectActionPlugins =
+            case cfg.projectCommon of
+                Just projectCommon ->
+                    AppState.getPluginsByConnector appState .projectActions
+                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> List.sortBy (.name << Tuple.second)
+                        |> List.map (pluginAction projectCommon)
+
+                Nothing ->
+                    []
+
+        pluginAction projectCommon ( plugin, connector ) =
+            Dropdown.anchorItem
+                [ class "dropdown-item"
+                , onClick
+                    (PluginProjectActionModalMsg
+                        (PluginModal.open
+                            { pluginUuid = plugin.uuid
+                            , pluginElement = connector.element
+                            , data = projectCommon
+                            }
+                        )
+                    )
+                ]
+                [ text plugin.name ]
+
+        projectActions =
             if actionsAvailable appState cfg model then
+                ActionResultBlock.dropdownView
+                    { viewContent = actionDropdownItem
+                    , actionResult = model.questionnaireActions
+                    , locale = appState.locale
+                    }
+
+            else
+                []
+
+        actionsItems =
+            projectActionPlugins ++ projectActions
+
+        actionsDropdown =
+            if List.isEmpty actionsItems then
+                Html.nothing
+
+            else
                 div [ class "item-group" ]
                     [ Dropdown.dropdown model.questionnaireActionsDropdown
                         { options = []
@@ -2117,17 +2205,9 @@ viewQuestionnaireToolbar appState cfg model =
                                 [ span [ class "icon" ] []
                                 , text (gettext "Actions" appState.locale)
                                 ]
-                        , items =
-                            ActionResultBlock.dropdownView
-                                { viewContent = actionDropdownItem
-                                , actionResult = model.questionnaireActions
-                                , locale = appState.locale
-                                }
+                        , items = actionsItems
                         }
                     ]
-
-            else
-                Html.nothing
 
         actionDropdownItem action =
             Dropdown.anchorItem
@@ -2351,70 +2431,66 @@ viewQuestionnaireLeftPanelPhaseSelection appState cfg model =
     let
         phases =
             KnowledgeModel.getPhases model.questionnaire.knowledgeModel
-    in
-    if List.length phases > 0 then
-        let
-            selectedPhaseTitle =
-                List.find ((==) (Maybe.map Uuid.toString model.questionnaire.phaseUuid) << Just << .uuid) phases
-                    |> Maybe.orElse (List.head phases)
-                    |> Maybe.unwrap "" .title
 
-            phaseButtonOnClick =
-                if cfg.features.readonly then
-                    []
+        selectedPhaseTitle =
+            List.find ((==) (Maybe.map Uuid.toString model.questionnaire.phaseUuid) << Just << .uuid) phases
+                |> Maybe.orElse (List.head phases)
+                |> Maybe.unwrap "" .title
 
-                else
-                    [ onClick (PhaseModalUpdate True Nothing) ]
+        phaseButtonOnClick =
+            if cfg.features.readonly then
+                []
 
-            phaseButton =
-                button
-                    ([ class "btn btn-input w-100"
-                     , dataCy "phase-selection"
-                     , disabled cfg.features.readonly
-                     ]
-                        ++ phaseButtonOnClick
-                    )
-                    [ text selectedPhaseTitle ]
+            else
+                [ onClick (PhaseModalUpdate True Nothing) ]
 
-            currentPhaseIndex =
-                ProjectQuestionnaire.getCurrentPhaseIndex model.questionnaire
+        phaseButton =
+            button
+                ([ class "btn btn-input w-100"
+                 , dataCy "phase-selection"
+                 , disabled cfg.features.readonly
+                 ]
+                    ++ phaseButtonOnClick
+                )
+                [ text selectedPhaseTitle ]
 
-            progress =
-                toFloat currentPhaseIndex / toFloat (List.length phases - 1)
+        currentPhaseIndex =
+            ProjectQuestionnaire.getCurrentPhaseIndex model.questionnaire
 
-            phaseProgressPoint i _ =
-                div
-                    [ class "phase-progress__point"
-                    , classList
-                        [ ( "phase-progress__point--active", i <= currentPhaseIndex )
-                        , ( "phase-progress__point--current", i == currentPhaseIndex )
-                        ]
+        progress =
+            toFloat currentPhaseIndex / toFloat (List.length phases - 1)
+
+        phaseProgressPoint i _ =
+            div
+                [ class "phase-progress__point"
+                , classList
+                    [ ( "phase-progress__point--active", i <= currentPhaseIndex )
+                    , ( "phase-progress__point--current", i == currentPhaseIndex )
                     ]
-                    []
+                ]
+                []
 
-            phaseProgressPoints =
-                List.indexedMap phaseProgressPoint phases
+        phaseProgressPoints =
+            List.indexedMap phaseProgressPoint phases
 
-            phaseProgress =
-                div (class "phase-progress" :: phaseButtonOnClick)
-                    (div [ class "phase-progress__bar" ]
-                        [ div
-                            [ class "phase-progress__fill"
-                            , style "width" (String.fromFloat (progress * 100) ++ "%")
-                            ]
-                            []
+        phaseProgress =
+            div (class "phase-progress" :: phaseButtonOnClick)
+                (div [ class "phase-progress__bar" ]
+                    [ div
+                        [ class "phase-progress__fill"
+                        , style "width" (String.fromFloat (progress * 100) ++ "%")
                         ]
-                        :: phaseProgressPoints
-                    )
-        in
+                        []
+                    ]
+                    :: phaseProgressPoints
+                )
+    in
+    Html.viewIf (not (List.isEmpty phases)) <|
         div [ class "questionnaire__left-panel__phase" ]
             [ label [] [ text (gettext "Current phase" appState.locale) ]
             , phaseButton
             , phaseProgress
             ]
-
-    else
-        Html.nothing
 
 
 viewPhaseModal : AppState -> Model -> Html Msg
@@ -2586,6 +2662,28 @@ viewQuestionnaireRightPanel appState cfg model =
 
             else
                 Html.nothing
+
+        RightPanel.PluginQuestionAction data ->
+            case ( cfg.features.pluginsEnabled, cfg.projectCommon ) of
+                ( True, Just projectCommon ) ->
+                    wrapPanel <|
+                        [ Html.Keyed.node "div"
+                            []
+                            [ ( data.questionPath
+                              , PluginView.view appState
+                                    data.plugin.uuid
+                                    data.connector.element
+                                    [ PluginElement.projectValue projectCommon
+                                    , PluginElement.questionValue data.question
+                                    , PluginElement.questionPathValue data.questionPath
+                                    , PluginElement.onActionClose (cfg.wrapMsg (SetRightPanel RightPanel.None))
+                                    ]
+                              )
+                            ]
+                        ]
+
+                _ ->
+                    Html.nothing
 
 
 
@@ -2861,7 +2959,7 @@ viewQuestionnaireRightPanelCommentsLoaded appState model path commentThreads =
             if model.commentsViewPrivate then
                 div [ class "alert alert-editor-notes" ]
                     [ i [ class "fa fas fa-lock" ] []
-                    , span [] [ text (gettext "Editor notes are only visible to project Editors and Owners." appState.locale) ]
+                    , span [ class "ms-2" ] [ text (gettext "Editor notes are only visible to project Editors and Owners." appState.locale) ]
                     ]
 
             else
@@ -3630,11 +3728,14 @@ viewQuestionLabel appState cfg _ model path humanIdentifiers question questionSt
                 [ cfg.renderer.renderQuestionLabel question ]
             ]
         , span [ class "custom-actions" ]
-            [ viewTodoAction appState cfg model path
-            , viewCommentAction appState cfg model path
-            , viewFeedbackAction appState cfg model question
-            , viewCopyLinkAction appState cfg model path
-            ]
+            ([ viewTodoAction appState cfg model path
+             , viewCommentAction appState cfg model path
+             , viewFeedbackAction appState cfg model question
+             ]
+                ++ viewPluginQuestionActions appState cfg model question path
+                ++ [ viewCopyLinkAction appState cfg model path
+                   ]
+            )
         ]
 
 
@@ -4739,6 +4840,66 @@ viewFeedbackAction appState cfg model question =
         Html.nothing
 
 
+viewPluginQuestionActions : AppState -> Config msg -> Model -> Question -> List String -> List (Html Msg)
+viewPluginQuestionActions appState cfg model question path =
+    case cfg.projectCommon of
+        Just projectCommon ->
+            let
+                plugins =
+                    AppState.getPluginsByConnector appState .projectQuestionActions
+                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> List.sortBy (.name << .action << Tuple.second)
+
+                viewPluginButton ( plugin, connector ) =
+                    let
+                        clickAction =
+                            case connector.type_ of
+                                ModalProjectQuestionAction ->
+                                    PluginProjectQuestionActionModalMsg
+                                        (PluginModal.open
+                                            { pluginUuid = plugin.uuid
+                                            , pluginElement = connector.element
+                                            , data = ( projectCommon, question, pathToString path )
+                                            }
+                                        )
+
+                                SidebarProjectQuestionAction ->
+                                    if isOpen then
+                                        SetRightPanel RightPanel.None
+
+                                    else
+                                        SetRightPanel <|
+                                            RightPanel.PluginQuestionAction
+                                                { plugin = plugin
+                                                , connector = connector
+                                                , question = question
+                                                , questionPath = pathToString path
+                                                }
+
+                        isOpen =
+                            case model.rightPanel of
+                                RightPanel.PluginQuestionAction details ->
+                                    (details.plugin.uuid == plugin.uuid)
+                                        && (details.connector.element == connector.element)
+                                        && (details.questionPath == pathToString path)
+
+                                _ ->
+                                    False
+                    in
+                    a
+                        (class "action"
+                            :: classList [ ( "action-comments-open", isOpen ) ]
+                            :: onClick clickAction
+                            :: tooltip (gettext connector.action.name appState.locale)
+                        )
+                        [ fa connector.action.icon ]
+            in
+            List.map viewPluginButton plugins
+
+        Nothing ->
+            []
+
+
 viewCopyLinkAction : AppState -> Config msg -> Model -> List String -> Html Msg
 viewCopyLinkAction appState cfg model path =
     if cfg.features.questionLinksEnabled then
@@ -4831,6 +4992,36 @@ viewFileDeleteModal appState model =
     Modal.confirm appState cfg
 
 
+viewPluginProjectActionModal : AppState -> Model -> Html Msg
+viewPluginProjectActionModal appState model =
+    let
+        pluginModalViewConfig =
+            { attributes =
+                \project ->
+                    [ PluginElement.projectValue project
+                    ]
+            , wrapMsg = PluginProjectActionModalMsg
+            }
+    in
+    PluginModal.view appState pluginModalViewConfig model.pluginProjectActionModal
+
+
+viewPluginProjectQuestionActionModal : AppState -> Model -> Html Msg
+viewPluginProjectQuestionActionModal appState model =
+    let
+        pluginModalViewConfig =
+            { attributes =
+                \( project, question, questionPath ) ->
+                    [ PluginElement.projectValue project
+                    , PluginElement.questionValue question
+                    , PluginElement.questionPathValue questionPath
+                    ]
+            , wrapMsg = PluginProjectQuestionActionModalMsg
+            }
+    in
+    PluginModal.view appState pluginModalViewConfig model.pluginProjectQuestionActionModal
+
+
 
 -- UTILS
 
@@ -4844,7 +5035,7 @@ createReply : AppState -> ReplyValue -> Reply
 createReply appState value =
     { value = value
     , createdAt = appState.currentTime
-    , createdBy = Maybe.map UserInfo.toUserSuggestion appState.config.user
+    , createdBy = Maybe.map UserConfig.toUserSuggestion appState.config.user
     }
 
 

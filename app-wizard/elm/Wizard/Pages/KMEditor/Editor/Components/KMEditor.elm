@@ -564,7 +564,7 @@ view appState wrapMsg eventMsg model integrationPrefabs kmSecrets editorContext 
             KnowledgeModel.getAllUrlReferences editorContext.kmEditor.knowledgeModel
 
         urlCheckerButton =
-            if Feature.urlChecker appState && List.length allUrlReferences > 0 then
+            if Feature.urlChecker appState && not (List.isEmpty allUrlReferences) then
                 let
                     newRightPanel =
                         if model.rightPanel == URLCheckerRightPanel then
@@ -1474,7 +1474,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                             createTypeEditEvent setVariables variables
 
                         variablesInput =
-                            if List.length selectedIntegrationVariables > 0 then
+                            Html.viewIf (not (List.isEmpty selectedIntegrationVariables)) <|
                                 let
                                     variableInput variable =
                                         Input.string
@@ -1491,9 +1491,6 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                                             (List.map variableInput selectedIntegrationVariables)
                                         ]
                                     ]
-
-                            else
-                                Html.nothing
 
                         integrationLink integrationUuid =
                             if Uuid.toString Uuid.nil == integrationUuid then
