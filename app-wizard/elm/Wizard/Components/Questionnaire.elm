@@ -107,7 +107,6 @@ import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
@@ -124,7 +123,6 @@ import Wizard.Api.Models.TypeHintLegacy exposing (TypeHintLegacy)
 import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
-import Wizard.Api.ProjectActions as ProjectActionsApi
 import Wizard.Api.ProjectFiles as ProjectFilesApi
 import Wizard.Api.ProjectImporters as ProjectsImportersApi
 import Wizard.Api.Projects as ProjectsApi
@@ -199,8 +197,6 @@ type alias Model =
     , questionnaireImportersDropdown : Dropdown.State
     , questionnaireImporters : ActionResult (List ProjectImporter)
     , questionnaireActionsDropdown : Dropdown.State
-    , questionnaireActions : ActionResult (List ProjectAction)
-    , questionnaireActionResult : Maybe Integrations.ActionResult
     , collapsedItems : Set String
     , recentlyCopied : Bool
     , contentScrollTop : Maybe Int
@@ -285,8 +281,6 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , questionnaireImportersDropdown = Dropdown.initialState
             , questionnaireImporters = ActionResult.Unset
             , questionnaireActionsDropdown = Dropdown.initialState
-            , questionnaireActions = ActionResult.Unset
-            , questionnaireActionResult = Nothing
             , collapsedItems = Set.empty
             , recentlyCopied = False
             , contentScrollTop = Nothing
@@ -711,9 +705,6 @@ type Msg
     | SplitPaneMsg SplitPane.Msg
     | ImportersDropdownMsg Dropdown.State
     | ActionsDropdownMsg Dropdown.State
-    | GotActionResult (Result D.Error Integrations.ActionResult)
-    | CloseActionResult
-    | OpenAction ProjectAction
     | CollapseItem String
     | ExpandItem String
     | CollapseItems (List String)
@@ -723,7 +714,6 @@ type Msg
     | ClearRecentlyCopied
     | GetCommentThreadsCompleted String (Result ApiError (Dict String (List CommentThread)))
     | GetQuestionnaireImportersComplete (Result ApiError (List ProjectImporter))
-    | GetQuestionnaireActionsComplete (Result ApiError (List ProjectAction))
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
     | LinkedItemsDropdownMsg String Dropdown.State
     | SearchPanelMsg SearchPanel.Msg
@@ -1338,54 +1328,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                 )
 
         ActionsDropdownMsg state ->
-            let
-                ( questionnaireActions, cmd ) =
-                    if ActionResult.isUnset model.questionnaireActions then
-                        ( Loading
-                        , ProjectActionsApi.getListFor appState model.uuid GetQuestionnaireActionsComplete
-                        )
-
-                    else
-                        ( model.questionnaireActions, Cmd.none )
-            in
-            withSeed
-                ( { model
-                    | questionnaireActionsDropdown = state
-                    , questionnaireActions = questionnaireActions
-                  }
-                , cmd
-                )
-
-        GotActionResult result ->
-            case result of
-                Ok actionResult ->
-                    wrap { model | questionnaireActionResult = Just actionResult }
-
-                Err err ->
-                    wrap
-                        { model
-                            | questionnaireActionResult =
-                                Just
-                                    { success = False
-                                    , message = "```\n" ++ D.errorToString err ++ "\n```"
-                                    }
-                        }
-
-        CloseActionResult ->
-            wrap { model | questionnaireActionResult = Nothing }
-
-        OpenAction questionnaireAction ->
-            withSeed
-                ( model
-                , Integrations.openAction
-                    { url = questionnaireAction.url
-                    , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
-                    , data =
-                        { projectUuid = model.uuid
-                        , userToken = String.toMaybe appState.session.token.token
-                        }
-                    }
-                )
+            wrap { model | questionnaireActionsDropdown = state }
 
         CollapseItem path ->
             updateCollapsedItems <|
@@ -1501,18 +1444,6 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                 Err _ ->
                     wrap { model | commentThreadsMap = Dict.insert path (Error (gettext "Unable to get comments." appState.locale)) model.commentThreadsMap }
-
-        GetQuestionnaireActionsComplete result ->
-            wrap
-                { model
-                    | questionnaireActions =
-                        case result of
-                            Ok actions ->
-                                Success actions
-
-                            Err error ->
-                                ApiError.toActionResult appState (gettext "Unable to get project actions." appState.locale) error
-                }
 
         GetQuestionnaireImportersComplete result ->
             wrap
@@ -1970,7 +1901,6 @@ subscriptions model =
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
          , Dropdown.subscriptions model.questionnaireImportersDropdown ImportersDropdownMsg
          , Dropdown.subscriptions model.questionnaireActionsDropdown ActionsDropdownMsg
-         , Integrations.actionSub GotActionResult
          , Integrations.integrationWidgetSub GotIntegrationWidgetValue
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
@@ -2022,7 +1952,6 @@ view appState cfg ctx model =
                 model.splitPane
             , viewQuestionnaireRightPanel appState cfg model
             ]
-        , Html.map cfg.wrapMsg <| viewActionResultModal appState model
         , Html.map cfg.wrapMsg <| viewPhaseModal appState model
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
         , Html.map (cfg.wrapMsg << FileUploadModalMsg) <| FileUploadModal.view appState cfg.isKmEditor model.fileUploadModalModel
@@ -2177,19 +2106,8 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
                 [ text plugin.name ]
 
-        projectActions =
-            if actionsAvailable appState cfg model then
-                ActionResultBlock.dropdownView
-                    { viewContent = actionDropdownItem
-                    , actionResult = model.questionnaireActions
-                    , locale = appState.locale
-                    }
-
-            else
-                []
-
         actionsItems =
-            projectActionPlugins ++ projectActions
+            projectActionPlugins
 
         actionsDropdown =
             if List.isEmpty actionsItems then
@@ -2208,11 +2126,6 @@ viewQuestionnaireToolbar appState cfg model =
                         , items = actionsItems
                         }
                     ]
-
-        actionDropdownItem action =
-            Dropdown.anchorItem
-                [ class "dropdown-item", onClick (OpenAction action) ]
-                [ text action.name ]
 
         navButton buttonElement visibleCondition =
             if visibleCondition then
@@ -2371,43 +2284,6 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
             ]
         ]
-
-
-viewActionResultModal : AppState -> Model -> Html Msg
-viewActionResultModal appState model =
-    let
-        modalTitle actionResult =
-            if actionResult.success then
-                [ span [ class "text-success me-2" ] [ faSuccess ]
-                , text (gettext "Action succeeded!" appState.locale)
-                ]
-
-            else
-                [ span [ class "text-danger me-2" ] [ faError ]
-                , text (gettext "Action failed!" appState.locale)
-                ]
-
-        modalBody =
-            Maybe.unwrap [] (List.singleton << Markdown.toHtml [] << .message) model.questionnaireActionResult
-
-        modalContent =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] (Maybe.unwrap [] modalTitle model.questionnaireActionResult)
-                ]
-            , div [ class "modal-body" ] modalBody
-            , div [ class "modal-footer" ]
-                [ button [ class "btn btn-primary", onClick CloseActionResult ]
-                    [ text (gettext "OK" appState.locale) ]
-                ]
-            ]
-    in
-    Modal.simple
-        { modalContent = modalContent
-        , visible = Maybe.isJust model.questionnaireActionResult
-        , enterMsg = Just CloseActionResult
-        , escMsg = Just CloseActionResult
-        , dataCy = "questionnaire-action-result"
-        }
 
 
 
@@ -5037,14 +4913,6 @@ createReply appState value =
     , createdAt = appState.currentTime
     , createdBy = Maybe.map UserConfig.toUserSuggestion appState.config.user
     }
-
-
-actionsAvailable : AppState -> Config a -> Model -> Bool
-actionsAvailable appState cfg model =
-    Session.exists appState.session
-        && not cfg.features.readonly
-        && model.questionnaire.projectActionsAvailable
-        > 0
 
 
 importersAvailable : AppState -> Config a -> Model -> Bool

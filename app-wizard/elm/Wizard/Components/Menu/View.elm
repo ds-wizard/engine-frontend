@@ -174,12 +174,6 @@ menuItems appState =
               , isActive = Routes.isDocumentsIndex
               , isVisible = Feature.documentsView
               }
-            , { title = gettext "Actions" appState.locale
-              , id = "projects-actions"
-              , route = Routes.projectActionsIndex
-              , isActive = Routes.isProjectActionsIndex
-              , isVisible = always False
-              }
             , { title = gettext "Importers" appState.locale
               , id = "projects-importers"
               , route = Routes.projectImportersIndex

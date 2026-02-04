@@ -21,7 +21,6 @@ import Wizard.Pages.KMEditor.Msgs
 import Wizard.Pages.KnowledgeModelSecrets.Msgs
 import Wizard.Pages.KnowledgeModels.Msgs
 import Wizard.Pages.Locales.Msgs
-import Wizard.Pages.ProjectActions.Msgs
 import Wizard.Pages.ProjectFiles.Msgs
 import Wizard.Pages.ProjectImporters.Msgs
 import Wizard.Pages.Projects.Msgs
@@ -57,7 +56,6 @@ type Msg
     | KnowledgeModelsMsg Wizard.Pages.KnowledgeModels.Msgs.Msg
     | KnowledgeModelSecretsMsg Wizard.Pages.KnowledgeModelSecrets.Msgs.Msg
     | LocaleMsg Wizard.Pages.Locales.Msgs.Msg
-    | ProjectActionsMsg Wizard.Pages.ProjectActions.Msgs.Msg
     | ProjectFilesMsg Wizard.Pages.ProjectFiles.Msgs.Msg
     | ProjectImportersMsg Wizard.Pages.ProjectImporters.Msgs.Msg
     | ProjectsMsg Wizard.Pages.Projects.Msgs.Msg

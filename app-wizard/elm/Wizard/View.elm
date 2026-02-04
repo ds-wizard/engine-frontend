@@ -19,7 +19,6 @@ import Wizard.Pages.KMEditor.View
 import Wizard.Pages.KnowledgeModelSecrets.View
 import Wizard.Pages.KnowledgeModels.View
 import Wizard.Pages.Locales.View
-import Wizard.Pages.ProjectActions.View
 import Wizard.Pages.ProjectFiles.View
 import Wizard.Pages.ProjectImporters.View
 import Wizard.Pages.Projects.View
@@ -98,12 +97,6 @@ view model =
                 model.localeModel
                     |> Wizard.Pages.Locales.View.view route model.appState
                     |> Html.map LocaleMsg
-                    |> Layout.app model
-
-            Routes.ProjectActionsRoute _ ->
-                model.projectActionsModel
-                    |> Wizard.Pages.ProjectActions.View.view model.appState
-                    |> Html.map ProjectActionsMsg
                     |> Layout.app model
 
             Routes.ProjectFilesRoute _ ->

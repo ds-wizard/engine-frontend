@@ -93,7 +93,6 @@ type alias ProjectQuestionnaire =
     , migrationUuid : Maybe Uuid
     , unresolvedCommentCounts : Dict String (Dict String Int)
     , resolvedCommentCounts : Dict String (Dict String Int)
-    , projectActionsAvailable : Int
     , projectImportersAvailable : Int
     , selectedQuestionTagUuids : List String
     , files : List ProjectFileSimple
@@ -117,7 +116,6 @@ decoder =
         |> D.required "migrationUuid" (D.maybe Uuid.decoder)
         |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
-        |> D.required "projectActionsAvailable" D.int
         |> D.required "projectImportersAvailable" D.int
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "files" (D.list ProjectFileSimple.decoder)
@@ -237,7 +235,6 @@ createQuestionnaireDetail kmPackage km =
     , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
     , labels = Dict.empty
     , migrationUuid = Nothing
-    , projectActionsAvailable = 0
     , projectImportersAvailable = 0
     , selectedQuestionTagUuids = []
     , files = []

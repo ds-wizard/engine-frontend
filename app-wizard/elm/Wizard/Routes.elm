@@ -34,7 +34,6 @@ module Wizard.Routes exposing
     , isKnowledgeModelsSubroute
     , isLocalesRoute
     , isPersistentCommandsIndex
-    , isProjectActionsIndex
     , isProjectFilesIndex
     , isProjectImportersIndex
     , isProjectSubroute
@@ -70,8 +69,6 @@ module Wizard.Routes exposing
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
-    , projectActionsIndex
-    , projectActionsIndexWithFilters
     , projectDocumentDownload
     , projectFilesIndex
     , projectFilesIndexWithFilters
@@ -142,7 +139,6 @@ import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
 import Wizard.Pages.KnowledgeModels.Routes
 import Wizard.Pages.Locales.Routes
-import Wizard.Pages.ProjectActions.Routes
 import Wizard.Pages.ProjectFiles.Routes
 import Wizard.Pages.ProjectImporters.Routes
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
@@ -167,7 +163,6 @@ type Route
     | KnowledgeModelsRoute Wizard.Pages.KnowledgeModels.Routes.Route
     | LocalesRoute Wizard.Pages.Locales.Routes.Route
     | ProjectsRoute Wizard.Pages.Projects.Routes.Route
-    | ProjectActionsRoute Wizard.Pages.ProjectActions.Routes.Route
     | ProjectFilesRoute Wizard.Pages.ProjectFiles.Routes.Route
     | ProjectImportersRoute Wizard.Pages.ProjectImporters.Routes.Route
     | PublicRoute Wizard.Pages.Public.Routes.Route
@@ -584,30 +579,6 @@ isKnowledgeModelSecrets route =
 
 
 
--- Project Actions
-
-
-projectActionsIndex : Route
-projectActionsIndex =
-    ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute PaginationQueryString.empty)
-
-
-projectActionsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
-projectActionsIndexWithFilters _ pagination =
-    ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute pagination)
-
-
-isProjectActionsIndex : Route -> Bool
-isProjectActionsIndex route =
-    case route of
-        ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute _) ->
-            True
-
-        _ ->
-            False
-
-
-
 -- Project Files
 
 
@@ -786,9 +757,6 @@ isProjectSubroute route =
     isDocumentsIndex route
         || (case route of
                 ProjectsRoute _ ->
-                    True
-
-                ProjectActionsRoute _ ->
                     True
 
                 ProjectImportersRoute _ ->

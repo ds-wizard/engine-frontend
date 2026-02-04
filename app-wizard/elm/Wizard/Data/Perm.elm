@@ -9,7 +9,6 @@ module Wizard.Data.Perm exposing
     , packageManagementRead
     , packageManagementWrite
     , project
-    , projectAction
     , projectFile
     , projectImporter
     , projectTemplate
@@ -75,11 +74,6 @@ project =
 projectTemplate : String
 projectTemplate =
     "PRJ_TML_PERM"
-
-
-projectAction : String
-projectAction =
-    "PRJ_ACTION_PERM"
 
 
 projectImporter : String

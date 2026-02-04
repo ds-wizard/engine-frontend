@@ -39,7 +39,6 @@ module Wizard.Utils.Feature exposing
     , localeSetDefault
     , localeView
     , newsModal
-    , projectActions
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -419,15 +418,6 @@ projectCommentPrivate appState project =
 projectFiles : AppState -> Bool
 projectFiles =
     adminOr Perm.projectFile
-
-
-
--- Project Actions
-
-
-projectActions : AppState -> Bool
-projectActions =
-    adminOr Perm.projectAction
 
 
 

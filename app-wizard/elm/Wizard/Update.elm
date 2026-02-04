@@ -25,7 +25,6 @@ import Wizard.Pages.KMEditor.Update
 import Wizard.Pages.KnowledgeModelSecrets.Update
 import Wizard.Pages.KnowledgeModels.Update
 import Wizard.Pages.Locales.Update
-import Wizard.Pages.ProjectActions.Update
 import Wizard.Pages.ProjectFiles.Update
 import Wizard.Pages.ProjectImporters.Update
 import Wizard.Pages.Projects.Update
@@ -86,10 +85,6 @@ fetchData model =
         Routes.LocalesRoute route ->
             Cmd.map Wizard.Msgs.LocaleMsg <|
                 Wizard.Pages.Locales.Update.fetchData route model.appState
-
-        Routes.ProjectActionsRoute _ ->
-            Cmd.map Wizard.Msgs.ProjectActionsMsg <|
-                Wizard.Pages.ProjectActions.Update.fetchData
 
         Routes.ProjectFilesRoute _ ->
             Cmd.map Wizard.Msgs.ProjectFilesMsg <|
@@ -372,13 +367,6 @@ update msg model =
                         Wizard.Pages.Locales.Update.update localeMsg Wizard.Msgs.LocaleMsg model.appState model.localeModel
                 in
                 ( { model | localeModel = localeModel }, cmd )
-
-            Wizard.Msgs.ProjectActionsMsg projectActionsMsg ->
-                let
-                    ( projectActionsModel, cmd ) =
-                        Wizard.Pages.ProjectActions.Update.update projectActionsMsg Wizard.Msgs.ProjectActionsMsg model.appState model.projectActionsModel
-                in
-                ( { model | projectActionsModel = projectActionsModel }, cmd )
 
             Wizard.Msgs.ProjectFilesMsg projectFilesMsg ->
                 let
