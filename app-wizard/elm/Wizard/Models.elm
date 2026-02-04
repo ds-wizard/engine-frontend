@@ -28,7 +28,6 @@ import Wizard.Pages.KnowledgeModelSecrets.Models
 import Wizard.Pages.KnowledgeModels.Models
 import Wizard.Pages.Locales.Models
 import Wizard.Pages.ProjectFiles.Models
-import Wizard.Pages.ProjectImporters.Models
 import Wizard.Pages.Projects.Models
 import Wizard.Pages.Public.Models
 import Wizard.Pages.Registry.Models
@@ -53,7 +52,6 @@ type alias Model =
     , kmSecretsModel : Wizard.Pages.KnowledgeModelSecrets.Models.Model
     , localeModel : Wizard.Pages.Locales.Models.Model
     , projectFilesModel : Wizard.Pages.ProjectFiles.Models.Model
-    , projectImportersModel : Wizard.Pages.ProjectImporters.Models.Model
     , projectsModel : Wizard.Pages.Projects.Models.Model
     , publicModel : Wizard.Pages.Public.Models.Model
     , registryModel : Wizard.Pages.Registry.Models.Model
@@ -81,7 +79,6 @@ initialModel appState =
     , kmSecretsModel = Wizard.Pages.KnowledgeModelSecrets.Models.initialModel appState
     , localeModel = Wizard.Pages.Locales.Models.initialModel appState
     , projectFilesModel = Wizard.Pages.ProjectFiles.Models.initialModel
-    , projectImportersModel = Wizard.Pages.ProjectImporters.Models.initialModel
     , projectsModel = Wizard.Pages.Projects.Models.initialModel appState
     , publicModel = Wizard.Pages.Public.Models.initialModel appState
     , registryModel = Wizard.Pages.Registry.Models.initialModel
@@ -184,9 +181,6 @@ initLocalModel appState model =
 
         Routes.ProjectFilesRoute route ->
             { model | projectFilesModel = Wizard.Pages.ProjectFiles.Models.initLocalModel route model.projectFilesModel }
-
-        Routes.ProjectImportersRoute route ->
-            { model | projectImportersModel = Wizard.Pages.ProjectImporters.Models.initLocalModel route model.projectImportersModel }
 
         Routes.ProjectsRoute route ->
             { model | projectsModel = Wizard.Pages.Projects.Models.initLocalModel model.appState route model.projectsModel }

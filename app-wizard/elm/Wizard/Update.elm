@@ -26,7 +26,6 @@ import Wizard.Pages.KnowledgeModelSecrets.Update
 import Wizard.Pages.KnowledgeModels.Update
 import Wizard.Pages.Locales.Update
 import Wizard.Pages.ProjectFiles.Update
-import Wizard.Pages.ProjectImporters.Update
 import Wizard.Pages.Projects.Update
 import Wizard.Pages.Public.Update
 import Wizard.Pages.Registry.Update
@@ -89,10 +88,6 @@ fetchData model =
         Routes.ProjectFilesRoute _ ->
             Cmd.map Wizard.Msgs.ProjectFilesMsg <|
                 Wizard.Pages.ProjectFiles.Update.fetchData
-
-        Routes.ProjectImportersRoute _ ->
-            Cmd.map Wizard.Msgs.ProjectImportersMsg <|
-                Wizard.Pages.ProjectImporters.Update.fetchData
 
         Routes.ProjectsRoute route ->
             Cmd.map Wizard.Msgs.ProjectsMsg <|
@@ -374,13 +369,6 @@ update msg model =
                         Wizard.Pages.ProjectFiles.Update.update projectFilesMsg Wizard.Msgs.ProjectFilesMsg model.appState model.projectFilesModel
                 in
                 ( { model | projectFilesModel = projectFilesModel }, cmd )
-
-            Wizard.Msgs.ProjectImportersMsg projectImporterMsg ->
-                let
-                    ( projectImportersModel, cmd ) =
-                        Wizard.Pages.ProjectImporters.Update.update projectImporterMsg Wizard.Msgs.ProjectImportersMsg model.appState model.projectImportersModel
-                in
-                ( { model | projectImportersModel = projectImportersModel }, cmd )
 
             Wizard.Msgs.ProjectsMsg plansMsg ->
                 let

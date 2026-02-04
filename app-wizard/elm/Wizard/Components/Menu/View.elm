@@ -174,12 +174,6 @@ menuItems appState =
               , isActive = Routes.isDocumentsIndex
               , isVisible = Feature.documentsView
               }
-            , { title = gettext "Importers" appState.locale
-              , id = "projects-importers"
-              , route = Routes.projectImportersIndex
-              , isActive = Routes.isProjectImportersIndex
-              , isVisible = Feature.projectImporters
-              }
             ]
         }
     , MenuGroup

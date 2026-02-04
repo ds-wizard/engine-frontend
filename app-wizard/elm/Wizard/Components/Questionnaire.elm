@@ -115,7 +115,6 @@ import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
 import Wizard.Api.Models.ProjectFileSimple exposing (ProjectFileSimple)
-import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Api.Models.ProjectVersion exposing (ProjectVersion)
 import Wizard.Api.Models.TypeHint exposing (TypeHint)
@@ -124,7 +123,6 @@ import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
 import Wizard.Api.ProjectFiles as ProjectFilesApi
-import Wizard.Api.ProjectImporters as ProjectsImportersApi
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (illustratedMessage, resizableTextarea)
@@ -145,7 +143,6 @@ import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Data.Integrations as Integrations
-import Wizard.Data.Session as Session
 import Wizard.Pages.Projects.Common.ProjectTodoGroup as ProjectTodoGroup
 import Wizard.Plugins.Plugin as Plugin exposing (ProjectQuestionActionConnectorType(..))
 import Wizard.Plugins.PluginElement as PluginElement
@@ -194,9 +191,8 @@ type alias Model =
     , commentsViewPrivate : Bool
     , commentDropdownStates : Dict String Dropdown.State
     , splitPane : SplitPane.State
-    , questionnaireImportersDropdown : Dropdown.State
-    , questionnaireImporters : ActionResult (List ProjectImporter)
-    , questionnaireActionsDropdown : Dropdown.State
+    , pluginImportersDropdown : Dropdown.State
+    , pluginActionsDropdown : Dropdown.State
     , collapsedItems : Set String
     , recentlyCopied : Bool
     , contentScrollTop : Maybe Int
@@ -278,9 +274,8 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , commentsViewPrivate = False
             , commentDropdownStates = Dict.empty
             , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.1, 0.7 )))
-            , questionnaireImportersDropdown = Dropdown.initialState
-            , questionnaireImporters = ActionResult.Unset
-            , questionnaireActionsDropdown = Dropdown.initialState
+            , pluginImportersDropdown = Dropdown.initialState
+            , pluginActionsDropdown = Dropdown.initialState
             , collapsedItems = Set.empty
             , recentlyCopied = False
             , contentScrollTop = Nothing
@@ -713,7 +708,6 @@ type Msg
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
     | GetCommentThreadsCompleted String (Result ApiError (Dict String (List CommentThread)))
-    | GetQuestionnaireImportersComplete (Result ApiError (List ProjectImporter))
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
     | LinkedItemsDropdownMsg String Dropdown.State
     | SearchPanelMsg SearchPanel.Msg
@@ -1309,26 +1303,10 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }
 
         ImportersDropdownMsg state ->
-            let
-                ( questionnaireImporters, cmd ) =
-                    if ActionResult.isUnset model.questionnaireImporters then
-                        ( Loading
-                        , ProjectsImportersApi.getListFor appState model.uuid GetQuestionnaireImportersComplete
-                        )
-
-                    else
-                        ( model.questionnaireImporters, Cmd.none )
-            in
-            withSeed
-                ( { model
-                    | questionnaireImportersDropdown = state
-                    , questionnaireImporters = questionnaireImporters
-                  }
-                , cmd
-                )
+            wrap { model | pluginImportersDropdown = state }
 
         ActionsDropdownMsg state ->
-            wrap { model | questionnaireActionsDropdown = state }
+            wrap { model | pluginActionsDropdown = state }
 
         CollapseItem path ->
             updateCollapsedItems <|
@@ -1444,18 +1422,6 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                 Err _ ->
                     wrap { model | commentThreadsMap = Dict.insert path (Error (gettext "Unable to get comments." appState.locale)) model.commentThreadsMap }
-
-        GetQuestionnaireImportersComplete result ->
-            wrap
-                { model
-                    | questionnaireImporters =
-                        case result of
-                            Ok importers ->
-                                Success importers
-
-                            Err error ->
-                                ApiError.toActionResult appState (gettext "Unable to get project importers." appState.locale) error
-                }
 
         UserSuggestionDropdownMsg uuid threadUuid editorNote userSuggestionDropdownMsg ->
             let
@@ -1899,8 +1865,8 @@ subscriptions model =
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
-         , Dropdown.subscriptions model.questionnaireImportersDropdown ImportersDropdownMsg
-         , Dropdown.subscriptions model.questionnaireActionsDropdown ActionsDropdownMsg
+         , Dropdown.subscriptions model.pluginImportersDropdown ImportersDropdownMsg
+         , Dropdown.subscriptions model.pluginActionsDropdown ActionsDropdownMsg
          , Integrations.integrationWidgetSub GotIntegrationWidgetValue
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
@@ -2045,40 +2011,21 @@ viewQuestionnaireToolbar appState cfg model =
                 (class "dropdown-item" :: linkToAttributes (Routes.projectsImport model.uuid connector.url))
                 [ text connector.name ]
 
-        importers =
-            if importersAvailable appState cfg model then
-                ActionResultBlock.dropdownView
-                    { viewContent = importerDropdownItem
-                    , actionResult = model.questionnaireImporters
-                    , locale = appState.locale
-                    }
-
-            else
-                []
-
-        importerItems =
-            importerPlugins ++ importers
-
         importersDropdown =
-            if List.isEmpty importerItems then
+            if List.isEmpty importerPlugins then
                 Html.nothing
 
             else
                 div [ class "item-group" ]
-                    [ Dropdown.dropdown model.questionnaireImportersDropdown
+                    [ Dropdown.dropdown model.pluginImportersDropdown
                         { options = []
                         , toggleMsg = ImportersDropdownMsg
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
                                 [ text (gettext "Import" appState.locale) ]
-                        , items = importerItems
+                        , items = importerPlugins
                         }
                     ]
-
-        importerDropdownItem importer =
-            Dropdown.anchorItem
-                (class "dropdown-item" :: linkToAttributes (Routes.projectsImportLegacy model.uuid importer.id))
-                [ text importer.name ]
 
         projectActionPlugins =
             case cfg.projectCommon of
@@ -2106,16 +2053,13 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
                 [ text plugin.name ]
 
-        actionsItems =
-            projectActionPlugins
-
         actionsDropdown =
-            if List.isEmpty actionsItems then
+            if List.isEmpty projectActionPlugins then
                 Html.nothing
 
             else
                 div [ class "item-group" ]
-                    [ Dropdown.dropdown model.questionnaireActionsDropdown
+                    [ Dropdown.dropdown model.pluginActionsDropdown
                         { options = []
                         , toggleMsg = ActionsDropdownMsg
                         , toggleButton =
@@ -2123,7 +2067,7 @@ viewQuestionnaireToolbar appState cfg model =
                                 [ span [ class "icon" ] []
                                 , text (gettext "Actions" appState.locale)
                                 ]
-                        , items = actionsItems
+                        , items = projectActionPlugins
                         }
                     ]
 
@@ -4913,11 +4857,3 @@ createReply appState value =
     , createdAt = appState.currentTime
     , createdBy = Maybe.map UserConfig.toUserSuggestion appState.config.user
     }
-
-
-importersAvailable : AppState -> Config a -> Model -> Bool
-importersAvailable appState cfg model =
-    Session.exists appState.session
-        && not cfg.features.readonly
-        && model.questionnaire.projectImportersAvailable
-        > 0

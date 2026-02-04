@@ -1,17 +1,13 @@
 port module Wizard.Data.Integrations exposing
-    ( ImporterData
-    , IntegrationConfig
+    ( IntegrationConfig
     , IntegrationWidgetData
-    , importerSub
     , integrationWidgetSub
-    , openImporter
     , openIntegrationWidget
     )
 
 import Common.Utils.Theme as Theme exposing (Theme)
 import Json.Decode as D
 import Json.Encode as E
-import Wizard.Components.Questionnaire.Importer.ImporterEvent as ImporterEvent exposing (ImporterEvent)
 import Wizard.Data.IntegrationWidgetValue as IntegrationWidgetValue exposing (IntegrationWidgetValue)
 
 
@@ -29,35 +25,6 @@ encodeIntegrationConfig encodeData openData =
         , ( "theme", E.string (Theme.toStyleString openData.theme) )
         , ( "data", encodeData openData.data )
         ]
-
-
-
--- Importer
-
-
-type alias ImporterData =
-    { knowledgeModel : String }
-
-
-encodeImporterData : ImporterData -> E.Value
-encodeImporterData data =
-    E.object [ ( "knowledgeModel", E.string data.knowledgeModel ) ]
-
-
-openImporter : IntegrationConfig ImporterData -> Cmd msg
-openImporter =
-    openImporterPort << encodeIntegrationConfig encodeImporterData
-
-
-port openImporterPort : E.Value -> Cmd msg
-
-
-importerSub : (Result D.Error (List ImporterEvent) -> msg) -> Sub msg
-importerSub toMsg =
-    gotImporterData (toMsg << D.decodeValue (D.list ImporterEvent.decoder))
-
-
-port gotImporterData : (E.Value -> msg) -> Sub msg
 
 
 

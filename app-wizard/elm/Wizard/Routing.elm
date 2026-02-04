@@ -19,7 +19,6 @@ import Wizard.Pages.KMEditor.Routing
 import Wizard.Pages.KnowledgeModels.Routing
 import Wizard.Pages.Locales.Routing
 import Wizard.Pages.ProjectFiles.Routing
-import Wizard.Pages.ProjectImporters.Routing
 import Wizard.Pages.Projects.Routing
 import Wizard.Pages.Public.Routing
 import Wizard.Pages.Registry.Routing
@@ -46,7 +45,6 @@ matchers appState =
                 ++ Wizard.Pages.KnowledgeModels.Routing.parsers Routes.KnowledgeModelsRoute
                 ++ Wizard.Pages.Locales.Routing.parsers appState Routes.LocalesRoute
                 ++ Wizard.Pages.ProjectFiles.Routing.parsers Routes.ProjectFilesRoute
-                ++ Wizard.Pages.ProjectImporters.Routing.parsers Routes.ProjectImportersRoute
                 ++ Wizard.Pages.Projects.Routing.parsers Routes.ProjectsRoute
                 ++ Wizard.Pages.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Pages.Registry.Routing.parsers Routes.RegistryRoute
@@ -107,9 +105,6 @@ isAllowed route appState =
 
         Routes.ProjectFilesRoute _ ->
             Wizard.Pages.ProjectFiles.Routing.isAllowed appState
-
-        Routes.ProjectImportersRoute _ ->
-            Wizard.Pages.ProjectImporters.Routing.isAllowed appState
 
         Routes.ProjectsRoute projectsRoute ->
             Wizard.Pages.Projects.Routing.isAllowed projectsRoute appState
@@ -178,9 +173,6 @@ toUrl route =
 
                 Routes.ProjectFilesRoute projectFilesRoute ->
                     Wizard.Pages.ProjectFiles.Routing.toUrl projectFilesRoute
-
-                Routes.ProjectImportersRoute projectImportersRoute ->
-                    Wizard.Pages.ProjectImporters.Routing.toUrl projectImportersRoute
 
                 Routes.ProjectsRoute projectsRoute ->
                     Wizard.Pages.Projects.Routing.toUrl projectsRoute

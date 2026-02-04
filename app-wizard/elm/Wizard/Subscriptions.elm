@@ -15,7 +15,6 @@ import Wizard.Pages.KMEditor.Subscriptions
 import Wizard.Pages.KnowledgeModels.Subscriptions
 import Wizard.Pages.Locales.Subscriptions
 import Wizard.Pages.ProjectFiles.Subscriptions
-import Wizard.Pages.ProjectImporters.Subscriptions
 import Wizard.Pages.Projects.Subscriptions
 import Wizard.Pages.Public.Subscriptions
 import Wizard.Pages.Tenants.Subscriptions
@@ -57,9 +56,6 @@ subscriptions model =
 
                 Routes.ProjectFilesRoute _ ->
                     Sub.map ProjectFilesMsg <| Wizard.Pages.ProjectFiles.Subscriptions.subscriptions model.projectFilesModel
-
-                Routes.ProjectImportersRoute _ ->
-                    Sub.map ProjectImportersMsg <| Wizard.Pages.ProjectImporters.Subscriptions.subscriptions model.projectImportersModel
 
                 Routes.ProjectsRoute route ->
                     Sub.map ProjectsMsg <| Wizard.Pages.Projects.Subscriptions.subscriptions route model.projectsModel

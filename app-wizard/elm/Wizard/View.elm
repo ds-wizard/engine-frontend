@@ -20,7 +20,6 @@ import Wizard.Pages.KnowledgeModelSecrets.View
 import Wizard.Pages.KnowledgeModels.View
 import Wizard.Pages.Locales.View
 import Wizard.Pages.ProjectFiles.View
-import Wizard.Pages.ProjectImporters.View
 import Wizard.Pages.Projects.View
 import Wizard.Pages.Public.View
 import Wizard.Pages.Registry.View
@@ -103,12 +102,6 @@ view model =
                 model.projectFilesModel
                     |> Wizard.Pages.ProjectFiles.View.view model.appState
                     |> Html.map ProjectFilesMsg
-                    |> Layout.app model
-
-            Routes.ProjectImportersRoute _ ->
-                model.projectImportersModel
-                    |> Wizard.Pages.ProjectImporters.View.view model.appState
-                    |> Html.map ProjectImportersMsg
                     |> Layout.app model
 
             Routes.ProjectsRoute route ->

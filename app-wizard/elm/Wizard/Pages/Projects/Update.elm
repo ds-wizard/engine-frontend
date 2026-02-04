@@ -14,7 +14,6 @@ import Wizard.Pages.Projects.Detail.Update
 import Wizard.Pages.Projects.DocumentDownload.Update
 import Wizard.Pages.Projects.FileDownload.Update
 import Wizard.Pages.Projects.Import.Update
-import Wizard.Pages.Projects.ImportLegacy.Update
 import Wizard.Pages.Projects.Index.Update
 import Wizard.Pages.Projects.Migration.Update
 import Wizard.Pages.Projects.Models exposing (Model)
@@ -49,10 +48,6 @@ fetchData route appState model =
         ImportRoute uuid _ ->
             Cmd.map ImportMsg <|
                 Wizard.Pages.Projects.Import.Update.fetchData appState uuid
-
-        ImportLegacyRoute uuid importerId ->
-            Cmd.map ImportLegacyMsg <|
-                Wizard.Pages.Projects.ImportLegacy.Update.fetchData appState uuid importerId
 
         DocumentDownloadRoute _ documentUuid ->
             Cmd.map DocumentDownloadMsg <|
@@ -128,13 +123,6 @@ update wrapMsg msg appState model =
                     Wizard.Pages.Projects.Import.Update.update (wrapMsg << ImportMsg) iMsg appState model.importModel
             in
             ( newSeed, { model | importModel = importModel }, cmd )
-
-        ImportLegacyMsg iMsg ->
-            let
-                ( newSeed, importModel, cmd ) =
-                    Wizard.Pages.Projects.ImportLegacy.Update.update (wrapMsg << ImportLegacyMsg) iMsg appState model.importLegacyModel
-            in
-            ( newSeed, { model | importLegacyModel = importModel }, cmd )
 
         DocumentDownloadMsg ddMsg ->
             let
