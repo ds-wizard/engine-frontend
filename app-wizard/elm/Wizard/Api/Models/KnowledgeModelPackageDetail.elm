@@ -72,8 +72,8 @@ encode kmPackage =
 createFormOptions : KnowledgeModelPackageDetail -> List ( String, String )
 createFormOptions kmPackage =
     kmPackage.versions
-        |> List.sortWith Version.compare
         |> List.filter (Version.greaterThan kmPackage.version)
+        |> List.sortWith Version.compare
         |> List.map (createFormOption kmPackage)
 
 

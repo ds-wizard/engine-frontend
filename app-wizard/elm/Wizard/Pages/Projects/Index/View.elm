@@ -156,11 +156,13 @@ listingProjectTagsFilter appState model =
                     else
                         PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId value model.questionnaires.filters
             in
-            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId)) filters
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId) filters
+                |> ListingMsg
 
         updateOpMsg op =
-            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId))
-                (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
+            PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters
+                |> ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId)
+                |> ListingMsg
 
         removeTagMsg tag =
             updateTagsMsg <| List.filter ((/=) tag) selectedTags

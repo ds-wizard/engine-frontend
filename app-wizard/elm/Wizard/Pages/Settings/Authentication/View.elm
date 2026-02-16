@@ -147,7 +147,7 @@ serviceFormView appState openIDPrefabs form i =
                 |> Maybe.andThen String.toMaybe
 
         prefabsView =
-            if (not << List.isEmpty) openIDPrefabs && AuthenticationConfigForm.isOpenIDServiceEmpty i form then
+            if not (List.isEmpty openIDPrefabs) && AuthenticationConfigForm.isOpenIDServiceEmpty i form then
                 let
                     viewPrefabButton openID =
                         ExternalLoginButton.render [ onClick (FillOpenIDServiceConfig i openID) ]

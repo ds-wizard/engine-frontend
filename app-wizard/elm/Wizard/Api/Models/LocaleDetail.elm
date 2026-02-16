@@ -60,7 +60,9 @@ decoder =
 
 isLatestVersion : LocaleDetail -> Bool
 isLatestVersion locale =
-    List.isEmpty <| List.filter (Version.greaterThan locale.version) locale.versions
+    locale.versions
+        |> List.any (Version.greaterThan locale.version)
+        |> not
 
 
 encode : { a | enabled : Bool, defaultLocale : Bool } -> E.Value

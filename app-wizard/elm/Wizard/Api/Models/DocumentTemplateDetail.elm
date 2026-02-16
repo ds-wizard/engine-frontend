@@ -76,4 +76,6 @@ encode documentTemplate =
 
 isLatestVersion : DocumentTemplateDetail -> Bool
 isLatestVersion documentTemplate =
-    List.isEmpty <| List.filter (Version.greaterThan documentTemplate.version) documentTemplate.versions
+    documentTemplate.versions
+        |> List.any (Version.greaterThan documentTemplate.version)
+        |> not

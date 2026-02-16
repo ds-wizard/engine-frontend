@@ -378,7 +378,8 @@ update appState cfg msg ( editorContext, model ) =
                         setTestResponseMsg =
                             EditIntegrationApiEventData.init
                                 |> setTestResponse (Just typeHintTestResponse)
-                                |> (EditIntegrationEvent << EditIntegrationApiEvent)
+                                |> EditIntegrationApiEvent
+                                |> EditIntegrationEvent
                                 |> cfg.eventMsg False Nothing Nothing (EditorContext.getParentUuid integrationUuid editorContext) (Just integrationUuid)
                     in
                     ( editorContext, newModel, Task.dispatch setTestResponseMsg )
@@ -471,7 +472,8 @@ update appState cfg msg ( editorContext, model ) =
                                 |> setRequestUrl curlRequest.url
                                 |> setRequestHeaders (List.map KeyValuePair.fromTuple curlRequest.headers)
                                 |> setIfNotEmpty setRequestBody curlRequest.body
-                                |> (EditIntegrationEvent << EditIntegrationApiEvent)
+                                |> EditIntegrationApiEvent
+                                |> EditIntegrationEvent
                                 |> cfg.eventMsg False Nothing Nothing (EditorContext.getParentUuid integrationUuid editorContext) (Just integrationUuid)
 
                         newModel =
@@ -1331,7 +1333,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionOptionsEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionOptionsEvent)
+                                |> EditQuestionOptionsEvent
+                                |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         addAnswerEvent =
@@ -1366,7 +1369,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionListEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionListEvent)
+                                |> EditQuestionListEvent
+                                |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         addItemTemplateQuestionEvent =
@@ -1409,7 +1413,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionValueEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionValueEvent)
+                                |> EditQuestionValueEvent
+                                |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         questionValueTypeOptions =
@@ -1451,7 +1456,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionIntegrationEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionIntegrationEvent)
+                                |> EditQuestionIntegrationEvent
+                                |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         integrationUuidOptions =
@@ -1521,7 +1527,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionMultiChoiceEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionMultiChoiceEvent)
+                                |> EditQuestionMultiChoiceEvent
+                                |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         addChoiceEvent =
@@ -1556,7 +1563,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionItemSelectEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionItemSelectEvent)
+                                |> EditQuestionItemSelectEvent
+                                |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
                         listQuestionUuidOptgroup ( chapter, questions ) =
@@ -1611,7 +1619,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                         createTypeEditEvent map value =
                             EditQuestionFileEventData.init
                                 |> map value
-                                |> (EditQuestionEvent << EditQuestionFileEvent)
+                                |> EditQuestionFileEvent
+                                |> EditQuestionEvent
                                 |> eventMsg True Nothing Nothing parentUuid (Just questionUuid)
 
                         fileTypesInput =
@@ -2043,7 +2052,7 @@ viewIntegrationEditor config integration =
                 |> wrapQuestionsWithIntegration
 
         prefabsView =
-            if (not << List.isEmpty) integrationPrefabs && EditorContext.isEmptyIntegrationEditorUuid integrationUuid editorContext then
+            if not (List.isEmpty integrationPrefabs) && EditorContext.isEmptyIntegrationEditorUuid integrationUuid editorContext then
                 let
                     viewLogo i =
                         case Integration.getLogo i of
@@ -2119,7 +2128,8 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
         createTypeEditEventWithFocusSelectorAndCursorPos map selector mbCursorPos value =
             EditIntegrationApiEventData.init
                 |> map value
-                |> (EditIntegrationEvent << EditIntegrationApiEvent)
+                |> EditIntegrationApiEvent
+                |> EditIntegrationEvent
                 |> eventMsg True selector mbCursorPos parentUuid (Just integrationUuid)
 
         allowCustomReplyGroup =
@@ -2593,7 +2603,8 @@ viewIntegrationEditorApiLegacy { appState, eventMsg } parentUuid integrationUuid
         createTypeEditEventWithFocusSelector map selector value =
             EditIntegrationApiLegacyEventData.init
                 |> map value
-                |> (EditIntegrationEvent << EditIntegrationApiLegacyEvent)
+                |> EditIntegrationApiLegacyEvent
+                |> EditIntegrationEvent
                 |> eventMsg True selector Nothing parentUuid (Just integrationUuid)
 
         requestUrlInput =
@@ -2706,13 +2717,15 @@ viewIntegrationEditorWidget { appState, eventMsg } parentUuid integrationUuid in
         createTypeEditEvent map value =
             EditIntegrationWidgetEventData.init
                 |> map value
-                |> (EditIntegrationEvent << EditIntegrationWidgetEvent)
+                |> EditIntegrationWidgetEvent
+                |> EditIntegrationEvent
                 |> eventMsg True Nothing Nothing parentUuid (Just integrationUuid)
 
         createTypeEditEventWithFocusSelector map selector value =
             EditIntegrationWidgetEventData.init
                 |> map value
-                |> (EditIntegrationEvent << EditIntegrationWidgetEvent)
+                |> EditIntegrationWidgetEvent
+                |> EditIntegrationEvent
                 |> eventMsg True selector Nothing parentUuid (Just integrationUuid)
 
         widgetUrlInput =
@@ -2962,15 +2975,18 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                 case value of
                     "ResourcePage" ->
                         EditReferenceResourcePageEventData.init
-                            |> (EditReferenceEvent << EditReferenceResourcePageEvent)
+                            |> EditReferenceResourcePageEvent
+                            |> EditReferenceEvent
 
                     "URL" ->
                         EditReferenceURLEventData.init
-                            |> (EditReferenceEvent << EditReferenceURLEvent)
+                            |> EditReferenceURLEvent
+                            |> EditReferenceEvent
 
                     _ ->
                         EditReferenceCrossEventData.init
-                            |> (EditReferenceEvent << EditReferenceCrossEvent)
+                            |> EditReferenceCrossEvent
+                            |> EditReferenceEvent
 
         referenceTypeOptions =
             [ ( "ResourcePage", gettext "Resource Page" appState.locale )
@@ -3009,7 +3025,8 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                         createEditEventWithFocusSelector map selector value =
                             EditReferenceResourcePageEventData.init
                                 |> map value
-                                |> (EditReferenceEvent << EditReferenceResourcePageEvent)
+                                |> EditReferenceResourcePageEvent
+                                |> EditReferenceEvent
                                 |> eventMsg True selector Nothing parentUuid (Just referenceUuid)
 
                         resourcePageOption resourcePageUuid =
@@ -3058,7 +3075,8 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                         createEditEventWithFocusSelector map selector value =
                             EditReferenceURLEventData.init
                                 |> map value
-                                |> (EditReferenceEvent << EditReferenceURLEvent)
+                                |> EditReferenceURLEvent
+                                |> EditReferenceEvent
                                 |> eventMsg True selector Nothing parentUuid (Just referenceUuid)
 
                         urlInput =
@@ -3108,7 +3126,8 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                         createTypeEditEvent map value =
                             EditReferenceCrossEventData.init
                                 |> map value
-                                |> (EditReferenceEvent << EditReferenceCrossEvent)
+                                |> EditReferenceCrossEvent
+                                |> EditReferenceEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just referenceUuid)
 
                         targetQuestionUuidOptgroup ( chapter, questions ) =

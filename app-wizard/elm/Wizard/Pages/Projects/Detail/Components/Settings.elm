@@ -397,7 +397,7 @@ formView appState settings model =
             originalTagCount /= currentTagCount
 
         formChanged =
-            (not << Set.isEmpty << Set.filter ((/=) (lastProjectTagFieldName model.form))) (Form.getChangedFields model.form)
+            not <| Set.isEmpty <| Set.remove (lastProjectTagFieldName model.form) <| Form.getChangedFields model.form
 
         formActionsConfig =
             { text = Nothing

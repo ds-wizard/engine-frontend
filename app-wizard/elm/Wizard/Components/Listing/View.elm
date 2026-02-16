@@ -202,8 +202,7 @@ viewToolbarSimpleFilter appState cfg model filterId filterCfg =
         item ( value, visibleName ) =
             let
                 newFiltersMsg =
-                    (cfg.wrapMsg << UpdatePaginationQueryFilters Nothing)
-                        (PaginationQueryFilters.insertValue filterId value model.filters)
+                    cfg.wrapMsg <| UpdatePaginationQueryFilters Nothing (PaginationQueryFilters.insertValue filterId value model.filters)
 
                 icon =
                     if Maybe.unwrap False ((==) value << Tuple.first) maybeFilterValue then
@@ -257,7 +256,7 @@ viewToolbarSimpleMultiFilter appState cfg model filterId filterCfg =
                         PaginationQueryFilters.insertValue filterId newFilterValue model.filters
 
                 newFiltersMsg =
-                    (cfg.wrapMsg << UpdatePaginationQueryFilters (Just filterId)) newFilters
+                    cfg.wrapMsg <| UpdatePaginationQueryFilters (Just filterId) newFilters
             in
             Dropdown.buttonItem [ onClick newFiltersMsg, class "dropdown-item-icon" ]
                 [ icon, text visibleName ]
@@ -332,8 +331,9 @@ viewFilter appState cfg model filterId label items =
             if filterActive then
                 let
                     clearAllMsg =
-                        (cfg.wrapMsg << UpdatePaginationQueryFilters Nothing)
-                            (PaginationQueryFilters.removeFilter filterId model.filters)
+                        cfg.wrapMsg <|
+                            UpdatePaginationQueryFilters Nothing <|
+                                PaginationQueryFilters.removeFilter filterId model.filters
 
                     clearAllItem =
                         Dropdown.buttonItem [ onClick clearAllMsg ]
