@@ -193,7 +193,7 @@ listingActions : AppState -> Document -> List (ListingDropdownItem Msg)
 listingActions appState document =
     let
         downloadEnabled =
-            Feature.documentDownload appState document
+            Feature.documentDownload document
 
         download =
             ListingDropdown.dropdownAction

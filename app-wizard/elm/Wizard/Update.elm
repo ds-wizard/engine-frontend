@@ -103,7 +103,7 @@ fetchData model =
 
         Routes.SettingsRoute route ->
             Cmd.map Wizard.Msgs.SettingsMsg <|
-                Wizard.Pages.Settings.Update.fetchData route model.appState model.settingsModel
+                Wizard.Pages.Settings.Update.fetchData route model.appState
 
         Routes.UsersRoute route ->
             Cmd.map Wizard.Msgs.UsersMsg <|
@@ -387,7 +387,7 @@ update msg model =
             Wizard.Msgs.RegistryMsg registryMsg ->
                 let
                     ( registryModel, cmd ) =
-                        Wizard.Pages.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
+                        Wizard.Pages.Registry.Update.update registryMsg model.appState model.registryModel
                 in
                 ( { model | registryModel = registryModel }, cmd )
 

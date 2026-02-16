@@ -15,7 +15,6 @@ import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Result exposing (Result)
 import String.Normalize as Normalize
 import Version exposing (Version)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi

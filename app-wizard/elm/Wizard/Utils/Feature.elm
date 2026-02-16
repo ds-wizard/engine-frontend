@@ -165,8 +165,8 @@ knowledgeModelEditorCancelMigration appState knowledgeModelEditor =
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Migrating, KnowledgeModelEditorState.Migrated ] knowledgeModelEditor
 
 
-knowledgeModelEditorDelete : AppState -> KnowledgeModelEditor -> Bool
-knowledgeModelEditorDelete appState _ =
+knowledgeModelEditorDelete : AppState -> Bool
+knowledgeModelEditorDelete appState =
     adminOr Perm.knowledgeModel appState
 
 
@@ -194,8 +194,8 @@ knowledgeModelsDelete =
     adminOr Perm.packageManagementWrite
 
 
-knowledgeModelsPreview : AppState -> Bool
-knowledgeModelsPreview _ =
+knowledgeModelsPreview : Bool
+knowledgeModelsPreview =
     True
 
 
@@ -291,8 +291,8 @@ projectTemplatesCreate =
     adminOr Perm.projectTemplate
 
 
-projectOpen : AppState -> Project -> Bool
-projectOpen _ project =
+projectOpen : Project -> Bool
+projectOpen project =
     project.state /= ProjectState.Migrating
 
 
@@ -301,8 +301,8 @@ projectCreateFromTemplate appState project =
     projectsCreateFromTemplate appState && project.isTemplate && project.state /= ProjectState.Migrating
 
 
-projectClone : AppState -> Project -> Bool
-projectClone _ project =
+projectClone : Project -> Bool
+projectClone project =
     project.state /= ProjectState.Migrating
 
 
@@ -336,18 +336,18 @@ projectMetrics appState =
     appState.config.project.summaryReport.enabled
 
 
-projectPreview : AppState -> Bool
-projectPreview _ =
+projectPreview : Bool
+projectPreview =
     True
 
 
-projectDocumentsView : AppState -> Bool
-projectDocumentsView _ =
+projectDocumentsView : Bool
+projectDocumentsView =
     True
 
 
-projectSearch : AppState -> ProjectLike q -> Bool
-projectSearch _ project =
+projectSearch : ProjectLike q -> Bool
+projectSearch project =
     not (ProjectUtils.isMigrating project)
 
 
@@ -443,8 +443,8 @@ documentDelete appState document =
     isAdmin appState || Document.isOwner appState document
 
 
-documentDownload : AppState -> Document -> Bool
-documentDownload _ document =
+documentDownload : Document -> Bool
+documentDownload document =
     document.state == DoneDocumentState
 
 

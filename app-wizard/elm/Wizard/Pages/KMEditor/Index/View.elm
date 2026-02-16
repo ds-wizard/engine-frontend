@@ -241,7 +241,7 @@ listingActions appState kmEditor =
             Feature.knowledgeModelEditorCancelMigration appState kmEditor
 
         showDelete =
-            Feature.knowledgeModelEditorDelete appState kmEditor
+            Feature.knowledgeModelEditorDelete appState
 
         groups =
             [ [ ( openEditor, showOpenEditor ) ]

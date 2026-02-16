@@ -13,7 +13,7 @@ subscriptions route model =
     case route of
         CreateRoute ->
             Sub.map CreateMsg <|
-                Wizard.Pages.Locales.Create.Subscriptions.subscriptions model.createModel
+                Wizard.Pages.Locales.Create.Subscriptions.subscriptions
 
         DetailRoute _ ->
             Sub.map DetailMsg <|

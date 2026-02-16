@@ -332,7 +332,7 @@ viewProjectNavigationNav appState route model projectCommon =
             , label = gettext "Preview" appState.locale
             , icon = faPreview
             , isActive = route == ProjectDetailRoute.Preview
-            , isVisible = Features.projectPreview appState
+            , isVisible = Features.projectPreview
             , dataCy = "project_nav_preview"
             }
 
@@ -341,7 +341,7 @@ viewProjectNavigationNav appState route model projectCommon =
             , label = gettext "Documents" appState.locale
             , icon = faProjectDocuments
             , isActive = isDocumentRoute
-            , isVisible = Features.projectDocumentsView appState
+            , isVisible = Features.projectDocumentsView
             , dataCy = "project_nav_documents"
             }
 

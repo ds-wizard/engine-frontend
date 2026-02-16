@@ -76,14 +76,14 @@ isAllowed route appState =
         Routes.CommentsRoute _ _ ->
             True
 
-        Routes.DevRoute adminRoute ->
-            Wizard.Pages.Dev.Routing.isAllowed adminRoute appState
+        Routes.DevRoute _ ->
+            Wizard.Pages.Dev.Routing.isAllowed appState
 
         Routes.DashboardRoute ->
             True
 
-        Routes.DocumentsRoute documentsRoute ->
-            Wizard.Pages.Documents.Routing.isAllowed documentsRoute appState
+        Routes.DocumentsRoute _ ->
+            Wizard.Pages.Documents.Routing.isAllowed appState
 
         Routes.DocumentTemplateEditorsRoute _ ->
             Wizard.Pages.DocumentTemplateEditors.Routing.isAllowed appState
@@ -112,14 +112,14 @@ isAllowed route appState =
         Routes.PublicRoute _ ->
             True
 
-        Routes.RegistryRoute registryRoute ->
-            Wizard.Pages.Registry.Routing.isAllowed registryRoute appState
+        Routes.RegistryRoute _ ->
+            Wizard.Pages.Registry.Routing.isAllowed appState
 
         Routes.SettingsRoute settingsRoute ->
             Wizard.Pages.Settings.Routing.isAllowed settingsRoute appState
 
-        Routes.TenantsRoute tenantsRoute ->
-            Wizard.Pages.Tenants.Routing.isAllowed tenantsRoute appState
+        Routes.TenantsRoute _ ->
+            Wizard.Pages.Tenants.Routing.isAllowed appState
 
         Routes.UsersRoute usersRoute ->
             Wizard.Pages.Users.Routing.isAllowed usersRoute appState

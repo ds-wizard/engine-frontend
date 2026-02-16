@@ -600,7 +600,7 @@ listingActions appState project =
                 }
 
         openProjectVisible =
-            Features.projectOpen appState project
+            Features.projectOpen project
 
         createProjectFromTemplate =
             ListingDropdown.dropdownAction
@@ -629,7 +629,7 @@ listingActions appState project =
                 }
 
         cloneVisible =
-            Features.projectClone appState project
+            Features.projectClone project
 
         createMigration =
             ListingDropdown.dropdownAction

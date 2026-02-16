@@ -16,8 +16,8 @@ fetchData route appState =
                 Wizard.Pages.Registry.RegistrySignupConfirmation.Update.fetchData organizationId hash appState
 
 
-update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-update msg _ appState model =
+update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+update msg appState model =
     case msg of
         RegistrySignupConfirmationMsg rMsg ->
             let

@@ -1,5 +1,5 @@
 module Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.TwoFactorAuthConfig exposing
-    ( TwoFactorAuthConfig(..)
+    ( TwoFactorAuthConfig
     , decoder
     , default
     )

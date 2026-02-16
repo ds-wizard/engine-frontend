@@ -116,9 +116,9 @@ view model =
                     |> Html.map PublicMsg
                     |> Layout.public model
 
-            Routes.RegistryRoute route ->
+            Routes.RegistryRoute _ ->
                 model.registryModel
-                    |> Wizard.Pages.Registry.View.view route model.appState
+                    |> Wizard.Pages.Registry.View.view model.appState
                     |> Html.map RegistryMsg
                     |> Layout.app model
 

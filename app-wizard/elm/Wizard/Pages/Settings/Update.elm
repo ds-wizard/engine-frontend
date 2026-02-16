@@ -24,8 +24,8 @@ import Wizard.Pages.Settings.Submission.Update
 import Wizard.Pages.Settings.Usage.Update
 
 
-fetchData : Route -> AppState -> Model -> Cmd Msg
-fetchData route appState _ =
+fetchData : Route -> AppState -> Cmd Msg
+fetchData route appState =
     let
         genericFetch wrapMsg =
             Cmd.map wrapMsg <|
@@ -46,8 +46,7 @@ fetchData route appState _ =
             genericFetch FeaturesMsg
 
         PluginsRoute ->
-            Cmd.map PluginsMsg <|
-                Wizard.Pages.Settings.Plugins.Update.fetchData appState
+            Cmd.none
 
         PluginSettingsRoute pluginUuid ->
             Cmd.map PluginSettingsMsg <|

@@ -83,7 +83,6 @@ import Roman
 import Set exposing (Set)
 import Shortcut
 import SplitPane
-import String
 import String.Extra as String
 import String.Format as String
 import Task.Extra as Task
@@ -753,7 +752,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.Search ->
                             showRightPanel
-                                (Feature.projectSearch appState model.questionnaire)
+                                (Feature.projectSearch model.questionnaire)
                                 RightPanel.Search
 
                         RightPanel.TODOs ->
@@ -2122,7 +2121,7 @@ viewQuestionnaireToolbar appState cfg model =
                     ( RightPanel.Warnings, False )
 
         searchButtonVisible =
-            Feature.projectSearch appState model.questionnaire
+            Feature.projectSearch model.questionnaire
 
         searchButton =
             div [ class "item-group" ]
@@ -2428,7 +2427,7 @@ viewQuestionnaireRightPanel appState cfg model =
                     , wrapMsg = cfg.wrapMsg << SearchPanelMsg
                     }
             in
-            Html.viewIf (Feature.projectSearch appState model.questionnaire) <|
+            Html.viewIf (Feature.projectSearch model.questionnaire) <|
                 wrapPanel [ SearchPanel.view appState viewConfig model.searchPanelModel ]
 
         RightPanel.TODOs ->
@@ -3446,7 +3445,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                         ( "question-hidden", Default )
 
         viewLabel =
-            viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question questionState
+            viewQuestionLabel appState cfg model newPath newHumanIdentifiers question questionState
 
         viewTags =
             if model.viewSettings.tags then
@@ -3512,8 +3511,8 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
         content
 
 
-viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> QuestionViewState -> Html Msg
-viewQuestionLabel appState cfg _ model path humanIdentifiers question questionState =
+viewQuestionLabel : AppState -> Config msg -> Model -> List String -> List String -> Question -> QuestionViewState -> Html Msg
+viewQuestionLabel appState cfg model path humanIdentifiers question questionState =
     let
         ( icon, tooltipText ) =
             case questionState of

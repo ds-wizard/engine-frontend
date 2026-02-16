@@ -65,7 +65,7 @@ actions appState cfg kmPackage =
                 }
 
         previewActionVisible =
-            Feature.knowledgeModelsPreview appState
+            Feature.knowledgeModelsPreview
 
         exportAction =
             ListingDropdown.dropdownAction

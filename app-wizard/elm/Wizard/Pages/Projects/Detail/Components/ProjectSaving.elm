@@ -64,17 +64,19 @@ type Msg
 
 
 update : Msg -> Model -> Model
-update _ model =
-    case model.state of
-        SavedRecently n ->
-            if n - 1 <= 0 then
-                { model | state = Saved }
+update msg model =
+    case msg of
+        SavedTickMsg ->
+            case model.state of
+                SavedRecently n ->
+                    if n - 1 <= 0 then
+                        { model | state = Saved }
 
-            else
-                { model | state = SavedRecently (n - 1) }
+                    else
+                        { model | state = SavedRecently (n - 1) }
 
-        _ ->
-            model
+                _ ->
+                    model
 
 
 

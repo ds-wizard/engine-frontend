@@ -1,7 +1,7 @@
 module Wizard.Components.ListingDropdown exposing
     ( ListingActionConfig
     , ListingActionType(..)
-    , ListingDropdownItem(..)
+    , ListingDropdownItem
     , dropdown
     , dropdownAction
     , dropdownSeparator

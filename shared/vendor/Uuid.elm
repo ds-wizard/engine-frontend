@@ -51,7 +51,6 @@ Have a look at the examples in the package to see how to use it!
 import Json.Decode as JD
 import Json.Encode as JE
 import Random exposing (Generator, Seed, int, list, map, step)
-import String
 import Uuid.Barebones exposing (..)
 
 

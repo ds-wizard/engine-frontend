@@ -33,6 +33,6 @@ toUrl route =
             [ moduleRoot, "signup", organizationId, hash ]
 
 
-isAllowed : Route -> AppState -> Bool
-isAllowed _ appState =
-    Feature.settings appState
+isAllowed : AppState -> Bool
+isAllowed =
+    Feature.settings

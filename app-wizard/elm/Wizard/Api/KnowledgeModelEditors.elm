@@ -39,8 +39,8 @@ getKnowledgeModelEditors appState _ qs =
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "knowledgeModelEditors" KnowledgeModelEditor.decoder)
 
 
-getKnowledgeModelEditorSuggestions : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination KnowledgeModelEditorSuggestion) msg -> Cmd msg
-getKnowledgeModelEditorSuggestions appState _ qs =
+getKnowledgeModelEditorSuggestions : AppState -> PaginationQueryString -> ToMsg (Pagination KnowledgeModelEditorSuggestion) msg -> Cmd msg
+getKnowledgeModelEditorSuggestions appState qs =
     let
         queryString =
             PaginationQueryString.toApiUrl qs

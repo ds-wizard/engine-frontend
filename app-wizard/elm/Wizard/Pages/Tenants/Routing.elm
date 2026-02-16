@@ -51,6 +51,6 @@ toUrl route =
             [ moduleRoot, Uuid.toString uuid ]
 
 
-isAllowed : Route -> AppState -> Bool
-isAllowed _ =
+isAllowed : AppState -> Bool
+isAllowed =
     Feature.tenants

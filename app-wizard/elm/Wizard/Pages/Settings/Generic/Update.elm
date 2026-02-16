@@ -46,7 +46,7 @@ update props wrapMsg msg appState model =
             handleGetConfigCompleted props appState model result
 
         PutConfigCompleted result ->
-            handlePutConfigCompleted props appState model result
+            handlePutConfigCompleted appState model result
 
         FormMsg formMsg ->
             handleForm props formMsg wrapMsg appState model
@@ -75,12 +75,11 @@ handleGetConfigCompleted props appState model result =
 
 
 handlePutConfigCompleted :
-    UpdateProps form
-    -> AppState
+    AppState
     -> Model form
     -> Result ApiError ()
     -> ( Model form, Cmd Wizard.Msgs.Msg )
-handlePutConfigCompleted _ appState model result =
+handlePutConfigCompleted appState model result =
     let
         ( newResult, cmd ) =
             case result of

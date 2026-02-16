@@ -202,7 +202,7 @@ update cfg appState msg model =
             let
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << KnowledgeModelEditorTypeHintInputMsg
-                    , getTypeHints = KnowledgeModelEditorsApi.getKnowledgeModelEditorSuggestions appState PaginationQueryFilters.empty
+                    , getTypeHints = KnowledgeModelEditorsApi.getKnowledgeModelEditorSuggestions appState
                     , getError = gettext "Unable to get knowledge model editors." appState.locale
                     , setReply = cfg.wrapMsg << KnowledgeModelEditorTypeHintInputSelect << .uuid
                     , clearReply = Nothing

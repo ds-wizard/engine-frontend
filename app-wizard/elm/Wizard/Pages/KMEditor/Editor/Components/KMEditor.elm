@@ -4,7 +4,7 @@ module Wizard.Pages.KMEditor.Editor.Components.KMEditor exposing
     , EventMsg
     , Model
     , MoveModalState
-    , Msg(..)
+    , Msg
     , RightPanel
     , UpdateConfig
     , closeAllModals
