@@ -26,6 +26,7 @@ import Wizard.Pages.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -156,25 +157,25 @@ sidePanelKmInfo : AppState -> KnowledgeModelPackageDetail -> Maybe ( String, Str
 sidePanelKmInfo appState kmPackage =
     let
         kmInfoList =
-            [ ( gettext "ID" appState.locale, "id", text kmPackage.id )
+            [ ( gettext "ID" appState.locale, "id", text (KnowledgeModelUtils.getPackageId kmPackage) )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString kmPackage.version )
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt kmPackage.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text kmPackage.license )
             ]
 
-        parentInfo =
+        forkOfInfo =
             case kmPackage.forkOfPackageId of
-                Just parentPackageId ->
+                Just forkOfPackageId ->
                     [ ( gettext "Fork of" appState.locale
                       , "fork-of"
-                      , linkTo (Routes.knowledgeModelsDetail parentPackageId) [] [ text parentPackageId ]
+                      , span [] [ text forkOfPackageId ]
                       )
                     ]
 
                 Nothing ->
                     []
     in
-    Just ( gettext "Knowledge Model" appState.locale, "knowledge-model-package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
+    Just ( gettext "Knowledge Model" appState.locale, "knowledge-model-package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ forkOfInfo )
 
 
 sidePanelOtherVersions : AppState -> Model -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html Msg )
@@ -182,7 +183,7 @@ sidePanelOtherVersions appState model kmPackage =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail <| kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -264,7 +265,7 @@ deleteVersionModal appState model kmPackage =
             [ p []
                 (String.formatHtml
                     (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                    [ strong [] [ text kmPackage.id ] ]
+                    [ strong [] [ text (KnowledgeModelUtils.getPackageId kmPackage) ] ]
                 )
             ]
 

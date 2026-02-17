@@ -13,6 +13,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Question as Question
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Questionnaire as Questionnaire
@@ -22,6 +23,7 @@ import Wizard.Pages.Projects.Common.QuestionChange as QuestionChange exposing (Q
 import Wizard.Pages.Projects.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
 import Wizard.Pages.Projects.Migration.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -86,22 +88,22 @@ migrationInfo appState migration =
         , table []
             [ tr []
                 [ th [] [ text (gettext "Source knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.oldProject.knowledgeModelPackageId ]
+                , td [] [ packageInfo migration.oldProject.knowledgeModelPackage ]
                 ]
             , tr []
                 [ th [] [ text (gettext "Target knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.newProject.knowledgeModelPackageId ]
+                , td [] [ packageInfo migration.newProject.knowledgeModelPackage ]
                 ]
             ]
         ]
 
 
-packageInfo : String -> Html Msg
-packageInfo kmPackageId =
+packageInfo : KnowledgeModelPackageSuggestion -> Html Msg
+packageInfo kmPackage =
     code []
-        [ linkTo (Routes.knowledgeModelsDetail kmPackageId)
+        [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
             [ target "_blank" ]
-            [ text kmPackageId ]
+            [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
         ]
 
 

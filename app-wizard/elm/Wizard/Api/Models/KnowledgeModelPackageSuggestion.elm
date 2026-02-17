@@ -9,14 +9,17 @@ module Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Maybe.Extra as Maybe
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 
 
 type alias KnowledgeModelPackageSuggestion =
-    { id : String
+    { uuid : Uuid
     , name : String
     , description : String
+    , organizationId : String
+    , kmId : String
     , version : Version
     }
 
@@ -24,17 +27,21 @@ type alias KnowledgeModelPackageSuggestion =
 decoder : Decoder KnowledgeModelPackageSuggestion
 decoder =
     D.succeed KnowledgeModelPackageSuggestion
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" D.string
+        |> D.required "organizationId" D.string
+        |> D.required "kmId" D.string
         |> D.required "version" Version.decoder
 
 
 fromKnowledgeModelPackage : KnowledgeModelPackage -> KnowledgeModelPackageSuggestion
 fromKnowledgeModelPackage kmPackage =
-    { id = kmPackage.id
+    { uuid = kmPackage.uuid
     , name = kmPackage.name
     , description = kmPackage.description
+    , organizationId = kmPackage.organizationId
+    , kmId = kmPackage.kmId
     , version = kmPackage.version
     }
 
@@ -51,14 +58,9 @@ isSameKnowledgeModelPackage kmPackageId1 kmPackageId2 =
     Maybe.isJust mbOrgId1 && mbOrgId1 == mbOrgId2 && Maybe.isJust mbKmId1 && mbKmId1 == mbKmId2
 
 
-knowledgeModelPackageIdAll : String -> String
-knowledgeModelPackageIdAll kmPackageId =
-    case getKnowledgeModelPackageIdValues kmPackageId of
-        ( Just orgId, Just kmId ) ->
-            orgId ++ ":" ++ kmId ++ ":all"
-
-        _ ->
-            kmPackageId
+knowledgeModelPackageIdAll : String -> String -> String
+knowledgeModelPackageIdAll orgId kmId =
+    orgId ++ ":" ++ kmId ++ ":all"
 
 
 getKnowledgeModelPackageIdValues : String -> ( Maybe String, Maybe String )

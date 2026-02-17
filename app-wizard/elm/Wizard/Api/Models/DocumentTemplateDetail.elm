@@ -36,7 +36,7 @@ type alias DocumentTemplateDetail =
     , remoteLatestVersion : Maybe Version
     , state : DocumentTemplateState
     , templateId : String
-    , usableKnowledgeModelPackages : List DocumentTemplatePackage
+    , usableKnowledgeModels : List DocumentTemplatePackage
     , version : Version
     , versions : List Version
     , nonEditable : Bool

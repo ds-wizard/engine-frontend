@@ -63,7 +63,7 @@ handleGetKnowledgeModelEditorCompleted wrapMsg appState model result =
         Ok kmEditor ->
             let
                 cmd =
-                    case kmEditor.previousPackageId of
+                    case Maybe.map .uuid kmEditor.previousPackage of
                         Just previousKnowledgeModelPackageId ->
                             Cmd.map wrapMsg <|
                                 KnowledgeModelPackagesApi.getKnowledgeModelPackage appState previousKnowledgeModelPackageId GetPreviousKnowledgeModelPackageCompleted
@@ -144,7 +144,7 @@ handlePutKnowledgeModelEditorCompleted : AppState -> Model -> Result ApiError Kn
 handlePutKnowledgeModelEditorCompleted appState model result =
     case result of
         Ok kmPackage ->
-            ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.id) )
+            ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.uuid) )
 
         Err error ->
             ( { model | publishingKnowledgeModelEditor = ApiError.toActionResult appState (gettext "Publishing the new version failed." appState.locale) error }

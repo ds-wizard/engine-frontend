@@ -14,6 +14,7 @@ module Wizard.Api.KnowledgeModelEditors exposing
     )
 
 import Common.Api.Models.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.UuidResponse as UuidResponse exposing (UuidResponse)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Api.WebSocket as WebSocket
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -56,9 +57,9 @@ getKnowledgeModelEditor appState uuid =
     Request.get (AppState.toServerInfo appState) ("/knowledge-model-editors/" ++ Uuid.toString uuid) KnowledgeModelEditorDetail.decoder
 
 
-postKnowledgeModelEditor : AppState -> E.Value -> ToMsg KnowledgeModelEditor msg -> Cmd msg
+postKnowledgeModelEditor : AppState -> E.Value -> ToMsg UuidResponse msg -> Cmd msg
 postKnowledgeModelEditor appState body =
-    Request.post (AppState.toServerInfo appState) "/knowledge-model-editors" KnowledgeModelEditor.decoder body
+    Request.post (AppState.toServerInfo appState) "/knowledge-model-editors" UuidResponse.decoder body
 
 
 putKnowledgeModelEditor : AppState -> Uuid -> E.Value -> ToMsg () msg -> Cmd msg

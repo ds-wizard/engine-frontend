@@ -12,6 +12,7 @@ import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> ActionResult (List KnowledgeModelPackage) -> Html msg
@@ -41,13 +42,13 @@ viewWidget appState kmPackages =
 
 viewKnowledgeModelPackage : AppState -> KnowledgeModelPackage -> Html msg
 viewKnowledgeModelPackage appState kmPackage =
-    linkTo (Routes.knowledgeModelsDetail kmPackage.id)
+    linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
         [ class "p-2 py-2 d-flex rounded-3" ]
         [ ItemIcon.view { text = kmPackage.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]
             [ strong [] [ text kmPackage.name ]
             , div [ class "d-flex align-items-center mt-1" ]
-                [ code [] [ text kmPackage.id ]
+                [ code [] [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
                 , Badge.warning [ class "ms-2" ] [ text (gettext "update available" appState.locale) ]
                 ]
             ]

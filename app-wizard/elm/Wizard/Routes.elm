@@ -422,9 +422,9 @@ isDocumentTemplateEditor id route =
 -- KM Editor
 
 
-kmEditorCreate : Maybe String -> Maybe Bool -> Route
-kmEditorCreate mbKmId mbEdit =
-    KMEditorRoute <| Wizard.Pages.KMEditor.Routes.CreateRoute mbKmId mbEdit
+kmEditorCreate : Maybe Uuid -> Maybe Bool -> Route
+kmEditorCreate mbKmUuid mbEdit =
+    KMEditorRoute <| Wizard.Pages.KMEditor.Routes.CreateRoute mbKmUuid mbEdit
 
 
 kmEditorEditor : Uuid -> Maybe Uuid -> Route
@@ -496,7 +496,7 @@ kmEditorPublish =
 -- Knowledge Models
 
 
-knowledgeModelsDetail : String -> Route
+knowledgeModelsDetail : Uuid -> Route
 knowledgeModelsDetail =
     KnowledgeModelsRoute << Wizard.Pages.KnowledgeModels.Routes.DetailRoute
 
@@ -526,14 +526,14 @@ isKnowledgeModelsIndex route =
             False
 
 
-knowledgeModelsPreview : String -> Maybe String -> Route
-knowledgeModelsPreview kmPackageId mbQuestionUuid =
-    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute kmPackageId mbQuestionUuid
+knowledgeModelsPreview : Uuid -> Maybe String -> Route
+knowledgeModelsPreview kmUuid mbQuestionUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute kmUuid mbQuestionUuid
 
 
-knowledgeModelsResourcePage : String -> String -> Route
-knowledgeModelsResourcePage kmId resourcePageUuid =
-    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.ResourcePageRoute kmId resourcePageUuid
+knowledgeModelsResourcePage : Uuid -> String -> Route
+knowledgeModelsResourcePage kmUuid resourcePageUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.ResourcePageRoute kmUuid resourcePageUuid
 
 
 isKnowledgeModelsSubroute : Route -> Bool
@@ -604,7 +604,7 @@ projectsCreate =
     ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute Nothing Nothing
 
 
-projectsCreateFromKnowledgeModel : String -> Route
+projectsCreateFromKnowledgeModel : Uuid -> Route
 projectsCreateFromKnowledgeModel selectedKnowledgeModel =
     ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute Nothing (Just selectedKnowledgeModel)
 

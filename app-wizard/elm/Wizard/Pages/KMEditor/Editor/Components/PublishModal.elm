@@ -88,7 +88,7 @@ update cfg appState msg model =
         PublishCompleted result ->
             case result of
                 Ok kmPackage ->
-                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.id) )
+                    ( model, cmdNavigate appState (Routes.knowledgeModelsDetail kmPackage.uuid) )
 
                 Err error ->
                     ( { model | publishing = ApiError.toActionResult appState (gettext "Unable to publish knowledge model" appState.locale) error }

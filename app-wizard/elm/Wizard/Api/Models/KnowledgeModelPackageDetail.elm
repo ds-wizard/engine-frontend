@@ -1,6 +1,5 @@
 module Wizard.Api.Models.KnowledgeModelPackageDetail exposing
     ( KnowledgeModelPackageDetail
-    , createFormOptions
     , decoder
     , encode
     , getLatestPackageId
@@ -13,6 +12,7 @@ import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnoweldgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
@@ -21,7 +21,7 @@ import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (Organiza
 
 
 type alias KnowledgeModelPackageDetail =
-    { id : String
+    { uuid : Uuid
     , name : String
     , organizationId : String
     , kmId : String
@@ -31,7 +31,7 @@ type alias KnowledgeModelPackageDetail =
     , license : String
     , metamodelVersion : Int
     , forkOfPackageId : Maybe String
-    , previousPackageId : Maybe String
+    , previousPackageUuid : Maybe Uuid
     , versions : List Version
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
@@ -44,7 +44,7 @@ type alias KnowledgeModelPackageDetail =
 decoder : Decoder KnowledgeModelPackageDetail
 decoder =
     D.succeed KnowledgeModelPackageDetail
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "organizationId" D.string
         |> D.required "kmId" D.string
@@ -54,7 +54,7 @@ decoder =
         |> D.required "license" D.string
         |> D.required "metamodelVersion" D.int
         |> D.required "forkOfPackageId" (D.maybe D.string)
-        |> D.required "previousPackageId" (D.maybe D.string)
+        |> D.required "previousPackageUuid" (D.maybe Uuid.decoder)
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
@@ -69,17 +69,9 @@ encode kmPackage =
         [ ( "phase", KnoweldgeModelPackagePhase.encode kmPackage.phase ) ]
 
 
-createFormOptions : KnowledgeModelPackageDetail -> List ( String, String )
-createFormOptions kmPackage =
-    kmPackage.versions
-        |> List.filter (Version.greaterThan kmPackage.version)
-        |> List.sortWith Version.compare
-        |> List.map (createFormOption kmPackage)
-
-
 toPackage : KnowledgeModelPackageDetail -> KnowledgeModelPackage
 toPackage kmPackage =
-    { id = kmPackage.id
+    { uuid = kmPackage.uuid
     , name = kmPackage.name
     , organizationId = kmPackage.organizationId
     , kmId = kmPackage.kmId
@@ -95,23 +87,13 @@ toPackage kmPackage =
 
 toPackageSuggestion : KnowledgeModelPackageDetail -> KnowledgeModelPackageSuggestion
 toPackageSuggestion kmPackage =
-    { id = kmPackage.id
+    { uuid = kmPackage.uuid
     , name = kmPackage.name
     , description = kmPackage.description
+    , organizationId = kmPackage.organizationId
+    , kmId = kmPackage.kmId
     , version = kmPackage.version
     }
-
-
-createFormOption : KnowledgeModelPackageDetail -> Version -> ( String, String )
-createFormOption kmPackage version =
-    let
-        id =
-            kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString version
-
-        optionText =
-            kmPackage.name ++ " " ++ Version.toString version ++ " (" ++ id ++ ")"
-    in
-    ( id, optionText )
 
 
 getLatestVersion : KnowledgeModelPackageDetail -> Maybe Version
@@ -121,9 +103,9 @@ getLatestVersion =
 
 getLatestPackageId : KnowledgeModelPackageDetail -> Maybe String
 getLatestPackageId kmPackage =
-    case ( String.split ":" kmPackage.id, getLatestVersion kmPackage ) of
-        ( orgId :: kmId :: _, Just latestVersion ) ->
-            Just (orgId ++ ":" ++ kmId ++ ":" ++ Version.toString latestVersion)
+    case getLatestVersion kmPackage of
+        Just latestVersion ->
+            Just (kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString latestVersion)
 
         _ ->
             Nothing

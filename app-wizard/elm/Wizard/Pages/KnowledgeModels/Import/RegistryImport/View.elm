@@ -11,6 +11,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onInput, onSubmit)
 import Html.Extra as Html
 import String.Format as String
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Components.Html exposing (linkTo)
@@ -25,8 +26,8 @@ view appState model =
     let
         content =
             case model.pulling of
-                Success _ ->
-                    viewImported appState model.knwoledgeModelPackageId
+                Success result ->
+                    viewImported appState model.knowledgeModelPackageId result.uuid
 
                 _ ->
                     viewForm appState model
@@ -44,7 +45,7 @@ viewForm appState model =
                 [ input
                     [ onInput ChangePackageId
                     , type_ "text"
-                    , value model.knwoledgeModelPackageId
+                    , value model.knowledgeModelPackageId
                     , class "form-control"
                     , placeholder <| gettext "Knowledge Model ID" appState.locale
                     ]
@@ -76,8 +77,8 @@ viewRegistryText appState =
             Html.nothing
 
 
-viewImported : AppState -> String -> Html Msg
-viewImported appState kmPackageId =
+viewImported : AppState -> String -> Uuid -> Html Msg
+viewImported appState kmPackageId kmPackageUuid =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSuccess ]
         , p [ class "lead" ]
@@ -86,7 +87,7 @@ viewImported appState kmPackageId =
                 [ code [] [ text kmPackageId ] ]
             )
         , p [ class "lead" ]
-            [ linkTo (Routes.knowledgeModelsDetail kmPackageId)
+            [ linkTo (Routes.knowledgeModelsDetail kmPackageUuid)
                 [ class "btn btn-primary" ]
                 [ text (gettext "View detail" appState.locale) ]
             ]

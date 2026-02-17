@@ -149,6 +149,7 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (linkToAttributes)
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 
@@ -1815,7 +1816,7 @@ loadTypeHints appState ctx model path questionUuidStr value =
 loadTypeHintsLegacy : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
 loadTypeHintsLegacy appState ctx model path questionUuid value =
     TypeHintsApi.fetchTypeHintsLegacy appState
-        (Just model.questionnaire.knowledgeModelPackageId)
+        (Just model.questionnaire.knowledgeModelPackage.uuid)
         ctx.events
         questionUuid
         value
@@ -2001,7 +2002,7 @@ viewQuestionnaireToolbar appState cfg model =
 
         importerPlugins =
             AppState.getPluginsByConnector appState .projectImporters
-                |> Plugin.filterByKmPatterns model.questionnaire.knowledgeModelPackageId
+                |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage)
                 |> List.sortBy (.name << Tuple.second)
                 |> List.map pluginImporter
 
@@ -4645,7 +4646,7 @@ viewFeedbackAction appState cfg model question =
     if feedbackEnabled then
         let
             openFeedbackModal =
-                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.knowledgeModelPackageId (Question.getUuid question))
+                FeedbackModalMsg (FeedbackModal.OpenFeedback (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage) (Question.getUuid question))
         in
         a
             (class "action"

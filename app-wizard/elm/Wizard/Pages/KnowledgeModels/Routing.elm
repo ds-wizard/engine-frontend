@@ -6,7 +6,9 @@ module Wizard.Pages.KnowledgeModels.Routing exposing
 
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
+import Url.Parser.Extensions as Parser
 import Url.Parser.Query as Query
+import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
@@ -24,28 +26,28 @@ parsers wrapRoute =
             wrapRoute <| ResourcePageRoute kmId resourcePageUuid
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "knowledgeModelPackageId")
-    , map (detail wrapRoute) (s moduleRoot </> string)
+    , map (detail wrapRoute) (s moduleRoot </> Parser.uuid)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
-    , map (project wrapRoute) (s moduleRoot </> string </> s "preview" <?> Query.string "questionUuid")
-    , map wrapResourcePageRoute (s moduleRoot </> string </> s "resource-pages" </> string)
+    , map (preview wrapRoute) (s moduleRoot </> Parser.uuid </> s "preview" <?> Query.string "questionUuid")
+    , map wrapResourcePageRoute (s moduleRoot </> Parser.uuid </> s "resource-pages" </> string)
     ]
 
 
-detail : (Route -> a) -> String -> a
-detail wrapRoute kmPackageId =
-    wrapRoute <| DetailRoute kmPackageId
+detail : (Route -> a) -> Uuid -> a
+detail wrapRoute kmPackageUuid =
+    wrapRoute <| DetailRoute kmPackageUuid
 
 
-project : (Route -> a) -> String -> Maybe String -> a
-project wrapRoute kmPackageId mbQuestionUuid =
-    wrapRoute <| PreviewRoute kmPackageId mbQuestionUuid
+preview : (Route -> a) -> Uuid -> Maybe String -> a
+preview wrapRoute kmPackageUuid mbQuestionUuid =
+    wrapRoute <| PreviewRoute kmPackageUuid mbQuestionUuid
 
 
 toUrl : Route -> List String
 toUrl route =
     case route of
-        DetailRoute kmPackageId ->
-            [ moduleRoot, kmPackageId ]
+        DetailRoute kmPackageUuid ->
+            [ moduleRoot, Uuid.toString kmPackageUuid ]
 
         ImportRoute kmPackageId ->
             case kmPackageId of
@@ -58,16 +60,16 @@ toUrl route =
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
-        PreviewRoute kmPackageId mbQuestionUuid ->
+        PreviewRoute kmPackageUuid mbQuestionUuid ->
             case mbQuestionUuid of
                 Just uuid ->
-                    [ moduleRoot, kmPackageId, "preview", "?questionUuid=" ++ uuid ]
+                    [ moduleRoot, Uuid.toString kmPackageUuid, "preview", "?questionUuid=" ++ uuid ]
 
                 Nothing ->
-                    [ moduleRoot, kmPackageId, "preview" ]
+                    [ moduleRoot, Uuid.toString kmPackageUuid, "preview" ]
 
-        ResourcePageRoute kmId resourcePageUuid ->
-            [ moduleRoot, kmId, "resource-pages", resourcePageUuid ]
+        ResourcePageRoute kmUuid resourcePageUuid ->
+            [ moduleRoot, Uuid.toString kmUuid, "resource-pages", resourcePageUuid ]
 
 
 isAllowed : Route -> AppState -> Bool

@@ -20,6 +20,7 @@ import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import String.Extra as String
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
 import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
@@ -55,7 +56,7 @@ config questionnaire =
     DefaultQuestionnaireRendererConfig
         { knowledgeModel = questionnaire.knowledgeModel
         , questionnaire = questionnaire
-        , resourcePageToRoute = defaultResourcePageToRoute questionnaire.knowledgeModelPackageId
+        , resourcePageToRoute = defaultResourcePageToRoute questionnaire.knowledgeModelPackage.uuid
         }
 
 
@@ -81,9 +82,9 @@ create appState (DefaultQuestionnaireRendererConfig cfg) =
     }
 
 
-defaultResourcePageToRoute : String -> String -> Wizard.Routes.Route
-defaultResourcePageToRoute kmPackageId =
-    Wizard.Routes.knowledgeModelsResourcePage kmPackageId
+defaultResourcePageToRoute : Uuid -> String -> Wizard.Routes.Route
+defaultResourcePageToRoute kmPackageUuid =
+    Wizard.Routes.knowledgeModelsResourcePage kmPackageUuid
 
 
 renderQuestionLabel : Question -> Html msg

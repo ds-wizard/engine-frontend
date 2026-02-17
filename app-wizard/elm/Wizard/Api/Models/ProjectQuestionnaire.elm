@@ -66,6 +66,7 @@ import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.Permission as Permission exposing (Permission)
 import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing(..))
 import Wizard.Api.Models.Project.ProjectTodo exposing (ProjectTodo)
@@ -82,7 +83,7 @@ type alias ProjectQuestionnaire =
     { uuid : Uuid
     , name : String
     , isTemplate : Bool
-    , knowledgeModelPackageId : String
+    , knowledgeModelPackage : KnowledgeModelPackageSuggestion
     , knowledgeModel : KnowledgeModel
     , replies : Dict String Reply
     , phaseUuid : Maybe Uuid
@@ -104,7 +105,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "isTemplate" D.bool
-        |> D.required "knowledgeModelPackageId" D.string
+        |> D.required "knowledgeModelPackage" KnowledgeModelPackageSuggestion.decoder
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "replies" (D.dict Reply.decoder)
         |> D.required "phaseUuid" (D.maybe Uuid.decoder)
@@ -225,7 +226,7 @@ createQuestionnaireDetail kmPackage km =
     , visibility = Private
     , sharing = Restricted
     , permissions = []
-    , knowledgeModelPackageId = kmPackage.id
+    , knowledgeModelPackage = KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage kmPackage
     , knowledgeModel = km
     , replies = Dict.empty
     , unresolvedCommentCounts = Dict.empty

@@ -11,6 +11,7 @@ import ActionResult exposing (ActionResult)
 import Common.Api.WebSocket as WebSocket exposing (WebSocket)
 import Debounce exposing (Debounce)
 import Dict exposing (Dict)
+import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import String.Extra as String
 import Uuid exposing (Uuid)
@@ -70,7 +71,7 @@ init appState uuid mbEditorUuid =
     , kmEditorModel = KMEditor.initialModel
     , phaseEditorModel = PhaseEditor.initialModel
     , tagEditorModel = TagEditor.initialModel
-    , previewModel = Preview.initialModel appState ""
+    , previewModel = Preview.initialModel appState Uuid.nil
     , settingsModel = Settings.initialModel appState
     , integrationPrefabs = ActionResult.Loading
     , kmSecrets = ActionResult.Loading
@@ -96,11 +97,11 @@ initPageModel appState route model =
                         currentQuestionUuid =
                             EditorContext.getActiveQuestionUuid editorContext
 
-                        kmPackageId =
+                        kmPackageUuid =
                             ActionResult.map .kmEditor model.editorContext
                                 |> ActionResult.toMaybe
-                                |> Maybe.andThen .previousPackageId
-                                |> Maybe.withDefault ""
+                                |> Maybe.andThen .previousPackage
+                                |> Maybe.unwrap Uuid.nil .uuid
 
                         firstChapterUuid =
                             editorContext.kmEditor.knowledgeModel.chapterUuids
@@ -120,7 +121,7 @@ initPageModel appState route model =
 
                         ( newSeed, previewModel ) =
                             model.previewModel
-                                |> Preview.setKnowledgeModelPackageId appState kmPackageId
+                                |> Preview.setKnowledgeModelPackageUuid appState kmPackageUuid
                                 |> Preview.setKnowledgeModel (EditorContext.getFilteredKM editorContext)
                                 |> Preview.setReplies editorContext.kmEditor.replies
                                 |> Preview.generateReplies appState currentQuestionUuid editorContext.kmEditor.knowledgeModel

@@ -10,6 +10,7 @@ import Bootstrap.Dropdown as Dropdown
 import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faOpen, faPreview)
 import Gettext exposing (gettext)
 import Html exposing (Html)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
@@ -20,7 +21,7 @@ import Wizard.Utils.Feature as Feature
 
 type alias KnowledgeModelPackageLike a =
     { a
-        | id : String
+        | uuid : Uuid
         , phase : KnowledgeModelPackagePhase
         , nonEditable : Bool
     }
@@ -48,7 +49,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faOpen
                 , label = gettext "Open" appState.locale
-                , msg = ListingActionLink (Routes.knowledgeModelsDetail kmPackage.id)
+                , msg = ListingActionLink (Routes.knowledgeModelsDetail kmPackage.uuid)
                 , dataCy = "view"
                 }
 
@@ -60,7 +61,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faPreview
                 , label = gettext "Preview" appState.locale
-                , msg = ListingActionLink (Routes.knowledgeModelsPreview kmPackage.id Nothing)
+                , msg = ListingActionLink (Routes.knowledgeModelsPreview kmPackage.uuid Nothing)
                 , dataCy = "preview"
                 }
 
@@ -84,7 +85,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faKmDetailCreateKmEditor
                 , label = gettext "Create KM editor" appState.locale
-                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.id) (Just True))
+                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.uuid) (Just True))
                 , dataCy = "create-km-editor"
                 }
 
@@ -96,7 +97,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faKmDetailFork
                 , label = gettext "Fork KM" appState.locale
-                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.id) Nothing)
+                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.uuid) Nothing)
                 , dataCy = "fork"
                 }
 
@@ -108,7 +109,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faKmDetailCreateQuestionnaire
                 , label = gettext "Create project" appState.locale
-                , msg = ListingActionLink (Routes.projectsCreateFromKnowledgeModel kmPackage.id)
+                , msg = ListingActionLink (Routes.projectsCreateFromKnowledgeModel kmPackage.uuid)
                 , dataCy = "create-project"
                 }
 

@@ -12,6 +12,7 @@ import Wizard.Api.Models.Event as Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState exposing (KnowledgeModelEditorState)
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackageInfo as KnowledgeModelPackageInfo exposing (KnowledgeModelPackageInfo)
 import Wizard.Api.Models.ProjectDetail.Reply as Reply exposing (Reply)
 
 
@@ -26,7 +27,7 @@ type alias KnowledgeModelEditorDetail =
     , knowledgeModel : KnowledgeModel
     , forkOfPackageId : Maybe String
     , forkOfPackage : Maybe KnowledgeModelPackage
-    , previousPackageId : Maybe String
+    , previousPackage : Maybe KnowledgeModelPackageInfo
     , events : List Event
     , state : KnowledgeModelEditorState
     , replies : Dict String Reply
@@ -46,7 +47,7 @@ decoder =
         |> D.required "knowledgeModel" KnowledgeModel.decoder
         |> D.required "forkOfPackageId" (D.nullable D.string)
         |> D.required "forkOfPackage" (D.nullable KnowledgeModelPackage.decoder)
-        |> D.required "previousPackageId" (D.nullable D.string)
+        |> D.required "previousPackage" (D.nullable KnowledgeModelPackageInfo.decoder)
         |> D.required "events" (D.list Event.decoder)
         |> D.required "state" KnowledgeModelEditorState.decoder
         |> D.required "replies" (D.dict Reply.decoder)

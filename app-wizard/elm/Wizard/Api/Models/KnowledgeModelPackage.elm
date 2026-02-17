@@ -9,13 +9,14 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 
 
 type alias KnowledgeModelPackage =
-    { id : String
+    { uuid : Uuid
     , name : String
     , organizationId : String
     , kmId : String
@@ -32,7 +33,7 @@ type alias KnowledgeModelPackage =
 decoder : Decoder KnowledgeModelPackage
 decoder =
     D.succeed KnowledgeModelPackage
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "organizationId" D.string
         |> D.required "kmId" D.string
@@ -47,7 +48,7 @@ decoder =
 
 dummy : KnowledgeModelPackage
 dummy =
-    { id = ""
+    { uuid = Uuid.nil
     , name = ""
     , organizationId = ""
     , kmId = ""

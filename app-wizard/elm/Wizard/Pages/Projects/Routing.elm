@@ -64,7 +64,7 @@ parsers wrapRoute =
         projectTabPluginRoute projectUuid pluginTabId =
             wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Plugin pluginTabId)
     in
-    [ map projectCreateRoute (s moduleRoot </> s "create" <?> Query.uuid "selectedProjectTemplate" <?> Query.string "selectedKnowledgeModel")
+    [ map projectCreateRoute (s moduleRoot </> s "create" <?> Query.uuid "selectedProjectTemplate" <?> Query.uuid "selectedKnowledgeModel")
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s "create-migration" </> uuid)
     , map projectDetailQuestionnaire (s moduleRoot </> uuid <?> Query.string "questionPath" <?> Query.uuid "commentThreadUuid")
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
@@ -100,7 +100,7 @@ toUrl route =
                 queryString =
                     queryParamsToString
                         [ ( "selectedProjectTemplate", Maybe.map Uuid.toString selectedProjectTemplate )
-                        , ( "selectedKnowledgeModel", selectedKnowledgeModel )
+                        , ( "selectedKnowledgeModel", Maybe.map Uuid.toString selectedKnowledgeModel )
                         ]
             in
             [ moduleRoot, "create" ++ queryString ]

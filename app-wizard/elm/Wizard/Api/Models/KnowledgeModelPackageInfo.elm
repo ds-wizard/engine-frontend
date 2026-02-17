@@ -5,11 +5,12 @@ module Wizard.Api.Models.KnowledgeModelPackageInfo exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 
 
 type alias KnowledgeModelPackageInfo =
-    { id : String
+    { uuid : Uuid
     , name : String
     , version : Version
     }
@@ -18,6 +19,6 @@ type alias KnowledgeModelPackageInfo =
 decoder : Decoder KnowledgeModelPackageInfo
 decoder =
     D.succeed KnowledgeModelPackageInfo
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "version" Version.decoder

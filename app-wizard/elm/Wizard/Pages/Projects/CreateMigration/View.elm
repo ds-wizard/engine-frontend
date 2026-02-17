@@ -39,9 +39,7 @@ createMigrationView appState model project =
                     Version.toString version
 
                 kmPackageId =
-                    String.join ":" <|
-                        List.take 2 (String.split ":" kmPackage.id)
-                            ++ [ versionString ]
+                    kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ versionString
             in
             ( kmPackageId, versionString )
 

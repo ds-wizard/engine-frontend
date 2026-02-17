@@ -18,7 +18,6 @@ import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEdit
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm exposing (KnowledgeModelEditorPublishForm)
-import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUtils as KnowledgeModelEditorUtils
 import Wizard.Pages.KMEditor.Publish.Models exposing (Model)
 import Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.Utils.HtmlAttributesUtils exposing (wideDetailClass)
@@ -55,7 +54,7 @@ formView : AppState -> Form FormError KnowledgeModelEditorPublishForm -> Knowled
 formView appState form kmEditor =
     let
         mbVersion =
-            KnowledgeModelEditorUtils.lastVersion appState kmEditor
+            Maybe.map .version kmEditor.previousPackage
 
         versionInputConfig =
             { label = gettext "New version" appState.locale

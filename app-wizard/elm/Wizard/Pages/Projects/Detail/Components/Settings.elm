@@ -554,7 +554,7 @@ knowledgeModel appState settings =
     div []
         [ h2 [] [ text (gettext "Knowledge Model" appState.locale) ]
         , deprecatedWarning
-        , linkTo (Routes.knowledgeModelsDetail settings.knowledgeModelPackage.id)
+        , linkTo (Routes.knowledgeModelsDetail settings.knowledgeModelPackage.uuid)
             [ class "package-link mb-2" ]
             [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage settings.knowledgeModelPackage) ]
         , tagList

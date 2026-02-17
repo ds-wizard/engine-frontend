@@ -37,10 +37,10 @@ import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.DeleteModal as DeleteModal
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorEditForm as KnowledgeModelEditorEditForm exposing (KnowledgeModelEditorEditForm)
-import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUtils as KnowledgeModelEditorUtils
 import Wizard.Pages.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.Routes as Routes
 import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -168,7 +168,7 @@ view appState kmEditorDetail model =
             , majorField = "versionMajor"
             , minorField = "versionMinor"
             , patchField = "versionPatch"
-            , currentVersion = KnowledgeModelEditorUtils.lastVersion appState kmEditorDetail
+            , currentVersion = Maybe.map .version kmEditorDetail.previousPackage
             , wrapFormMsg = FormMsg
             , setVersionMsg = Just FormSetVersion
             }
@@ -215,7 +215,7 @@ parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
                         [ div [] [ text (gettext "This is not the latest version of the parent knowledge model." appState.locale) ]
                         , button
                             [ class "btn btn-warning"
-                            , onClick (UpgradeModalMsg (UpgradeModal.open kmEditorDetail.uuid kmEditorDetail.name forkOfPackage.id))
+                            , onClick (UpgradeModalMsg (UpgradeModal.open kmEditorDetail.uuid kmEditorDetail.name (Just (KnowledgeModelUtils.getPackageId forkOfPackage))))
                             ]
                             [ text (gettext "Update" appState.locale) ]
                         ]
@@ -225,7 +225,7 @@ parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
     in
     div []
         [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
-        , linkTo (Routes.knowledgeModelsDetail forkOfPackage.id)
+        , linkTo (Routes.knowledgeModelsDetail forkOfPackage.uuid)
             [ class "package-link" ]
             [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage forkOfPackage) ]
         , outdatedWarning

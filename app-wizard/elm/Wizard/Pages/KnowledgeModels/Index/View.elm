@@ -23,6 +23,7 @@ import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -82,7 +83,7 @@ listingConfig appState =
 listingTitle : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitle appState kmPackage =
     span []
-        [ linkTo (Routes.knowledgeModelsDetail kmPackage.id) [] [ text kmPackage.name ]
+        [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid) [] [ text kmPackage.name ]
         , Badge.light
             (tooltip <| gettext "Latest version" appState.locale)
             [ text <| Version.toString kmPackage.version ]
@@ -149,7 +150,7 @@ listingDescription appState kmPackage =
                     Html.nothing
     in
     span []
-        [ code [ class "fragment" ] [ text kmPackage.id ]
+        [ code [ class "fragment" ] [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
         , organizationFragment
         , span [ class "fragment" ] [ text kmPackage.description ]
         ]

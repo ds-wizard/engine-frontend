@@ -187,7 +187,7 @@ handleForm wrapMsg formMsg appState model =
                             , selectedTags = []
                           }
                         , Cmd.map wrapMsg <|
-                            KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] GetKnowledgeModelPreviewCompleted
+                            KnowledgeModelsApi.fetchPreview appState (Just (Uuid.fromUuidString kmPackageId)) [] [] GetKnowledgeModelPreviewCompleted
                         )
 
                     else
@@ -205,7 +205,7 @@ handleSelectPackage wrapMsg appState model kmPackage =
 
         getSelectedPackageCmd =
             Cmd.map wrapMsg <|
-                KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackage.id GetSelectedKnowledgeModelPackageCompleted
+                KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackage.uuid GetSelectedKnowledgeModelPackageCompleted
     in
     ( { model
         | selectedPackage = Just kmPackage
@@ -276,7 +276,7 @@ loadCurrentPackage appState wrapMsg ( model, cmd ) =
             let
                 getCurrentPackageCmd =
                     Cmd.map wrapMsg <|
-                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState project.knowledgeModelPackage.id GetCurrentKnowledgeModelPackageCompleted
+                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState project.knowledgeModelPackage.uuid GetCurrentKnowledgeModelPackageCompleted
             in
             ( model, Cmd.batch [ cmd, getCurrentPackageCmd ] )
 
@@ -289,15 +289,15 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
     case model.selectedPackageDetail of
         Success kmPackage ->
             let
-                mbLatestPackageId =
+                mbLatestPackageUuid =
                     KnowledgeModelPackageDetail.getLatestPackageId kmPackage
 
                 ( packageCmd, lastFetchedPreview ) =
-                    case mbLatestPackageId of
-                        Just latestPackageId ->
+                    case mbLatestPackageUuid of
+                        Just latestPackageUuid ->
                             ( Cmd.map wrapMsg <|
-                                KnowledgeModelsApi.fetchPreview appState (Just latestPackageId) [] [] GetKnowledgeModelPreviewCompleted
-                            , Just latestPackageId
+                                KnowledgeModelsApi.fetchPreview appState (Just (Uuid.fromUuidString latestPackageUuid)) [] [] GetKnowledgeModelPreviewCompleted
+                            , Just latestPackageUuid
                             )
 
                         Nothing ->
@@ -307,7 +307,7 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
                     Maybe.unwrap
                         ProjectMigrationCreateForm.initEmpty
                         ProjectMigrationCreateForm.init
-                        mbLatestPackageId
+                        mbLatestPackageUuid
 
                 packageSuggestion =
                     KnowledgeModelPackageDetail.toPackageSuggestion kmPackage

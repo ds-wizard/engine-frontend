@@ -34,6 +34,7 @@ import Wizard.Pages.Projects.Import.Msgs exposing (Msg(..))
 import Wizard.Plugins.Plugin as Plugin
 import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -55,7 +56,7 @@ viewContentBeforeImport appState model project kmString =
     let
         mbPluginData =
             AppState.getPluginsByConnector appState .projectImporters
-                |> Plugin.filterByKmPatterns project.knowledgeModelPackageId
+                |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId project.knowledgeModelPackage)
                 |> List.find (\( _, connector ) -> connector.url == model.importerUrl)
     in
     case mbPluginData of

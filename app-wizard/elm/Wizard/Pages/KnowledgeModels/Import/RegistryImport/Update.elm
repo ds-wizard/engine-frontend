@@ -15,15 +15,15 @@ update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wi
 update msg wrapMsg appState model =
     case msg of
         ChangePackageId kmPackageId ->
-            ( { model | knwoledgeModelPackageId = kmPackageId }, Cmd.none )
+            ( { model | knowledgeModelPackageId = kmPackageId }, Cmd.none )
 
         Submit ->
-            if String.isEmpty model.knwoledgeModelPackageId then
+            if String.isEmpty model.knowledgeModelPackageId then
                 ( model, Cmd.none )
 
             else
                 ( { model | pulling = Loading }
-                , KnowledgeModelPackagesApi.pullKnowledgeModelPackage appState model.knwoledgeModelPackageId (wrapMsg << PullPackageCompleted)
+                , KnowledgeModelPackagesApi.pullKnowledgeModelPackage appState model.knowledgeModelPackageId (wrapMsg << PullPackageCompleted)
                 )
 
         PullPackageCompleted result ->

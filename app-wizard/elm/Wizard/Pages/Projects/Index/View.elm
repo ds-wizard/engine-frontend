@@ -47,6 +47,7 @@ import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFil
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -282,13 +283,13 @@ listingKMsFilter appState model =
                 filterMsg (PaginationQueryFilter.insertValue indexRouteKnowledgeModelPackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
 
         removePackageMsg kmPackage =
-            List.filter ((/=) (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id)) selectedPackageIds
+            List.filter ((/=) (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.organizationId kmPackage.kmId)) selectedPackageIds
                 |> updatePackagesMsg
                 |> ListingMsg
 
         addPackageMsg kmPackage =
             ListingFilterAddSelectedPackage kmPackage
-                (updatePackagesMsg (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id :: selectedPackageIds))
+                (updatePackagesMsg (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.organizationId kmPackage.kmId :: selectedPackageIds))
 
         viewPackageItem updateMsg icon kmPackage =
             Dropdown.buttonItem
@@ -314,11 +315,11 @@ listingKMsFilter appState model =
 
         selectedPackages =
             selectedPackageIds
-                |> List.filterMap (\a -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage a << .id) foundSelectedPackages)
+                |> List.filterMap (\a -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage a << KnowledgeModelUtils.getPackageId) foundSelectedPackages)
                 |> List.sortBy .name
 
         filterPackages =
-            List.filter (Maybe.isNothing << (\kmPackage -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage kmPackage.id) selectedPackageIds))
+            List.filter (Maybe.isNothing << (\kmPackage -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage (KnowledgeModelUtils.getPackageId kmPackage)) selectedPackageIds))
 
         foundPackages =
             model.kmPackagesFilterPackages
@@ -574,7 +575,7 @@ listingDescription appState project =
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
-                Wizard.Pages.KnowledgeModels.Routes.DetailRoute project.knowledgeModelPackage.id
+                Wizard.Pages.KnowledgeModels.Routes.DetailRoute project.knowledgeModelPackage.uuid
 
         kmLink =
             linkTo kmRoute

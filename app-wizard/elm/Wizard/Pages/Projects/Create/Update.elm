@@ -46,7 +46,7 @@ fetchData appState model =
             Feature.projectsCreateCustom appState
 
         anythingPreselected =
-            Maybe.isJust model.selectedProjectTemplateUuid || Maybe.isJust model.selectedKnowledgeModelId
+            Maybe.isJust model.selectedProjectTemplateUuid || Maybe.isJust model.selectedKnowledgeModelUuid
 
         fetchSelectedProjectTemplate =
             case ( createFromTemplate, model.selectedProjectTemplateUuid ) of
@@ -57,7 +57,7 @@ fetchData appState model =
                     Cmd.none
 
         fetchSelectedKnowledgeModel =
-            case ( createCustom, model.selectedKnowledgeModelId ) of
+            case ( createCustom, model.selectedKnowledgeModelUuid ) of
                 ( True, Just kmId ) ->
                     Cmd.batch
                         [ KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmId GetSelectedKnowledgeModelCompleted
@@ -252,15 +252,15 @@ update wrapMsg msg appState model =
                             Maybe.andThen String.toMaybe (Form.getFieldAsString "knowledgeModelPackageId" newModel.form).value
                     in
                     case selectedPackage of
-                        Just kmPackageId ->
-                            if newModel.lastFetchedPreview /= Just kmPackageId then
+                        Just kmPackageUuid ->
+                            if newModel.lastFetchedPreview /= Just kmPackageUuid then
                                 ( { newModel
-                                    | lastFetchedPreview = Just kmPackageId
+                                    | lastFetchedPreview = Just kmPackageUuid
                                     , knowledgeModelPreview = ActionResult.Loading
                                     , selectedTags = []
                                   }
                                 , Cmd.map wrapMsg <|
-                                    KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] GetKnowledgeModelPreviewCompleted
+                                    KnowledgeModelsApi.fetchPreview appState (Just (Uuid.fromUuidString kmPackageUuid)) [] [] GetKnowledgeModelPreviewCompleted
                                 )
 
                             else
@@ -342,7 +342,7 @@ update wrapMsg msg appState model =
                     { wrapMsg = wrapMsg << KnowledgeModelTypeHintInputMsg
                     , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState Nothing
                     , getError = gettext "Unable to get knowledge models." appState.locale
-                    , setReply = formMsg << .id
+                    , setReply = formMsg << Uuid.toString << .uuid
                     , clearReply = Just <| formMsg ""
                     , filterResults = Nothing
                     }

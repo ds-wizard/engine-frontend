@@ -17,7 +17,7 @@ type alias KnowledgeModelEditor =
     , name : String
     , kmId : String
     , forkOfPackageId : Maybe String
-    , previousPackageId : Maybe String
+    , previousPackageUuid : Maybe Uuid
     , state : KnowledgeModelEditorState
     , updatedAt : Time.Posix
     }
@@ -30,7 +30,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "kmId" D.string
         |> D.required "forkOfPackageId" (D.nullable D.string)
-        |> D.required "previousPackageId" (D.nullable D.string)
+        |> D.required "previousPackageUuid" (D.nullable Uuid.decoder)
         |> D.required "state" KnowledgeModelEditorState.decoder
         |> D.required "updatedAt" D.datetime
 

@@ -17,8 +17,9 @@ module Wizard.Api.KnowledgeModelPackages exposing
     )
 
 import Common.Api.Models.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.UuidResponse as UuidResponse exposing (UuidResponse)
 import Common.Api.Request as Request exposing (ToMsg)
-import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Utils.Bool as Bool
 import File exposing (File)
@@ -34,15 +35,26 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 
 
 getKnowledgeModelPackages : AppState -> PaginationQueryFilters -> PaginationQueryString -> ToMsg (Pagination KnowledgeModelPackage) msg -> Cmd msg
-getKnowledgeModelPackages appState _ qs =
+getKnowledgeModelPackages appState pqf qs =
     let
+        extraParams =
+            createListExtraParams pqf
+
         queryString =
-            PaginationQueryString.toApiUrl qs
+            PaginationQueryString.toApiUrlWith extraParams qs
 
         url =
             "/knowledge-model-packages" ++ queryString
     in
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "knowledgeModelPackages" KnowledgeModelPackage.decoder)
+
+
+createListExtraParams : PaginationQueryFilters -> List ( String, String )
+createListExtraParams filters =
+    PaginationQueryString.filterParams
+        [ ( "organizationId", PaginationQueryFilters.getValue "organizationId" filters )
+        , ( "kmId", PaginationQueryFilters.getValue "kmId" filters )
+        ]
 
 
 getOutdatedKnowledgeModelPackages : AppState -> ToMsg (Pagination KnowledgeModelPackage) msg -> Cmd msg
@@ -91,14 +103,14 @@ getKnowledgeModelPackagesSuggestionsWithOptions appState qs select exclude =
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "knowledgeModelPackages" KnowledgeModelPackageSuggestion.decoder)
 
 
-getKnowledgeModelPackage : AppState -> String -> ToMsg KnowledgeModelPackageDetail msg -> Cmd msg
-getKnowledgeModelPackage appState kmPackageId =
-    Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ kmPackageId) KnowledgeModelPackageDetail.decoder
+getKnowledgeModelPackage : AppState -> Uuid -> ToMsg KnowledgeModelPackageDetail msg -> Cmd msg
+getKnowledgeModelPackage appState kmPackageUuid =
+    Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid) KnowledgeModelPackageDetail.decoder
 
 
-getKnowledgeModelPackageWithoutDeprecatedVersions : AppState -> String -> ToMsg KnowledgeModelPackageDetail msg -> Cmd msg
-getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackageId =
-    Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ kmPackageId ++ "?excludeDeprecatedVersions=true") KnowledgeModelPackageDetail.decoder
+getKnowledgeModelPackageWithoutDeprecatedVersions : AppState -> Uuid -> ToMsg KnowledgeModelPackageDetail msg -> Cmd msg
+getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackageUuid =
+    Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "?excludeDeprecatedVersions=true") KnowledgeModelPackageDetail.decoder
 
 
 postFromKnowledgeModelEditor : AppState -> Uuid -> ToMsg KnowledgeModelPackage msg -> Cmd msg
@@ -115,13 +127,13 @@ postFromMigration appState body =
     Request.post (AppState.toServerInfo appState) "/knowledge-model-packages/from-migration" KnowledgeModelPackage.decoder body
 
 
-putKnowledgeModelPackage : AppState -> { p | id : String, phase : KnowledgeModelPackagePhase } -> ToMsg () msg -> Cmd msg
+putKnowledgeModelPackage : AppState -> { p | uuid : Uuid, phase : KnowledgeModelPackagePhase } -> ToMsg () msg -> Cmd msg
 putKnowledgeModelPackage appState kmPackage =
     let
         body =
             KnowledgeModelPackageDetail.encode kmPackage
     in
-    Request.putWhatever (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ kmPackage.id) body
+    Request.putWhatever (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackage.uuid) body
 
 
 deleteKnowledgeModelPackage : AppState -> String -> String -> ToMsg () msg -> Cmd msg
@@ -129,14 +141,14 @@ deleteKnowledgeModelPackage appState organizationId kmId =
     Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/?organizationId=" ++ organizationId ++ "&kmId=" ++ kmId)
 
 
-deleteKnowledgeModelPackageVersion : AppState -> String -> ToMsg () msg -> Cmd msg
-deleteKnowledgeModelPackageVersion appState kmPackageId =
-    Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ kmPackageId)
+deleteKnowledgeModelPackageVersion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
+deleteKnowledgeModelPackageVersion appState kmPackageUuid =
+    Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid)
 
 
-pullKnowledgeModelPackage : AppState -> String -> ToMsg () msg -> Cmd msg
+pullKnowledgeModelPackage : AppState -> String -> ToMsg UuidResponse msg -> Cmd msg
 pullKnowledgeModelPackage appState kmPackageId =
-    Request.postEmpty (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ kmPackageId ++ "/pull")
+    Request.postEmptyBody (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ kmPackageId ++ "/pull") UuidResponse.decoder
 
 
 importKnowledgeModelPackage : AppState -> File -> ToMsg () msg -> Cmd msg
@@ -153,6 +165,6 @@ importFromOwl appState params file =
     Request.postFileWithDataWhatever (AppState.toServerInfo appState) "/knowledge-model-packages/bundle" file httpParams
 
 
-exportKnowledgeModelPackageUrl : String -> String
-exportKnowledgeModelPackageUrl kmPackageId =
-    "/knowledge-model-packages/" ++ kmPackageId ++ "/bundle"
+exportKnowledgeModelPackageUrl : Uuid -> String
+exportKnowledgeModelPackageUrl kmPackageUuid =
+    "/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/bundle"

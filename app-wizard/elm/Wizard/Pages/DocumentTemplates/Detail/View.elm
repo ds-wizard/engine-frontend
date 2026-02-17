@@ -29,6 +29,7 @@ import Wizard.Pages.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.Pages.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -306,9 +307,9 @@ sidePanelUsableWith appState model template =
     let
         packageLink kmPackage =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail kmPackage.id)
+                [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
                     [ dataCy "template_km-link" ]
-                    [ text kmPackage.id ]
+                    [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
                 ]
 
         takeFirstPackages =
@@ -319,7 +320,7 @@ sidePanelUsableWith appState model template =
                 List.take 10
 
         kmPackageLinks =
-            template.usableKnowledgeModelPackages
+            template.usableKnowledgeModels
                 |> List.sortWith DocumentTemplatePackage.compareById
                 |> takeFirstPackages
                 |> List.map packageLink
@@ -330,7 +331,7 @@ sidePanelUsableWith appState model template =
     else
         let
             showAllLink =
-                if model.showAllKms || List.length template.usableKnowledgeModelPackages <= 10 then
+                if model.showAllKms || List.length template.usableKnowledgeModels <= 10 then
                     Html.nothing
 
                 else

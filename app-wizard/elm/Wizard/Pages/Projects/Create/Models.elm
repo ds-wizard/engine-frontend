@@ -26,7 +26,7 @@ import Wizard.Utils.Feature as Feature
 
 type alias Model =
     { selectedProjectTemplateUuid : Maybe Uuid
-    , selectedKnowledgeModelId : Maybe String
+    , selectedKnowledgeModelUuid : Maybe Uuid
     , selectedProjectTemplate : ActionResult ProjectSettings
     , selectedKnowledgeModel : ActionResult KnowledgeModelPackageDetail
     , projectTemplateTypeHintInputModel : TypeHintInput.Model Project
@@ -114,11 +114,11 @@ updateDefaultMode appState model =
                 { model | mode = DefaultMode TabsDefaultMode }
 
 
-initialModel : AppState -> Maybe Uuid -> Maybe String -> Model
-initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
+initialModel : AppState -> Maybe Uuid -> Maybe Uuid -> Model
+initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelUuid =
     let
         mode =
-            case ( selectedProjectTemplateUuid, selectedKnowledgeModelId ) of
+            case ( selectedProjectTemplateUuid, selectedKnowledgeModelUuid ) of
                 ( Just _, _ ) ->
                     FromProjectTemplateMode
 
@@ -129,7 +129,7 @@ initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
                     DefaultMode TabsDefaultMode
 
         knowledgeModelPreview =
-            case selectedKnowledgeModelId of
+            case selectedKnowledgeModelUuid of
                 Just _ ->
                     ActionResult.Loading
 
@@ -145,7 +145,7 @@ initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
                     ActionResult.Unset
 
         selectedKnowledgeModel =
-            case selectedKnowledgeModelId of
+            case selectedKnowledgeModelUuid of
                 Just _ ->
                     ActionResult.Loading
 
@@ -159,7 +159,7 @@ initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
             Feature.projectsCreateCustom appState
 
         anythingPreselected =
-            Maybe.isJust selectedProjectTemplateUuid || Maybe.isJust selectedKnowledgeModelId
+            Maybe.isJust selectedProjectTemplateUuid || Maybe.isJust selectedKnowledgeModelUuid
 
         loadProjectTemplates =
             if createFromTemplate && not anythingPreselected then
@@ -176,19 +176,19 @@ initialModel appState selectedProjectTemplateUuid selectedKnowledgeModelId =
                 ActionResult.Unset
     in
     { selectedProjectTemplateUuid = selectedProjectTemplateUuid
-    , selectedKnowledgeModelId = selectedKnowledgeModelId
+    , selectedKnowledgeModelUuid = selectedKnowledgeModelUuid
     , selectedProjectTemplate = selectedProjectTemplate
     , selectedKnowledgeModel = selectedKnowledgeModel
     , projectTemplateTypeHintInputModel = TypeHintInput.init "templateId"
     , knowledgeModelTypeHintInputModel = TypeHintInput.init "knowledgeModelPackageId"
     , anyProjectTemplates = loadProjectTemplates
     , anyKnowledgeModels = loadKnowledgeModels
-    , form = ProjectCreateForm.init appState ProjectCreateForm.TemplateValidationMode selectedProjectTemplateUuid selectedKnowledgeModelId
+    , form = ProjectCreateForm.init appState ProjectCreateForm.TemplateValidationMode selectedProjectTemplateUuid selectedKnowledgeModelUuid
     , mode = mode
     , savingQuestionnaire = ActionResult.Unset
     , selectedTags = []
     , useAllQuestions = True
-    , lastFetchedPreview = selectedKnowledgeModelId
+    , lastFetchedPreview = Maybe.map Uuid.toString selectedKnowledgeModelUuid
     , knowledgeModelPreview = knowledgeModelPreview
     , activeTab = ProjectTemplateTab
     }

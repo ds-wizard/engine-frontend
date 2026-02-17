@@ -9,6 +9,7 @@ import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setKnowledgeModelPackage)
 import Gettext exposing (gettext)
+import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -19,9 +20,9 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : String -> AppState -> Cmd Msg
-fetchData kmPackageId appState =
-    KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetKnowledgeModelPackageCompleted
+fetchData : Uuid -> AppState -> Cmd Msg
+fetchData kmPackageUuid appState =
+    KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageUuid GetKnowledgeModelPackageCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -69,7 +70,7 @@ update msg wrapMsg appState model =
                     ( model, Cmd.none )
 
         ExportKnowledgeModelPackage kmPackage ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.id)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -83,7 +84,7 @@ handleDeleteVersion wrapMsg appState model =
     case model.knowledgeModelPackage of
         Success kmPackage ->
             ( { model | deletingVersion = Loading }
-            , KnowledgeModelPackagesApi.deleteKnowledgeModelPackageVersion appState kmPackage.id (wrapMsg << DeleteVersionCompleted)
+            , KnowledgeModelPackagesApi.deleteKnowledgeModelPackageVersion appState kmPackage.uuid (wrapMsg << DeleteVersionCompleted)
             )
 
         _ ->
