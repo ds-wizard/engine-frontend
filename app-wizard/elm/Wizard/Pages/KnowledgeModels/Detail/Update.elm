@@ -69,6 +69,25 @@ update msg wrapMsg appState model =
                 _ ->
                     ( model, Cmd.none )
 
+        UpdatePublic isPublic ->
+            handleSetUpdatePublic wrapMsg appState model isPublic
+
+        UpdatePublicCompleted isPublic result ->
+            case model.knowledgeModelPackage of
+                Success kmPackage ->
+                    RequestHelpers.applyResultTransform
+                        { setResult = setKnowledgeModelPackage
+                        , defaultError = gettext "Unable to update the knowledge model." appState.locale
+                        , model = model
+                        , result = result
+                        , logoutMsg = Wizard.Msgs.logoutMsg
+                        , transform = always { kmPackage | public = isPublic }
+                        , locale = appState.locale
+                        }
+
+                _ ->
+                    ( model, Cmd.none )
+
         ExportKnowledgeModelPackage kmPackage ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.uuid)) )
 
@@ -112,6 +131,20 @@ handleSetUpdatePhase wrapMsg appState model phase =
                     { kmPackage | phase = phase }
             in
             ( model, KnowledgeModelPackagesApi.putKnowledgeModelPackage appState newPackage (wrapMsg << UpdatePhaseCompleted phase) )
+
+        _ ->
+            ( model, Cmd.none )
+
+
+handleSetUpdatePublic : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Bool -> ( Model, Cmd Wizard.Msgs.Msg )
+handleSetUpdatePublic wrapMsg appState model isPublic =
+    case model.knowledgeModelPackage of
+        Success kmPackage ->
+            let
+                newPackage =
+                    { kmPackage | public = isPublic }
+            in
+            ( model, KnowledgeModelPackagesApi.putKnowledgeModelPackage appState newPackage (wrapMsg << UpdatePublicCompleted isPublic) )
 
         _ ->
             ( model, Cmd.none )

@@ -62,6 +62,8 @@ module Common.Components.FontAwesome exposing
     , faKmReference
     , faKmResourceCollection
     , faKmResourcePage
+    , faKmSetPrivate
+    , faKmSetPublic
     , faKmTag
     , faKmsUpload
     , faKnowledgeModel
@@ -506,6 +508,16 @@ faKmResourceCollection =
 faKmResourcePage : Html msg
 faKmResourcePage =
     far "fa-file-lines"
+
+
+faKmSetPublic : Html msg
+faKmSetPublic =
+    fas "fa-globe"
+
+
+faKmSetPrivate : Html msg
+faKmSetPrivate =
+    fas "fa-lock"
 
 
 faKmTag : Html msg

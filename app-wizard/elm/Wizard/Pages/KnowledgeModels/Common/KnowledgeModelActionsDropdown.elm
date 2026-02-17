@@ -7,7 +7,7 @@ module Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposin
     )
 
 import Bootstrap.Dropdown as Dropdown
-import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faOpen, faPreview)
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faKmSetPrivate, faKmSetPublic, faOpen, faPreview)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Uuid exposing (Uuid)
@@ -24,6 +24,7 @@ type alias KnowledgeModelPackageLike a =
         | uuid : Uuid
         , phase : KnowledgeModelPackagePhase
         , nonEditable : Bool
+        , public : Bool
     }
 
 
@@ -36,6 +37,7 @@ type alias DropdownConfig msg =
 type alias ActionsConfig a msg =
     { exportMsg : KnowledgeModelPackageLike a -> msg
     , updatePhaseMsg : KnowledgeModelPackageLike a -> KnowledgeModelPackagePhase -> msg
+    , updatePublicMsg : KnowledgeModelPackageLike a -> Bool -> msg
     , deleteMsg : KnowledgeModelPackageLike a -> msg
     , viewActionVisible : Bool
     }
@@ -140,6 +142,30 @@ actions appState cfg kmPackage =
         restoreActionVisible =
             Feature.knowledgeModelRestore appState kmPackage
 
+        setPublicAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faKmSetPublic
+                , label = gettext "Set public" appState.locale
+                , msg = ListingActionMsg (cfg.updatePublicMsg kmPackage True)
+                , dataCy = "set-public"
+                }
+
+        setPublicActionVisible =
+            Feature.knowledgeModelSetPublic appState kmPackage
+
+        setPrivateAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faKmSetPrivate
+                , label = gettext "Set private" appState.locale
+                , msg = ListingActionMsg (cfg.updatePublicMsg kmPackage False)
+                , dataCy = "set-private"
+                }
+
+        setPrivateActionVisible =
+            Feature.knowledgeModelSetPrivate appState kmPackage
+
         deleteAction =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
@@ -163,7 +189,10 @@ actions appState cfg kmPackage =
               ]
             , [ ( setDeprecatedAction, setDeprecatedActionVisible )
               , ( restoreAction, restoreActionVisible )
-              , ( deleteAction, deleteActionVisible )
+              , ( setPublicAction, setPublicActionVisible )
+              , ( setPrivateAction, setPrivateActionVisible )
+              ]
+            , [ ( deleteAction, deleteActionVisible )
               ]
             ]
     in

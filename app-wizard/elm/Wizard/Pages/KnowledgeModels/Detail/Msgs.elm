@@ -15,6 +15,8 @@ type Msg
     | DeleteVersionCompleted (Result ApiError ())
     | UpdatePhase KnowledgeModelPackagePhase
     | UpdatePhaseCompleted KnowledgeModelPackagePhase (Result ApiError ())
+    | UpdatePublic Bool
+    | UpdatePublicCompleted Bool (Result ApiError ())
     | ExportKnowledgeModelPackage KnowledgeModelPackageDetail
     | FileDownloaderMsg FileDownloader.Msg
     | ShowAllVersions

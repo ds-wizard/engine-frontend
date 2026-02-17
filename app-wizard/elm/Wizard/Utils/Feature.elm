@@ -26,6 +26,8 @@ module Wizard.Utils.Feature exposing
     , knowledgeModelRestore
     , knowledgeModelSecrets
     , knowledgeModelSetDeprecated
+    , knowledgeModelSetPrivate
+    , knowledgeModelSetPublic
     , knowledgeModelsDelete
     , knowledgeModelsExport
     , knowledgeModelsImport
@@ -209,6 +211,18 @@ knowledgeModelRestore : AppState -> { a | phase : KnowledgeModelPackagePhase } -
 knowledgeModelRestore appState kmPackage =
     adminOr Perm.packageManagementWrite appState
         && (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated)
+
+
+knowledgeModelSetPublic : AppState -> { a | public : Bool } -> Bool
+knowledgeModelSetPublic appState kmPackage =
+    adminOr Perm.packageManagementWrite appState
+        && not kmPackage.public
+
+
+knowledgeModelSetPrivate : AppState -> { a | public : Bool } -> Bool
+knowledgeModelSetPrivate appState kmPackage =
+    adminOr Perm.packageManagementWrite appState
+        && kmPackage.public
 
 
 

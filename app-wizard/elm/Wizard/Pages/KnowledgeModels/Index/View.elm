@@ -57,6 +57,7 @@ listingConfig appState =
         KnowledgeModelActionsDropdown.actions appState
             { exportMsg = ExportKnowledgeModelPackage
             , updatePhaseMsg = UpdatePhase
+            , updatePublicMsg = UpdatePublic
             , deleteMsg = ShowHideDeletePackage << Just
             , viewActionVisible = True
             }
@@ -90,12 +91,13 @@ listingTitle appState kmPackage =
         , listingTitleNonEditableBadge appState kmPackage
         , listingTitleDeprecatedBadge appState kmPackage
         , listingTitleOutdatedBadge appState kmPackage
+        , listingTitlePublicBadge appState kmPackage
         ]
 
 
 listingTitleOutdatedBadge : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitleOutdatedBadge appState kmPackage =
-    if KnowledgeModelPackage.isOutdated kmPackage then
+    Html.viewIf (KnowledgeModelPackage.isOutdated kmPackage) <|
         let
             kmPackageId =
                 Maybe.map ((++) (kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":") << Version.toString) kmPackage.remoteLatestVersion
@@ -104,26 +106,23 @@ listingTitleOutdatedBadge appState kmPackage =
             [ class Badge.warningClass ]
             [ text (gettext "update available" appState.locale) ]
 
-    else
-        Html.nothing
-
 
 listingTitleDeprecatedBadge : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitleDeprecatedBadge appState kmPackage =
-    if kmPackage.phase == KnowledgeModelPackagePhase.Deprecated then
+    Html.viewIf (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated) <|
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
-
-    else
-        Html.nothing
 
 
 listingTitleNonEditableBadge : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitleNonEditableBadge appState kmPackage =
-    if kmPackage.nonEditable then
+    Html.viewIf kmPackage.nonEditable <|
         Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
-    else
-        Html.nothing
+
+listingTitlePublicBadge : AppState -> KnowledgeModelPackage -> Html Msg
+listingTitlePublicBadge appState kmPackage =
+    Html.viewIf kmPackage.public <|
+        Badge.info [] [ text (gettext "public" appState.locale) ]
 
 
 listingDescription : AppState -> KnowledgeModelPackage -> Html Msg

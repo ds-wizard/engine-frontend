@@ -38,6 +38,7 @@ type alias KnowledgeModelPackageDetail =
     , remoteLatestVersion : Maybe Version
     , phase : KnowledgeModelPackagePhase
     , nonEditable : Bool
+    , public : Bool
     }
 
 
@@ -61,12 +62,15 @@ decoder =
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "phase" KnoweldgeModelPackagePhase.decoder
         |> D.required "nonEditable" D.bool
+        |> D.required "public" D.bool
 
 
-encode : { a | phase : KnowledgeModelPackagePhase } -> E.Value
+encode : { a | phase : KnowledgeModelPackagePhase, public : Bool } -> E.Value
 encode kmPackage =
     E.object
-        [ ( "phase", KnoweldgeModelPackagePhase.encode kmPackage.phase ) ]
+        [ ( "phase", KnoweldgeModelPackagePhase.encode kmPackage.phase )
+        , ( "public", E.bool kmPackage.public )
+        ]
 
 
 toPackage : KnowledgeModelPackageDetail -> KnowledgeModelPackage
@@ -82,6 +86,7 @@ toPackage kmPackage =
     , phase = kmPackage.phase
     , createdAt = Time.millisToPosix 0
     , nonEditable = True
+    , public = kmPackage.public
     }
 
 

@@ -27,6 +27,7 @@ type alias KnowledgeModelPackage =
     , phase : KnowledgeModelPackagePhase
     , createdAt : Time.Posix
     , nonEditable : Bool
+    , public : Bool
     }
 
 
@@ -44,6 +45,7 @@ decoder =
         |> D.required "phase" KnowledgeModelPackagePhase.decoder
         |> D.required "createdAt" D.datetime
         |> D.required "nonEditable" D.bool
+        |> D.required "public" D.bool
 
 
 dummy : KnowledgeModelPackage
@@ -59,6 +61,7 @@ dummy =
     , phase = KnowledgeModelPackagePhase.Released
     , createdAt = Time.millisToPosix 0
     , nonEditable = True
+    , public = False
     }
 
 

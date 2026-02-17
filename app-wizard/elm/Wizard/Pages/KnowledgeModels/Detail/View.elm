@@ -48,18 +48,16 @@ header : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
 header appState model kmPackage =
     let
         deprecatedBadge =
-            if kmPackage.phase == KnowledgeModelPackagePhase.Deprecated then
+            Html.viewIf (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated) <|
                 Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
-            else
-                Html.nothing
-
         nonEditableBadge =
-            if kmPackage.nonEditable then
+            Html.viewIf kmPackage.nonEditable <|
                 Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
-            else
-                Html.nothing
+        publicBadge =
+            Html.viewIf kmPackage.public <|
+                Badge.info [] [ text (gettext "public" appState.locale) ]
 
         dropdownActions =
             KnowledgeModelActionsDropdown.dropdown appState
@@ -68,12 +66,13 @@ header appState model kmPackage =
                 }
                 { exportMsg = ExportKnowledgeModelPackage
                 , updatePhaseMsg = \_ phase -> UpdatePhase phase
+                , updatePublicMsg = \_ isPublic -> UpdatePublic isPublic
                 , deleteMsg = always (ShowDeleteDialog True)
                 , viewActionVisible = False
                 }
                 kmPackage
     in
-    DetailPage.header (span [] [ text kmPackage.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.header (span [] [ text kmPackage.name, nonEditableBadge, deprecatedBadge, publicBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> KnowledgeModelPackageDetail -> Html msg

@@ -14,5 +14,7 @@ type Msg
     | ListingMsg (Listing.Msg KnowledgeModelPackage)
     | UpdatePhase KnowledgeModelPackage KnowledgeModelPackagePhase
     | UpdatePhaseCompleted (Result ApiError ())
+    | UpdatePublic KnowledgeModelPackage Bool
+    | UpdatePublicCompleted (Result ApiError ())
     | ExportKnowledgeModelPackage KnowledgeModelPackage
     | FileDownloaderMsg FileDownloader.Msg

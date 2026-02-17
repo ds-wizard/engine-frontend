@@ -127,7 +127,7 @@ postFromMigration appState body =
     Request.post (AppState.toServerInfo appState) "/knowledge-model-packages/from-migration" KnowledgeModelPackage.decoder body
 
 
-putKnowledgeModelPackage : AppState -> { p | uuid : Uuid, phase : KnowledgeModelPackagePhase } -> ToMsg () msg -> Cmd msg
+putKnowledgeModelPackage : AppState -> { p | uuid : Uuid, phase : KnowledgeModelPackagePhase, public : Bool } -> ToMsg () msg -> Cmd msg
 putKnowledgeModelPackage appState kmPackage =
     let
         body =

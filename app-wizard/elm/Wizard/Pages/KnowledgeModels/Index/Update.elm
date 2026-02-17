@@ -55,6 +55,21 @@ update msg wrapMsg appState model =
                     , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
 
+        UpdatePublic kmPackage isPublic ->
+            ( model, KnowledgeModelPackagesApi.putKnowledgeModelPackage appState { kmPackage | public = isPublic } (wrapMsg << UpdatePublicCompleted) )
+
+        UpdatePublicCompleted result ->
+            case result of
+                Ok _ ->
+                    ( model
+                    , Task.dispatch (wrapMsg (ListingMsg ListingMsgs.OnAfterDelete))
+                    )
+
+                Err error ->
+                    ( { model | deletingKmPackage = ApiError.toActionResult appState (gettext "Knowledge model could not be updated." appState.locale) error }
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
+                    )
+
         ExportKnowledgeModelPackage kmPackage ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.uuid)) )
 
