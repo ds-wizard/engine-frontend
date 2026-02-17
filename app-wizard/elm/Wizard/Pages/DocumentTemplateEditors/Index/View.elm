@@ -20,6 +20,7 @@ import Wizard.Pages.DocumentTemplateEditors.Index.Models exposing (Model)
 import Wizard.Pages.DocumentTemplateEditors.Index.Msgs exposing (Msg(..))
 import Wizard.Pages.DocumentTemplateEditors.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
 
@@ -63,7 +64,7 @@ listingConfig appState =
 listingTitle : AppState -> DocumentTemplateDraft -> Html Msg
 listingTitle appState template =
     span []
-        [ linkTo (Routes.documentTemplateEditorDetail template.id) [] [ text template.name ]
+        [ linkTo (Routes.documentTemplateEditorDetail template.uuid) [] [ text template.name ]
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString template.version ]
@@ -73,7 +74,7 @@ listingTitle appState template =
 listingDescription : DocumentTemplateDraft -> Html Msg
 listingDescription template =
     span []
-        [ code [ class "fragment" ] [ text template.id ]
+        [ code [ class "fragment" ] [ text (DocumentTemplateUtils.getId template) ]
         , span [ class "fragment" ] [ text template.description ]
         ]
 
@@ -86,7 +87,7 @@ listingActions appState template =
                 { extraClass = Nothing
                 , icon = faEdit
                 , label = gettext "Open editor" appState.locale
-                , msg = ListingActionLink (Routes.documentTemplateEditorDetail template.id)
+                , msg = ListingActionLink (Routes.documentTemplateEditorDetail template.uuid)
                 , dataCy = "view"
                 }
 

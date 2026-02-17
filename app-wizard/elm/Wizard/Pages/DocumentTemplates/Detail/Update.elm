@@ -9,6 +9,7 @@ import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setTemplate)
 import Gettext exposing (gettext)
+import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -19,9 +20,9 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : String -> AppState -> Cmd Msg
-fetchData templateId appState =
-    DocumentTemplatesApi.getTemplate appState templateId GetTemplateCompleted
+fetchData : Uuid -> AppState -> Cmd Msg
+fetchData templateUuid appState =
+    DocumentTemplatesApi.getTemplate appState templateUuid GetTemplateCompleted
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -63,7 +64,7 @@ update msg wrapMsg appState model =
                 }
 
         ExportTemplate template ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentTemplatesApi.exportTemplateUrl template.id)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentTemplatesApi.exportTemplateUrl template.uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
@@ -77,7 +78,7 @@ handleDeleteVersion wrapMsg appState model =
     case model.template of
         Success template ->
             ( { model | deletingVersion = Loading }
-            , Cmd.map wrapMsg <| DocumentTemplatesApi.deleteTemplateVersion appState template.id DeleteVersionCompleted
+            , Cmd.map wrapMsg <| DocumentTemplatesApi.deleteTemplateVersion appState template.uuid DeleteVersionCompleted
             )
 
         _ ->

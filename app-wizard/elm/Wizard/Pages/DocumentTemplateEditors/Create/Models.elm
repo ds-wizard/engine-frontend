@@ -7,6 +7,7 @@ import ActionResult exposing (ActionResult)
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Data.AppState exposing (AppState)
@@ -18,17 +19,17 @@ type alias Model =
     , form : Form FormError DocumentTemplateEditorCreateForm
     , documentTemplateTypeHintInputModel : TypeHintInput.Model DocumentTemplateSuggestion
     , documentTemplate : ActionResult DocumentTemplateDetail
-    , selectedDocumentTemplate : Maybe String
+    , selectedDocumentTemplateUuid : Maybe Uuid
     , edit : Bool
     }
 
 
-initialModel : AppState -> Maybe String -> Maybe Bool -> Model
-initialModel appState selectedDocumentTemplate edit =
+initialModel : AppState -> Maybe Uuid -> Maybe Bool -> Model
+initialModel appState selectedDocumentTemplateUuid edit =
     { savingDocumentTemplate = ActionResult.Unset
-    , form = DocumentTemplateEditorCreateForm.init appState selectedDocumentTemplate
+    , form = DocumentTemplateEditorCreateForm.init appState selectedDocumentTemplateUuid
     , documentTemplateTypeHintInputModel = TypeHintInput.init "basedOn"
     , documentTemplate = ActionResult.Loading
-    , selectedDocumentTemplate = selectedDocumentTemplate
+    , selectedDocumentTemplateUuid = selectedDocumentTemplateUuid
     , edit = Maybe.withDefault False edit
     }

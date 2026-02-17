@@ -60,7 +60,7 @@ update msg wrapMsg appState model =
                     )
 
         ExportDocumentTemplate documentTemplate ->
-            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentTemplatesApi.exportTemplateUrl documentTemplate.id)) )
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (DocumentTemplatesApi.exportTemplateUrl documentTemplate.uuid)) )
 
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )

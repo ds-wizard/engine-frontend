@@ -22,6 +22,7 @@ import Wizard.Pages.DocumentTemplates.Index.Models exposing (Model)
 import Wizard.Pages.DocumentTemplates.Index.Msgs exposing (Msg(..))
 import Wizard.Pages.DocumentTemplates.Routes exposing (Route(..))
 import Wizard.Routes as Routes
+import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
 
@@ -83,7 +84,7 @@ listingConfig appState =
 listingTitle : AppState -> DocumentTemplate -> Html Msg
 listingTitle appState documentTemplate =
     span []
-        [ linkTo (Routes.documentTemplatesDetail documentTemplate.id) [] [ text documentTemplate.name ]
+        [ linkTo (Routes.documentTemplatesDetail documentTemplate.uuid) [] [ text documentTemplate.name ]
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString documentTemplate.version ]
@@ -162,7 +163,7 @@ listingDescription appState documentTemplate =
                     Html.nothing
     in
     span []
-        [ code [ class "fragment" ] [ text documentTemplate.id ]
+        [ code [ class "fragment" ] [ text (DocumentTemplateUtils.getId documentTemplate) ]
         , organizationFragment
         , span [ class "fragment" ] [ text documentTemplate.description ]
         ]

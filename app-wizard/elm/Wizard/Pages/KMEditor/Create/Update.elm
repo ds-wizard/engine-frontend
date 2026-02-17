@@ -35,7 +35,7 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         fetchPackageCmd =
-            case ( model.selectedKmPackage, model.edit ) of
+            case ( model.selectedKmPackageUuid, model.edit ) of
                 ( Just kmPackageId, True ) ->
                     KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageCompleted
 

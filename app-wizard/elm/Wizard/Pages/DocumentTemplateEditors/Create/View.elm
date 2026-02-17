@@ -1,6 +1,7 @@
 module Wizard.Pages.DocumentTemplateEditors.Create.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionResultBlock as ActionResult
 import Common.Components.Container as Container
 import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
@@ -13,6 +14,7 @@ import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Create.Models exposing (Model)
 import Wizard.Pages.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
+import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -22,7 +24,7 @@ view appState model =
         pageView =
             Page.actionResultView appState (viewCreate appState model)
     in
-    case ( model.selectedDocumentTemplate, model.edit ) of
+    case ( model.selectedDocumentTemplateUuid, model.edit ) of
         ( Just _, True ) ->
             pageView model.documentTemplate
 
@@ -52,9 +54,17 @@ formView : AppState -> Model -> Html Msg
 formView appState model =
     let
         parentInput =
-            case model.selectedDocumentTemplate of
-                Just documentTemplate ->
-                    FormGroup.codeView documentTemplate
+            case model.selectedDocumentTemplateUuid of
+                Just _ ->
+                    let
+                        viewDocumentTemplateId documentTemplate =
+                            FormGroup.codeView (DocumentTemplateUtils.getId documentTemplate) (gettext "Based on" appState.locale)
+                    in
+                    ActionResult.inlineView
+                        { viewContent = viewDocumentTemplateId
+                        , actionResult = model.documentTemplate
+                        , locale = appState.locale
+                        }
 
                 Nothing ->
                     let
@@ -69,7 +79,7 @@ formView appState model =
                         typeHintInput =
                             TypeHintInput.view cfg model.documentTemplateTypeHintInputModel
                     in
-                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "basedOn"
+                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "basedOn" (gettext "Based on" appState.locale)
 
         previousVersion =
             model.documentTemplate
@@ -91,6 +101,6 @@ formView appState model =
         , Html.map FormMsg <| FormGroup.input appState.locale model.form "templateId" <| gettext "Document Template ID" appState.locale
         , FormExtra.textAfter <| gettext "Document template ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
         , FormGroup.version appState.locale versionInputConfig model.form
-        , parentInput <| gettext "Based on" appState.locale
+        , parentInput
         , FormExtra.textAfter <| gettext "You can create a new document template based on the existing one or start from scratch." appState.locale
         ]

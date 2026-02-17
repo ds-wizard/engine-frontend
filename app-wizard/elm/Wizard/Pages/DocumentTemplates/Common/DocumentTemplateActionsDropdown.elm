@@ -10,6 +10,7 @@ import Bootstrap.Dropdown as Dropdown
 import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faEdit, faExport, faView)
 import Gettext exposing (gettext)
 import Html exposing (Html)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
@@ -19,7 +20,7 @@ import Wizard.Utils.Feature as Feature
 
 type alias DocumentTemplateLike a =
     { a
-        | id : String
+        | uuid : Uuid
         , phase : DocumentTemplatePhase
         , nonEditable : Bool
     }
@@ -47,7 +48,7 @@ actions appState cfg template =
                 { extraClass = Nothing
                 , icon = faView
                 , label = gettext "View detail" appState.locale
-                , msg = ListingActionLink (Routes.documentTemplatesDetail template.id)
+                , msg = ListingActionLink (Routes.documentTemplatesDetail template.uuid)
                 , dataCy = "view"
                 }
 
@@ -71,7 +72,7 @@ actions appState cfg template =
                 { extraClass = Nothing
                 , icon = faEdit
                 , label = gettext "Create editor" appState.locale
-                , msg = ListingActionLink (Routes.documentTemplateEditorCreate (Just template.id) (Just True))
+                , msg = ListingActionLink (Routes.documentTemplateEditorCreate (Just template.uuid) (Just True))
                 , dataCy = "create-editor"
                 }
 

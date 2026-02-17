@@ -28,6 +28,7 @@ import Wizard.Pages.DocumentTemplates.Common.DocumentTemplateActionsDropdown as 
 import Wizard.Pages.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.Pages.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
+import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -224,7 +225,7 @@ sidePanelKmInfo : AppState -> DocumentTemplateDetail -> Maybe ( String, String, 
 sidePanelKmInfo appState template =
     let
         templateInfoList =
-            [ ( gettext "ID" appState.locale, "id", text template.id )
+            [ ( gettext "ID" appState.locale, "id", text (DocumentTemplateUtils.getId template) )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString template.version )
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| Version.toStringMinor template.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text template.license )
@@ -259,7 +260,7 @@ sidePanelOtherVersions appState template =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.documentTemplatesDetail <| template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.documentTemplatesDetail template.uuid)
                     []
                     [ text <| Version.toString version ]
                 ]
@@ -352,14 +353,14 @@ viewOrganization organization =
         (ItemIcon.view { text = organization.name, image = organization.logo })
 
 
-deleteVersionModal : AppState -> Model -> { a | id : String } -> Html Msg
+deleteVersionModal : AppState -> Model -> DocumentTemplateDetail -> Html Msg
 deleteVersionModal appState model template =
     let
         modalContent =
             [ p []
                 (String.formatHtml
                     (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                    [ strong [] [ text template.id ] ]
+                    [ strong [] [ text (DocumentTemplateUtils.getId template) ] ]
                 )
             ]
 

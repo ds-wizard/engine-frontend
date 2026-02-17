@@ -24,7 +24,7 @@ type alias DocumentTemplateDraftDetail =
     , createdAt : Time.Posix
     , description : String
     , formats : List DocumentTemplateFormatDraft
-    , id : String
+    , uuid : Uuid
     , license : String
     , name : String
     , readme : String
@@ -45,7 +45,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormatDraft.decoder)
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "license" D.string
         |> D.required "name" D.string
         |> D.required "readme" D.string

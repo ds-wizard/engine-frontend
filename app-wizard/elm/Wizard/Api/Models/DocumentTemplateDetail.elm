@@ -10,6 +10,7 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAllowedPackage as DocumentTemplateAllowedPackage exposing (DocumentTemplateAllowedPackage)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
@@ -24,7 +25,7 @@ type alias DocumentTemplateDetail =
     , createdAt : Time.Posix
     , description : String
     , formats : List DocumentTemplateFormat
-    , id : String
+    , uuid : Uuid
     , license : String
     , metamodelVersion : Version
     , name : String
@@ -50,7 +51,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormat.decoder)
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "license" D.string
         |> D.required "metamodelVersion" Version.decoder
         |> D.required "name" D.string

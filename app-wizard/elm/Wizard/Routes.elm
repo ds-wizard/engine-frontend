@@ -316,7 +316,7 @@ isDocumentsIndex route =
 -- Document Templates
 
 
-documentTemplatesDetail : String -> Route
+documentTemplatesDetail : Uuid -> Route
 documentTemplatesDetail =
     DocumentTemplatesRoute << Wizard.Pages.DocumentTemplates.Routes.DetailRoute
 
@@ -363,27 +363,27 @@ isDocumentTemplatesSubroute route =
 -- Document Template Editors
 
 
-documentTemplateEditorCreate : Maybe String -> Maybe Bool -> Route
+documentTemplateEditorCreate : Maybe Uuid -> Maybe Bool -> Route
 documentTemplateEditorCreate mbBasedOn mbEdit =
     DocumentTemplateEditorsRoute <| Wizard.Pages.DocumentTemplateEditors.Routes.CreateRoute mbBasedOn mbEdit
 
 
-documentTemplateEditorDetail : String -> Route
+documentTemplateEditorDetail : Uuid -> Route
 documentTemplateEditorDetail =
     documentTemplateEditorDetailFiles
 
 
-documentTemplateEditorDetailFiles : String -> Route
+documentTemplateEditorDetailFiles : Uuid -> Route
 documentTemplateEditorDetailFiles =
     DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Files
 
 
-documentTemplateEditorDetailPreview : String -> Route
+documentTemplateEditorDetailPreview : Uuid -> Route
 documentTemplateEditorDetailPreview =
     DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
 
 
-documentTemplateEditorDetailSettings : String -> Route
+documentTemplateEditorDetailSettings : Uuid -> Route
 documentTemplateEditorDetailSettings =
     DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Settings
 
@@ -408,11 +408,11 @@ isDocumentTemplateEditorsIndex route =
             False
 
 
-isDocumentTemplateEditor : String -> Route -> Bool
-isDocumentTemplateEditor id route =
+isDocumentTemplateEditor : Uuid -> Route -> Bool
+isDocumentTemplateEditor uuid route =
     case route of
-        DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute documentTemplateId _) ->
-            id == documentTemplateId
+        DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute documentTemplateUuid _) ->
+            uuid == documentTemplateUuid
 
         _ ->
             False

@@ -24,7 +24,7 @@ view appState model =
         pageView =
             Page.actionResultView appState (viewCreate appState model)
     in
-    case ( model.selectedKmPackage, model.edit ) of
+    case ( model.selectedKmPackageUuid, model.edit ) of
         ( Just _, True ) ->
             pageView model.kmPackage
 
@@ -54,7 +54,7 @@ formView : AppState -> Model -> Html Msg
 formView appState model =
     let
         parentInput =
-            case model.selectedKmPackage of
+            case model.selectedKmPackageUuid of
                 Just _ ->
                     let
                         viewPackageId package =

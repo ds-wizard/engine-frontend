@@ -7,6 +7,7 @@ module Wizard.Pages.DocumentTemplateEditors.Editor.Models exposing
     )
 
 import ActionResult exposing (ActionResult)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
 import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
@@ -19,7 +20,7 @@ import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRout
 
 
 type alias Model =
-    { documentTemplateId : String
+    { documentTemplateUuid : Uuid
     , documentTemplate : ActionResult DocumentTemplateDraftDetail
     , currentEditor : CurrentEditor
     , settingsModel : Settings.Model
@@ -38,10 +39,10 @@ type CurrentEditor
     | PreviewEditor
 
 
-initialModel : AppState -> String -> DTEditorRoute -> Model
-initialModel appState documentTemplateId editorRoute =
+initialModel : AppState -> Uuid -> DTEditorRoute -> Model
+initialModel appState documentTemplateUuid editorRoute =
     setEditorFromRoute editorRoute
-        { documentTemplateId = documentTemplateId
+        { documentTemplateUuid = documentTemplateUuid
         , documentTemplate = ActionResult.Loading
         , currentEditor = TemplateEditor
         , settingsModel = Settings.initialModel appState

@@ -11,6 +11,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onInput, onSubmit)
 import Html.Extra as Html
 import String.Format as String
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Components.Html exposing (linkTo)
@@ -25,8 +26,8 @@ view appState model =
     let
         content =
             case model.pulling of
-                Success _ ->
-                    viewImported appState model.documentTemplateId
+                Success result ->
+                    viewImported appState model.documentTemplateId result.uuid
 
                 _ ->
                     viewForm appState model
@@ -75,8 +76,8 @@ viewRegistryText appState =
             Html.nothing
 
 
-viewImported : AppState -> String -> Html Msg
-viewImported appState documentTemplateId =
+viewImported : AppState -> String -> Uuid -> Html Msg
+viewImported appState documentTemplateId documentTemplateUuid =
     div [ class "px-4 py-5 bg-light rounded-3" ]
         [ h1 [] [ faSuccess ]
         , p [ class "lead" ]
@@ -85,7 +86,7 @@ viewImported appState documentTemplateId =
                 [ code [] [ text documentTemplateId ] ]
             )
         , p [ class "lead" ]
-            [ linkTo (Routes.documentTemplatesDetail documentTemplateId)
+            [ linkTo (Routes.documentTemplatesDetail documentTemplateUuid)
                 [ class "btn btn-primary" ]
                 [ text (gettext "View detail" appState.locale) ]
             ]

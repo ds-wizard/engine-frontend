@@ -5,8 +5,10 @@ module Wizard.Pages.DocumentTemplates.Routing exposing
     )
 
 import Common.Data.PaginationQueryString as PaginationQueryString
-import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
+import Url.Parser exposing ((</>), (<?>), Parser, map, s)
+import Url.Parser.Extensions as Parser
 import Url.Parser.Query as Query
+import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplates.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
@@ -20,7 +22,7 @@ moduleRoot =
 parsers : (Route -> a) -> List (Parser (a -> c) c)
 parsers wrapRoute =
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "documentTemplateId")
-    , map (wrapRoute << DetailRoute) (s moduleRoot </> string)
+    , map (wrapRoute << DetailRoute) (s moduleRoot </> Parser.uuid)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     ]
 
@@ -28,11 +30,11 @@ parsers wrapRoute =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        DetailRoute kmPackageId ->
-            [ moduleRoot, kmPackageId ]
+        DetailRoute templateUuid ->
+            [ moduleRoot, Uuid.toString templateUuid ]
 
-        ImportRoute kmPackageId ->
-            case kmPackageId of
+        ImportRoute tempalteId ->
+            case tempalteId of
                 Just id ->
                     [ moduleRoot, "import", "?documentTemplateId=" ++ id ]
 

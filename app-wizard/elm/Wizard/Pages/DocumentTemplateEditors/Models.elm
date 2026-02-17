@@ -5,6 +5,7 @@ module Wizard.Pages.DocumentTemplateEditors.Models exposing
     )
 
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Uuid
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Create.Models
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRoute
@@ -24,7 +25,7 @@ initialModel : AppState -> Model
 initialModel appState =
     { createModel = Wizard.Pages.DocumentTemplateEditors.Create.Models.initialModel appState Nothing Nothing
     , indexModel = Wizard.Pages.DocumentTemplateEditors.Index.Models.initialModel PaginationQueryString.empty
-    , editorModel = Wizard.Pages.DocumentTemplateEditors.Editor.Models.initialModel appState "" DTEditorRoute.Settings
+    , editorModel = Wizard.Pages.DocumentTemplateEditors.Editor.Models.initialModel appState Uuid.nil DTEditorRoute.Settings
     }
 
 
@@ -38,7 +39,7 @@ initLocalModel appState route model =
             { model | indexModel = Wizard.Pages.DocumentTemplateEditors.Index.Models.initialModel paginationQueryString }
 
         EditorRoute documentTemplateId subroute ->
-            if documentTemplateId == model.editorModel.documentTemplateId then
+            if documentTemplateId == model.editorModel.documentTemplateUuid then
                 { model | editorModel = Wizard.Pages.DocumentTemplateEditors.Editor.Models.setEditorFromRoute subroute model.editorModel }
 
             else

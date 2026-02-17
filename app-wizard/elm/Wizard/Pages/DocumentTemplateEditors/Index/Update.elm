@@ -43,7 +43,7 @@ handleDeleteTemplate wrapMsg appState model =
         Just template ->
             ( { model | deletingDocumentTemplateDraft = ActionResult.Loading }
             , Cmd.map wrapMsg <|
-                DocumentTemplateDraftsApi.deleteDraft appState template.id DeleteDocumentTemplateDraftCompleted
+                DocumentTemplateDraftsApi.deleteDraft appState template.uuid DeleteDocumentTemplateDraftCompleted
             )
 
         Nothing ->

@@ -19,7 +19,7 @@ type alias Model =
     , form : Form FormError KnowledgeModelEditorCreateForm
     , kmPackageTypeHintInputModel : TypeHintInput.Model KnowledgeModelPackageSuggestion
     , kmPackage : ActionResult KnowledgeModelPackageDetail
-    , selectedKmPackage : Maybe Uuid
+    , selectedKmPackageUuid : Maybe Uuid
     , edit : Bool
     }
 
@@ -30,6 +30,6 @@ initialModel appState selectedPackage edit =
     , form = KnowledgeModelEditorCreateForm.init appState (Maybe.map Uuid.toString selectedPackage)
     , kmPackageTypeHintInputModel = TypeHintInput.init "previousKnowledgeModelPackageId"
     , kmPackage = ActionResult.Loading
-    , selectedKmPackage = selectedPackage
+    , selectedKmPackageUuid = selectedPackage
     , edit = Maybe.withDefault False edit
     }

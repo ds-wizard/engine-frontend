@@ -313,18 +313,18 @@ subscriptions wrapMsg onTime model =
 -- UPDATE
 
 
-fetchData : String -> AppState -> Cmd Msg
-fetchData documentTemplateId appState =
+fetchData : Uuid -> AppState -> Cmd Msg
+fetchData documentTemplateUuid appState =
     Cmd.batch
-        [ DocumentTemplateDraftsApi.getFiles appState documentTemplateId GetTemplateFilesCompleted
-        , DocumentTemplateDraftsApi.getAssets appState documentTemplateId GetTemplateAssetsCompleted
+        [ DocumentTemplateDraftsApi.getFiles appState documentTemplateUuid GetTemplateFilesCompleted
+        , DocumentTemplateDraftsApi.getAssets appState documentTemplateUuid GetTemplateAssetsCompleted
         ]
 
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , logoutMsg : msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , onFileSavedMsg : msg
     }
 
@@ -464,7 +464,7 @@ update cfg appState msg model =
 
                             else
                                 ( Dict.insert (Uuid.toString uuid) ActionResult.Loading model.fileContents
-                                , DocumentTemplateDraftsApi.getFileContent appState cfg.documentTemplateId file.uuid (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
+                                , DocumentTemplateDraftsApi.getFileContent appState cfg.documentTemplateUuid file.uuid (cfg.wrapMsg << GetTemplateFileContentCompleted file.uuid)
                                 )
 
                         editor =
@@ -515,7 +515,7 @@ update cfg appState msg model =
                         ( newModel, getAssetCmd ) =
                             if shouldLoadAsset then
                                 ( { model | assetCache = Dict.insert (Uuid.toString asset.uuid) ActionResult.Loading model.assetCache }
-                                , DocumentTemplateDraftsApi.getAsset appState cfg.documentTemplateId asset.uuid (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
+                                , DocumentTemplateDraftsApi.getAsset appState cfg.documentTemplateUuid asset.uuid (cfg.wrapMsg << GetTemplateAssetDetailCompleted asset.uuid)
                                 )
 
                             else
@@ -610,7 +610,7 @@ update cfg appState msg model =
                                 in
                                 DocumentTemplateDraftsApi.putFileContent
                                     appState
-                                    cfg.documentTemplateId
+                                    cfg.documentTemplateUuid
                                     fileUuid
                                     fileContent
                                     (cfg.wrapMsg << FileSaveComplete fileUuid)
@@ -698,7 +698,7 @@ update cfg appState msg model =
                         }
 
                     cmd =
-                        DocumentTemplateDraftsApi.postFile appState cfg.documentTemplateId templateFile "" (cfg.wrapMsg << AddFileCompleted)
+                        DocumentTemplateDraftsApi.postFile appState cfg.documentTemplateUuid templateFile "" (cfg.wrapMsg << AddFileCompleted)
                 in
                 ( { model | addingFile = ActionResult.Loading }
                 , cmd
@@ -761,7 +761,7 @@ update cfg appState msg model =
                             ( { model
                                 | deleting = ActionResult.Loading
                               }
-                            , DocumentTemplateDraftsApi.deleteFile appState cfg.documentTemplateId file.uuid (cfg.wrapMsg << DeleteSelectedFileCompleted file.uuid)
+                            , DocumentTemplateDraftsApi.deleteFile appState cfg.documentTemplateUuid file.uuid (cfg.wrapMsg << DeleteSelectedFileCompleted file.uuid)
                             )
 
                         Nothing ->
@@ -773,7 +773,7 @@ update cfg appState msg model =
                             ( { model
                                 | deleting = ActionResult.Loading
                               }
-                            , DocumentTemplateDraftsApi.deleteAsset appState cfg.documentTemplateId asset.uuid (cfg.wrapMsg << DeleteSelectedAssetCompleted asset.uuid)
+                            , DocumentTemplateDraftsApi.deleteAsset appState cfg.documentTemplateUuid asset.uuid (cfg.wrapMsg << DeleteSelectedAssetCompleted asset.uuid)
                             )
 
                         Nothing ->
@@ -781,7 +781,7 @@ update cfg appState msg model =
 
                 SelectedFolder path ->
                     ( { model | deleting = ActionResult.Loading }
-                    , DocumentTemplateDraftsApi.deleteFolder appState cfg.documentTemplateId path (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
+                    , DocumentTemplateDraftsApi.deleteFolder appState cfg.documentTemplateUuid path (cfg.wrapMsg << DeleteSelectedFolderCompleted path)
                     )
 
         DeleteSelectedFileCompleted uuid result ->
@@ -905,7 +905,7 @@ update cfg appState msg model =
                     { wrapMsg = cfg.wrapMsg << AssetUploadModalMsg
                     , addAssetMsg = cfg.wrapMsg << AddAsset
                     , addFileMsg = cfg.wrapMsg << AddFile
-                    , documentTemplateId = cfg.documentTemplateId
+                    , documentTemplateUuid = cfg.documentTemplateUuid
                     , path = getSelectedFolderPath model
                     }
 
@@ -928,7 +928,7 @@ update cfg appState msg model =
                 renameModalConfig =
                     { wrapMsg = cfg.wrapMsg << RenameModalMsg
                     , logoutMsg = cfg.logoutMsg
-                    , documentTemplateId = cfg.documentTemplateId
+                    , documentTemplateUuid = cfg.documentTemplateUuid
                     , selectedFolderPath = getSelectedFolderPath model
                     , fileContents = model.fileContents
                     , onRenameFile = compose2 cfg.wrapMsg RenameFile
@@ -949,7 +949,7 @@ update cfg appState msg model =
                 moveModalConfig =
                     { wrapMsg = cfg.wrapMsg << MoveModalMsg
                     , logoutMsg = cfg.logoutMsg
-                    , documentTemplateId = cfg.documentTemplateId
+                    , documentTemplateUuid = cfg.documentTemplateUuid
                     , fileContents = model.fileContents
                     , onRenameFile = compose2 cfg.wrapMsg RenameFile
                     , onRenameAsset = compose2 cfg.wrapMsg RenameAsset

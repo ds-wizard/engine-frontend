@@ -176,7 +176,7 @@ listingDescription document =
 
         documentTemplateLink =
             span [ class "fragment" ]
-                [ linkTo (Routes.documentTemplatesDetail document.documentTemplateId)
+                [ linkTo (Routes.documentTemplatesDetail document.uuid)
                     []
                     [ text document.documentTemplateName ]
                 ]

@@ -33,7 +33,7 @@ import Html.Extra as Html
 import List.Extra as List
 import Random exposing (Seed)
 import Task.Extra as Task
-import Uuid
+import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
@@ -114,7 +114,7 @@ saveMsg =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , logoutMsg : msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , updateDocumentTemplate : DocumentTemplateDraftDetail -> msg
     }
 
@@ -179,7 +179,7 @@ update cfg appState msg model =
                     withSeed
                         ( { model | savingForm = ActionResult.Loading }
                         , DocumentTemplateDraftsApi.putDraft appState
-                            cfg.documentTemplateId
+                            cfg.documentTemplateUuid
                             (DocumentTemplateForm.encode DocumentTemplatePhase.Draft documentTemplateForm)
                             (cfg.wrapMsg << PutTemplateCompleted)
                         )
@@ -190,7 +190,7 @@ update cfg appState msg model =
         PutTemplateCompleted result ->
             case result of
                 Ok documentTemplate ->
-                    if documentTemplate.id == cfg.documentTemplateId then
+                    if documentTemplate.uuid == cfg.documentTemplateUuid then
                         withSeed
                             ( { model
                                 | savingForm = ActionResult.Success ""
@@ -203,7 +203,7 @@ update cfg appState msg model =
                     else
                         withSeed
                             ( model
-                            , cmdNavigate appState (Routes.documentTemplateEditorDetailSettings documentTemplate.id)
+                            , cmdNavigate appState (Routes.documentTemplateEditorDetailSettings documentTemplate.uuid)
                             )
 
                 Err error ->
