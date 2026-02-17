@@ -5,14 +5,13 @@ import Common.Api.ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
 
 
 type Msg
     = GetKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)
     | DropdownMsg Dropdown.State
-    | ShowDeleteDialog Bool
-    | DeleteVersion
-    | DeleteVersionCompleted (Result ApiError ())
+    | DeleteModalMsg DeleteModal.Msg
     | UpdatePhase KnowledgeModelPackagePhase
     | UpdatePhaseCompleted KnowledgeModelPackagePhase (Result ApiError ())
     | UpdatePublic Bool

@@ -4,7 +4,6 @@ module Wizard.Pages.KnowledgeModels.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setKnowledgeModelPackage)
@@ -14,6 +13,7 @@ import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs
+import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
 import Wizard.Pages.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -41,14 +41,19 @@ update msg wrapMsg appState model =
         DropdownMsg state ->
             ( { model | dropdownState = state }, Cmd.none )
 
-        ShowDeleteDialog visible ->
-            ( { model | showDeleteDialog = visible, deletingVersion = Unset }, Cmd.none )
+        DeleteModalMsg deleteModalMsg ->
+            let
+                deleteModalConfig =
+                    { afterDeleteCmd = cmdNavigate appState Routes.knowledgeModelsIndex
+                    , wrapMsg = wrapMsg << DeleteModalMsg
+                    }
 
-        DeleteVersion ->
-            handleDeleteVersion wrapMsg appState model
-
-        DeleteVersionCompleted result ->
-            deleteVersionCompleted appState model result
+                ( deleteModalModel, deleteModalCmd ) =
+                    DeleteModal.update appState deleteModalConfig deleteModalMsg model.deleteModalModel
+            in
+            ( { model | deleteModalModel = deleteModalModel }
+            , deleteModalCmd
+            )
 
         UpdatePhase phase ->
             handleSetUpdatePhase wrapMsg appState model phase
@@ -96,30 +101,6 @@ update msg wrapMsg appState model =
 
         ShowAllVersions ->
             ( { model | showAllVersions = True }, Cmd.none )
-
-
-handleDeleteVersion : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteVersion wrapMsg appState model =
-    case model.knowledgeModelPackage of
-        Success kmPackage ->
-            ( { model | deletingVersion = Loading }
-            , KnowledgeModelPackagesApi.deleteKnowledgeModelPackageVersion appState kmPackage.uuid (wrapMsg << DeleteVersionCompleted)
-            )
-
-        _ ->
-            ( model, Cmd.none )
-
-
-deleteVersionCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-deleteVersionCompleted appState model result =
-    case result of
-        Ok _ ->
-            ( model, cmdNavigate appState Routes.knowledgeModelsIndex )
-
-        Err error ->
-            ( { model | deletingVersion = ApiError.toActionResult appState (gettext "Knowledge Model could not be deleted." appState.locale) error }
-            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
-            )
 
 
 handleSetUpdatePhase : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> KnowledgeModelPackagePhase -> ( Model, Cmd Wizard.Msgs.Msg )

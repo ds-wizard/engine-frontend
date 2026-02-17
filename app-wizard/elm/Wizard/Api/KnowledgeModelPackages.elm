@@ -1,8 +1,8 @@
 module Wizard.Api.KnowledgeModelPackages exposing
     ( deleteKnowledgeModelPackage
-    , deleteKnowledgeModelPackageVersion
     , exportKnowledgeModelPackageUrl
     , getKnowledgeModelPackage
+    , getKnowledgeModelPackageDependents
     , getKnowledgeModelPackageWithoutDeprecatedVersions
     , getKnowledgeModelPackages
     , getKnowledgeModelPackagesSuggestions
@@ -24,11 +24,13 @@ import Common.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Common.Utils.Bool as Bool
 import File exposing (File)
 import Http
+import Json.Decode as D
 import Json.Encode as E
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
+import Wizard.Api.Models.KnowledgeModelPackageDeletionImpact as KnowledgeModelPackageDeletionImpact exposing (KnowledgeModelPackageDeletionImpact)
 import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -113,6 +115,11 @@ getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackageUuid =
     Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "?excludeDeprecatedVersions=true") KnowledgeModelPackageDetail.decoder
 
 
+getKnowledgeModelPackageDependents : AppState -> Uuid -> Bool -> ToMsg (List KnowledgeModelPackageDeletionImpact) msg -> Cmd msg
+getKnowledgeModelPackageDependents appState kmPackageUuid allVersions =
+    Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/dependents?allVersions=" ++ Bool.toString allVersions) (D.list KnowledgeModelPackageDeletionImpact.decoder)
+
+
 postFromKnowledgeModelEditor : AppState -> Uuid -> ToMsg KnowledgeModelPackage msg -> Cmd msg
 postFromKnowledgeModelEditor appState uuid =
     let
@@ -136,14 +143,9 @@ putKnowledgeModelPackage appState kmPackage =
     Request.putWhatever (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackage.uuid) body
 
 
-deleteKnowledgeModelPackage : AppState -> String -> String -> ToMsg () msg -> Cmd msg
-deleteKnowledgeModelPackage appState organizationId kmId =
-    Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/?organizationId=" ++ organizationId ++ "&kmId=" ++ kmId)
-
-
-deleteKnowledgeModelPackageVersion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
-deleteKnowledgeModelPackageVersion appState kmPackageUuid =
-    Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid)
+deleteKnowledgeModelPackage : AppState -> Uuid -> Bool -> ToMsg () msg -> Cmd msg
+deleteKnowledgeModelPackage appState kmPackageUuid allVersions =
+    Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "?allVersions=" ++ Bool.toString allVersions)
 
 
 pullKnowledgeModelPackage : AppState -> String -> ToMsg UuidResponse msg -> Cmd msg

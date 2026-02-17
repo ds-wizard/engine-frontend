@@ -2,20 +2,19 @@ module Wizard.Pages.KnowledgeModels.Index.View exposing (view)
 
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faKmsUpload)
-import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
 import Gettext exposing (gettext)
-import Html exposing (Html, code, div, img, p, span, strong, text)
+import Html exposing (Html, code, div, img, span, text)
 import Html.Attributes exposing (class, src, title)
 import Html.Extra as Html
-import String.Format as String
 import Version
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
 import Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown as KnowledgeModelActionsDropdown
 import Wizard.Pages.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Index.Msgs exposing (Msg(..))
@@ -31,7 +30,7 @@ view appState model =
     div [ listClass "" ]
         [ Page.header (gettext "Knowledge Models" appState.locale) []
         , Listing.view appState (listingConfig appState) model.packages
-        , deleteModal appState model
+        , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
         ]
 
 
@@ -58,7 +57,7 @@ listingConfig appState =
             { exportMsg = ExportKnowledgeModelPackage
             , updatePhaseMsg = UpdatePhase
             , updatePublicMsg = UpdatePublic
-            , deleteMsg = ShowHideDeletePackage << Just
+            , deleteMsg = DeleteModalMsg << DeleteModal.open
             , viewActionVisible = True
             }
     , textTitle = .name
@@ -153,35 +152,3 @@ listingDescription appState kmPackage =
         , organizationFragment
         , span [ class "fragment" ] [ text kmPackage.description ]
         ]
-
-
-deleteModal : AppState -> Model -> Html Msg
-deleteModal appState model =
-    let
-        ( visible, version ) =
-            case model.kmPackageToBeDeleted of
-                Just kmPackage ->
-                    ( True, kmPackage.organizationId ++ ":" ++ kmPackage.kmId )
-
-                Nothing ->
-                    ( False, "" )
-
-        modalContent =
-            [ p []
-                (String.formatHtml
-                    (gettext "Are you sure you want to permanently delete %s and all its versions?" appState.locale)
-                    [ strong [] [ text version ] ]
-                )
-            ]
-
-        modalConfig =
-            Modal.confirmConfig (gettext "Delete knowledge model" appState.locale)
-                |> Modal.confirmConfigContent modalContent
-                |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingKmPackage
-                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteKnowledgeModelPackage
-                |> Modal.confirmConfigCancelMsg (ShowHideDeletePackage Nothing)
-                |> Modal.confirmConfigDangerous True
-                |> Modal.confirmConfigDataCy "km-delete"
-    in
-    Modal.confirm appState modalConfig

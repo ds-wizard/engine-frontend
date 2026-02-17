@@ -6,6 +6,7 @@ module Common.Components.Modal exposing
     , confirm
     , confirmConfig
     , confirmConfigAction
+    , confirmConfigActionEnabled
     , confirmConfigActionResult
     , confirmConfigCancelMsg
     , confirmConfigCancelShortcutMsg
@@ -105,6 +106,7 @@ type alias ConfirmConfigData msg =
     , visible : Bool
     , actionResult : ActionResult String
     , action : Maybe ( String, msg )
+    , actionEnabled : Bool
     , cancelMsg : Maybe msg
     , cancelShortcutMsg : Maybe msg
     , dangerous : Bool
@@ -122,6 +124,7 @@ confirmConfig title =
         , visible = False
         , actionResult = ActionResult.Unset
         , action = Nothing
+        , actionEnabled = True
         , cancelMsg = Nothing
         , cancelShortcutMsg = Nothing
         , dangerous = False
@@ -149,6 +152,11 @@ confirmConfigActionResult actionResult (ConfirmConfig data) =
 confirmConfigAction : String -> msg -> ConfirmConfig msg -> ConfirmConfig msg
 confirmConfigAction actionName actionMsg (ConfirmConfig data) =
     ConfirmConfig { data | action = Just ( actionName, actionMsg ) }
+
+
+confirmConfigActionEnabled : Bool -> ConfirmConfig msg -> ConfirmConfig msg
+confirmConfigActionEnabled actionEnabled (ConfirmConfig data) =
+    ConfirmConfig { data | actionEnabled = actionEnabled }
 
 
 confirmConfigCancelMsg : msg -> ConfirmConfig msg -> ConfirmConfig msg
@@ -215,7 +223,13 @@ confirm appState (ConfirmConfig data) =
                     let
                         btn =
                             ActionButton.buttonWithAttrs <|
-                                ActionButton.ButtonWithAttrsConfig actionName data.actionResult actionMsg data.dangerous [ dataCy "modal_action-button" ]
+                                ActionButton.ButtonWithAttrsConfig actionName
+                                    data.actionResult
+                                    actionMsg
+                                    data.dangerous
+                                    [ dataCy "modal_action-button"
+                                    , disabled (not data.actionEnabled)
+                                    ]
 
                         shortcut =
                             wrapShortcut (Shortcut.simpleShortcut Shortcut.Enter actionMsg)
