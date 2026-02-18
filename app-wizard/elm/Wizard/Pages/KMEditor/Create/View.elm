@@ -24,8 +24,8 @@ view appState model =
         pageView =
             Page.actionResultView appState (viewCreate appState model)
     in
-    case ( model.selectedKmPackageUuid, model.edit ) of
-        ( Just _, True ) ->
+    case model.selectedKmPackageUuid of
+        Just _ ->
             pageView model.kmPackage
 
         _ ->

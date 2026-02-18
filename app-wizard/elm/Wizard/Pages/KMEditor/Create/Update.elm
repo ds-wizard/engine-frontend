@@ -35,8 +35,8 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         fetchPackageCmd =
-            case ( model.selectedKmPackageUuid, model.edit ) of
-                ( Just kmPackageId, True ) ->
+            case model.selectedKmPackageUuid of
+                Just kmPackageId ->
                     KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageCompleted
 
                 _ ->
@@ -68,9 +68,13 @@ update msg wrapMsg appState model =
                 Ok kmPackage ->
                     let
                         form =
-                            model.form
-                                |> setKmEditorCreateFormValue appState "name" kmPackage.name
-                                |> setKmEditorCreateFormValue appState "kmId" kmPackage.kmId
+                            if model.edit then
+                                model.form
+                                    |> setKmEditorCreateFormValue appState "name" kmPackage.name
+                                    |> setKmEditorCreateFormValue appState "kmId" kmPackage.kmId
+
+                            else
+                                model.form
                     in
                     ( { model | kmPackage = Success kmPackage, form = form }, Cmd.none )
 
