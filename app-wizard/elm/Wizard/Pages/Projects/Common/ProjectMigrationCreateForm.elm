@@ -11,6 +11,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
+import Uuid exposing (Uuid)
 
 
 type alias ProjectMigrationCreateForm =
@@ -23,11 +24,11 @@ initEmpty =
     Form.initial [] validation
 
 
-init : String -> Form FormError ProjectMigrationCreateForm
-init kmPackageId =
+init : Uuid -> Form FormError ProjectMigrationCreateForm
+init kmPackageUuid =
     let
         initials =
-            [ ( "knowledgeModelPackageUuid", Field.string kmPackageId ) ]
+            [ ( "knowledgeModelPackageUuid", Field.string (Uuid.toString kmPackageUuid) ) ]
     in
     Form.initial initials validation
 
@@ -41,6 +42,6 @@ validation =
 encode : List String -> ProjectMigrationCreateForm -> E.Value
 encode tagUuids form =
     E.object
-        [ ( "knowledgeModelPackageUuid", E.string form.knowledgeModelPackageUuid )
+        [ ( "targetKnowledgeModelPackageUuid", E.string form.knowledgeModelPackageUuid )
         , ( "targetTagUuids", E.list E.string tagUuids )
         ]

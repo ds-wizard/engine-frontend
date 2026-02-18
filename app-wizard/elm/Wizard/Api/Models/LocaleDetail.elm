@@ -13,6 +13,7 @@ import Time
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid exposing (VersionUuid)
 
 
 type alias LocaleDetail =
@@ -32,7 +33,7 @@ type alias LocaleDetail =
     , license : String
     , readme : String
     , recommendedAppVersion : Version
-    , versions : List Version
+    , versions : List VersionUuid
     }
 
 
@@ -55,13 +56,13 @@ decoder =
         |> D.required "license" D.string
         |> D.required "readme" D.string
         |> D.required "recommendedAppVersion" Version.decoder
-        |> D.required "versions" (D.list Version.decoder)
+        |> D.required "versions" (D.list VersionUuid.decoder)
 
 
 isLatestVersion : LocaleDetail -> Bool
 isLatestVersion locale =
     locale.versions
-        |> List.any (Version.greaterThan locale.version)
+        |> List.any (Version.greaterThan locale.version << .version)
         |> not
 
 

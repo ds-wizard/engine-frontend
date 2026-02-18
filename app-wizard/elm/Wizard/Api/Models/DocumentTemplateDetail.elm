@@ -18,6 +18,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePackage as DocumentTem
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid exposing (VersionUuid)
 
 
 type alias DocumentTemplateDetail =
@@ -39,7 +40,7 @@ type alias DocumentTemplateDetail =
     , templateId : String
     , usableKnowledgeModels : List DocumentTemplatePackage
     , version : Version
-    , versions : List Version
+    , versions : List VersionUuid
     , nonEditable : Bool
     }
 
@@ -65,7 +66,7 @@ decoder =
         |> D.required "templateId" D.string
         |> D.required "usableKnowledgeModels" (D.list DocumentTemplatePackage.decoder)
         |> D.required "version" Version.decoder
-        |> D.required "versions" (D.list Version.decoder)
+        |> D.required "versions" (D.list VersionUuid.decoder)
         |> D.required "nonEditable" D.bool
 
 
@@ -78,5 +79,5 @@ encode documentTemplate =
 isLatestVersion : DocumentTemplateDetail -> Bool
 isLatestVersion documentTemplate =
     documentTemplate.versions
-        |> List.any (Version.greaterThan documentTemplate.version)
+        |> List.any (Version.greaterThan documentTemplate.version << .version)
         |> not

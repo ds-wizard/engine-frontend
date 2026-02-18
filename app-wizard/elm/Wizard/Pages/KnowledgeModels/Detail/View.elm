@@ -16,6 +16,7 @@ import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -79,7 +80,7 @@ readme : AppState -> KnowledgeModelPackageDetail -> Html msg
 readme appState kmPackage =
     let
         containsNewerVersions =
-            List.any (Version.greaterThan kmPackage.version) kmPackage.versions
+            List.any (Version.greaterThan kmPackage.version << .version) kmPackage.versions
 
         nonEditableInfo =
             if kmPackage.nonEditable then
@@ -182,9 +183,9 @@ sidePanelOtherVersions appState model kmPackage =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
+                [ linkTo (Routes.knowledgeModelsDetail version.uuid)
                     []
-                    [ text <| Version.toString version ]
+                    [ text <| Version.toString version.version ]
                 ]
 
         takeFirstVersions =
@@ -196,8 +197,8 @@ sidePanelOtherVersions appState model kmPackage =
 
         versionLinks =
             kmPackage.versions
-                |> List.filter ((/=) kmPackage.version)
-                |> List.sortWith Version.compare
+                |> List.filter ((/=) kmPackage.version << .version)
+                |> List.sortWith VersionUuid.compare
                 |> List.reverse
                 |> takeFirstVersions
                 |> List.map versionLink

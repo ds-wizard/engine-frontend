@@ -20,6 +20,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTempl
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -260,15 +261,15 @@ sidePanelOtherVersions appState template =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.documentTemplatesDetail template.uuid)
+                [ linkTo (Routes.documentTemplatesDetail version.uuid)
                     []
-                    [ text <| Version.toString version ]
+                    [ text <| Version.toString version.version ]
                 ]
 
         versionLinks =
             template.versions
-                |> List.filter ((/=) template.version)
-                |> List.sortWith Version.compare
+                |> List.filter ((/=) template.version << .version)
+                |> List.sortWith VersionUuid.compare
                 |> List.reverse
                 |> List.map versionLink
     in

@@ -2,7 +2,7 @@ module Wizard.Api.Models.KnowledgeModelPackageDetail exposing
     ( KnowledgeModelPackageDetail
     , decoder
     , encode
-    , getLatestPackageId
+    , getLatestPackageUuid
     , toPackage
     , toPackageSuggestion
     )
@@ -18,6 +18,7 @@ import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnoweldgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid exposing (VersionUuid)
 
 
 type alias KnowledgeModelPackageDetail =
@@ -32,7 +33,7 @@ type alias KnowledgeModelPackageDetail =
     , metamodelVersion : Int
     , forkOfPackageId : Maybe String
     , previousPackageUuid : Maybe Uuid
-    , versions : List Version
+    , versions : List VersionUuid
     , organization : Maybe OrganizationInfo
     , registryLink : Maybe String
     , remoteLatestVersion : Maybe Version
@@ -56,7 +57,7 @@ decoder =
         |> D.required "metamodelVersion" D.int
         |> D.required "forkOfPackageId" (D.maybe D.string)
         |> D.required "previousPackageUuid" (D.maybe Uuid.decoder)
-        |> D.required "versions" (D.list Version.decoder)
+        |> D.required "versions" (D.list VersionUuid.decoder)
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
@@ -101,16 +102,16 @@ toPackageSuggestion kmPackage =
     }
 
 
-getLatestVersion : KnowledgeModelPackageDetail -> Maybe Version
+getLatestVersion : KnowledgeModelPackageDetail -> Maybe VersionUuid
 getLatestVersion =
-    List.last << List.sortWith Version.compare << .versions
+    List.last << List.sortWith VersionUuid.compare << .versions
 
 
-getLatestPackageId : KnowledgeModelPackageDetail -> Maybe String
-getLatestPackageId kmPackage =
+getLatestPackageUuid : KnowledgeModelPackageDetail -> Maybe Uuid
+getLatestPackageUuid kmPackage =
     case getLatestVersion kmPackage of
         Just latestVersion ->
-            Just (kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString latestVersion)
+            Just latestVersion.uuid
 
         _ ->
             Nothing

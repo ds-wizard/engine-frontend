@@ -27,7 +27,7 @@ type alias Model =
     , useAllQuestions : Bool
     , savingMigration : ActionResult String
     , knowledgeModelPreview : ActionResult KnowledgeModel
-    , lastFetchedPreview : Maybe String
+    , lastFetchedPreview : Maybe Uuid
     }
 
 
