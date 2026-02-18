@@ -47,6 +47,7 @@ import Wizard.Plugins.Plugin as Plugin
 import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes
 import Wizard.Utils.Feature as Features
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.ProjectUtils as ProjectUtils
 
 
@@ -387,7 +388,7 @@ viewProjectNavigationNav appState route model projectCommon =
 
         pluginLinks =
             AppState.getPluginsByConnector appState .projectTabs
-                |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId projectCommon.knowledgeModelPackage)
                 |> List.sortBy (.name << .tab << Tuple.second)
                 |> List.map pluginLink
 
@@ -510,7 +511,7 @@ viewProjectContent appState route model projectCommon =
             let
                 mbPluginData =
                     AppState.getPluginsByConnector appState .projectTabs
-                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId projectCommon.knowledgeModelPackage)
                         |> List.find (\( _, connector ) -> connector.url == pluginId)
             in
             case mbPluginData of

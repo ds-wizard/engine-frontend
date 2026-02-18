@@ -2031,7 +2031,7 @@ viewQuestionnaireToolbar appState cfg model =
             case cfg.projectCommon of
                 Just projectCommon ->
                     AppState.getPluginsByConnector appState .projectActions
-                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage)
                         |> List.sortBy (.name << Tuple.second)
                         |> List.map (pluginAction projectCommon)
 
@@ -4667,7 +4667,7 @@ viewPluginQuestionActions appState cfg model question path =
             let
                 plugins =
                     AppState.getPluginsByConnector appState .projectQuestionActions
-                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage)
                         |> List.sortBy (.name << .action << Tuple.second)
 
                 viewPluginButton ( plugin, connector ) =

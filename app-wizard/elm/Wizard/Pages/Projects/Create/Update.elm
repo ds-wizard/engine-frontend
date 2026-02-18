@@ -249,7 +249,7 @@ update wrapMsg msg appState model =
                             { model | form = Form.update (ProjectCreateForm.validation validationMode) formMsg model.form }
 
                         selectedPackage =
-                            Maybe.andThen String.toMaybe (Form.getFieldAsString "knowledgeModelPackageId" newModel.form).value
+                            Maybe.andThen String.toMaybe (Form.getFieldAsString "knowledgeModelPackageUuid" newModel.form).value
                     in
                     case selectedPackage of
                         Just kmPackageUuid ->
@@ -317,7 +317,7 @@ update wrapMsg msg appState model =
         ProjectTemplateTypeHintInputMsg typeHintInputMsg ->
             let
                 formMsg =
-                    wrapMsg << FormMsg << Form.Input "templateId" Form.Select << Field.String
+                    wrapMsg << FormMsg << Form.Input "projectUuid" Form.Select << Field.String
 
                 cfg =
                     { wrapMsg = wrapMsg << ProjectTemplateTypeHintInputMsg
@@ -336,7 +336,7 @@ update wrapMsg msg appState model =
         KnowledgeModelTypeHintInputMsg typeHintInputMsg ->
             let
                 formMsg =
-                    wrapMsg << FormMsg << Form.Input "knowledgeModelPackageId" Form.Select << Field.String
+                    wrapMsg << FormMsg << Form.Input "knowledgeModelPackageUuid" Form.Select << Field.String
 
                 cfg =
                     { wrapMsg = wrapMsg << KnowledgeModelTypeHintInputMsg

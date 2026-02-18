@@ -14,7 +14,7 @@ import Json.Encode as E
 
 
 type alias ProjectMigrationCreateForm =
-    { knowledgeModelPackageId : String
+    { knowledgeModelPackageUuid : String
     }
 
 
@@ -27,7 +27,7 @@ init : String -> Form FormError ProjectMigrationCreateForm
 init kmPackageId =
     let
         initials =
-            [ ( "knowledgeModelPackageId", Field.string kmPackageId ) ]
+            [ ( "knowledgeModelPackageUuid", Field.string kmPackageId ) ]
     in
     Form.initial initials validation
 
@@ -35,12 +35,12 @@ init kmPackageId =
 validation : Validation FormError ProjectMigrationCreateForm
 validation =
     Validate.map ProjectMigrationCreateForm
-        (Validate.field "knowledgeModelPackageId" Validate.string)
+        (Validate.field "knowledgeModelPackageUuid" Validate.string)
 
 
 encode : List String -> ProjectMigrationCreateForm -> E.Value
 encode tagUuids form =
     E.object
-        [ ( "targetKnowledgeModelPackageId", E.string form.knowledgeModelPackageId )
+        [ ( "knowledgeModelPackageUuid", E.string form.knowledgeModelPackageUuid )
         , ( "targetTagUuids", E.list E.string tagUuids )
         ]

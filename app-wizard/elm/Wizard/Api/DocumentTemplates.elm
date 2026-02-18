@@ -66,12 +66,12 @@ getTemplate appState templateUuid =
     Request.get (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString templateUuid) DocumentTemplateDetail.decoder
 
 
-getTemplatesFor : AppState -> String -> PaginationQueryString -> ToMsg (Pagination DocumentTemplateSuggestion) msg -> Cmd msg
-getTemplatesFor appState pkgId qs =
+getTemplatesFor : AppState -> Uuid -> PaginationQueryString -> ToMsg (Pagination DocumentTemplateSuggestion) msg -> Cmd msg
+getTemplatesFor appState knowledgeModelPackageUuid qs =
     let
         queryString =
             PaginationQueryString.toApiUrlWith
-                [ ( "pkgId", pkgId )
+                [ ( "knowledgeModelPackageUuid", Uuid.toString knowledgeModelPackageUuid )
                 , ( "phase", DocumentTemplatePhase.toString DocumentTemplatePhase.Released )
                 ]
                 qs

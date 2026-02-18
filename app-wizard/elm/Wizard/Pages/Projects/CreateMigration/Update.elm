@@ -201,7 +201,7 @@ handleSelectPackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Knowledge
 handleSelectPackage wrapMsg appState model kmPackage =
     let
         formMsg =
-            Form.Input "knowledgeModelPackageId" Form.Select Field.EmptyField
+            Form.Input "knowledgeModelPackageUuid" Form.Select Field.EmptyField
 
         getSelectedPackageCmd =
             Cmd.map wrapMsg <|
@@ -327,7 +327,7 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
 
 getSelectedPackageId : Model -> Maybe String
 getSelectedPackageId model =
-    (Form.getFieldAsString "knowledgeModelPackageId" model.form).value
+    (Form.getFieldAsString "knowledgeModelPackageUuid" model.form).value
 
 
 needFetchKnowledgeModelPreview : Model -> String -> Bool

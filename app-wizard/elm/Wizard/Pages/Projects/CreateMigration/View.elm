@@ -68,7 +68,7 @@ createMigrationView appState model project =
                 Just _ ->
                     case model.selectedPackageDetail of
                         Success selectedPackageDetail ->
-                            FormGroup.select appState.locale (createOptions selectedPackageDetail) model.form "knowledgeModelPackageId"
+                            FormGroup.select appState.locale (createOptions selectedPackageDetail) model.form "knowledgeModelPackageUuid"
 
                         _ ->
                             always (Flash.loader appState.locale)

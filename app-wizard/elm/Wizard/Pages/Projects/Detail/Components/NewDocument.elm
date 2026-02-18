@@ -119,7 +119,7 @@ fetchData appState projectUuid mbEventUuid =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , projectUuid : Uuid
-    , knowledgeModelPackageId : String
+    , knowledgeModelPackageUuid : Uuid
     , documentsNavigateCmd : Cmd msg
     }
 
@@ -226,7 +226,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageUuid
             , getError = gettext "Unable to get document templates." appState.locale
             , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
