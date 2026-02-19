@@ -170,7 +170,7 @@ listingDescription document =
     span []
         [ formatFragment
         , fileSizeFragment
-        , span [ class "fragment" ] [ text document.documentTemplateName ]
+        , span [ class "fragment" ] [ text document.documentTemplate.name ]
         , versionFragment
         ]
 

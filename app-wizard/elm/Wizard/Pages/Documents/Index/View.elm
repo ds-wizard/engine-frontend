@@ -178,7 +178,7 @@ listingDescription document =
             span [ class "fragment" ]
                 [ linkTo (Routes.documentTemplatesDetail document.uuid)
                     []
-                    [ text document.documentTemplateName ]
+                    [ text document.documentTemplate.name ]
                 ]
     in
     span []
