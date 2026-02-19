@@ -79,7 +79,7 @@ formView appState model =
                         typeHintInput =
                             TypeHintInput.view cfg model.kmPackageTypeHintInputModel
                     in
-                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousPackageId" (gettext "Based on" appState.locale)
+                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousPackageUuid" (gettext "Based on" appState.locale)
 
         previousVersion =
             if model.edit then
