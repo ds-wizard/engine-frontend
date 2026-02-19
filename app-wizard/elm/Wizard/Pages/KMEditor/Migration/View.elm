@@ -77,6 +77,7 @@ import Wizard.Pages.KMEditor.Migration.Models exposing (ButtonClicked(..), Model
 import Wizard.Pages.KMEditor.Migration.Msgs exposing (Msg(..))
 import Wizard.Pages.KMEditor.Migration.View.DiffTree as DiffTree
 import Wizard.Routes as Routes
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -136,8 +137,8 @@ migrationSummary appState migration =
         [ p []
             (String.formatHtml (gettext "Migration of %s from %s to %s." appState.locale)
                 [ strong [] [ text migration.editorName ]
-                , code [] [ text migration.editorPreviousPackageId ]
-                , code [] [ text migration.targetPackageId ]
+                , code [] [ text (KnowledgeModelUtils.getPackageId migration.editorPreviousPackage) ]
+                , code [] [ text (KnowledgeModelUtils.getPackageId migration.targetPackage) ]
                 ]
             )
         ]

@@ -40,7 +40,6 @@ import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorEditForm as KnowledgeMod
 import Wizard.Pages.KMEditor.Common.UpgradeModal as UpgradeModal
 import Wizard.Routes as Routes
 import Wizard.Utils.HtmlAttributesUtils exposing (detailClass)
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -215,7 +214,7 @@ parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
                         [ div [] [ text (gettext "This is not the latest version of the parent knowledge model." appState.locale) ]
                         , button
                             [ class "btn btn-warning"
-                            , onClick (UpgradeModalMsg (UpgradeModal.open kmEditorDetail.uuid kmEditorDetail.name (Just (KnowledgeModelUtils.getPackageId forkOfPackage))))
+                            , onClick (UpgradeModalMsg (UpgradeModal.open kmEditorDetail.uuid kmEditorDetail.name forkOfPackage.uuid))
                             ]
                             [ text (gettext "Update" appState.locale) ]
                         ]

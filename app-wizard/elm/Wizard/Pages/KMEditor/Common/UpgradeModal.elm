@@ -10,12 +10,9 @@ module Wizard.Pages.KMEditor.Common.UpgradeModal exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
-import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
-import Common.Data.PaginationQueryFilters as PaginationQueryFilters
-import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
@@ -25,46 +22,42 @@ import Html.Extra as Html
 import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid exposing (Uuid)
-import Version exposing (Version)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
-import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorUpgradeForm as KnowledgeModelEditorUpgradeForm exposing (KnowledgeModelEditorUpgradeForm)
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 type alias Model =
     { kmEditor : Maybe ( Uuid, String )
-    , forkOfPackageVersion : Maybe Version
     , kmEditorUpgradeForm : Form FormError KnowledgeModelEditorUpgradeForm
     , creatingMigration : ActionResult String
-    , kmPackages : ActionResult (Pagination KnowledgeModelPackage)
+    , kmPackage : ActionResult KnowledgeModelPackageDetail
     }
 
 
 initialModel : Model
 initialModel =
     { kmEditor = Nothing
-    , forkOfPackageVersion = Nothing
     , kmEditorUpgradeForm = KnowledgeModelEditorUpgradeForm.init
     , creatingMigration = ActionResult.Unset
-    , kmPackages = ActionResult.Unset
+    , kmPackage = ActionResult.Unset
     }
 
 
 type Msg
-    = Open Uuid String (Maybe String)
+    = Open Uuid String Uuid
     | FormMsg Form.Msg
     | UpgradeComplete (Result ApiError ())
-    | GetKnowledgeModelPackageComplete (Result ApiError (Pagination KnowledgeModelPackage))
+    | GetKnowledgeModelPackageComplete (Result ApiError KnowledgeModelPackageDetail)
     | Close
 
 
-open : Uuid -> String -> Maybe String -> Msg
-open uuid name mbForkOfPackageUuid =
-    Open uuid name mbForkOfPackageUuid
+open : Uuid -> String -> Uuid -> Msg
+open uuid name forkOfPackageUuid =
+    Open uuid name forkOfPackageUuid
 
 
 type alias UpdateConfig msg =
@@ -76,30 +69,14 @@ type alias UpdateConfig msg =
 update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
-        Open uuid name mbForkOfPackageUuid ->
-            case Maybe.map (String.split ":") mbForkOfPackageUuid of
-                Just (organizationId :: kmId :: versionString :: []) ->
-                    let
-                        filters =
-                            PaginationQueryFilters.fromValues
-                                [ ( "organizationId", Just organizationId )
-                                , ( "kmId", Just kmId )
-                                ]
-
-                        pqs =
-                            PaginationQueryString.empty |> PaginationQueryString.withSize (Just 999)
-                    in
-                    ( { model
-                        | kmEditor = Just ( uuid, name )
-                        , forkOfPackageVersion = Version.fromString versionString
-                        , creatingMigration = ActionResult.Unset
-                        , kmPackages = ActionResult.Loading
-                      }
-                    , Cmd.map cfg.wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackages appState filters pqs GetKnowledgeModelPackageComplete
-                    )
-
-                _ ->
-                    ( model, Cmd.none )
+        Open uuid name forkOfPackageUuid ->
+            ( { model
+                | kmEditor = Just ( uuid, name )
+                , creatingMigration = ActionResult.Unset
+                , kmPackage = ActionResult.Loading
+              }
+            , Cmd.map cfg.wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackage appState forkOfPackageUuid GetKnowledgeModelPackageComplete
+            )
 
         FormMsg formMsg ->
             case ( formMsg, Form.getOutput model.kmEditorUpgradeForm, model.kmEditor ) of
@@ -134,10 +111,10 @@ update cfg appState msg model =
         GetKnowledgeModelPackageComplete result ->
             case result of
                 Ok kmPackage ->
-                    ( { model | kmPackages = ActionResult.Success kmPackage }, Cmd.none )
+                    ( { model | kmPackage = ActionResult.Success kmPackage }, Cmd.none )
 
                 Err error ->
-                    ( { model | kmPackages = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
+                    ( { model | kmPackage = ApiError.toActionResult appState (gettext "Unable to get the Knowledge Model." appState.locale) error }
                     , Cmd.none
                     )
 
@@ -157,7 +134,7 @@ view appState model =
                     ( False, "" )
 
         modalContent =
-            case model.kmPackages of
+            case model.kmPackage of
                 Unset ->
                     [ Html.nothing ]
 
@@ -167,33 +144,19 @@ view appState model =
                 Error error ->
                     [ p [ class "alert alert-danger" ] [ text error ] ]
 
-                Success results ->
+                Success _ ->
                     let
-                        previousVersion =
-                            Maybe.withDefault (Version.create 0 0 0) model.forkOfPackageVersion
-
-                        createFormOption kmPackage =
-                            let
-                                id =
-                                    KnowledgeModelUtils.getPackageId kmPackage
-
-                                optionText =
-                                    kmPackage.name ++ " " ++ Version.toString kmPackage.version ++ " (" ++ id ++ ")"
-                            in
-                            ( id, optionText )
-
-                        kmOptions =
-                            results.items
-                                |> List.filter (Version.greaterThan previousVersion << .version)
-                                |> List.sortWith (\a b -> Version.compare a.version b.version)
-                                |> List.map createFormOption
-
                         options =
-                            ( "", gettext "- select parent knowledge model -" appState.locale ) :: kmOptions
+                            case model.kmPackage of
+                                Success kmPackage ->
+                                    ( "", gettext "- select parent knowledge model -" appState.locale ) :: KnowledgeModelPackageDetail.createFormOptions kmPackage
+
+                                _ ->
+                                    []
                     in
                     [ p [ class "alert alert-info" ]
                         (String.formatHtml (gettext "Select the new parent knowledge model for %s." appState.locale) [ strong [] [ text name ] ])
-                    , FormGroup.select appState.locale options model.kmEditorUpgradeForm "targetPackageId" (gettext "New parent knowledge model" appState.locale)
+                    , FormGroup.select appState.locale options model.kmEditorUpgradeForm "targetPackageUuid" (gettext "New parent knowledge model" appState.locale)
                         |> Html.map FormMsg
                     ]
 

@@ -11,6 +11,8 @@ import Html.Attributes exposing (class, title)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
+import Maybe.Extra as Maybe
+import Uuid
 import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState
 import Wizard.Components.Html exposing (linkTo)
@@ -26,6 +28,7 @@ import Wizard.Pages.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
+import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
@@ -108,14 +111,19 @@ listingTitleBadge : AppState -> KnowledgeModelEditor -> Html Msg
 listingTitleBadge appState kmEditor =
     case kmEditor.state of
         KnowledgeModelEditorState.Outdated ->
-            a
-                ([ class Badge.warningClass
-                 , onClick (UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name kmEditor.forkOfPackageId))
-                 , dataCy "km-editor_list_outdated-badge"
-                 ]
-                    ++ tooltip (gettext "There is a new version of parent knowledge model" appState.locale)
-                )
-                [ text (gettext "update available" appState.locale) ]
+            case kmEditor.forkOfPackage of
+                Just forkOfPackage ->
+                    a
+                        ([ class Badge.warningClass
+                         , onClick (UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name forkOfPackage.uuid))
+                         , dataCy "km-editor_list_outdated-badge"
+                         ]
+                            ++ tooltip (gettext "There is a new version of parent knowledge model" appState.locale)
+                        )
+                        [ text (gettext "update available" appState.locale) ]
+
+                Nothing ->
+                    Html.nothing
 
         KnowledgeModelEditorState.Migrating ->
             Badge.info
@@ -139,11 +147,11 @@ listingDescription : AppState -> KnowledgeModelEditor -> Html Msg
 listingDescription appState kmEditor =
     let
         parent =
-            case kmEditor.forkOfPackageId of
-                Just forkOfPackageId ->
+            case kmEditor.forkOfPackage of
+                Just forkOfPackage ->
                     span [ class "fragment", title <| gettext "Parent Knowledge Model" appState.locale ]
                         [ faKmFork
-                        , text forkOfPackageId
+                        , text (KnowledgeModelUtils.getPackageId forkOfPackage)
                         ]
 
                 Nothing ->
@@ -172,7 +180,7 @@ listingActions appState kmEditor =
                 { extraClass = Nothing
                 , icon = faKmEditorListUpdate
                 , label = gettext "Update" appState.locale
-                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name kmEditor.forkOfPackageId)
+                , msg = ListingActionMsg <| UpgradeModalMsg (UpgradeModal.open kmEditor.uuid kmEditor.name (Maybe.unwrap Uuid.nil .uuid kmEditor.forkOfPackage))
                 , dataCy = "update"
                 }
 

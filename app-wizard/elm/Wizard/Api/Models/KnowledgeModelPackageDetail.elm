@@ -1,5 +1,6 @@
 module Wizard.Api.Models.KnowledgeModelPackageDetail exposing
     ( KnowledgeModelPackageDetail
+    , createFormOptions
     , decoder
     , encode
     , getLatestPackageUuid
@@ -115,3 +116,23 @@ getLatestPackageUuid kmPackage =
 
         _ ->
             Nothing
+
+
+createFormOptions : KnowledgeModelPackageDetail -> List ( String, String )
+createFormOptions kmPackage =
+    kmPackage.versions
+        |> List.filter (Version.greaterThan kmPackage.version << .version)
+        |> List.sortWith VersionUuid.compare
+        |> List.map (createFormOption kmPackage)
+
+
+createFormOption : KnowledgeModelPackageDetail -> VersionUuid -> ( String, String )
+createFormOption kmPackage version =
+    let
+        id =
+            kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString version.version
+
+        optionText =
+            kmPackage.name ++ " " ++ Version.toString version.version ++ " (" ++ id ++ ")"
+    in
+    ( Uuid.toString version.uuid, optionText )
