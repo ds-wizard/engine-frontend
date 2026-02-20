@@ -3,11 +3,12 @@ module Wizard.Api.Models.DocumentTemplateInfo exposing (DocumentTemplateInfo, de
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 
 
 type alias DocumentTemplateInfo =
-    { id : String
+    { uuid : Uuid
     , name : String
     , organizationId : String
     , templateId : String
@@ -18,7 +19,7 @@ type alias DocumentTemplateInfo =
 decoder : Decoder DocumentTemplateInfo
 decoder =
     D.succeed DocumentTemplateInfo
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "organizationId" D.string
         |> D.required "templateId" D.string
@@ -28,7 +29,7 @@ decoder =
 encode : DocumentTemplateInfo -> E.Value
 encode templateInfo =
     E.object
-        [ ( "id", E.string templateInfo.id )
+        [ ( "uuid", Uuid.encode templateInfo.uuid )
         , ( "name", E.string templateInfo.name )
         , ( "organizationId", E.string templateInfo.organizationId )
         , ( "templateId", E.string templateInfo.templateId )
