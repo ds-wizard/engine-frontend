@@ -42,8 +42,6 @@ import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft expos
 import Wizard.Api.Models.DocumentTemplateDraftDetail exposing (DocumentTemplateDraftDetail)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Editor.Components.TemplateEditor.DocumentTemplateForm as DocumentTemplateForm exposing (DocumentTemplateForm)
-import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
@@ -190,21 +188,14 @@ update cfg appState msg model =
         PutTemplateCompleted result ->
             case result of
                 Ok documentTemplate ->
-                    if documentTemplate.uuid == cfg.documentTemplateUuid then
-                        withSeed
-                            ( { model
-                                | savingForm = ActionResult.Success ""
-                                , form = DocumentTemplateForm.init appState documentTemplate
-                                , formListsChanged = False
-                              }
-                            , Task.dispatch (cfg.updateDocumentTemplate documentTemplate)
-                            )
-
-                    else
-                        withSeed
-                            ( model
-                            , cmdNavigate appState (Routes.documentTemplateEditorDetailSettings documentTemplate.uuid)
-                            )
+                    withSeed
+                        ( { model
+                            | savingForm = ActionResult.Success ""
+                            , form = DocumentTemplateForm.init appState documentTemplate
+                            , formListsChanged = False
+                          }
+                        , Task.dispatch (cfg.updateDocumentTemplate documentTemplate)
+                        )
 
                 Err error ->
                     withSeed
