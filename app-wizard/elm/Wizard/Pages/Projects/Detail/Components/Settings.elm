@@ -83,7 +83,7 @@ init appState mbQuestionnaire =
             setSelected (Maybe.andThen .documentTemplate mbQuestionnaire)
     in
     { form = Maybe.unwrap (ProjectSettingsForm.initEmpty appState) (ProjectSettingsForm.init appState) mbQuestionnaire
-    , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "documentTemplateId"
+    , templateTypeHintInputModel = setSelectedTemplate <| TypeHintInput.init "documentTemplateUuid"
     , savingQuestionnaire = Unset
     , deleteModalModel = DeleteModal.initialModel
     , projectTagsDebouncer = Debouncer.toDebouncer <| Debouncer.debounce 500
@@ -220,7 +220,7 @@ handleSetTemplateTypeHintInputReplyMsg appState model value =
 
         form =
             model.form
-                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateId" value)
+                |> Form.update (ProjectSettingsForm.validation appState) (formMsg "documentTemplateUuid" value)
                 |> Form.update (ProjectSettingsForm.validation appState) (formMsg "formatUuid" "")
     in
     ( { model | form = form }, Cmd.none )
@@ -233,7 +233,7 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageUuid
             , getError = gettext "Unable to get document templates." appState.locale
-            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Uuid.toString << .uuid
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
             , filterResults = Nothing
             }
@@ -336,14 +336,14 @@ formView appState settings model =
 
         typeHintInput isInvalid =
             let
-                selectedTemplateId =
-                    Maybe.map .id model.templateTypeHintInputModel.selected
+                selectedTemplateUuid =
+                    Maybe.map .uuid model.templateTypeHintInputModel.selected
 
-                questionnaireTemplateId =
-                    Maybe.map .id settings.documentTemplate
+                questionnaireTemplateUuid =
+                    Maybe.map .uuid settings.documentTemplate
 
                 templateFlash =
-                    if selectedTemplateId == questionnaireTemplateId then
+                    if selectedTemplateUuid == questionnaireTemplateUuid then
                         case ( settings.documentTemplateState, settings.documentTemplatePhase ) of
                             ( Just DocumentTemplateState.UnsupportedMetamodelVersion, _ ) ->
                                 Flash.error (gettext "The used version of the document template is no longer supported. Select a newer version or another supported template." appState.locale)
@@ -413,7 +413,7 @@ formView appState settings model =
                  , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" <| gettext "Description" appState.locale
                  , Html.map FormMsg <| projectTagsInput
                  , hr [] []
-                 , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateId" <| gettext "Default document template" appState.locale
+                 , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateUuid" <| gettext "Default document template" appState.locale
                  , Html.map FormMsg <| formatInput
                  ]
                     ++ isTemplateInput

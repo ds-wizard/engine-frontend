@@ -17,6 +17,7 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import String.Normalize as Normalize
+import Uuid
 import Version exposing (Version)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
@@ -160,7 +161,7 @@ handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             { wrapMsg = wrapMsg << DocumentTemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesSuggestions appState (Just False) True
             , getError = gettext "Unable to get Knowledge Models." appState.locale
-            , setReply = formMsg << .id
+            , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing
             }

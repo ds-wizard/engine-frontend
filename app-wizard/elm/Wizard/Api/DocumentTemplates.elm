@@ -25,6 +25,7 @@ import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
+import Wizard.Api.Models.DocumentTemplateAllSuggestion as DocumentTemplateAllSuggestion exposing (DocumentTemplateAllSuggestion)
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -42,9 +43,9 @@ getTemplates appState _ qs =
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "documentTemplates" DocumentTemplate.decoder)
 
 
-getTemplatesAll : AppState -> ToMsg (List DocumentTemplateSuggestion) msg -> Cmd msg
+getTemplatesAll : AppState -> ToMsg (List DocumentTemplateAllSuggestion) msg -> Cmd msg
 getTemplatesAll appState =
-    Request.get (AppState.toServerInfo appState) "/document-templates/all" (D.list DocumentTemplateSuggestion.decoder)
+    Request.get (AppState.toServerInfo appState) "/document-templates/all" (D.list DocumentTemplateAllSuggestion.decoder)
 
 
 getOutdatedTemplates : AppState -> ToMsg (Pagination DocumentTemplate) msg -> Cmd msg
