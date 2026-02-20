@@ -54,6 +54,7 @@ import Common.Ports.Dom.ElementScrollTop as ElementScrollTop
 import Common.Ports.LocalStorage as LocalStorage
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.FileIcon as FileIcon
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RegexPatterns as RegexPatterns
 import Common.Utils.ShortcutUtils as Shortcut
@@ -149,7 +150,6 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (linkToAttributes)
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 

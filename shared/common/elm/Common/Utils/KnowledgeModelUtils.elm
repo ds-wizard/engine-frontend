@@ -1,4 +1,4 @@
-module Wizard.Utils.KnowledgeModelUtils exposing (getPackageId)
+module Common.Utils.KnowledgeModelUtils exposing (getPackageId)
 
 import Version exposing (Version)
 

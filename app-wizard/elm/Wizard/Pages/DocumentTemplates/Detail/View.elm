@@ -4,6 +4,8 @@ import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
@@ -29,9 +31,7 @@ import Wizard.Pages.DocumentTemplates.Common.DocumentTemplateActionsDropdown as 
 import Wizard.Pages.DocumentTemplates.Detail.Models exposing (Model)
 import Wizard.Pages.DocumentTemplates.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.Feature as Feature
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 

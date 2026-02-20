@@ -5,6 +5,7 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
 import Common.Components.Page as Page
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
@@ -34,7 +35,6 @@ import Wizard.Pages.Projects.Import.Msgs exposing (Msg(..))
 import Wizard.Plugins.Plugin as Plugin
 import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg

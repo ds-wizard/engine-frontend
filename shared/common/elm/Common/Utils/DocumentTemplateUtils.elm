@@ -1,4 +1,4 @@
-module Wizard.Utils.DocumentTemplateUtils exposing (getId)
+module Common.Utils.DocumentTemplateUtils exposing (getId)
 
 import Version exposing (Version)
 

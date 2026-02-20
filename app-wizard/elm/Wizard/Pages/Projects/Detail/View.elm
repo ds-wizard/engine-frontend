@@ -10,6 +10,7 @@ import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
@@ -47,7 +48,6 @@ import Wizard.Plugins.Plugin as Plugin
 import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes
 import Wizard.Utils.Feature as Features
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Wizard.Utils.ProjectUtils as ProjectUtils
 
 

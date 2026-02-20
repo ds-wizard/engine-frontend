@@ -2,6 +2,7 @@ module Wizard.Pages.Dashboard.Widgets.OutdatedPackagesWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
 import Common.Components.Badge as Badge
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
@@ -12,7 +13,6 @@ import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> ActionResult (List KnowledgeModelPackage) -> Html msg

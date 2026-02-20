@@ -9,6 +9,7 @@ import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Data.PaginationQueryFilters as PaginationQueryFilter
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
@@ -47,7 +48,6 @@ import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFil
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg

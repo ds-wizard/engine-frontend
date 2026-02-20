@@ -5,6 +5,7 @@ import Common.Components.FontAwesome exposing (faCancel, faDelete, faKmEditorLis
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Attribute, Html, a, code, div, span, text)
 import Html.Attributes exposing (class, title)
@@ -28,7 +29,6 @@ import Wizard.Pages.KMEditor.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg

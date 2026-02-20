@@ -4,6 +4,7 @@ import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faKmsUpload)
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, span, text)
 import Html.Attributes exposing (class, src, title)
@@ -22,7 +23,6 @@ import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg

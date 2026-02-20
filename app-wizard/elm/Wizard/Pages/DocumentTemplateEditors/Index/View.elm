@@ -5,6 +5,7 @@ import Common.Components.FontAwesome exposing (faDelete, faEdit)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, p, span, strong, text)
 import Html.Attributes exposing (class)
@@ -20,7 +21,6 @@ import Wizard.Pages.DocumentTemplateEditors.Index.Models exposing (Model)
 import Wizard.Pages.DocumentTemplateEditors.Index.Msgs exposing (Msg(..))
 import Wizard.Pages.DocumentTemplateEditors.Routes exposing (Route(..))
 import Wizard.Routes as Routes
-import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
 

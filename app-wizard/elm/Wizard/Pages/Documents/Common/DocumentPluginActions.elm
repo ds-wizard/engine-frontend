@@ -1,13 +1,13 @@
 module Wizard.Pages.Documents.Common.DocumentPluginActions exposing (documentPluginActions)
 
 import Common.Components.FontAwesome exposing (fa)
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Gettext exposing (gettext)
 import Wizard.Api.Models.Document exposing (Document)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Components.PluginModal as PluginModal
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Plugins.Plugin as Plugin exposing (DocumentActionConnector, Plugin)
-import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 
 
 documentPluginActions : AppState -> Document -> (PluginModal.Msg Document -> msg) -> List ( ListingDropdownItem msg, Bool )

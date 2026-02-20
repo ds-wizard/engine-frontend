@@ -8,13 +8,13 @@ import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.DocumentTemplateEditors.Create.Models exposing (Model)
 import Wizard.Pages.DocumentTemplateEditors.Create.Msgs exposing (Msg(..))
-import Wizard.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 

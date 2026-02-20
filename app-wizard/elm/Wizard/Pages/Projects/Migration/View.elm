@@ -4,6 +4,7 @@ import Common.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, 
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Utils.Bool as Bool
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
@@ -23,7 +24,6 @@ import Wizard.Pages.Projects.Common.QuestionChange as QuestionChange exposing (Q
 import Wizard.Pages.Projects.Migration.Models exposing (Model, isQuestionChangeResolved, isSelectedChangeResolved)
 import Wizard.Pages.Projects.Migration.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg

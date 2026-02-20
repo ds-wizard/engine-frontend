@@ -3,6 +3,7 @@ module Wizard.Pages.KnowledgeModels.Detail.View exposing (view)
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Common.Components.Page as Page
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, span, strong, text, ul)
@@ -27,7 +28,6 @@ import Wizard.Pages.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
-import Wizard.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 
 
 view : AppState -> Model -> Html Msg
