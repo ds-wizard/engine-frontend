@@ -98,7 +98,7 @@ viewKnowledgeModel appState model documentTemplate =
         , sidebar =
             [ SidebarRow.viewId appState
                 { title = gettext "Document Template ID" appState.locale
-                , id = documentTemplate.id
+                , id = DocumentTemplate.getId documentTemplate
                 , wrapMsg = ItemIdBoxMsg
                 , itemIdBoxState = model.itemIdBoxState
                 }

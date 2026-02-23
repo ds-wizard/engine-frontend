@@ -13,7 +13,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Registry.Api.KnowledgeModels as KnowledgeModelsApi
-import Registry.Api.Models.KnowledgeModel exposing (KnowledgeModel)
+import Registry.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Registry.Components.ListItem as ListItem
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
@@ -69,7 +69,7 @@ viewKnowledgeModels appState knowledgeModels =
         knowledgeModelsView =
             knowledgeModels
                 |> List.sortBy ((*) -1 << Time.posixToMillis << .createdAt)
-                |> List.map (ListItem.view appState { toRoute = Routes.knowledgeModelDetail << .id })
+                |> List.map (ListItem.view appState { toRoute = Routes.knowledgeModelDetail << KnowledgeModel.getId })
                 |> div []
     in
     div [ class "my-5" ]
