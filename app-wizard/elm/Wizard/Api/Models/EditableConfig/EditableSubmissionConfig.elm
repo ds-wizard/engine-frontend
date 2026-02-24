@@ -236,8 +236,7 @@ initService definition =
 
 initSupportedFormat : SupportedFormat -> List ( String, Field )
 initSupportedFormat supportedFormat =
-    [ ( "template", Field.string supportedFormat.templateUuid )
-    , ( "templateUuid", Field.string supportedFormat.templateUuid )
+    [ ( "templateUuid", Field.string supportedFormat.templateUuid )
     , ( "formatUuid", Field.string supportedFormat.formatUuid )
     ]
 

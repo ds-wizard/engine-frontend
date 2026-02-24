@@ -127,9 +127,6 @@ supportedFormatFormView appState templates prefix form index =
         field name =
             prefix ++ "." ++ String.fromInt index ++ "." ++ name
 
-        templateField =
-            Form.getFieldAsString (field "template") form
-
         templateUuidField =
             Form.getFieldAsString (field "templateUuid") form
 
@@ -145,26 +142,14 @@ supportedFormatFormView appState templates prefix form index =
         defaultOption =
             ( "", "--" )
 
+        createTemplateOption template =
+            ( Uuid.toString template.uuid, template.name ++ " (" ++ Version.toString template.version ++ ")" )
+
         templateOptions =
-            DocumentTemplateAllSuggestion.createOptions templates
-
-        templateToTemplateVersionOptions : String -> List ( String, String )
-        templateToTemplateVersionOptions templateUuid =
-            let
-                templateOrganizationAndTemplateId =
-                    List.find ((==) templateUuid << Uuid.toString << .uuid) templates
-                        |> Maybe.map DocumentTemplateAllSuggestion.getOrganizationAndTemplateId
-            in
             templates
-                |> List.filter ((==) templateOrganizationAndTemplateId << Just << DocumentTemplateAllSuggestion.getOrganizationAndTemplateId)
-                |> List.sortWith (\a b -> Version.compare b.version a.version)
-                |> List.map (\t -> ( Uuid.toString t.uuid, Version.toString t.version ))
+                |> List.sortWith DocumentTemplateAllSuggestion.compare
+                |> List.map createTemplateOption
                 |> (::) defaultOption
-
-        templateVersionOptions =
-            templateField.value
-                |> Maybe.map templateToTemplateVersionOptions
-                |> Maybe.withDefault []
 
         formatOptions =
             templateUuidField.value
@@ -173,8 +158,7 @@ supportedFormatFormView appState templates prefix form index =
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
-        [ Input.selectInput templateOptions templateField [ class "form-select", class templateIdErrorClass ]
-        , Input.selectInput templateVersionOptions templateUuidField [ class "form-select", class templateIdErrorClass ]
+        [ Input.selectInput templateOptions templateUuidField [ class "form-select", class templateIdErrorClass ]
         , Input.selectInput formatOptions formatUuidField [ class "form-select", class formatUuidErrorClass ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
             [ faDelete ]

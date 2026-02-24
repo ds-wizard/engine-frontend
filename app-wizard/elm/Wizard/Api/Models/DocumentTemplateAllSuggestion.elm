@@ -1,13 +1,11 @@
 module Wizard.Api.Models.DocumentTemplateAllSuggestion exposing
     ( DocumentTemplateAllSuggestion
-    , createOptions
+    , compare
     , decoder
-    , getOrganizationAndTemplateId
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import List.Extra as List
 import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatSimple as DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
@@ -36,16 +34,10 @@ decoder =
         |> D.required "templateId" D.string
 
 
-getOrganizationAndTemplateId : DocumentTemplateAllSuggestion -> String
-getOrganizationAndTemplateId template =
-    template.organizationId ++ ":" ++ template.templateId
+compare : DocumentTemplateAllSuggestion -> DocumentTemplateAllSuggestion -> Order
+compare a b =
+    if a.name == b.name then
+        Version.compare a.version b.version
 
-
-createOptions : List DocumentTemplateAllSuggestion -> List ( String, String )
-createOptions templates =
-    templates
-        |> List.map getOrganizationAndTemplateId
-        |> List.unique
-        |> List.sort
-        |> List.map (\t -> ( t, t ))
-        |> (::) ( "", "--" )
+    else
+        Basics.compare a.name b.name
