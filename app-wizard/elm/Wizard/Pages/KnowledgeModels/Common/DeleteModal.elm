@@ -15,7 +15,7 @@ import Common.Components.Badge as Badge
 import Common.Components.Flash as Flash
 import Common.Components.Modal as Modal
 import Common.Ports.Dom as Dom
-import Gettext exposing (gettext)
+import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, div, input, label, li, p, strong, text, ul)
 import Html.Attributes exposing (class, id, target)
 import Html.Events exposing (onInput)
@@ -191,10 +191,23 @@ viewDependents appState kmLabel allVersions dependents =
     let
         explanationText =
             if allVersions then
-                gettext "This action will permanently delete all versions of %s, including all dependent knowledge models, knowledge model editors, and projects." appState.locale
+                gettext "You are about to permanently delete all versions of %s, including all dependent knowledge models, knowledge model editors, and projects." appState.locale
 
             else
-                gettext "This action will permanently delete %s, including all dependent knowledge models, knowledge model editors, and projects." appState.locale
+                gettext "You are about to permanently delete %s, including all dependent knowledge models, knowledge model editors, and projects." appState.locale
+
+        knowledgeModelCount =
+            List.length dependents
+
+        projectCount =
+            dependents
+                |> List.concatMap .projects
+                |> List.length
+
+        editorCount =
+            dependents
+                |> List.concatMap .editors
+                |> List.length
     in
     div []
         [ Flash.warning (gettext "Unexpected bad things will happen if you don't read this!" appState.locale)
@@ -202,6 +215,17 @@ viewDependents appState kmLabel allVersions dependents =
             (String.formatHtml explanationText
                 [ strong [] [ text kmLabel ] ]
             )
+        , p []
+            [ strong [] [ text (gettext "This action will permanently delete:" appState.locale) ]
+            , ul []
+                [ Html.viewIf (knowledgeModelCount > 0) <|
+                    li [] (String.formatHtml (ngettext ( "%s knowledge model", "%s knowledge models" ) knowledgeModelCount appState.locale) [ strong [ class "text-danger" ] [ text (String.fromInt knowledgeModelCount) ] ])
+                , Html.viewIf (editorCount > 0) <|
+                    li [] (String.formatHtml (ngettext ( "%s knowledge model editor", "%s knowledge model editors" ) editorCount appState.locale) [ strong [ class "text-danger" ] [ text (String.fromInt editorCount) ] ])
+                , Html.viewIf (projectCount > 0) <|
+                    li [] (String.formatHtml (ngettext ( "%s project", "%s projects" ) projectCount appState.locale) [ strong [ class "text-danger" ] [ text (String.fromInt projectCount) ] ])
+                ]
+            ]
         , p [] [ text (gettext "Carefully review the list of what will be deleted before continuing." appState.locale) ]
         , div [] (List.map (viewDependent appState) dependents)
         ]
