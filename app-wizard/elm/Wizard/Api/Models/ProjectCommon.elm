@@ -49,7 +49,7 @@ encode p =
         [ ( "uuid", Uuid.encode p.uuid )
         , ( "name", E.string p.name )
         , ( "isTemplate", E.bool p.isTemplate )
-        , ( "knowledgeModelPackageUuid", Uuid.encode p.knowledgeModelPackage.uuid )
+        , ( "knowledgeModelPackage", KnowledgeModelPackageSuggestion.encode p.knowledgeModelPackage )
         ]
 
 

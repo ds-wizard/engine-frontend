@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing
     ( KnowledgeModelPackageSuggestion
     , decoder
+    , encode
     , fromKnowledgeModelPackage
     , isSameKnowledgeModelPackage
     , knowledgeModelPackageIdAll
@@ -8,6 +9,7 @@ module Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Json.Encode as E
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
 import Version exposing (Version)
@@ -33,6 +35,18 @@ decoder =
         |> D.required "organizationId" D.string
         |> D.required "kmId" D.string
         |> D.required "version" Version.decoder
+
+
+encode : KnowledgeModelPackageSuggestion -> E.Value
+encode kmPackageSuggestion =
+    E.object
+        [ ( "uuid", Uuid.encode kmPackageSuggestion.uuid )
+        , ( "name", E.string kmPackageSuggestion.name )
+        , ( "description", E.string kmPackageSuggestion.description )
+        , ( "organizationId", E.string kmPackageSuggestion.organizationId )
+        , ( "kmId", E.string kmPackageSuggestion.kmId )
+        , ( "version", Version.encode kmPackageSuggestion.version )
+        ]
 
 
 fromKnowledgeModelPackage : KnowledgeModelPackage -> KnowledgeModelPackageSuggestion

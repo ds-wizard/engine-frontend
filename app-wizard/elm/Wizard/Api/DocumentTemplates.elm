@@ -119,7 +119,7 @@ putTemplate appState documentTemplate =
 
 deleteTemplate : AppState -> String -> String -> ToMsg () msg -> Cmd msg
 deleteTemplate appState organizationId templateId =
-    Request.delete (AppState.toServerInfo appState) ("/document-templates/?organizationId=" ++ organizationId ++ "&templateUuid=" ++ templateId)
+    Request.delete (AppState.toServerInfo appState) ("/document-templates/?organizationId=" ++ organizationId ++ "&templateId=" ++ templateId)
 
 
 deleteTemplateVersion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
