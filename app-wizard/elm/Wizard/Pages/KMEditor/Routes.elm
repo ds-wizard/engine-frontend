@@ -6,7 +6,7 @@ import Wizard.Pages.KMEditor.Editor.KMEditorRoute exposing (KMEditorRoute)
 
 
 type Route
-    = CreateRoute (Maybe String) (Maybe Bool)
+    = CreateRoute (Maybe Uuid) (Maybe Bool)
     | EditorRoute Uuid KMEditorRoute
     | IndexRoute PaginationQueryString
     | MigrationRoute Uuid

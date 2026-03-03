@@ -18,9 +18,7 @@ import Wizard.Pages.Documents.Routing
 import Wizard.Pages.KMEditor.Routing
 import Wizard.Pages.KnowledgeModels.Routing
 import Wizard.Pages.Locales.Routing
-import Wizard.Pages.ProjectActions.Routing
 import Wizard.Pages.ProjectFiles.Routing
-import Wizard.Pages.ProjectImporters.Routing
 import Wizard.Pages.Projects.Routing
 import Wizard.Pages.Public.Routing
 import Wizard.Pages.Registry.Routing
@@ -46,9 +44,7 @@ matchers appState =
                 ++ Wizard.Pages.KMEditor.Routing.parsers Routes.KMEditorRoute
                 ++ Wizard.Pages.KnowledgeModels.Routing.parsers Routes.KnowledgeModelsRoute
                 ++ Wizard.Pages.Locales.Routing.parsers appState Routes.LocalesRoute
-                ++ Wizard.Pages.ProjectActions.Routing.parsers Routes.ProjectActionsRoute
                 ++ Wizard.Pages.ProjectFiles.Routing.parsers Routes.ProjectFilesRoute
-                ++ Wizard.Pages.ProjectImporters.Routing.parsers Routes.ProjectImportersRoute
                 ++ Wizard.Pages.Projects.Routing.parsers Routes.ProjectsRoute
                 ++ Wizard.Pages.Public.Routing.parsers appState Routes.PublicRoute
                 ++ Wizard.Pages.Registry.Routing.parsers Routes.RegistryRoute
@@ -80,14 +76,14 @@ isAllowed route appState =
         Routes.CommentsRoute _ _ ->
             True
 
-        Routes.DevRoute adminRoute ->
-            Wizard.Pages.Dev.Routing.isAllowed adminRoute appState
+        Routes.DevRoute _ ->
+            Wizard.Pages.Dev.Routing.isAllowed appState
 
         Routes.DashboardRoute ->
             True
 
-        Routes.DocumentsRoute documentsRoute ->
-            Wizard.Pages.Documents.Routing.isAllowed documentsRoute appState
+        Routes.DocumentsRoute _ ->
+            Wizard.Pages.Documents.Routing.isAllowed appState
 
         Routes.DocumentTemplateEditorsRoute _ ->
             Wizard.Pages.DocumentTemplateEditors.Routing.isAllowed appState
@@ -107,14 +103,8 @@ isAllowed route appState =
         Routes.LocalesRoute localeRoute ->
             Wizard.Pages.Locales.Routing.isAllowed localeRoute appState
 
-        Routes.ProjectActionsRoute _ ->
-            Wizard.Pages.ProjectActions.Routing.isAllowed appState
-
         Routes.ProjectFilesRoute _ ->
             Wizard.Pages.ProjectFiles.Routing.isAllowed appState
-
-        Routes.ProjectImportersRoute _ ->
-            Wizard.Pages.ProjectImporters.Routing.isAllowed appState
 
         Routes.ProjectsRoute projectsRoute ->
             Wizard.Pages.Projects.Routing.isAllowed projectsRoute appState
@@ -122,14 +112,14 @@ isAllowed route appState =
         Routes.PublicRoute _ ->
             True
 
-        Routes.RegistryRoute registryRoute ->
-            Wizard.Pages.Registry.Routing.isAllowed registryRoute appState
+        Routes.RegistryRoute _ ->
+            Wizard.Pages.Registry.Routing.isAllowed appState
 
         Routes.SettingsRoute settingsRoute ->
             Wizard.Pages.Settings.Routing.isAllowed settingsRoute appState
 
-        Routes.TenantsRoute tenantsRoute ->
-            Wizard.Pages.Tenants.Routing.isAllowed tenantsRoute appState
+        Routes.TenantsRoute _ ->
+            Wizard.Pages.Tenants.Routing.isAllowed appState
 
         Routes.UsersRoute usersRoute ->
             Wizard.Pages.Users.Routing.isAllowed usersRoute appState
@@ -181,14 +171,8 @@ toUrl route =
                 Routes.LocalesRoute localeRoute ->
                     Wizard.Pages.Locales.Routing.toUrl localeRoute
 
-                Routes.ProjectActionsRoute projectActionsRoute ->
-                    Wizard.Pages.ProjectActions.Routing.toUrl projectActionsRoute
-
                 Routes.ProjectFilesRoute projectFilesRoute ->
                     Wizard.Pages.ProjectFiles.Routing.toUrl projectFilesRoute
-
-                Routes.ProjectImportersRoute projectImportersRoute ->
-                    Wizard.Pages.ProjectImporters.Routing.toUrl projectImportersRoute
 
                 Routes.ProjectsRoute projectsRoute ->
                     Wizard.Pages.Projects.Routing.toUrl projectsRoute

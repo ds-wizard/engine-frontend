@@ -6,7 +6,7 @@ module Wizard.Pages.KMEditor.Editor.Components.Preview exposing
     , initialModel
     , setActiveChapterIfNot
     , setKnowledgeModel
-    , setKnowledgeModelPackageId
+    , setKnowledgeModelPackageUuid
     , setPhase
     , setReplies
     , subscriptions
@@ -44,11 +44,11 @@ type alias Model =
     }
 
 
-initialModel : AppState -> String -> Model
-initialModel appState kmPackageId =
+initialModel : AppState -> Uuid -> Model
+initialModel appState kmPackageUuid =
     let
         questionnaire =
-            createQuestionnaireDetail kmPackageId KnowledgeModel.empty
+            createQuestionnaireDetail kmPackageUuid KnowledgeModel.empty
     in
     { questionnaireModel = initQuestionnaireModel appState questionnaire
     , tags = Set.empty
@@ -85,11 +85,11 @@ setPhase mbPhaseUuid model =
         model
 
 
-setKnowledgeModelPackageId : AppState -> String -> Model -> Model
-setKnowledgeModelPackageId appState kmPackageId model =
+setKnowledgeModelPackageUuid : AppState -> Uuid -> Model -> Model
+setKnowledgeModelPackageUuid appState kmPackageUuid model =
     let
         questionnaire =
-            createQuestionnaireDetail kmPackageId KnowledgeModel.empty
+            createQuestionnaireDetail kmPackageUuid KnowledgeModel.empty
 
         questionnaireModel =
             initQuestionnaireModel appState questionnaire
@@ -140,13 +140,13 @@ generateReplies appState questionUuid knowledgeModel model =
     )
 
 
-createQuestionnaireDetail : String -> KnowledgeModel -> ProjectQuestionnaire
-createQuestionnaireDetail kmPackageId km =
+createQuestionnaireDetail : Uuid -> KnowledgeModel -> ProjectQuestionnaire
+createQuestionnaireDetail kmPackageUuid km =
     let
         kmPackage =
             KnowledgeModelPackage.dummy
     in
-    ProjectQuestionnaire.createQuestionnaireDetail { kmPackage | id = kmPackageId } km
+    ProjectQuestionnaire.createQuestionnaireDetail { kmPackage | uuid = kmPackageUuid } km
 
 
 questionnaireModelWithKnowledgeModel : KnowledgeModel -> Questionnaire.Model -> Questionnaire.Model

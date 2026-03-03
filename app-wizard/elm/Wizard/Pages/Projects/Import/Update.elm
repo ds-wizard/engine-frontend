@@ -54,7 +54,7 @@ update wrapMsg msg appState model =
                 fetchCmd =
                     case newModel.project of
                         Success questionnaire ->
-                            KnowledgeModelsApi.fetchAsString appState questionnaire.knowledgeModelPackageId questionnaire.selectedQuestionTagUuids (wrapMsg << FetchKnowledgeModelStringComplete)
+                            KnowledgeModelsApi.fetchAsString appState questionnaire.knowledgeModelPackage.uuid questionnaire.selectedQuestionTagUuids (wrapMsg << FetchKnowledgeModelStringComplete)
 
                         _ ->
                             Cmd.none

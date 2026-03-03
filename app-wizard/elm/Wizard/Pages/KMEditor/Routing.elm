@@ -8,9 +8,8 @@ import Common.Data.PaginationQueryString as PaginationQueryString
 import Flip exposing (flip)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extensions exposing (uuid)
-import Url.Parser.Query as Query
 import Url.Parser.Query.Extensions as Query
-import Uuid
+import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute as KMEditorRoute
 import Wizard.Pages.KMEditor.Routes exposing (Route(..))
@@ -28,7 +27,7 @@ parsers wrapRoute =
         editorWithEntityRoute editorUuid entityUuid =
             wrapRoute <| EditorRoute editorUuid <| KMEditorRoute.Edit (Just entityUuid)
     in
-    [ map (createRoute wrapRoute) (s moduleRoot </> s "create" <?> Query.string "selected" <?> Query.bool "edit")
+    [ map (createRoute wrapRoute) (s moduleRoot </> s "create" <?> Query.uuid "selected" <?> Query.bool "edit")
     , map (wrapRoute << flip EditorRoute (KMEditorRoute.Edit Nothing)) (s moduleRoot </> s "editor" </> uuid)
     , map editorWithEntityRoute (s moduleRoot </> s "editor" </> uuid </> s "edit" </> uuid)
     , map (wrapRoute << flip EditorRoute KMEditorRoute.Phases) (s moduleRoot </> s "editor" </> uuid </> s "phases")
@@ -41,9 +40,9 @@ parsers wrapRoute =
     ]
 
 
-createRoute : (Route -> a) -> Maybe String -> Maybe Bool -> a
-createRoute wrapRoute kmId edit =
-    wrapRoute <| CreateRoute kmId edit
+createRoute : (Route -> a) -> Maybe Uuid -> Maybe Bool -> a
+createRoute wrapRoute kmUuid edit =
+    wrapRoute <| CreateRoute kmUuid edit
 
 
 toUrl : Route -> List String
@@ -51,7 +50,7 @@ toUrl route =
     case route of
         CreateRoute mbSelected mbEdit ->
             case ( mbSelected, mbEdit ) of
-                ( Just id, Just edit ) ->
+                ( Just kmUuid, Just edit ) ->
                     let
                         editString =
                             if edit then
@@ -62,13 +61,13 @@ toUrl route =
                     in
                     [ moduleRoot
                     , "create"
-                    , "?selected=" ++ id ++ "&edit=" ++ editString
+                    , "?selected=" ++ Uuid.toString kmUuid ++ "&edit=" ++ editString
                     ]
 
-                ( Just id, Nothing ) ->
+                ( Just kmUuid, Nothing ) ->
                     [ moduleRoot
                     , "create"
-                    , "?selected=" ++ id
+                    , "?selected=" ++ Uuid.toString kmUuid
                     ]
 
                 _ ->

@@ -14,6 +14,7 @@ module Wizard.Api.DocumentTemplates exposing
     )
 
 import Common.Api.Models.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.UuidResponse as UuidResponse exposing (UuidResponse)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
@@ -21,8 +22,10 @@ import Common.Utils.Bool as Bool
 import File exposing (File)
 import Json.Decode as D
 import Maybe.Extra as Maybe
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
+import Wizard.Api.Models.DocumentTemplateAllSuggestion as DocumentTemplateAllSuggestion exposing (DocumentTemplateAllSuggestion)
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -40,9 +43,9 @@ getTemplates appState _ qs =
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "documentTemplates" DocumentTemplate.decoder)
 
 
-getTemplatesAll : AppState -> ToMsg (List DocumentTemplateSuggestion) msg -> Cmd msg
+getTemplatesAll : AppState -> ToMsg (List DocumentTemplateAllSuggestion) msg -> Cmd msg
 getTemplatesAll appState =
-    Request.get (AppState.toServerInfo appState) "/document-templates/all" (D.list DocumentTemplateSuggestion.decoder)
+    Request.get (AppState.toServerInfo appState) "/document-templates/all" (D.list DocumentTemplateAllSuggestion.decoder)
 
 
 getOutdatedTemplates : AppState -> ToMsg (Pagination DocumentTemplate) msg -> Cmd msg
@@ -59,17 +62,17 @@ getOutdatedTemplates appState =
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "documentTemplates" DocumentTemplate.decoder)
 
 
-getTemplate : AppState -> String -> ToMsg DocumentTemplateDetail msg -> Cmd msg
-getTemplate appState templateId =
-    Request.get (AppState.toServerInfo appState) ("/document-templates/" ++ templateId) DocumentTemplateDetail.decoder
+getTemplate : AppState -> Uuid -> ToMsg DocumentTemplateDetail msg -> Cmd msg
+getTemplate appState templateUuid =
+    Request.get (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString templateUuid) DocumentTemplateDetail.decoder
 
 
-getTemplatesFor : AppState -> String -> PaginationQueryString -> ToMsg (Pagination DocumentTemplateSuggestion) msg -> Cmd msg
-getTemplatesFor appState pkgId qs =
+getTemplatesFor : AppState -> Uuid -> PaginationQueryString -> ToMsg (Pagination DocumentTemplateSuggestion) msg -> Cmd msg
+getTemplatesFor appState knowledgeModelPackageUuid qs =
     let
         queryString =
             PaginationQueryString.toApiUrlWith
-                [ ( "pkgId", pkgId )
+                [ ( "knowledgeModelPackageUuid", Uuid.toString knowledgeModelPackageUuid )
                 , ( "phase", DocumentTemplatePhase.toString DocumentTemplatePhase.Released )
                 ]
                 qs
@@ -105,13 +108,13 @@ getTemplatesSuggestions appState nonEditable includeUnsupportedMetamodelVersion 
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "documentTemplates" DocumentTemplateSuggestion.decoder)
 
 
-putTemplate : AppState -> { t | id : String, phase : DocumentTemplatePhase } -> ToMsg DocumentTemplateDetail msg -> Cmd msg
+putTemplate : AppState -> { t | uuid : Uuid, phase : DocumentTemplatePhase } -> ToMsg DocumentTemplateDetail msg -> Cmd msg
 putTemplate appState documentTemplate =
     let
         body =
             DocumentTemplateDetail.encode documentTemplate
     in
-    Request.put (AppState.toServerInfo appState) ("/document-templates/" ++ documentTemplate.id) DocumentTemplateDetail.decoder body
+    Request.put (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString documentTemplate.uuid) DocumentTemplateDetail.decoder body
 
 
 deleteTemplate : AppState -> String -> String -> ToMsg () msg -> Cmd msg
@@ -119,14 +122,14 @@ deleteTemplate appState organizationId templateId =
     Request.delete (AppState.toServerInfo appState) ("/document-templates/?organizationId=" ++ organizationId ++ "&templateId=" ++ templateId)
 
 
-deleteTemplateVersion : AppState -> String -> ToMsg () msg -> Cmd msg
-deleteTemplateVersion appState templateId =
-    Request.delete (AppState.toServerInfo appState) ("/document-templates/" ++ templateId)
+deleteTemplateVersion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
+deleteTemplateVersion appState templateUuid =
+    Request.delete (AppState.toServerInfo appState) ("/document-templates/" ++ Uuid.toString templateUuid)
 
 
-pullTemplate : AppState -> String -> ToMsg () msg -> Cmd msg
+pullTemplate : AppState -> String -> ToMsg UuidResponse msg -> Cmd msg
 pullTemplate appState templateId =
-    Request.postEmpty (AppState.toServerInfo appState) ("/document-templates/" ++ templateId ++ "/pull")
+    Request.postEmptyBody (AppState.toServerInfo appState) ("/document-templates/" ++ templateId ++ "/pull") UuidResponse.decoder
 
 
 importTemplate : AppState -> File -> ToMsg () msg -> Cmd msg
@@ -134,6 +137,6 @@ importTemplate appState file =
     Request.postFile (AppState.toServerInfo appState) "/document-templates/bundle" file
 
 
-exportTemplateUrl : String -> String
-exportTemplateUrl templateId =
-    "/document-templates/" ++ templateId ++ "/bundle"
+exportTemplateUrl : Uuid -> String
+exportTemplateUrl templateUuid =
+    "/document-templates/" ++ Uuid.toString templateUuid ++ "/bundle"

@@ -15,6 +15,7 @@ import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig
 import Wizard.Api.Models.Locale as Locale
 import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -175,15 +176,15 @@ sidePanelOtherVersions appState locale =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.localesDetail locale.uuid)
+                [ linkTo (Routes.localesDetail version.uuid)
                     []
-                    [ text <| Version.toString version ]
+                    [ text <| Version.toString version.version ]
                 ]
 
         versionLinks =
             locale.versions
-                |> List.filter ((/=) locale.version)
-                |> List.sortWith Version.compare
+                |> List.filter ((/=) locale.version << .version)
+                |> List.sortWith VersionUuid.compare
                 |> List.reverse
                 |> List.map versionLink
     in

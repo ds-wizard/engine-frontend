@@ -25,9 +25,7 @@ import Wizard.Pages.KMEditor.Update
 import Wizard.Pages.KnowledgeModelSecrets.Update
 import Wizard.Pages.KnowledgeModels.Update
 import Wizard.Pages.Locales.Update
-import Wizard.Pages.ProjectActions.Update
 import Wizard.Pages.ProjectFiles.Update
-import Wizard.Pages.ProjectImporters.Update
 import Wizard.Pages.Projects.Update
 import Wizard.Pages.Public.Update
 import Wizard.Pages.Registry.Update
@@ -87,17 +85,9 @@ fetchData model =
             Cmd.map Wizard.Msgs.LocaleMsg <|
                 Wizard.Pages.Locales.Update.fetchData route model.appState
 
-        Routes.ProjectActionsRoute _ ->
-            Cmd.map Wizard.Msgs.ProjectActionsMsg <|
-                Wizard.Pages.ProjectActions.Update.fetchData
-
         Routes.ProjectFilesRoute _ ->
             Cmd.map Wizard.Msgs.ProjectFilesMsg <|
                 Wizard.Pages.ProjectFiles.Update.fetchData
-
-        Routes.ProjectImportersRoute _ ->
-            Cmd.map Wizard.Msgs.ProjectImportersMsg <|
-                Wizard.Pages.ProjectImporters.Update.fetchData
 
         Routes.ProjectsRoute route ->
             Cmd.map Wizard.Msgs.ProjectsMsg <|
@@ -113,7 +103,7 @@ fetchData model =
 
         Routes.SettingsRoute route ->
             Cmd.map Wizard.Msgs.SettingsMsg <|
-                Wizard.Pages.Settings.Update.fetchData route model.appState model.settingsModel
+                Wizard.Pages.Settings.Update.fetchData route model.appState
 
         Routes.UsersRoute route ->
             Cmd.map Wizard.Msgs.UsersMsg <|
@@ -373,26 +363,12 @@ update msg model =
                 in
                 ( { model | localeModel = localeModel }, cmd )
 
-            Wizard.Msgs.ProjectActionsMsg projectActionsMsg ->
-                let
-                    ( projectActionsModel, cmd ) =
-                        Wizard.Pages.ProjectActions.Update.update projectActionsMsg Wizard.Msgs.ProjectActionsMsg model.appState model.projectActionsModel
-                in
-                ( { model | projectActionsModel = projectActionsModel }, cmd )
-
             Wizard.Msgs.ProjectFilesMsg projectFilesMsg ->
                 let
                     ( projectFilesModel, cmd ) =
                         Wizard.Pages.ProjectFiles.Update.update projectFilesMsg Wizard.Msgs.ProjectFilesMsg model.appState model.projectFilesModel
                 in
                 ( { model | projectFilesModel = projectFilesModel }, cmd )
-
-            Wizard.Msgs.ProjectImportersMsg projectImporterMsg ->
-                let
-                    ( projectImportersModel, cmd ) =
-                        Wizard.Pages.ProjectImporters.Update.update projectImporterMsg Wizard.Msgs.ProjectImportersMsg model.appState model.projectImportersModel
-                in
-                ( { model | projectImportersModel = projectImportersModel }, cmd )
 
             Wizard.Msgs.ProjectsMsg plansMsg ->
                 let
@@ -411,7 +387,7 @@ update msg model =
             Wizard.Msgs.RegistryMsg registryMsg ->
                 let
                     ( registryModel, cmd ) =
-                        Wizard.Pages.Registry.Update.update registryMsg Wizard.Msgs.RegistryMsg model.appState model.registryModel
+                        Wizard.Pages.Registry.Update.update registryMsg model.appState model.registryModel
                 in
                 ( { model | registryModel = registryModel }, cmd )
 

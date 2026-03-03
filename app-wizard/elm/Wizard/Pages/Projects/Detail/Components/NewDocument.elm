@@ -71,7 +71,7 @@ initialModel project mbEventUuid =
     { summaryReport = Loading
     , event = Maybe.unwrap Unset (always Loading) mbEventUuid
     , form = DocumentCreateForm.init project mbEventUuid
-    , templateTypeHintInputModel = setSelected project.documentTemplate <| TypeHintInput.init "documentTemplateId"
+    , templateTypeHintInputModel = setSelected project.documentTemplate <| TypeHintInput.init "documentTemplateUuid"
     , savingDocument = Unset
     }
 
@@ -119,7 +119,7 @@ fetchData appState projectUuid mbEventUuid =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , projectUuid : Uuid
-    , knowledgeModelPackageId : String
+    , knowledgeModelPackageUuid : Uuid
     , documentsNavigateCmd : Cmd msg
     }
 
@@ -215,7 +215,7 @@ handleSetTemplateTypeHintInputReplyMsg model value =
 
         form =
             model.form
-                |> Form.update DocumentCreateForm.validation (formMsg "documentTemplateId" value)
+                |> Form.update DocumentCreateForm.validation (formMsg "documentTemplateUuid" value)
                 |> updateFormatUuid
     in
     ( { model | form = form }, Cmd.none )
@@ -226,9 +226,9 @@ handleTemplateTypeHintInputMsg cfg typeHintInputMsg appState model =
     let
         typeHintInputCfg =
             { wrapMsg = cfg.wrapMsg << TemplateTypeHintInputMsg
-            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageId
+            , getTypeHints = DocumentTemplatesApi.getTemplatesFor appState cfg.knowledgeModelPackageUuid
             , getError = gettext "Unable to get document templates." appState.locale
-            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << .id
+            , setReply = cfg.wrapMsg << SetTemplateTypeHintInputReply << Uuid.toString << .uuid
             , clearReply = Just <| cfg.wrapMsg <| SetTemplateTypeHintInputReply ""
             , filterResults = Nothing
             }
@@ -350,6 +350,6 @@ formView appState project mbEvent model summaryReport =
     div []
         [ Html.map FormMsg <| nameInput
         , div [ class "form-group" ] [ extraInfo ]
-        , FormGroup.formGroupCustom templateInput appState.locale model.form "documentTemplateId" <| gettext "Document Template" appState.locale
+        , FormGroup.formGroupCustom templateInput appState.locale model.form "documentTemplateUuid" <| gettext "Document Template" appState.locale
         , Html.map FormMsg <| formatInput
         ]

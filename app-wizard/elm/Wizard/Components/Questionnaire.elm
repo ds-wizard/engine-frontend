@@ -54,6 +54,7 @@ import Common.Ports.Dom.ElementScrollTop as ElementScrollTop
 import Common.Ports.LocalStorage as LocalStorage
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.FileIcon as FileIcon
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Common.Utils.RegexPatterns as RegexPatterns
 import Common.Utils.ShortcutUtils as Shortcut
@@ -83,7 +84,6 @@ import Roman
 import Set exposing (Set)
 import Shortcut
 import SplitPane
-import String
 import String.Extra as String
 import String.Format as String
 import Task.Extra as Task
@@ -107,7 +107,6 @@ import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType(..))
-import Wizard.Api.Models.ProjectAction exposing (ProjectAction)
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
@@ -116,7 +115,6 @@ import Wizard.Api.Models.ProjectDetail.Reply exposing (Reply)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue exposing (ReplyValue(..))
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue.IntegrationReplyType exposing (IntegrationReplyType(..))
 import Wizard.Api.Models.ProjectFileSimple exposing (ProjectFileSimple)
-import Wizard.Api.Models.ProjectImporter exposing (ProjectImporter)
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Api.Models.ProjectVersion exposing (ProjectVersion)
 import Wizard.Api.Models.TypeHint exposing (TypeHint)
@@ -124,9 +122,7 @@ import Wizard.Api.Models.TypeHintLegacy exposing (TypeHintLegacy)
 import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
 import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
-import Wizard.Api.ProjectActions as ProjectActionsApi
 import Wizard.Api.ProjectFiles as ProjectFilesApi
-import Wizard.Api.ProjectImporters as ProjectsImportersApi
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (illustratedMessage, resizableTextarea)
@@ -147,7 +143,6 @@ import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.IntegrationWidgetValue exposing (IntegrationWidgetValue)
 import Wizard.Data.Integrations as Integrations
-import Wizard.Data.Session as Session
 import Wizard.Pages.Projects.Common.ProjectTodoGroup as ProjectTodoGroup
 import Wizard.Plugins.Plugin as Plugin exposing (ProjectQuestionActionConnectorType(..))
 import Wizard.Plugins.PluginElement as PluginElement
@@ -196,11 +191,8 @@ type alias Model =
     , commentsViewPrivate : Bool
     , commentDropdownStates : Dict String Dropdown.State
     , splitPane : SplitPane.State
-    , questionnaireImportersDropdown : Dropdown.State
-    , questionnaireImporters : ActionResult (List ProjectImporter)
-    , questionnaireActionsDropdown : Dropdown.State
-    , questionnaireActions : ActionResult (List ProjectAction)
-    , questionnaireActionResult : Maybe Integrations.ActionResult
+    , pluginImportersDropdown : Dropdown.State
+    , pluginActionsDropdown : Dropdown.State
     , collapsedItems : Set String
     , recentlyCopied : Bool
     , contentScrollTop : Maybe Int
@@ -282,11 +274,8 @@ init appState questionnaire mbPath mbCommentThreadUuid =
             , commentsViewPrivate = False
             , commentDropdownStates = Dict.empty
             , splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.1, 0.7 )))
-            , questionnaireImportersDropdown = Dropdown.initialState
-            , questionnaireImporters = ActionResult.Unset
-            , questionnaireActionsDropdown = Dropdown.initialState
-            , questionnaireActions = ActionResult.Unset
-            , questionnaireActionResult = Nothing
+            , pluginImportersDropdown = Dropdown.initialState
+            , pluginActionsDropdown = Dropdown.initialState
             , collapsedItems = Set.empty
             , recentlyCopied = False
             , contentScrollTop = Nothing
@@ -711,9 +700,6 @@ type Msg
     | SplitPaneMsg SplitPane.Msg
     | ImportersDropdownMsg Dropdown.State
     | ActionsDropdownMsg Dropdown.State
-    | GotActionResult (Result D.Error Integrations.ActionResult)
-    | CloseActionResult
-    | OpenAction ProjectAction
     | CollapseItem String
     | ExpandItem String
     | CollapseItems (List String)
@@ -722,8 +708,6 @@ type Msg
     | CopyLinkToQuestion (List String)
     | ClearRecentlyCopied
     | GetCommentThreadsCompleted String (Result ApiError (Dict String (List CommentThread)))
-    | GetQuestionnaireImportersComplete (Result ApiError (List ProjectImporter))
-    | GetQuestionnaireActionsComplete (Result ApiError (List ProjectAction))
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
     | LinkedItemsDropdownMsg String Dropdown.State
     | SearchPanelMsg SearchPanel.Msg
@@ -769,7 +753,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.Search ->
                             showRightPanel
-                                (Feature.projectSearch appState model.questionnaire)
+                                (Feature.projectSearch model.questionnaire)
                                 RightPanel.Search
 
                         RightPanel.TODOs ->
@@ -1319,73 +1303,10 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
             wrap { model | splitPane = SplitPane.update splitPaneMsg model.splitPane }
 
         ImportersDropdownMsg state ->
-            let
-                ( questionnaireImporters, cmd ) =
-                    if ActionResult.isUnset model.questionnaireImporters then
-                        ( Loading
-                        , ProjectsImportersApi.getListFor appState model.uuid GetQuestionnaireImportersComplete
-                        )
-
-                    else
-                        ( model.questionnaireImporters, Cmd.none )
-            in
-            withSeed
-                ( { model
-                    | questionnaireImportersDropdown = state
-                    , questionnaireImporters = questionnaireImporters
-                  }
-                , cmd
-                )
+            wrap { model | pluginImportersDropdown = state }
 
         ActionsDropdownMsg state ->
-            let
-                ( questionnaireActions, cmd ) =
-                    if ActionResult.isUnset model.questionnaireActions then
-                        ( Loading
-                        , ProjectActionsApi.getListFor appState model.uuid GetQuestionnaireActionsComplete
-                        )
-
-                    else
-                        ( model.questionnaireActions, Cmd.none )
-            in
-            withSeed
-                ( { model
-                    | questionnaireActionsDropdown = state
-                    , questionnaireActions = questionnaireActions
-                  }
-                , cmd
-                )
-
-        GotActionResult result ->
-            case result of
-                Ok actionResult ->
-                    wrap { model | questionnaireActionResult = Just actionResult }
-
-                Err err ->
-                    wrap
-                        { model
-                            | questionnaireActionResult =
-                                Just
-                                    { success = False
-                                    , message = "```\n" ++ D.errorToString err ++ "\n```"
-                                    }
-                        }
-
-        CloseActionResult ->
-            wrap { model | questionnaireActionResult = Nothing }
-
-        OpenAction questionnaireAction ->
-            withSeed
-                ( model
-                , Integrations.openAction
-                    { url = questionnaireAction.url
-                    , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
-                    , data =
-                        { projectUuid = model.uuid
-                        , userToken = String.toMaybe appState.session.token.token
-                        }
-                    }
-                )
+            wrap { model | pluginActionsDropdown = state }
 
         CollapseItem path ->
             updateCollapsedItems <|
@@ -1501,30 +1422,6 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                 Err _ ->
                     wrap { model | commentThreadsMap = Dict.insert path (Error (gettext "Unable to get comments." appState.locale)) model.commentThreadsMap }
-
-        GetQuestionnaireActionsComplete result ->
-            wrap
-                { model
-                    | questionnaireActions =
-                        case result of
-                            Ok actions ->
-                                Success actions
-
-                            Err error ->
-                                ApiError.toActionResult appState (gettext "Unable to get project actions." appState.locale) error
-                }
-
-        GetQuestionnaireImportersComplete result ->
-            wrap
-                { model
-                    | questionnaireImporters =
-                        case result of
-                            Ok importers ->
-                                Success importers
-
-                            Err error ->
-                                ApiError.toActionResult appState (gettext "Unable to get project importers." appState.locale) error
-                }
 
         UserSuggestionDropdownMsg uuid threadUuid editorNote userSuggestionDropdownMsg ->
             let
@@ -1919,7 +1816,7 @@ loadTypeHints appState ctx model path questionUuidStr value =
 loadTypeHintsLegacy : AppState -> Context -> Model -> List String -> String -> String -> Cmd Msg
 loadTypeHintsLegacy appState ctx model path questionUuid value =
     TypeHintsApi.fetchTypeHintsLegacy appState
-        (Just model.questionnaire.knowledgeModelPackageId)
+        (Just model.questionnaire.knowledgeModelPackage.uuid)
         ctx.events
         questionUuid
         value
@@ -1968,9 +1865,8 @@ subscriptions model =
     in
     Sub.batch
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
-         , Dropdown.subscriptions model.questionnaireImportersDropdown ImportersDropdownMsg
-         , Dropdown.subscriptions model.questionnaireActionsDropdown ActionsDropdownMsg
-         , Integrations.actionSub GotActionResult
+         , Dropdown.subscriptions model.pluginImportersDropdown ImportersDropdownMsg
+         , Dropdown.subscriptions model.pluginActionsDropdown ActionsDropdownMsg
          , Integrations.integrationWidgetSub GotIntegrationWidgetValue
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
@@ -2022,7 +1918,6 @@ view appState cfg ctx model =
                 model.splitPane
             , viewQuestionnaireRightPanel appState cfg model
             ]
-        , Html.map cfg.wrapMsg <| viewActionResultModal appState model
         , Html.map cfg.wrapMsg <| viewPhaseModal appState model
         , Html.map (cfg.wrapMsg << FeedbackModalMsg) <| FeedbackModal.view appState model.feedbackModalModel
         , Html.map (cfg.wrapMsg << FileUploadModalMsg) <| FileUploadModal.view appState cfg.isKmEditor model.fileUploadModalModel
@@ -2107,7 +2002,7 @@ viewQuestionnaireToolbar appState cfg model =
 
         importerPlugins =
             AppState.getPluginsByConnector appState .projectImporters
-                |> Plugin.filterByKmPatterns model.questionnaire.knowledgeModelPackageId
+                |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage)
                 |> List.sortBy (.name << Tuple.second)
                 |> List.map pluginImporter
 
@@ -2116,46 +2011,27 @@ viewQuestionnaireToolbar appState cfg model =
                 (class "dropdown-item" :: linkToAttributes (Routes.projectsImport model.uuid connector.url))
                 [ text connector.name ]
 
-        importers =
-            if importersAvailable appState cfg model then
-                ActionResultBlock.dropdownView
-                    { viewContent = importerDropdownItem
-                    , actionResult = model.questionnaireImporters
-                    , locale = appState.locale
-                    }
-
-            else
-                []
-
-        importerItems =
-            importerPlugins ++ importers
-
         importersDropdown =
-            if List.isEmpty importerItems then
+            if List.isEmpty importerPlugins then
                 Html.nothing
 
             else
                 div [ class "item-group" ]
-                    [ Dropdown.dropdown model.questionnaireImportersDropdown
+                    [ Dropdown.dropdown model.pluginImportersDropdown
                         { options = []
                         , toggleMsg = ImportersDropdownMsg
                         , toggleButton =
                             Dropdown.toggle [ Button.roleLink, Button.attrs [ class "item" ] ]
                                 [ text (gettext "Import" appState.locale) ]
-                        , items = importerItems
+                        , items = importerPlugins
                         }
                     ]
-
-        importerDropdownItem importer =
-            Dropdown.anchorItem
-                (class "dropdown-item" :: linkToAttributes (Routes.projectsImportLegacy model.uuid importer.id))
-                [ text importer.name ]
 
         projectActionPlugins =
             case cfg.projectCommon of
                 Just projectCommon ->
                     AppState.getPluginsByConnector appState .projectActions
-                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage)
                         |> List.sortBy (.name << Tuple.second)
                         |> List.map (pluginAction projectCommon)
 
@@ -2177,27 +2053,13 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
                 [ text plugin.name ]
 
-        projectActions =
-            if actionsAvailable appState cfg model then
-                ActionResultBlock.dropdownView
-                    { viewContent = actionDropdownItem
-                    , actionResult = model.questionnaireActions
-                    , locale = appState.locale
-                    }
-
-            else
-                []
-
-        actionsItems =
-            projectActionPlugins ++ projectActions
-
         actionsDropdown =
-            if List.isEmpty actionsItems then
+            if List.isEmpty projectActionPlugins then
                 Html.nothing
 
             else
                 div [ class "item-group" ]
-                    [ Dropdown.dropdown model.questionnaireActionsDropdown
+                    [ Dropdown.dropdown model.pluginActionsDropdown
                         { options = []
                         , toggleMsg = ActionsDropdownMsg
                         , toggleButton =
@@ -2205,14 +2067,9 @@ viewQuestionnaireToolbar appState cfg model =
                                 [ span [ class "icon" ] []
                                 , text (gettext "Actions" appState.locale)
                                 ]
-                        , items = actionsItems
+                        , items = projectActionPlugins
                         }
                     ]
-
-        actionDropdownItem action =
-            Dropdown.anchorItem
-                [ class "dropdown-item", onClick (OpenAction action) ]
-                [ text action.name ]
 
         navButton buttonElement visibleCondition =
             if visibleCondition then
@@ -2265,7 +2122,7 @@ viewQuestionnaireToolbar appState cfg model =
                     ( RightPanel.Warnings, False )
 
         searchButtonVisible =
-            Feature.projectSearch appState model.questionnaire
+            Feature.projectSearch model.questionnaire
 
         searchButton =
             div [ class "item-group" ]
@@ -2371,43 +2228,6 @@ viewQuestionnaireToolbar appState cfg model =
                 ]
             ]
         ]
-
-
-viewActionResultModal : AppState -> Model -> Html Msg
-viewActionResultModal appState model =
-    let
-        modalTitle actionResult =
-            if actionResult.success then
-                [ span [ class "text-success me-2" ] [ faSuccess ]
-                , text (gettext "Action succeeded!" appState.locale)
-                ]
-
-            else
-                [ span [ class "text-danger me-2" ] [ faError ]
-                , text (gettext "Action failed!" appState.locale)
-                ]
-
-        modalBody =
-            Maybe.unwrap [] (List.singleton << Markdown.toHtml [] << .message) model.questionnaireActionResult
-
-        modalContent =
-            [ div [ class "modal-header" ]
-                [ h5 [ class "modal-title" ] (Maybe.unwrap [] modalTitle model.questionnaireActionResult)
-                ]
-            , div [ class "modal-body" ] modalBody
-            , div [ class "modal-footer" ]
-                [ button [ class "btn btn-primary", onClick CloseActionResult ]
-                    [ text (gettext "OK" appState.locale) ]
-                ]
-            ]
-    in
-    Modal.simple
-        { modalContent = modalContent
-        , visible = Maybe.isJust model.questionnaireActionResult
-        , enterMsg = Just CloseActionResult
-        , escMsg = Just CloseActionResult
-        , dataCy = "questionnaire-action-result"
-        }
 
 
 
@@ -2608,7 +2428,7 @@ viewQuestionnaireRightPanel appState cfg model =
                     , wrapMsg = cfg.wrapMsg << SearchPanelMsg
                     }
             in
-            Html.viewIf (Feature.projectSearch appState model.questionnaire) <|
+            Html.viewIf (Feature.projectSearch model.questionnaire) <|
                 wrapPanel [ SearchPanel.view appState viewConfig model.searchPanelModel ]
 
         RightPanel.TODOs ->
@@ -3626,7 +3446,7 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                         ( "question-hidden", Default )
 
         viewLabel =
-            viewQuestionLabel appState cfg ctx model newPath newHumanIdentifiers question questionState
+            viewQuestionLabel appState cfg model newPath newHumanIdentifiers question questionState
 
         viewTags =
             if model.viewSettings.tags then
@@ -3692,8 +3512,8 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
         content
 
 
-viewQuestionLabel : AppState -> Config msg -> Context -> Model -> List String -> List String -> Question -> QuestionViewState -> Html Msg
-viewQuestionLabel appState cfg _ model path humanIdentifiers question questionState =
+viewQuestionLabel : AppState -> Config msg -> Model -> List String -> List String -> Question -> QuestionViewState -> Html Msg
+viewQuestionLabel appState cfg model path humanIdentifiers question questionState =
     let
         ( icon, tooltipText ) =
             case questionState of
@@ -4826,7 +4646,7 @@ viewFeedbackAction appState cfg model question =
     if feedbackEnabled then
         let
             openFeedbackModal =
-                FeedbackModalMsg (FeedbackModal.OpenFeedback model.questionnaire.knowledgeModelPackageId (Question.getUuid question))
+                FeedbackModalMsg (FeedbackModal.OpenFeedback (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage) (Question.getUuid question))
         in
         a
             (class "action"
@@ -4847,7 +4667,7 @@ viewPluginQuestionActions appState cfg model question path =
             let
                 plugins =
                     AppState.getPluginsByConnector appState .projectQuestionActions
-                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId model.questionnaire.knowledgeModelPackage)
                         |> List.sortBy (.name << .action << Tuple.second)
 
                 viewPluginButton ( plugin, connector ) =
@@ -5037,19 +4857,3 @@ createReply appState value =
     , createdAt = appState.currentTime
     , createdBy = Maybe.map UserConfig.toUserSuggestion appState.config.user
     }
-
-
-actionsAvailable : AppState -> Config a -> Model -> Bool
-actionsAvailable appState cfg model =
-    Session.exists appState.session
-        && not cfg.features.readonly
-        && model.questionnaire.projectActionsAvailable
-        > 0
-
-
-importersAvailable : AppState -> Config a -> Model -> Bool
-importersAvailable appState cfg model =
-    Session.exists appState.session
-        && not cfg.features.readonly
-        && model.questionnaire.projectImportersAvailable
-        > 0

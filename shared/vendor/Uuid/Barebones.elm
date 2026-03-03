@@ -16,7 +16,6 @@ import Char
 import List
 import Random exposing (Generator, Seed, int, list, map, step)
 import Regex
-import String
 
 
 {-| Random Generator for Uuid Strings. Using this Generator instead of the generate

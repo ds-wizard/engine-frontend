@@ -13,13 +13,12 @@ import Wizard.Pages.Projects.Detail.ProjectDetailRoute exposing (ProjectDetailRo
 
 
 type Route
-    = CreateRoute (Maybe Uuid) (Maybe String)
+    = CreateRoute (Maybe Uuid) (Maybe Uuid)
     | CreateMigrationRoute Uuid
     | DetailRoute Uuid ProjectDetailRoute
     | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator)
     | MigrationRoute Uuid
     | ImportRoute Uuid String
-    | ImportLegacyRoute Uuid String
     | DocumentDownloadRoute Uuid Uuid
     | FileDownloadRoute Uuid Uuid
 

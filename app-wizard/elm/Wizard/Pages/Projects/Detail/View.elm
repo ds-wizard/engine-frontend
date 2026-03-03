@@ -10,6 +10,7 @@ import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, div, p, text)
@@ -332,7 +333,7 @@ viewProjectNavigationNav appState route model projectCommon =
             , label = gettext "Preview" appState.locale
             , icon = faPreview
             , isActive = route == ProjectDetailRoute.Preview
-            , isVisible = Features.projectPreview appState
+            , isVisible = Features.projectPreview
             , dataCy = "project_nav_preview"
             }
 
@@ -341,7 +342,7 @@ viewProjectNavigationNav appState route model projectCommon =
             , label = gettext "Documents" appState.locale
             , icon = faProjectDocuments
             , isActive = isDocumentRoute
-            , isVisible = Features.projectDocumentsView appState
+            , isVisible = Features.projectDocumentsView
             , dataCy = "project_nav_documents"
             }
 
@@ -387,7 +388,7 @@ viewProjectNavigationNav appState route model projectCommon =
 
         pluginLinks =
             AppState.getPluginsByConnector appState .projectTabs
-                |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId projectCommon.knowledgeModelPackage)
                 |> List.sortBy (.name << .tab << Tuple.second)
                 |> List.map pluginLink
 
@@ -510,7 +511,7 @@ viewProjectContent appState route model projectCommon =
             let
                 mbPluginData =
                     AppState.getPluginsByConnector appState .projectTabs
-                        |> Plugin.filterByKmPatterns projectCommon.knowledgeModelPackageId
+                        |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId projectCommon.knowledgeModelPackage)
                         |> List.find (\( _, connector ) -> connector.url == pluginId)
             in
             case mbPluginData of

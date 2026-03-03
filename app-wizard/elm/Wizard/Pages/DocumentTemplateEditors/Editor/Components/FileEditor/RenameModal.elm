@@ -76,7 +76,7 @@ openFolder path =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , logoutMsg : msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , selectedFolderPath : String
     , fileContents : Dict String (ActionResult String)
     , onRenameFile : Uuid -> String -> msg
@@ -132,7 +132,7 @@ update cfg appState msg model =
                                 { file | fileName = fileName }
 
                             cmd =
-                                DocumentTemplateDraftsApi.putFile appState cfg.documentTemplateId templateFile fileContent (cfg.wrapMsg << RenameCompleted fileName)
+                                DocumentTemplateDraftsApi.putFile appState cfg.documentTemplateUuid templateFile fileContent (cfg.wrapMsg << RenameCompleted fileName)
                         in
                         ( { model | renaming = ActionResult.Loading }
                         , cmd
@@ -147,7 +147,7 @@ update cfg appState msg model =
                                 { asset | fileName = assetName }
 
                             cmd =
-                                DocumentTemplateDraftsApi.putAsset appState cfg.documentTemplateId templateAsset (cfg.wrapMsg << RenameCompleted assetName)
+                                DocumentTemplateDraftsApi.putAsset appState cfg.documentTemplateUuid templateAsset (cfg.wrapMsg << RenameCompleted assetName)
                         in
                         ( { model | renaming = ActionResult.Loading }
                         , cmd
@@ -168,7 +168,7 @@ update cfg appState msg model =
                                 String.join "/" (newPath ++ [ model.input ])
 
                             cmd =
-                                DocumentTemplateDraftsApi.moveFolder appState cfg.documentTemplateId currentName newName (cfg.wrapMsg << RenameCompleted newName)
+                                DocumentTemplateDraftsApi.moveFolder appState cfg.documentTemplateUuid currentName newName (cfg.wrapMsg << RenameCompleted newName)
                         in
                         ( { model | renaming = ActionResult.Loading }
                         , cmd

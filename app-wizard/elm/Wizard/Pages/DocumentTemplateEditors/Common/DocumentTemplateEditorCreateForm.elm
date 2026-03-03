@@ -8,6 +8,7 @@ import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Maybe.Extra as Maybe
 import String exposing (fromInt)
+import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 
 
@@ -21,13 +22,13 @@ type alias DocumentTemplateEditorCreateForm =
     }
 
 
-init : AppState -> Maybe String -> Form FormError DocumentTemplateEditorCreateForm
+init : AppState -> Maybe Uuid -> Form FormError DocumentTemplateEditorCreateForm
 init appState mbBasedOn =
     let
         initials =
             case mbBasedOn of
                 Just basedOn ->
-                    [ ( "basedOn", Field.string basedOn ) ]
+                    [ ( "basedOn", Field.string (Uuid.toString basedOn) ) ]
 
                 Nothing ->
                     []

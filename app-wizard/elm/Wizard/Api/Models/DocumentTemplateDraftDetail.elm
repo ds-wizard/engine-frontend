@@ -12,20 +12,19 @@ import Json.Decode.Pipeline as D
 import Time
 import Uuid exposing (Uuid)
 import Version exposing (Version)
-import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAllowedPackage as DocumentTemplateAllowedPackage
+import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAllowedPackage as DocumentTemplateAllowedPackage exposing (DocumentTemplateAllowedPackage)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateDraftPreviewSettings as DocumentTemplateDraftPreviewSettings exposing (DocumentTemplateDraftPreviewSettings)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
-import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig.EditablePublicKnowledgeModelsConfig.AllowedKnowledgeModelPackage exposing (AllowedKnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
 import Wizard.Api.Models.ProjectSuggestion as ProjectSuggestion exposing (ProjectSuggestion)
 
 
 type alias DocumentTemplateDraftDetail =
-    { allowedPackages : List AllowedKnowledgeModelPackage
+    { allowedPackages : List DocumentTemplateAllowedPackage
     , createdAt : Time.Posix
     , description : String
     , formats : List DocumentTemplateFormatDraft
-    , id : String
+    , uuid : Uuid
     , license : String
     , name : String
     , readme : String
@@ -46,7 +45,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormatDraft.decoder)
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "license" D.string
         |> D.required "name" D.string
         |> D.required "readme" D.string

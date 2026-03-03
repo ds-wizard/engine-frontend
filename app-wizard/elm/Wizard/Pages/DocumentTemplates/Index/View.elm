@@ -5,6 +5,7 @@ import Common.Components.FontAwesome exposing (faKmsUpload)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, img, p, span, strong, text)
 import Html.Attributes exposing (class, src, title)
@@ -83,7 +84,7 @@ listingConfig appState =
 listingTitle : AppState -> DocumentTemplate -> Html Msg
 listingTitle appState documentTemplate =
     span []
-        [ linkTo (Routes.documentTemplatesDetail documentTemplate.id) [] [ text documentTemplate.name ]
+        [ linkTo (Routes.documentTemplatesDetail documentTemplate.uuid) [] [ text documentTemplate.name ]
         , Badge.light
             (tooltip (gettext "Latest version" appState.locale))
             [ text <| Version.toString documentTemplate.version ]
@@ -162,7 +163,7 @@ listingDescription appState documentTemplate =
                     Html.nothing
     in
     span []
-        [ code [ class "fragment" ] [ text documentTemplate.id ]
+        [ code [ class "fragment" ] [ text (DocumentTemplateUtils.getId documentTemplate) ]
         , organizationFragment
         , span [ class "fragment" ] [ text documentTemplate.description ]
         ]

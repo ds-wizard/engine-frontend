@@ -34,9 +34,7 @@ module Wizard.Routes exposing
     , isKnowledgeModelsSubroute
     , isLocalesRoute
     , isPersistentCommandsIndex
-    , isProjectActionsIndex
     , isProjectFilesIndex
-    , isProjectImportersIndex
     , isProjectSubroute
     , isProjectsDetail
     , isProjectsIndex
@@ -70,13 +68,9 @@ module Wizard.Routes exposing
     , persistentCommandsDetail
     , persistentCommandsIndex
     , persistentCommandsIndexWithFilters
-    , projectActionsIndex
-    , projectActionsIndexWithFilters
     , projectDocumentDownload
     , projectFilesIndex
     , projectFilesIndexWithFilters
-    , projectImportersIndex
-    , projectImportersIndexWithFilters
     , projectsCreate
     , projectsCreateFromKnowledgeModel
     , projectsCreateFromProjectTemplate
@@ -90,7 +84,6 @@ module Wizard.Routes exposing
     , projectsDetailSettings
     , projectsFileDownload
     , projectsImport
-    , projectsImportLegacy
     , projectsIndex
     , projectsIndexWithFilters
     , projectsMigration
@@ -142,9 +135,7 @@ import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
 import Wizard.Pages.KnowledgeModels.Routes
 import Wizard.Pages.Locales.Routes
-import Wizard.Pages.ProjectActions.Routes
 import Wizard.Pages.ProjectFiles.Routes
-import Wizard.Pages.ProjectImporters.Routes
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
 import Wizard.Pages.Projects.Routes
 import Wizard.Pages.Public.Routes
@@ -167,9 +158,7 @@ type Route
     | KnowledgeModelsRoute Wizard.Pages.KnowledgeModels.Routes.Route
     | LocalesRoute Wizard.Pages.Locales.Routes.Route
     | ProjectsRoute Wizard.Pages.Projects.Routes.Route
-    | ProjectActionsRoute Wizard.Pages.ProjectActions.Routes.Route
     | ProjectFilesRoute Wizard.Pages.ProjectFiles.Routes.Route
-    | ProjectImportersRoute Wizard.Pages.ProjectImporters.Routes.Route
     | PublicRoute Wizard.Pages.Public.Routes.Route
     | RegistryRoute Wizard.Pages.Registry.Routes.Route
     | SettingsRoute Wizard.Pages.Settings.Routes.Route
@@ -228,7 +217,6 @@ listingRouteMatchers =
     , isLocalesIndex
     , isPersistentCommandsIndex
     , isProjectFilesIndex
-    , isProjectImportersIndex
     , isProjectsIndex
     , isUsersIndex
     ]
@@ -328,7 +316,7 @@ isDocumentsIndex route =
 -- Document Templates
 
 
-documentTemplatesDetail : String -> Route
+documentTemplatesDetail : Uuid -> Route
 documentTemplatesDetail =
     DocumentTemplatesRoute << Wizard.Pages.DocumentTemplates.Routes.DetailRoute
 
@@ -375,27 +363,27 @@ isDocumentTemplatesSubroute route =
 -- Document Template Editors
 
 
-documentTemplateEditorCreate : Maybe String -> Maybe Bool -> Route
+documentTemplateEditorCreate : Maybe Uuid -> Maybe Bool -> Route
 documentTemplateEditorCreate mbBasedOn mbEdit =
     DocumentTemplateEditorsRoute <| Wizard.Pages.DocumentTemplateEditors.Routes.CreateRoute mbBasedOn mbEdit
 
 
-documentTemplateEditorDetail : String -> Route
+documentTemplateEditorDetail : Uuid -> Route
 documentTemplateEditorDetail =
     documentTemplateEditorDetailFiles
 
 
-documentTemplateEditorDetailFiles : String -> Route
+documentTemplateEditorDetailFiles : Uuid -> Route
 documentTemplateEditorDetailFiles =
     DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Files
 
 
-documentTemplateEditorDetailPreview : String -> Route
+documentTemplateEditorDetailPreview : Uuid -> Route
 documentTemplateEditorDetailPreview =
     DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Preview
 
 
-documentTemplateEditorDetailSettings : String -> Route
+documentTemplateEditorDetailSettings : Uuid -> Route
 documentTemplateEditorDetailSettings =
     DocumentTemplateEditorsRoute << flip Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute.Settings
 
@@ -420,11 +408,11 @@ isDocumentTemplateEditorsIndex route =
             False
 
 
-isDocumentTemplateEditor : String -> Route -> Bool
-isDocumentTemplateEditor id route =
+isDocumentTemplateEditor : Uuid -> Route -> Bool
+isDocumentTemplateEditor uuid route =
     case route of
-        DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute documentTemplateId _) ->
-            id == documentTemplateId
+        DocumentTemplateEditorsRoute (Wizard.Pages.DocumentTemplateEditors.Routes.EditorRoute documentTemplateUuid _) ->
+            uuid == documentTemplateUuid
 
         _ ->
             False
@@ -434,9 +422,9 @@ isDocumentTemplateEditor id route =
 -- KM Editor
 
 
-kmEditorCreate : Maybe String -> Maybe Bool -> Route
-kmEditorCreate mbKmId mbEdit =
-    KMEditorRoute <| Wizard.Pages.KMEditor.Routes.CreateRoute mbKmId mbEdit
+kmEditorCreate : Maybe Uuid -> Maybe Bool -> Route
+kmEditorCreate mbKmUuid mbEdit =
+    KMEditorRoute <| Wizard.Pages.KMEditor.Routes.CreateRoute mbKmUuid mbEdit
 
 
 kmEditorEditor : Uuid -> Maybe Uuid -> Route
@@ -508,7 +496,7 @@ kmEditorPublish =
 -- Knowledge Models
 
 
-knowledgeModelsDetail : String -> Route
+knowledgeModelsDetail : Uuid -> Route
 knowledgeModelsDetail =
     KnowledgeModelsRoute << Wizard.Pages.KnowledgeModels.Routes.DetailRoute
 
@@ -538,14 +526,14 @@ isKnowledgeModelsIndex route =
             False
 
 
-knowledgeModelsPreview : String -> Maybe String -> Route
-knowledgeModelsPreview kmPackageId mbQuestionUuid =
-    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute kmPackageId mbQuestionUuid
+knowledgeModelsPreview : Uuid -> Maybe String -> Route
+knowledgeModelsPreview kmUuid mbQuestionUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.PreviewRoute kmUuid mbQuestionUuid
 
 
-knowledgeModelsResourcePage : String -> String -> Route
-knowledgeModelsResourcePage kmId resourcePageUuid =
-    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.ResourcePageRoute kmId resourcePageUuid
+knowledgeModelsResourcePage : Uuid -> String -> Route
+knowledgeModelsResourcePage kmUuid resourcePageUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.ResourcePageRoute kmUuid resourcePageUuid
 
 
 isKnowledgeModelsSubroute : Route -> Bool
@@ -584,30 +572,6 @@ isKnowledgeModelSecrets route =
 
 
 
--- Project Actions
-
-
-projectActionsIndex : Route
-projectActionsIndex =
-    ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute PaginationQueryString.empty)
-
-
-projectActionsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
-projectActionsIndexWithFilters _ pagination =
-    ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute pagination)
-
-
-isProjectActionsIndex : Route -> Bool
-isProjectActionsIndex route =
-    case route of
-        ProjectActionsRoute (Wizard.Pages.ProjectActions.Routes.IndexRoute _) ->
-            True
-
-        _ ->
-            False
-
-
-
 -- Project Files
 
 
@@ -632,30 +596,6 @@ isProjectFilesIndex route =
 
 
 
--- Project Importers
-
-
-projectImportersIndex : Route
-projectImportersIndex =
-    ProjectImportersRoute (Wizard.Pages.ProjectImporters.Routes.IndexRoute PaginationQueryString.empty)
-
-
-projectImportersIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
-projectImportersIndexWithFilters _ pagination =
-    ProjectImportersRoute (Wizard.Pages.ProjectImporters.Routes.IndexRoute pagination)
-
-
-isProjectImportersIndex : Route -> Bool
-isProjectImportersIndex route =
-    case route of
-        ProjectImportersRoute (Wizard.Pages.ProjectImporters.Routes.IndexRoute _) ->
-            True
-
-        _ ->
-            False
-
-
-
 -- Projects
 
 
@@ -664,7 +604,7 @@ projectsCreate =
     ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute Nothing Nothing
 
 
-projectsCreateFromKnowledgeModel : String -> Route
+projectsCreateFromKnowledgeModel : Uuid -> Route
 projectsCreateFromKnowledgeModel selectedKnowledgeModel =
     ProjectsRoute <| Wizard.Pages.Projects.Routes.CreateRoute Nothing (Just selectedKnowledgeModel)
 
@@ -776,22 +716,11 @@ projectsImport uuid importerUrl =
     ProjectsRoute <| Wizard.Pages.Projects.Routes.ImportRoute uuid importerUrl
 
 
-projectsImportLegacy : Uuid -> String -> Route
-projectsImportLegacy uuid importerId =
-    ProjectsRoute <| Wizard.Pages.Projects.Routes.ImportLegacyRoute uuid importerId
-
-
 isProjectSubroute : Route -> Bool
 isProjectSubroute route =
     isDocumentsIndex route
         || (case route of
                 ProjectsRoute _ ->
-                    True
-
-                ProjectActionsRoute _ ->
-                    True
-
-                ProjectImportersRoute _ ->
                     True
 
                 ProjectFilesRoute _ ->

@@ -6,7 +6,6 @@ import Common.Components.FormGroup as FormGroup
 import Common.Components.Page as Page
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.HttpMethod as HttpMethod
-import Common.Utils.IdentifierUtils as IdentifierUtils
 import Common.Utils.Markdown as Markdown
 import Form exposing (Form)
 import Form.Input as Input
@@ -18,7 +17,7 @@ import Html.Extra as Html
 import List.Extra as List
 import Uuid
 import Version
-import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.DocumentTemplateAllSuggestion as DocumentTemplateAllSuggestion exposing (DocumentTemplateAllSuggestion)
 import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs
@@ -33,12 +32,12 @@ view appState model =
     Page.actionResultView appState (viewConfig appState model) model.templates
 
 
-viewConfig : AppState -> Model -> List DocumentTemplateSuggestion -> Html Msg
+viewConfig : AppState -> Model -> List DocumentTemplateAllSuggestion -> Html Msg
 viewConfig appState model templates =
     GenericView.view (viewProps templates) appState model.genericModel
 
 
-viewProps : List DocumentTemplateSuggestion -> GenericView.ViewProps EditableSubmissionConfig Msg
+viewProps : List DocumentTemplateAllSuggestion -> GenericView.ViewProps EditableSubmissionConfig Msg
 viewProps templates =
     { locTitle = gettext "Document Submission"
     , locSave = gettext "Save"
@@ -48,7 +47,7 @@ viewProps templates =
     }
 
 
-formView : List DocumentTemplateSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Msg
+formView : List DocumentTemplateAllSuggestion -> AppState -> Form FormError EditableSubmissionConfig -> Html Msg
 formView templates appState form =
     let
         enabled =
@@ -69,7 +68,7 @@ formView templates appState form =
             ]
 
 
-serviceFormView : AppState -> List DocumentTemplateSuggestion -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+serviceFormView : AppState -> List DocumentTemplateAllSuggestion -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 serviceFormView appState templates form i =
     let
         field name =
@@ -122,23 +121,20 @@ serviceFormView appState templates form i =
         ]
 
 
-supportedFormatFormView : AppState -> List DocumentTemplateSuggestion -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
+supportedFormatFormView : AppState -> List DocumentTemplateAllSuggestion -> String -> Form FormError EditableSubmissionConfig -> Int -> Html Form.Msg
 supportedFormatFormView appState templates prefix form index =
     let
         field name =
             prefix ++ "." ++ String.fromInt index ++ "." ++ name
 
-        templateField =
-            Form.getFieldAsString (field "template") form
-
-        templateIdField =
-            Form.getFieldAsString (field "templateId") form
+        templateUuidField =
+            Form.getFieldAsString (field "templateUuid") form
 
         formatUuidField =
             Form.getFieldAsString (field "formatUuid") form
 
         ( templateIdError, templateIdErrorClass ) =
-            FormGroup.getErrors appState.locale templateIdField (gettext "Document Template" appState.locale)
+            FormGroup.getErrors appState.locale templateUuidField (gettext "Document Template" appState.locale)
 
         ( formatUuidError, formatUuidErrorClass ) =
             FormGroup.getErrors appState.locale formatUuidField (gettext "Format" appState.locale)
@@ -146,30 +142,23 @@ supportedFormatFormView appState templates prefix form index =
         defaultOption =
             ( "", "--" )
 
-        templateOptions =
-            DocumentTemplateSuggestion.createOptions templates
+        createTemplateOption template =
+            ( Uuid.toString template.uuid, template.name ++ " (" ++ Version.toString template.version ++ ")" )
 
-        templateToTemplateVersionOptions template =
+        templateOptions =
             templates
-                |> List.filter (.id >> IdentifierUtils.getOrganizationAndItemId >> (==) template)
-                |> List.sortWith (\a b -> Version.compare b.version a.version)
-                |> List.map (\t -> ( t.id, Version.toString t.version ))
+                |> List.sortWith DocumentTemplateAllSuggestion.compare
+                |> List.map createTemplateOption
                 |> (::) defaultOption
 
-        templateVersionOptions =
-            templateField.value
-                |> Maybe.map templateToTemplateVersionOptions
-                |> Maybe.withDefault []
-
         formatOptions =
-            templateIdField.value
-                |> Maybe.andThen (\uuid -> List.find (.id >> (==) uuid) templates)
+            templateUuidField.value
+                |> Maybe.andThen (\uuid -> List.find ((==) uuid << Uuid.toString << .uuid) templates)
                 |> Maybe.map (.formats >> List.map (\f -> ( Uuid.toString f.uuid, f.name )) >> (::) defaultOption)
                 |> Maybe.withDefault []
     in
     div [ class "input-group mb-2" ]
-        [ Input.selectInput templateOptions templateField [ class "form-select", class templateIdErrorClass ]
-        , Input.selectInput templateVersionOptions templateIdField [ class "form-select", class templateIdErrorClass ]
+        [ Input.selectInput templateOptions templateUuidField [ class "form-select", class templateIdErrorClass ]
         , Input.selectInput formatOptions formatUuidField [ class "form-select", class formatUuidErrorClass ]
         , button [ class "btn btn-link text-danger", onClick (Form.RemoveItem prefix index), type_ "button" ]
             [ faDelete ]

@@ -3,7 +3,6 @@ module Wizard.Pages.Projects.Subscriptions exposing (subscriptions)
 import Wizard.Pages.Projects.Create.Subscriptions
 import Wizard.Pages.Projects.CreateMigration.Subscriptions
 import Wizard.Pages.Projects.Detail.Subscriptions
-import Wizard.Pages.Projects.ImportLegacy.Subscriptions
 import Wizard.Pages.Projects.Index.Subscriptions
 import Wizard.Pages.Projects.Migration.Subscriptions
 import Wizard.Pages.Projects.Models exposing (Model)
@@ -31,9 +30,6 @@ subscriptions route model =
 
         MigrationRoute _ ->
             Sub.map MigrationMsg <| Wizard.Pages.Projects.Migration.Subscriptions.subscriptions model.migrationModel
-
-        ImportLegacyRoute _ _ ->
-            Sub.map ImportLegacyMsg <| Wizard.Pages.Projects.ImportLegacy.Subscriptions.subscriptions model.importLegacyModel
 
         _ ->
             Sub.none

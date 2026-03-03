@@ -178,16 +178,16 @@ handleForm wrapMsg formMsg appState model =
                 newModel =
                     { model | form = Form.update ProjectMigrationCreateForm.validation formMsg model.form }
             in
-            case getSelectedPackageId newModel of
-                Just kmPackageId ->
-                    if needFetchKnowledgeModelPreview model kmPackageId then
+            case getSelectedPackageUuid newModel of
+                Just kmPackageUuid ->
+                    if needFetchKnowledgeModelPreview model kmPackageUuid then
                         ( { newModel
-                            | lastFetchedPreview = Just kmPackageId
+                            | lastFetchedPreview = Just kmPackageUuid
                             , knowledgeModelPreview = Loading
                             , selectedTags = []
                           }
                         , Cmd.map wrapMsg <|
-                            KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] GetKnowledgeModelPreviewCompleted
+                            KnowledgeModelsApi.fetchPreview appState (Just kmPackageUuid) [] [] GetKnowledgeModelPreviewCompleted
                         )
 
                     else
@@ -201,11 +201,11 @@ handleSelectPackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Knowledge
 handleSelectPackage wrapMsg appState model kmPackage =
     let
         formMsg =
-            Form.Input "knowledgeModelPackageId" Form.Select Field.EmptyField
+            Form.Input "knowledgeModelPackageUuid" Form.Select Field.EmptyField
 
         getSelectedPackageCmd =
             Cmd.map wrapMsg <|
-                KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackage.id GetSelectedKnowledgeModelPackageCompleted
+                KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState kmPackage.uuid GetSelectedKnowledgeModelPackageCompleted
     in
     ( { model
         | selectedPackage = Just kmPackage
@@ -276,7 +276,7 @@ loadCurrentPackage appState wrapMsg ( model, cmd ) =
             let
                 getCurrentPackageCmd =
                     Cmd.map wrapMsg <|
-                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState project.knowledgeModelPackage.id GetCurrentKnowledgeModelPackageCompleted
+                        KnowledgeModelPackagesApi.getKnowledgeModelPackageWithoutDeprecatedVersions appState project.knowledgeModelPackage.uuid GetCurrentKnowledgeModelPackageCompleted
             in
             ( model, Cmd.batch [ cmd, getCurrentPackageCmd ] )
 
@@ -289,15 +289,15 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
     case model.selectedPackageDetail of
         Success kmPackage ->
             let
-                mbLatestPackageId =
-                    KnowledgeModelPackageDetail.getLatestPackageId kmPackage
+                mbLatestPackageUuid =
+                    KnowledgeModelPackageDetail.getLatestPackageUuid kmPackage
 
                 ( packageCmd, lastFetchedPreview ) =
-                    case mbLatestPackageId of
-                        Just latestPackageId ->
+                    case mbLatestPackageUuid of
+                        Just latestPackageUuid ->
                             ( Cmd.map wrapMsg <|
-                                KnowledgeModelsApi.fetchPreview appState (Just latestPackageId) [] [] GetKnowledgeModelPreviewCompleted
-                            , Just latestPackageId
+                                KnowledgeModelsApi.fetchPreview appState (Just latestPackageUuid) [] [] GetKnowledgeModelPreviewCompleted
+                            , Just latestPackageUuid
                             )
 
                         Nothing ->
@@ -307,7 +307,7 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
                     Maybe.unwrap
                         ProjectMigrationCreateForm.initEmpty
                         ProjectMigrationCreateForm.init
-                        mbLatestPackageId
+                        mbLatestPackageUuid
 
                 packageSuggestion =
                     KnowledgeModelPackageDetail.toPackageSuggestion kmPackage
@@ -325,11 +325,12 @@ preselectKnowledgeModel appState wrapMsg ( model, cmd ) =
             ( model, cmd )
 
 
-getSelectedPackageId : Model -> Maybe String
-getSelectedPackageId model =
-    (Form.getFieldAsString "knowledgeModelPackageId" model.form).value
+getSelectedPackageUuid : Model -> Maybe Uuid
+getSelectedPackageUuid model =
+    (Form.getFieldAsString "knowledgeModelPackageUuid" model.form).value
+        |> Maybe.andThen Uuid.fromString
 
 
-needFetchKnowledgeModelPreview : Model -> String -> Bool
-needFetchKnowledgeModelPreview model kmPackageId =
-    model.lastFetchedPreview /= Just kmPackageId
+needFetchKnowledgeModelPreview : Model -> Uuid -> Bool
+needFetchKnowledgeModelPreview model kmPackageUuid =
+    model.lastFetchedPreview /= Just kmPackageUuid

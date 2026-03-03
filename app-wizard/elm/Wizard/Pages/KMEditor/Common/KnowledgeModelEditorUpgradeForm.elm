@@ -12,7 +12,7 @@ import Json.Encode as E
 
 
 type alias KnowledgeModelEditorUpgradeForm =
-    { targetPackageId : String }
+    { targetPackageUuid : String }
 
 
 init : Form FormError KnowledgeModelEditorUpgradeForm
@@ -23,10 +23,10 @@ init =
 validation : Validation FormError KnowledgeModelEditorUpgradeForm
 validation =
     Validate.map KnowledgeModelEditorUpgradeForm
-        (Validate.field "targetPackageId" Validate.string)
+        (Validate.field "targetPackageUuid" Validate.string)
 
 
 encode : KnowledgeModelEditorUpgradeForm -> E.Value
 encode form =
     E.object
-        [ ( "targetPackageId", E.string form.targetPackageId ) ]
+        [ ( "targetPackageUuid", E.string form.targetPackageUuid ) ]

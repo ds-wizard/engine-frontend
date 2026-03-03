@@ -587,7 +587,7 @@ update wrapMsg msg appState model =
                             NewDocument.update
                                 { wrapMsg = wrapMsg << NewDocumentMsg
                                 , projectUuid = questionnaire.uuid
-                                , knowledgeModelPackageId = questionnaire.knowledgeModelPackageId
+                                , knowledgeModelPackageUuid = questionnaire.knowledgeModelPackage.uuid
                                 , documentsNavigateCmd = cmdNavigate appState <| Routes.projectsDetailDocuments questionnaire.uuid
                                 }
                                 newDocumentMsg
@@ -763,7 +763,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << SettingsMsg
                     , redirectCmd = cmdNavigate appState (Routes.projectsIndex appState)
-                    , knowledgeModelPackageId = ActionResult.unwrap "" .knowledgeModelPackageId model.questionnaireCommon
+                    , knowledgeModelPackageUuid = ActionResult.unwrap Uuid.nil (.uuid << .knowledgeModelPackage) model.questionnaireCommon
                     , projectUuid = model.uuid
                     , permissions = ActionResult.unwrap [] .permissions model.questionnaireCommon
                     }

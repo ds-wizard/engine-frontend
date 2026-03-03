@@ -4,18 +4,19 @@ import ActionResult exposing (ActionResult(..))
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Components.Listing.Models as Listing
+import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
 
 
 type alias Model =
     { packages : Listing.Model KnowledgeModelPackage
-    , kmPackageToBeDeleted : Maybe KnowledgeModelPackage
-    , deletingKmPackage : ActionResult String
+    , deleteModalModel : DeleteModal.Model
+    , updatingKmPackagePhase : ActionResult ()
     }
 
 
 initialModel : PaginationQueryString -> Model
 initialModel paginationQueryString =
     { packages = Listing.initialModel paginationQueryString
-    , kmPackageToBeDeleted = Nothing
-    , deletingKmPackage = Unset
+    , deleteModalModel = DeleteModal.initialModel True
+    , updatingKmPackagePhase = Unset
     }

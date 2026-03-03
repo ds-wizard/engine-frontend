@@ -1,6 +1,7 @@
 module Registry.Api.Models.DocumentTemplateDetail exposing
     ( DocumentTemplateDetail
     , decoder
+    , getId
     , otherVersionId
     )
 
@@ -9,11 +10,12 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Registry.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 
 
 type alias DocumentTemplateDetail =
-    { id : String
+    { uuid : Uuid
     , name : String
     , templateId : String
     , version : Version
@@ -30,7 +32,7 @@ type alias DocumentTemplateDetail =
 decoder : Decoder DocumentTemplateDetail
 decoder =
     D.succeed DocumentTemplateDetail
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "templateId" D.string
         |> D.required "version" Version.decoder
@@ -41,6 +43,11 @@ decoder =
         |> D.required "versions" (D.list Version.decoder)
         |> D.required "license" D.string
         |> D.required "createdAt" D.datetime
+
+
+getId : DocumentTemplateDetail -> String
+getId documentTemplate =
+    documentTemplate.organization.organizationId ++ ":" ++ documentTemplate.templateId ++ ":" ++ Version.toString documentTemplate.version
 
 
 otherVersionId : DocumentTemplateDetail -> Version -> String

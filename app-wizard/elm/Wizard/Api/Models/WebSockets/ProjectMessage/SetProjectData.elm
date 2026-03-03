@@ -21,7 +21,7 @@ type alias SetProjectData =
     , isTemplate : Bool
     , visibility : ProjectVisibility
     , sharing : ProjectSharing
-    , documentTemplateId : Maybe String
+    , documentTemplateUuid : Maybe Uuid
     , documentTemplate : Maybe DocumentTemplateSuggestion
     , formatUuid : Maybe Uuid
     , format : Maybe DocumentTemplateFormat
@@ -41,7 +41,7 @@ decoder =
         |> D.required "isTemplate" D.bool
         |> D.required "visibility" ProjectVisibility.decoder
         |> D.required "sharing" ProjectSharing.decoder
-        |> D.required "documentTemplateId" (D.maybe D.string)
+        |> D.required "documentTemplateUuid" (D.maybe Uuid.decoder)
         |> D.required "documentTemplate" (D.maybe DocumentTemplateSuggestion.decoder)
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)

@@ -52,6 +52,6 @@ toUrl route =
             [ moduleRoot, "persistent-commands" ++ PaginationQueryString.toUrlWith params paginationQueryString ]
 
 
-isAllowed : Route -> AppState -> Bool
-isAllowed _ appState =
-    Feature.dev appState
+isAllowed : AppState -> Bool
+isAllowed =
+    Feature.dev

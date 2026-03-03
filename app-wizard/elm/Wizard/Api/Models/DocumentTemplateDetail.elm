@@ -10,6 +10,7 @@ import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Time
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAllowedPackage as DocumentTemplateAllowedPackage exposing (DocumentTemplateAllowedPackage)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
@@ -17,6 +18,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePackage as DocumentTem
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase exposing (DocumentTemplatePhase)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Wizard.Api.Models.OrganizationInfo as OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid exposing (VersionUuid)
 
 
 type alias DocumentTemplateDetail =
@@ -24,7 +26,7 @@ type alias DocumentTemplateDetail =
     , createdAt : Time.Posix
     , description : String
     , formats : List DocumentTemplateFormat
-    , id : String
+    , uuid : Uuid
     , license : String
     , metamodelVersion : Version
     , name : String
@@ -36,9 +38,9 @@ type alias DocumentTemplateDetail =
     , remoteLatestVersion : Maybe Version
     , state : DocumentTemplateState
     , templateId : String
-    , usableKnowledgeModelPackages : List DocumentTemplatePackage
+    , usableKnowledgeModels : List DocumentTemplatePackage
     , version : Version
-    , versions : List Version
+    , versions : List VersionUuid
     , nonEditable : Bool
     }
 
@@ -50,7 +52,7 @@ decoder =
         |> D.required "createdAt" D.datetime
         |> D.required "description" D.string
         |> D.required "formats" (D.list DocumentTemplateFormat.decoder)
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "license" D.string
         |> D.required "metamodelVersion" Version.decoder
         |> D.required "name" D.string
@@ -64,7 +66,7 @@ decoder =
         |> D.required "templateId" D.string
         |> D.required "usableKnowledgeModels" (D.list DocumentTemplatePackage.decoder)
         |> D.required "version" Version.decoder
-        |> D.required "versions" (D.list Version.decoder)
+        |> D.required "versions" (D.list VersionUuid.decoder)
         |> D.required "nonEditable" D.bool
 
 
@@ -76,4 +78,6 @@ encode documentTemplate =
 
 isLatestVersion : DocumentTemplateDetail -> Bool
 isLatestVersion documentTemplate =
-    List.isEmpty <| List.filter (Version.greaterThan documentTemplate.version) documentTemplate.versions
+    documentTemplate.versions
+        |> List.any (Version.greaterThan documentTemplate.version << .version)
+        |> not

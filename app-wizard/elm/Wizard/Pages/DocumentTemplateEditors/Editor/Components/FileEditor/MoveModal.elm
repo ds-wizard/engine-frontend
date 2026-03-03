@@ -78,7 +78,7 @@ openFolder path =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , logoutMsg : msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , fileContents : Dict String (ActionResult String)
     , onRenameFile : Uuid -> String -> msg
     , onRenameAsset : Uuid -> String -> msg
@@ -129,7 +129,7 @@ update cfg appState msg model =
                                     { file | fileName = fileName }
 
                                 cmd =
-                                    DocumentTemplateDraftsApi.putFile appState cfg.documentTemplateId templateFile fileContent (cfg.wrapMsg << MoveCompleted fileName)
+                                    DocumentTemplateDraftsApi.putFile appState cfg.documentTemplateUuid templateFile fileContent (cfg.wrapMsg << MoveCompleted fileName)
                             in
                             ( { model | moving = ActionResult.Loading }, cmd )
 
@@ -142,7 +142,7 @@ update cfg appState msg model =
                                     { asset | fileName = assetName }
 
                                 cmd =
-                                    DocumentTemplateDraftsApi.putAsset appState cfg.documentTemplateId templateAsset (cfg.wrapMsg << MoveCompleted assetName)
+                                    DocumentTemplateDraftsApi.putAsset appState cfg.documentTemplateUuid templateAsset (cfg.wrapMsg << MoveCompleted assetName)
                             in
                             ( { model | moving = ActionResult.Loading }, cmd )
 
@@ -152,7 +152,7 @@ update cfg appState msg model =
                                     String.join "/" (parts ++ [ getNameFromPath currentPath ])
 
                                 cmd =
-                                    DocumentTemplateDraftsApi.moveFolder appState cfg.documentTemplateId currentPath newPath (cfg.wrapMsg << MoveCompleted newPath)
+                                    DocumentTemplateDraftsApi.moveFolder appState cfg.documentTemplateUuid currentPath newPath (cfg.wrapMsg << MoveCompleted newPath)
                             in
                             ( { model | moving = ActionResult.Loading }, cmd )
 

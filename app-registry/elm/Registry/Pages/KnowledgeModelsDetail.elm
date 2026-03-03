@@ -110,7 +110,7 @@ viewKnowledgeModel appState model knowledgeModel =
         , sidebar =
             [ SidebarRow.viewId appState
                 { title = gettext "Knowledge Model ID" appState.locale
-                , id = knowledgeModel.id
+                , id = KnowledgeModel.getId knowledgeModel
                 , wrapMsg = ItemIdMsg
                 , itemIdBoxState = model.itemIdBoxState
                 }

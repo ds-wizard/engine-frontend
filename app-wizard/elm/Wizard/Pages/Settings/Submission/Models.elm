@@ -4,13 +4,13 @@ module Wizard.Pages.Settings.Submission.Models exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
+import Wizard.Api.Models.DocumentTemplateAllSuggestion exposing (DocumentTemplateAllSuggestion)
 import Wizard.Api.Models.EditableConfig.EditableSubmissionConfig as EditableSubmissionConfig exposing (EditableSubmissionConfig)
 import Wizard.Pages.Settings.Generic.Model as GenericModel
 
 
 type alias Model =
-    { templates : ActionResult (List DocumentTemplateSuggestion)
+    { templates : ActionResult (List DocumentTemplateAllSuggestion)
     , genericModel : GenericModel.Model EditableSubmissionConfig
     }
 

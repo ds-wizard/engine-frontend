@@ -2,6 +2,7 @@ module Wizard.Pages.Dashboard.Widgets.OutdatedTemplatesWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
 import Common.Components.Badge as Badge
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
@@ -41,13 +42,13 @@ viewWidget appState templates =
 
 viewTemplate : AppState -> DocumentTemplate -> Html msg
 viewTemplate appState template =
-    linkTo (Routes.documentTemplatesDetail template.id)
+    linkTo (Routes.documentTemplatesDetail template.uuid)
         [ class "p-2 py-2 d-flex rounded-3" ]
         [ ItemIcon.view { text = template.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]
             [ strong [] [ text template.name ]
             , div [ class "d-flex align-items-center mt-1" ]
-                [ code [] [ text template.id ]
+                [ code [] [ text (DocumentTemplateUtils.getId template) ]
                 , Badge.warning [ class "ms-2" ] [ text (gettext "update available" appState.locale) ]
                 ]
             ]

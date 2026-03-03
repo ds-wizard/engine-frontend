@@ -11,6 +11,7 @@ import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Random exposing (Seed)
 import Task.Extra as Task
+import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplateDraftDetail as DocumentTemplateDraftDetail
 import Wizard.Api.Prefabs as PrefabsApi
@@ -26,17 +27,17 @@ import Wizard.Pages.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 
 
-fetchData : AppState -> String -> DTEditorRoute -> Model -> Cmd Msg
-fetchData appState documentTemplateId subroute model =
-    if ActionResult.unwrap False ((==) documentTemplateId << .id) model.documentTemplate then
+fetchData : AppState -> Uuid -> DTEditorRoute -> Model -> Cmd Msg
+fetchData appState documentTemplateUuid subroute model =
+    if ActionResult.unwrap False ((==) documentTemplateUuid << .uuid) model.documentTemplate then
         loadPreviewCmd (subroute == DTEditorRoute.Preview)
 
     else
         Cmd.batch
-            [ DocumentTemplateDraftsApi.getDraft appState documentTemplateId GetTemplateCompleted
+            [ DocumentTemplateDraftsApi.getDraft appState documentTemplateUuid GetTemplateCompleted
             , PrefabsApi.getDocumentTemplateFormatPrefabs appState GetDocumentTemplateFormatPrefabsCompleted
             , PrefabsApi.getDocumentTemplateFormatStepPrefabs appState GetDocumentTemplateFormatStepPrefabsCompleted
-            , Cmd.map FileEditorMsg (FileEditor.fetchData documentTemplateId appState)
+            , Cmd.map FileEditorMsg (FileEditor.fetchData documentTemplateUuid appState)
             , loadPreviewCmd (subroute == DTEditorRoute.Preview)
             ]
 
@@ -55,7 +56,7 @@ isGuarded appState nextRoute model =
     if not (containsChanges model) then
         Nothing
 
-    else if Routes.isDocumentTemplateEditor model.documentTemplateId nextRoute then
+    else if Routes.isDocumentTemplateEditor model.documentTemplateUuid nextRoute then
         Nothing
 
     else
@@ -115,7 +116,7 @@ update appState wrapMsg msg model =
         templateEditorUpdateConfig =
             { wrapMsg = wrapMsg << SettingsMsg
             , logoutMsg = Wizard.Msgs.logoutMsg
-            , documentTemplateId = model.documentTemplateId
+            , documentTemplateUuid = model.documentTemplateUuid
             , updateDocumentTemplate = wrapMsg << UpdateDocumentTemplate
             }
 
@@ -123,7 +124,7 @@ update appState wrapMsg msg model =
         fileEditorUpdateConfig =
             { wrapMsg = wrapMsg << FileEditorMsg
             , logoutMsg = Wizard.Msgs.logoutMsg
-            , documentTemplateId = model.documentTemplateId
+            , documentTemplateUuid = model.documentTemplateUuid
             , onFileSavedMsg = wrapMsg SaveForm
             }
     in
@@ -187,7 +188,7 @@ update appState wrapMsg msg model =
                 previewUpdateConfig =
                     { wrapMsg = wrapMsg << PreviewMsg
                     , logoutMsg = Wizard.Msgs.logoutMsg
-                    , documentTemplateId = model.documentTemplateId
+                    , documentTemplateUuid = model.documentTemplateUuid
                     , documentTemplate = model.documentTemplate
                     , updatePreviewSettings = wrapMsg << UpdatePreviewSettings
                     }
@@ -201,7 +202,7 @@ update appState wrapMsg msg model =
             let
                 publishModalUpdateConfig =
                     { wrapMsg = wrapMsg << PublishModalMsg
-                    , documentTemplateId = model.documentTemplateId
+                    , documentTemplateUuid = model.documentTemplateUuid
                     , documentTemplateForm = Settings.getFormOutput model.settingsModel
                     }
 
@@ -237,8 +238,8 @@ update appState wrapMsg msg model =
                     , settingsModel = Settings.initialModel appState
                   }
                 , Cmd.batch
-                    [ DocumentTemplateDraftsApi.getDraft appState model.documentTemplateId (wrapMsg << GetTemplateCompleted)
-                    , Cmd.map (wrapMsg << FileEditorMsg) (FileEditor.fetchData model.documentTemplateId appState)
+                    [ DocumentTemplateDraftsApi.getDraft appState model.documentTemplateUuid (wrapMsg << GetTemplateCompleted)
+                    , Cmd.map (wrapMsg << FileEditorMsg) (FileEditor.fetchData model.documentTemplateUuid appState)
                     , Cmd.map wrapMsg (loadPreviewCmd (model.currentEditor == PreviewEditor))
                     , Window.clearUnloadMessage ()
                     ]

@@ -8,14 +8,15 @@ import Json.Decode.Pipeline as D
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelMigration.KnowledgeModelMigrationState as KnowledgeModelMigrationState exposing (KnowledgeModelMigrationState)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 
 
 type alias KnowledgeModelMigration =
     { editorUuid : Uuid
     , editorName : String
-    , editorPreviousPackageId : String
+    , editorPreviousPackage : KnowledgeModelPackageSuggestion
     , state : KnowledgeModelMigrationState
-    , targetPackageId : String
+    , targetPackage : KnowledgeModelPackageSuggestion
     , currentKnowledgeModel : KnowledgeModel
     }
 
@@ -25,7 +26,7 @@ decoder =
     D.succeed KnowledgeModelMigration
         |> D.required "editorUuid" Uuid.decoder
         |> D.required "editorName" D.string
-        |> D.required "editorPreviousPackageId" D.string
+        |> D.required "editorPreviousPackage" KnowledgeModelPackageSuggestion.decoder
         |> D.required "state" KnowledgeModelMigrationState.decoder
-        |> D.required "targetPackageId" D.string
+        |> D.required "targetPackage" KnowledgeModelPackageSuggestion.decoder
         |> D.required "currentKnowledgeModel" KnowledgeModel.decoder

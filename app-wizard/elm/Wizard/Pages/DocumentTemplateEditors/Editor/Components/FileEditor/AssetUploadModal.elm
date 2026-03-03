@@ -27,7 +27,7 @@ import Json.Decode as D
 import Maybe.Extra as Maybe
 import Task
 import Task.Extra as Task
-import Uuid
+import Uuid exposing (Uuid)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateAsset exposing (DocumentTemplateAsset)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFile exposing (DocumentTemplateFile)
@@ -80,7 +80,7 @@ type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , addAssetMsg : DocumentTemplateAsset -> msg
     , addFileMsg : DocumentTemplateFile -> msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , path : String
     }
 
@@ -213,7 +213,7 @@ uploadFilesAndAssets cfg appState model files =
 uploadAsset : UpdateConfig msg -> AppState -> File -> Cmd msg
 uploadAsset cfg appState file =
     DocumentTemplateDraftsApi.uploadAsset appState
-        cfg.documentTemplateId
+        cfg.documentTemplateUuid
         (getFileName cfg.path file)
         file
         (cfg.wrapMsg << SubmitAssetComplete (File.name file))
@@ -228,7 +228,7 @@ uploadFile cfg appState file content =
             }
     in
     DocumentTemplateDraftsApi.postFile appState
-        cfg.documentTemplateId
+        cfg.documentTemplateUuid
         documentTemplateFile
         content
         (cfg.wrapMsg << SubmitFileComplete (File.name file))

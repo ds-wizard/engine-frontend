@@ -1,19 +1,17 @@
 module Wizard.Api.Models.DocumentTemplateSuggestion exposing
     ( DocumentTemplateSuggestion
-    , createOptions
     , decoder
     )
 
-import Common.Utils.IdentifierUtils as IdentifierUtils
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import List.Extra as List
+import Uuid exposing (Uuid)
 import Version exposing (Version)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatSimple as DocumentTemplateFormatSimple exposing (DocumentTemplateFormatSimple)
 
 
 type alias DocumentTemplateSuggestion =
-    { id : String
+    { uuid : Uuid
     , name : String
     , description : String
     , version : Version
@@ -24,18 +22,8 @@ type alias DocumentTemplateSuggestion =
 decoder : Decoder DocumentTemplateSuggestion
 decoder =
     D.succeed DocumentTemplateSuggestion
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" D.string
         |> D.required "version" Version.decoder
         |> D.required "formats" (D.list DocumentTemplateFormatSimple.decoder)
-
-
-createOptions : List DocumentTemplateSuggestion -> List ( String, String )
-createOptions templates =
-    templates
-        |> List.map (IdentifierUtils.getOrganizationAndItemId << .id)
-        |> List.unique
-        |> List.sort
-        |> List.map (\t -> ( t, t ))
-        |> (::) ( "", "--" )

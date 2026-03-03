@@ -1,6 +1,6 @@
 module Wizard.Pages.Users.Edit.Components.Profile exposing
     ( Model
-    , Msg(..)
+    , Msg
     , UpdateConfig
     , fetchData
     , initialModel

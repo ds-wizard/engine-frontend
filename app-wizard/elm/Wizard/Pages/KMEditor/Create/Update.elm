@@ -5,6 +5,7 @@ module Wizard.Pages.KMEditor.Create.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.UuidResponse exposing (UuidResponse)
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
@@ -15,12 +16,11 @@ import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
-import Result exposing (Result)
 import String.Normalize as Normalize
+import Uuid
 import Version exposing (Version)
 import Wizard.Api.KnowledgeModelEditors as KnowledgeModelEditorsApi
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
-import Wizard.Api.Models.KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -35,8 +35,8 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         fetchPackageCmd =
-            case ( model.selectedKmPackage, model.edit ) of
-                ( Just kmPackageId, True ) ->
+            case model.selectedKmPackageUuid of
+                Just kmPackageId ->
                     KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageCompleted
 
                 _ ->
@@ -68,9 +68,13 @@ update msg wrapMsg appState model =
                 Ok kmPackage ->
                     let
                         form =
-                            model.form
-                                |> setKmEditorCreateFormValue appState "name" kmPackage.name
-                                |> setKmEditorCreateFormValue appState "kmId" kmPackage.kmId
+                            if model.edit then
+                                model.form
+                                    |> setKmEditorCreateFormValue appState "name" kmPackage.name
+                                    |> setKmEditorCreateFormValue appState "kmId" kmPackage.kmId
+
+                            else
+                                model.form
                     in
                     ( { model | kmPackage = Success kmPackage, form = form }, Cmd.none )
 
@@ -128,7 +132,7 @@ handleFormSetVersion appState version model =
     ( { model | form = form }, Cmd.none )
 
 
-handlePostKmEditorCompleted : AppState -> Model -> Result ApiError KnowledgeModelEditor -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostKmEditorCompleted : AppState -> Model -> Result ApiError UuidResponse -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePostKmEditorCompleted appState model result =
     case result of
         Ok kmEditor ->
@@ -149,13 +153,13 @@ handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg Kn
 handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
         formMsg =
-            wrapMsg << FormMsg << Form.Input "previousPackageId" Form.Select << Field.String
+            wrapMsg << FormMsg << Form.Input "previousPackageUuid" Form.Select << Field.String
 
         cfg =
             { wrapMsg = wrapMsg << KnowledgeModelPackageTypeHintInputMsg
             , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState (Just False)
             , getError = gettext "Unable to get Knowledge Models." appState.locale
-            , setReply = formMsg << .id
+            , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing
             }

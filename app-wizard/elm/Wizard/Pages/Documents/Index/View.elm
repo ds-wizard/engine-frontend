@@ -176,9 +176,9 @@ listingDescription document =
 
         documentTemplateLink =
             span [ class "fragment" ]
-                [ linkTo (Routes.documentTemplatesDetail document.documentTemplateId)
+                [ linkTo (Routes.documentTemplatesDetail document.documentTemplate.uuid)
                     []
-                    [ text document.documentTemplateName ]
+                    [ text document.documentTemplate.name ]
                 ]
     in
     span []
@@ -193,7 +193,7 @@ listingActions : AppState -> Document -> List (ListingDropdownItem Msg)
 listingActions appState document =
     let
         downloadEnabled =
-            Feature.documentDownload appState document
+            Feature.documentDownload document
 
         download =
             ListingDropdown.dropdownAction

@@ -18,7 +18,7 @@ import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSu
 
 type alias DocumentCreateForm =
     { name : String
-    , documentTemplateId : String
+    , documentTemplateUuid : String
     , formatUuid : String
     , projectEventUuid : Maybe String
     }
@@ -31,7 +31,7 @@ init :
 init project mbEventUuid =
     Form.initial
         [ ( "name", Field.string project.name )
-        , ( "documentTemplateId", Field.string (Maybe.unwrap "" .id project.documentTemplate) )
+        , ( "documentTemplateUuid", Field.string (Maybe.unwrap "" (Uuid.toString << .uuid) project.documentTemplate) )
         , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString project.formatUuid) )
         , ( "projectEventUuid", Field.string (Maybe.unwrap "" Uuid.toString mbEventUuid) )
         ]
@@ -42,7 +42,7 @@ validation : Validation FormError DocumentCreateForm
 validation =
     Validate.map4 DocumentCreateForm
         (Validate.field "name" Validate.string)
-        (Validate.field "documentTemplateId" Validate.string)
+        (Validate.field "documentTemplateUuid" Validate.string)
         (Validate.field "formatUuid" Validate.string)
         (Validate.field "projectEventUuid" (Validate.maybe Validate.string))
 
@@ -52,7 +52,7 @@ encode projectUuid form =
     E.object
         [ ( "name", E.string form.name )
         , ( "projectUuid", E.string (Uuid.toString projectUuid) )
-        , ( "documentTemplateId", E.string form.documentTemplateId )
+        , ( "documentTemplateUuid", E.string form.documentTemplateUuid )
         , ( "formatUuid", E.string form.formatUuid )
         , ( "projectEventUuid", E.maybe E.string form.projectEventUuid )
         ]

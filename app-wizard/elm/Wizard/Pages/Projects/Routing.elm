@@ -55,9 +55,6 @@ parsers wrapRoute =
         projectImportRoute uuid importerUrl =
             wrapRoute <| ImportRoute uuid importerUrl
 
-        projectImportLegacyRoute uuid string =
-            wrapRoute <| ImportLegacyRoute uuid string
-
         documentDownloadRoute projectUuid documentUuid =
             wrapRoute <| DocumentDownloadRoute projectUuid documentUuid
 
@@ -67,7 +64,7 @@ parsers wrapRoute =
         projectTabPluginRoute projectUuid pluginTabId =
             wrapRoute <| DetailRoute projectUuid (ProjectDetailRoute.Plugin pluginTabId)
     in
-    [ map projectCreateRoute (s moduleRoot </> s "create" <?> Query.uuid "selectedProjectTemplate" <?> Query.string "selectedKnowledgeModel")
+    [ map projectCreateRoute (s moduleRoot </> s "create" <?> Query.uuid "selectedProjectTemplate" <?> Query.uuid "selectedKnowledgeModel")
     , map (wrapRoute << CreateMigrationRoute) (s moduleRoot </> s "create-migration" </> uuid)
     , map projectDetailQuestionnaire (s moduleRoot </> uuid <?> Query.string "questionPath" <?> Query.uuid "commentThreadUuid")
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Preview) (s moduleRoot </> uuid </> s "preview")
@@ -79,7 +76,6 @@ parsers wrapRoute =
     , map (PaginationQueryString.wrapRoute7 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
     , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> uuid)
     , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
-    , map projectImportLegacyRoute (s moduleRoot </> s "import-legacy" </> uuid </> string)
     , map documentDownloadRoute (s moduleRoot </> uuid </> s "documents" </> uuid </> s "download")
     , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
     , map projectTabPluginRoute (s moduleRoot </> uuid </> s "plugin" </> string)
@@ -104,7 +100,7 @@ toUrl route =
                 queryString =
                     queryParamsToString
                         [ ( "selectedProjectTemplate", Maybe.map Uuid.toString selectedProjectTemplate )
-                        , ( "selectedKnowledgeModel", selectedKnowledgeModel )
+                        , ( "selectedKnowledgeModel", Maybe.map Uuid.toString selectedKnowledgeModel )
                         ]
             in
             [ moduleRoot, "create" ++ queryString ]
@@ -170,9 +166,6 @@ toUrl route =
 
         ImportRoute uuid importerUrl ->
             [ moduleRoot, "import", Uuid.toString uuid, importerUrl ]
-
-        ImportLegacyRoute uuid importerId ->
-            [ moduleRoot, "import-legacy", Uuid.toString uuid, importerId ]
 
         DocumentDownloadRoute projectUuid documentUuid ->
             [ moduleRoot, Uuid.toString projectUuid, "documents", Uuid.toString documentUuid, "download" ]

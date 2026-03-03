@@ -10,7 +10,6 @@ import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Pages.Projects.DocumentDownload.Models
 import Wizard.Pages.Projects.FileDownload.Models
 import Wizard.Pages.Projects.Import.Models
-import Wizard.Pages.Projects.ImportLegacy.Models
 import Wizard.Pages.Projects.Index.Models
 import Wizard.Pages.Projects.Migration.Models
 import Wizard.Pages.Projects.Routes exposing (Route(..))
@@ -23,7 +22,6 @@ type alias Model =
     , indexModel : Wizard.Pages.Projects.Index.Models.Model
     , migrationModel : Wizard.Pages.Projects.Migration.Models.Model
     , importModel : Wizard.Pages.Projects.Import.Models.Model
-    , importLegacyModel : Wizard.Pages.Projects.ImportLegacy.Models.Model
     , documentDownload : Wizard.Pages.Projects.DocumentDownload.Models.Model
     , fileDownload : Wizard.Pages.Projects.FileDownload.Models.Model
     }
@@ -37,7 +35,6 @@ initialModel appState =
     , indexModel = Wizard.Pages.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
     , migrationModel = Wizard.Pages.Projects.Migration.Models.initialModel Uuid.nil
     , importModel = Wizard.Pages.Projects.Import.Models.initialModel Uuid.nil ""
-    , importLegacyModel = Wizard.Pages.Projects.ImportLegacy.Models.initialModel Uuid.nil ""
     , documentDownload = Wizard.Pages.Projects.DocumentDownload.Models.initialModel Uuid.nil Uuid.nil
     , fileDownload = Wizard.Pages.Projects.FileDownload.Models.initialModel Uuid.nil Uuid.nil
     }
@@ -76,9 +73,6 @@ initLocalModel appState route model =
 
         ImportRoute uuid importerUrl ->
             { model | importModel = Wizard.Pages.Projects.Import.Models.initialModel uuid importerUrl }
-
-        ImportLegacyRoute uuid importerId ->
-            { model | importLegacyModel = Wizard.Pages.Projects.ImportLegacy.Models.initialModel uuid importerId }
 
         DocumentDownloadRoute projectUuid fileUuid ->
             { model | documentDownload = Wizard.Pages.Projects.DocumentDownload.Models.initialModel projectUuid fileUuid }

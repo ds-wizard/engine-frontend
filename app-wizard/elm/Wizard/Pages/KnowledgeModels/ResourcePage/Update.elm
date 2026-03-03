@@ -6,6 +6,7 @@ module Wizard.Pages.KnowledgeModels.ResourcePage.Update exposing
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setKnowledgeModel)
 import Gettext exposing (gettext)
+import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModels as KnowlegeModelsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -13,9 +14,9 @@ import Wizard.Pages.KnowledgeModels.ResourcePage.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.ResourcePage.Msgs exposing (Msg(..))
 
 
-fetchData : AppState -> String -> Cmd Msg
-fetchData appState kmId =
-    KnowlegeModelsApi.fetchPreview appState (Just kmId) [] [] FetchPreviewComplete
+fetchData : AppState -> Uuid -> Cmd Msg
+fetchData appState kmUuid =
+    KnowlegeModelsApi.fetchPreview appState (Just kmUuid) [] [] FetchPreviewComplete
 
 
 update : AppState -> Msg -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -13,7 +13,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Registry.Api.DocumentTemplates as DocumentTemplatesApi
-import Registry.Api.Models.DocumentTemplate exposing (DocumentTemplate)
+import Registry.Api.Models.DocumentTemplate as DocumentTemplate exposing (DocumentTemplate)
 import Registry.Components.ListItem as ListItem
 import Registry.Components.Page as Page
 import Registry.Data.AppState exposing (AppState)
@@ -69,7 +69,7 @@ viewDocumentTemplates appState documentTemplates =
         documentTemplateView =
             documentTemplates
                 |> List.sortBy ((*) -1 << Time.posixToMillis << .createdAt)
-                |> List.map (ListItem.view appState { toRoute = Routes.documentTemplateDetail << .id })
+                |> List.map (ListItem.view appState { toRoute = Routes.documentTemplateDetail << DocumentTemplate.getId })
                 |> div []
     in
     div [ class "my-5" ]

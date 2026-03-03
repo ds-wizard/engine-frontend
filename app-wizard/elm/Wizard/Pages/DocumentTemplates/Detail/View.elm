@@ -4,6 +4,8 @@ import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
@@ -20,6 +22,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTempl
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
@@ -223,7 +226,7 @@ sidePanelKmInfo : AppState -> DocumentTemplateDetail -> Maybe ( String, String, 
 sidePanelKmInfo appState template =
     let
         templateInfoList =
-            [ ( gettext "ID" appState.locale, "id", text template.id )
+            [ ( gettext "ID" appState.locale, "id", text (DocumentTemplateUtils.getId template) )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString template.version )
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| Version.toStringMinor template.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text template.license )
@@ -258,15 +261,15 @@ sidePanelOtherVersions appState template =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.documentTemplatesDetail <| template.organizationId ++ ":" ++ template.templateId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.documentTemplatesDetail version.uuid)
                     []
-                    [ text <| Version.toString version ]
+                    [ text <| Version.toString version.version ]
                 ]
 
         versionLinks =
             template.versions
-                |> List.filter ((/=) template.version)
-                |> List.sortWith Version.compare
+                |> List.filter ((/=) template.version << .version)
+                |> List.sortWith VersionUuid.compare
                 |> List.reverse
                 |> List.map versionLink
     in
@@ -306,9 +309,9 @@ sidePanelUsableWith appState model template =
     let
         packageLink kmPackage =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail kmPackage.id)
+                [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
                     [ dataCy "template_km-link" ]
-                    [ text kmPackage.id ]
+                    [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
                 ]
 
         takeFirstPackages =
@@ -319,7 +322,7 @@ sidePanelUsableWith appState model template =
                 List.take 10
 
         kmPackageLinks =
-            template.usableKnowledgeModelPackages
+            template.usableKnowledgeModels
                 |> List.sortWith DocumentTemplatePackage.compareById
                 |> takeFirstPackages
                 |> List.map packageLink
@@ -330,7 +333,7 @@ sidePanelUsableWith appState model template =
     else
         let
             showAllLink =
-                if model.showAllKms || List.length template.usableKnowledgeModelPackages <= 10 then
+                if model.showAllKms || List.length template.usableKnowledgeModels <= 10 then
                     Html.nothing
 
                 else
@@ -351,14 +354,14 @@ viewOrganization organization =
         (ItemIcon.view { text = organization.name, image = organization.logo })
 
 
-deleteVersionModal : AppState -> Model -> { a | id : String } -> Html Msg
+deleteVersionModal : AppState -> Model -> DocumentTemplateDetail -> Html Msg
 deleteVersionModal appState model template =
     let
         modalContent =
             [ p []
                 (String.formatHtml
                     (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                    [ strong [] [ text template.id ] ]
+                    [ strong [] [ text (DocumentTemplateUtils.getId template) ] ]
                 )
             ]
 

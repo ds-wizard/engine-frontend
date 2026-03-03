@@ -13,6 +13,7 @@ import Gettext exposing (gettext)
 import Json.Encode as E
 import Json.Encode.Extra as E
 import Random exposing (Seed)
+import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.KnowledgeModels as KnowledgeModelsApi
@@ -31,11 +32,11 @@ import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> String -> Cmd Msg
-fetchData appState kmPackageId =
+fetchData : AppState -> Uuid -> Cmd Msg
+fetchData appState kmPackageUuid =
     Cmd.batch
-        [ KnowledgeModelsApi.fetchPreview appState (Just kmPackageId) [] [] FetchPreviewComplete
-        , KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageId GetPackageComplete
+        [ KnowledgeModelsApi.fetchPreview appState (Just kmPackageUuid) [] [] FetchPreviewComplete
+        , KnowledgeModelPackagesApi.getKnowledgeModelPackage appState kmPackageUuid GetPackageComplete
         ]
 
 
@@ -74,11 +75,11 @@ update msg wrapMsg appState model =
                         body =
                             E.object
                                 [ ( "name", E.string kmPackage.name )
-                                , ( "knowledgeModelPackageId", E.string kmPackage.id )
+                                , ( "knowledgeModelPackageUuid", Uuid.encode kmPackage.uuid )
                                 , ( "visibility", ProjectVisibility.encode appState.config.project.projectVisibility.defaultValue )
                                 , ( "sharing", ProjectSharing.encode ProjectSharing.AnyoneWithLinkEdit )
                                 , ( "questionTagUuids", E.list E.string [] )
-                                , ( "templateId", E.maybe E.string Nothing )
+                                , ( "projectUuid", E.maybe E.string Nothing )
                                 ]
 
                         cmd =

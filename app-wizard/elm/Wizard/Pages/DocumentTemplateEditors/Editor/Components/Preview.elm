@@ -153,7 +153,7 @@ subscriptions model =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , logoutMsg : msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , documentTemplate : ActionResult DocumentTemplateDraftDetail
     , updatePreviewSettings : DocumentTemplateDraftPreviewSettings -> msg
     }
@@ -163,7 +163,7 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     let
         getPreviewCmd =
-            DocumentTemplateDraftsApi.getPreview appState cfg.documentTemplateId (cfg.wrapMsg << GetPreviewCompleted)
+            DocumentTemplateDraftsApi.getPreview appState cfg.documentTemplateUuid (cfg.wrapMsg << GetPreviewCompleted)
 
         updatePreviewSettings updateFn =
             let
@@ -174,7 +174,7 @@ update cfg appState msg model =
                         cfg.documentTemplate
             in
             DocumentTemplateDraftsApi.putPreviewSettings appState
-                cfg.documentTemplateId
+                cfg.documentTemplateUuid
                 (updateFn previewSettings)
                 (cfg.wrapMsg << PutPreviewSettingsCompleted)
     in
@@ -202,7 +202,7 @@ update cfg appState msg model =
             let
                 updateCfg =
                     { wrapMsg = cfg.wrapMsg << KnowledgeModelEditorTypeHintInputMsg
-                    , getTypeHints = KnowledgeModelEditorsApi.getKnowledgeModelEditorSuggestions appState PaginationQueryFilters.empty
+                    , getTypeHints = KnowledgeModelEditorsApi.getKnowledgeModelEditorSuggestions appState
                     , getError = gettext "Unable to get knowledge model editors." appState.locale
                     , setReply = cfg.wrapMsg << KnowledgeModelEditorTypeHintInputSelect << .uuid
                     , clearReply = Nothing

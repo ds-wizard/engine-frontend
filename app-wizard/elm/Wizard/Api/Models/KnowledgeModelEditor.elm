@@ -10,14 +10,15 @@ import Json.Decode.Pipeline as D
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as KnowledgeModelEditorState exposing (KnowledgeModelEditorState)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 
 
 type alias KnowledgeModelEditor =
     { uuid : Uuid
     , name : String
     , kmId : String
-    , forkOfPackageId : Maybe String
-    , previousPackageId : Maybe String
+    , forkOfPackage : Maybe KnowledgeModelPackageSuggestion
+    , previousPackageUuid : Maybe Uuid
     , state : KnowledgeModelEditorState
     , updatedAt : Time.Posix
     }
@@ -29,8 +30,8 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "kmId" D.string
-        |> D.required "forkOfPackageId" (D.nullable D.string)
-        |> D.required "previousPackageId" (D.nullable D.string)
+        |> D.required "forkOfPackage" (D.nullable KnowledgeModelPackageSuggestion.decoder)
+        |> D.required "previousPackageUuid" (D.nullable Uuid.decoder)
         |> D.required "state" KnowledgeModelEditorState.decoder
         |> D.required "updatedAt" D.datetime
 

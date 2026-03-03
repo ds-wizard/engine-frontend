@@ -5,6 +5,7 @@ import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faKmAnswer, faKmChoice)
 import Common.Components.Page as Page
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
@@ -55,7 +56,7 @@ viewContentBeforeImport appState model project kmString =
     let
         mbPluginData =
             AppState.getPluginsByConnector appState .projectImporters
-                |> Plugin.filterByKmPatterns project.knowledgeModelPackageId
+                |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId project.knowledgeModelPackage)
                 |> List.find (\( _, connector ) -> connector.url == model.importerUrl)
     in
     case mbPluginData of

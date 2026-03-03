@@ -2,20 +2,20 @@ module Wizard.Pages.KnowledgeModels.Index.View exposing (view)
 
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faKmsUpload)
-import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
-import Html exposing (Html, code, div, img, p, span, strong, text)
+import Html exposing (Html, code, div, img, span, text)
 import Html.Attributes exposing (class, src, title)
 import Html.Extra as Html
-import String.Format as String
 import Version
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
 import Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown as KnowledgeModelActionsDropdown
 import Wizard.Pages.KnowledgeModels.Index.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Index.Msgs exposing (Msg(..))
@@ -30,7 +30,7 @@ view appState model =
     div [ listClass "" ]
         [ Page.header (gettext "Knowledge Models" appState.locale) []
         , Listing.view appState (listingConfig appState) model.packages
-        , deleteModal appState model
+        , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
         ]
 
 
@@ -56,7 +56,8 @@ listingConfig appState =
         KnowledgeModelActionsDropdown.actions appState
             { exportMsg = ExportKnowledgeModelPackage
             , updatePhaseMsg = UpdatePhase
-            , deleteMsg = ShowHideDeletePackage << Just
+            , updatePublicMsg = UpdatePublic
+            , deleteMsg = DeleteModalMsg << DeleteModal.open
             , viewActionVisible = True
             }
     , textTitle = .name
@@ -82,19 +83,20 @@ listingConfig appState =
 listingTitle : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitle appState kmPackage =
     span []
-        [ linkTo (Routes.knowledgeModelsDetail kmPackage.id) [] [ text kmPackage.name ]
+        [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid) [] [ text kmPackage.name ]
         , Badge.light
             (tooltip <| gettext "Latest version" appState.locale)
             [ text <| Version.toString kmPackage.version ]
         , listingTitleNonEditableBadge appState kmPackage
         , listingTitleDeprecatedBadge appState kmPackage
         , listingTitleOutdatedBadge appState kmPackage
+        , listingTitlePublicBadge appState kmPackage
         ]
 
 
 listingTitleOutdatedBadge : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitleOutdatedBadge appState kmPackage =
-    if KnowledgeModelPackage.isOutdated kmPackage then
+    Html.viewIf (KnowledgeModelPackage.isOutdated kmPackage) <|
         let
             kmPackageId =
                 Maybe.map ((++) (kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":") << Version.toString) kmPackage.remoteLatestVersion
@@ -103,26 +105,23 @@ listingTitleOutdatedBadge appState kmPackage =
             [ class Badge.warningClass ]
             [ text (gettext "update available" appState.locale) ]
 
-    else
-        Html.nothing
-
 
 listingTitleDeprecatedBadge : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitleDeprecatedBadge appState kmPackage =
-    if kmPackage.phase == KnowledgeModelPackagePhase.Deprecated then
+    Html.viewIf (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated) <|
         Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
-
-    else
-        Html.nothing
 
 
 listingTitleNonEditableBadge : AppState -> KnowledgeModelPackage -> Html Msg
 listingTitleNonEditableBadge appState kmPackage =
-    if kmPackage.nonEditable then
+    Html.viewIf kmPackage.nonEditable <|
         Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
-    else
-        Html.nothing
+
+listingTitlePublicBadge : AppState -> KnowledgeModelPackage -> Html Msg
+listingTitlePublicBadge appState kmPackage =
+    Html.viewIf kmPackage.public <|
+        Badge.info [] [ text (gettext "public" appState.locale) ]
 
 
 listingDescription : AppState -> KnowledgeModelPackage -> Html Msg
@@ -149,39 +148,7 @@ listingDescription appState kmPackage =
                     Html.nothing
     in
     span []
-        [ code [ class "fragment" ] [ text kmPackage.id ]
+        [ code [ class "fragment" ] [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
         , organizationFragment
         , span [ class "fragment" ] [ text kmPackage.description ]
         ]
-
-
-deleteModal : AppState -> Model -> Html Msg
-deleteModal appState model =
-    let
-        ( visible, version ) =
-            case model.kmPackageToBeDeleted of
-                Just kmPackage ->
-                    ( True, kmPackage.organizationId ++ ":" ++ kmPackage.kmId )
-
-                Nothing ->
-                    ( False, "" )
-
-        modalContent =
-            [ p []
-                (String.formatHtml
-                    (gettext "Are you sure you want to permanently delete %s and all its versions?" appState.locale)
-                    [ strong [] [ text version ] ]
-                )
-            ]
-
-        modalConfig =
-            Modal.confirmConfig (gettext "Delete knowledge model" appState.locale)
-                |> Modal.confirmConfigContent modalContent
-                |> Modal.confirmConfigVisible visible
-                |> Modal.confirmConfigActionResult model.deletingKmPackage
-                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteKnowledgeModelPackage
-                |> Modal.confirmConfigCancelMsg (ShowHideDeletePackage Nothing)
-                |> Modal.confirmConfigDangerous True
-                |> Modal.confirmConfigDataCy "km-delete"
-    in
-    Modal.confirm appState modalConfig

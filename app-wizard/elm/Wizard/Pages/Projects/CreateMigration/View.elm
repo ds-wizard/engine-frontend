@@ -12,9 +12,11 @@ import Form
 import Gettext exposing (gettext)
 import Html exposing (Html, div, label, text)
 import Html.Attributes exposing (class)
+import Uuid
 import Version
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
+import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.FormActions as FormActions
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
@@ -33,20 +35,11 @@ view appState model =
 createMigrationView : AppState -> Model -> ProjectSettings -> Html Msg
 createMigrationView appState model project =
     let
-        createVersionOption kmPackage version =
-            let
-                versionString =
-                    Version.toString version
-
-                kmPackageId =
-                    String.join ":" <|
-                        List.take 2 (String.split ":" kmPackage.id)
-                            ++ [ versionString ]
-            in
-            ( kmPackageId, versionString )
+        createVersionOption version =
+            ( Uuid.toString version.uuid, Version.toString version.version )
 
         createOptions kmPackage =
-            ( "", "--" ) :: List.map (createVersionOption kmPackage) (List.reverse (List.sortWith Version.compare kmPackage.versions))
+            ( "", "--" ) :: List.map createVersionOption (List.reverse (List.sortWith VersionUuid.compare kmPackage.versions))
 
         originalTagList =
             div [ class "form-group form-group-tags" ]
@@ -70,7 +63,7 @@ createMigrationView appState model project =
                 Just _ ->
                     case model.selectedPackageDetail of
                         Success selectedPackageDetail ->
-                            FormGroup.select appState.locale (createOptions selectedPackageDetail) model.form "knowledgeModelPackageId"
+                            FormGroup.select appState.locale (createOptions selectedPackageDetail) model.form "knowledgeModelPackageUuid"
 
                         _ ->
                             always (Flash.loader appState.locale)

@@ -4,6 +4,7 @@ import Common.Components.FontAwesome exposing (faQuestionnaireMigrationResolve, 
 import Common.Components.Page as Page
 import Common.Components.Undraw as Undraw
 import Common.Utils.Bool as Bool
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, button, code, div, h5, p, small, strong, table, td, text, th, tr)
@@ -13,6 +14,7 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import String.Format as String
 import Wizard.Api.Models.KnowledgeModel.Question as Question
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Questionnaire as Questionnaire
@@ -86,22 +88,22 @@ migrationInfo appState migration =
         , table []
             [ tr []
                 [ th [] [ text (gettext "Source knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.oldProject.knowledgeModelPackageId ]
+                , td [] [ packageInfo migration.oldProject.knowledgeModelPackage ]
                 ]
             , tr []
                 [ th [] [ text (gettext "Target knowledge model" appState.locale) ]
-                , td [] [ packageInfo migration.newProject.knowledgeModelPackageId ]
+                , td [] [ packageInfo migration.newProject.knowledgeModelPackage ]
                 ]
             ]
         ]
 
 
-packageInfo : String -> Html Msg
-packageInfo kmPackageId =
+packageInfo : KnowledgeModelPackageSuggestion -> Html Msg
+packageInfo kmPackage =
     code []
-        [ linkTo (Routes.knowledgeModelsDetail kmPackageId)
+        [ linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
             [ target "_blank" ]
-            [ text kmPackageId ]
+            [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
         ]
 
 

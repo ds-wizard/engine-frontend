@@ -2,6 +2,7 @@ module Wizard.Pages.Dashboard.Widgets.OutdatedPackagesWidget exposing (view)
 
 import ActionResult exposing (ActionResult)
 import Common.Components.Badge as Badge
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, code, div, h2, strong, text)
 import Html.Attributes exposing (class)
@@ -41,13 +42,13 @@ viewWidget appState kmPackages =
 
 viewKnowledgeModelPackage : AppState -> KnowledgeModelPackage -> Html msg
 viewKnowledgeModelPackage appState kmPackage =
-    linkTo (Routes.knowledgeModelsDetail kmPackage.id)
+    linkTo (Routes.knowledgeModelsDetail kmPackage.uuid)
         [ class "p-2 py-2 d-flex rounded-3" ]
         [ ItemIcon.view { text = kmPackage.name, image = Nothing }
         , div [ class "ms-2 flex-grow-1 content" ]
             [ strong [] [ text kmPackage.name ]
             , div [ class "d-flex align-items-center mt-1" ]
-                [ code [] [ text kmPackage.id ]
+                [ code [] [ text (KnowledgeModelUtils.getPackageId kmPackage) ]
                 , Badge.warning [ class "ms-2" ] [ text (gettext "update available" appState.locale) ]
                 ]
             ]

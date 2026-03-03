@@ -9,6 +9,7 @@ import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.Permission as Permission exposing (Permission)
 import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing)
 import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility)
@@ -23,7 +24,7 @@ type alias ProjectCommon =
     , sharing : ProjectSharing
     , visibility : ProjectVisibility
     , migrationUuid : Maybe Uuid
-    , knowledgeModelPackageId : String
+    , knowledgeModelPackage : KnowledgeModelPackageSuggestion
     , fileCount : Int
     }
 
@@ -38,7 +39,7 @@ decoder =
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "visibility" ProjectVisibility.decoder
         |> D.required "migrationUuid" (D.nullable Uuid.decoder)
-        |> D.required "knowledgeModelPackageId" D.string
+        |> D.required "knowledgeModelPackage" KnowledgeModelPackageSuggestion.decoder
         |> D.required "fileCount" D.int
 
 
@@ -48,7 +49,7 @@ encode p =
         [ ( "uuid", Uuid.encode p.uuid )
         , ( "name", E.string p.name )
         , ( "isTemplate", E.bool p.isTemplate )
-        , ( "knowledgeModelPackageId", E.string p.knowledgeModelPackageId )
+        , ( "knowledgeModelPackage", KnowledgeModelPackageSuggestion.encode p.knowledgeModelPackage )
         ]
 
 

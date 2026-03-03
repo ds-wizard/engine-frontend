@@ -21,7 +21,7 @@ type alias KnowledgeModelEditorCreateForm =
     , versionMajor : Int
     , versionMinor : Int
     , versionPatch : Int
-    , previousPackageId : Maybe String
+    , previousPackageUuid : Maybe String
     }
 
 
@@ -30,8 +30,8 @@ init appState selectedKnowledgeModelPackage =
     let
         initials =
             case selectedKnowledgeModelPackage of
-                Just kmPackageId ->
-                    [ ( "previousPackageId", Field.string kmPackageId ) ]
+                Just kmPackageUuid ->
+                    [ ( "previousPackageUuid", Field.string kmPackageUuid ) ]
 
                 _ ->
                     []
@@ -47,14 +47,14 @@ validation appState =
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)
-        |> V.andMap (V.field "previousPackageId" V.maybeString)
+        |> V.andMap (V.field "previousPackageUuid" V.maybeString)
 
 
 encode : KnowledgeModelEditorCreateForm -> E.Value
 encode form =
     let
         parentPackage =
-            Maybe.unwrap E.null E.string form.previousPackageId
+            Maybe.unwrap E.null E.string form.previousPackageUuid
 
         version =
             String.join "." <| List.map String.fromInt [ form.versionMajor, form.versionMinor, form.versionPatch ]
@@ -63,5 +63,5 @@ encode form =
         [ ( "name", E.string form.name )
         , ( "kmId", E.string form.kmId )
         , ( "version", E.string version )
-        , ( "previousPackageId", parentPackage )
+        , ( "previousPackageUuid", parentPackage )
         ]

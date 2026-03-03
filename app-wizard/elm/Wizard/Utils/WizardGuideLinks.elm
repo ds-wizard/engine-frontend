@@ -19,7 +19,6 @@ module Wizard.Utils.WizardGuideLinks exposing
     , profileActiveSessions
     , profileApiKeys
     , profileLanguage
-    , projectImporters
     , projectsCreate
     , projectsDocumentSubmission
     , projectsDocuments
@@ -69,7 +68,6 @@ default =
         , ( "projectsCreate", "https://guide.ds-wizard.org/en/latest/application/projects/list/create.html" )
         , ( "projectsDocumentSubmission", "https://guide.ds-wizard.org/en/latest/application/projects/list/detail/documents.html#document-submission" )
         , ( "projectsDocuments", "https://guide.ds-wizard.org/en/latest/application/projects/documents.html" )
-        , ( "projectsImporters", "https://guide.ds-wizard.org/en/latest/application/projects/importers.html" )
         , ( "projectsFiles", "https://guide.ds-wizard.org/en/latest/application/projects/files.html" )
         , ( "projectsMigration", "https://guide.ds-wizard.org/en/latest/application/projects/list/migration.html" )
         , ( "projectsNewDocument", "https://guide.ds-wizard.org/en/latest/application/projects/list/detail/documents.html#new-document" )
@@ -202,11 +200,6 @@ projectsDocuments =
 projectsFiles : GuideLinks -> String
 projectsFiles =
     GuideLinks.get "projectsFiles"
-
-
-projectImporters : GuideLinks -> String
-projectImporters =
-    GuideLinks.get "projectsImporters"
 
 
 projectsMigration : GuideLinks -> String

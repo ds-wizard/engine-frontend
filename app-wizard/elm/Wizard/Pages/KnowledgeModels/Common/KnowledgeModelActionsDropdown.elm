@@ -7,9 +7,10 @@ module Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposin
     )
 
 import Bootstrap.Dropdown as Dropdown
-import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faOpen, faPreview)
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faKmSetPrivate, faKmSetPublic, faOpen, faPreview)
 import Gettext exposing (gettext)
 import Html exposing (Html)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
 import Wizard.Data.AppState exposing (AppState)
@@ -20,9 +21,10 @@ import Wizard.Utils.Feature as Feature
 
 type alias KnowledgeModelPackageLike a =
     { a
-        | id : String
+        | uuid : Uuid
         , phase : KnowledgeModelPackagePhase
         , nonEditable : Bool
+        , public : Bool
     }
 
 
@@ -35,6 +37,7 @@ type alias DropdownConfig msg =
 type alias ActionsConfig a msg =
     { exportMsg : KnowledgeModelPackageLike a -> msg
     , updatePhaseMsg : KnowledgeModelPackageLike a -> KnowledgeModelPackagePhase -> msg
+    , updatePublicMsg : KnowledgeModelPackageLike a -> Bool -> msg
     , deleteMsg : KnowledgeModelPackageLike a -> msg
     , viewActionVisible : Bool
     }
@@ -48,7 +51,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faOpen
                 , label = gettext "Open" appState.locale
-                , msg = ListingActionLink (Routes.knowledgeModelsDetail kmPackage.id)
+                , msg = ListingActionLink (Routes.knowledgeModelsDetail kmPackage.uuid)
                 , dataCy = "view"
                 }
 
@@ -60,12 +63,12 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faPreview
                 , label = gettext "Preview" appState.locale
-                , msg = ListingActionLink (Routes.knowledgeModelsPreview kmPackage.id Nothing)
+                , msg = ListingActionLink (Routes.knowledgeModelsPreview kmPackage.uuid Nothing)
                 , dataCy = "preview"
                 }
 
         previewActionVisible =
-            Feature.knowledgeModelsPreview appState
+            Feature.knowledgeModelsPreview
 
         exportAction =
             ListingDropdown.dropdownAction
@@ -84,7 +87,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faKmDetailCreateKmEditor
                 , label = gettext "Create KM editor" appState.locale
-                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.id) (Just True))
+                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.uuid) (Just True))
                 , dataCy = "create-km-editor"
                 }
 
@@ -96,7 +99,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faKmDetailFork
                 , label = gettext "Fork KM" appState.locale
-                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.id) Nothing)
+                , msg = ListingActionLink (Routes.kmEditorCreate (Just kmPackage.uuid) Nothing)
                 , dataCy = "fork"
                 }
 
@@ -108,7 +111,7 @@ actions appState cfg kmPackage =
                 { extraClass = Nothing
                 , icon = faKmDetailCreateQuestionnaire
                 , label = gettext "Create project" appState.locale
-                , msg = ListingActionLink (Routes.projectsCreateFromKnowledgeModel kmPackage.id)
+                , msg = ListingActionLink (Routes.projectsCreateFromKnowledgeModel kmPackage.uuid)
                 , dataCy = "create-project"
                 }
 
@@ -139,6 +142,30 @@ actions appState cfg kmPackage =
         restoreActionVisible =
             Feature.knowledgeModelRestore appState kmPackage
 
+        setPublicAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faKmSetPublic
+                , label = gettext "Set public" appState.locale
+                , msg = ListingActionMsg (cfg.updatePublicMsg kmPackage True)
+                , dataCy = "set-public"
+                }
+
+        setPublicActionVisible =
+            Feature.knowledgeModelSetPublic appState kmPackage
+
+        setPrivateAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faKmSetPrivate
+                , label = gettext "Set private" appState.locale
+                , msg = ListingActionMsg (cfg.updatePublicMsg kmPackage False)
+                , dataCy = "set-private"
+                }
+
+        setPrivateActionVisible =
+            Feature.knowledgeModelSetPrivate appState kmPackage
+
         deleteAction =
             ListingDropdown.dropdownAction
                 { extraClass = Just "text-danger"
@@ -162,7 +189,10 @@ actions appState cfg kmPackage =
               ]
             , [ ( setDeprecatedAction, setDeprecatedActionVisible )
               , ( restoreAction, restoreActionVisible )
-              , ( deleteAction, deleteActionVisible )
+              , ( setPublicAction, setPublicActionVisible )
+              , ( setPrivateAction, setPrivateActionVisible )
+              ]
+            , [ ( deleteAction, deleteActionVisible )
               ]
             ]
     in

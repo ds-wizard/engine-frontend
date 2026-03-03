@@ -4,6 +4,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Components.FontAwesome exposing (faArrowRight, faSpinner, faSuccess)
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Dict exposing (Dict)
 import Flip exposing (flip)
 import Gettext exposing (gettext)
@@ -136,8 +137,8 @@ migrationSummary appState migration =
         [ p []
             (String.formatHtml (gettext "Migration of %s from %s to %s." appState.locale)
                 [ strong [] [ text migration.editorName ]
-                , code [] [ text migration.editorPreviousPackageId ]
-                , code [] [ text migration.targetPackageId ]
+                , code [] [ text (KnowledgeModelUtils.getPackageId migration.editorPreviousPackage) ]
+                , code [] [ text (KnowledgeModelUtils.getPackageId migration.targetPackage) ]
                 ]
             )
         ]

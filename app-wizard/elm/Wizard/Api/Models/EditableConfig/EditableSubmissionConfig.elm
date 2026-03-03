@@ -14,7 +14,6 @@ module Wizard.Api.Models.EditableConfig.EditableSubmissionConfig exposing
 import Common.Utils.Form.Field as Field
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Form.Validate as V
-import Common.Utils.IdentifierUtils as IdentifierUtils
 import Dict exposing (Dict)
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)
@@ -41,7 +40,7 @@ type alias Service =
 
 
 type alias SupportedFormat =
-    { templateId : String
+    { templateUuid : String
     , formatUuid : String
     }
 
@@ -85,7 +84,7 @@ decodeService =
 decodeSupportedFormat : Decoder SupportedFormat
 decodeSupportedFormat =
     D.succeed SupportedFormat
-        |> D.required "templateId" D.string
+        |> D.required "templateUuid" D.string
         |> D.required "formatUuid" D.string
 
 
@@ -128,7 +127,7 @@ encodeService definition =
 encodeSupportedFormat : SupportedFormat -> E.Value
 encodeSupportedFormat supportedFormat =
     E.object
-        [ ( "templateId", E.string supportedFormat.templateId )
+        [ ( "templateUuid", E.string supportedFormat.templateUuid )
         , ( "formatUuid", E.string supportedFormat.formatUuid )
         ]
 
@@ -176,7 +175,7 @@ validateService =
 validateSupportedFormat : Validation FormError SupportedFormat
 validateSupportedFormat =
     V.succeed SupportedFormat
-        |> V.andMap (V.field "templateId" V.string)
+        |> V.andMap (V.field "templateUuid" V.string)
         |> V.andMap (V.field "formatUuid" V.string)
 
 
@@ -237,8 +236,7 @@ initService definition =
 
 initSupportedFormat : SupportedFormat -> List ( String, Field )
 initSupportedFormat supportedFormat =
-    [ ( "template", Field.string (IdentifierUtils.getOrganizationAndItemId supportedFormat.templateId) )
-    , ( "templateId", Field.string supportedFormat.templateId )
+    [ ( "templateUuid", Field.string supportedFormat.templateUuid )
     , ( "formatUuid", Field.string supportedFormat.formatUuid )
     ]
 

@@ -16,7 +16,7 @@ import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing
 
 type alias ProjectPreview =
     { uuid : Uuid
-    , documentTemplateId : Maybe String
+    , documentTemplateUuid : Maybe Uuid
     , format : Maybe DocumentTemplateFormat
     , permissions : List Permission
     , sharing : ProjectSharing
@@ -29,7 +29,7 @@ decoder : Decoder ProjectPreview
 decoder =
     D.succeed ProjectPreview
         |> D.required "uuid" Uuid.decoder
-        |> D.required "documentTemplateId" (D.maybe D.string)
+        |> D.required "documentTemplateUuid" (D.maybe Uuid.decoder)
         |> D.required "format" (D.maybe DocumentTemplateFormat.decoder)
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "sharing" ProjectSharing.decoder
@@ -39,4 +39,4 @@ decoder =
 
 hasTemplateSet : ProjectPreview -> Bool
 hasTemplateSet questionnairePreview =
-    Maybe.isJust questionnairePreview.documentTemplateId && Maybe.isJust questionnairePreview.format
+    Maybe.isJust questionnairePreview.documentTemplateUuid && Maybe.isJust questionnairePreview.format

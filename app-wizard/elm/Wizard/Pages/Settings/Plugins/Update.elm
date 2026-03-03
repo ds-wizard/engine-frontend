@@ -1,7 +1,4 @@
-module Wizard.Pages.Settings.Plugins.Update exposing
-    ( fetchData
-    , update
-    )
+module Wizard.Pages.Settings.Plugins.Update exposing (update)
 
 import ActionResult
 import Common.Api.ApiError as ApiError
@@ -13,11 +10,6 @@ import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Settings.Plugins.Models exposing (Model)
 import Wizard.Pages.Settings.Plugins.Msgs exposing (Msg(..))
-
-
-fetchData : AppState -> Cmd Msg
-fetchData _ =
-    Cmd.none
 
 
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

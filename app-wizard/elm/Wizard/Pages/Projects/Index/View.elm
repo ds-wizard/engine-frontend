@@ -9,6 +9,7 @@ import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Data.PaginationQueryFilters as PaginationQueryFilter
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Flip exposing (flip)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, span, text)
@@ -156,11 +157,13 @@ listingProjectTagsFilter appState model =
                     else
                         PaginationQueryFilter.insertValue indexRouteProjectTagsFilterId value model.questionnaires.filters
             in
-            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId)) filters
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId) filters
+                |> ListingMsg
 
         updateOpMsg op =
-            (ListingMsg << ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId))
-                (PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters)
+            PaginationQueryFilter.insertOp indexRouteProjectTagsFilterId op model.questionnaires.filters
+                |> ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteProjectTagsFilterId)
+                |> ListingMsg
 
         removeTagMsg tag =
             updateTagsMsg <| List.filter ((/=) tag) selectedTags
@@ -280,13 +283,13 @@ listingKMsFilter appState model =
                 filterMsg (PaginationQueryFilter.insertValue indexRouteKnowledgeModelPackagesFilterId (String.join "," (List.unique packageIds)) model.questionnaires.filters)
 
         removePackageMsg kmPackage =
-            List.filter ((/=) (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id)) selectedPackageIds
+            List.filter ((/=) (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.organizationId kmPackage.kmId)) selectedPackageIds
                 |> updatePackagesMsg
                 |> ListingMsg
 
         addPackageMsg kmPackage =
             ListingFilterAddSelectedPackage kmPackage
-                (updatePackagesMsg (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.id :: selectedPackageIds))
+                (updatePackagesMsg (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll kmPackage.organizationId kmPackage.kmId :: selectedPackageIds))
 
         viewPackageItem updateMsg icon kmPackage =
             Dropdown.buttonItem
@@ -312,11 +315,11 @@ listingKMsFilter appState model =
 
         selectedPackages =
             selectedPackageIds
-                |> List.filterMap (\a -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage a << .id) foundSelectedPackages)
+                |> List.filterMap (\a -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage a << KnowledgeModelUtils.getPackageId) foundSelectedPackages)
                 |> List.sortBy .name
 
         filterPackages =
-            List.filter (Maybe.isNothing << (\kmPackage -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage kmPackage.id) selectedPackageIds))
+            List.filter (Maybe.isNothing << (\kmPackage -> List.find (KnowledgeModelPackageSuggestion.isSameKnowledgeModelPackage (KnowledgeModelUtils.getPackageId kmPackage)) selectedPackageIds))
 
         foundPackages =
             model.kmPackagesFilterPackages
@@ -572,7 +575,7 @@ listingDescription appState project =
 
         kmRoute =
             Routes.KnowledgeModelsRoute <|
-                Wizard.Pages.KnowledgeModels.Routes.DetailRoute project.knowledgeModelPackage.id
+                Wizard.Pages.KnowledgeModels.Routes.DetailRoute project.knowledgeModelPackage.uuid
 
         kmLink =
             linkTo kmRoute
@@ -598,7 +601,7 @@ listingActions appState project =
                 }
 
         openProjectVisible =
-            Features.projectOpen appState project
+            Features.projectOpen project
 
         createProjectFromTemplate =
             ListingDropdown.dropdownAction
@@ -627,7 +630,7 @@ listingActions appState project =
                 }
 
         cloneVisible =
-            Features.projectClone appState project
+            Features.projectClone project
 
         createMigration =
             ListingDropdown.dropdownAction

@@ -2,11 +2,11 @@ module Wizard.Pages.KnowledgeModels.Detail.View exposing (view)
 
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
-import Common.Components.Modal as Modal
 import Common.Components.Page as Page
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, li, p, span, strong, text, ul)
+import Html exposing (Html, a, div, li, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
@@ -15,12 +15,14 @@ import Version
 import Wizard.Api.Models.BootstrapConfig.RegistryConfig exposing (RegistryConfig(..))
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase
-import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Api.Models.KnowledgeModelPackageDetail as KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
+import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
 import Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown as KnowledgeModelActionsDropdown
 import Wizard.Pages.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Detail.Msgs exposing (Msg(..))
@@ -39,7 +41,7 @@ viewPackage appState model kmPackage =
         [ header appState model kmPackage
         , readme appState kmPackage
         , sidePanel appState model kmPackage
-        , deleteVersionModal appState model kmPackage
+        , Html.map DeleteModalMsg <| DeleteModal.view appState model.deleteModalModel
         ]
 
 
@@ -47,18 +49,16 @@ header : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
 header appState model kmPackage =
     let
         deprecatedBadge =
-            if kmPackage.phase == KnowledgeModelPackagePhase.Deprecated then
+            Html.viewIf (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated) <|
                 Badge.danger [] [ text (gettext "deprecated" appState.locale) ]
 
-            else
-                Html.nothing
-
         nonEditableBadge =
-            if kmPackage.nonEditable then
+            Html.viewIf kmPackage.nonEditable <|
                 Badge.dark [] [ text (gettext "non-editable" appState.locale) ]
 
-            else
-                Html.nothing
+        publicBadge =
+            Html.viewIf kmPackage.public <|
+                Badge.info [] [ text (gettext "public" appState.locale) ]
 
         dropdownActions =
             KnowledgeModelActionsDropdown.dropdown appState
@@ -67,19 +67,20 @@ header appState model kmPackage =
                 }
                 { exportMsg = ExportKnowledgeModelPackage
                 , updatePhaseMsg = \_ phase -> UpdatePhase phase
-                , deleteMsg = always (ShowDeleteDialog True)
+                , updatePublicMsg = \_ isPublic -> UpdatePublic isPublic
+                , deleteMsg = always (DeleteModalMsg (DeleteModal.open (KnowledgeModelPackageDetail.toPackage kmPackage)))
                 , viewActionVisible = False
                 }
                 kmPackage
     in
-    DetailPage.header (span [] [ text kmPackage.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
+    DetailPage.header (span [] [ text kmPackage.name, nonEditableBadge, deprecatedBadge, publicBadge ]) [ dropdownActions ]
 
 
 readme : AppState -> KnowledgeModelPackageDetail -> Html msg
 readme appState kmPackage =
     let
         containsNewerVersions =
-            List.any (Version.greaterThan kmPackage.version) kmPackage.versions
+            List.any (Version.greaterThan kmPackage.version << .version) kmPackage.versions
 
         nonEditableInfo =
             if kmPackage.nonEditable then
@@ -156,25 +157,25 @@ sidePanelKmInfo : AppState -> KnowledgeModelPackageDetail -> Maybe ( String, Str
 sidePanelKmInfo appState kmPackage =
     let
         kmInfoList =
-            [ ( gettext "ID" appState.locale, "id", text kmPackage.id )
+            [ ( gettext "ID" appState.locale, "id", text (KnowledgeModelUtils.getPackageId kmPackage) )
             , ( gettext "Version" appState.locale, "version", text <| Version.toString kmPackage.version )
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| String.fromInt kmPackage.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text kmPackage.license )
             ]
 
-        parentInfo =
+        forkOfInfo =
             case kmPackage.forkOfPackageId of
-                Just parentPackageId ->
+                Just forkOfPackageId ->
                     [ ( gettext "Fork of" appState.locale
                       , "fork-of"
-                      , linkTo (Routes.knowledgeModelsDetail parentPackageId) [] [ text parentPackageId ]
+                      , span [] [ text forkOfPackageId ]
                       )
                     ]
 
                 Nothing ->
                     []
     in
-    Just ( gettext "Knowledge Model" appState.locale, "knowledge-model-package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ parentInfo )
+    Just ( gettext "Knowledge Model" appState.locale, "knowledge-model-package", DetailPage.sidePanelList 4 8 <| kmInfoList ++ forkOfInfo )
 
 
 sidePanelOtherVersions : AppState -> Model -> KnowledgeModelPackageDetail -> Maybe ( String, String, Html Msg )
@@ -182,9 +183,9 @@ sidePanelOtherVersions appState model kmPackage =
     let
         versionLink version =
             li []
-                [ linkTo (Routes.knowledgeModelsDetail <| kmPackage.organizationId ++ ":" ++ kmPackage.kmId ++ ":" ++ Version.toString version)
+                [ linkTo (Routes.knowledgeModelsDetail version.uuid)
                     []
-                    [ text <| Version.toString version ]
+                    [ text <| Version.toString version.version ]
                 ]
 
         takeFirstVersions =
@@ -196,8 +197,8 @@ sidePanelOtherVersions appState model kmPackage =
 
         versionLinks =
             kmPackage.versions
-                |> List.filter ((/=) kmPackage.version)
-                |> List.sortWith Version.compare
+                |> List.filter ((/=) kmPackage.version << .version)
+                |> List.sortWith VersionUuid.compare
                 |> List.reverse
                 |> takeFirstVersions
                 |> List.map versionLink
@@ -255,27 +256,3 @@ viewOrganization organization =
     DetailPage.sidePanelItemWithIcon organization.name
         (text organization.organizationId)
         (ItemIcon.view { text = organization.name, image = organization.logo })
-
-
-deleteVersionModal : AppState -> Model -> KnowledgeModelPackageDetail -> Html Msg
-deleteVersionModal appState model kmPackage =
-    let
-        modalContent =
-            [ p []
-                (String.formatHtml
-                    (gettext "Are you sure you want to permanently delete %s?" appState.locale)
-                    [ strong [] [ text kmPackage.id ] ]
-                )
-            ]
-
-        modalConfig =
-            Modal.confirmConfig (gettext "Delete version" appState.locale)
-                |> Modal.confirmConfigContent modalContent
-                |> Modal.confirmConfigVisible model.showDeleteDialog
-                |> Modal.confirmConfigActionResult model.deletingVersion
-                |> Modal.confirmConfigAction (gettext "Delete" appState.locale) DeleteVersion
-                |> Modal.confirmConfigCancelMsg (ShowDeleteDialog False)
-                |> Modal.confirmConfigDangerous True
-                |> Modal.confirmConfigDataCy "km-delete-version"
-    in
-    Modal.confirm appState modalConfig

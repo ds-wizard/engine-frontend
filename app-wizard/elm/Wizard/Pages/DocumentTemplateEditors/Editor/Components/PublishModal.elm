@@ -20,6 +20,7 @@ import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import String.Format as String
+import Uuid exposing (Uuid)
 import Version
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTemplatePhase
@@ -70,7 +71,7 @@ openMsg =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
-    , documentTemplateId : String
+    , documentTemplateUuid : Uuid
     , documentTemplateForm : Maybe DocumentTemplateForm
     }
 
@@ -86,7 +87,7 @@ update cfg appState msg model =
                 Just documentTemplateForm ->
                     ( { model | publishing = ActionResult.Loading }
                     , DocumentTemplateDraftsApi.putDraft appState
-                        cfg.documentTemplateId
+                        cfg.documentTemplateUuid
                         (DocumentTemplateForm.encode DocumentTemplatePhase.Released documentTemplateForm)
                         (cfg.wrapMsg << PublishCompleted)
                     )
@@ -97,7 +98,7 @@ update cfg appState msg model =
         PublishCompleted result ->
             case result of
                 Ok documentTemplate ->
-                    ( model, cmdNavigate appState (Routes.documentTemplatesDetail documentTemplate.id) )
+                    ( model, cmdNavigate appState (Routes.documentTemplatesDetail documentTemplate.uuid) )
 
                 Err error ->
                     ( { model | publishing = ApiError.toActionResult appState (gettext "Unable to publish document template" appState.locale) error }
@@ -119,7 +120,7 @@ view cfg appState model =
         info =
             div [ class "alert alert-info" ]
                 (String.formatHtml (gettext "Check the document template's metadata before publishing. You change them in %s." appState.locale)
-                    [ linkTo (Routes.documentTemplateEditorDetailSettings cfg.documentTemplate.id)
+                    [ linkTo (Routes.documentTemplateEditorDetailSettings cfg.documentTemplate.uuid)
                         [ onClick (SetOpen False), class "btn-link with-icon" ]
                         [ faSettings
                         , text (gettext "Settings" appState.locale)

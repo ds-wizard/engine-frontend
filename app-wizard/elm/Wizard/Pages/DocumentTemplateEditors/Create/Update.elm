@@ -5,6 +5,7 @@ module Wizard.Pages.DocumentTemplateEditors.Create.Update exposing
 
 import ActionResult
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.UuidResponse exposing (UuidResponse)
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Dom as Dom
 import Common.Ports.Window as Window
@@ -16,10 +17,10 @@ import Form.Field as Field
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
 import String.Normalize as Normalize
+import Uuid
 import Version exposing (Version)
 import Wizard.Api.DocumentTemplateDrafts as DocumentTemplateDraftsApi
 import Wizard.Api.DocumentTemplates as DocumentTemplatesApi
-import Wizard.Api.Models.CreatedEntityWithId exposing (CreatedEntityWithId)
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -34,9 +35,9 @@ fetchData : AppState -> Model -> Cmd Msg
 fetchData appState model =
     let
         fetchDocumentTemplateCmd =
-            case ( model.selectedDocumentTemplate, model.edit ) of
-                ( Just documentTemplateId, True ) ->
-                    DocumentTemplatesApi.getTemplate appState documentTemplateId GetDocumentTemplateCompleted
+            case ( model.selectedDocumentTemplateUuid, model.edit ) of
+                ( Just documentTemplateUuid, True ) ->
+                    DocumentTemplatesApi.getTemplate appState documentTemplateUuid GetDocumentTemplateCompleted
 
                 _ ->
                     Cmd.none
@@ -133,12 +134,12 @@ handleFormSetVersion appState version model =
     ( { model | form = form }, Cmd.none )
 
 
-handlePostDocumentTemplateDraftCompleted : AppState -> Model -> Result ApiError CreatedEntityWithId -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostDocumentTemplateDraftCompleted : AppState -> Model -> Result ApiError UuidResponse -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePostDocumentTemplateDraftCompleted appState model result =
     case result of
         Ok documentTemplate ->
             ( model
-            , cmdNavigate appState (Routes.documentTemplateEditorDetail documentTemplate.id)
+            , cmdNavigate appState (Routes.documentTemplateEditorDetail documentTemplate.uuid)
             )
 
         Err error ->
@@ -160,7 +161,7 @@ handleDocumentTemplateTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             { wrapMsg = wrapMsg << DocumentTemplateTypeHintInputMsg
             , getTypeHints = DocumentTemplatesApi.getTemplatesSuggestions appState (Just False) True
             , getError = gettext "Unable to get Knowledge Models." appState.locale
-            , setReply = formMsg << .id
+            , setReply = formMsg << Uuid.toString << .uuid
             , clearReply = Just <| formMsg ""
             , filterResults = Nothing
             }

@@ -27,19 +27,12 @@ fetchTypeHints appState typeHintRequest =
     Request.post (AppState.toServerInfo appState) "/type-hints" (D.list TypeHint.decoder) data
 
 
-fetchTypeHintsLegacy : AppState -> Maybe String -> List Event -> String -> String -> ToMsg (List TypeHintLegacy) msg -> Cmd msg
-fetchTypeHintsLegacy appState mbKmPackageId events questionUuid q =
+fetchTypeHintsLegacy : AppState -> Maybe Uuid -> List Event -> String -> String -> ToMsg (List TypeHintLegacy) msg -> Cmd msg
+fetchTypeHintsLegacy appState mbKmPackageUuid events questionUuid q =
     let
-        strToMaybe str =
-            if String.isEmpty str then
-                Nothing
-
-            else
-                Just str
-
         data =
             E.object
-                [ ( "knowledgeModelPackageId", E.maybe E.string <| Maybe.andThen strToMaybe mbKmPackageId )
+                [ ( "knowledgeModelPackageUuid", E.maybe Uuid.encode mbKmPackageUuid )
                 , ( "events", E.list Event.encode events )
                 , ( "questionUuid", E.string questionUuid )
                 , ( "q", E.string q )

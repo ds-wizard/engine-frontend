@@ -143,7 +143,7 @@ viewEditorNavigationNav : AppState -> DTEditorRoute -> Model -> Html Msg
 viewEditorNavigationNav appState route model =
     let
         filesLink =
-            { route = Routes.documentTemplateEditorDetailFiles model.documentTemplateId
+            { route = Routes.documentTemplateEditorDetailFiles model.documentTemplateUuid
             , label = gettext "Files" appState.locale
             , icon = faDocumentTemplateEditorFiles
             , isActive = route == DTEditorRoute.Files
@@ -152,7 +152,7 @@ viewEditorNavigationNav appState route model =
             }
 
         previewLink =
-            { route = Routes.documentTemplateEditorDetailPreview model.documentTemplateId
+            { route = Routes.documentTemplateEditorDetailPreview model.documentTemplateUuid
             , label = gettext "Preview" appState.locale
             , icon = faPreview
             , isActive = route == DTEditorRoute.Preview
@@ -161,7 +161,7 @@ viewEditorNavigationNav appState route model =
             }
 
         settingsLink =
-            { route = Routes.documentTemplateEditorDetailSettings model.documentTemplateId
+            { route = Routes.documentTemplateEditorDetailSettings model.documentTemplateUuid
             , label = gettext "Settings" appState.locale
             , icon = faSettings
             , isActive = route == DTEditorRoute.Settings

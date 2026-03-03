@@ -16,6 +16,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.Document.DocumentState as DocumentState exposing (DocumentState)
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormat as DocumentTemplateFormat exposing (DocumentTemplateFormat)
+import Wizard.Api.Models.DocumentTemplateInfo as DocumentTemplateInfo exposing (DocumentTemplateInfo)
 import Wizard.Api.Models.ProjectInfo as ProjectInfo exposing (ProjectInfo)
 import Wizard.Api.Models.Submission as Submission exposing (Submission)
 
@@ -27,8 +28,7 @@ type alias Document =
     , project : Maybe ProjectInfo
     , projectEventUuid : Maybe Uuid
     , projectVersion : Maybe String
-    , documentTemplateId : String
-    , documentTemplateName : String
+    , documentTemplate : DocumentTemplateInfo
     , format : DocumentTemplateFormat
     , state : DocumentState
     , submissions : List Submission
@@ -54,8 +54,7 @@ decoder =
         |> D.optional "project" (D.maybe ProjectInfo.decoder) Nothing
         |> D.required "projectEventUuid" (D.maybe Uuid.decoder)
         |> D.required "projectVersion" (D.maybe D.string)
-        |> D.required "documentTemplateId" D.string
-        |> D.required "documentTemplateName" D.string
+        |> D.required "documentTemplate" DocumentTemplateInfo.decoder
         |> D.required "format" DocumentTemplateFormat.decoder
         |> D.required "state" DocumentState.decoder
         |> D.required "submissions" (D.list Submission.decoder)
@@ -73,8 +72,7 @@ encode document =
         , ( "project", E.maybe ProjectInfo.encode document.project )
         , ( "projectEventUuid", E.maybe Uuid.encode document.projectEventUuid )
         , ( "projectVersion", E.maybe E.string document.projectVersion )
-        , ( "documentTemplateId", E.string document.documentTemplateId )
-        , ( "documentTemplateName", E.string document.documentTemplateName )
+        , ( "documentTemplate", DocumentTemplateInfo.encode document.documentTemplate )
         , ( "format", DocumentTemplateFormat.encode document.format )
         , ( "state", DocumentState.encode document.state )
         , ( "createdBy", E.maybe Uuid.encode document.createdBy )

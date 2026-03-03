@@ -17,7 +17,6 @@ type alias Item a =
     { a
         | createdAt : Time.Posix
         , description : String
-        , id : String
         , name : String
         , organization : OrganizationInfo
         , version : Version

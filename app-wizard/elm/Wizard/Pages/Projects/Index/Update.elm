@@ -109,7 +109,7 @@ update wrapMsg msg appState model =
         ListingFilterAddSelectedPackage kmPackage listingMsg ->
             let
                 updatePackages kmPackages =
-                    { kmPackages | items = List.uniqueBy (KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll << .id) (kmPackage :: kmPackages.items) }
+                    { kmPackages | items = List.uniqueBy (\p -> KnowledgeModelPackageSuggestion.knowledgeModelPackageIdAll p.organizationId p.kmId) (kmPackage :: kmPackages.items) }
 
                 newModel =
                     { model | kmPackagesFilterSelectedPackages = ActionResult.map updatePackages model.kmPackagesFilterSelectedPackages }

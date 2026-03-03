@@ -6,51 +6,38 @@ module Wizard.Api.Models.DocumentTemplate.DocumentTemplatePackage exposing
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
-import Version
+import Uuid exposing (Uuid)
+import Version exposing (Version)
 
 
 type alias DocumentTemplatePackage =
-    { id : String
+    { uuid : Uuid
     , name : String
     , description : String
+    , organizationId : String
+    , kmId : String
+    , version : Version
     }
 
 
 decoder : Decoder DocumentTemplatePackage
 decoder =
     D.succeed DocumentTemplatePackage
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" D.string
+        |> D.required "organizationId" D.string
+        |> D.required "kmId" D.string
+        |> D.required "version" Version.decoder
 
 
 compareById : DocumentTemplatePackage -> DocumentTemplatePackage -> Order
 compareById tp1 tp2 =
-    let
-        split tp =
-            case String.split ":" tp of
-                orgId :: pkgId :: version :: [] ->
-                    ( orgId, pkgId, version )
+    if tp1.organizationId /= tp2.organizationId then
+        Basics.compare tp1.organizationId tp2.organizationId
 
-                _ ->
-                    ( "", "", "" )
-
-        ( tp1orgId, tp1PkgId, tp1version ) =
-            split tp1.id
-
-        ( tp2orgId, tp2PkgId, tp2version ) =
-            split tp2.id
-    in
-    if tp1orgId /= tp2orgId then
-        Basics.compare tp1orgId tp2orgId
-
-    else if tp1PkgId /= tp2PkgId then
-        Basics.compare tp1PkgId tp2PkgId
+    else if tp1.kmId /= tp2.kmId then
+        Basics.compare tp1.kmId tp2.kmId
 
     else
-        case ( Version.fromString tp1version, Version.fromString tp2version ) of
-            ( Just version1, Just version2 ) ->
-                Version.compare version1 version2
-
-            _ ->
-                EQ
+        Version.compare tp1.version tp2.version

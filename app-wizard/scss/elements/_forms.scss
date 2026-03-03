@@ -23,6 +23,15 @@ input[type=text]:read-only:not(.form-control-flatpickr), textarea:read-only, .fo
     min-height: 2.2rem;
 }
 
+.form-control.form-control-danger {
+    border-color: var(--bs-form-invalid-border-color);
+
+    &:focus {
+        border-color: var(--bs-form-invalid-border-color);
+        box-shadow: 0 0 0 0.25rem rgba(var(--bs-danger-rgb), 0.25);
+    }
+}
+
 label {
     font-weight: bold;
     margin-bottom: $spacer-2;

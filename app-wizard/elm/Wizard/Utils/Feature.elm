@@ -26,6 +26,8 @@ module Wizard.Utils.Feature exposing
     , knowledgeModelRestore
     , knowledgeModelSecrets
     , knowledgeModelSetDeprecated
+    , knowledgeModelSetPrivate
+    , knowledgeModelSetPublic
     , knowledgeModelsDelete
     , knowledgeModelsExport
     , knowledgeModelsImport
@@ -39,7 +41,6 @@ module Wizard.Utils.Feature exposing
     , localeSetDefault
     , localeView
     , newsModal
-    , projectActions
     , projectCancelMigration
     , projectClone
     , projectCommentAdd
@@ -166,8 +167,8 @@ knowledgeModelEditorCancelMigration appState knowledgeModelEditor =
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Migrating, KnowledgeModelEditorState.Migrated ] knowledgeModelEditor
 
 
-knowledgeModelEditorDelete : AppState -> KnowledgeModelEditor -> Bool
-knowledgeModelEditorDelete appState _ =
+knowledgeModelEditorDelete : AppState -> Bool
+knowledgeModelEditorDelete appState =
     adminOr Perm.knowledgeModel appState
 
 
@@ -195,8 +196,8 @@ knowledgeModelsDelete =
     adminOr Perm.packageManagementWrite
 
 
-knowledgeModelsPreview : AppState -> Bool
-knowledgeModelsPreview _ =
+knowledgeModelsPreview : Bool
+knowledgeModelsPreview =
     True
 
 
@@ -210,6 +211,18 @@ knowledgeModelRestore : AppState -> { a | phase : KnowledgeModelPackagePhase } -
 knowledgeModelRestore appState kmPackage =
     adminOr Perm.packageManagementWrite appState
         && (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated)
+
+
+knowledgeModelSetPublic : AppState -> { a | public : Bool } -> Bool
+knowledgeModelSetPublic appState kmPackage =
+    adminOr Perm.packageManagementWrite appState
+        && not kmPackage.public
+
+
+knowledgeModelSetPrivate : AppState -> { a | public : Bool } -> Bool
+knowledgeModelSetPrivate appState kmPackage =
+    adminOr Perm.packageManagementWrite appState
+        && kmPackage.public
 
 
 
@@ -292,8 +305,8 @@ projectTemplatesCreate =
     adminOr Perm.projectTemplate
 
 
-projectOpen : AppState -> Project -> Bool
-projectOpen _ project =
+projectOpen : Project -> Bool
+projectOpen project =
     project.state /= ProjectState.Migrating
 
 
@@ -302,8 +315,8 @@ projectCreateFromTemplate appState project =
     projectsCreateFromTemplate appState && project.isTemplate && project.state /= ProjectState.Migrating
 
 
-projectClone : AppState -> Project -> Bool
-projectClone _ project =
+projectClone : Project -> Bool
+projectClone project =
     project.state /= ProjectState.Migrating
 
 
@@ -337,18 +350,18 @@ projectMetrics appState =
     appState.config.project.summaryReport.enabled
 
 
-projectPreview : AppState -> Bool
-projectPreview _ =
+projectPreview : Bool
+projectPreview =
     True
 
 
-projectDocumentsView : AppState -> Bool
-projectDocumentsView _ =
+projectDocumentsView : Bool
+projectDocumentsView =
     True
 
 
-projectSearch : AppState -> ProjectLike q -> Bool
-projectSearch _ project =
+projectSearch : ProjectLike q -> Bool
+projectSearch project =
     not (ProjectUtils.isMigrating project)
 
 
@@ -422,15 +435,6 @@ projectFiles =
 
 
 
--- Project Actions
-
-
-projectActions : AppState -> Bool
-projectActions =
-    adminOr Perm.projectAction
-
-
-
 -- Project Importers
 
 
@@ -453,8 +457,8 @@ documentDelete appState document =
     isAdmin appState || Document.isOwner appState document
 
 
-documentDownload : AppState -> Document -> Bool
-documentDownload _ document =
+documentDownload : Document -> Bool
+documentDownload document =
     document.state == DoneDocumentState
 
 

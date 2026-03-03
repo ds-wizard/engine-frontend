@@ -26,13 +26,13 @@ type alias ProjectCreateForm =
     , visibilityPermission : ProjectPermission
     , sharingEnabled : Bool
     , sharingPermission : ProjectPermission
-    , knowledgeModelPackageId : String
-    , templateId : String
+    , knowledgeModelPackageUuid : String
+    , projectUuid : String
     }
 
 
-init : AppState -> ValidationMode -> Maybe Uuid -> Maybe String -> Form FormError ProjectCreateForm
-init appState validationMode selectedTemplateUuid selectedPackageId =
+init : AppState -> ValidationMode -> Maybe Uuid -> Maybe Uuid -> Form FormError ProjectCreateForm
+init appState validationMode selectedTemplateUuid selectedPackageUuid =
     let
         toField fieldName mbFieldValue =
             case mbFieldValue of
@@ -54,8 +54,8 @@ init appState validationMode selectedTemplateUuid selectedPackageId =
             , ( "sharingEnabled", Field.bool sharingEnabled )
             , ( "sharingPermission", ProjectPermission.field sharingPermission )
             ]
-                ++ toField "templateId" (Maybe.map Uuid.toString selectedTemplateUuid)
-                ++ toField "knowledgeModelPackageId" selectedPackageId
+                ++ toField "projectUuid" (Maybe.map Uuid.toString selectedTemplateUuid)
+                ++ toField "knowledgeModelPackageUuid" (Maybe.map Uuid.toString selectedPackageUuid)
     in
     Form.initial initials (validation validationMode)
 
@@ -80,11 +80,11 @@ validation validationMode =
         TemplateValidationMode ->
             validationBase
                 |> V.andMap (V.succeed "")
-                |> V.andMap (V.field "templateId" V.string)
+                |> V.andMap (V.field "projectUuid" V.string)
 
         PackageValidationMode ->
             validationBase
-                |> V.andMap (V.field "knowledgeModelPackageId" V.string)
+                |> V.andMap (V.field "knowledgeModelPackageUuid" V.string)
                 |> V.andMap (V.succeed "")
 
 
@@ -92,11 +92,11 @@ encodeFromPackage : List String -> ProjectCreateForm -> E.Value
 encodeFromPackage questionTagUuids form =
     E.object
         [ ( "name", E.string form.name )
-        , ( "knowledgeModelPackageId", E.string form.knowledgeModelPackageId )
+        , ( "knowledgeModelPackageUuid", E.string form.knowledgeModelPackageUuid )
         , ( "visibility", ProjectVisibility.encode (ProjectVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission) )
         , ( "sharing", ProjectSharing.encode (ProjectSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
         , ( "questionTagUuids", E.list E.string questionTagUuids )
-        , ( "templateId", E.maybe E.string Nothing )
+        , ( "projectUuid", E.maybe E.string Nothing )
         ]
 
 
@@ -104,5 +104,5 @@ encodeFromTemplate : ProjectCreateForm -> E.Value
 encodeFromTemplate form =
     E.object
         [ ( "name", E.string form.name )
-        , ( "projectUuid", E.string form.templateId )
+        , ( "projectUuid", E.string form.projectUuid )
         ]

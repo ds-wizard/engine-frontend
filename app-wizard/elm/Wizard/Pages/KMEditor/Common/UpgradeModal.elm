@@ -48,16 +48,16 @@ initialModel =
 
 
 type Msg
-    = Open Uuid String String
+    = Open Uuid String Uuid
     | FormMsg Form.Msg
     | UpgradeComplete (Result ApiError ())
     | GetKnowledgeModelPackageComplete (Result ApiError KnowledgeModelPackageDetail)
     | Close
 
 
-open : Uuid -> String -> String -> Msg
-open uuid name forkOfPackageId =
-    Open uuid name forkOfPackageId
+open : Uuid -> String -> Uuid -> Msg
+open uuid name forkOfPackageUuid =
+    Open uuid name forkOfPackageUuid
 
 
 type alias UpdateConfig msg =
@@ -69,13 +69,13 @@ type alias UpdateConfig msg =
 update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
-        Open uuid name forkOfPackageId ->
+        Open uuid name forkOfPackageUuid ->
             ( { model
                 | kmEditor = Just ( uuid, name )
                 , creatingMigration = ActionResult.Unset
                 , kmPackage = ActionResult.Loading
               }
-            , Cmd.map cfg.wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackage appState forkOfPackageId GetKnowledgeModelPackageComplete
+            , Cmd.map cfg.wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackage appState forkOfPackageUuid GetKnowledgeModelPackageComplete
             )
 
         FormMsg formMsg ->
@@ -156,7 +156,7 @@ view appState model =
                     in
                     [ p [ class "alert alert-info" ]
                         (String.formatHtml (gettext "Select the new parent knowledge model for %s." appState.locale) [ strong [] [ text name ] ])
-                    , FormGroup.select appState.locale options model.kmEditorUpgradeForm "targetPackageId" (gettext "New parent knowledge model" appState.locale)
+                    , FormGroup.select appState.locale options model.kmEditorUpgradeForm "targetPackageUuid" (gettext "New parent knowledge model" appState.locale)
                         |> Html.map FormMsg
                     ]
 

@@ -194,7 +194,7 @@ projectTemplateFormFields appState model =
                 typeHintInput =
                     TypeHintInput.view cfg model.projectTemplateTypeHintInputModel
             in
-            FormGroup.formGroupCustom typeHintInput appState.locale model.form "templateId" (gettext "Project Template" appState.locale)
+            FormGroup.formGroupCustom typeHintInput appState.locale model.form "projectUuid" (gettext "Project Template" appState.locale)
     in
     div [] [ projectTemplateInput ]
 
@@ -215,7 +215,7 @@ knowledgeModelFormFields appState model =
                 typeHintInput =
                     TypeHintInput.view cfg model.knowledgeModelTypeHintInputModel
             in
-            FormGroup.formGroupCustom typeHintInput appState.locale model.form "knowledgeModelPackageId" (gettext "Knowledge Model" appState.locale)
+            FormGroup.formGroupCustom typeHintInput appState.locale model.form "knowledgeModelPackageUuid" (gettext "Knowledge Model" appState.locale)
     in
     div []
         [ knowledgeModelInput

@@ -7,6 +7,7 @@ import ActionResult exposing (ActionResult(..))
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Data.AppState exposing (AppState)
@@ -18,17 +19,17 @@ type alias Model =
     , form : Form FormError KnowledgeModelEditorCreateForm
     , kmPackageTypeHintInputModel : TypeHintInput.Model KnowledgeModelPackageSuggestion
     , kmPackage : ActionResult KnowledgeModelPackageDetail
-    , selectedKmPackage : Maybe String
+    , selectedKmPackageUuid : Maybe Uuid
     , edit : Bool
     }
 
 
-initialModel : AppState -> Maybe String -> Maybe Bool -> Model
+initialModel : AppState -> Maybe Uuid -> Maybe Bool -> Model
 initialModel appState selectedPackage edit =
     { savingKmEditor = Unset
-    , form = KnowledgeModelEditorCreateForm.init appState selectedPackage
+    , form = KnowledgeModelEditorCreateForm.init appState (Maybe.map Uuid.toString selectedPackage)
     , kmPackageTypeHintInputModel = TypeHintInput.init "previousKnowledgeModelPackageId"
     , kmPackage = ActionResult.Loading
-    , selectedKmPackage = selectedPackage
+    , selectedKmPackageUuid = selectedPackage
     , edit = Maybe.withDefault False edit
     }

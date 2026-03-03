@@ -1,12 +1,14 @@
 module Wizard.Pages.KMEditor.Create.View exposing (view)
 
 import ActionResult
+import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Container as Container
 import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
@@ -22,8 +24,8 @@ view appState model =
         pageView =
             Page.actionResultView appState (viewCreate appState model)
     in
-    case ( model.selectedKmPackage, model.edit ) of
-        ( Just _, True ) ->
+    case model.selectedKmPackageUuid of
+        Just _ ->
             pageView model.kmPackage
 
         _ ->
@@ -52,9 +54,17 @@ formView : AppState -> Model -> Html Msg
 formView appState model =
     let
         parentInput =
-            case model.selectedKmPackage of
-                Just kmPackageId ->
-                    FormGroup.codeView kmPackageId
+            case model.selectedKmPackageUuid of
+                Just _ ->
+                    let
+                        viewPackageId package =
+                            FormGroup.codeView (KnowledgeModelUtils.getPackageId package) (gettext "Based on" appState.locale)
+                    in
+                    ActionResultBlock.inlineView
+                        { viewContent = viewPackageId
+                        , actionResult = model.kmPackage
+                        , locale = appState.locale
+                        }
 
                 Nothing ->
                     let
@@ -69,7 +79,7 @@ formView appState model =
                         typeHintInput =
                             TypeHintInput.view cfg model.kmPackageTypeHintInputModel
                     in
-                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousPackageId"
+                    FormGroup.formGroupCustom typeHintInput appState.locale model.form "previousPackageUuid" (gettext "Based on" appState.locale)
 
         previousVersion =
             if model.edit then
@@ -95,6 +105,6 @@ formView appState model =
         , Html.map FormMsg <| FormGroup.input appState.locale model.form "kmId" <| gettext "Knowledge Model ID" appState.locale
         , FormExtra.textAfter <| gettext "Knowledge model ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
         , FormGroup.version appState.locale versionInputConfig model.form
-        , parentInput <| gettext "Based on" appState.locale
+        , parentInput
         , FormExtra.textAfter <| gettext "You can create a new knowledge model based on the existing one or start from scratch." appState.locale
         ]

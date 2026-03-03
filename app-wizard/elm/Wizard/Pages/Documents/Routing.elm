@@ -48,6 +48,6 @@ toUrl route =
                 [ moduleRoot, queryString ]
 
 
-isAllowed : Route -> AppState -> Bool
-isAllowed _ appState =
-    Feature.documentsView appState
+isAllowed : AppState -> Bool
+isAllowed =
+    Feature.documentsView
