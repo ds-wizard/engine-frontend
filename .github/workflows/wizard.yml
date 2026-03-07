@@ -65,7 +65,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker] Build (default)'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE }}
@@ -94,7 +94,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker-dev] Build + Push (default)'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: github.event_name != 'pull_request' && steps.meta-dev-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
@@ -121,7 +121,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker-public] Build + Push (default)'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: github.event_name != 'pull_request' && steps.meta-public-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
