@@ -1407,56 +1407,6 @@ computeIntegrationWarnings appState secrets integration =
             in
             nameWarning ++ variablesWarning ++ urlWarning ++ testDataWarning ++ itemTemplateWarning
 
-        Integration.ApiLegacyIntegration _ data ->
-            let
-                idWarning =
-                    if String.isEmpty (Integration.getId integration) then
-                        createError (gettext "Empty ID for integration" appState.locale)
-
-                    else
-                        []
-
-                urlError =
-                    if String.isEmpty data.requestUrl then
-                        createError (gettext "Empty request URL for integration" appState.locale)
-
-                    else
-                        []
-
-                requestMethod =
-                    if String.isEmpty data.requestMethod then
-                        createError (gettext "Empty request HTTP method for integration" appState.locale)
-
-                    else
-                        []
-
-                responseItemTemplate =
-                    if String.isEmpty data.responseItemTemplate then
-                        createError (gettext "Empty response item template for integration" appState.locale)
-
-                    else
-                        []
-            in
-            idWarning ++ urlError ++ requestMethod ++ responseItemTemplate
-
-        Integration.WidgetIntegration _ data ->
-            let
-                idWarning =
-                    if String.isEmpty (Integration.getId integration) then
-                        createError (gettext "Empty ID for integration" appState.locale)
-
-                    else
-                        []
-
-                widgetUrlWarning =
-                    if String.isEmpty data.widgetUrl then
-                        createError (gettext "Empty widget URL for integration" appState.locale)
-
-                    else
-                        []
-            in
-            idWarning ++ widgetUrlWarning
-
 
 computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorContextWarning
 computeResourceCollectionWarnings appState km resourceCollection =
