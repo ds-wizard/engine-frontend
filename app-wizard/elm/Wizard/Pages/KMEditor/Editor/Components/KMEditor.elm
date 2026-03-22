@@ -30,15 +30,14 @@ import Common.Ports.Dom as Dom
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.CurlUtils as CurlUtils
 import Common.Utils.GuideLinks exposing (GuideLinks)
-import Common.Utils.HttpMethod as HttpMethod
 import Common.Utils.HttpStatus as HttpStatus
 import Common.Utils.Markdown as Markdown
 import Compose exposing (compose2, compose3)
 import Dict exposing (Dict)
 import Flip exposing (flip)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, button, code, div, h3, h5, hr, i, img, label, li, pre, small, span, strong, text, textarea, ul)
-import Html.Attributes exposing (attribute, class, classList, disabled, id, placeholder, src, target, value)
+import Html exposing (Html, a, button, code, div, h3, h5, hr, i, label, li, pre, small, span, strong, text, textarea, ul)
+import Html.Attributes exposing (attribute, class, classList, disabled, id, placeholder, target, value)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick, onInput, onMouseLeave)
 import Html.Extra as Html
@@ -46,7 +45,6 @@ import Html.Keyed
 import Html.Lazy as Lazy
 import Json.Print
 import Json.Value as JsonValue
-import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
@@ -71,12 +69,10 @@ import Wizard.Api.Models.Event.AddTagEventData as AddTagEventData
 import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
 import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
 import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
-import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setId, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setItemUrl, setLabel, setListQuestionUuid, setLogo, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestEmptySearch, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemId, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTargetUuid, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables, setWidgetUrl)
+import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setLabel, setListQuestionUuid, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTargetUuid, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables)
 import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
 import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
-import Wizard.Api.Models.Event.EditIntegrationApiLegacyEventData as EditIntegrationApiLegacyEventData
 import Wizard.Api.Models.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
-import Wizard.Api.Models.Event.EditIntegrationWidgetEventData as EditIntegrationWidgetEventData
 import Wizard.Api.Models.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
 import Wizard.Api.Models.Event.EditMetricEventData as EditMetricEventData
 import Wizard.Api.Models.Event.EditPhaseEventData as EditPhaseEventData
@@ -104,9 +100,7 @@ import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData as ApiIntegrationData exposing (ApiIntegrationData)
-import Wizard.Api.Models.KnowledgeModel.Integration.ApiLegacyIntegrationData exposing (ApiLegacyIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair
-import Wizard.Api.Models.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
@@ -1902,7 +1896,7 @@ viewIntegrationEditor config integration =
         parentUuid =
             EditorContext.getParentUuid integrationUuid editorContext
 
-        createEditEventWithFocusSelector setApi setApiLegacy setWidget selector value =
+        createEditEventWithFocusSelector setApi selector value =
             eventMsg True selector Nothing parentUuid (Just integrationUuid) <|
                 EditIntegrationEvent <|
                     case integration of
@@ -1910,16 +1904,6 @@ viewIntegrationEditor config integration =
                             EditIntegrationApiEventData.init
                                 |> setApi value
                                 |> EditIntegrationApiEvent
-
-                        ApiLegacyIntegration _ _ ->
-                            EditIntegrationApiLegacyEventData.init
-                                |> setApiLegacy value
-                                |> EditIntegrationApiLegacyEvent
-
-                        WidgetIntegration _ _ ->
-                            EditIntegrationWidgetEventData.init
-                                |> setWidget value
-                                |> EditIntegrationWidgetEvent
 
         createEditEventFromPrefab integrationPrefab =
             eventMsg False Nothing Nothing parentUuid (Just integrationUuid) <|
@@ -1944,57 +1928,18 @@ viewIntegrationEditor config integration =
                                 , variables = EventField.create data.variables True
                                 }
 
-                        ApiLegacyIntegration commonData apiData ->
-                            EditIntegrationApiLegacyEvent
-                                { id = EventField.create commonData.id True
-                                , name = EventField.create commonData.name True
-                                , variables = EventField.create commonData.variables True
-                                , logo = EventField.create commonData.logo True
-                                , itemUrl = EventField.create commonData.itemUrl True
-                                , annotations = EventField.create commonData.annotations True
-                                , requestMethod = EventField.create apiData.requestMethod True
-                                , requestUrl = EventField.create apiData.requestUrl True
-                                , requestHeaders = EventField.create apiData.requestHeaders True
-                                , requestBody = EventField.create apiData.requestBody True
-                                , requestEmptySearch = EventField.create apiData.requestEmptySearch True
-                                , responseListField = EventField.create apiData.responseListField True
-                                , responseItemId = EventField.create apiData.responseItemId True
-                                , responseItemTemplate = EventField.create apiData.responseItemTemplate True
-                                }
-
-                        WidgetIntegration commonData widgetData ->
-                            EditIntegrationWidgetEvent
-                                { id = EventField.create commonData.id True
-                                , name = EventField.create commonData.name True
-                                , variables = EventField.create commonData.variables True
-                                , logo = EventField.create commonData.logo True
-                                , itemUrl = EventField.create commonData.itemUrl True
-                                , annotations = EventField.create commonData.annotations True
-                                , widgetUrl = EventField.create widgetData.widgetUrl True
-                                }
-
-        onTypeChange value =
+        onTypeChange _ =
+            --onTypeChange value =
             eventMsg False Nothing Nothing parentUuid (Just integrationUuid) <|
-                case value of
-                    "Api" ->
-                        EditIntegrationApiEventData.init
-                            |> EditIntegrationApiEvent
-                            |> EditIntegrationEvent
-
-                    "Widget" ->
-                        EditIntegrationWidgetEventData.init
-                            |> EditIntegrationWidgetEvent
-                            |> EditIntegrationEvent
-
-                    _ ->
-                        EditIntegrationApiLegacyEventData.init
-                            |> EditIntegrationApiLegacyEvent
-                            |> EditIntegrationEvent
+                (--case value of
+                 --    "Api" ->
+                 EditIntegrationApiEventData.init
+                    |> EditIntegrationApiEvent
+                    |> EditIntegrationEvent
+                )
 
         integrationTypeOptions =
             [ ( "Api", gettext "API" appState.locale )
-            , ( "ApiLegacy", gettext "API (Legacy)" appState.locale )
-            , ( "Widget", gettext "Widget" appState.locale )
             ]
 
         integrationEditorTitle =
@@ -2021,19 +1966,13 @@ viewIntegrationEditor config integration =
         annotationsInput =
             Input.annotations appState
                 { annotations = Integration.getAnnotations integration
-                , onEdit = createEditEventWithFocusSelector setAnnotations setAnnotations setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations
                 }
 
         integrationTypeInputs =
             case integration of
                 ApiIntegration data ->
                     viewIntegrationEditorApi config parentUuid integrationUuid integration data
-
-                ApiLegacyIntegration _ data ->
-                    viewIntegrationEditorApiLegacy config parentUuid integrationUuid integration data
-
-                WidgetIntegration _ data ->
-                    viewIntegrationEditorWidget config parentUuid integrationUuid integration data
 
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
@@ -2054,18 +1993,10 @@ viewIntegrationEditor config integration =
         prefabsView =
             if not (List.isEmpty integrationPrefabs) && EditorContext.isEmptyIntegrationEditorUuid integrationUuid editorContext then
                 let
-                    viewLogo i =
-                        case Integration.getLogo i of
-                            Just logo ->
-                                img [ src logo ] []
-
-                            Nothing ->
-                                faKmIntegration
-
                     viewIntegrationButton i =
                         li []
                             [ a [ onClick (createEditEventFromPrefab i) ]
-                                [ viewLogo i
+                                [ faKmIntegration
                                 , span [] [ text (Integration.getVisibleName i) ]
                                 ]
                             ]
@@ -2076,30 +2007,30 @@ viewIntegrationEditor config integration =
                     ]
 
             else
-                case List.find ((==) (Integration.getId integration) << Integration.getId) integrationPrefabs of
-                    Just usedPrefab ->
-                        let
-                            differFromPrefab =
-                                Integration.getName integration
-                                    /= Integration.getName usedPrefab
-                                    || Integration.getResponseItemTemplate integration
-                                    /= Integration.getResponseItemTemplate usedPrefab
-                        in
-                        if differFromPrefab then
-                            div [ class "alert alert-info" ]
-                                [ text (gettext "This integration was created from a template and now differs." appState.locale)
-                                , button
-                                    [ class "btn btn-primary ms-2"
-                                    , onClick (createEditEventFromPrefab usedPrefab)
-                                    ]
-                                    [ text (gettext "Update" appState.locale) ]
-                                ]
-
-                        else
-                            Html.nothing
-
-                    Nothing ->
-                        Html.nothing
+                --case List.find ((==) (Integration.getId integration) << Integration.getId) integrationPrefabs of
+                --    Just usedPrefab ->
+                --        let
+                --            differFromPrefab =
+                --                Integration.getName integration
+                --                    /= Integration.getName usedPrefab
+                --                    || Integration.getResponseItemTemplate integration
+                --                    /= Integration.getResponseItemTemplate usedPrefab
+                --        in
+                --        if differFromPrefab then
+                --            div [ class "alert alert-info" ]
+                --                [ text (gettext "This integration was created from a template and now differs." appState.locale)
+                --                , button
+                --                    [ class "btn btn-primary ms-2"
+                --                    , onClick (createEditEventFromPrefab usedPrefab)
+                --                    ]
+                --                    [ text (gettext "Update" appState.locale) ]
+                --                ]
+                --
+                --        else
+                --            Html.nothing
+                --
+                --    Nothing ->
+                Html.nothing
     in
     editor ("integration-" ++ integrationUuid)
         ([ integrationEditorTitle
@@ -2594,171 +2525,6 @@ copyableJinjaVariable { appState, model, wrapMsg } domain variable =
         [ faCopy ]
 
 
-viewIntegrationEditorApiLegacy : EditorConfig msg -> String -> String -> Integration -> ApiLegacyIntegrationData -> List (Html msg)
-viewIntegrationEditorApiLegacy { appState, eventMsg } parentUuid integrationUuid integration data =
-    let
-        createTypeEditEvent map value =
-            createTypeEditEventWithFocusSelector map Nothing value
-
-        createTypeEditEventWithFocusSelector map selector value =
-            EditIntegrationApiLegacyEventData.init
-                |> map value
-                |> EditIntegrationApiLegacyEvent
-                |> EditIntegrationEvent
-                |> eventMsg True selector Nothing parentUuid (Just integrationUuid)
-
-        requestUrlInput =
-            Input.string
-                { name = "requestUrl"
-                , label = gettext "Request URL" appState.locale
-                , value = data.requestUrl
-                , onInput = createTypeEditEvent setRequestUrl
-                }
-
-        requestMethodInput =
-            Input.select
-                { name = "requestMethod"
-                , label = gettext "Request HTTP Method" appState.locale
-                , value = data.requestMethod
-                , options = HttpMethod.options
-                , onChange = createTypeEditEvent setRequestMethod
-                , extra = Nothing
-                }
-
-        requestHeadersInput =
-            Input.headers appState
-                { label = gettext "Request HTTP Headers" appState.locale
-                , headers = data.requestHeaders
-                , onEdit = createTypeEditEventWithFocusSelector setRequestHeaders
-                }
-
-        requestBodyInput =
-            Input.textarea
-                { name = "requestBody"
-                , label = gettext "Request HTTP Body" appState.locale
-                , value = data.requestBody
-                , onInput = createTypeEditEvent setRequestBody
-                }
-
-        requestEmptySearchInput =
-            Input.checkbox
-                { name = "requestEmptySearch"
-                , label = gettext "Allow Empty Search" appState.locale
-                , value = data.requestEmptySearch
-                , onInput = createTypeEditEvent setRequestEmptySearch
-                }
-
-        responseItemId =
-            Input.string
-                { name = "responseItemId"
-                , label = gettext "Response Item ID" appState.locale
-                , value = String.fromMaybe data.responseItemId
-                , onInput = createTypeEditEvent setResponseItemId << String.toMaybe
-                }
-
-        responseListFieldInput =
-            Input.string
-                { name = "responseListField"
-                , label = gettext "Response List Field" appState.locale
-                , value = String.fromMaybe data.responseListField
-                , onInput = createTypeEditEvent setResponseListField << String.toMaybe
-                }
-
-        responseItemTemplate =
-            Input.textarea
-                { name = "responseItemTemplate"
-                , label = gettext "Response Item Template" appState.locale
-                , value = data.responseItemTemplate
-                , onInput = createTypeEditEvent setResponseItemTemplate
-                }
-    in
-    integrationIdInput appState integration (createTypeEditEvent setId)
-        ++ integrationNameInput appState integration (createTypeEditEvent setName)
-        ++ integrationLogoUrlInput appState integration (createTypeEditEvent (setLogo << String.toMaybe))
-        ++ integrationVariablesLegacyInput appState integration (createTypeEditEventWithFocusSelector setVariables)
-        ++ [ div [ class "card card-border-light mb-5" ]
-                [ div [ class "card-header" ] [ text (gettext "Request" appState.locale) ]
-                , div [ class "card-body" ]
-                    [ Markdown.toHtml [ class "alert alert-info mb-5" ] (gettext "Use this section to configure the search request. The service you want to integrate has to provide a search HTTP API where you send a search string and it returns a JSON with found items." appState.locale)
-                    , requestUrlInput
-                    , FormExtra.mdAfter (gettext "The full API endpoint used for search. Use `${q}` to insert the user's search term (for example, *https://example.com/search?q=${q}*), and `${propName}` to reference fields defined in props." appState.locale)
-                    , requestMethodInput
-                    , requestHeadersInput
-                    , FormExtra.mdAfter (gettext "Optional headers to include in the API request. You can use `${q}` for the search term and `${propName}` for values from props." appState.locale)
-                    , requestBodyInput
-                    , FormExtra.mdAfter (gettext "Optional request body for POST or PUT methods. Supports the same variables: `${q}` for the search term and `${propName}` for props." appState.locale)
-                    , requestEmptySearchInput
-                    , FormExtra.mdAfter (gettext "Turn this off if the API cannot handle empty search requests. In that case, the requests will be made only after users type something." appState.locale)
-                    ]
-                ]
-           , div [ class "card card-border-light mb-5" ]
-                [ div [ class "card-header" ] [ text (gettext "Response" appState.locale) ]
-                , div [ class "card-body" ]
-                    [ Markdown.toHtml [ class "alert alert-info mb-5" ] (gettext "Use this section to configure how to process the response returned from the search API." appState.locale)
-                    , responseListFieldInput
-                    , FormExtra.mdAfter (gettext "If the returned JSON is not an array of items directly but the items are nested, use this to define the name or path to the field in the response that contains the list of items. Keep empty otherwise." appState.locale)
-                    , responseItemId
-                    , FormExtra.mdAfter (gettext "Use this to define an identifier for the item. This will be used in **Item URL** as `${id}` to compose a URL to the found item. You can use properties from the returned item in Jinja2 notation. For example, if the item has a field `id` use `{{item.id}}` here. You can also compose multiple fields together, e.g., `{{item.field1}}-{{item.field2}}`." appState.locale)
-                    , responseItemTemplate
-                    , FormExtra.mdAfter
-                        (String.format (gettext "This defines how the found items will be displayed for the user. You can use properties from the returned item in Jinja2 notation, you can also use [Markdown](%s) for some formatting. For example, if the returned item has a field called name, you can use `**{{item.name}}**` to display the name in bold." appState.locale)
-                            [ WizardGuideLinks.markdownCheatsheet appState.guideLinks ]
-                        )
-                    ]
-                ]
-           , integrationItemUrlInput appState integration (createTypeEditEvent setItemUrl << String.toMaybe)
-           , FormExtra.mdAfter (gettext "Defines the URL to the selected item. Use `${id}` to get the value defined in **Response Item ID** field, for example `https://example.com/${id}`." appState.locale)
-           ]
-
-
-viewIntegrationEditorWidget : EditorConfig msg -> String -> String -> Integration -> WidgetIntegrationData -> List (Html msg)
-viewIntegrationEditorWidget { appState, eventMsg } parentUuid integrationUuid integration data =
-    let
-        createTypeEditEvent map value =
-            EditIntegrationWidgetEventData.init
-                |> map value
-                |> EditIntegrationWidgetEvent
-                |> EditIntegrationEvent
-                |> eventMsg True Nothing Nothing parentUuid (Just integrationUuid)
-
-        createTypeEditEventWithFocusSelector map selector value =
-            EditIntegrationWidgetEventData.init
-                |> map value
-                |> EditIntegrationWidgetEvent
-                |> EditIntegrationEvent
-                |> eventMsg True selector Nothing parentUuid (Just integrationUuid)
-
-        widgetUrlInput =
-            Input.string
-                { name = "widgetUrl"
-                , label = gettext "Widget URL" appState.locale
-                , value = data.widgetUrl
-                , onInput = createTypeEditEvent setWidgetUrl
-                }
-    in
-    integrationIdInput appState integration (createTypeEditEvent setId)
-        ++ integrationNameInput appState integration (createTypeEditEvent setName)
-        ++ integrationLogoUrlInput appState integration (createTypeEditEvent (setLogo << String.toMaybe))
-        ++ integrationVariablesLegacyInput appState integration (createTypeEditEventWithFocusSelector setVariables)
-        ++ [ widgetUrlInput
-           , FormExtra.mdAfter (gettext "The URL of the widget implemented using [DSW Integration SDK](https://github.com/ds-wizard/dsw-integration-sdk)." appState.locale)
-           , integrationItemUrlInput appState integration (createTypeEditEvent setItemUrl << String.toMaybe)
-           , FormExtra.mdAfter (gettext "Defines the URL to the selected item. Use `${id}` value returned from the widget, for example `https://example.com/${id}`." appState.locale)
-           ]
-
-
-integrationIdInput : AppState -> Integration -> (String -> msg) -> List (Html msg)
-integrationIdInput appState integration onInput =
-    [ Input.string
-        { name = "id"
-        , label = gettext "ID" appState.locale
-        , value = Integration.getId integration
-        , onInput = onInput
-        }
-    , FormExtra.mdAfter (gettext "A string that identifies the integration. It has to be unique for each integration." appState.locale)
-    ]
-
-
 integrationNameInput : AppState -> Integration -> (String -> msg) -> List (Html msg)
 integrationNameInput appState integration onInput =
     [ Input.string
@@ -2769,40 +2535,6 @@ integrationNameInput appState integration onInput =
         }
     , FormExtra.mdAfter (gettext "A name visible everywhere else in the knowledge model Editor, such as when choosing the integration for a question." appState.locale)
     ]
-
-
-integrationLogoUrlInput : AppState -> Integration -> (String -> msg) -> List (Html msg)
-integrationLogoUrlInput appState integration onInput =
-    [ Input.string
-        { name = "logo"
-        , label = gettext "Logo URL" appState.locale
-        , value = String.fromMaybe (Integration.getLogo integration)
-        , onInput = onInput
-        }
-    , FormExtra.mdAfter (gettext "Logo is displayed next to the link to the selected item in questionnaires. It can be either URL or base64 image." appState.locale)
-    ]
-
-
-integrationVariablesLegacyInput : AppState -> Integration -> (Maybe String -> List String -> msg) -> List (Html msg)
-integrationVariablesLegacyInput appState integration onInput =
-    [ Input.variables appState
-        { label = gettext "Variables" appState.locale
-        , values = Integration.getVariables integration
-        , onChange = onInput
-        , copyableInput = always Html.nothing
-        }
-    , FormExtra.mdAfter (gettext "Variables can be used to parametrize the integration for each question. Use this to define the variables whose value can be filled on the questions using this integration. The variables can then be used in the URL configuration. For example, if you define a variable named *type*, you can use it as `${type}`, such as *ht&#8203;tps://example.com/${type}*." appState.locale)
-    ]
-
-
-integrationItemUrlInput : AppState -> Integration -> (String -> msg) -> Html msg
-integrationItemUrlInput appState integration onInput =
-    Input.string
-        { name = "itemUrl"
-        , label = gettext "Item URL" appState.locale
-        , value = String.fromMaybe (Integration.getItemUrl integration)
-        , onInput = onInput
-        }
 
 
 

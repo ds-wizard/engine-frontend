@@ -402,22 +402,23 @@ knowledgeModelEntitiesDecoderTest =
                             "references": {},
                             "integrations": {
                                 "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9": {
-                                    "integrationType": "ApiLegacyIntegration",
-                                    "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
-                                    "id": "service",
+                                    "integrationType": "ApiIntegration",
+                                    "allowCustomReply": true,
+                                    "annotations": [],
                                     "name": "Service",
-                                    "variables": ["kind", "category"],
-                                    "logo": "data:image/png;base64,...",
-                                    "itemUrl": "http://example.com/${id}",
+                                    "requestAllowEmptySearch": true,
+                                    "requestBody": "{}",
+                                    "requestHeaders": [{ "key": "X_USER", "value": "user" }],
                                     "requestMethod": "GET",
                                     "requestUrl": "/",
-                                    "requestHeaders": [{"key": "X_USER", "value": "user"}],
-                                    "requestBody": "{}",
-                                    "requestEmptySearch": true,
-                                    "responseListField": null,
-                                    "responseItemId": "{{id}}",
                                     "responseItemTemplate": "{{title}}",
-                                    "annotations": []
+                                    "responseItemTemplateForSelection": null,
+                                    "responseListField": "items",
+                                    "testQ": "item",
+                                    "testResponse": null,
+                                    "testVariables": {},
+                                    "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
+                                    "variables": ["kind", "category"]
                                 }
                             },
                             "tags": {},
@@ -438,23 +439,23 @@ knowledgeModelEntitiesDecoderTest =
                         , integrations =
                             Dict.fromList
                                 [ ( "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                                  , ApiLegacyIntegration
-                                        { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                                        , id = "service"
-                                        , name = "Service"
-                                        , variables = [ "kind", "category" ]
-                                        , logo = Just "data:image/png;base64,..."
-                                        , itemUrl = Just "http://example.com/${id}"
+                                  , ApiIntegration
+                                        { allowCustomReply = True
                                         , annotations = []
-                                        }
-                                        { requestMethod = "GET"
-                                        , requestUrl = "/"
+                                        , name = "Service"
+                                        , requestAllowEmptySearch = True
+                                        , requestBody = Just "{}"
                                         , requestHeaders = [ { key = "X_USER", value = "user" } ]
-                                        , requestBody = "{}"
-                                        , requestEmptySearch = True
-                                        , responseListField = Nothing
-                                        , responseItemId = Just "{{id}}"
+                                        , requestMethod = "GET"
+                                        , requestUrl = "/"
                                         , responseItemTemplate = "{{title}}"
+                                        , responseItemTemplateForSelection = Nothing
+                                        , responseListField = Just "items"
+                                        , testQ = "item"
+                                        , testResponse = Nothing
+                                        , testVariables = Dict.empty
+                                        , uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
+                                        , variables = [ "kind", "category" ]
                                         }
                                   )
                                 ]

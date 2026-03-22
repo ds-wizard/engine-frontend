@@ -1,5 +1,6 @@
 module Wizard.Api.Models.KnowledgeModel.IntegrationTest exposing (integrationDecoderTest)
 
+import Dict
 import Test exposing (Test, describe, test)
 import TestUtils exposing (expectDecoder)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
@@ -14,75 +15,44 @@ integrationDecoderTest =
                     raw =
                         """
                         {
-                            "integrationType": "ApiLegacyIntegration",
-                            "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
-                            "id": "service",
+                            "integrationType": "ApiIntegration",
+                            "allowCustomReply": true,
+                            "annotations": [],
                             "name": "Service",
-                            "variables": ["kind", "category"],
-                            "logo": "data:image/png;base64,...",
-                            "itemUrl": "http://example.com/${id}",
+                            "requestAllowEmptySearch": true,
+                            "requestBody": "{}",
+                            "requestHeaders": [{ "key": "X_USER", "value": "user" }],
                             "requestMethod": "GET",
                             "requestUrl": "/",
-                            "requestHeaders": [{"key": "X_USER", "value": "user"}],
-                            "requestBody": "{}",
-                            "requestEmptySearch": false,
-                            "responseListField": null,
-                            "responseItemId": "{{id}}",
                             "responseItemTemplate": "{{title}}",
-                            "annotations": []
+                            "responseItemTemplateForSelection": null,
+                            "responseListField": "items",
+                            "testQ": "item",
+                            "testResponse": null,
+                            "testVariables": {},
+                            "uuid": "aae37504-aec6-4be8-b703-5bcb3502f3e6",
+                            "variables": ["kind", "category"]
                         }
                         """
 
                     expected =
-                        ApiLegacyIntegration
-                            { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                            , id = "service"
-                            , name = "Service"
-                            , variables = [ "kind", "category" ]
-                            , logo = Just "data:image/png;base64,..."
-                            , itemUrl = Just "http://example.com/${id}"
+                        ApiIntegration
+                            { allowCustomReply = True
                             , annotations = []
-                            }
-                            { requestMethod = "GET"
-                            , requestUrl = "/"
+                            , name = "Service"
+                            , requestAllowEmptySearch = True
+                            , requestBody = Just "{}"
                             , requestHeaders = [ { key = "X_USER", value = "user" } ]
-                            , requestBody = "{}"
-                            , requestEmptySearch = False
-                            , responseListField = Nothing
-                            , responseItemId = Just "{{id}}"
+                            , requestMethod = "GET"
+                            , requestUrl = "/"
                             , responseItemTemplate = "{{title}}"
-                            }
-                in
-                expectDecoder Integration.decoder raw expected
-        , test "should decode widget integration" <|
-            \_ ->
-                let
-                    raw =
-                        """
-                        {
-                          "integrationType": "WidgetIntegration",
-                          "uuid": "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9",
-                          "id": "service",
-                          "name": "Service",
-                          "variables": ["kind", "category"],
-                          "logo": "data:image/png;base64,...",
-                          "itemUrl": "http://example.com/${id}",
-                          "widgetUrl": "http://example.com",
-                          "annotations": []
-                        }
-                        """
-
-                    expected =
-                        WidgetIntegration
-                            { uuid = "8f831db8-6f7a-42bd-bcd6-7b5174fd1ec9"
-                            , id = "service"
-                            , name = "Service"
+                            , responseItemTemplateForSelection = Nothing
+                            , responseListField = Just "items"
+                            , testQ = "item"
+                            , testResponse = Nothing
+                            , testVariables = Dict.empty
+                            , uuid = "aae37504-aec6-4be8-b703-5bcb3502f3e6"
                             , variables = [ "kind", "category" ]
-                            , logo = Just "data:image/png;base64,..."
-                            , itemUrl = Just "http://example.com/${id}"
-                            , annotations = []
-                            }
-                            { widgetUrl = "http://example.com"
                             }
                 in
                 expectDecoder Integration.decoder raw expected

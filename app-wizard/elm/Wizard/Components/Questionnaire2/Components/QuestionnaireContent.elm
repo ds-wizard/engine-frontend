@@ -2223,9 +2223,6 @@ viewQuestionIntegration appState model questionViewFlags questionNodeData mbRepl
 
                 _ ->
                     Nothing
-
-        isAnswered =
-            Maybe.isJust mbReply
     in
     case mbIntegration of
         Just (Integration.ApiIntegration _) ->
@@ -2252,21 +2249,10 @@ viewQuestionIntegration appState model questionViewFlags questionNodeData mbRepl
                 (replyToString mbReply)
                 commentCount
 
-        Just _ ->
-            viewQuestionWrapper
-                { commentCount = commentCount
-                , isAnswered = isAnswered
-                , locale = appState.locale
-                , pluginActions = model.projectQuestionActionPlugins
-                , questionNodeData = questionNodeData
-                , questionViewFlags = questionViewFlags
-                }
-                [ Flash.warning "Unsupported integration type." ]
-
         Nothing ->
             viewQuestionWrapper
                 { commentCount = commentCount
-                , isAnswered = isAnswered
+                , isAnswered = Maybe.isJust mbReply
                 , locale = appState.locale
                 , pluginActions = model.projectQuestionActionPlugins
                 , questionNodeData = questionNodeData
