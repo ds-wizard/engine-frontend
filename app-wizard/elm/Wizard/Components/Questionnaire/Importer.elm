@@ -146,19 +146,6 @@ createEvent appState questionnaire importerEvent ( seed, items, importerResult )
                 Nothing ->
                     questionNotFound data.path
 
-        ReplyIntegrationLegacy data ->
-            case getQuestionFromPath data.path of
-                Just question ->
-                    case question of
-                        IntegrationQuestion _ _ ->
-                            wrap <| setReply data.path <| IntegrationReply <| IntegrationReplyType.IntegrationLegacyType data.id data.value
-
-                        _ ->
-                            replyTypeUnexpected data.path
-
-                Nothing ->
-                    questionNotFound data.path
-
         ReplyItemSelect data ->
             case getQuestionFromPath data.path of
                 Just question ->

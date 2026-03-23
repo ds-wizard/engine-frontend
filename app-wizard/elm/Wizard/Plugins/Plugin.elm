@@ -2,6 +2,7 @@ module Wizard.Plugins.Plugin exposing
     ( ActionWithIcon
     , Connectors
     , DocumentActionConnector
+    , KnowledgeModelIntegrationConnector
     , Plugin
     , ProjectActionConnector
     , ProjectImporterConnector
@@ -56,6 +57,7 @@ type alias Plugin =
 
 type alias Connectors =
     { documentActions : Maybe (List DocumentActionConnector)
+    , knowledgeModelIntegrations : Maybe (List KnowledgeModelIntegrationConnector)
     , projectActions : Maybe (List ProjectActionConnector)
     , projectImporters : Maybe (List ProjectImporterConnector)
     , projectQuestionActions : Maybe (List ProjectQuestionActionConnector)
@@ -76,6 +78,15 @@ type alias DocumentActionConnector =
     , element : PluginElement
     , dtPatterns : Maybe (List IdentifierPattern)
     , dtFormats : Maybe (List Uuid)
+    }
+
+
+type alias KnowledgeModelIntegrationConnector =
+    { editorElement : PluginElement
+    , integrationId : String
+    , name : String
+    , questionnaireElement : PluginElement
+    , rendersReply : Bool
     }
 
 
@@ -170,6 +181,7 @@ connectorsDecoder : Decoder Connectors
 connectorsDecoder =
     D.succeed Connectors
         |> D.optional "documentActions" (D.maybe (D.list documentActionConnectorDecoder)) Nothing
+        |> D.optional "knowledgeModelIntegrations" (D.maybe (D.list knowledgeModelIntegrationConnectorDecoder)) Nothing
         |> D.optional "projectActions" (D.maybe (D.list projectActionConnectorDecoder)) Nothing
         |> D.optional "projectImporters" (D.maybe (D.list projectImporterConnectorDecoder)) Nothing
         |> D.optional "projectQuestionActions" (D.maybe (D.list projectQuestionActionConnectorDecoder)) Nothing
@@ -192,6 +204,16 @@ documentActionConnectorDecoder =
         |> D.required "element" PluginElement.decoder
         |> D.required "dtPatterns" (D.maybe (D.list IdentifierPattern.decoder))
         |> D.required "dtFormats" (D.maybe (D.list Uuid.decoder))
+
+
+knowledgeModelIntegrationConnectorDecoder : Decoder KnowledgeModelIntegrationConnector
+knowledgeModelIntegrationConnectorDecoder =
+    D.succeed KnowledgeModelIntegrationConnector
+        |> D.required "editorElement" PluginElement.decoder
+        |> D.required "integrationId" D.string
+        |> D.required "name" D.string
+        |> D.required "questionnaireElement" PluginElement.decoder
+        |> D.required "rendersReply" D.bool
 
 
 projectActionConnectorDecoder : Decoder ProjectActionConnector

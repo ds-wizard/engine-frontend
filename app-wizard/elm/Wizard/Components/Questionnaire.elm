@@ -4008,9 +4008,6 @@ viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
                         IntegrationType value _ ->
                             Markdown.toHtml [ class "form-control" ] value
 
-                        _ ->
-                            Html.nothing
-
                 _ ->
                     viewInput ""
 

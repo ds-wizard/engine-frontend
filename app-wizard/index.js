@@ -145,7 +145,6 @@ async function importPlugin(plugin) {
 async function loadPlugins(config) {
     const plugins = config.plugins || []
     const modules = await Promise.allSettled(plugins.map(importPlugin))
-
     const loaded = []
     for (const r of modules) {
         if (r.status === 'fulfilled') loaded.push(r.value);

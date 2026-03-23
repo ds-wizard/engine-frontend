@@ -3,11 +3,16 @@ module Wizard.Plugins.PluginElement exposing
     , decoder
     , documentValue
     , element
+    , encode
+    , integrationReplyValue
     , knowledgeModelValue
     , onActionClose
     , onImport
+    , onPluginIntegrationSettingsChange
+    , onReplyValueChange
     , onSettingsValueChange
     , onUserSettingsValueChange
+    , pluginIntegrationSettingsValue
     , projectValue
     , questionPathValue
     , questionValue
@@ -35,6 +40,11 @@ decoder =
     D.map PluginElement D.string
 
 
+encode : PluginElement -> E.Value
+encode (PluginElement pluginElement) =
+    E.string pluginElement
+
+
 element : PluginElement -> List (Attribute msg) -> Html msg
 element (PluginElement pluginElement) attributes =
     node pluginElement attributes []
@@ -50,9 +60,19 @@ documentValue document =
         E.encode 0 (Document.encode document)
 
 
+integrationReplyValue : String -> Html.Attribute msg
+integrationReplyValue =
+    Html.Attributes.attribute "integration-reply-value"
+
+
 knowledgeModelValue : String -> Html.Attribute msg
 knowledgeModelValue kmString =
     Html.Attributes.attribute "knowledge-model-value" kmString
+
+
+pluginIntegrationSettingsValue : String -> Html.Attribute msg
+pluginIntegrationSettingsValue =
+    Html.Attributes.attribute "plugin-integration-settings-value"
 
 
 projectValue : ProjectCommon -> Html.Attribute msg
@@ -95,6 +115,16 @@ onActionClose msg =
 onImport : (List ImporterEvent -> msg) -> Html.Attribute msg
 onImport =
     onEvent "import" [ "detail", "events" ] (D.list ImporterEvent.decoder)
+
+
+onPluginIntegrationSettingsChange : (String -> msg) -> Html.Attribute msg
+onPluginIntegrationSettingsChange =
+    onEvent "plugin-integration-settings-change" [ "detail", "value" ] D.string
+
+
+onReplyValueChange : (String -> msg) -> Html.Attribute msg
+onReplyValueChange =
+    onEvent "reply-value-change" [ "detail", "value" ] D.string
 
 
 onSettingsValueChange : (String -> msg) -> Html.Attribute msg

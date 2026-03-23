@@ -45,6 +45,7 @@ import Html.Keyed
 import Html.Lazy as Lazy
 import Json.Print
 import Json.Value as JsonValue
+import List.Extra as List
 import Maybe.Extra as Maybe
 import Reorderable
 import Set
@@ -69,10 +70,11 @@ import Wizard.Api.Models.Event.AddTagEventData as AddTagEventData
 import Wizard.Api.Models.Event.EditAnswerEventData as EditAnswerEventData
 import Wizard.Api.Models.Event.EditChapterEventData as EditChapterEventData
 import Wizard.Api.Models.Event.EditChoiceEventData as EditChoiceEventData
-import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setLabel, setListQuestionUuid, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTargetUuid, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables)
+import Wizard.Api.Models.Event.EditEventSetters exposing (setAbbreviation, setAdvice, setAllowCustomReply, setAnnotations, setAnswerUuids, setChapterUuids, setChoiceUuids, setColor, setContent, setDescription, setEmail, setExpertUuids, setFileTypes, setFollowUpUuids, setIntegrationUuid, setIntegrationUuids, setItemTemplateQuestionUuids, setLabel, setListQuestionUuid, setMaxSize, setMetricMeasures, setMetricUuids, setName, setPhaseUuids, setPluginIntegrationSettings, setQuestionUuids, setReferenceUuids, setRequestAllowEmptySearch, setRequestBody, setRequestHeaders, setRequestMethod, setRequestUrl, setRequiredPhaseUuid, setResourceCollectionUuids, setResourcePageUuid, setResourcePageUuids, setResponseItemTemplate, setResponseItemTemplateForSelection, setResponseListField, setTagUuids, setTargetUuid, setTestQ, setTestResponse, setTestVariables, setText, setTitle, setUrl, setValidations, setValueType, setVariables)
 import Wizard.Api.Models.Event.EditExpertEventData as EditExpertEventData
 import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData
 import Wizard.Api.Models.Event.EditIntegrationEventData exposing (EditIntegrationEventData(..))
+import Wizard.Api.Models.Event.EditIntegrationPluginEventData as EditIntegrationPluginEventData
 import Wizard.Api.Models.Event.EditKnowledgeModelEventData as EditKnowledgeModelEventData
 import Wizard.Api.Models.Event.EditMetricEventData as EditMetricEventData
 import Wizard.Api.Models.Event.EditPhaseEventData as EditPhaseEventData
@@ -101,6 +103,7 @@ import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData as ApiIntegrationData exposing (ApiIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair
+import Wizard.Api.Models.KnowledgeModel.Integration.PluginIntegrationData exposing (PluginIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
@@ -116,6 +119,7 @@ import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (
 import Wizard.Api.Models.UrlCheckResponse.UrlResult as UrlResult
 import Wizard.Api.TypeHints as TypeHintsApi
 import Wizard.Components.Html exposing (linkTo)
+import Wizard.Components.PluginView as PluginView
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposing (EditorContext)
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Breadcrumbs as Breadcrumbs
@@ -123,6 +127,7 @@ import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Input as Input
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.Tree as Tree
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.TreeInput as TreeInput
 import Wizard.Pages.KMEditor.Editor.Components.KMEditor.UrlChecker as UrlChecker
+import Wizard.Plugins.PluginElement as PluginElement
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Feature
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -1896,7 +1901,7 @@ viewIntegrationEditor config integration =
         parentUuid =
             EditorContext.getParentUuid integrationUuid editorContext
 
-        createEditEventWithFocusSelector setApi selector value =
+        createEditEventWithFocusSelector setApi setPlugin selector value =
             eventMsg True selector Nothing parentUuid (Just integrationUuid) <|
                 EditIntegrationEvent <|
                     case integration of
@@ -1904,6 +1909,11 @@ viewIntegrationEditor config integration =
                             EditIntegrationApiEventData.init
                                 |> setApi value
                                 |> EditIntegrationApiEvent
+
+                        PluginIntegration _ ->
+                            EditIntegrationPluginEventData.init
+                                |> setPlugin value
+                                |> EditIntegrationPluginEvent
 
         createEditEventFromPrefab integrationPrefab =
             eventMsg False Nothing Nothing parentUuid (Just integrationUuid) <|
@@ -1928,18 +1938,31 @@ viewIntegrationEditor config integration =
                                 , variables = EventField.create data.variables True
                                 }
 
-        onTypeChange _ =
-            --onTypeChange value =
+                        PluginIntegration data ->
+                            EditIntegrationPluginEvent
+                                { annotations = EventField.create data.annotations True
+                                , name = EventField.create data.name True
+                                , pluginIntegrationId = EventField.create data.pluginIntegrationId True
+                                , pluginIntegrationSettings = EventField.create data.pluginIntegrationSettings True
+                                , pluginUuid = EventField.create data.pluginUuid True
+                                }
+
+        onTypeChange value =
             eventMsg False Nothing Nothing parentUuid (Just integrationUuid) <|
-                (--case value of
-                 --    "Api" ->
-                 EditIntegrationApiEventData.init
-                    |> EditIntegrationApiEvent
-                    |> EditIntegrationEvent
-                )
+                case value of
+                    "Plugin" ->
+                        EditIntegrationPluginEventData.init
+                            |> EditIntegrationPluginEvent
+                            |> EditIntegrationEvent
+
+                    _ ->
+                        EditIntegrationApiEventData.init
+                            |> EditIntegrationApiEvent
+                            |> EditIntegrationEvent
 
         integrationTypeOptions =
             [ ( "Api", gettext "API" appState.locale )
+            , ( "Plugin", gettext "Plugin" appState.locale )
             ]
 
         integrationEditorTitle =
@@ -1966,13 +1989,16 @@ viewIntegrationEditor config integration =
         annotationsInput =
             Input.annotations appState
                 { annotations = Integration.getAnnotations integration
-                , onEdit = createEditEventWithFocusSelector setAnnotations
+                , onEdit = createEditEventWithFocusSelector setAnnotations setAnnotations
                 }
 
         integrationTypeInputs =
             case integration of
                 ApiIntegration data ->
                     viewIntegrationEditorApi config parentUuid integrationUuid integration data
+
+                PluginIntegration data ->
+                    viewIntegrationEditorPlugin config parentUuid integrationUuid integration data
 
         wrapQuestionsWithIntegration questions =
             if List.isEmpty questions then
@@ -2007,29 +2033,6 @@ viewIntegrationEditor config integration =
                     ]
 
             else
-                --case List.find ((==) (Integration.getId integration) << Integration.getId) integrationPrefabs of
-                --    Just usedPrefab ->
-                --        let
-                --            differFromPrefab =
-                --                Integration.getName integration
-                --                    /= Integration.getName usedPrefab
-                --                    || Integration.getResponseItemTemplate integration
-                --                    /= Integration.getResponseItemTemplate usedPrefab
-                --        in
-                --        if differFromPrefab then
-                --            div [ class "alert alert-info" ]
-                --                [ text (gettext "This integration was created from a template and now differs." appState.locale)
-                --                , button
-                --                    [ class "btn btn-primary ms-2"
-                --                    , onClick (createEditEventFromPrefab usedPrefab)
-                --                    ]
-                --                    [ text (gettext "Update" appState.locale) ]
-                --                ]
-                --
-                --        else
-                --            Html.nothing
-                --
-                --    Nothing ->
                 Html.nothing
     in
     editor ("integration-" ++ integrationUuid)
@@ -2535,6 +2538,91 @@ integrationNameInput appState integration onInput =
         }
     , FormExtra.mdAfter (gettext "A name visible everywhere else in the knowledge model Editor, such as when choosing the integration for a question." appState.locale)
     ]
+
+
+viewIntegrationEditorPlugin : EditorConfig msg -> String -> String -> Integration -> PluginIntegrationData -> List (Html msg)
+viewIntegrationEditorPlugin config parentUuid integrationUuid integration data =
+    let
+        plugins =
+            AppState.getPluginsByConnector config.appState .knowledgeModelIntegrations
+    in
+    if List.isEmpty plugins then
+        [ div [ class "form-group" ]
+            [ Flash.info (gettext "There are no available plugins." config.appState.locale) ]
+        ]
+
+    else
+        let
+            createTypeEditEvent map value =
+                createTypeEditEventWithFocusSelector map Nothing value
+
+            createTypeEditEventWithFocusSelector map selector value =
+                createTypeEditEventWithFocusSelectorAndCursorPos map selector Nothing value
+
+            createTypeEditEventWithFocusSelectorAndCursorPos map selector mbCursorPos value =
+                EditIntegrationPluginEventData.init
+                    |> map value
+                    |> EditIntegrationPluginEvent
+                    |> EditIntegrationEvent
+                    |> config.eventMsg True selector mbCursorPos parentUuid (Just integrationUuid)
+
+            toPluginOption ( plugin, connector ) =
+                ( Uuid.toString plugin.uuid ++ "/" ++ connector.integrationId, connector.name )
+
+            pluginOptions =
+                ( "", "--" ) :: List.map toPluginOption plugins
+
+            onPluginChange =
+                let
+                    mapValue value event =
+                        let
+                            ( pluginUuid, pluginIntegrationId ) =
+                                case String.split "/" value of
+                                    [ pUuid, pIntegrationId ] ->
+                                        ( pUuid, pIntegrationId )
+
+                                    _ ->
+                                        ( "", "" )
+                        in
+                        { event
+                            | pluginUuid = EventField.create pluginUuid True
+                            , pluginIntegrationId = EventField.create pluginIntegrationId True
+                        }
+                in
+                createTypeEditEvent mapValue
+
+            pluginInput =
+                Input.select
+                    { name = "plugin"
+                    , label = gettext "Plugin" config.appState.locale
+                    , value = data.pluginUuid ++ "/" ++ data.pluginIntegrationId
+                    , options = pluginOptions
+                    , onChange = onPluginChange
+                    , extra = Nothing
+                    }
+
+            selectedPlugin =
+                List.find
+                    (\( plugin, connector ) -> Uuid.toString plugin.uuid == data.pluginUuid && connector.integrationId == data.pluginIntegrationId)
+                    plugins
+
+            pluginSettingsInput =
+                case selectedPlugin of
+                    Just ( plugin, connector ) ->
+                        PluginView.view config.appState
+                            plugin.uuid
+                            connector.editorElement
+                            [ PluginElement.pluginIntegrationSettingsValue data.pluginIntegrationSettings
+                            , PluginElement.onPluginIntegrationSettingsChange (createTypeEditEvent setPluginIntegrationSettings)
+                            ]
+
+                    Nothing ->
+                        Html.nothing
+        in
+        integrationNameInput config.appState integration (createTypeEditEvent setName)
+            ++ [ pluginInput
+               , pluginSettingsInput
+               ]
 
 
 

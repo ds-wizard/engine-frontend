@@ -8,6 +8,7 @@ import Json.Decode as D exposing (Decoder)
 
 type IntegrationType
     = Api
+    | Plugin
 
 
 decoder : Decoder IntegrationType
@@ -18,6 +19,9 @@ decoder =
                 case str of
                     "ApiIntegration" ->
                         D.succeed Api
+
+                    "PluginIntegration" ->
+                        D.succeed Plugin
 
                     valueType ->
                         D.fail <| "Unknown integration type: " ++ valueType

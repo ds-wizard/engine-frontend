@@ -176,9 +176,6 @@ getStringReply replyValue =
                 IntegrationType value _ ->
                     value
 
-                IntegrationLegacyType _ value ->
-                    value
-
         _ ->
             ""
 

@@ -660,9 +660,6 @@ viewEventDetailSetReply appState cfg data question =
                 IntegrationReplyType.IntegrationType reply _ ->
                     eventView [ ( fa "fas fa-link", Markdown.toString reply ) ]
 
-                IntegrationReplyType.IntegrationLegacyType _ reply ->
-                    eventView [ ( fa "fas fa-link", Markdown.toString reply ) ]
-
         ReplyValue.ItemSelectReply itemUuid ->
             let
                 itemLabel =

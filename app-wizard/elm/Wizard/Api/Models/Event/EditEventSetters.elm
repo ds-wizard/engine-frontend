@@ -23,6 +23,7 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setMetricUuids
     , setName
     , setPhaseUuids
+    , setPluginIntegrationSettings
     , setQuestionUuids
     , setReferenceUuids
     , setRequestAllowEmptySearch
@@ -166,6 +167,11 @@ setMetricUuids value data =
 setName : a -> { b | name : EventField a } -> { b | name : EventField a }
 setName value data =
     { data | name = EventField.create value True }
+
+
+setPluginIntegrationSettings : a -> { b | pluginIntegrationSettings : EventField a } -> { b | pluginIntegrationSettings : EventField a }
+setPluginIntegrationSettings value data =
+    { data | pluginIntegrationSettings = EventField.create value True }
 
 
 setPhaseUuids : a -> { b | phaseUuids : EventField a } -> { b | phaseUuids : EventField a }
