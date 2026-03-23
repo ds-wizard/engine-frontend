@@ -706,11 +706,26 @@ viewAddIntegrationDiff appState event =
                         , Maybe.withDefault "" <| data.responseItemTemplateForSelection
                         ]
 
+                AddIntegrationPluginEvent data ->
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Plugin UUID" appState.locale
+                        , gettext "Plugin Integration ID" appState.locale
+                        , gettext "Plugin Integration Settings" appState.locale
+                        ]
+                        [ AddIntegrationEventData.getTypeString event
+                        , data.name
+                        , data.pluginUuid
+                        , data.pluginIntegrationId
+                        , data.pluginIntegrationSettings
+                        ]
+
         fieldDiff =
             viewAdd fields
 
         annotationsDiff =
-            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations event)
+            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations event)
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -759,13 +774,34 @@ viewEditIntegrationDiff appState event integration =
                         , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseItemTemplateForSelection (Integration.getResponseItemTemplateForSelection integration)
                         ]
 
+                EditIntegrationPluginEvent data ->
+                    List.zip3
+                        [ gettext "Type" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Plugin UUID" appState.locale
+                        , gettext "Plugin Integration ID" appState.locale
+                        , gettext "Plugin Integration Settings" appState.locale
+                        ]
+                        [ Integration.getTypeString integration
+                        , Integration.getName integration
+                        , Maybe.withDefault "" <| Integration.getPluginUuid integration
+                        , Maybe.withDefault "" <| Integration.getPluginIntegrationId integration
+                        , Maybe.withDefault "" <| Integration.getPluginIntegrationSettings integration
+                        ]
+                        [ EditIntegrationEventData.getTypeString event
+                        , EventField.getValueWithDefault data.name (Integration.getName integration)
+                        , EventField.getValueWithDefault data.pluginUuid (Maybe.withDefault "" <| Integration.getPluginUuid integration)
+                        , EventField.getValueWithDefault data.pluginIntegrationId (Maybe.withDefault "" <| Integration.getPluginIntegrationId integration)
+                        , EventField.getValueWithDefault data.pluginIntegrationSettings (Maybe.withDefault "" <| Integration.getPluginIntegrationSettings integration)
+                        ]
+
         fieldDiff =
             viewDiff fields
 
         annotationsDiff =
             viewAnnotationsDiff appState
                 (Integration.getAnnotations integration)
-                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations event) (Integration.getAnnotations integration))
+                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations event) (Integration.getAnnotations integration))
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -800,6 +836,21 @@ viewDeleteIntegrationDiff appState integration =
                         , Maybe.withDefault "" <| data.responseListField
                         , data.responseItemTemplate
                         , Maybe.withDefault "" <| data.responseItemTemplateForSelection
+                        ]
+
+                PluginIntegration data ->
+                    List.zip
+                        [ gettext "Type" appState.locale
+                        , gettext "Name" appState.locale
+                        , gettext "Plugin UUID" appState.locale
+                        , gettext "Plugin Integration ID" appState.locale
+                        , gettext "Plugin Integration Settings" appState.locale
+                        ]
+                        [ Integration.getTypeString integration
+                        , Integration.getName integration
+                        , data.pluginUuid
+                        , data.pluginIntegrationId
+                        , data.pluginIntegrationSettings
                         ]
 
         fieldDiff =

@@ -1407,6 +1407,24 @@ computeIntegrationWarnings appState secrets integration =
             in
             nameWarning ++ variablesWarning ++ urlWarning ++ testDataWarning ++ itemTemplateWarning
 
+        Integration.PluginIntegration data ->
+            let
+                nameWarning =
+                    if String.isEmpty (Integration.getName integration) then
+                        createError (gettext "Empty name for integration" appState.locale)
+
+                    else
+                        []
+
+                pluginWarning =
+                    if String.isEmpty data.pluginUuid || String.isEmpty data.pluginIntegrationId then
+                        createError (gettext "No plugin selected for plugin integration" appState.locale)
+
+                    else
+                        []
+            in
+            nameWarning ++ pluginWarning
+
 
 computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorContextWarning
 computeResourceCollectionWarnings appState km resourceCollection =

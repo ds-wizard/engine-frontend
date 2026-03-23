@@ -304,9 +304,6 @@ viewReply appState questionnaire question data =
                 IntegrationReplyType.IntegrationType reply _ ->
                     eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
 
-                IntegrationReplyType.IntegrationLegacyType _ reply ->
-                    eventView [ ( fa "fas fa-link", text (Markdown.toString reply) ) ]
-
         ReplyValue.ItemSelectReply _ ->
             eventView [ ( fa "fas fa-plus", text (gettext "Added item" appState.locale) ) ]
 

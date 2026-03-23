@@ -56,7 +56,7 @@ decoder =
         |> D.required "variables" (EventField.decoder (D.list D.string))
 
 
-encode : EditIntegrationApiEventData -> List ( String, D.Value )
+encode : EditIntegrationApiEventData -> List ( String, E.Value )
 encode data =
     [ ( "integrationType", E.string "ApiIntegration" )
     , ( "allowCustomReply", EventField.encode E.bool data.allowCustomReply )

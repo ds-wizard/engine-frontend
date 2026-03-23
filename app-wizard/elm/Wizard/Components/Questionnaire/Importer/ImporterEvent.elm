@@ -2,7 +2,6 @@ module Wizard.Components.Questionnaire.Importer.ImporterEvent exposing
     ( AddItemData
     , ImporterEvent(..)
     , ReplyIntegrationData
-    , ReplyIntegrationLegacyData
     , ReplyItemSelectData
     , ReplyListData
     , ReplyStringData
@@ -18,7 +17,6 @@ type ImporterEvent
     = ReplyString ReplyStringData
     | ReplyList ReplyListData
     | ReplyIntegration ReplyIntegrationData
-    | ReplyIntegrationLegacy ReplyIntegrationLegacyData
     | ReplyItemSelect ReplyItemSelectData
     | AddItem AddItemData
 
@@ -40,9 +38,6 @@ decoderByType eventType =
 
         "ReplyIntegration" ->
             D.map ReplyIntegration decodeReplyIntegrationData
-
-        "ReplyIntegrationLegacy" ->
-            D.map ReplyIntegrationLegacy decodeReplyIntegrationLegacyData
 
         "ReplyItemSelect" ->
             D.map ReplyItemSelect decodeReplyItemSelectData
@@ -93,21 +88,6 @@ decodeReplyIntegrationData =
         |> D.required "path" D.string
         |> D.required "value" D.string
         |> D.required "raw" JsonValue.decoder
-
-
-type alias ReplyIntegrationLegacyData =
-    { path : String
-    , value : String
-    , id : Maybe String
-    }
-
-
-decodeReplyIntegrationLegacyData : Decoder ReplyIntegrationLegacyData
-decodeReplyIntegrationLegacyData =
-    D.succeed ReplyIntegrationLegacyData
-        |> D.required "path" D.string
-        |> D.required "value" D.string
-        |> D.required "id" (D.maybe D.string)
 
 
 type alias ReplyItemSelectData =

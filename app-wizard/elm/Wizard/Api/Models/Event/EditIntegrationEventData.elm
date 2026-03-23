@@ -13,12 +13,14 @@ import Dict
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Wizard.Api.Models.Event.EditIntegrationApiEventData as EditIntegrationApiEventData exposing (EditIntegrationApiEventData)
+import Wizard.Api.Models.Event.EditIntegrationPluginEventData as EditIntegrationPluginEventData exposing (EditIntegrationPluginEventData)
 import Wizard.Api.Models.Event.EventField as EventField
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration(..))
 
 
 type EditIntegrationEventData
     = EditIntegrationApiEvent EditIntegrationApiEventData
+    | EditIntegrationPluginEvent EditIntegrationPluginEventData
 
 
 decoder : Decoder EditIntegrationEventData
@@ -29,6 +31,9 @@ decoder =
                 case integrationType of
                     "ApiIntegration" ->
                         D.map EditIntegrationApiEvent EditIntegrationApiEventData.decoder
+
+                    "PluginIntegration" ->
+                        D.map EditIntegrationPluginEvent EditIntegrationPluginEventData.decoder
 
                     _ ->
                         D.fail <| "Unknown integration type: " ++ integrationType
@@ -41,6 +46,7 @@ encode data =
         eventData =
             map
                 EditIntegrationApiEventData.encode
+                EditIntegrationPluginEventData.encode
                 data
     in
     ( "eventType", E.string "EditIntegrationEvent" ) :: eventData
@@ -69,41 +75,51 @@ apply event integration =
                 , variables = EventField.getValueWithDefault eventData.variables (Integration.getVariables integration)
                 }
 
+        EditIntegrationPluginEvent eventData ->
+            PluginIntegration
+                { annotations = EventField.getValueWithDefault eventData.annotations (Integration.getAnnotations integration)
+                , name = EventField.getValueWithDefault eventData.name (Integration.getName integration)
+                , pluginIntegrationId = EventField.getValueWithDefault eventData.pluginIntegrationId (Maybe.withDefault "" (Integration.getPluginIntegrationId integration))
+                , pluginIntegrationSettings = EventField.getValueWithDefault eventData.pluginIntegrationSettings (Maybe.withDefault "" (Integration.getPluginIntegrationSettings integration))
+                , pluginUuid = EventField.getValueWithDefault eventData.pluginUuid (Maybe.withDefault "" (Integration.getPluginUuid integration))
+                , uuid = Integration.getUuid integration
+                }
+
 
 getTypeString : EditIntegrationEventData -> String
 getTypeString =
     map
-        (\_ -> "Api")
+        (always "Api")
+        (always "Plugin")
 
 
 getEntityVisibleName : EditIntegrationEventData -> Maybe String
 getEntityVisibleName =
-    EventField.getValue << map .name
+    EventField.getValue << map .name .pluginIntegrationId
 
 
 map :
     (EditIntegrationApiEventData -> a)
+    -> (EditIntegrationPluginEventData -> a)
     -> EditIntegrationEventData
     -> a
-map apiIntegration integration =
+map apiIntegration pluginIntegration integration =
     case integration of
         EditIntegrationApiEvent data ->
             apiIntegration data
 
+        EditIntegrationPluginEvent data ->
+            pluginIntegration data
+
 
 squash : EditIntegrationEventData -> EditIntegrationEventData -> EditIntegrationEventData
-squash (EditIntegrationApiEvent oldData) (EditIntegrationApiEvent newData) =
-    EditIntegrationApiEvent (EditIntegrationApiEventData.squash oldData newData)
+squash old new =
+    case ( old, new ) of
+        ( EditIntegrationApiEvent oldData, EditIntegrationApiEvent newData ) ->
+            EditIntegrationApiEvent (EditIntegrationApiEventData.squash oldData newData)
 
+        ( EditIntegrationPluginEvent oldData, EditIntegrationPluginEvent newData ) ->
+            EditIntegrationPluginEvent (EditIntegrationPluginEventData.squash oldData newData)
 
-
---squash : EditIntegrationEventData -> EditIntegrationEventData -> EditIntegrationEventData
---squash old new =
---    case ( old, new ) of
---        ( EditIntegrationApiEvent oldData, EditIntegrationApiEvent newData ) ->
---            EditIntegrationApiEvent (EditIntegrationApiEventData.squash oldData newData)
---
---
---
---        _ ->
---            new
+        _ ->
+            new

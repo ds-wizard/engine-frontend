@@ -4,6 +4,9 @@ module Wizard.Api.Models.KnowledgeModel.Integration exposing
     , getAllowCustomReply
     , getAnnotations
     , getName
+    , getPluginIntegrationId
+    , getPluginIntegrationSettings
+    , getPluginUuid
     , getRequestAllowEmptySearch
     , getRequestBody
     , getRequestHeaders
@@ -28,11 +31,13 @@ import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData as ApiIntegrationData exposing (ApiIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Integration.IntegrationType as IntegrationType
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair exposing (KeyValuePair)
+import Wizard.Api.Models.KnowledgeModel.Integration.PluginIntegrationData as PluginIntegrationData exposing (PluginIntegrationData)
 import Wizard.Api.Models.TypeHintTestResponse exposing (TypeHintTestResponse)
 
 
 type Integration
     = ApiIntegration ApiIntegrationData
+    | PluginIntegration PluginIntegrationData
 
 
 
@@ -41,15 +46,20 @@ type Integration
 
 decoder : Decoder Integration
 decoder =
-    --D.oneOf
-    --    [ D.when IntegrationType.decoder ((==) IntegrationType.Api) apiIntegrationDecoder
-    --    ]
-    D.when IntegrationType.decoder ((==) IntegrationType.Api) apiIntegrationDecoder
+    D.oneOf
+        [ D.when IntegrationType.decoder ((==) IntegrationType.Api) apiIntegrationDecoder
+        , D.when IntegrationType.decoder ((==) IntegrationType.Plugin) pluginIntegrationDecoder
+        ]
 
 
 apiIntegrationDecoder : Decoder Integration
 apiIntegrationDecoder =
     D.map ApiIntegration ApiIntegrationData.decoder
+
+
+pluginIntegrationDecoder : Decoder Integration
+pluginIntegrationDecoder =
+    D.map PluginIntegration PluginIntegrationData.decoder
 
 
 
@@ -62,11 +72,17 @@ getTypeString integration =
         ApiIntegration _ ->
             "Api"
 
+        PluginIntegration _ ->
+            "Plugin"
+
 
 getUuid : Integration -> String
 getUuid integration =
     case integration of
         ApiIntegration data ->
+            data.uuid
+
+        PluginIntegration data ->
             data.uuid
 
 
@@ -76,6 +92,9 @@ getName integration =
         ApiIntegration data ->
             data.name
 
+        PluginIntegration data ->
+            data.name
+
 
 getVisibleName : Integration -> String
 getVisibleName integration =
@@ -83,11 +102,17 @@ getVisibleName integration =
         ApiIntegration data ->
             data.name
 
+        PluginIntegration data ->
+            data.name
+
 
 getAnnotations : Integration -> List Annotation
 getAnnotations integration =
     case integration of
         ApiIntegration data ->
+            data.annotations
+
+        PluginIntegration data ->
             data.annotations
 
 
@@ -157,9 +182,40 @@ getVariables integration =
         ApiIntegration data ->
             data.variables
 
+        _ ->
+            []
+
+
+getPluginIntegrationId : Integration -> Maybe String
+getPluginIntegrationId =
+    getPluginIntegrationData (Just << .pluginIntegrationId)
+
+
+getPluginIntegrationSettings : Integration -> Maybe String
+getPluginIntegrationSettings =
+    getPluginIntegrationData (Just << .pluginIntegrationSettings)
+
+
+getPluginUuid : Integration -> Maybe String
+getPluginUuid =
+    getPluginIntegrationData (Just << .pluginUuid)
+
 
 getApiIntegrationData : (ApiIntegrationData -> Maybe a) -> Integration -> Maybe a
 getApiIntegrationData map integration =
     case integration of
         ApiIntegration data ->
             map data
+
+        _ ->
+            Nothing
+
+
+getPluginIntegrationData : (PluginIntegrationData -> Maybe a) -> Integration -> Maybe a
+getPluginIntegrationData map integration =
+    case integration of
+        PluginIntegration data ->
+            map data
+
+        _ ->
+            Nothing

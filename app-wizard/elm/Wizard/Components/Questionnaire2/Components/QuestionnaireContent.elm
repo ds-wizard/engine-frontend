@@ -86,7 +86,7 @@ import Wizard.Components.Questionnaire2.QuestionnaireVirtualization exposing (Ch
 import Wizard.Components.Tag as Tag
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Plugins.Plugin exposing (Plugin, ProjectQuestionActionConnector, ProjectQuestionActionConnectorType(..))
-import Wizard.Plugins.PluginElement exposing (PluginElement)
+import Wizard.Plugins.PluginElement as PluginElement exposing (PluginElement)
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
@@ -150,6 +150,7 @@ type Msg
     | TypeHintInput String Bool Bool String ReplyValue
     | TypeHintDebounceMsg Debounce.Msg
     | TypeHintsLoaded String String (Result ApiError (List TypeHint))
+    | SetPluginReply String String
     | CopyLinkToQuestion String
     | ClearRecentlyCopied
     | AddTodo String
@@ -495,6 +496,31 @@ update appState cfg msg model =
                         QuestionnaireUpdateReturnData.fromModel appState model
 
                 Nothing ->
+                    QuestionnaireUpdateReturnData.fromModel appState model
+
+        SetPluginReply path replyString ->
+            case D.decodeString ReplyValue.decoder replyString of
+                Ok replyValue ->
+                    let
+                        ( newUuid, newSeed ) =
+                            Uuid.step appState.seed
+
+                        setReplyEvent =
+                            ProjectEvent.SetReply
+                                { uuid = newUuid
+                                , path = path
+                                , value = replyValue
+                                , createdAt = appState.currentTime
+                                , createdBy = getCreatedBy appState
+                                }
+                    in
+                    { seed = newSeed
+                    , model = model
+                    , cmd = Cmd.none
+                    , event = Just setReplyEvent
+                    }
+
+                Err _ ->
                     QuestionnaireUpdateReturnData.fromModel appState model
 
         CopyLinkToQuestion questionPath ->
@@ -2249,6 +2275,46 @@ viewQuestionIntegration appState model questionViewFlags questionNodeData mbRepl
                 (replyToString mbReply)
                 commentCount
 
+        Just (Integration.PluginIntegration pluginIntegrationData) ->
+            let
+                pluginAndConnector =
+                    AppState.getPluginsByConnector appState .knowledgeModelIntegrations
+                        |> List.find (\( p, c ) -> Uuid.toString p.uuid == pluginIntegrationData.pluginUuid && c.integrationId == pluginIntegrationData.pluginIntegrationId)
+            in
+            case pluginAndConnector of
+                Just ( plugin, connector ) ->
+                    let
+                        pluginDataString =
+                            { integrationSettings = pluginIntegrationData.pluginIntegrationSettings
+                            , pluginElement = connector.questionnaireElement
+                            , rendersReply = connector.rendersReply
+                            , userSettings = AppState.getPluginUserSettings appState plugin.uuid
+                            , settings = AppState.getPluginSettings appState plugin.uuid
+                            }
+                                |> encodeIntegrationPluginData
+                                |> E.encode 0
+                    in
+                    Lazy.lazy8 viewQuestionIntegrationPluginLazy
+                        appState.locale
+                        model.projectQuestionActionPlugins
+                        questionNodeData
+                        questionViewFlags
+                        (getQuestionReplyTime appState mbReply)
+                        (replyToString mbReply)
+                        pluginDataString
+                        commentCount
+
+                Nothing ->
+                    viewQuestionWrapper
+                        { commentCount = commentCount
+                        , isAnswered = Maybe.isJust mbReply
+                        , locale = appState.locale
+                        , pluginActions = model.projectQuestionActionPlugins
+                        , questionNodeData = questionNodeData
+                        , questionViewFlags = questionViewFlags
+                        }
+                        [ Flash.error (gettext "Missing plugin." appState.locale) ]
+
         Nothing ->
             viewQuestionWrapper
                 { commentCount = commentCount
@@ -2342,9 +2408,6 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
                         IntegrationReplyType.IntegrationType value _ ->
                             Markdown.toHtml [ class "form-control questionnaireContent__markdown" ] value
 
-                        _ ->
-                            Html.nothing
-
                 _ ->
                     viewInput ""
 
@@ -2391,6 +2454,111 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
             , questionViewFlags = questionViewFlags
             }
         ]
+
+
+viewQuestionIntegrationPluginLazy :
+    Gettext.Locale
+    -> List ( Plugin, ProjectQuestionActionConnector )
+    -> QuestionNodeData
+    -> Int
+    -> String
+    -> String
+    -> String
+    -> Int
+    -> Html Msg
+viewQuestionIntegrationPluginLazy locale pluginActions questionNodeData questionViewFlags replyTime replyString pluginDataString commentCount =
+    let
+        mbReply =
+            replyFromString replyString
+
+        isAnswered =
+            Maybe.isJust mbReply
+
+        isReadOnly =
+            QuestionViewFlags.isReadOnly questionViewFlags
+
+        mbPluginData =
+            D.decodeString decodeIntegrationPluginData pluginDataString
+                |> Result.toMaybe
+
+        content =
+            case mbPluginData of
+                Just pluginData ->
+                    if isAnswered && not pluginData.rendersReply then
+                        Markdown.toHtml [ class "form-control questionnaireContent__markdown" ]
+                            (Maybe.unwrap "" (ReplyValue.getStringReply << .value) mbReply)
+
+                    else
+                        let
+                            replyValue =
+                                Maybe.map .value mbReply
+                                    |> Maybe.map (E.encode 0 << ReplyValue.encode)
+                                    |> Maybe.withDefault ""
+                        in
+                        PluginElement.element pluginData.pluginElement
+                            [ PluginElement.settingValue pluginData.settings
+                            , PluginElement.userSettingsValue pluginData.userSettings
+                            , PluginElement.pluginIntegrationSettingsValue pluginData.integrationSettings
+                            , PluginElement.integrationReplyValue replyValue
+                            , PluginElement.onReplyValueChange (SetPluginReply questionNodeData.questionPath)
+                            ]
+
+                Nothing ->
+                    Flash.error (gettext "Plugin error." locale)
+    in
+    viewQuestionWrapper
+        { commentCount = commentCount
+        , isAnswered = Maybe.isJust (replyFromString replyString)
+        , locale = locale
+        , pluginActions = pluginActions
+        , questionNodeData = questionNodeData
+        , questionViewFlags = questionViewFlags
+        }
+        [ div [ class "questionnaireContent__value" ] [ content ]
+        , viewQuestionClearReply
+            { isAnswered = isAnswered
+            , locale = locale
+            , questionPath = questionNodeData.questionPath
+            , readonly = isReadOnly
+            }
+        , viewQuestionAnsweredBy
+            { locale = locale
+            , mbReply = mbReply
+            , question = questionNodeData.question
+            , replyTime = replyTime
+            , questionViewFlags = questionViewFlags
+            }
+        ]
+
+
+type alias IntegrationPluginData =
+    { integrationSettings : String
+    , pluginElement : PluginElement
+    , rendersReply : Bool
+    , settings : String
+    , userSettings : String
+    }
+
+
+encodeIntegrationPluginData : IntegrationPluginData -> E.Value
+encodeIntegrationPluginData data =
+    E.object
+        [ ( "integrationSettings", E.string data.integrationSettings )
+        , ( "pluginElement", PluginElement.encode data.pluginElement )
+        , ( "rendersReply", E.bool data.rendersReply )
+        , ( "settings", E.string data.settings )
+        , ( "userSettings", E.string data.userSettings )
+        ]
+
+
+decodeIntegrationPluginData : D.Decoder IntegrationPluginData
+decodeIntegrationPluginData =
+    D.succeed IntegrationPluginData
+        |> D.required "integrationSettings" D.string
+        |> D.required "pluginElement" PluginElement.decoder
+        |> D.required "rendersReply" D.bool
+        |> D.required "settings" D.string
+        |> D.required "userSettings" D.string
 
 
 type alias ViewQuestionIntegrationTypeHintsProps =

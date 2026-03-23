@@ -12,11 +12,13 @@ module Wizard.Api.Models.Event.AddIntegrationEventData exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Wizard.Api.Models.Event.AddIntegrationApiEventData as AddIntegrationApiEventData exposing (AddIntegrationApiEventData)
+import Wizard.Api.Models.Event.AddIntegrationPluginEventData as AddIntegrationPluginEventData exposing (AddIntegrationPluginEventData)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 
 
 type AddIntegrationEventData
     = AddIntegrationApiEvent AddIntegrationApiEventData
+    | AddIntegrationPluginEvent AddIntegrationPluginEventData
 
 
 decoder : Decoder AddIntegrationEventData
@@ -27,6 +29,9 @@ decoder =
                 case integrationType of
                     "ApiIntegration" ->
                         D.map AddIntegrationApiEvent AddIntegrationApiEventData.decoder
+
+                    "PluginIntegration" ->
+                        D.map AddIntegrationPluginEvent AddIntegrationPluginEventData.decoder
 
                     _ ->
                         D.fail <| "Unknown integration type: " ++ integrationType
@@ -39,6 +44,7 @@ encode data =
         eventData =
             map
                 AddIntegrationApiEventData.encode
+                AddIntegrationPluginEventData.encode
                 data
     in
     ( "eventType", E.string "AddIntegrationEvent" ) :: eventData
@@ -55,23 +61,31 @@ toIntegration uuid data =
         AddIntegrationApiEvent eventData ->
             AddIntegrationApiEventData.toIntegration uuid eventData
 
+        AddIntegrationPluginEvent eventData ->
+            AddIntegrationPluginEventData.toIntegration uuid eventData
+
 
 getTypeString : AddIntegrationEventData -> String
 getTypeString =
     map
-        (\_ -> "Api")
+        (always "Api")
+        (always "Plugin")
 
 
 getEntityVisibleName : AddIntegrationEventData -> Maybe String
 getEntityVisibleName =
-    Just << map .name
+    Just << map .name .pluginIntegrationId
 
 
 map :
     (AddIntegrationApiEventData -> a)
+    -> (AddIntegrationPluginEventData -> a)
     -> AddIntegrationEventData
     -> a
-map apiIntegration integration =
+map apiIntegration pluginIntegration integration =
     case integration of
         AddIntegrationApiEvent data ->
             apiIntegration data
+
+        AddIntegrationPluginEvent data ->
+            pluginIntegration data
