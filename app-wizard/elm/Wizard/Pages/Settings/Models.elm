@@ -5,7 +5,6 @@ import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Authentication.Models
 import Wizard.Pages.Settings.DashboardAndLoginScreen.Models
 import Wizard.Pages.Settings.Features.Models
-import Wizard.Pages.Settings.KnowledgeModels.Models
 import Wizard.Pages.Settings.LookAndFeel.Models
 import Wizard.Pages.Settings.Organization.Models
 import Wizard.Pages.Settings.PluginSettings.Model
@@ -30,7 +29,6 @@ type alias Model =
     , registryModel : Wizard.Pages.Settings.Registry.Models.Model
     , questionnairesModel : Wizard.Pages.Settings.Projects.Models.Model
     , documentSubmissionModel : Wizard.Pages.Settings.Submission.Models.Model
-    , knowledgeModelsModel : Wizard.Pages.Settings.KnowledgeModels.Models.Model
     , usageModel : Wizard.Pages.Settings.Usage.Models.Model
     }
 
@@ -48,7 +46,6 @@ initialModel appState =
     , registryModel = Wizard.Pages.Settings.Registry.Models.initialModel appState
     , questionnairesModel = Wizard.Pages.Settings.Projects.Models.initialModel appState
     , documentSubmissionModel = Wizard.Pages.Settings.Submission.Models.initialModel
-    , knowledgeModelsModel = Wizard.Pages.Settings.KnowledgeModels.Models.initialModel
     , usageModel = Wizard.Pages.Settings.Usage.Models.initialModel
     }
 
@@ -88,9 +85,6 @@ initLocalModel appState route model =
 
         SubmissionRoute ->
             { model | documentSubmissionModel = Wizard.Pages.Settings.Submission.Models.initialModel }
-
-        KnowledgeModelsRoute ->
-            { model | knowledgeModelsModel = Wizard.Pages.Settings.KnowledgeModels.Models.initialModel }
 
         UsageRoute ->
             { model | usageModel = Wizard.Pages.Settings.Usage.Models.initialModel }

@@ -5,7 +5,6 @@ module Wizard.Utils.WizardGuideLinks exposing
     , documentTemplatesImport
     , documentTemplatesPublish
     , documentTemplatesUnsupportedMetamodel
-    , integrationQuestionSecrets
     , jinjaCheatsheet
     , kmEditorCreate
     , kmEditorIntegrationQuestion
@@ -31,7 +30,6 @@ module Wizard.Utils.WizardGuideLinks exposing
     , settingsDashboardAndLoginScreen
     , settingsDocumentSubmission
     , settingsFeatures
-    , settingsKnowledgeModels
     , settingsLookAndFeel
     , settingsOrganization
     , settingsPrivacyAndSupport
@@ -51,7 +49,6 @@ default =
         , ( "documentTemplatesImport", "https://guide.ds-wizard.org/en/latest/application/document-templates/list/import.html" )
         , ( "documentTemplatesPublish", "https://guide.ds-wizard.org/en/latest/application/document-templates/editors/detail/publish.html" )
         , ( "documentTemplatesUnsupportedMetamodel", "https://guide.ds-wizard.org/en/latest/more/self-hosted-dsw/faq-notes.html#document-templates-show-unsupported-metamodel-what-should-i-do" )
-        , ( "integrationQuestionSecrets", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/integration-api.html#secrets-and-other-properties" )
         , ( "jinjaCheatsheet", "https://guide.ds-wizard.org/en/latest/more/miscellaneous/jinja-cheatsheet.html" )
         , ( "kmEditorCreate", "https://guide.ds-wizard.org/en/latest/application/knowledge-models/editors/create.html" )
         , ( "kmEditorIntegrationQuestion", "https://guide.ds-wizard.org/en/latest/more/development/integration-questions/index.html" )
@@ -77,7 +74,6 @@ default =
         , ( "settingsDashboardAndLoginScreen", "https://guide.ds-wizard.org/en/latest/application/administration/settings/user-interface/dashboard-and-login-screen.html" )
         , ( "settingsDocumentSubmission", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/document-submission.html" )
         , ( "settingsFeatures", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/features.html" )
-        , ( "settingsKnowledgeModels", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/knowledge-models.html" )
         , ( "settingsLookAndFeel", "https://guide.ds-wizard.org/en/latest/application/administration/settings/user-interface/look-and-feel.html" )
         , ( "settingsOrganization", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/organization.html" )
         , ( "settingsPrivacyAndSupport", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/privacy-and-support.html" )
@@ -110,11 +106,6 @@ documentTemplatesPublish =
 documentTemplatesUnsupportedMetamodel : GuideLinks -> String
 documentTemplatesUnsupportedMetamodel =
     GuideLinks.get "documentTemplatesUnsupportedMetamodel"
-
-
-integrationQuestionSecrets : GuideLinks -> String
-integrationQuestionSecrets =
-    GuideLinks.get "integrationQuestionSecrets"
 
 
 jinjaCheatsheet : GuideLinks -> String
@@ -240,11 +231,6 @@ settingsDocumentSubmission =
 settingsFeatures : GuideLinks -> String
 settingsFeatures =
     GuideLinks.get "settingsFeatures"
-
-
-settingsKnowledgeModels : GuideLinks -> String
-settingsKnowledgeModels =
-    GuideLinks.get "settingsKnowledgeModels"
 
 
 settingsLookAndFeel : GuideLinks -> String

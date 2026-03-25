@@ -9,7 +9,6 @@ import Wizard.Pages.Settings.Authentication.Update
 import Wizard.Pages.Settings.DashboardAndLoginScreen.Update
 import Wizard.Pages.Settings.Features.Update
 import Wizard.Pages.Settings.Generic.Update
-import Wizard.Pages.Settings.KnowledgeModels.Update
 import Wizard.Pages.Settings.LookAndFeel.Update
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
@@ -68,9 +67,6 @@ fetchData route appState =
         SubmissionRoute ->
             Cmd.map SubmissionMsg <|
                 Wizard.Pages.Settings.Submission.Update.fetchData appState
-
-        KnowledgeModelsRoute ->
-            genericFetch KnowledgeModelsMsg
 
         UsageRoute ->
             Cmd.map UsageMsg <|
@@ -156,13 +152,6 @@ update wrapMsg msg appState model =
                     Wizard.Pages.Settings.Submission.Update.update (wrapMsg << SubmissionMsg) documentSubmissionMsg appState model.documentSubmissionModel
             in
             ( { model | documentSubmissionModel = documentSubmissionModel }, cmd )
-
-        KnowledgeModelsMsg knowledgeModelsMsg ->
-            let
-                ( knowledgeModelsModel, cmd ) =
-                    Wizard.Pages.Settings.KnowledgeModels.Update.update (wrapMsg << KnowledgeModelsMsg) knowledgeModelsMsg appState model.knowledgeModelsModel
-            in
-            ( { model | knowledgeModelsModel = knowledgeModelsModel }, cmd )
 
         UsageMsg usageMsg ->
             let
