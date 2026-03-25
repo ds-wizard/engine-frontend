@@ -27,7 +27,7 @@ import Wizard.Plugins.PluginElement as PluginElement exposing (PluginElement)
 
 pluginApiVersion : Version
 pluginApiVersion =
-    Version.create 0 2 0
+    Version.create 0 3 0
 
 
 isApiVersionSupported : { a | pluginApiVersion : Version, version : Version } -> Bool
