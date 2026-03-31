@@ -303,6 +303,7 @@ updateContentScrollTopMsg =
 
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
+    , mbKmEditorUuid : Maybe Uuid
     , mbSetFullScreenMsg : Maybe (Bool -> msg)
     , projectCommon : ProjectCommon
     }
@@ -410,7 +411,7 @@ update appState cfg msg model =
                     , collapsedPaths = model.collapsedPaths
                     , deleteFileCmd = dispatchDeleteFile cfg.wrapMsg
                     , knowledgeModelParentMap = model.knowledgeModelParentMap
-                    , mbKmEditorUuid = Nothing
+                    , mbKmEditorUuid = cfg.mbKmEditorUuid
                     , openChapterCmd = dispatchOpenChapter cfg.wrapMsg
                     , openCommentsCmd = dispatchUpdateRightPanel cfg.wrapMsg << QuestionnaireRightPanel.Comments
                     , openFileUploadCmd = dispatchOpenFileUploadModal cfg.wrapMsg

@@ -250,6 +250,7 @@ update wrapMsg msg appState model =
                         questionnaireUpdateReturnData =
                             Questionnaire2.update appState
                                 { wrapMsg = wrapMsg << QuestionnaireMsg
+                                , mbKmEditorUuid = Nothing
                                 , mbSetFullScreenMsg = Just Wizard.Msgs.SetFullscreen
                                 , projectCommon = questionnaireCommon
                                 }

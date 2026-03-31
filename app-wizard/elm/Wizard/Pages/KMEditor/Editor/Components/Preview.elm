@@ -39,19 +39,21 @@ import Wizard.Pages.KMEditor.Editor.Common.EditorContext as EditorContext exposi
 
 
 type alias Model =
-    { projectCommon : ProjectCommon
+    { kmEditorUuid : Uuid
+    , projectCommon : ProjectCommon
     , questionnaireModel : Questionnaire2.Model
     , tags : Set String
     }
 
 
-initialModel : AppState -> Uuid -> Model
-initialModel appState kmPackageUuid =
+initialModel : AppState -> Uuid -> Uuid -> Model
+initialModel appState kmEditorUuid kmPackageUuid =
     let
         questionnaire =
             createQuestionnaireDetail kmPackageUuid KnowledgeModel.empty
     in
-    { projectCommon = ProjectCommon.dummy
+    { kmEditorUuid = kmEditorUuid
+    , projectCommon = ProjectCommon.dummy
     , questionnaireModel = initQuestionnaireModel appState questionnaire
     , tags = Set.empty
     }
@@ -76,6 +78,7 @@ setActiveChapterIfNot appState chapterUuid model =
             questionnaireReturnData =
                 Questionnaire2.update appState
                     { wrapMsg = QuestionnaireMsg
+                    , mbKmEditorUuid = Just model.kmEditorUuid
                     , mbSetFullScreenMsg = Nothing
                     , projectCommon = model.projectCommon
                     }
@@ -95,6 +98,7 @@ setPhase appState mbPhaseUuid model =
             questionnaireReturnData =
                 Questionnaire2.update appState
                     { wrapMsg = QuestionnaireMsg
+                    , mbKmEditorUuid = Just model.kmEditorUuid
                     , mbSetFullScreenMsg = Nothing
                     , projectCommon = model.projectCommon
                     }
@@ -151,6 +155,7 @@ generateReplies appState questionUuid knowledgeModel model =
         questionnaireReturnData =
             Questionnaire2.update appState
                 { wrapMsg = QuestionnaireMsg
+                , mbKmEditorUuid = Just model.kmEditorUuid
                 , mbSetFullScreenMsg = Nothing
                 , projectCommon = model.projectCommon
                 }
@@ -222,6 +227,7 @@ handleQuestionnaireMsg msg appState model =
         questionnaireReturnData =
             Questionnaire2.update appState
                 { wrapMsg = QuestionnaireMsg
+                , mbKmEditorUuid = Just model.kmEditorUuid
                 , mbSetFullScreenMsg = Nothing
                 , projectCommon = model.projectCommon
                 }
