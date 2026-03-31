@@ -855,7 +855,8 @@ viewQuestionWrapper props content =
                         , text (String.join "." props.questionNodeData.humanIdentifier)
                         ]
                     , strong
-                        [ classList
+                        [ class "questionnaireContent__questionTitle"
+                        , classList
                             [ ( "text-success", questionState == Answered )
                             , ( "text-danger", questionState == Desirable )
                             , ( "text-secondary", questionState == Default )

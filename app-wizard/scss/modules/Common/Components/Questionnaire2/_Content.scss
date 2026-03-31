@@ -83,10 +83,6 @@ $item-border: var(--bs-border-width) solid var(--bs-border-color-translucent);
     padding-top: $spacer-2;
     padding-bottom: $spacer-3;
 
-    strong {
-      font-size: 120%;
-    }
-
     .tag-list {
       .tag {
         .tag-label {
@@ -95,6 +91,10 @@ $item-border: var(--bs-border-width) solid var(--bs-border-color-translucent);
         }
       }
     }
+  }
+
+  &__questionTitle {
+    font-size: 120%;
   }
 
   &__questionAction {
