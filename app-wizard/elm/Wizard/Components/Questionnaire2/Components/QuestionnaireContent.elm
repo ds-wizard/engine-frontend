@@ -1326,12 +1326,12 @@ viewQuestionOptionsLazy locale pluginActions questionNodeData questionViewFlags 
                 Nothing ->
                     ( 0, "" )
 
-        isAnswered =
-            Maybe.isJust mbSelectedAnswerUuid
+        isQuestionAnswered =
+            isAnswered mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -1339,7 +1339,7 @@ viewQuestionOptionsLazy locale pluginActions questionNodeData questionViewFlags 
         }
         [ div [ class "questionnaireContent__options" ] answersView
         , viewQuestionClearReply
-            { isAnswered = isAnswered
+            { isAnswered = isQuestionAnswered
             , locale = locale
             , questionPath = questionPath
             , readonly = QuestionViewFlags.isReadOnly questionViewFlags
@@ -1545,13 +1545,10 @@ viewQuestionListLazy locale pluginActions questionNodeData questionViewFlags rep
     let
         mbReply =
             replyFromString replyString
-
-        isAnswered =
-            Maybe.isJust mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isAnswered mbReply
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -1687,12 +1684,12 @@ viewQuestionValueLazy locale pluginActions questionNodeData questionViewFlags re
                 _ ->
                     defaultInput
 
-        isAnswered =
-            Maybe.isJust mbReply
+        isQuestionAnswered =
+            isAnswered mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -1701,7 +1698,7 @@ viewQuestionValueLazy locale pluginActions questionNodeData questionViewFlags re
         [ div [ class "questionnaireContent__value" ]
             (inputView ++ validationWarnings)
         , viewQuestionClearReply
-            { isAnswered = isAnswered
+            { isAnswered = isQuestionAnswered
             , locale = locale
             , questionPath = questionPath
             , readonly = isReadOnly
@@ -1771,12 +1768,12 @@ viewQuestionMultiChoiceLazy locale pluginActions questionNodeData questionViewFl
         choicesView =
             List.indexedMap viewChoice_ choices
 
-        isAnswered =
-            Maybe.isJust mbReply
+        isQuestionAnswered =
+            isAnswered mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -1784,7 +1781,7 @@ viewQuestionMultiChoiceLazy locale pluginActions questionNodeData questionViewFl
         }
         [ div [ class "questionnaireContent__options" ] choicesView
         , viewQuestionClearReply
-            { isAnswered = isAnswered
+            { isAnswered = isQuestionAnswered
             , locale = locale
             , questionPath = questionPath
             , readonly = QuestionViewFlags.isReadOnly questionViewFlags
@@ -2083,12 +2080,12 @@ viewQuestionItemSelectLazy locale pluginActions questionNodeData questionViewFla
             else
                 Html.nothing
 
-        isAnswered =
-            Maybe.isJust mbSelectedItem
+        isQuestionAnswered =
+            isAnswered mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -2101,7 +2098,7 @@ viewQuestionItemSelectLazy locale pluginActions questionNodeData questionViewFla
             , missingItemWarning
             ]
         , viewQuestionClearReply
-            { isAnswered = isAnswered
+            { isAnswered = isQuestionAnswered
             , locale = locale
             , questionPath = questionPath
             , readonly = QuestionViewFlags.isReadOnly questionViewFlags
@@ -2207,12 +2204,12 @@ viewQuestionFileLazy locale pluginActions questionNodeData questionViewFlags rep
                     , False
                     )
 
-        isAnswered =
-            Maybe.isJust mbReply
+        isQuestionAnswered =
+            isAnswered mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -2221,7 +2218,7 @@ viewQuestionFileLazy locale pluginActions questionNodeData questionViewFlags rep
         [ div [ class "questionnaireContent__value questionnaireContent__integrationQuestion" ] [ questionContent ]
         , Html.viewIf clearReplyVisible <|
             viewQuestionClearReply
-                { isAnswered = Maybe.isJust mbReply
+                { isAnswered = isQuestionAnswered
                 , locale = locale
                 , questionPath = questionPath
                 , readonly = QuestionViewFlags.isReadOnly questionViewFlags
@@ -2426,12 +2423,12 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
             else
                 Html.nothing
 
-        isAnswered =
-            Maybe.isJust mbReply
+        isQuestionAnswered =
+            isAnswered mbReply
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = isAnswered
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -2442,7 +2439,7 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
             , viewTypeHints
             ]
         , viewQuestionClearReply
-            { isAnswered = isAnswered
+            { isAnswered = isQuestionAnswered
             , locale = locale
             , questionPath = questionPath
             , readonly = isReadOnly
@@ -2472,8 +2469,8 @@ viewQuestionIntegrationPluginLazy locale pluginActions questionNodeData question
         mbReply =
             replyFromString replyString
 
-        isAnswered =
-            Maybe.isJust mbReply
+        isQuestionAnswered =
+            isAnswered mbReply
 
         isReadOnly =
             QuestionViewFlags.isReadOnly questionViewFlags
@@ -2485,7 +2482,7 @@ viewQuestionIntegrationPluginLazy locale pluginActions questionNodeData question
         content =
             case mbPluginData of
                 Just pluginData ->
-                    if isAnswered && not pluginData.rendersReply then
+                    if isQuestionAnswered && not pluginData.rendersReply then
                         Markdown.toHtml [ class "form-control questionnaireContent__markdown" ]
                             (Maybe.unwrap "" (ReplyValue.getStringReply << .value) mbReply)
 
@@ -2509,7 +2506,7 @@ viewQuestionIntegrationPluginLazy locale pluginActions questionNodeData question
     in
     viewQuestionWrapper
         { commentCount = commentCount
-        , isAnswered = Maybe.isJust (replyFromString replyString)
+        , isAnswered = isQuestionAnswered
         , locale = locale
         , pluginActions = pluginActions
         , questionNodeData = questionNodeData
@@ -2517,7 +2514,7 @@ viewQuestionIntegrationPluginLazy locale pluginActions questionNodeData question
         }
         [ div [ class "questionnaireContent__value" ] [ content ]
         , viewQuestionClearReply
-            { isAnswered = isAnswered
+            { isAnswered = isQuestionAnswered
             , locale = locale
             , questionPath = questionNodeData.questionPath
             , readonly = isReadOnly
@@ -2915,6 +2912,13 @@ replyFromString replyString =
     else
         D.decodeString Reply.decoder replyString
             |> Result.toMaybe
+
+
+isAnswered : Maybe Reply -> Bool
+isAnswered mbReply =
+    mbReply
+        |> Maybe.map .value
+        |> Maybe.unwrap False (not << ReplyValue.isEmpty)
 
 
 
