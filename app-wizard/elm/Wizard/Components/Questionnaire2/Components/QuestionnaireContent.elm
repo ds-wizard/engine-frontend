@@ -1282,16 +1282,17 @@ viewQuestionOptionsLazy locale pluginActions questionNodeData questionViewFlags 
         mbReply =
             replyFromString replyString
 
-        ( answers, followUpsCollapsed, metrics ) =
+        { answers, followUpsCount, followUpsCollapsed, metrics } =
             case questionSpecificData of
                 OptionsQuestionSpecificNodeData data ->
-                    ( data.answers
-                    , data.followUpsCollapsed
-                    , data.metrics
-                    )
+                    data
 
                 _ ->
-                    ( [], False, [] )
+                    { answers = []
+                    , followUpsCount = 0
+                    , followUpsCollapsed = False
+                    , metrics = []
+                    }
 
         mbSelectedAnswerUuid =
             Maybe.map (ReplyValue.getAnswerUuid << .value) mbReply
@@ -1316,15 +1317,8 @@ viewQuestionOptionsLazy locale pluginActions questionNodeData questionViewFlags 
         answersView =
             List.indexedMap viewAnswer_ answers
 
-        ( followUpsCount, answerPath ) =
-            case mbAnswer of
-                Just answer ->
-                    ( List.length answer.followUpUuids
-                    , questionPath ++ "." ++ answer.uuid
-                    )
-
-                Nothing ->
-                    ( 0, "" )
+        answerPath =
+            questionPath ++ "." ++ Maybe.withDefault "" mbSelectedAnswerUuid
 
         isQuestionAnswered =
             isAnswered mbReply

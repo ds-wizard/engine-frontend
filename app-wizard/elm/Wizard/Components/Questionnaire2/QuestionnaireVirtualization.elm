@@ -138,6 +138,7 @@ type QuestionSpecificNodeData
 type alias OptionsQuestionNodeData =
     { answers : List Answer
     , followUpsCollapsed : Bool
+    , followUpsCount : Int
     , metrics : List Metric
     }
 
@@ -325,6 +326,14 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 let
                                     answers =
                                         KnowledgeModel.getQuestionAnswers questionUuid ctx.questionnaire.knowledgeModel
+                                            |> List.map cleanFollowUpUuids
+
+                                    followUpExists followUpUuid =
+                                        Dict.get followUpUuid ctx.questionnaire.knowledgeModel.entities.questions
+                                            |> Maybe.isJust
+
+                                    cleanFollowUpUuids answer =
+                                        { answer | followUpUuids = List.filter followUpExists answer.followUpUuids }
 
                                     mbSelectedAnswerUuid =
                                         Dict.get questionPath ctx.questionnaire.replies
@@ -341,15 +350,19 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                             Nothing ->
                                                 ""
 
-                                    followUpQuestions =
+                                    ( followUpsCount, followUpQuestions ) =
                                         case mbSelectedAnswer of
                                             Just selectedAnswer ->
                                                 let
                                                     answerPath =
                                                         path ++ [ questionUuid, selectedAnswer.uuid ]
+
+                                                    count =
+                                                        selectedAnswer.followUpUuids
+                                                            |> List.length
                                                 in
                                                 if isPathCollapsed (pathToString answerPath) ctx then
-                                                    []
+                                                    ( count, [] )
 
                                                 else
                                                     let
@@ -360,14 +373,17 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                                                 |> List.singleton
                                                                 |> (++) questionHumanIdentifier
                                                     in
-                                                    List.indexedMap (virtualizeQuestion ctx (createNestingType << FollowUpNesting) (path ++ [ questionUuid, selectedAnswer.uuid ]) answerHumanIdentifier) selectedAnswer.followUpUuids
+                                                    ( count
+                                                    , List.indexedMap (virtualizeQuestion ctx (createNestingType << FollowUpNesting) (path ++ [ questionUuid, selectedAnswer.uuid ]) answerHumanIdentifier) selectedAnswer.followUpUuids
                                                         |> List.concat
+                                                    )
 
                                             Nothing ->
-                                                []
+                                                ( 0, [] )
                                 in
                                 ( OptionsQuestionSpecificNodeData
                                     { answers = answers
+                                    , followUpsCount = followUpsCount
                                     , followUpsCollapsed = isPathCollapsed selectedAnswerPath ctx
                                     , metrics = KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
                                     }
