@@ -173,6 +173,7 @@ initQuestionnaireModel appState ( model, cmd ) =
                         Just chapterUuid ->
                             Questionnaire2.update appState
                                 { wrapMsg = QuestionnaireMsg
+                                , mbKmEditorUuid = Nothing
                                 , mbSetFullScreenMsg = Nothing
                                 , projectCommon = ProjectCommon.dummy
                                 }
@@ -199,6 +200,7 @@ handleQuestionnaireMsg msg wrapMsg appState model =
                 questionnaireReturnData =
                     Questionnaire2.update appState
                         { wrapMsg = QuestionnaireMsg
+                        , mbKmEditorUuid = Nothing
                         , mbSetFullScreenMsg = Nothing
                         , projectCommon = ProjectCommon.dummy
                         }

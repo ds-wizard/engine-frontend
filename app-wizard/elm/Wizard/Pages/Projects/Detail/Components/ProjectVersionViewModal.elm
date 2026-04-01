@@ -138,6 +138,7 @@ update appState msg model =
                         newQuestionnaireModel =
                             Questionnaire.update appState
                                 { wrapMsg = QuestionnaireMsg
+                                , mbKmEditorUuid = Nothing
                                 , mbSetFullScreenMsg = Nothing
                                 , projectCommon = questionnaireCommon
                                 }
