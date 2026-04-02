@@ -8,33 +8,35 @@ import Common.Api.Models.DevOperationSection exposing (DevOperationSection)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Flash as Flash
 import Common.Components.Page as Page
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.Markdown as Markdown
 import Dict
 import Html exposing (Html, a, div, h2, h3, input, label, span, strong, text)
-import Html.Attributes exposing (class, classList, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html.Attributes exposing (checked, class, classList, placeholder, type_, value)
+import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Uuid
+import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Dev.Operations.Models exposing (Model, fieldPath, operationPath)
+import Wizard.Pages.Dev.Operations.Models exposing (Model, fieldPath, getTypeHintInputModel, operationPath)
 import Wizard.Pages.Dev.Operations.Msgs exposing (Msg(..))
 import Wizard.Utils.HtmlAttributesUtils exposing (settingsClass)
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (viewContent model) model.adminOperationSections
+    Page.actionResultView appState (viewContent appState model) model.adminOperationSections
 
 
-viewContent : Model -> List DevOperationSection -> Html Msg
-viewContent model adminOperationSections =
+viewContent : AppState -> Model -> List DevOperationSection -> Html Msg
+viewContent appState model adminOperationSections =
     let
         section =
             adminOperationSections
                 |> List.find (.name >> Just >> (==) model.openedSection)
-                |> Maybe.unwrap Html.nothing (viewSection model)
+                |> Maybe.unwrap Html.nothing (viewSection appState model)
     in
     div [ settingsClass "Settings" ]
         [ div [ class "Settings__navigation" ] [ navigation model adminOperationSections ]
@@ -65,11 +67,11 @@ navigationSectionLink model section =
         [ text section.name ]
 
 
-viewSection : Model -> DevOperationSection -> Html Msg
-viewSection model section =
+viewSection : AppState -> Model -> DevOperationSection -> Html Msg
+viewSection appState model section =
     let
         operations =
-            List.map (viewOperation model section.name) section.operations
+            List.map (viewOperation appState model section.name) section.operations
 
         description =
             Maybe.unwrap Html.nothing (Markdown.toHtml []) section.description
@@ -81,14 +83,14 @@ viewSection model section =
         ]
 
 
-viewOperation : Model -> String -> DevOperation -> Html Msg
-viewOperation model sectionName operation =
+viewOperation : AppState -> Model -> String -> DevOperation -> Html Msg
+viewOperation appState model sectionName operation =
     let
         description =
             Maybe.unwrap Html.nothing (Markdown.toHtml []) operation.description
 
         parameters =
-            List.map (viewParameter model sectionName operation.name) operation.parameters
+            List.map (viewParameter appState model sectionName operation.name) operation.parameters
 
         actionResult =
             Maybe.withDefault Unset <| Dict.get (operationPath sectionName operation.name) model.operationResults
@@ -126,35 +128,61 @@ viewOperation model sectionName operation =
         ]
 
 
-viewParameter : Model -> String -> String -> DevOperationParameter -> Html Msg
-viewParameter model sectionName operationName parameter =
+viewParameter : AppState -> Model -> String -> String -> DevOperationParameter -> Html Msg
+viewParameter appState model sectionName operationName parameter =
     let
-        ( parameterTypeLabel, parameterTypePlaceholder ) =
-            case parameter.type_ of
-                DevOperationParameterType.String ->
-                    ( "string", "abc" )
-
-                DevOperationParameterType.Int ->
-                    ( "int", "1" )
-
-                DevOperationParameterType.Double ->
-                    ( "double", "2.3" )
-
-                DevOperationParameterType.Bool ->
-                    ( "bool", "True / False" )
-
-                DevOperationParameterType.Json ->
-                    ( "Json", " { \"prop\": 1 }" )
-
-                DevOperationParameterType.Tenant ->
-                    ( "tenant", Uuid.toString Uuid.nil )
-
         path =
             fieldPath sectionName operationName parameter.name
 
         fieldValue =
             Maybe.withDefault "" <| Dict.get path model.fieldValues
+
+        viewSimpleParameterFormGroup_ =
+            viewSimpleParameterFormGroup parameter path fieldValue
     in
+    case parameter.type_ of
+        DevOperationParameterType.String ->
+            viewSimpleParameterFormGroup_ "string" "abc"
+
+        DevOperationParameterType.Int ->
+            viewSimpleParameterFormGroup_ "int" "1"
+
+        DevOperationParameterType.Double ->
+            viewSimpleParameterFormGroup_ "double" "2.3"
+
+        DevOperationParameterType.Bool ->
+            viewBoolParameterFormGroup parameter path fieldValue
+
+        DevOperationParameterType.Json ->
+            viewSimpleParameterFormGroup_ "Json" "{ \"prop\": 1 }"
+
+        DevOperationParameterType.Tenant ->
+            let
+                item tenant =
+                    div [ class "typehints-complex-item" ]
+                        [ ItemIcon.tenantIcon LookAndFeelConfig.defaultLogoUrl tenant
+                        , div []
+                            [ strong [ class "d-block" ] [ text tenant.name ]
+                            , div [] [ text tenant.clientUrl ]
+                            ]
+                        ]
+
+                viewConfig =
+                    { viewItem = item
+                    , wrapMsg = UpdateTypeHintInput path
+                    , nothingSelectedItem = span [ class "text-muted" ] [ text <| "Select tenant" ]
+                    , clearEnabled = True
+                    , locale = appState.locale
+                    }
+            in
+            div [ class "form-group" ]
+                [ label [] [ text parameter.name ]
+                , TypeHintInput.view viewConfig (getTypeHintInputModel path model) False
+                ]
+
+
+viewSimpleParameterFormGroup : DevOperationParameter -> String -> String -> String -> String -> Html Msg
+viewSimpleParameterFormGroup parameter path fieldValue parameterTypeLabel parameterTypePlaceholder =
     div [ class "form-group" ]
         [ label [] [ text parameter.name ]
         , div [ class "input-group" ]
@@ -167,5 +195,24 @@ viewParameter model sectionName operationName parameter =
                 , value fieldValue
                 ]
                 []
+            ]
+        ]
+
+
+viewBoolParameterFormGroup : DevOperationParameter -> String -> String -> Html Msg
+viewBoolParameterFormGroup parameter path fieldValue =
+    div [ class "form-group" ]
+        [ label [] [ text parameter.name ]
+        , div [ class "form-check py-0 my-0" ]
+            [ label [ class "form-check-label form-check-toggle" ]
+                [ input
+                    [ class "form-check-input"
+                    , onCheck (FieldInputBool path)
+                    , type_ "checkbox"
+                    , checked (fieldValue == "True")
+                    ]
+                    []
+                , span [] []
+                ]
             ]
         ]

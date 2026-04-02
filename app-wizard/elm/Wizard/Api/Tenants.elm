@@ -2,6 +2,7 @@ module Wizard.Api.Tenants exposing
     ( getCurrentConfig
     , getCurrentPluginSettingsDetail
     , getTenant
+    , getTenantSuggestions
     , getTenantUsage
     , getTenants
     , postTenant
@@ -13,11 +14,13 @@ module Wizard.Api.Tenants exposing
     )
 
 import Common.Api.Models.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.TenantSuggestion as TenantSuggestion exposing (TenantSuggestion)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Dict exposing (Dict)
+import Json.Decode as D
 import Json.Encode as E
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.EditableConfig as EditableConfig exposing (EditableConfig)
@@ -43,6 +46,25 @@ getTenants appState filters qs =
             "/tenants" ++ queryString
     in
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "tenants" Tenant.decoder)
+
+
+getTenantSuggestions : AppState -> PaginationQueryString -> ToMsg (Pagination TenantSuggestion) msg -> Cmd msg
+getTenantSuggestions appState pqs =
+    let
+        queryString =
+            PaginationQueryString.toApiUrl pqs
+
+        url =
+            "/tenants/suggestions" ++ queryString
+
+        wrapPagination items =
+            let
+                pagination =
+                    Pagination.empty
+            in
+            { pagination | items = items }
+    in
+    Request.get (AppState.toServerInfo appState) url (D.map wrapPagination (D.list TenantSuggestion.decoder))
 
 
 getTenant : AppState -> Uuid -> ToMsg TenantDetail msg -> Cmd msg

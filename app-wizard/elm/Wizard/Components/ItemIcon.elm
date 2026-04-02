@@ -3,6 +3,7 @@ module Wizard.Components.ItemIcon exposing
     , ConfigExtra
     , IconFaConfig
     , iconFa
+    , tenantIcon
     , view
     , viewExtra
     )
@@ -75,6 +76,17 @@ viewExtra config =
     in
     div (class "ItemIcon" :: backgroundColorStyle ++ config.attributes)
         [ content ]
+
+
+tenantIcon : String -> { a | logoUrl : Maybe String } -> Html msg
+tenantIcon defaultUrl app =
+    let
+        logoUrl =
+            Maybe.withDefault defaultUrl app.logoUrl
+    in
+    div
+        [ class "ItemIcon" ]
+        [ img [ src logoUrl ] [] ]
 
 
 
