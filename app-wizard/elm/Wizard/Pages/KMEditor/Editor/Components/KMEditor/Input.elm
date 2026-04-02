@@ -668,6 +668,7 @@ annotations appState config =
                         , class "form-control"
                         , placeholder (gettext "Key" appState.locale)
                         , dataCy "annotation_key"
+                        , id ("annotation_" ++ String.fromInt i ++ "_key")
                         ]
                         []
                     , Html.textarea
@@ -692,9 +693,13 @@ annotations appState config =
             )
 
         addAnnotation =
+            let
+                nextId =
+                    "#annotation_" ++ String.fromInt (List.length config.annotations) ++ "_key"
+            in
             a
                 [ class "with-icon"
-                , onClick (config.onEdit (Just ".annotations-editor-item:last-child .annotations-editor-item-inputs input") (config.annotations ++ [ Annotation.new ]))
+                , onClick (config.onEdit (Just nextId) (config.annotations ++ [ Annotation.new ]))
                 ]
                 [ faAdd
                 , text (gettext "Add annotation" appState.locale)
