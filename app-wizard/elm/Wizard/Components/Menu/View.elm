@@ -21,6 +21,7 @@ import Json.Decode as D
 import Json.Decode.Extra as D
 import Maybe.Extra as Maybe
 import String.Format as String
+import Version
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
@@ -898,7 +899,9 @@ viewAboutModalContent appState serverBuildInfo =
          , viewBuildInfo appState (gettext "Server" appState.locale) serverBuildInfo extraServerInfo
          ]
             ++ componentVersions
-            ++ [ metamodelVersions ]
+            ++ [ metamodelVersions
+               , viewPluginVersions appState
+               ]
         )
 
 
@@ -952,5 +955,32 @@ viewMetamodelVersions appState metamodelVersions =
                         ]
                 )
                 metamodelVersions
+            )
+        ]
+
+
+viewPluginVersions : AppState -> Html msg
+viewPluginVersions appState =
+    let
+        pluginMetadataList =
+            List.sortBy (String.toLower << .name) appState.pluginMetadata
+    in
+    table [ class "table table-borderless table-build-info" ]
+        [ thead []
+            [ tr []
+                [ th [ colspan 2 ]
+                    [ text (gettext "Plugins" appState.locale)
+                    ]
+                ]
+            ]
+        , tbody []
+            (List.map
+                (\pluginMetadata ->
+                    tr []
+                        [ td [ class "w-50" ] [ text pluginMetadata.name ]
+                        , td [] [ text (Version.toString pluginMetadata.version) ]
+                        ]
+                )
+                pluginMetadataList
             )
         ]
