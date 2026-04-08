@@ -77,7 +77,7 @@ default =
         , ( "settingsFeatures", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/features.html" )
         , ( "settingsLookAndFeel", "https://guide.ds-wizard.org/en/latest/application/administration/settings/user-interface/look-and-feel.html" )
         , ( "settingsOrganization", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/organization.html" )
-        , ( "settingsPlugins", "https://guide.ds-wizard.org/en/latest/applications/administration/settings/system/plugins.html" )
+        , ( "settingsPlugins", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/plugins.html" )
         , ( "settingsPrivacyAndSupport", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/privacy-and-support.html" )
         , ( "settingsProjects", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/projects.html" )
         , ( "settingsRegistry", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/dsw-registry.html" )
