@@ -2582,7 +2582,7 @@ viewIntegrationEditorPlugin config parentUuid integrationUuid integration data =
                                         ( pUuid, pIntegrationId )
 
                                     _ ->
-                                        ( "", "" )
+                                        ( Uuid.toString Uuid.nil, "" )
                         in
                         { event
                             | pluginUuid = EventField.create pluginUuid True
