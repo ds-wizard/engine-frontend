@@ -653,42 +653,22 @@ addApiIntegrationEvent =
     , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
     , content =
         AddIntegrationEvent
-            (AddIntegrationApiLegacyEvent
-                { id = "service"
+            (AddIntegrationApiEvent
+                { allowCustomReply = True
+                , annotations = []
                 , name = "Service"
-                , variables = [ "kind", "category" ]
-                , logo = Just "data:image/png;base64,..."
-                , itemUrl = Just "http://example.com/${id}"
-                , requestMethod = "GET"
-                , requestUrl = "/api/search"
+                , requestAllowEmptySearch = True
+                , requestBody = Just "{}"
                 , requestHeaders = [ { key = "X_USER", value = "user" } ]
-                , requestBody = "{}"
-                , requestEmptySearch = True
+                , requestMethod = "GET"
+                , requestUrl = "/"
+                , responseItemTemplate = "{{title}}"
+                , responseItemTemplateForSelection = Nothing
                 , responseListField = Just "items"
-                , responseItemId = Just "uuid"
-                , responseItemTemplate = "title"
-                , annotations = []
-                }
-            )
-    , createdAt = Time.millisToPosix 1642607898
-    }
-
-
-addWidgetIntegrationEvent : Event
-addWidgetIntegrationEvent =
-    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-    , entityUuid = "0d03f237-bc95-4033-99ab-5ba3d85cd6c7"
-    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-    , content =
-        AddIntegrationEvent
-            (AddIntegrationWidgetEvent
-                { id = "service"
-                , name = "Service"
+                , testQ = "item"
+                , testResponse = Nothing
+                , testVariables = Dict.empty
                 , variables = [ "kind", "category" ]
-                , logo = Just "data:image/png;base64,..."
-                , itemUrl = Just "http://example.com/${id}"
-                , widgetUrl = "http://example.com"
-                , annotations = []
                 }
             )
     , createdAt = Time.millisToPosix 1642607898
@@ -699,18 +679,18 @@ addIntegrationEventTest : Test
 addIntegrationEventTest =
     describe "AddIntegrationEvent"
         [ parametrized
-            [ addApiIntegrationEvent, addWidgetIntegrationEvent ]
+            [ addApiIntegrationEvent ]
             "should encode and decode"
           <|
             \event -> expectEventEncodeDecode event
         , parametrized
-            [ addApiIntegrationEvent, addWidgetIntegrationEvent ]
+            [ addApiIntegrationEvent ]
             "get event uuid"
           <|
             \event ->
                 Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (Event.getUuid event)
         , parametrized
-            [ addApiIntegrationEvent, addWidgetIntegrationEvent ]
+            [ addApiIntegrationEvent ]
             "get event entity visible name"
           <|
             \event ->
@@ -725,42 +705,22 @@ editApiIntegrationEvent =
     , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
     , content =
         EditIntegrationEvent
-            (EditIntegrationApiLegacyEvent
-                { id = { changed = True, value = Just "service" }
+            (EditIntegrationApiEvent
+                { allowCustomReply = { changed = True, value = Just True }
+                , annotations = { changed = False, value = Nothing }
                 , name = { changed = True, value = Just "Service" }
-                , variables = { changed = True, value = Just [ "kind", "category" ] }
-                , logo = { changed = False, value = Nothing }
-                , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
+                , requestAllowEmptySearch = { changed = True, value = Just True }
+                , requestBody = { changed = True, value = Just (Just "{}") }
+                , requestHeaders = { changed = True, value = Just [ { key = "X_USER", value = "user" } ] }
                 , requestMethod = { changed = True, value = Just "GET" }
-                , requestUrl = { changed = False, value = Nothing }
-                , requestHeaders = { changed = True, value = Just <| [ { key = "X_SEARCH", value = "full" }, { key = "X_USER", value = "user" } ] }
-                , requestBody = { changed = True, value = Just "{}" }
-                , requestEmptySearch = { changed = True, value = Just False }
-                , responseListField = { changed = False, value = Nothing }
-                , responseItemId = { changed = False, value = Nothing }
-                , responseItemTemplate = { changed = True, value = Just "title" }
-                , annotations = { changed = False, value = Nothing }
-                }
-            )
-    , createdAt = Time.millisToPosix 1642607898
-    }
-
-
-editWidgetIntegrationEvent : Event
-editWidgetIntegrationEvent =
-    { uuid = "cbecbad5-f85d-4e7e-95b9-34669e3333f9"
-    , entityUuid = "52034933-3065-4876-9999-5f5c0d91f7aa"
-    , parentUuid = "aad436a7-c8a5-4237-a2bd-34decdf26a1f"
-    , content =
-        EditIntegrationEvent
-            (EditIntegrationWidgetEvent
-                { id = { changed = True, value = Just "service" }
-                , name = { changed = True, value = Just "Service" }
+                , requestUrl = { changed = True, value = Just "/" }
+                , responseItemTemplate = { changed = True, value = Just "{{title}}" }
+                , responseItemTemplateForSelection = { changed = False, value = Nothing }
+                , responseListField = { changed = True, value = Just (Just "items") }
+                , testQ = { changed = True, value = Just "item" }
+                , testResponse = { changed = False, value = Nothing }
+                , testVariables = { changed = False, value = Nothing }
                 , variables = { changed = True, value = Just [ "kind", "category" ] }
-                , logo = { changed = False, value = Nothing }
-                , itemUrl = { changed = True, value = Just (Just "http://example.com/${id}") }
-                , widgetUrl = { changed = False, value = Nothing }
-                , annotations = { changed = False, value = Nothing }
                 }
             )
     , createdAt = Time.millisToPosix 1642607898
@@ -771,18 +731,18 @@ editIntegrationEventTest : Test
 editIntegrationEventTest =
     describe "EditIntegrationEventTest"
         [ parametrized
-            [ editApiIntegrationEvent, editWidgetIntegrationEvent ]
+            [ editApiIntegrationEvent ]
             "should encode and decode"
           <|
             \event -> expectEventEncodeDecode event
         , parametrized
-            [ editApiIntegrationEvent, editWidgetIntegrationEvent ]
+            [ editApiIntegrationEvent ]
             "get event uuid"
           <|
             \event ->
                 Expect.equal "cbecbad5-f85d-4e7e-95b9-34669e3333f9" (Event.getUuid event)
         , parametrized
-            [ editApiIntegrationEvent, editWidgetIntegrationEvent ]
+            [ editApiIntegrationEvent ]
             "get event entity visible name"
           <|
             \event ->

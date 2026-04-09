@@ -1407,55 +1407,23 @@ computeIntegrationWarnings appState secrets integration =
             in
             nameWarning ++ variablesWarning ++ urlWarning ++ testDataWarning ++ itemTemplateWarning
 
-        Integration.ApiLegacyIntegration _ data ->
+        Integration.PluginIntegration data ->
             let
-                idWarning =
-                    if String.isEmpty (Integration.getId integration) then
-                        createError (gettext "Empty ID for integration" appState.locale)
+                nameWarning =
+                    if String.isEmpty (Integration.getName integration) then
+                        createError (gettext "Empty name for integration" appState.locale)
 
                     else
                         []
 
-                urlError =
-                    if String.isEmpty data.requestUrl then
-                        createError (gettext "Empty request URL for integration" appState.locale)
-
-                    else
-                        []
-
-                requestMethod =
-                    if String.isEmpty data.requestMethod then
-                        createError (gettext "Empty request HTTP method for integration" appState.locale)
-
-                    else
-                        []
-
-                responseItemTemplate =
-                    if String.isEmpty data.responseItemTemplate then
-                        createError (gettext "Empty response item template for integration" appState.locale)
+                pluginWarning =
+                    if String.isEmpty data.pluginUuid || String.isEmpty data.pluginIntegrationId then
+                        createError (gettext "No plugin selected for plugin integration" appState.locale)
 
                     else
                         []
             in
-            idWarning ++ urlError ++ requestMethod ++ responseItemTemplate
-
-        Integration.WidgetIntegration _ data ->
-            let
-                idWarning =
-                    if String.isEmpty (Integration.getId integration) then
-                        createError (gettext "Empty ID for integration" appState.locale)
-
-                    else
-                        []
-
-                widgetUrlWarning =
-                    if String.isEmpty data.widgetUrl then
-                        createError (gettext "Empty widget URL for integration" appState.locale)
-
-                    else
-                        []
-            in
-            idWarning ++ widgetUrlWarning
+            nameWarning ++ pluginWarning
 
 
 computeResourceCollectionWarnings : AppState -> KnowledgeModel -> ResourceCollection -> List EditorContextWarning

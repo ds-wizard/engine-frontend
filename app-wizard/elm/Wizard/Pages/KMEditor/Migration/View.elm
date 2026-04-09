@@ -706,57 +706,26 @@ viewAddIntegrationDiff appState event =
                         , Maybe.withDefault "" <| data.responseItemTemplateForSelection
                         ]
 
-                AddIntegrationApiLegacyEvent data ->
+                AddIntegrationPluginEvent data ->
                     List.zip
                         [ gettext "Type" appState.locale
-                        , gettext "ID" appState.locale
                         , gettext "Name" appState.locale
-                        , gettext "Props" appState.locale
-                        , gettext "Item URL" appState.locale
-                        , gettext "Request HTTP Method" appState.locale
-                        , gettext "Request URL" appState.locale
-                        , gettext "Request HTTP Headers" appState.locale
-                        , gettext "Request HTTP Body" appState.locale
-                        , gettext "Response List Field" appState.locale
-                        , gettext "Response Item ID" appState.locale
-                        , gettext "Response Item Template" appState.locale
+                        , gettext "Plugin UUID" appState.locale
+                        , gettext "Plugin Integration ID" appState.locale
+                        , gettext "Plugin Integration Settings" appState.locale
                         ]
                         [ AddIntegrationEventData.getTypeString event
-                        , AddIntegrationEventData.map (always "") .id .id event
-                        , AddIntegrationEventData.map .name .name .name event
-                        , String.join ", " <| AddIntegrationEventData.map (always []) .variables .variables event
-                        , Maybe.withDefault "" <| AddIntegrationEventData.map (always Nothing) .itemUrl .itemUrl event
-                        , data.requestMethod
-                        , data.requestUrl
-                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
-                        , data.requestBody
-                        , Maybe.withDefault "" data.responseListField
-                        , Maybe.withDefault "" data.responseItemId
-                        , data.responseItemTemplate
-                        ]
-
-                AddIntegrationWidgetEvent data ->
-                    List.zip
-                        [ gettext "Type" appState.locale
-                        , gettext "ID" appState.locale
-                        , gettext "Name" appState.locale
-                        , gettext "Props" appState.locale
-                        , gettext "Item URL" appState.locale
-                        , gettext "Widget URL" appState.locale
-                        ]
-                        [ AddIntegrationEventData.getTypeString event
-                        , AddIntegrationEventData.map (always "") .id .id event
-                        , AddIntegrationEventData.map .name .name .name event
-                        , String.join ", " <| AddIntegrationEventData.map (always []) .variables .variables event
-                        , Maybe.withDefault "" <| AddIntegrationEventData.map (always Nothing) .itemUrl .itemUrl event
-                        , data.widgetUrl
+                        , data.name
+                        , data.pluginUuid
+                        , data.pluginIntegrationId
+                        , data.pluginIntegrationSettings
                         ]
 
         fieldDiff =
             viewAdd fields
 
         annotationsDiff =
-            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations .annotations event)
+            viewAnnotationsDiff appState [] (AddIntegrationEventData.map .annotations .annotations event)
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -805,70 +774,25 @@ viewEditIntegrationDiff appState event integration =
                         , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseItemTemplateForSelection (Integration.getResponseItemTemplateForSelection integration)
                         ]
 
-                EditIntegrationApiLegacyEvent data ->
+                EditIntegrationPluginEvent data ->
                     List.zip3
                         [ gettext "Type" appState.locale
-                        , gettext "ID" appState.locale
                         , gettext "Name" appState.locale
-                        , gettext "Props" appState.locale
-                        , gettext "Item URL" appState.locale
-                        , gettext "Request HTTP Method" appState.locale
-                        , gettext "Request URL" appState.locale
-                        , gettext "Request HTTP Headers" appState.locale
-                        , gettext "Request HTTP Body" appState.locale
-                        , gettext "Response List Field" appState.locale
-                        , gettext "Response Item ID" appState.locale
-                        , gettext "Response Item Template" appState.locale
+                        , gettext "Plugin UUID" appState.locale
+                        , gettext "Plugin Integration ID" appState.locale
+                        , gettext "Plugin Integration Settings" appState.locale
                         ]
                         [ Integration.getTypeString integration
-                        , Integration.getId integration
                         , Integration.getName integration
-                        , String.join ", " <| Integration.getVariables integration
-                        , Maybe.withDefault "" <| Integration.getItemUrl integration
-                        , Maybe.withDefault "" <| Integration.getRequestMethod integration
-                        , Maybe.withDefault "" <| Integration.getRequestUrl integration
-                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| Maybe.withDefault [] <| Integration.getRequestHeaders integration
-                        , Maybe.withDefault "" <| Integration.getRequestBody integration
-                        , Maybe.withDefault "" <| Integration.getResponseListField integration
-                        , Maybe.withDefault "" <| Integration.getResponseItemId integration
-                        , Maybe.withDefault "" <| Integration.getResponseItemId integration
+                        , Maybe.withDefault "" <| Integration.getPluginUuid integration
+                        , Maybe.withDefault "" <| Integration.getPluginIntegrationId integration
+                        , Maybe.withDefault "" <| Integration.getPluginIntegrationSettings integration
                         ]
                         [ EditIntegrationEventData.getTypeString event
-                        , EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .id .id event) (Integration.getId integration)
-                        , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name .name event) (Integration.getName integration)
-                        , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .variables .variables event) (Integration.getVariables integration)
-                        , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .itemUrl .itemUrl event) (Integration.getItemUrl integration)
-                        , EventField.getValueWithDefault data.requestMethod (Maybe.withDefault "" <| Integration.getRequestMethod integration)
-                        , EventField.getValueWithDefault data.requestUrl (Maybe.withDefault "" <| Integration.getRequestUrl integration)
-                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) <| EventField.getValueWithDefault data.requestHeaders (Maybe.withDefault [] <| Integration.getRequestHeaders integration)
-                        , EventField.getValueWithDefault data.requestBody (Maybe.withDefault "" <| Integration.getRequestBody integration)
-                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseListField (Integration.getResponseListField integration)
-                        , Maybe.withDefault "" <| EventField.getValueWithDefault data.responseItemId (Integration.getResponseItemId integration)
-                        , EventField.getValueWithDefault data.responseItemTemplate (Maybe.withDefault "" <| Integration.getResponseItemTemplate integration)
-                        ]
-
-                EditIntegrationWidgetEvent data ->
-                    List.zip3
-                        [ gettext "Type" appState.locale
-                        , gettext "ID" appState.locale
-                        , gettext "Name" appState.locale
-                        , gettext "Props" appState.locale
-                        , gettext "Item URL" appState.locale
-                        , gettext "Widget URL" appState.locale
-                        ]
-                        [ Integration.getTypeString integration
-                        , Integration.getId integration
-                        , Integration.getName integration
-                        , String.join ", " <| Integration.getVariables integration
-                        , Maybe.withDefault "" <| Integration.getItemUrl integration
-                        , Maybe.withDefault "" <| Integration.getWidgetUrl integration
-                        ]
-                        [ EditIntegrationEventData.getTypeString event
-                        , EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .id .id event) (Integration.getId integration)
-                        , EventField.getValueWithDefault (EditIntegrationEventData.map .name .name .name event) (Integration.getName integration)
-                        , String.join ", " <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .variables .variables event) (Integration.getVariables integration)
-                        , Maybe.withDefault "" <| EventField.getValueWithDefault (EditIntegrationEventData.map (always EventField.empty) .itemUrl .itemUrl event) (Integration.getItemUrl integration)
-                        , EventField.getValueWithDefault data.widgetUrl (Maybe.withDefault "" <| Integration.getWidgetUrl integration)
+                        , EventField.getValueWithDefault data.name (Integration.getName integration)
+                        , EventField.getValueWithDefault data.pluginUuid (Maybe.withDefault "" <| Integration.getPluginUuid integration)
+                        , EventField.getValueWithDefault data.pluginIntegrationId (Maybe.withDefault "" <| Integration.getPluginIntegrationId integration)
+                        , EventField.getValueWithDefault data.pluginIntegrationSettings (Maybe.withDefault "" <| Integration.getPluginIntegrationSettings integration)
                         ]
 
         fieldDiff =
@@ -877,7 +801,7 @@ viewEditIntegrationDiff appState event integration =
         annotationsDiff =
             viewAnnotationsDiff appState
                 (Integration.getAnnotations integration)
-                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations .annotations event) (Integration.getAnnotations integration))
+                (EventField.getValueWithDefault (EditIntegrationEventData.map .annotations .annotations event) (Integration.getAnnotations integration))
     in
     div [] (fieldDiff ++ [ annotationsDiff ])
 
@@ -914,50 +838,19 @@ viewDeleteIntegrationDiff appState integration =
                         , Maybe.withDefault "" <| data.responseItemTemplateForSelection
                         ]
 
-                ApiLegacyIntegration _ data ->
+                PluginIntegration data ->
                     List.zip
                         [ gettext "Type" appState.locale
-                        , gettext "ID" appState.locale
                         , gettext "Name" appState.locale
-                        , gettext "Props" appState.locale
-                        , gettext "Item URL" appState.locale
-                        , gettext "Request HTTP Method" appState.locale
-                        , gettext "Request URL" appState.locale
-                        , gettext "Request HTTP Headers" appState.locale
-                        , gettext "Request HTTP Body" appState.locale
-                        , gettext "Response List Field" appState.locale
-                        , gettext "Response Item ID" appState.locale
-                        , gettext "Response Item Template" appState.locale
+                        , gettext "Plugin UUID" appState.locale
+                        , gettext "Plugin Integration ID" appState.locale
+                        , gettext "Plugin Integration Settings" appState.locale
                         ]
                         [ Integration.getTypeString integration
-                        , Integration.getId integration
                         , Integration.getName integration
-                        , String.join ", " <| Integration.getVariables integration
-                        , Maybe.withDefault "" <| Integration.getItemUrl integration
-                        , data.requestMethod
-                        , data.requestUrl
-                        , String.join ", " <| List.map (\{ key, value } -> key ++ ": " ++ value) data.requestHeaders
-                        , data.requestBody
-                        , Maybe.withDefault "" <| data.responseListField
-                        , Maybe.withDefault "" <| data.responseItemId
-                        , data.responseItemTemplate
-                        ]
-
-                WidgetIntegration _ data ->
-                    List.zip
-                        [ gettext "Type" appState.locale
-                        , gettext "ID" appState.locale
-                        , gettext "Name" appState.locale
-                        , gettext "Props" appState.locale
-                        , gettext "Item URL" appState.locale
-                        , gettext "Widget URL" appState.locale
-                        ]
-                        [ Integration.getTypeString integration
-                        , Integration.getId integration
-                        , Integration.getName integration
-                        , String.join ", " <| Integration.getVariables integration
-                        , Maybe.withDefault "" <| Integration.getItemUrl integration
-                        , data.widgetUrl
+                        , data.pluginUuid
+                        , data.pluginIntegrationId
+                        , data.pluginIntegrationSettings
                         ]
 
         fieldDiff =

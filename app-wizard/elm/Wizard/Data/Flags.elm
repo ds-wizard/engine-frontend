@@ -34,6 +34,7 @@ type alias Flags =
     , newsUrl : Maybe String
     , pluginMetadata : List PluginMetadata
     , plugins : List Plugin
+    , aiAssistantAvailable : Bool
     , success : Bool
     }
 
@@ -57,6 +58,7 @@ decoder =
         |> D.required "newsUrl" (D.maybe D.string)
         |> D.required "plugins" (D.listIgnoreInvalid PluginMetadata.decoder)
         |> D.required "plugins" (D.listIgnoreInvalid Plugin.decoder)
+        |> D.required "aiAssistantAvailable" D.bool
         |> D.hardcoded True
 
 
@@ -78,5 +80,6 @@ default =
     , newsUrl = Nothing
     , pluginMetadata = []
     , plugins = []
+    , aiAssistantAvailable = False
     , success = False
     }

@@ -9,6 +9,8 @@ import Common.Utils.UrlUtils as Url
 import Dict
 import Gettext exposing (gettext)
 import Task
+import Uuid
+import Version
 import Wizard.Api.BuildInfo as BuildInfoApi
 import Wizard.Components.Menu.Models exposing (Model)
 import Wizard.Components.Menu.Msgs exposing (Msg(..))
@@ -49,12 +51,20 @@ update wrapMsg msg appState model =
                                 Nothing ->
                                     ""
 
+                        pluginsString =
+                            if List.isEmpty appState.pluginMetadata then
+                                ""
+
+                            else
+                                "Plugins\n"
+                                    ++ String.join "\n" (List.map (\p -> "- " ++ p.name ++ " (" ++ Uuid.toString p.uuid ++ "): " ++ Version.toString p.version) appState.pluginMetadata)
+
                         parts =
                             ("Instance: " ++ Maybe.withDefault appState.apiUrl (Url.getDomain appState.apiUrl))
                                 :: componentToString (gettext "Client" appState.locale) BuildInfo.client
                                 :: componentToString (gettext "Server" appState.locale) apiBuildInfo
                                 :: List.map (\c -> componentToString c.name c) (List.sortBy .name apiBuildInfo.components)
-                                ++ [ metamodelVersionsString ]
+                                ++ [ metamodelVersionsString, pluginsString ]
 
                         aboutString =
                             String.join "\n---\n" parts

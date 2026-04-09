@@ -21,16 +21,15 @@ import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Shortcut
-import Triple
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectContent exposing (ProjectContent)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Api.Models.ProjectVersion as ProjectVersion exposing (ProjectVersion)
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.Questionnaire as Questionnaire
-import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Components.Questionnaire2 as Questionnaire
 import Wizard.Components.QuestionnaireVersionTag as QuestionnaireVersionTag
 import Wizard.Data.AppState exposing (AppState)
 
@@ -43,6 +42,7 @@ type alias Model =
     { questionnaireModel : ActionResult Questionnaire.Model
     , projectContent : ActionResult ProjectContent
     , projectQuestionnaire : ActionResult ProjectQuestionnaire
+    , projectCommon : ActionResult ProjectCommon
     , eventUuid : Maybe Uuid
     }
 
@@ -52,6 +52,7 @@ initEmpty =
     { questionnaireModel = Unset
     , projectContent = Unset
     , projectQuestionnaire = Unset
+    , projectCommon = Unset
     , eventUuid = Nothing
     }
 
@@ -61,6 +62,7 @@ init appState projectUuid eventUuid =
     ( { questionnaireModel = Loading
       , projectContent = Loading
       , projectQuestionnaire = Loading
+      , projectCommon = Loading
       , eventUuid = Just eventUuid
       }
     , Cmd.batch
@@ -130,21 +132,25 @@ update appState msg model =
                         )
 
         QuestionnaireMsg questionnaireMsg ->
-            let
-                updateQuestionnaire =
-                    Triple.second
-                        << Questionnaire.update
-                            questionnaireMsg
-                            QuestionnaireMsg
-                            Nothing
-                            appState
-                            { events = []
-                            , kmEditorUuid = Nothing
-                            }
-            in
-            ( { model | questionnaireModel = ActionResult.map updateQuestionnaire model.questionnaireModel }
-            , Cmd.none
-            )
+            case ( model.projectCommon, model.questionnaireModel ) of
+                ( Success questionnaireCommon, Success questionnaireModel ) ->
+                    let
+                        newQuestionnaireModel =
+                            Questionnaire.update appState
+                                { wrapMsg = QuestionnaireMsg
+                                , mbKmEditorUuid = Nothing
+                                , mbSetFullScreenMsg = Nothing
+                                , projectCommon = questionnaireCommon
+                                }
+                                questionnaireMsg
+                                questionnaireModel
+                    in
+                    ( { model | questionnaireModel = Success newQuestionnaireModel.model }
+                    , newQuestionnaireModel.cmd
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
 
         Close ->
             ( { model
@@ -208,25 +214,11 @@ view cfg appState model =
 viewContent : AppState -> Questionnaire.Model -> Html Msg
 viewContent appState qm =
     Questionnaire.view appState
-        { features =
-            { feedbackEnabled = False
-            , todosEnabled = False
-            , commentsEnabled = False
-            , pluginsEnabled = False
-            , readonly = True
-            , toolbarEnabled = False
-            , questionLinksEnabled = False
-            }
-        , renderer =
-            DefaultQuestionnaireRenderer.create appState
-                (DefaultQuestionnaireRenderer.config qm.questionnaire)
-        , wrapMsg = QuestionnaireMsg
+        { wrapMsg = QuestionnaireMsg
+        , readonly = True
+        , toolbarEnabled = False
+        , actionsEnabled = False
         , previewQuestionnaireEventMsg = Nothing
         , revertQuestionnaireMsg = Nothing
-        , isKmEditor = False
-        , projectCommon = Nothing
-        }
-        { events = []
-        , kmEditorUuid = Nothing
         }
         qm

@@ -21,7 +21,6 @@ const registerDomPorts = require('../shared/common/js/ports/dom')
 const registerDownloadPorts = require('../shared/common/js/ports/file')
 const registerDriverPorts = require('../shared/common/js/ports/driver')
 const registerImportPorts = require('./js/ports/import')
-const registerIntegrationPorts = require('./js/ports/integrations')
 const registerLocalePorts = require('../shared/common/js/ports/locale')
 const registerLocalStoragePorts = require('../shared/common/js/ports/local-storage')
 const registerSessionPorts = require('./js/ports/session')
@@ -80,7 +79,8 @@ function loadApp(config, locale, plugins) {
         maxUploadFileSize: appConfig.getMaxUploadFileSize(),
         newsUrl: appConfig.getNewsUrl(),
         urlCheckerUrl: appConfig.getUrlCheckerUrl(),
-        plugins: plugins.map(p => initPlugin(config, p))
+        plugins: plugins.map(p => initPlugin(config, p)),
+        aiAssistantAvailable: appConfig.isAiAssistantAvailable()
     }
 
     if (Object.keys(locale).length > 0) {
@@ -98,7 +98,6 @@ function loadApp(config, locale, plugins) {
     registerDownloadPorts(app)
     registerDriverPorts(app)
     registerImportPorts(app)
-    registerIntegrationPorts(app)
     registerLocalePorts(app)
     registerLocalStoragePorts(app)
     registerSessionPorts(app, sessionKey, [appSessionKey])
@@ -147,7 +146,6 @@ async function importPlugin(plugin) {
 async function loadPlugins(config) {
     const plugins = config.plugins || []
     const modules = await Promise.allSettled(plugins.map(importPlugin))
-
     const loaded = []
     for (const r of modules) {
         if (r.status === 'fulfilled') loaded.push(r.value);

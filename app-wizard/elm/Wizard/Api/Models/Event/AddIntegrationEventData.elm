@@ -12,15 +12,13 @@ module Wizard.Api.Models.Event.AddIntegrationEventData exposing
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Wizard.Api.Models.Event.AddIntegrationApiEventData as AddIntegrationApiEventData exposing (AddIntegrationApiEventData)
-import Wizard.Api.Models.Event.AddIntegrationApiLegacyEventData as AddIntegrationApiLegacyEventData exposing (AddIntegrationApiLegacyEventData)
-import Wizard.Api.Models.Event.AddIntegrationWidgetEventData as AddIntegrationWidgetEventData exposing (AddIntegrationWidgetEventData)
+import Wizard.Api.Models.Event.AddIntegrationPluginEventData as AddIntegrationPluginEventData exposing (AddIntegrationPluginEventData)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 
 
 type AddIntegrationEventData
     = AddIntegrationApiEvent AddIntegrationApiEventData
-    | AddIntegrationApiLegacyEvent AddIntegrationApiLegacyEventData
-    | AddIntegrationWidgetEvent AddIntegrationWidgetEventData
+    | AddIntegrationPluginEvent AddIntegrationPluginEventData
 
 
 decoder : Decoder AddIntegrationEventData
@@ -32,11 +30,8 @@ decoder =
                     "ApiIntegration" ->
                         D.map AddIntegrationApiEvent AddIntegrationApiEventData.decoder
 
-                    "ApiLegacyIntegration" ->
-                        D.map AddIntegrationApiLegacyEvent AddIntegrationApiLegacyEventData.decoder
-
-                    "WidgetIntegration" ->
-                        D.map AddIntegrationWidgetEvent AddIntegrationWidgetEventData.decoder
+                    "PluginIntegration" ->
+                        D.map AddIntegrationPluginEvent AddIntegrationPluginEventData.decoder
 
                     _ ->
                         D.fail <| "Unknown integration type: " ++ integrationType
@@ -49,8 +44,7 @@ encode data =
         eventData =
             map
                 AddIntegrationApiEventData.encode
-                AddIntegrationApiLegacyEventData.encode
-                AddIntegrationWidgetEventData.encode
+                AddIntegrationPluginEventData.encode
                 data
     in
     ( "eventType", E.string "AddIntegrationEvent" ) :: eventData
@@ -67,39 +61,31 @@ toIntegration uuid data =
         AddIntegrationApiEvent eventData ->
             AddIntegrationApiEventData.toIntegration uuid eventData
 
-        AddIntegrationApiLegacyEvent eventData ->
-            AddIntegrationApiLegacyEventData.toIntegration uuid eventData
-
-        AddIntegrationWidgetEvent eventData ->
-            AddIntegrationWidgetEventData.toIntegration uuid eventData
+        AddIntegrationPluginEvent eventData ->
+            AddIntegrationPluginEventData.toIntegration uuid eventData
 
 
 getTypeString : AddIntegrationEventData -> String
 getTypeString =
     map
-        (\_ -> "Api")
-        (\_ -> "ApiLegacy")
-        (\_ -> "Widget")
+        (always "Api")
+        (always "Plugin")
 
 
 getEntityVisibleName : AddIntegrationEventData -> Maybe String
 getEntityVisibleName =
-    Just << map .name .name .name
+    Just << map .name .pluginIntegrationId
 
 
 map :
     (AddIntegrationApiEventData -> a)
-    -> (AddIntegrationApiLegacyEventData -> a)
-    -> (AddIntegrationWidgetEventData -> a)
+    -> (AddIntegrationPluginEventData -> a)
     -> AddIntegrationEventData
     -> a
-map apiIntegration apiLegacyIntegration widgetIntegration integration =
+map apiIntegration pluginIntegration integration =
     case integration of
         AddIntegrationApiEvent data ->
             apiIntegration data
 
-        AddIntegrationApiLegacyEvent data ->
-            apiLegacyIntegration data
-
-        AddIntegrationWidgetEvent data ->
-            widgetIntegration data
+        AddIntegrationPluginEvent data ->
+            pluginIntegration data

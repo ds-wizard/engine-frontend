@@ -1287,14 +1287,3 @@ $toolbar-height: 40px;
   initial-value: rgba(0, 0, 0, 0);
 }
 
-@include keyframes(highlightFade) {
-  0% {
-    --c: #{shift-color($warning, -80%)};
-  }
-  50% {
-    --c: #{shift-color($warning, -80%)};
-  }
-  100% {
-    --c: rgba(0, 0, 0, 0);
-  }
-}

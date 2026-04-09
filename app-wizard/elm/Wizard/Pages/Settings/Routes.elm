@@ -19,7 +19,6 @@ type Route
     | RegistryRoute
     | ProjectsRoute
     | SubmissionRoute
-    | KnowledgeModelsRoute
     | UsageRoute
 
 

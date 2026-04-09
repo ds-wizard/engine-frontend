@@ -147,9 +147,6 @@ searchReplies appState term questionnaire =
                         IntegrationReplyType.IntegrationType str _ ->
                             tryCreateResult path (Markdown.toString str)
 
-                        IntegrationReplyType.IntegrationLegacyType _ str ->
-                            tryCreateResult path (Markdown.toString str)
-
                 ReplyValue.FileReply fileUuid ->
                     List.find ((==) fileUuid << .uuid) questionnaire.files
                         |> Maybe.andThen (tryCreateResult path << .fileName)

@@ -10,8 +10,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Version
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Components.ActionResultView as ActionResultView
-import Wizard.Components.Questionnaire as Questionnaire
-import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
+import Wizard.Components.Questionnaire2 as Questionnaire2
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Preview.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Preview.Msgs exposing (Msg(..))
@@ -27,33 +26,43 @@ view appState model =
     Page.actionResultView appState (viewProject appState model) actionResult
 
 
-viewProject : AppState -> Model -> ( KnowledgeModelPackageDetail, Questionnaire.Model ) -> Html Msg
+viewProject : AppState -> Model -> ( KnowledgeModelPackageDetail, Questionnaire2.Model ) -> Html Msg
 viewProject appState model ( kmPackage, questionnaireModel ) =
     let
         questionnaire =
-            Questionnaire.view appState
-                { features =
-                    { feedbackEnabled = False
-                    , todosEnabled = False
-                    , commentsEnabled = False
-                    , pluginsEnabled = False
-                    , readonly = True
-                    , toolbarEnabled = False
-                    , questionLinksEnabled = False
-                    }
-                , renderer =
-                    DefaultQuestionnaireRenderer.create appState
-                        (DefaultQuestionnaireRenderer.config questionnaireModel.questionnaire)
-                , wrapMsg = QuestionnaireMsg
+            Questionnaire2.view appState
+                { wrapMsg = QuestionnaireMsg
+                , readonly = True
+                , toolbarEnabled = False
+                , actionsEnabled = False
                 , previewQuestionnaireEventMsg = Nothing
                 , revertQuestionnaireMsg = Nothing
-                , isKmEditor = False
-                , projectCommon = Nothing
-                }
-                { events = []
-                , kmEditorUuid = Nothing
                 }
                 questionnaireModel
+
+        --Questionnaire2.view appState
+        --    { features =
+        --        { feedbackEnabled = False
+        --        , todosEnabled = False
+        --        , commentsEnabled = False
+        --        , pluginsEnabled = False
+        --        , readonly = True
+        --        , toolbarEnabled = False
+        --        , questionLinksEnabled = False
+        --        }
+        --    , renderer =
+        --        DefaultQuestionnaireRenderer.create appState
+        --            (DefaultQuestionnaireRenderer.config questionnaireModel.questionnaire)
+        --    , wrapMsg = QuestionnaireMsg
+        --    , previewQuestionnaireEventMsg = Nothing
+        --    , revertQuestionnaireMsg = Nothing
+        --    , isKmEditor = False
+        --    , projectCommon = Nothing
+        --    }
+        --    { events = []
+        --    , kmEditorUuid = Nothing
+        --    }
+        --    questionnaireModel
     in
     div [ class "KnowledgeModels__Preview" ]
         [ viewHeader appState model kmPackage

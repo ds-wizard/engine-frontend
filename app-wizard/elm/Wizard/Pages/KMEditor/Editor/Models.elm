@@ -71,7 +71,7 @@ init appState uuid mbEditorUuid =
     , kmEditorModel = KMEditor.initialModel
     , phaseEditorModel = PhaseEditor.initialModel
     , tagEditorModel = TagEditor.initialModel
-    , previewModel = Preview.initialModel appState Uuid.nil
+    , previewModel = Preview.initialModel appState uuid Uuid.nil
     , settingsModel = Settings.initialModel appState
     , integrationPrefabs = ActionResult.Loading
     , kmSecrets = ActionResult.Loading
@@ -125,8 +125,8 @@ initPageModel appState route model =
                                 |> Preview.setKnowledgeModel (EditorContext.getFilteredKM editorContext)
                                 |> Preview.setReplies editorContext.kmEditor.replies
                                 |> Preview.generateReplies appState currentQuestionUuid editorContext.kmEditor.knowledgeModel
-                                |> Tuple.mapSecond (Preview.setActiveChapterIfNot selectedChapterUuid)
-                                |> Tuple.mapSecond (Preview.setPhase defaultPhaseUuid)
+                                |> Tuple.mapSecond (Preview.setActiveChapterIfNot appState selectedChapterUuid)
+                                |> Tuple.mapSecond (Preview.setPhase appState defaultPhaseUuid)
                     in
                     ( newSeed, { model | previewModel = previewModel } )
 

@@ -5,7 +5,6 @@ module Wizard.Api.Models.EditableConfig exposing
     , updateAuthentication
     , updateDashboardAndLoginScreen
     , updateFeatures
-    , updateKnowledgeModel
     , updateLookAndFeel
     , updateOrganization
     , updatePrivacyAndSupport
@@ -22,7 +21,6 @@ import Wizard.Api.Models.BootstrapConfig.OrganizationConfig as OrganizationConfi
 import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig exposing (PrivacyAndSupportConfig)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig as EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 import Wizard.Api.Models.EditableConfig.EditableFeaturesConfig as EditableFeaturesConfig exposing (EditableFeaturesConfig)
-import Wizard.Api.Models.EditableConfig.EditableKnowledgeModelConfig as EditableKnowledgeModelConfig exposing (EditableKnowledgeModelConfig)
 import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig as EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Api.Models.EditableConfig.EditableProjectConfig as EditableProjectConfig exposing (EditableProjectConfig)
 import Wizard.Api.Models.EditableConfig.EditableRegistryConfig as EditableRegistryConfig exposing (EditableRegistryConfig)
@@ -39,7 +37,6 @@ type alias EditableConfig =
     , registry : EditableRegistryConfig
     , project : EditableProjectConfig
     , submission : EditableSubmissionConfig
-    , knowledgeModel : EditableKnowledgeModelConfig
     }
 
 
@@ -88,11 +85,6 @@ updateSubmission submission config =
     { config | submission = submission }
 
 
-updateKnowledgeModel : EditableKnowledgeModelConfig -> EditableConfig -> EditableConfig
-updateKnowledgeModel knowledgeModel config =
-    { config | knowledgeModel = knowledgeModel }
-
-
 
 -- JSON
 
@@ -109,7 +101,6 @@ decoder =
         |> D.required "registry" EditableRegistryConfig.decoder
         |> D.required "project" EditableProjectConfig.decoder
         |> D.required "submission" EditableSubmissionConfig.decoder
-        |> D.required "knowledgeModel" EditableKnowledgeModelConfig.decoder
 
 
 encode : EditableConfig -> E.Value
@@ -124,5 +115,4 @@ encode config =
         , ( "registry", EditableRegistryConfig.encode config.registry )
         , ( "project", EditableProjectConfig.encode config.project )
         , ( "submission", EditableSubmissionConfig.encode config.submission )
-        , ( "knowledgeModel", EditableKnowledgeModelConfig.encode config.knowledgeModel )
         ]

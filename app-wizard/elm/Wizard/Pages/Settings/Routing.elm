@@ -40,7 +40,6 @@ parsers appState wrapRoute =
         |> List.insertIf (map (wrapRoute <| RegistryRoute) (s moduleRoot </> s "registry")) (Feature.registry appState)
         |> List.insertIf (map (wrapRoute <| ProjectsRoute) (s moduleRoot </> s "projects")) True
         |> List.insertIf (map (wrapRoute <| SubmissionRoute) (s moduleRoot </> s "submission")) True
-        |> List.insertIf (map (wrapRoute <| KnowledgeModelsRoute) (s moduleRoot </> s "knowledge-models")) True
         |> List.insertIf (map (wrapRoute <| UsageRoute) (s moduleRoot </> s "usage")) True
 
 
@@ -79,9 +78,6 @@ toUrl route =
 
         SubmissionRoute ->
             [ moduleRoot, "submission" ]
-
-        KnowledgeModelsRoute ->
-            [ moduleRoot, "knowledge-models" ]
 
         UsageRoute ->
             [ moduleRoot, "usage" ]

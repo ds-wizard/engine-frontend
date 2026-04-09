@@ -64,8 +64,8 @@ import Debounce exposing (Debounce)
 import Dict exposing (Dict)
 import Flip exposing (flip)
 import Gettext exposing (gettext, ngettext)
-import Html exposing (Html, a, button, div, h2, h5, i, img, input, label, li, option, p, select, small, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, placeholder, selected, src, style, target, type_, value)
+import Html exposing (Html, a, button, div, h2, h5, i, input, label, li, option, p, select, small, span, strong, text, ul)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, id, name, placeholder, selected, style, type_, value)
 import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Events exposing (onBlur, onCheck, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
@@ -84,14 +84,12 @@ import Roman
 import Set exposing (Set)
 import Shortcut
 import SplitPane
-import String.Extra as String
 import String.Format as String
 import Task.Extra as Task
 import Time
 import Time.Distance as Time
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
-import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeel
 import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Event exposing (Event)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel exposing (KnowledgeModel)
@@ -100,9 +98,6 @@ import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration(..))
 import Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing (ApiIntegrationData)
-import Wizard.Api.Models.KnowledgeModel.Integration.ApiLegacyIntegrationData exposing (ApiLegacyIntegrationData)
-import Wizard.Api.Models.KnowledgeModel.Integration.CommonIntegrationData exposing (CommonIntegrationData)
-import Wizard.Api.Models.KnowledgeModel.Integration.WidgetIntegrationData exposing (WidgetIntegrationData)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question(..))
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation
@@ -141,8 +136,6 @@ import Wizard.Components.Questionnaire.VersionModal as VersionModal
 import Wizard.Components.Tag as Tag
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Data.IntegrationWidgetValue exposing (IntegrationWidgetValue)
-import Wizard.Data.Integrations as Integrations
 import Wizard.Pages.Projects.Common.ProjectTodoGroup as ProjectTodoGroup
 import Wizard.Plugins.Plugin as Plugin exposing (ProjectQuestionActionConnectorType(..))
 import Wizard.Plugins.PluginElement as PluginElement
@@ -664,8 +657,6 @@ type Msg
     | FileDownloaderMsg FileDownloader.Msg
     | MoveItemUp String String
     | MoveItemDown String String
-    | OpenIntegrationWidget String String
-    | GotIntegrationWidgetValue (Result D.Error IntegrationWidgetValue)
     | SetLabels String (List String)
     | ViewSettingsDropdownMsg Dropdown.State
     | SetViewSettings QuestionnaireViewSettings
@@ -1064,31 +1055,6 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
                     SetReply path replyValue
             in
             withSeed ( { model | removeItem = Nothing }, Task.dispatch setReplyMsg )
-
-        OpenIntegrationWidget path requestUrl ->
-            withSeed
-                ( model
-                , Integrations.openIntegrationWidget
-                    { url = requestUrl
-                    , theme = Maybe.withDefault (LookAndFeel.getTheme appState.config.lookAndFeel) appState.theme
-                    , data = { path = path }
-                    }
-                )
-
-        GotIntegrationWidgetValue result ->
-            case result of
-                Ok value ->
-                    let
-                        setReplyMsg =
-                            SetReply value.path <|
-                                createReply appState <|
-                                    IntegrationReply <|
-                                        IntegrationLegacyType (Just value.id) value.value
-                    in
-                    withSeed ( model, Task.dispatch setReplyMsg )
-
-                Err _ ->
-                    wrap model
 
         SetLabels path value ->
             wrap <| setLabels path value model
@@ -1867,7 +1833,6 @@ subscriptions model =
         ([ Dropdown.subscriptions model.viewSettingsDropdown ViewSettingsDropdownMsg
          , Dropdown.subscriptions model.pluginImportersDropdown ImportersDropdownMsg
          , Dropdown.subscriptions model.pluginActionsDropdown ActionsDropdownMsg
-         , Integrations.integrationWidgetSub GotIntegrationWidgetValue
          , Sub.map HistoryMsg <| History.subscriptions model.historyModel
          , commentDeleteSub
          , splitPaneSubscriptions
@@ -3408,12 +3373,6 @@ viewQuestion appState cfg ctx model path humanIdentifiers order question =
                         Just (ApiIntegration apiIntegrationData) ->
                             ( viewQuestionIntegrationApi appState cfg model newPath apiIntegrationData question, [] )
 
-                        Just (ApiLegacyIntegration commonIntegrationData apiLegacyIntegrationData) ->
-                            ( viewQuestionIntegrationApiLegacy appState cfg model newPath commonIntegrationData apiLegacyIntegrationData question, [] )
-
-                        Just (WidgetIntegration commonIntegrationData widgetIntegrationData) ->
-                            ( viewQuestionIntegrationWidget appState cfg model newPath commonIntegrationData widgetIntegrationData, [] )
-
                         _ ->
                             ( Html.nothing, [] )
 
@@ -3678,7 +3637,7 @@ viewQuestionMultiChoice appState cfg model path question =
 
         selectedChoicesUuids =
             Dict.get (pathToString path) model.questionnaire.replies
-                |> Maybe.unwrap [] (.value >> ReplyValue.getChoiceUuid)
+                |> Maybe.unwrap [] (.value >> ReplyValue.getChoiceUuids)
 
         clearReplyButton =
             viewQuestionClearButton appState cfg path (not (List.isEmpty selectedChoicesUuids))
@@ -4049,9 +4008,6 @@ viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
                         IntegrationType value _ ->
                             Markdown.toHtml [ class "form-control" ] value
 
-                        _ ->
-                            Html.nothing
-
                 _ ->
                     viewInput ""
 
@@ -4061,101 +4017,6 @@ viewQuestionIntegrationApi appState cfg model path apiIntegrationData question =
         viewTypeHints =
             if typeHintsVisible then
                 viewQuestionIntegrationTypeHints appState cfg model path
-
-            else
-                Html.nothing
-    in
-    div [ class "question-integration-answer" ]
-        [ questionInput
-        , viewTypeHints
-        , viewQuestionClearButton appState cfg path (Maybe.isJust mbReplyValue)
-        ]
-
-
-viewQuestionIntegrationWidget : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> WidgetIntegrationData -> Html Msg
-viewQuestionIntegrationWidget appState cfg model path commonIntegrationData widgetIntegrationData =
-    let
-        mbReplyValue =
-            Maybe.map .value <|
-                Dict.get (pathToString path) model.questionnaire.replies
-
-        questionInput =
-            case mbReplyValue of
-                Just (IntegrationReply (IntegrationLegacyType id integrationValue)) ->
-                    viewQuestionIntegrationIntegrationReply commonIntegrationData id integrationValue
-
-                _ ->
-                    viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationData mbReplyValue
-    in
-    div [ class "question-integration-answer" ]
-        [ questionInput
-        , viewQuestionClearButton appState cfg path (Maybe.isJust mbReplyValue)
-        ]
-
-
-viewQuestionIntegrationWidgetSelectButton : AppState -> Config msg -> List String -> WidgetIntegrationData -> Maybe ReplyValue -> Html Msg
-viewQuestionIntegrationWidgetSelectButton appState cfg path widgetIntegrationData mbReplyValue =
-    case ( cfg.features.readonly, Maybe.isJust mbReplyValue ) of
-        ( False, False ) ->
-            button
-                [ onClick (OpenIntegrationWidget (pathToString path) widgetIntegrationData.widgetUrl)
-                , class "btn btn-secondary"
-                ]
-                [ text (gettext "Select" appState.locale) ]
-
-        _ ->
-            Html.nothing
-
-
-viewQuestionIntegrationApiLegacy : AppState -> Config msg -> Model -> List String -> CommonIntegrationData -> ApiLegacyIntegrationData -> Question -> Html Msg
-viewQuestionIntegrationApiLegacy appState cfg model path commonIntegrationData apiLegacyIntegrationData question =
-    let
-        extraArgs =
-            if cfg.features.readonly then
-                [ disabled True ]
-
-            else
-                let
-                    questionValue =
-                        Maybe.unwrap "" ReplyValue.getStringReply mbReplyValue
-
-                    onFocusHandler =
-                        [ onFocus (ShowTypeHintsLegacy path apiLegacyIntegrationData.requestEmptySearch (Question.getUuid question) questionValue) ]
-                in
-                [ onInput (TypeHintLegacyInput path apiLegacyIntegrationData.requestEmptySearch << createReply appState << IntegrationReply << PlainType)
-                , onBlur HideTypeHintsLegacy
-                ]
-                    ++ onFocusHandler
-
-        mbReplyValue =
-            Maybe.map .value <|
-                Dict.get (pathToString path) model.questionnaire.replies
-
-        viewInput currentValue =
-            input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
-
-        questionInput =
-            case mbReplyValue of
-                Just (IntegrationReply integrationReply) ->
-                    case integrationReply of
-                        PlainType plainValue ->
-                            viewInput plainValue
-
-                        IntegrationLegacyType id integrationValue ->
-                            viewQuestionIntegrationIntegrationReply commonIntegrationData id integrationValue
-
-                        _ ->
-                            Html.nothing
-
-                _ ->
-                    viewInput ""
-
-        typeHintsVisible =
-            Maybe.unwrap False (.path >> (==) path) model.typeHintsLegacy
-
-        viewTypeHints =
-            if typeHintsVisible then
-                viewQuestionIntegrationTypeHintsLegacy appState cfg model path
 
             else
                 Html.nothing
@@ -4199,38 +4060,6 @@ viewQuestionIntegrationTypeHints appState cfg model path =
     div [ class "integration-typehints" ] [ content ]
 
 
-viewQuestionIntegrationTypeHintsLegacy : AppState -> Config msg -> Model -> List String -> Html Msg
-viewQuestionIntegrationTypeHintsLegacy appState cfg model path =
-    let
-        content =
-            case Maybe.unwrap Unset .hints model.typeHintsLegacy of
-                Success [] ->
-                    div [ class "info" ]
-                        [ faInfo
-                        , text (gettext "There are no results for your search." appState.locale)
-                        ]
-
-                Success hints ->
-                    ul [ class "integration-typehints-list" ] (List.map (viewQuestionIntegrationTypeHintLegacy appState cfg path) hints)
-
-                Loading ->
-                    div [ class "loading" ]
-                        [ faSpinner
-                        , text (gettext "Loading..." appState.locale)
-                        ]
-
-                Error err ->
-                    div [ class "error" ]
-                        [ faError
-                        , text err
-                        ]
-
-                Unset ->
-                    Html.nothing
-    in
-    div [ class "integration-typehints" ] [ content ]
-
-
 viewQuestionIntegrationTypeHint : AppState -> Config msg -> List String -> TypeHint -> Html Msg
 viewQuestionIntegrationTypeHint appState cfg path typeHint =
     if cfg.features.readonly then
@@ -4243,53 +4072,6 @@ viewQuestionIntegrationTypeHint appState cfg path typeHint =
             ]
             [ Markdown.toHtml [ class "item-md" ] (Maybe.withDefault typeHint.value typeHint.valueForSelection)
             ]
-
-
-viewQuestionIntegrationTypeHintLegacy : AppState -> Config msg -> List String -> TypeHintLegacy -> Html Msg
-viewQuestionIntegrationTypeHintLegacy appState cfg path typeHint =
-    if cfg.features.readonly then
-        Html.nothing
-
-    else
-        li
-            [ class "integration-typehints-list-item"
-            , onMouseDown <| SetReply (pathToString path) <| createReply appState <| IntegrationReply <| IntegrationLegacyType typeHint.id typeHint.name
-            ]
-            [ Markdown.toHtml [ class "item-md" ] typeHint.name
-            ]
-
-
-viewQuestionIntegrationIntegrationReply : CommonIntegrationData -> Maybe String -> String -> Html Msg
-viewQuestionIntegrationIntegrationReply integration id value =
-    div [ class "card" ]
-        [ Markdown.toHtml [ class "card-body item-md" ] value
-        , viewQuestionIntegrationLink integration id
-        ]
-
-
-viewQuestionIntegrationLink : CommonIntegrationData -> Maybe String -> Html Msg
-viewQuestionIntegrationLink integration mbId =
-    case ( integration.itemUrl, mbId ) of
-        ( Just itemUrl, Just id ) ->
-            let
-                url =
-                    String.replace "${id}" id itemUrl
-
-                logo =
-                    case Maybe.andThen String.toMaybe integration.logo of
-                        Just logoUrl ->
-                            img [ src logoUrl ] []
-
-                        Nothing ->
-                            Html.nothing
-            in
-            div [ class "card-footer" ]
-                [ logo
-                , a [ href url, target "_blank" ] [ text url ]
-                ]
-
-        _ ->
-            Html.nothing
 
 
 viewQuestionItemSelect : AppState -> Config msg -> Model -> List String -> Question -> Html Msg

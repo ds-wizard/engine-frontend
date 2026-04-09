@@ -8,8 +8,7 @@ import Json.Decode as D exposing (Decoder)
 
 type IntegrationType
     = Api
-    | ApiLegacy
-    | Widget
+    | Plugin
 
 
 decoder : Decoder IntegrationType
@@ -21,11 +20,8 @@ decoder =
                     "ApiIntegration" ->
                         D.succeed Api
 
-                    "ApiLegacyIntegration" ->
-                        D.succeed ApiLegacy
-
-                    "WidgetIntegration" ->
-                        D.succeed Widget
+                    "PluginIntegration" ->
+                        D.succeed Plugin
 
                     valueType ->
                         D.fail <| "Unknown integration type: " ++ valueType

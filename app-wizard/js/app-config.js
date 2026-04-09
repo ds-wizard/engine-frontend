@@ -7,7 +7,8 @@ module.exports = {
     getNewsUrl,
     getUrlCheckerUrl,
     getWebSocketThrottleDelay,
-    isAdminEnabled
+    isAdminEnabled,
+    isAiAssistantAvailable
 }
 
 function getAdminApiUrl() {
@@ -44,6 +45,10 @@ function getWebSocketThrottleDelay() {
 
 function isAdminEnabled() {
     return !!getConfigProp('admin')
+}
+
+function isAiAssistantAvailable() {
+    return !!getConfigProp('aiAssistant')
 }
 
 function getConfigProp(prop, defaultValue) {

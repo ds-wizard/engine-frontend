@@ -9,7 +9,6 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Authentication.View
 import Wizard.Pages.Settings.DashboardAndLoginScreen.View
 import Wizard.Pages.Settings.Features.View
-import Wizard.Pages.Settings.KnowledgeModels.View
 import Wizard.Pages.Settings.LookAndFeel.View
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
@@ -75,10 +74,6 @@ view route appState model =
                 SubmissionRoute ->
                     Html.map SubmissionMsg <|
                         Wizard.Pages.Settings.Submission.View.view appState model.documentSubmissionModel
-
-                KnowledgeModelsRoute ->
-                    Html.map KnowledgeModelsMsg <|
-                        Wizard.Pages.Settings.KnowledgeModels.View.view appState model.knowledgeModelsModel
 
                 UsageRoute ->
                     Html.map UsageMsg <|
@@ -174,8 +169,7 @@ navigationContentLinks : AppState -> List ( Route, String, Route -> Bool )
 navigationContentLinks appState =
     let
         items =
-            [ ( KnowledgeModelsRoute, gettext "Knowledge Models" appState.locale, (==) KnowledgeModelsRoute )
-            , ( ProjectsRoute, gettext "Projects" appState.locale, (==) ProjectsRoute )
+            [ ( ProjectsRoute, gettext "Projects" appState.locale, (==) ProjectsRoute )
             , ( SubmissionRoute, gettext "Document Submission" appState.locale, (==) SubmissionRoute )
             ]
     in

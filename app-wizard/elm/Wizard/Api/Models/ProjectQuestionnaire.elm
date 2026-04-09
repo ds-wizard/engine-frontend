@@ -24,6 +24,7 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , getUnresolvedCommentCount
     , getWarnings
     , hasReply
+    , hasTodo
     , isCurrentVersion
     , isPathVisible
     , itemSelectQuestionItemMissing
@@ -850,7 +851,7 @@ getItemTitleRecursive itemUuids questionnaire itemPath itemTemplateQuestions =
 
                 MultiChoiceQuestion common _ ->
                     getReply common
-                        |> Maybe.map (ReplyValue.getChoiceUuid << .value)
+                        |> Maybe.map (ReplyValue.getChoiceUuids << .value)
                         |> Maybe.andThen
                             (\uuids ->
                                 if List.isEmpty uuids then
@@ -936,15 +937,15 @@ getItemUsageInItemSelectQuestions questionnaire itemUuid =
 -- Evaluations
 
 
-calculateUnansweredQuestionsForChapter : ProjectQuestionnaire -> Chapter -> Int
+calculateUnansweredQuestionsForChapter : ProjectQuestionnaire -> String -> Int
 calculateUnansweredQuestionsForChapter questionnaire =
     Tuple.first << evaluateChapter questionnaire
 
 
-evaluateChapter : ProjectQuestionnaire -> Chapter -> ( Int, Int )
-evaluateChapter questionnaire chapter =
-    KnowledgeModel.getChapterQuestions chapter.uuid questionnaire.knowledgeModel
-        |> List.map (evaluateQuestion questionnaire [ chapter.uuid ])
+evaluateChapter : ProjectQuestionnaire -> String -> ( Int, Int )
+evaluateChapter questionnaire chapterUuid =
+    KnowledgeModel.getChapterQuestions chapterUuid questionnaire.knowledgeModel
+        |> List.map (evaluateQuestion questionnaire [ chapterUuid ])
         |> List.foldl Tuple.sum ( 0, 0 )
 
 

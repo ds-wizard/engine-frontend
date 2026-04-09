@@ -1,10 +1,12 @@
 module Wizard.Api.Models.ProjectFileSimple exposing
     ( ProjectFileSimple
     , decoder
+    , encode
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Json.Encode as E
 import Uuid exposing (Uuid)
 
 
@@ -23,3 +25,13 @@ decoder =
         |> D.required "contentType" D.string
         |> D.required "fileName" D.string
         |> D.required "fileSize" D.int
+
+
+encode : ProjectFileSimple -> E.Value
+encode file =
+    E.object
+        [ ( "uuid", Uuid.encode file.uuid )
+        , ( "contentType", E.string file.contentType )
+        , ( "fileName", E.string file.fileName )
+        , ( "fileSize", E.int file.fileSize )
+        ]

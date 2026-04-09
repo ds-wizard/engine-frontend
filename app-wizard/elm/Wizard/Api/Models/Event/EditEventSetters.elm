@@ -13,24 +13,21 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setExpertUuids
     , setFileTypes
     , setFollowUpUuids
-    , setId
     , setIntegrationUuid
     , setIntegrationUuids
     , setItemTemplateQuestionUuids
-    , setItemUrl
     , setLabel
     , setListQuestionUuid
-    , setLogo
     , setMaxSize
     , setMetricMeasures
     , setMetricUuids
     , setName
     , setPhaseUuids
+    , setPluginIntegrationSettings
     , setQuestionUuids
     , setReferenceUuids
     , setRequestAllowEmptySearch
     , setRequestBody
-    , setRequestEmptySearch
     , setRequestHeaders
     , setRequestMethod
     , setRequestUrl
@@ -38,7 +35,6 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setResourceCollectionUuids
     , setResourcePageUuid
     , setResourcePageUuids
-    , setResponseItemId
     , setResponseItemTemplate
     , setResponseItemTemplateForSelection
     , setResponseListField
@@ -53,7 +49,6 @@ module Wizard.Api.Models.Event.EditEventSetters exposing
     , setValidations
     , setValueType
     , setVariables
-    , setWidgetUrl
     )
 
 import Wizard.Api.Models.Event.EventField as EventField exposing (EventField)
@@ -129,11 +124,6 @@ setFollowUpUuids value data =
     { data | followUpUuids = EventField.create value True }
 
 
-setId : a -> { b | id : EventField a } -> { b | id : EventField a }
-setId value data =
-    { data | id = EventField.create value True }
-
-
 setIntegrationUuid : a -> { b | integrationUuid : EventField a } -> { b | integrationUuid : EventField a }
 setIntegrationUuid value data =
     { data | integrationUuid = EventField.create value True }
@@ -149,11 +139,6 @@ setItemTemplateQuestionUuids value data =
     { data | itemTemplateQuestionUuids = EventField.create value True }
 
 
-setItemUrl : a -> { b | itemUrl : EventField a } -> { b | itemUrl : EventField a }
-setItemUrl value data =
-    { data | itemUrl = EventField.create value True }
-
-
 setLabel : a -> { b | label : EventField a } -> { b | label : EventField a }
 setLabel value data =
     { data | label = EventField.create value True }
@@ -162,11 +147,6 @@ setLabel value data =
 setListQuestionUuid : a -> { b | listQuestionUuid : EventField a } -> { b | listQuestionUuid : EventField a }
 setListQuestionUuid value data =
     { data | listQuestionUuid = EventField.create value True }
-
-
-setLogo : a -> { b | logo : EventField a } -> { b | logo : EventField a }
-setLogo value data =
-    { data | logo = EventField.create value True }
 
 
 setMaxSize : a -> { b | maxSize : EventField a } -> { b | maxSize : EventField a }
@@ -187,6 +167,11 @@ setMetricUuids value data =
 setName : a -> { b | name : EventField a } -> { b | name : EventField a }
 setName value data =
     { data | name = EventField.create value True }
+
+
+setPluginIntegrationSettings : a -> { b | pluginIntegrationSettings : EventField a } -> { b | pluginIntegrationSettings : EventField a }
+setPluginIntegrationSettings value data =
+    { data | pluginIntegrationSettings = EventField.create value True }
 
 
 setPhaseUuids : a -> { b | phaseUuids : EventField a } -> { b | phaseUuids : EventField a }
@@ -212,11 +197,6 @@ setRequestAllowEmptySearch value data =
 setRequestBody : a -> { b | requestBody : EventField a } -> { b | requestBody : EventField a }
 setRequestBody value data =
     { data | requestBody = EventField.create value True }
-
-
-setRequestEmptySearch : a -> { b | requestEmptySearch : EventField a } -> { b | requestEmptySearch : EventField a }
-setRequestEmptySearch value data =
-    { data | requestEmptySearch = EventField.create value True }
 
 
 setRequestHeaders : a -> { b | requestHeaders : EventField a } -> { b | requestHeaders : EventField a }
@@ -252,11 +232,6 @@ setResourcePageUuid value data =
 setResourcePageUuids : a -> { b | resourcePageUuids : EventField a } -> { b | resourcePageUuids : EventField a }
 setResourcePageUuids value data =
     { data | resourcePageUuids = EventField.create value True }
-
-
-setResponseItemId : a -> { b | responseItemId : EventField a } -> { b | responseItemId : EventField a }
-setResponseItemId value data =
-    { data | responseItemId = EventField.create value True }
 
 
 setResponseItemTemplate : a -> { b | responseItemTemplate : EventField a } -> { b | responseItemTemplate : EventField a }
@@ -327,8 +302,3 @@ setValueType value data =
 setVariables : a -> { b | variables : EventField a } -> { b | variables : EventField a }
 setVariables value data =
     { data | variables = EventField.create value True }
-
-
-setWidgetUrl : a -> { b | widgetUrl : EventField a } -> { b | widgetUrl : EventField a }
-setWidgetUrl value data =
-    { data | widgetUrl = EventField.create value True }

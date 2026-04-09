@@ -21,5 +21,4 @@ type Msg
     | RegistryMsg Wizard.Pages.Settings.Registry.Msgs.Msg
     | QuestionnairesMsg Wizard.Pages.Settings.Generic.Msgs.Msg
     | SubmissionMsg Wizard.Pages.Settings.Submission.Msgs.Msg
-    | KnowledgeModelsMsg Wizard.Pages.Settings.Generic.Msgs.Msg
     | UsageMsg Wizard.Pages.Settings.Usage.Msgs.Msg

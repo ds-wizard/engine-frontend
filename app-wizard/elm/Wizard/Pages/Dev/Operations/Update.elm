@@ -5,12 +5,15 @@ module Wizard.Pages.Dev.Operations.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.Models.DevOperationSection as AdminOperationSection
+import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.RequestHelpers as RequestHelpers
 import Dict
+import Uuid
 import Wizard.Api.DevOperations as DevOperationsApi
+import Wizard.Api.Tenants as TenantsApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.Dev.Operations.Models exposing (Model, fieldPath, getSection, operationPath)
+import Wizard.Pages.Dev.Operations.Models exposing (Model, fieldPath, getSection, getTypeHintInputModel, operationPath)
 import Wizard.Pages.Dev.Operations.Msgs exposing (Msg(..))
 
 
@@ -47,6 +50,33 @@ update msg wrapMsg appState model =
 
         FieldInput path value ->
             ( { model | fieldValues = Dict.insert path value model.fieldValues }, Cmd.none )
+
+        FieldInputBool path value ->
+            let
+                stringValue =
+                    if value then
+                        "True"
+
+                    else
+                        "False"
+            in
+            ( { model | fieldValues = Dict.insert path stringValue model.fieldValues }, Cmd.none )
+
+        UpdateTypeHintInput path typeHintInputMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << UpdateTypeHintInput path
+                    , getTypeHints = TenantsApi.getTenantSuggestions appState
+                    , getError = "Unable to get tenants"
+                    , setReply = wrapMsg << FieldInput path << Uuid.toString << .uuid
+                    , clearReply = Just (wrapMsg <| FieldInput path "")
+                    , filterResults = Nothing
+                    }
+
+                ( typeHintInputModel, cmd ) =
+                    TypeHintInput.update updateConfig typeHintInputMsg (getTypeHintInputModel path model)
+            in
+            ( { model | typeHintInputModels = Dict.insert path typeHintInputModel model.typeHintInputModels }, cmd )
 
         ExecuteOperation sectionName operationName ->
             let

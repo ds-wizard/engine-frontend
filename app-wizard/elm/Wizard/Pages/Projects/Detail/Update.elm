@@ -21,21 +21,16 @@ import Html.Attributes.Extensions exposing (selectDataTour)
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Task.Extra as Task
-import Triple
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.ProjectCommon as ProjectCommon
-import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
-import Wizard.Api.Models.ProjectDetail.ProjectEvent.AddCommentData as AddCommentData
-import Wizard.Api.Models.ProjectDetail.ProjectEvent.SetReplyData as SetReplyData
 import Wizard.Api.Models.ProjectPerm as ProjectPerm
 import Wizard.Api.Models.ProjectPreview as ProjectPreview
 import Wizard.Api.Models.WebSockets.ClientProjectMessage as ClientProjectMessage
 import Wizard.Api.Models.WebSockets.ServerProjectMessage as ServerProjectMessage
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.Questionnaire as Questionnaire
+import Wizard.Components.Questionnaire2 as Questionnaire2
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
@@ -50,7 +45,7 @@ import Wizard.Pages.Projects.Detail.Components.Settings as Settings
 import Wizard.Pages.Projects.Detail.Components.ShareModal as ShareModal
 import Wizard.Pages.Projects.Detail.Documents.Update as Documents
 import Wizard.Pages.Projects.Detail.Files.Update as Files
-import Wizard.Pages.Projects.Detail.Models exposing (Model, addQuestionnaireEvent, addSavingActionUuid, removeSavingActionUuid)
+import Wizard.Pages.Projects.Detail.Models exposing (Model, addSavingActionUuid, removeSavingActionUuid)
 import Wizard.Pages.Projects.Detail.Msgs exposing (Msg(..))
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Pages.Projects.Routes exposing (Route(..))
@@ -86,10 +81,20 @@ fetchSubrouteData appState model =
         ProjectsRoute (DetailRoute uuid route) ->
             case route of
                 ProjectDetailRoute.Questionnaire _ _ ->
-                    Cmd.batch
-                        [ Task.dispatch (QuestionnaireMsg Questionnaire.UpdateContentScroll)
-                        , ProjectsApi.getQuestionnaire appState uuid GetQuestionnaireDetailCompleted
-                        ]
+                    let
+                        shouldFetchQuestionnaire =
+                            case model.questionnaireModel of
+                                Success questionnaireModel ->
+                                    uuid /= questionnaireModel.uuid
+
+                                _ ->
+                                    True
+                    in
+                    if shouldFetchQuestionnaire then
+                        ProjectsApi.getQuestionnaire appState uuid GetQuestionnaireDetailCompleted
+
+                    else
+                        Task.dispatch (QuestionnaireMsg Questionnaire2.updateContentScrollTopMsg)
 
                 ProjectDetailRoute.Preview ->
                     ProjectsApi.getPreview appState uuid GetQuestionnairePreviewCompleted
@@ -239,283 +244,88 @@ update wrapMsg msg appState model =
             withSeed ( { model | uuid = Uuid.nil }, Cmd.none )
 
         QuestionnaireMsg questionnaireMsg ->
-            let
-                ( questionnaireSeed, newQuestionnaireModel, questionnaireCmd ) =
-                    case model.questionnaireModel of
-                        Success questionnaireModel ->
-                            Triple.mapSnd Success <|
-                                Questionnaire.update
-                                    questionnaireMsg
-                                    (wrapMsg << QuestionnaireMsg)
-                                    (Just Wizard.Msgs.SetFullscreen)
-                                    appState
-                                    { events = []
-                                    , kmEditorUuid = Nothing
-                                    }
-                                    questionnaireModel
+            case ( model.questionnaireCommon, model.questionnaireModel ) of
+                ( Success questionnaireCommon, Success questionnaireModel ) ->
+                    let
+                        questionnaireUpdateReturnData =
+                            Questionnaire2.update appState
+                                { wrapMsg = wrapMsg << QuestionnaireMsg
+                                , mbKmEditorUuid = Nothing
+                                , mbSetFullScreenMsg = Just Wizard.Msgs.SetFullscreen
+                                , projectCommon = questionnaireCommon
+                                }
+                                questionnaireMsg
+                                questionnaireModel
+
+                        newModel =
+                            { model | questionnaireModel = ActionResult.Success questionnaireUpdateReturnData.model }
+
+                        sendProjectEvent event =
+                            let
+                                updatedModel =
+                                    newModel
+                                        |> addSavingActionUuid (ProjectEvent.getUuid event)
+
+                                wsCmd =
+                                    event
+                                        |> ClientProjectMessage.SetContent
+                                        |> ClientProjectMessage.encode
+                                        |> WebSocket.send newModel.websocket
+
+                                setUnloadMessageCmd =
+                                    Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+                            in
+                            ( questionnaireUpdateReturnData.seed
+                            , updatedModel
+                            , Cmd.batch
+                                [ questionnaireUpdateReturnData.cmd
+                                , wsCmd
+                                , setUnloadMessageCmd
+                                ]
+                            )
+
+                        sendProjectEventDebounce event =
+                            let
+                                path =
+                                    Maybe.withDefault "" (ProjectEvent.getPath event)
+
+                                ( debounce, debounceCmd ) =
+                                    Debounce.push (debounceConfig appState path)
+                                        event
+                                        (getDebounceModel path newModel)
+
+                                updatedModel =
+                                    { newModel | questionnaireWebSocketDebounce = Dict.insert path debounce model.questionnaireWebSocketDebounce }
+
+                                setUnloadMessageCmd =
+                                    Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
+                            in
+                            ( questionnaireUpdateReturnData.seed
+                            , updatedModel
+                            , Cmd.batch
+                                [ questionnaireUpdateReturnData.cmd
+                                , Cmd.map wrapMsg debounceCmd
+                                , setUnloadMessageCmd
+                                ]
+                            )
+                    in
+                    case questionnaireUpdateReturnData.event of
+                        Just event ->
+                            case event of
+                                ProjectEvent.SetReply _ ->
+                                    sendProjectEventDebounce event
+
+                                _ ->
+                                    sendProjectEvent event
 
                         _ ->
-                            ( appState.seed, model.questionnaireModel, Cmd.none )
+                            ( questionnaireUpdateReturnData.seed
+                            , newModel
+                            , questionnaireUpdateReturnData.cmd
+                            )
 
-                newModel1 =
-                    { model | questionnaireModel = newQuestionnaireModel }
-
-                applyAction seed updateQuestionnaire buildEvent =
-                    let
-                        ( uuid, applyActionSeed ) =
-                            Random.step Uuid.uuidGenerator seed
-
-                        event =
-                            buildEvent uuid
-
-                        applyActionModel =
-                            newModel1
-                                |> addSavingActionUuid uuid
-                                |> addQuestionnaireEvent event
-
-                        updatedQuestionnaireModel =
-                            ActionResult.map updateQuestionnaire applyActionModel.questionnaireModel
-
-                        updatedModel =
-                            { applyActionModel | questionnaireModel = updatedQuestionnaireModel }
-
-                        wsCmd =
-                            event
-                                |> ClientProjectMessage.SetContent
-                                |> ClientProjectMessage.encode
-                                |> WebSocket.send model.websocket
-
-                        setUnloadMessageCmd =
-                            Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
-                    in
-                    ( applyActionSeed, updatedModel, Cmd.batch [ wsCmd, setUnloadMessageCmd ] )
-
-                applyActionDebounce seed buildEvent =
-                    let
-                        ( uuid, applyActionSeed ) =
-                            Random.step Uuid.uuidGenerator seed
-
-                        event =
-                            buildEvent uuid
-
-                        path =
-                            Maybe.withDefault "" (ProjectEvent.getPath event)
-
-                        ( debounce, debounceCmd ) =
-                            Debounce.push (debounceConfig appState path)
-                                event
-                                (getDebounceModel path newModel1)
-
-                        updatedModel =
-                            { newModel1 | questionnaireWebSocketDebounce = Dict.insert path debounce model.questionnaireWebSocketDebounce }
-
-                        setUnloadMessageCmd =
-                            Window.setUnloadMessage (gettext "Some changes are still saving." appState.locale)
-                    in
-                    ( applyActionSeed, updatedModel, Cmd.batch [ Cmd.map wrapMsg debounceCmd, setUnloadMessageCmd ] )
-
-                createdAt =
-                    appState.currentTime
-
-                createdBy =
-                    Maybe.map UserConfig.toUserSuggestion appState.config.user
-
-                ( newSeed, newModel, newCmd ) =
-                    case questionnaireMsg of
-                        Questionnaire.PhaseModalUpdate _ mbPhaseUuid ->
-                            if Maybe.isJust mbPhaseUuid then
-                                applyAction questionnaireSeed identity <|
-                                    \uuid ->
-                                        ProjectEvent.SetPhase
-                                            { uuid = uuid
-                                            , phaseUuid = mbPhaseUuid
-                                            , createdAt = createdAt
-                                            , createdBy = createdBy
-                                            }
-
-                            else
-                                ( appState.seed, newModel1, Cmd.none )
-
-                        Questionnaire.SetReply path reply ->
-                            applyActionDebounce questionnaireSeed <|
-                                \uuid ->
-                                    ProjectEvent.SetReply
-                                        { uuid = uuid
-                                        , path = path
-                                        , value = reply.value
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.ClearReply path ->
-                            applyAction questionnaireSeed identity <|
-                                \uuid ->
-                                    ProjectEvent.ClearReply
-                                        { uuid = uuid
-                                        , path = path
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.SetLabels path value ->
-                            applyAction questionnaireSeed identity <|
-                                \uuid ->
-                                    ProjectEvent.SetLabels
-                                        { uuid = uuid
-                                        , path = path
-                                        , value = value
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.CommentSubmit path mbThreadUuid text private ->
-                            let
-                                ( newThreadUuid, threadSeed ) =
-                                    Random.step Uuid.uuidGenerator questionnaireSeed
-
-                                ( commentUuid, commentSeed ) =
-                                    Random.step Uuid.uuidGenerator threadSeed
-
-                                threadUuid =
-                                    Maybe.withDefault newThreadUuid mbThreadUuid
-
-                                newThread =
-                                    Maybe.isNothing mbThreadUuid
-
-                                comment =
-                                    { uuid = commentUuid
-                                    , text = text
-                                    , createdBy = createdBy
-                                    , createdAt = createdAt
-                                    , updatedAt = createdAt
-                                    }
-
-                                addComment questionnaire =
-                                    Questionnaire.addComment path threadUuid private comment questionnaire
-                            in
-                            applyAction commentSeed addComment <|
-                                \uuid ->
-                                    ProjectEvent.AddComment
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = threadUuid
-                                        , newThread = newThread
-                                        , commentUuid = commentUuid
-                                        , text = text
-                                        , private = private
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.CommentDeleteSubmit path threadUuid commentUuid private ->
-                            let
-                                deleteComment questionnaire =
-                                    Questionnaire.deleteComment path threadUuid commentUuid questionnaire
-                            in
-                            applyAction questionnaireSeed deleteComment <|
-                                \uuid ->
-                                    ProjectEvent.DeleteComment
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = threadUuid
-                                        , commentUuid = commentUuid
-                                        , private = private
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.CommentEditSubmit path threadUuid commentUuid text private ->
-                            let
-                                editComment questionnaire =
-                                    Questionnaire.editComment path threadUuid commentUuid appState.currentTime text questionnaire
-                            in
-                            applyAction questionnaireSeed editComment <|
-                                \uuid ->
-                                    ProjectEvent.EditComment
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = threadUuid
-                                        , commentUuid = commentUuid
-                                        , text = text
-                                        , private = private
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.CommentThreadDelete path commentThread ->
-                            let
-                                deleteCommentThread questionnaire =
-                                    Questionnaire.deleteCommentThread path commentThread.uuid questionnaire
-                            in
-                            applyAction questionnaireSeed deleteCommentThread <|
-                                \uuid ->
-                                    ProjectEvent.DeleteCommentThread
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = commentThread.uuid
-                                        , private = commentThread.private
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        Questionnaire.CommentThreadResolve path commentThread ->
-                            let
-                                resolveCommentThread questionnaire =
-                                    Questionnaire.resolveCommentThread path commentThread.uuid (CommentThread.commentCount commentThread) questionnaire
-                            in
-                            applyAction questionnaireSeed resolveCommentThread <|
-                                \uuid ->
-                                    ProjectEvent.ResolveCommentThread
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = commentThread.uuid
-                                        , private = commentThread.private
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        , commentCount = List.length commentThread.comments
-                                        }
-
-                        Questionnaire.CommentThreadReopen path commentThread ->
-                            let
-                                reopenCommentThread questionnaire =
-                                    Questionnaire.reopenCommentThread path commentThread.uuid (CommentThread.commentCount commentThread) questionnaire
-                            in
-                            applyAction questionnaireSeed reopenCommentThread <|
-                                \uuid ->
-                                    ProjectEvent.ReopenCommentThread
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = commentThread.uuid
-                                        , private = commentThread.private
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        , commentCount = List.length commentThread.comments
-                                        }
-
-                        Questionnaire.CommentThreadAssign path commentThread mbUser ->
-                            let
-                                assignCommentThread questionnaire =
-                                    Questionnaire.assignCommentThread path commentThread.uuid mbUser questionnaire
-                            in
-                            applyAction questionnaireSeed assignCommentThread <|
-                                \uuid ->
-                                    ProjectEvent.AssignCommentThread
-                                        { uuid = uuid
-                                        , path = path
-                                        , threadUuid = commentThread.uuid
-                                        , private = commentThread.private
-                                        , assignedTo = mbUser
-                                        , createdAt = createdAt
-                                        , createdBy = createdBy
-                                        }
-
-                        _ ->
-                            ( appState.seed, newModel1, Cmd.none )
-            in
-            ( newSeed
-            , newModel
-            , Cmd.batch [ questionnaireCmd, newCmd ]
-            )
+                _ ->
+                    ( appState.seed, model, Cmd.none )
 
         QuestionnaireDebounceMsg path debounceMsg ->
             let
@@ -549,7 +359,6 @@ update wrapMsg msg appState model =
                 newModel =
                     model
                         |> addSavingActionUuid (ProjectEvent.getUuid questionnaireEvent)
-                        |> addQuestionnaireEvent questionnaireEvent
             in
             withSeed ( newModel, Cmd.none )
 
@@ -629,7 +438,7 @@ update wrapMsg msg appState model =
                 Ok data ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Questionnaire.init appState data.data model.mbSelectedPath model.mbCommentThreadUuid
+                            Questionnaire2.init appState data.data model.mbSelectedPath model.mbCommentThreadUuid
 
                         newModel =
                             { model
@@ -746,7 +555,7 @@ update wrapMsg msg appState model =
             ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
 
         ShareModalCloseMsg ->
-            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire.resetUserSuggestionDropdownModels model.questionnaireModel }, Cmd.none )
+            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire2.resetUserSuggestionDropdownModels model.questionnaireModel }, Cmd.none )
 
         ShareDropdownMsg dropdownState ->
             withSeed ( { model | shareDropdownState = dropdownState }, Cmd.none )
@@ -874,15 +683,17 @@ update wrapMsg msg appState model =
 handleWebsocketMsg : WebSocket.RawMsg -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 handleWebsocketMsg websocketMsg appState model =
     let
-        updateQuestionnaire event actionUuid fn =
+        updateQuestionnaire event =
             let
+                actionUuid =
+                    ProjectEvent.getUuid event
+
                 ( newModel, removed ) =
                     removeSavingActionUuid actionUuid model
 
                 newModel2 =
                     if not removed then
-                        addQuestionnaireEvent event <|
-                            { newModel | questionnaireModel = ActionResult.map fn newModel.questionnaireModel }
+                        { newModel | questionnaireModel = ActionResult.map (Questionnaire2.applyProjectEvent event) newModel.questionnaireModel }
 
                     else
                         newModel
@@ -903,7 +714,7 @@ handleWebsocketMsg websocketMsg appState model =
             ( appState.seed
             , { model
                 | questionnaireCommon = ActionResult.map (ProjectCommon.updateWithQuestionnaireData data) model.questionnaireCommon
-                , questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData appState data) model.questionnaireModel
+                , questionnaireModel = ActionResult.map (Questionnaire2.updateWithQuestionnaireData appState data) model.questionnaireModel
               }
             , Cmd.none
             )
@@ -917,46 +728,14 @@ handleWebsocketMsg websocketMsg appState model =
                             ( appState.seed, { model | onlineUsers = users }, Cmd.none )
 
                         ServerProjectMessage.SetContent event ->
-                            case event of
-                                ProjectEvent.SetReply data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.setReply data.path (SetReplyData.toReply data))
-
-                                ProjectEvent.ClearReply data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.clearReply data.path)
-
-                                ProjectEvent.SetPhase data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.setPhaseUuid data.phaseUuid)
-
-                                ProjectEvent.SetLabels data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.setLabels data.path data.value)
-
-                                ProjectEvent.ResolveCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.resolveCommentThread data.path data.threadUuid data.commentCount)
-
-                                ProjectEvent.ReopenCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.reopenCommentThread data.path data.threadUuid data.commentCount)
-
-                                ProjectEvent.DeleteCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.deleteCommentThread data.path data.threadUuid)
-
-                                ProjectEvent.AssignCommentThread data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.assignCommentThread data.path data.threadUuid data.assignedTo)
-
-                                ProjectEvent.AddComment data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.addComment data.path data.threadUuid data.private (AddCommentData.toComment data))
-
-                                ProjectEvent.EditComment data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.editComment data.path data.threadUuid data.commentUuid data.createdAt data.text)
-
-                                ProjectEvent.DeleteComment data ->
-                                    updateQuestionnaire event data.uuid (Questionnaire.deleteComment data.path data.threadUuid data.commentUuid)
+                            updateQuestionnaire event
 
                         ServerProjectMessage.SetProject data ->
                             updateQuestionnaireData data
 
                         ServerProjectMessage.AddFile file ->
                             ( appState.seed
-                            , { model | questionnaireModel = ActionResult.map (Questionnaire.addFile file) model.questionnaireModel }
+                            , { model | questionnaireModel = ActionResult.map (Questionnaire2.addFile file) model.questionnaireModel }
                             , Cmd.none
                             )
 

@@ -23,6 +23,7 @@ import Wizard.Pages.Settings.Plugins.Msgs exposing (Msg(..))
 import Wizard.Plugins.Plugin as Plugin
 import Wizard.Plugins.PluginMetadata exposing (PluginMetadata)
 import Wizard.Routes as Routes
+import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 view : AppState -> Model -> Html Msg
@@ -36,14 +37,16 @@ view appState model =
                 |> Form.viewDynamic
     in
     div []
-        [ Page.header (gettext "Plugins" appState.locale) []
+        [ Page.headerWithGuideLink
+            (AppState.toGuideLinkConfig appState WizardGuideLinks.settingsPlugins)
+            (gettext "Plugins" appState.locale)
         , form
         ]
 
 
 formView : AppState -> Model -> Html Msg
 formView appState model =
-    div [] (List.map (viewPlugin appState model) appState.pluginMetadata)
+    div [] (List.map (viewPlugin appState model) (List.sortBy (String.toLower << .name) appState.pluginMetadata))
 
 
 viewPlugin : AppState -> Model -> PluginMetadata -> Html Msg

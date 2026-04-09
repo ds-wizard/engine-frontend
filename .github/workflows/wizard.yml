@@ -28,11 +28,11 @@ jobs:
         uses: actions/checkout@v6
 
       - name: '[setup] QEMU'
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: '[setup] Docker Buildx'
         id: buildx
-        uses: docker/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
       - name: '[setup] Node.js ${{ matrix.node-version }}'
         uses: actions/setup-node@v6
@@ -55,7 +55,7 @@ jobs:
 
       - name: '[docker] Meta (default)'
         id: meta-default
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
@@ -65,7 +65,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker] Build (default)'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE }}
@@ -84,7 +84,7 @@ jobs:
       - name: '[docker-dev] Meta (default)'
         id: meta-dev-default
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
@@ -94,7 +94,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker-dev] Build + Push (default)'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: github.event_name != 'pull_request' && steps.meta-dev-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
@@ -107,7 +107,7 @@ jobs:
       - name: '[docker-public] Meta (default)'
         id: meta-public-default
         if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: |
             ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
@@ -121,7 +121,7 @@ jobs:
             suffix=${{ env.DOCKER_META_SUFFIX }}
 
       - name: '[docker-public] Build + Push (default)'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         if: github.event_name != 'pull_request' && steps.meta-public-default.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
