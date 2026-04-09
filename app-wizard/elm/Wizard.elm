@@ -62,7 +62,7 @@ init flags location key =
                                 Cmd.none
 
                     aiAssistantCmd =
-                        if appState.config.features.aiAssistantEnabled && Session.exists appState.session then
+                        if AppState.aiAssistantEnabled appState && Session.exists appState.session then
                             Task.dispatch (Wizard.Msgs.AIAssistantMsg AIAssistant.init)
 
                         else

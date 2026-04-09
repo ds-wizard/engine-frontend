@@ -79,7 +79,8 @@ function loadApp(config, locale, plugins) {
         maxUploadFileSize: appConfig.getMaxUploadFileSize(),
         newsUrl: appConfig.getNewsUrl(),
         urlCheckerUrl: appConfig.getUrlCheckerUrl(),
-        plugins: plugins.map(p => initPlugin(config, p))
+        plugins: plugins.map(p => initPlugin(config, p)),
+        aiAssistantAvailable: appConfig.isAiAssistantAvailable()
     }
 
     if (Object.keys(locale).length > 0) {

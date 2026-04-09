@@ -1,6 +1,7 @@
 module Wizard.Data.AppState exposing
     ( AppState
     , acceptCookies
+    , aiAssistantEnabled
     , anyPluginsAvailable
     , getClientUrlRoot
     , getPlugin
@@ -76,6 +77,7 @@ type alias AppState =
     , newsUrl : Maybe String
     , pluginMetadata : List PluginMetadata
     , plugins : List Plugin
+    , aiAssistantAvailable : Bool
     }
 
 
@@ -135,6 +137,7 @@ init flagsValue key =
       , newsUrl = flags.newsUrl
       , pluginMetadata = flags.pluginMetadata
       , plugins = List.filter Plugin.isApiVersionSupported flags.plugins
+      , aiAssistantAvailable = flags.aiAssistantAvailable
       }
     , flagsCmd
     )
@@ -238,6 +241,11 @@ sessionRemainingTime appState =
                 |> String.padLeft 2 '0'
     in
     timeLeftMin ++ ":" ++ timeLeftSec
+
+
+aiAssistantEnabled : AppState -> Bool
+aiAssistantEnabled appState =
+    appState.aiAssistantAvailable && appState.config.features.aiAssistantEnabled
 
 
 getAIAssistantApiUrl : AppState -> String

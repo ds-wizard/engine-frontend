@@ -248,7 +248,7 @@ view : Model -> Html Wizard.Msgs.Msg
 view model =
     let
         viewAiAssistant =
-            if model.appState.config.features.aiAssistantEnabled then
+            if AppState.aiAssistantEnabled model.appState then
                 div []
                     [ a
                         [ class "sidebar-ai-assistant"
