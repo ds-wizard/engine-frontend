@@ -769,9 +769,9 @@ publicLogoutSuccessful =
 -- Settings
 
 
-settingsDefault : Bool -> Route
-settingsDefault adminEnabled =
-    SettingsRoute (Wizard.Pages.Settings.Routes.defaultRoute adminEnabled)
+settingsDefault : Bool -> Bool -> Route
+settingsDefault adminEnabled pluginsAvailable =
+    SettingsRoute (Wizard.Pages.Settings.Routes.defaultRoute adminEnabled pluginsAvailable)
 
 
 isSettingsRoute : Route -> Bool
