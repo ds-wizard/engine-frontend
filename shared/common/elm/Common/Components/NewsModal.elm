@@ -72,6 +72,7 @@ type alias UpdateConfig msg =
     { lastSeenId : Maybe String
     , setLastSeenMsg : String -> msg
     , wrapMsg : Msg -> msg
+    , dashboardTourActive : Bool
     }
 
 
@@ -85,7 +86,7 @@ update cfg msg model =
                         wasLastNewsSeen =
                             Maybe.isJust cfg.lastSeenId && (cfg.lastSeenId == Maybe.map .id (List.head newsList))
                     in
-                    ( { model | news = ActionResult.Success newsList, closed = wasLastNewsSeen }, Cmd.none )
+                    ( { model | news = ActionResult.Success newsList, closed = wasLastNewsSeen || cfg.dashboardTourActive }, Cmd.none )
 
                 Err _ ->
                     ( { model | news = ActionResult.Error "" }, Cmd.none )
