@@ -19,6 +19,7 @@ import Common.Components.DatePicker as DatePicker
 import Common.Components.FileDownloader as FileDownloader
 import Common.Components.Flash as Flash
 import Common.Components.FontAwesome exposing (fa, faAdd, faDelete, faError, faInfo, faKmQuestion, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCopyLink, faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences, faRemove, faSearch, faSpinner)
+import Common.Components.MarkdownEditor as MarkdownEditor
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft, tooltipRight)
 import Common.Ports.Copy as Copy
@@ -76,7 +77,6 @@ import Wizard.Api.Models.TypeHintRequest as TypeHintRequest
 import Wizard.Api.Models.User as User
 import Wizard.Api.ProjectFiles as ProjectFilesApi
 import Wizard.Api.TypeHints as TypeHintsApi
-import Wizard.Components.Html exposing (resizableTextarea)
 import Wizard.Components.Questionnaire2.Components.FileUploadModal as FileUploadModal
 import Wizard.Components.Questionnaire2.QuestionViewFlags as QuestionViewFlags
 import Wizard.Components.Questionnaire2.QuestionnaireRightPanel as QuestionnaireRightPanel exposing (PluginQuestionActionData, QuestionnaireRightPanel)
@@ -1668,8 +1668,18 @@ viewQuestionValueLazy locale pluginActions questionNodeData questionViewFlags re
                     ]
 
                 Just QuestionValueType.TextQuestionValueType ->
-                    [ resizableTextarea 3 replyValue (defaultAttrs ++ extraAttrs) [] ]
+                    if isReadOnly then
+                        [ Markdown.toHtml [ class "form-control bg-light text-secondary" ] replyValue ]
 
+                    else
+                        [ MarkdownEditor.markdownEditor
+                            [ MarkdownEditor.value replyValue
+                            , MarkdownEditor.onChange toMsg
+                            , MarkdownEditor.labels locale
+                            ]
+                        ]
+
+                --[ resizableTextarea 3 replyValue (defaultAttrs ++ extraAttrs) [] ]
                 Just QuestionValueType.ColorQuestionValueType ->
                     [ input (type_ "color" :: defaultAttrs ++ extraAttrs) []
                     , warningView RegexPatterns.color (gettext "This is not a valid color." locale)

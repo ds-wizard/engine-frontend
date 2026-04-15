@@ -12,6 +12,7 @@ const program = require('./elm/Wizard.elm')
 require('./js/components/charts')
 require('./js/components/code-editor')
 require('../shared/common/js/components/datetime-pickers')
+require('../shared/common/js/components/markdown-editor')
 require('../shared/common/js/components/shortcut-element')
 
 const cookies = require('./js/ports/cookies')
