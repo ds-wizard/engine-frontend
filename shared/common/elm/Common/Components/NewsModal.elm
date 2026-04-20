@@ -120,6 +120,9 @@ update cfg msg model =
 view : Gettext.Locale -> Model -> Html Msg
 view locale model =
     let
+        visible =
+            ActionResult.isSuccess model.news && not model.closed
+
         ( modalContent, shortcuts ) =
             case model.news of
                 ActionResult.Success newsList ->
@@ -179,8 +182,8 @@ view locale model =
                                     ]
                               ]
                             , []
-                                |> List.insertIf prevShortcut hasPrev
-                                |> List.insertIf nextShortcut hasNext
+                                |> List.insertIf prevShortcut (visible && hasPrev)
+                                |> List.insertIf nextShortcut (visible && hasNext)
                             )
 
                 _ ->
@@ -188,7 +191,7 @@ view locale model =
 
         modalConfig =
             { modalContent = modalContent
-            , visible = ActionResult.isSuccess model.news && not model.closed
+            , visible = visible
             , enterMsg = Just (SetClosed True)
             , escMsg = Just (SetClosed True)
             , dataCy = "news_modal"
