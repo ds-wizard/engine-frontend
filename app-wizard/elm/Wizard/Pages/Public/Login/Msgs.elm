@@ -12,3 +12,4 @@ type Msg
     | DoLogin
     | LoginCompleted (Result ApiError TokenResponse)
     | ExternalLoginOpenId OpenIDServiceConfig
+    | ShowAdminLogin

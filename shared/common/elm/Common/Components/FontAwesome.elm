@@ -11,6 +11,7 @@ module Common.Components.FontAwesome exposing
     , faDelete
     , faDetailShowAll
     , faDisable
+    , faDisconnectAccount
     , faDocumentTemplateEditorFiles
     , faDocumentTemplateEditorPublish
     , faDocumentTemplateRestore
@@ -259,6 +260,11 @@ faDetailShowAll =
 faDisable : Html msg
 faDisable =
     fas "fa-toggle-off"
+
+
+faDisconnectAccount : Html msg
+faDisconnectAccount =
+    fas "fa-link-slash"
 
 
 faDocumentTemplateEditorFiles : Html msg

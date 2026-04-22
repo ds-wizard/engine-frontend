@@ -2,13 +2,13 @@ module Wizard.Pages.Public.View exposing (view)
 
 import Html exposing (Html)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Public.Auth.View
 import Wizard.Pages.Public.ForgottenPassword.View
 import Wizard.Pages.Public.ForgottenPasswordConfirmation.View
 import Wizard.Pages.Public.Login.View
 import Wizard.Pages.Public.LogoutSuccessful.View
 import Wizard.Pages.Public.Models exposing (Model)
 import Wizard.Pages.Public.Msgs exposing (Msg(..))
+import Wizard.Pages.Public.OpenIdCallback.View
 import Wizard.Pages.Public.Routes exposing (Route(..))
 import Wizard.Pages.Public.Signup.View
 import Wizard.Pages.Public.SignupConfirmation.View
@@ -17,9 +17,9 @@ import Wizard.Pages.Public.SignupConfirmation.View
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        AuthCallback _ _ _ _ ->
+        OpenIdCallback _ _ _ _ ->
             Html.map AuthMsg <|
-                Wizard.Pages.Public.Auth.View.view appState model.authModel
+                Wizard.Pages.Public.OpenIdCallback.View.view appState model.authModel
 
         ForgottenPasswordRoute ->
             Html.map ForgottenPasswordMsg <|

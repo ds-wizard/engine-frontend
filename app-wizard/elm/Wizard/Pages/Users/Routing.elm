@@ -41,6 +41,7 @@ parsers appState wrapRoute =
                 [ map (wrapRoute <| CreateRoute) (s moduleRoot </> s "create")
                 , map (PaginationQueryString.wrapRoute1 wrappedIndexRoute (Just "lastName")) (PaginationQueryString.parser1 (s moduleRoot) (Query.string indexRouteRoleFilterId))
                 , map (wrapRoute << flip EditRoute UserEditRoute.Password) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "password")
+                , map (wrapRoute << flip EditRoute UserEditRoute.ConnectedAccounts) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "connected-accounts")
                 , map (wrapRoute << flip EditRoute UserEditRoute.Language) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "language")
                 ]
                     |> List.insertIf (map (wrapRoute << flip EditRoute UserEditRoute.Tours) (s moduleRoot </> s "edit" </> UuidOrCurrent.parser </> s "tours")) appState.config.features.toursEnabled
@@ -75,6 +76,9 @@ toUrl route =
 
                 UserEditRoute.Language ->
                     editBase ++ [ "language" ]
+
+                UserEditRoute.ConnectedAccounts ->
+                    editBase ++ [ "connected-accounts" ]
 
                 UserEditRoute.Tours ->
                     editBase ++ [ "tours" ]

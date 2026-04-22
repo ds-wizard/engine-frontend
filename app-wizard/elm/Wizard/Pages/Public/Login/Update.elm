@@ -10,9 +10,9 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import String.Extra as String
 import Task.Extra as Task
-import Wizard.Api.Auth as AuthApi
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
+import Wizard.Api.OpenIdClients as OpenIdClientApi
 import Wizard.Api.Tokens as TokensApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
@@ -21,7 +21,7 @@ import Wizard.Pages.Auth.Msgs
 import Wizard.Pages.Public.Login.Models exposing (Model)
 import Wizard.Pages.Public.Login.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
 fetchData : AppState -> Maybe String -> Cmd msg
@@ -33,7 +33,7 @@ fetchData appState mbOriginalUrl =
         case List.head appState.config.authentication.external.services of
             Just service ->
                 Cmd.batch
-                    [ Navigation.load (AuthApi.authRedirectUrl appState service)
+                    [ Navigation.load (OpenIdClientApi.requestUrl appState service)
                     , saveOriginalUrlCmd mbOriginalUrl
                     ]
 
@@ -75,10 +75,13 @@ update msg wrapMsg appState model =
         ExternalLoginOpenId openIdServiceConfig ->
             ( model
             , Cmd.batch
-                [ Navigation.load (AuthApi.authRedirectUrl appState openIdServiceConfig)
+                [ Navigation.load (OpenIdClientApi.requestUrl appState openIdServiceConfig)
                 , saveOriginalUrlCmd model.originalUrl
                 ]
             )
+
+        ShowAdminLogin ->
+            ( { model | adminLoginVisible = True }, Cmd.none )
 
 
 loginCompleted : AppState -> Model -> Result ApiError TokenResponse -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -94,6 +97,12 @@ loginCompleted appState model result =
 
                 TokenResponse.ConsentsRequired _ ->
                     ( model, Cmd.none )
+
+                TokenResponse.IdentityLinked ->
+                    ( model, Navigation.load (Routing.toUrl Routes.usersEditConnectedAccounts) )
+
+                _ ->
+                    ( { model | loggingIn = ActionResult.Error (gettext "Unexpected response from the server." appState.locale) }, Cmd.none )
 
         Err error ->
             ( { model | loggingIn = ApiError.toActionResult appState (gettext "Login failed." appState.locale) error }, Cmd.none )

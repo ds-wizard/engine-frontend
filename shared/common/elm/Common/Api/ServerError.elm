@@ -259,6 +259,12 @@ messageToReadable appState message =
         "error.validation.qtn_migration_uniqueness" ->
             Just <| gettext "There is already an ongoing project migration." appState.locale
 
+        "error.service.openid.identity_linked_to_different_user" ->
+            Just <| gettext "This account is already linked to a different user." appState.locale
+
+        "error.service.openid.registration_disabled" ->
+            Just <| gettext "Registration of new accounts via this service is disabled." appState.locale
+
         "error.service.pkg.highest_number_in_new_version" ->
             Just <| gettext "New version has to be higher than the previous one." appState.locale
 
@@ -270,6 +276,9 @@ messageToReadable appState message =
 
         "error.service.tb.missing_asset" ->
             Just <| String.format (gettext "Asset \"%s\" was not found in archive." appState.locale) message.params
+
+        "error.service.saml.registration_disabled" ->
+            Just <| gettext "Registration of new accounts via this service is disabled." appState.locale
 
         -- Admin
         "error.validation.tenant_deal_id_uniqueness" ->

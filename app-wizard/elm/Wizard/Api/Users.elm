@@ -1,5 +1,7 @@
 module Wizard.Api.Users exposing
     ( deleteUser
+    , deleteUserIdentity
+    , getCurrentUserIdentities
     , getCurrentUserLocale
     , getCurrentUserPluginSettings
     , getCurrentUserSubmissionProps
@@ -7,6 +9,8 @@ module Wizard.Api.Users exposing
     , getUsers
     , getUsersSuggestions
     , getUsersSuggestionsWithOptions
+    , postConsents
+    , postFromExternal
     , postUser
     , postUserPublic
     , putCurrentPluginSettings
@@ -20,6 +24,8 @@ module Wizard.Api.Users exposing
     )
 
 import Common.Api.Models.Pagination as Pagination exposing (Pagination)
+import Common.Api.Models.UserFromExternal as UserFromExternal exposing (UserFromExternal)
+import Common.Api.Models.UserIdentity as UserIdentity exposing (UserIdentity)
 import Common.Api.Models.UserSuggestion as UserSuggestion exposing (UserSuggestion)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
@@ -27,8 +33,10 @@ import Common.Data.PaginationQueryString as PaginationQueryString exposing (Pagi
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Json.Decode as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.SubmissionProps as SubmissionProps exposing (SubmissionProps)
+import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Models.UserLocale as UserLocale exposing (UserLocale)
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -146,6 +154,23 @@ deleteUser appState uuid =
     Request.delete (AppState.toServerInfo appState) ("/users/" ++ uuid)
 
 
+postConsents : AppState -> String -> Maybe String -> ToMsg TokenResponse msg -> Cmd msg
+postConsents appState hash mbSessionState =
+    let
+        body =
+            E.object
+                [ ( "hash", E.string hash )
+                , ( "sessionState", E.maybe E.string mbSessionState )
+                ]
+    in
+    Request.post (AppState.toServerInfo appState) "/users/consents" TokenResponse.decoder body
+
+
+postFromExternal : AppState -> UserFromExternal -> ToMsg TokenResponse msg -> Cmd msg
+postFromExternal appState userFromExternal =
+    Request.post (AppState.toServerInfo appState) "/users/from-external" TokenResponse.decoder (UserFromExternal.encode userFromExternal)
+
+
 putLastSeenNewsId : AppState -> String -> ToMsg () msg -> Cmd msg
 putLastSeenNewsId appState lastSeenNewsId =
     Request.putEmpty (AppState.toServerInfo appState) ("/users/current/news/" ++ lastSeenNewsId)
@@ -159,3 +184,13 @@ getCurrentUserPluginSettings appState pluginUuid =
 putCurrentPluginSettings : AppState -> Uuid -> String -> ToMsg () msg -> Cmd msg
 putCurrentPluginSettings appState pluginUuid =
     Request.putString (AppState.toServerInfo appState) ("/users/current/plugin-settings/" ++ Uuid.toString pluginUuid) "application/json"
+
+
+getCurrentUserIdentities : AppState -> ToMsg (List UserIdentity) msg -> Cmd msg
+getCurrentUserIdentities appState =
+    Request.get (AppState.toServerInfo appState) "/users/current/identities" (D.list UserIdentity.decoder)
+
+
+deleteUserIdentity : AppState -> Uuid -> ToMsg () msg -> Cmd msg
+deleteUserIdentity appState identityUuid =
+    Request.delete (AppState.toServerInfo appState) ("/users/current/identities/" ++ Uuid.toString identityUuid)

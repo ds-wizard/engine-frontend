@@ -31,6 +31,9 @@ parsers appState wrapRoute =
     []
         |> List.insertIf (map (wrapRoute <| OrganizationRoute) (s moduleRoot </> s "organization")) adminDisabled
         |> List.insertIf (map (wrapRoute <| AuthenticationRoute) (s moduleRoot </> s "authentication")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| OpenIdRoute) (s moduleRoot </> s "open-id")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| OpenIdCreateRoute) (s moduleRoot </> s "open-id" </> s "create")) adminDisabled
+        |> List.insertIf (map (wrapRoute << OpenIdDetailRoute) (s moduleRoot </> s "open-id" </> Parser.uuid)) adminDisabled
         |> List.insertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
         |> List.insertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
         |> List.insertIf (map (wrapRoute <| PluginsRoute) (s moduleRoot </> s "plugins")) pluginsAvilable
@@ -51,6 +54,15 @@ toUrl route =
 
         AuthenticationRoute ->
             [ moduleRoot, "authentication" ]
+
+        OpenIdRoute ->
+            [ moduleRoot, "open-id" ]
+
+        OpenIdCreateRoute ->
+            [ moduleRoot, "open-id", "create" ]
+
+        OpenIdDetailRoute openIdUuid ->
+            [ moduleRoot, "open-id", Uuid.toString openIdUuid ]
 
         PrivacyAndSupportRoute ->
             [ moduleRoot, "privacy-and-support" ]

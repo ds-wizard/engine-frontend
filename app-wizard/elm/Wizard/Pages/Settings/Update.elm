@@ -12,6 +12,9 @@ import Wizard.Pages.Settings.Generic.Update
 import Wizard.Pages.Settings.LookAndFeel.Update
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
+import Wizard.Pages.Settings.OpenId.Update
+import Wizard.Pages.Settings.OpenIdCreate.Update
+import Wizard.Pages.Settings.OpenIdDetail.Update
 import Wizard.Pages.Settings.Organization.Update
 import Wizard.Pages.Settings.PluginSettings.Update
 import Wizard.Pages.Settings.Plugins.Update
@@ -35,8 +38,19 @@ fetchData route appState =
             genericFetch OrganizationMsg
 
         AuthenticationRoute ->
-            Cmd.map AuthenticationMsg <|
-                Wizard.Pages.Settings.Authentication.Update.fetchData appState
+            genericFetch AuthenticationMsg
+
+        OpenIdRoute ->
+            Cmd.map OpenIdMsg <|
+                Wizard.Pages.Settings.OpenId.Update.fetchData appState
+
+        OpenIdCreateRoute ->
+            Cmd.map OpenIdCreateMsg <|
+                Wizard.Pages.Settings.OpenIdCreate.Update.fetchData appState
+
+        OpenIdDetailRoute uuid ->
+            Cmd.map OpenIdDetailMsg <|
+                Wizard.Pages.Settings.OpenIdDetail.Update.fetchData appState uuid
 
         PrivacyAndSupportRoute ->
             genericFetch PrivacyAndSupportMsg
@@ -89,6 +103,42 @@ update wrapMsg msg appState model =
                     Wizard.Pages.Settings.Authentication.Update.update (wrapMsg << AuthenticationMsg) authenticationMsg appState model.authenticationModel
             in
             ( { model | authenticationModel = authenticationModel }, cmd )
+
+        OpenIdMsg openIdMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << OpenIdMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( openIdModel, cmd ) =
+                    Wizard.Pages.Settings.OpenId.Update.update updateConfig appState openIdMsg model.openIdModel
+            in
+            ( { model | openIdModel = openIdModel }, cmd )
+
+        OpenIdCreateMsg openIdCreateMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << OpenIdCreateMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( openIdCreateModel, cmd ) =
+                    Wizard.Pages.Settings.OpenIdCreate.Update.update updateConfig appState openIdCreateMsg model.openIdCreateModel
+            in
+            ( { model | openIdCreateModel = openIdCreateModel }, cmd )
+
+        OpenIdDetailMsg openIdDetailMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << OpenIdDetailMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( openIdDetailModel, cmd ) =
+                    Wizard.Pages.Settings.OpenIdDetail.Update.update updateConfig appState openIdDetailMsg model.openIdDetailModel
+            in
+            ( { model | openIdDetailModel = openIdDetailModel }, cmd )
 
         PrivacyAndSupportMsg privacyAndSupportMsg ->
             let

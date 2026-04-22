@@ -1,25 +1,21 @@
 module Wizard.Components.ExternalLoginButton exposing
     ( ViewConfig
-    , badgeWrapper
     , defaultBackground
     , defaultColor
     , defaultIcon
     , render
+    , renderIcon
     , view
+    , viewAsBadge
     )
 
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (fa, faLoginExternalService)
-import Gettext exposing (gettext)
-import Html exposing (Attribute, Html, a, text)
+import Common.Components.FontAwesome exposing (fa, faFw, faLoginExternalService)
+import Html exposing (Attribute, Html, a, span, text)
 import Html.Attributes exposing (class, style)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onClick)
-import Html.Extra as Html
-import List.Extra as List
-import Maybe.Extra as Maybe
 import Uuid
-import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 
 
@@ -35,7 +31,7 @@ defaultColor =
 
 defaultIcon : String
 defaultIcon =
-    "fa-openid"
+    "fab fa-openid"
 
 
 type alias ViewConfig msg =
@@ -47,21 +43,11 @@ type alias ViewConfig msg =
 view : ViewConfig msg -> Html msg
 view cfg =
     render
-        [ onClick cfg.onClick, dataCy ("login_external_" ++ cfg.service.id) ]
+        [ onClick cfg.onClick, dataCy ("login_external_" ++ Uuid.toString cfg.service.uuid) ]
         cfg.service.name
         cfg.service.style.icon
         cfg.service.style.color
         cfg.service.style.background
-
-
-badgeWrapper : Gettext.Locale -> BootstrapConfig -> String -> Html msg
-badgeWrapper locale config sourceId =
-    if sourceId == Uuid.toString Uuid.nil || sourceId == "internal" then
-        Badge.light [] [ text (gettext "internal" locale) ]
-
-    else
-        List.find (.id >> (==) sourceId) config.authentication.external.services
-            |> Maybe.unwrap Html.nothing viewAsBadge
 
 
 viewAsBadge : OpenIDServiceConfig -> Html msg
@@ -70,7 +56,9 @@ viewAsBadge config =
         [ color config.style.color
         , background config.style.background
         ]
-        [ icon config.style.icon, text config.name ]
+        [ fa ("me-1 " ++ Maybe.withDefault defaultIcon config.style.icon)
+        , text config.name
+        ]
 
 
 render : List (Attribute msg) -> String -> Maybe String -> Maybe String -> Maybe String -> Html msg
@@ -83,6 +71,12 @@ render attributes name mbIcon mbColor mbBackground =
             ++ attributes
         )
         [ icon mbIcon, text name ]
+
+
+renderIcon : Maybe String -> Maybe String -> Maybe String -> Html msg
+renderIcon mbIcon mbColor mbBackground =
+    span [ color mbColor, background mbBackground, class "px-2 py-1 rounded me-2" ]
+        [ iconFw mbIcon ]
 
 
 background : Maybe String -> Attribute msg
@@ -98,3 +92,8 @@ color =
 icon : Maybe String -> Html msg
 icon =
     Maybe.withDefault faLoginExternalService << Maybe.map (\i -> fa i)
+
+
+iconFw : Maybe String -> Html msg
+iconFw =
+    Maybe.withDefault (faFw defaultIcon) << Maybe.map (\i -> faFw i)

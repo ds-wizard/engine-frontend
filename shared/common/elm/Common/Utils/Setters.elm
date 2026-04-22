@@ -3,7 +3,9 @@ module Common.Utils.Setters exposing
     , setApiKeys
     , setAppKeys
     , setAssets
+    , setAuthenticating
     , setCommentThreads
+    , setCompletingRegistration
     , setDashboard
     , setDebouncer
     , setDev
@@ -35,6 +37,7 @@ module Common.Utils.Setters exposing
     , setSelected
     , setSettings
     , setShouldSendEmail
+    , setSubmittingConsent
     , setSynchronizations
     , setTemplate
     , setTemplates
@@ -74,9 +77,19 @@ setAssets value record =
     { record | assets = value }
 
 
+setAuthenticating : a -> { b | authenticating : a } -> { b | authenticating : a }
+setAuthenticating value record =
+    { record | authenticating = value }
+
+
 setCommentThreads : a -> { b | commentThreads : a } -> { b | commentThreads : a }
 setCommentThreads value record =
     { record | commentThreads = value }
+
+
+setCompletingRegistration : a -> { b | completingRegistration : a } -> { b | completingRegistration : a }
+setCompletingRegistration value record =
+    { record | completingRegistration = value }
 
 
 setDashboard : a -> { b | dashboard : a } -> { b | dashboard : a }
@@ -232,6 +245,11 @@ setSettings value record =
 setShouldSendEmail : v -> { a | shouldSendEmail : v } -> { a | shouldSendEmail : v }
 setShouldSendEmail value record =
     { record | shouldSendEmail = value }
+
+
+setSubmittingConsent : v -> { a | submittingConsent : v } -> { a | submittingConsent : v }
+setSubmittingConsent value record =
+    { record | submittingConsent = value }
 
 
 setSynchronizations : v -> { a | synchronizations : v } -> { a | synchronizations : v }

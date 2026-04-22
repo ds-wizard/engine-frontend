@@ -6,10 +6,11 @@ module Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfi
 import Common.Api.Models.AuthServiceProviderButtonStyle as AuthServiceProviderButtonStyle exposing (AuthServiceProviderButtonStyle)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Uuid exposing (Uuid)
 
 
 type alias OpenIDServiceConfig =
-    { id : String
+    { uuid : Uuid
     , name : String
     , style : AuthServiceProviderButtonStyle
     }
@@ -18,6 +19,6 @@ type alias OpenIDServiceConfig =
 decoder : Decoder OpenIDServiceConfig
 decoder =
     D.succeed OpenIDServiceConfig
-        |> D.required "id" D.string
+        |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "style" AuthServiceProviderButtonStyle.decoder
