@@ -2,6 +2,7 @@ module Wizard.Pages.KnowledgeModels.Import.OwlImport.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
 import File
@@ -73,7 +74,9 @@ update msg wrapMsg appState model =
                     )
 
                 _ ->
-                    ( { model | form = Form.update OwlImportForm.validation formMsg model.form }, Cmd.none )
+                    ( { model | form = Form.update OwlImportForm.validation formMsg model.form }
+                    , FormUtils.scrollToInvalidField formMsg
+                    )
 
         _ ->
             ( model, Cmd.none )

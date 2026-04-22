@@ -18,6 +18,7 @@ import Common.Components.FormGroup as FormGroup
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Setters exposing (setSelected)
@@ -196,7 +197,7 @@ handleForm cfg formMsg appState model =
                 newModel =
                     { model | form = Form.update DocumentCreateForm.validation formMsg model.form }
             in
-            ( newModel, Cmd.none )
+            ( newModel, FormUtils.scrollToInvalidField formMsg )
 
 
 handleSetTemplateTypeHintInputReplyMsg : Model -> String -> ( Model, Cmd msg )

@@ -3,6 +3,7 @@ module Wizard.Pages.Users.Create.Update exposing (update)
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -56,7 +57,7 @@ handleForm formMsg wrapMsg seed appState model =
                 newModel =
                     { model | form = Form.update (UserCreateForm.validation appState) formMsg model.form }
             in
-            ( seed, newModel, Cmd.none )
+            ( seed, newModel, FormUtils.scrollToInvalidField formMsg )
 
 
 postUserCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )

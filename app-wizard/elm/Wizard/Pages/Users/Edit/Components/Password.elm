@@ -15,6 +15,7 @@ import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Data.UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
@@ -83,7 +84,7 @@ handlePasswordForm cfg appState formMsg model =
                 passwordForm =
                     Form.update (UserPasswordForm.validation appState) formMsg model.passwordForm
             in
-            ( { model | passwordForm = passwordForm }, Cmd.none )
+            ( { model | passwordForm = passwordForm }, FormUtils.scrollToInvalidField formMsg )
 
 
 putUserPasswordCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError () -> ( Model, Cmd msg )

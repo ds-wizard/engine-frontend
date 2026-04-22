@@ -8,6 +8,7 @@ import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Bool as Bool
 import Common.Utils.CmdUtils exposing (withNoCmd)
@@ -264,7 +265,7 @@ update wrapMsg msg appState model =
                                 )
 
                             else
-                                ( newModel, Cmd.none )
+                                ( newModel, FormUtils.scrollToInvalidField formMsg )
 
                         Nothing ->
                             ( { newModel
@@ -272,7 +273,7 @@ update wrapMsg msg appState model =
                                 , knowledgeModelPreview = ActionResult.Unset
                                 , selectedTags = []
                               }
-                            , Cmd.none
+                            , FormUtils.scrollToInvalidField formMsg
                             )
 
         PostProjectCompleted result ->

@@ -20,6 +20,7 @@ import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -177,7 +178,7 @@ handleFormMsg cfg formMsg appState model =
                             searchValue fieldName value
 
                         _ ->
-                            Cmd.none
+                            FormUtils.scrollToInvalidField formMsg
             in
             ( { model | form = Form.update (ProjectSettingsForm.validation appState) formMsg model.form }
             , cmd
