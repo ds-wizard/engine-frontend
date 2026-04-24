@@ -67,6 +67,7 @@ module Wizard.Utils.Feature exposing
     , projectTagging
     , projectTemplatesCreate
     , projectTodos
+    , projectToolbarImporters
     , projectVersionHistory
     , projectsCreateCustom
     , projectsCreateFromTemplate
@@ -367,6 +368,11 @@ projectSearch project =
 
 projectTodos : AppState -> ProjectLike q -> Bool
 projectTodos appState project =
+    ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
+
+
+projectToolbarImporters : AppState -> ProjectLike q -> Bool
+projectToolbarImporters appState project =
     ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
 
 
