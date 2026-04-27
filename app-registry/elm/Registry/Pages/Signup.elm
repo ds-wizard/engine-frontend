@@ -114,9 +114,9 @@ viewSignupForm appState model =
                     (Input.checkboxInput acceptField [ id "accept", name "accept", class "me-2" ]
                         :: String.formatHtml
                             (gettext "I have read %s and %s." appState.locale)
-                            [ a [ href "https://ds-wizard.org/privacy.html", target "_blank" ]
+                            [ a [ href "https://dsw.elixir-europe.org/privacy", target "_blank" ]
                                 [ text (gettext "Privacy" appState.locale) ]
-                            , a [ href "https://ds-wizard.org/terms.html", target "_blank" ]
+                            , a [ href "https://dsw.elixir-europe.org/terms-of-service", target "_blank" ]
                                 [ text (gettext "Terms of Service" appState.locale) ]
                             ]
                     )
