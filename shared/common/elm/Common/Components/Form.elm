@@ -4,6 +4,7 @@ module Common.Components.Form exposing
     , DynamicFormConfig
     , FormActionsDynamicConfig
     , SimpleFormConfig
+    , SimpleFormWithSubmitAttrsConfig
     , custom
     , formActionsDynamic
     , initDynamic
@@ -13,6 +14,7 @@ module Common.Components.Form exposing
     , setWide
     , viewDynamic
     , viewSimple
+    , viewSimpleWithSubmitAttrs
     )
 
 import ActionResult exposing (ActionResult)
@@ -44,9 +46,35 @@ type alias SimpleFormConfig a msg =
 
 viewSimple : SimpleFormConfig a msg -> Html msg
 viewSimple cfg =
+    viewSimpleWithSubmitAttrs
+        { formMsg = cfg.formMsg
+        , formResult = cfg.formResult
+        , formView = cfg.formView
+        , submitLabel = cfg.submitLabel
+        , submitDisabled = False
+        , cancelMsg = cfg.cancelMsg
+        , locale = cfg.locale
+        , isMac = cfg.isMac
+        }
+
+
+type alias SimpleFormWithSubmitAttrsConfig a msg =
+    { formMsg : Form.Msg -> msg
+    , formResult : ActionResult a
+    , formView : Html msg
+    , submitLabel : String
+    , submitDisabled : Bool
+    , cancelMsg : Maybe msg
+    , locale : Gettext.Locale
+    , isMac : Bool
+    }
+
+
+viewSimpleWithSubmitAttrs : SimpleFormWithSubmitAttrsConfig a msg -> Html msg
+viewSimpleWithSubmitAttrs cfg =
     let
         shortcuts =
-            if not (ActionResult.isLoading cfg.formResult) then
+            if not cfg.submitDisabled && not (ActionResult.isLoading cfg.formResult) then
                 [ Shortcut.submitShortcut cfg.isMac (cfg.formMsg Form.Submit) ]
 
             else
@@ -60,6 +88,7 @@ viewSimple cfg =
             { formMsg = cfg.formMsg
             , formResult = cfg.formResult
             , submitLabel = cfg.submitLabel
+            , submitDisabled = cfg.submitDisabled
             , cancelMsg = cfg.cancelMsg
             , locale = cfg.locale
             }
@@ -70,6 +99,7 @@ type alias FormActionsConfig a msg =
     { formMsg : Form.Msg -> msg
     , formResult : ActionResult a
     , submitLabel : String
+    , submitDisabled : Bool
     , cancelMsg : Maybe msg
     , locale : Gettext.Locale
     }
@@ -97,7 +127,7 @@ formActions cfg =
                 , result = cfg.formResult
                 , msg = cfg.formMsg Form.Submit
                 , dangerous = False
-                , attrs = [ dataCy "form_submit" ]
+                , attrs = [ dataCy "form_submit", disabled cfg.submitDisabled ]
                 }
     in
     div
