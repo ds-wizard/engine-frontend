@@ -372,7 +372,7 @@ projectTodos appState project =
 
 projectToolbarImporters : AppState -> ProjectLike q -> Bool
 projectToolbarImporters appState project =
-    ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
+    Session.exists appState.session && ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
 
 
 projectVersionHistory : AppState -> ProjectLike q -> Bool
