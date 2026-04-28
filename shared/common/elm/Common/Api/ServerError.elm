@@ -2,11 +2,14 @@ module Common.Api.ServerError exposing
     ( Message
     , ServerError(..)
     , SystemLogErrorData
+    , TooManyRequestsErrorData
     , UserFormErrorData
     , decoder
     , forbiddenMessage
     , getUserFormErrorData
     , messageToReadable
+    , tooManyRequestsErrorDecoder
+    , tooManyRequestsMessage
     )
 
 import Common.Utils.ByteUnits as ByteUnits
@@ -23,6 +26,7 @@ type ServerError
     | UserFormError UserFormErrorData
     | ForbiddenError
     | SystemLogError SystemLogErrorData
+    | TooManyRequestsError TooManyRequestsErrorData
 
 
 type alias Message =
@@ -40,6 +44,11 @@ type alias UserFormErrorData =
 type alias SystemLogErrorData =
     { defaultMessage : String
     , params : List String
+    }
+
+
+type alias TooManyRequestsErrorData =
+    { retryAfterSeconds : Int
     }
 
 
@@ -117,9 +126,27 @@ systemLogErrorDataDecoder =
         |> D.required "params" (D.list D.string)
 
 
+tooManyRequestsErrorDecoder : Decoder ServerError
+tooManyRequestsErrorDecoder =
+    D.map TooManyRequestsError tooManyRequestsErrorDataDecoder
+
+
+tooManyRequestsErrorDataDecoder : Decoder TooManyRequestsErrorData
+tooManyRequestsErrorDataDecoder =
+    D.succeed TooManyRequestsErrorData
+        |> D.required "retryAfterSeconds" D.int
+
+
 forbiddenMessage : { a | locale : Gettext.Locale } -> String
 forbiddenMessage appState =
     gettext "You do not have permission to view this page." appState.locale
+
+
+tooManyRequestsMessage : { a | locale : Gettext.Locale } -> TooManyRequestsErrorData -> String
+tooManyRequestsMessage appState data =
+    String.format
+        (gettext "Too many requests. Try again after %s seconds." appState.locale)
+        [ String.fromInt data.retryAfterSeconds ]
 
 
 messageToReadable : { a | locale : Gettext.Locale } -> Message -> Maybe String

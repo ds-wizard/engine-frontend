@@ -44,11 +44,12 @@ viewPageContent appState model _ =
         [ Page.headerWithGuideLink
             (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsCreate)
             (gettext "Create Project" appState.locale)
-        , Form.viewSimple
+        , Form.viewSimpleWithSubmitAttrs
             { formMsg = FormMsg
             , formResult = model.savingQuestionnaire
             , formView = formView appState model
             , submitLabel = gettext "Create" appState.locale
+            , submitDisabled = ActionResult.isLoading model.knowledgeModelPreview
             , cancelMsg = Just Cancel
             , locale = appState.locale
             , isMac = appState.navigator.isMac

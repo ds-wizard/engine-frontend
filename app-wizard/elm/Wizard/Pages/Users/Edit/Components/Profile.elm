@@ -19,6 +19,7 @@ import Common.Components.Page as Page
 import Common.Data.Role as Role
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -105,7 +106,7 @@ handleUserForm cfg appState formMsg model =
                 userForm =
                     Form.update UserEditForm.validation formMsg model.userForm
             in
-            ( { model | userForm = userForm }, Cmd.none )
+            ( { model | userForm = userForm }, FormUtils.scrollToInvalidField formMsg )
 
 
 getUserCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError User -> ( Model, Cmd msg )

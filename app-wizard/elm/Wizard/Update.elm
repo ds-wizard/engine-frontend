@@ -5,6 +5,7 @@ import Browser.Navigation as Navigation exposing (load, pushUrl)
 import Common.Components.AIAssistant as AIAssistant
 import Common.Components.NewsModal as NewsModal
 import Common.Ports.Window as Window
+import Common.Utils.Driver as Driver
 import Common.Utils.TimeUtils as TimeUtils
 import Url
 import Wizard.Api.Tours as ToursApi
@@ -36,6 +37,7 @@ import Wizard.Ports.Cookies as Cookies
 import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (parseLocation, routeIfAllowed)
+import Wizard.Utils.TourId as TourId
 
 
 fetchData : Model -> Cmd Msg
@@ -422,10 +424,16 @@ update msg model =
 
             Wizard.Msgs.NewsModalMsg newsModalMsg ->
                 let
+                    dashboardTourActive =
+                        model.appState.config.features.toursEnabled
+                            && (model.appState.route == Routes.DashboardRoute)
+                            && not (List.member TourId.dashboard (List.map Driver.tourId model.appState.config.tours))
+
                     config =
                         { lastSeenId = Maybe.andThen .lastSeenNewsId model.appState.config.user
                         , setLastSeenMsg = Wizard.Msgs.SetLastSeenNewsId
                         , wrapMsg = Wizard.Msgs.NewsModalMsg
+                        , dashboardTourActive = dashboardTourActive
                         }
 
                     ( newsModalModel, newsModalCmd ) =

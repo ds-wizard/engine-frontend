@@ -1,4 +1,4 @@
-module Wizard.Components.Questionnaire2.ToolbarViewFlags exposing (ToolbarViewFlags, commentsVisible, toInt, todosVisible, versionHistoryVisible)
+module Wizard.Components.Questionnaire2.ToolbarViewFlags exposing (ToolbarViewFlags, commentsVisible, importersVisible, toInt, todosVisible, versionHistoryVisible)
 
 import Bitwise
 
@@ -7,6 +7,7 @@ type alias ToolbarViewFlags =
     { todosVisible : Bool
     , commentsVisible : Bool
     , versionHistoryVisible : Bool
+    , importersVisible : Bool
     }
 
 
@@ -25,6 +26,11 @@ versionHistoryVisibleMask =
     4
 
 
+importersVisibleMask : Int
+importersVisibleMask =
+    8
+
+
 toInt : ToolbarViewFlags -> Int
 toInt flags =
     let
@@ -39,6 +45,7 @@ toInt flags =
         |> addFlag flags.todosVisible todosVisibleMask
         |> addFlag flags.commentsVisible commentsVisibleMask
         |> addFlag flags.versionHistoryVisible versionHistoryVisibleMask
+        |> addFlag flags.importersVisible importersVisibleMask
 
 
 todosVisible : Int -> Bool
@@ -54,6 +61,11 @@ commentsVisible =
 versionHistoryVisible : Int -> Bool
 versionHistoryVisible =
     checkFlag versionHistoryVisibleMask
+
+
+importersVisible : Int -> Bool
+importersVisible =
+    checkFlag importersVisibleMask
 
 
 checkFlag : Int -> Int -> Bool
