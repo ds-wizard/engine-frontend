@@ -58,7 +58,6 @@ module Wizard.Utils.Feature exposing
     , projectDelete
     , projectDocumentsView
     , projectFiles
-    , projectImporters
     , projectMetrics
     , projectOpen
     , projectPreview
@@ -438,15 +437,6 @@ projectCommentPrivate appState project =
 projectFiles : AppState -> Bool
 projectFiles =
     adminOr Perm.projectFile
-
-
-
--- Project Importers
-
-
-projectImporters : AppState -> Bool
-projectImporters =
-    adminOr Perm.projectImporter
 
 
 
