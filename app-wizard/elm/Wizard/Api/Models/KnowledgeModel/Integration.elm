@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Integration exposing
     ( Integration(..)
     , decoder
+    , equalContent
     , getAllowCustomReply
     , getAnnotations
     , getName
@@ -18,6 +19,7 @@ module Wizard.Api.Models.KnowledgeModel.Integration exposing
     , getTestQ
     , getTestResponse
     , getTestVariables
+    , getTypeReadableString
     , getTypeString
     , getUuid
     , getVariables
@@ -25,6 +27,7 @@ module Wizard.Api.Models.KnowledgeModel.Integration exposing
     )
 
 import Dict exposing (Dict)
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
@@ -66,6 +69,19 @@ pluginIntegrationDecoder =
 -- Helpers
 
 
+equalContent : Integration -> Integration -> Bool
+equalContent integration1 integration2 =
+    case ( integration1, integration2 ) of
+        ( ApiIntegration data1, ApiIntegration data2 ) ->
+            ApiIntegrationData.equalContent data1 data2
+
+        ( PluginIntegration data1, PluginIntegration data2 ) ->
+            PluginIntegrationData.equalContent data1 data2
+
+        _ ->
+            False
+
+
 getTypeString : Integration -> String
 getTypeString integration =
     case integration of
@@ -74,6 +90,16 @@ getTypeString integration =
 
         PluginIntegration _ ->
             "Plugin"
+
+
+getTypeReadableString : Gettext.Locale -> Integration -> String
+getTypeReadableString locale integration =
+    case integration of
+        ApiIntegration _ ->
+            gettext "API" locale
+
+        PluginIntegration _ ->
+            gettext "Plugin" locale
 
 
 getUuid : Integration -> String

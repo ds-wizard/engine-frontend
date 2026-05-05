@@ -37,6 +37,7 @@ module Wizard.Api.Models.KnowledgeModel exposing
     , getQuestionItemTemplateQuestions
     , getQuestionName
     , getQuestionReferences
+    , getQuestionTags
     , getReference
     , getReferenceName
     , getResourceCollection
@@ -551,6 +552,11 @@ getQuestionExperts =
 getQuestionItemTemplateQuestions : String -> KnowledgeModel -> List Question
 getQuestionItemTemplateQuestions =
     getEntities .questions Question.getItemTemplateQuestionUuids .questions
+
+
+getQuestionTags : String -> KnowledgeModel -> List Tag
+getQuestionTags =
+    getEntities .questions Question.getTagUuids .tags
 
 
 getAnswerFollowupQuestions : String -> KnowledgeModel -> List Question

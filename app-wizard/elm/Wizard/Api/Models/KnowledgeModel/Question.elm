@@ -7,6 +7,7 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     , addReferenceUuid
     , decoder
     , encode
+    , equalContent
     , getAnnotations
     , getAnswerUuids
     , getChoiceUuids
@@ -178,6 +179,34 @@ encode question =
 
 
 -- Helpers
+
+
+equalContent : Question -> Question -> Bool
+equalContent question1 question2 =
+    case ( question1, question2 ) of
+        ( OptionsQuestion commonData1 _, OptionsQuestion commonData2 _ ) ->
+            CommonQuestionData.equalContent commonData1 commonData2
+
+        ( ListQuestion commonData1 _, ListQuestion commonData2 _ ) ->
+            CommonQuestionData.equalContent commonData1 commonData2
+
+        ( ValueQuestion commonData1 questionData1, ValueQuestion commonData2 questionData2 ) ->
+            CommonQuestionData.equalContent commonData1 commonData2 && ValueQuestionData.equalContent questionData1 questionData2
+
+        ( IntegrationQuestion commonData1 questionData1, IntegrationQuestion commonData2 questionData2 ) ->
+            CommonQuestionData.equalContent commonData1 commonData2 && IntegrationQuestionData.equalContent questionData1 questionData2
+
+        ( MultiChoiceQuestion commonData1 _, MultiChoiceQuestion commonData2 _ ) ->
+            CommonQuestionData.equalContent commonData1 commonData2
+
+        ( ItemSelectQuestion commonData1 questionData1, ItemSelectQuestion commonData2 questionData2 ) ->
+            CommonQuestionData.equalContent commonData1 commonData2 && ItemSelectQuestionData.equalContent questionData1 questionData2
+
+        ( FileQuestion commonData1 questionData1, FileQuestion commonData2 questionData2 ) ->
+            CommonQuestionData.equalContent commonData1 commonData2 && FileQuestionData.equalContent questionData1 questionData2
+
+        _ ->
+            False
 
 
 addReferenceUuid : String -> Question -> Question

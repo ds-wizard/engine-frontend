@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Question.IntegrationQuestionData exposin
     ( IntegrationQuestionData
     , decoder
     , encodeValues
+    , equalContent
     )
 
 import Dict exposing (Dict)
@@ -28,3 +29,9 @@ encodeValues integrationData =
     [ ( "integrationUuid", E.string integrationData.integrationUuid )
     , ( "variables", E.dict identity E.string integrationData.variables )
     ]
+
+
+equalContent : IntegrationQuestionData -> IntegrationQuestionData -> Bool
+equalContent data1 data2 =
+    (data1.integrationUuid == data2.integrationUuid)
+        && (data1.variables == data2.variables)

@@ -22,6 +22,7 @@ import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
 import Wizard.Api.Models.ProjectMigration exposing (ProjectMigration)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Projects as ProjectsApi
+import Wizard.Components.KMComparison as KMComparison
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Projects.Common.ProjectMigrationCreateForm as ProjectMigrationCreateForm
@@ -74,6 +75,43 @@ update wrapMsg msg appState model =
 
         KnowledgeModelPackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
+
+        CompareKnowledgeModels ->
+            case ( model.currentPackage, model.selectedPackageDetail, model.project ) of
+                ( Success currentPackage, Success selectedPackageDetail, Success project ) ->
+                    case Form.getOutput model.form of
+                        Just form ->
+                            let
+                                compareInput =
+                                    { leftPackage = currentPackage
+                                    , rightPackage = selectedPackageDetail
+                                    , leftVersion = currentPackage.uuid
+                                    , rightVersion = Uuid.fromUuidString form.knowledgeModelPackageUuid
+                                    , leftTags = project.selectedQuestionTagUuids
+                                    , rightTags =
+                                        if model.useAllQuestions then
+                                            []
+
+                                        else
+                                            model.selectedTags
+                                    }
+                            in
+                            handleKMComparisonMsg wrapMsg
+                                (KMComparison.compare compareInput)
+                                appState
+                                { model | compareModalOpen = True }
+
+                        Nothing ->
+                            ( model, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        CloseCompareModal ->
+            ( { model | compareModalOpen = False }, Cmd.none )
+
+        KMComparisonMsg kmComparisonMsg ->
+            handleKMComparisonMsg wrapMsg kmComparisonMsg appState model
 
 
 
@@ -266,6 +304,20 @@ handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
             TypeHintInput.update cfg typeHintInputMsg model.knowledgeModelPackageTypeHintInputModel
     in
     ( { model | knowledgeModelPackageTypeHintInputModel = packageTypeHintInputModel }, cmd )
+
+
+handleKMComparisonMsg : (Msg -> Wizard.Msgs.Msg) -> KMComparison.Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handleKMComparisonMsg wrapMsg kmComparisonMsg appState model =
+    let
+        updateConfig =
+            { wrapMsg = wrapMsg << KMComparisonMsg
+            , logoutMsg = Wizard.Msgs.logoutMsg
+            }
+
+        ( kmComparisonModel, cmd ) =
+            KMComparison.update appState updateConfig kmComparisonMsg model.kmComparisonModel
+    in
+    ( { model | kmComparisonModel = kmComparisonModel }, cmd )
 
 
 

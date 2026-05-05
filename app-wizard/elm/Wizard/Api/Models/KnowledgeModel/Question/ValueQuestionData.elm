@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Question.ValueQuestionData exposing
     ( ValueQuestionData
     , decoder
     , encodeValues
+    , equalContent
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -27,3 +28,8 @@ decoder =
 encodeValues : ValueQuestionData -> List ( String, E.Value )
 encodeValues valueData =
     [ ( "valueType", QuestionValueType.encode valueData.valueType ) ]
+
+
+equalContent : ValueQuestionData -> ValueQuestionData -> Bool
+equalContent data1 data2 =
+    data1.valueType == data2.valueType

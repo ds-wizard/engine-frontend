@@ -54,6 +54,7 @@ module Wizard.Routes exposing
     , kmEditorMigration
     , kmEditorPublish
     , knowledgeModelSecrets
+    , knowledgeModelsCompare
     , knowledgeModelsDetail
     , knowledgeModelsImport
     , knowledgeModelsIndex
@@ -494,6 +495,11 @@ kmEditorPublish =
 
 
 -- Knowledge Models
+
+
+knowledgeModelsCompare : Maybe Uuid -> Route
+knowledgeModelsCompare mbLeftKmUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.CompareRoute mbLeftKmUuid
 
 
 knowledgeModelsDetail : Uuid -> Route

@@ -12,6 +12,7 @@ import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
+import Wizard.Components.KMComparison as KMComparison
 import Wizard.Pages.Projects.Common.ProjectMigrationCreateForm as ProjectMigrationCreateForm exposing (ProjectMigrationCreateForm)
 
 
@@ -28,6 +29,8 @@ type alias Model =
     , savingMigration : ActionResult String
     , knowledgeModelPreview : ActionResult KnowledgeModel
     , lastFetchedPreview : Maybe Uuid
+    , compareModalOpen : Bool
+    , kmComparisonModel : KMComparison.Model
     }
 
 
@@ -45,4 +48,6 @@ initialModel uuid =
     , savingMigration = Unset
     , knowledgeModelPreview = Unset
     , lastFetchedPreview = Nothing
+    , compareModalOpen = False
+    , kmComparisonModel = KMComparison.initialModel
     }

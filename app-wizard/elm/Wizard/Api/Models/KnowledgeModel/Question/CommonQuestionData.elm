@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Question.CommonQuestionData exposing
     ( CommonQuestionData
     , decoder
     , encodeValues
+    , equalContent
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -47,3 +48,11 @@ encodeValues commonData =
     , ( "expertUuids", E.list E.string commonData.expertUuids )
     , ( "annotations", E.list Annotation.encode commonData.annotations )
     ]
+
+
+equalContent : CommonQuestionData -> CommonQuestionData -> Bool
+equalContent data1 data2 =
+    (data1.title == data2.title)
+        && (data1.text == data2.text)
+        && (data1.requiredPhaseUuid == data2.requiredPhaseUuid)
+        && (data1.tagUuids == data2.tagUuids)
