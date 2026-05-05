@@ -31,4 +31,4 @@ toUrl route =
 
 isAllowed : AppState -> Bool
 isAllowed appState =
-    Feature.projectImporters appState
+    Feature.projectFiles appState

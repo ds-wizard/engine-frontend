@@ -8,6 +8,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UuidResponse exposing (UuidResponse)
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -117,7 +118,9 @@ handleFormMsg wrapMsg formMsg appState model =
                         _ ->
                             newForm
             in
-            ( { model | form = formWithKmId }, Cmd.none )
+            ( { model | form = formWithKmId }
+            , FormUtils.scrollToInvalidField formMsg
+            )
 
 
 handleFormSetVersion : AppState -> Version -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

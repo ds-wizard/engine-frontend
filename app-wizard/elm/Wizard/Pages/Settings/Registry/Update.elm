@@ -5,6 +5,7 @@ module Wizard.Pages.Settings.Registry.Update exposing
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.FormUtils as FormUtils
 import Common.Utils.Form as Form
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form
@@ -92,7 +93,7 @@ handleForm wrapMsg formMsg appState model =
 
         _ ->
             ( { model | registrySignupForm = registrySignupForm }
-            , Cmd.none
+            , FormUtils.scrollToInvalidField formMsg
             )
 
 

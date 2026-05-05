@@ -43,6 +43,7 @@ import ActionResult exposing (ActionResult)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.DatePicker as DatePicker
 import Common.Components.FontAwesome exposing (faAdd, faDelete, fas)
+import Common.Components.MarkdownEditor as MarkdownEditor
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.Markdown as Markdown
@@ -50,7 +51,7 @@ import Common.Utils.RegexPatterns as RegexPatterns
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, input, label, li, optgroup, option, span, text, ul)
-import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, href, id, name, placeholder, rows, selected, step, style, target, type_, value)
+import Html.Attributes as Attribute exposing (attribute, checked, class, classList, for, id, name, placeholder, rows, selected, step, style, type_, value)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onCheck, onClick, onInput)
 import Html.Events.Extensions exposing (onBlurWithSelection)
@@ -347,62 +348,20 @@ type alias MarkdownInputConfig msg =
     , onInput : String -> msg
     , previewMsg : Bool -> String -> msg
     , entityUuid : String
-    , markdownPreviews : List String
+
+    --, markdownPreviews : List String
     }
 
 
 markdown : AppState -> MarkdownInputConfig msg -> Html msg
 markdown appState config =
-    let
-        fieldIdentifier =
-            createFieldId config.entityUuid config.name
-
-        previewActive =
-            List.member fieldIdentifier config.markdownPreviews
-
-        content =
-            if previewActive then
-                Markdown.toHtml [] config.value
-
-            else
-                Html.textarea
-                    [ class "form-control"
-                    , id config.name
-                    , name config.name
-                    , onInput config.onInput
-                    , value config.value
-                    , rows <| List.length <| String.lines config.value
-                    ]
-                    []
-    in
     div [ class "form-group form-group-markup-editor" ]
         [ label [ for config.name ] [ text config.label ]
-        , div [ class "card" ]
-            [ div [ class "card-header" ]
-                [ ul [ class "nav nav-tabs card-header-tabs" ]
-                    [ li [ class "nav-item" ]
-                        [ a
-                            [ onClick (config.previewMsg False fieldIdentifier)
-                            , class "nav-link"
-                            , classList [ ( "active", not previewActive ) ]
-                            ]
-                            [ text (gettext "Editor" appState.locale) ]
-                        ]
-                    , li [ class "nav-item" ]
-                        [ a
-                            [ onClick (config.previewMsg True fieldIdentifier)
-                            , class "nav-link"
-                            , classList [ ( "active", previewActive ) ]
-                            ]
-                            [ text (gettext "Preview" appState.locale) ]
-                        ]
-                    ]
-                ]
-            , div [ class "card-body" ] [ content ]
-            , div [ class "card-footer text-muted" ]
-                (String.formatHtml (gettext "You can use %s and see the result in the preview tab." appState.locale)
-                    [ a [ href (WizardGuideLinks.markdownCheatsheet appState.guideLinks), target "_blank" ] [ text "Markdown" ] ]
-                )
+        , MarkdownEditor.markdownEditor
+            [ id config.name
+            , MarkdownEditor.value config.value
+            , MarkdownEditor.onChange config.onInput
+            , MarkdownEditor.labels appState.locale
             ]
         ]
 
@@ -420,7 +379,7 @@ type alias ItemTemplateEditorConfig msg =
     , showPreviewMsg : String -> msg
     , showTemplateMsg : String -> msg
     , entityUuid : String
-    , markdownPreviews : List String
+    , editorPreviews : List String
     , integrationTestPreviews : Dict String (ActionResult (List TypeHint))
     , cursorPositions : Dict String ( Int, Int )
     , fieldSuggestions : List String
@@ -435,7 +394,7 @@ itemTemplateEditor appState config =
             createFieldId config.entityUuid config.name
 
         previewActive =
-            List.member fieldIdentifier config.markdownPreviews
+            List.member fieldIdentifier config.editorPreviews
 
         content =
             if previewActive then

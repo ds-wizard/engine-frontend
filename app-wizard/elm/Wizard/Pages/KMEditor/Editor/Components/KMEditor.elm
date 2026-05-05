@@ -139,7 +139,7 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 type alias Model =
     { splitPane : SplitPane.State
-    , markdownPreviews : List String
+    , editorPreviews : List String
     , reorderableStates : Dict String Reorderable.State
     , deleteModalState : DeleteModalState
     , moveModalState : Maybe MoveModalState
@@ -191,7 +191,7 @@ type alias CurlImportModalState =
 initialModel : Model
 initialModel =
     { splitPane = SplitPane.init SplitPane.Horizontal |> SplitPane.configureSplitter (SplitPane.percentage 0.2 (Just ( 0.05, 0.7 )))
-    , markdownPreviews = []
+    , editorPreviews = []
     , reorderableStates = Dict.empty
     , deleteModalState = Closed
     , moveModalState = Nothing
@@ -263,10 +263,10 @@ update appState cfg msg ( editorContext, model ) =
     let
         showHideMarkdownPreview visible field m =
             if visible then
-                { m | markdownPreviews = field :: m.markdownPreviews }
+                { m | editorPreviews = field :: m.editorPreviews }
 
             else
-                { m | markdownPreviews = List.filter ((/=) field) m.markdownPreviews }
+                { m | editorPreviews = List.filter ((/=) field) m.editorPreviews }
     in
     case msg of
         SplitPaneMsg splitPaneMsg ->
@@ -478,7 +478,7 @@ update appState cfg msg ( editorContext, model ) =
                         newModel =
                             { model
                                 | curlImportModalState = { integrationUuid = Nothing, curlString = "" }
-                                , markdownPreviews = (integrationUuid ++ ":requestAdvancedConfiguration") :: model.markdownPreviews
+                                , editorPreviews = (integrationUuid ++ ":requestAdvancedConfiguration") :: model.editorPreviews
                             }
                     in
                     ( editorContext, newModel, Task.dispatch setRequestBodyMsg )
@@ -1027,7 +1027,6 @@ viewChapterEditor { appState, wrapMsg, eventMsg, model, editorContext } chapter 
                 , onInput = createEditEvent setText << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = chapter.uuid
-                , markdownPreviews = model.markdownPreviews
                 }
 
         questionsInput =
@@ -1258,7 +1257,6 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                 , onInput = createEditEvent setText setText setText setText setText setText setText << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = questionUuid
-                , markdownPreviews = model.markdownPreviews
                 }
 
         requiredPhaseUuidInput =
@@ -1689,7 +1687,7 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
 
 
 viewMetricEditor : EditorConfig msg -> Metric -> Html msg
-viewMetricEditor { appState, wrapMsg, eventMsg, model, editorContext } metric =
+viewMetricEditor { appState, wrapMsg, eventMsg, editorContext } metric =
     let
         parentUuid =
             EditorContext.getParentUuid metric.uuid editorContext
@@ -1738,7 +1736,6 @@ viewMetricEditor { appState, wrapMsg, eventMsg, model, editorContext } metric =
                 , onInput = createEditEvent setDescription << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = metric.uuid
-                , markdownPreviews = model.markdownPreviews
                 }
 
         annotationsInput =
@@ -2121,7 +2118,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                 { identifier = "advancedConfiguration"
                 , openLabel = gettext "Advanced Integration Configuration" appState.locale
                 , content = allowCustomReplyGroup ++ variablesGroup ++ secretsGroup
-                , markdownPreviews = model.markdownPreviews
+                , markdownPreviews = model.editorPreviews
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = integrationUuid
                 }
@@ -2156,7 +2153,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                         { identifier = "requestAdvancedConfiguration"
                         , openLabel = gettext "Advanced Request Configuration" appState.locale
                         , content = requestAdvancedConfigurationContent
-                        , markdownPreviews = model.markdownPreviews
+                        , markdownPreviews = model.editorPreviews
                         , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                         , entityUuid = integrationUuid
                         }
@@ -2252,7 +2249,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                         { identifier = "requestDetails"
                                         , openLabel = gettext "Request Details" appState.locale
                                         , content = requestDetailsGroupContent
-                                        , markdownPreviews = model.markdownPreviews
+                                        , markdownPreviews = model.editorPreviews
                                         , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                                         , entityUuid = integrationUuid
                                         }
@@ -2441,7 +2438,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                         , showPreviewMsg = wrapMsg << TestIntegrationPreview integrationUuid
                                         , showTemplateMsg = wrapMsg << ShowHideMarkdownPreview False
                                         , entityUuid = integrationUuid
-                                        , markdownPreviews = model.markdownPreviews
+                                        , editorPreviews = model.editorPreviews
                                         , integrationTestPreviews = model.integrationTestPreviews
                                         , cursorPositions = model.cursorPositions
                                         , fieldSuggestions = TypeHintTestResponse.getSuggestedItemProperties (String.fromMaybe data.responseListField) responseData
@@ -2459,7 +2456,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                         , showPreviewMsg = wrapMsg << TestIntegrationPreview integrationUuid
                                         , showTemplateMsg = wrapMsg << ShowHideMarkdownPreview False
                                         , entityUuid = integrationUuid
-                                        , markdownPreviews = model.markdownPreviews
+                                        , editorPreviews = model.editorPreviews
                                         , integrationTestPreviews = model.integrationTestPreviews
                                         , cursorPositions = model.cursorPositions
                                         , fieldSuggestions = TypeHintTestResponse.getSuggestedItemProperties (String.fromMaybe data.responseListField) responseData
@@ -2472,7 +2469,7 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                         { identifier = "responseAdvancedConfiguration"
                                         , openLabel = gettext "Advanced Response Configuration" appState.locale
                                         , content = responseAdvancedConfigurationContent
-                                        , markdownPreviews = model.markdownPreviews
+                                        , markdownPreviews = model.editorPreviews
                                         , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                                         , entityUuid = integrationUuid
                                         }
@@ -2676,7 +2673,6 @@ viewAnswerEditor { appState, wrapMsg, eventMsg, model, editorContext } answer =
                 , onInput = createEditEvent setAdvice << String.toMaybe
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = answer.uuid
-                , markdownPreviews = model.markdownPreviews
                 }
 
         followUpsInput =
@@ -3158,7 +3154,7 @@ viewResourceCollectionEditor { appState, wrapMsg, eventMsg, model, editorContext
 
 
 viewResourcePageEditor : EditorConfig msg -> ResourcePage -> Html msg
-viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorContext } resourcePage =
+viewResourcePageEditor { appState, wrapMsg, eventMsg, editorContext } resourcePage =
     let
         parentUuid =
             EditorContext.getParentUuid resourcePage.uuid editorContext
@@ -3199,7 +3195,6 @@ viewResourcePageEditor { appState, wrapMsg, eventMsg, model, editorContext } res
                 , onInput = createEditEvent setContent
                 , previewMsg = compose2 wrapMsg ShowHideMarkdownPreview
                 , entityUuid = resourcePage.uuid
-                , markdownPreviews = model.markdownPreviews
                 }
 
         annotationsInput =

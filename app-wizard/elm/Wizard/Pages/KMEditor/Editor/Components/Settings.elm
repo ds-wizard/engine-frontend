@@ -14,6 +14,7 @@ import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Page as Page
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
@@ -97,7 +98,9 @@ update cfg appState msg model =
                     ( { model | savingKMEditor = ActionResult.Loading }, cmd )
 
                 _ ->
-                    ( { model | form = Form.update (KnowledgeModelEditorEditForm.validation appState) formMsg model.form }, Cmd.none )
+                    ( { model | form = Form.update (KnowledgeModelEditorEditForm.validation appState) formMsg model.form }
+                    , FormUtils.scrollToInvalidField formMsg
+                    )
 
         FormSetVersion version ->
             let

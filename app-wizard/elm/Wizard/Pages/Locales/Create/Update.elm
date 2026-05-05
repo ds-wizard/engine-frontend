@@ -2,6 +2,7 @@ module Wizard.Pages.Locales.Create.Update exposing (update)
 
 import ActionResult
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Locale as Locale
 import Common.Ports.Window as Window
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -150,7 +151,7 @@ handleForm formMsg wrapMsg appState model =
                 newModel =
                     { model | form = Form.update (LocaleCreateForm.validation appState) formMsg model.form }
             in
-            ( newModel, Cmd.none )
+            ( newModel, FormUtils.scrollToInvalidField formMsg )
 
 
 handleCreateCompleted : AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )

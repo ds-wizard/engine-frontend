@@ -165,19 +165,28 @@ subscriptions model =
 
 view : AppState -> QuestionnaireViewSettings -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List ProjectTodo -> List QuestionnaireWarning -> Model -> Html Msg
 view appState viewSettings rightPanel questionnaire todos warnings model =
+    let
+        toolbarViewFlags =
+            ToolbarViewFlags.toInt
+                { todosVisible = Feature.projectTodos appState questionnaire
+                , commentsVisible = Feature.projectCommentAdd appState questionnaire
+                , versionHistoryVisible = Feature.projectVersionHistory appState questionnaire
+                , importersVisible = Feature.projectToolbarImporters appState questionnaire
+                }
+    in
     div [ class "questionnaireToolbar" ]
-        [ viewToolbarLeft appState.locale viewSettings model
-        , viewToolbarRight appState rightPanel questionnaire todos warnings
+        [ viewToolbarLeft appState.locale viewSettings model toolbarViewFlags
+        , viewToolbarRight appState rightPanel questionnaire todos warnings toolbarViewFlags
         ]
 
 
-viewToolbarLeft : Gettext.Locale -> QuestionnaireViewSettings -> Model -> Html Msg
-viewToolbarLeft locale viewSettings model =
-    Lazy.lazy3 viewToolbarLeftLazy locale viewSettings model
+viewToolbarLeft : Gettext.Locale -> QuestionnaireViewSettings -> Model -> Int -> Html Msg
+viewToolbarLeft locale viewSettings model toolbarViewFlags =
+    Lazy.lazy4 viewToolbarLeftLazy locale viewSettings model toolbarViewFlags
 
 
-viewToolbarLeftLazy : Gettext.Locale -> QuestionnaireViewSettings -> Model -> Html Msg
-viewToolbarLeftLazy locale viewSettings model =
+viewToolbarLeftLazy : Gettext.Locale -> QuestionnaireViewSettings -> Model -> Int -> Html Msg
+viewToolbarLeftLazy locale viewSettings model toolbarViewFlags =
     let
         viewDropdown =
             let
@@ -249,7 +258,7 @@ viewToolbarLeftLazy locale viewSettings model =
                 [ text connector.name ]
 
         pluginImportersDropdown =
-            Html.viewIf (not (List.isEmpty model.pluginImporters)) <|
+            Html.viewIf (ToolbarViewFlags.importersVisible toolbarViewFlags && not (List.isEmpty model.pluginImporters)) <|
                 div [ class "item-group" ]
                     [ Dropdown.dropdown model.pluginImportersDropdownState
                         { options = []
@@ -290,8 +299,8 @@ viewToolbarLeftLazy locale viewSettings model =
         ]
 
 
-viewToolbarRight : AppState -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List ProjectTodo -> List QuestionnaireWarning -> Html Msg
-viewToolbarRight appState rightPanel questionnaire todos warnings =
+viewToolbarRight : AppState -> QuestionnaireRightPanel -> ProjectQuestionnaire -> List ProjectTodo -> List QuestionnaireWarning -> Int -> Html Msg
+viewToolbarRight appState rightPanel questionnaire todos warnings toolbarViewFlags =
     let
         warningsLength =
             List.length warnings
@@ -304,13 +313,6 @@ viewToolbarRight appState rightPanel questionnaire todos warnings =
 
         isFullScreen =
             AppState.isFullscreen appState
-
-        toolbarViewFlags =
-            ToolbarViewFlags.toInt
-                { todosVisible = Feature.projectTodos appState questionnaire
-                , commentsVisible = Feature.projectCommentAdd appState questionnaire
-                , versionHistoryVisible = Feature.projectVersionHistory appState questionnaire
-                }
     in
     Lazy.lazy7 viewToolbarRightLazy
         appState.locale

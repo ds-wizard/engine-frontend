@@ -13,6 +13,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
+import Common.Ports.FormUtils as FormUtils
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Gettext exposing (gettext)
@@ -91,7 +92,7 @@ update cfg appState msg model =
 
                 _ ->
                     ( { model | kmEditorUpgradeForm = Form.update KnowledgeModelEditorUpgradeForm.validation formMsg model.kmEditorUpgradeForm }
-                    , Cmd.none
+                    , FormUtils.scrollToInvalidField formMsg
                     )
 
         UpgradeComplete result ->

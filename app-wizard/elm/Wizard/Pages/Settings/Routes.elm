@@ -22,10 +22,14 @@ type Route
     | UsageRoute
 
 
-defaultRoute : Bool -> Route
-defaultRoute adminEnabled =
+defaultRoute : Bool -> Bool -> Route
+defaultRoute adminEnabled pluginsAvailable =
     if adminEnabled then
-        DashboardAndLoginScreenRoute
+        if pluginsAvailable then
+            PluginsRoute
+
+        else
+            DashboardAndLoginScreenRoute
 
     else
         OrganizationRoute

@@ -72,6 +72,7 @@ type alias UpdateConfig msg =
     { lastSeenId : Maybe String
     , setLastSeenMsg : String -> msg
     , wrapMsg : Msg -> msg
+    , dashboardTourActive : Bool
     }
 
 
@@ -85,7 +86,7 @@ update cfg msg model =
                         wasLastNewsSeen =
                             Maybe.isJust cfg.lastSeenId && (cfg.lastSeenId == Maybe.map .id (List.head newsList))
                     in
-                    ( { model | news = ActionResult.Success newsList, closed = wasLastNewsSeen }, Cmd.none )
+                    ( { model | news = ActionResult.Success newsList, closed = wasLastNewsSeen || cfg.dashboardTourActive }, Cmd.none )
 
                 Err _ ->
                     ( { model | news = ActionResult.Error "" }, Cmd.none )
@@ -119,6 +120,9 @@ update cfg msg model =
 view : Gettext.Locale -> Model -> Html Msg
 view locale model =
     let
+        visible =
+            ActionResult.isSuccess model.news && not model.closed
+
         ( modalContent, shortcuts ) =
             case model.news of
                 ActionResult.Success newsList ->
@@ -178,8 +182,8 @@ view locale model =
                                     ]
                               ]
                             , []
-                                |> List.insertIf prevShortcut hasPrev
-                                |> List.insertIf nextShortcut hasNext
+                                |> List.insertIf prevShortcut (visible && hasPrev)
+                                |> List.insertIf nextShortcut (visible && hasNext)
                             )
 
                 _ ->
@@ -187,7 +191,7 @@ view locale model =
 
         modalConfig =
             { modalContent = modalContent
-            , visible = ActionResult.isSuccess model.news && not model.closed
+            , visible = visible
             , enterMsg = Just (SetClosed True)
             , escMsg = Just (SetClosed True)
             , dataCy = "news_modal"

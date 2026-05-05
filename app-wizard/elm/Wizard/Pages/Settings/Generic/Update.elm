@@ -7,6 +7,7 @@ module Wizard.Pages.Settings.Generic.Update exposing
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -133,5 +134,5 @@ handleForm props formMsg wrapMsg appState model =
                 | form = form
                 , formRemoved = formRemoved
               }
-            , Cmd.none
+            , FormUtils.scrollToInvalidField formMsg
             )

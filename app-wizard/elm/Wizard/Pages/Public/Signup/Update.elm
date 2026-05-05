@@ -2,6 +2,7 @@ module Wizard.Pages.Public.Signup.Update exposing (update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Ports.FormUtils as FormUtils
 import Common.Utils.Form as Form
 import Form
 import Gettext exposing (gettext)
@@ -46,7 +47,7 @@ handleForm formMsg wrapMsg appState model =
                 newModel =
                     { model | form = Form.update (SignupForm.validation appState) formMsg model.form }
             in
-            ( newModel, Cmd.none )
+            ( newModel, FormUtils.scrollToInvalidField formMsg )
 
 
 handlePostSignupCompleted : AppState -> Result ApiError () -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

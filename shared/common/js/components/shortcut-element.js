@@ -19,7 +19,20 @@ export class ShortcutElement extends HTMLElement {
                 .map(({ name, ctrl, meta, baseKey }) => {
                     const isSubmitShortcut = (ctrl === true || meta === true) && baseKey?.toLowerCase() === 'enter'
 
-                    if (!isSubmitShortcut && event.target instanceof HTMLTextAreaElement) {
+                    // If the key event comes from an editable area (textarea, input or
+                    // contenteditable element), don't intercept it unless it's a submit
+                    // shortcut (ctrl/meta+Enter). This avoids preventing default
+                    // behavior in rich text editors and other editable fields.
+                    let targetElement = event.target
+                    // If the target is a text node, try to get a parent element
+                    if (targetElement && targetElement.nodeType && targetElement.nodeType === Node.TEXT_NODE) {
+                        targetElement = targetElement.parentElement
+                    }
+
+                    const isInputElement = event.target instanceof HTMLTextAreaElement || event.target instanceof HTMLInputElement
+                    const isInContentEditable = targetElement && (targetElement.isContentEditable || (typeof targetElement.closest === 'function' && !!targetElement.closest('[contenteditable="true"]')))
+
+                    if (!isSubmitShortcut && (isInputElement || isInContentEditable)) {
                         return
                     }
 

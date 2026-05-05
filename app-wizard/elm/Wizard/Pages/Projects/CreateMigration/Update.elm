@@ -3,6 +3,7 @@ module Wizard.Pages.Projects.CreateMigration.Update exposing (fetchData, update)
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.TypeHintInput as TypeHintInput
+import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
 import Common.Utils.CmdUtils exposing (withNoCmd)
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -191,10 +192,12 @@ handleForm wrapMsg formMsg appState model =
                         )
 
                     else
-                        ( newModel, Cmd.none )
+                        ( newModel, FormUtils.scrollToInvalidField formMsg )
 
                 Nothing ->
-                    ( { newModel | knowledgeModelPreview = Unset, selectedTags = [] }, Cmd.none )
+                    ( { newModel | knowledgeModelPreview = Unset, selectedTags = [] }
+                    , FormUtils.scrollToInvalidField formMsg
+                    )
 
 
 handleSelectPackage : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> KnowledgeModelPackageSuggestion -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -24,6 +24,10 @@ toServerError error =
         BadStatus 403 _ ->
             Just ServerError.ForbiddenError
 
+        BadStatus 429 response ->
+            Result.toMaybe <|
+                decodeString ServerError.tooManyRequestsErrorDecoder response
+
         BadStatus 500 _ ->
             Nothing
 
@@ -61,6 +65,9 @@ toActionResult appState defaultMessage error =
 
                 ServerError.ForbiddenError ->
                     Error (ServerError.forbiddenMessage appState)
+
+                ServerError.TooManyRequestsError retryAfter ->
+                    Error (ServerError.tooManyRequestsMessage appState retryAfter)
 
                 _ ->
                     Error defaultMessage

@@ -18,6 +18,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FontAwesome exposing (fa, faDelete)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
+import Common.Ports.FormUtils as FormUtils
 import Common.Utils.Form as Form
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -183,7 +184,10 @@ update cfg appState msg model =
                         )
 
                 Nothing ->
-                    wrap { model | form = Form.update (DocumentTemplateForm.validation appState) Form.Submit model.form }
+                    withSeed
+                        ( { model | form = Form.update (DocumentTemplateForm.validation appState) Form.Submit model.form }
+                        , FormUtils.scrollToInvalidField Form.Submit
+                        )
 
         PutTemplateCompleted result ->
             case result of
