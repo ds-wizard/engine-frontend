@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.ResourcePage exposing
     ( ResourcePage
     , decoder
+    , equalContent
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -23,3 +24,9 @@ decoder =
         |> D.required "title" D.string
         |> D.required "content" D.string
         |> D.required "annotations" (D.list Annotation.decoder)
+
+
+equalContent : ResourcePage -> ResourcePage -> Bool
+equalContent resourcePage1 resourcePage2 =
+    (resourcePage1.title == resourcePage2.title)
+        && (resourcePage1.content == resourcePage2.content)

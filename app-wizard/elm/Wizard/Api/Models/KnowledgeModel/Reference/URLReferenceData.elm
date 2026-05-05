@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Reference.URLReferenceData exposing
     ( URLReferenceData
     , decoder
+    , equalContent
     , toLabel
     )
 
@@ -33,3 +34,9 @@ toLabel data =
 
     else
         data.label
+
+
+equalContent : URLReferenceData -> URLReferenceData -> Bool
+equalContent data1 data2 =
+    (data1.url == data2.url)
+        && (data1.label == data2.label)

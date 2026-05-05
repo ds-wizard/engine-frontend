@@ -1,0 +1,30 @@
+$sidebarWidth: 30rem;
+
+.kmComparison {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex: 1;
+
+  &__content {
+    flex: 1;
+    padding: $spacer-2;
+    //height: 100%;
+    overflow: auto;
+    min-height: 0;
+
+    a {
+      color: inherit !important;
+    }
+  }
+
+  &__sidePanel {
+    background: $gray-100;
+    width: $sidebarWidth;
+    flex: 0 0 $sidebarWidth;
+    border-left: 1px solid $gray-400;
+    padding: $spacer-3 $spacer-4;
+    overflow: auto;
+    min-height: 0;
+  }
+}

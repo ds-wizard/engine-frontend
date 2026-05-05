@@ -31,6 +31,7 @@ module Common.Components.FontAwesome exposing
     , faKmAnswer
     , faKmChapter
     , faKmChoice
+    , faKmCompare
     , faKmDetailCreateKmEditor
     , faKmDetailCreateQuestionnaire
     , faKmDetailFork
@@ -353,6 +354,11 @@ faKmChapter =
 faKmChoice : Html msg
 faKmChoice =
     far "fa-check-square"
+
+
+faKmCompare : Html msg
+faKmCompare =
+    fas "fa-table-columns"
 
 
 faKmDetailCreateKmEditor : Html msg

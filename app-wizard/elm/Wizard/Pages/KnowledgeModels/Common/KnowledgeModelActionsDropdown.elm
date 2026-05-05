@@ -7,7 +7,7 @@ module Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposin
     )
 
 import Bootstrap.Dropdown as Dropdown
-import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faKmSetPrivate, faKmSetPublic, faOpen, faPreview)
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmCompare, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faKmSetPrivate, faKmSetPublic, faOpen, faPreview)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Uuid exposing (Uuid)
@@ -81,6 +81,18 @@ actions appState cfg kmPackage =
 
         exportActionVisible =
             Feature.knowledgeModelsExport appState && not kmPackage.nonEditable
+
+        compareAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faKmCompare
+                , label = gettext "Compare" appState.locale
+                , msg = ListingActionLink (Routes.knowledgeModelsCompare (Just kmPackage.uuid))
+                , dataCy = "compare"
+                }
+
+        compareActionVisible =
+            Feature.knowledgeModelsView appState && not kmPackage.nonEditable
 
         createEditorAction =
             ListingDropdown.dropdownAction
@@ -182,6 +194,7 @@ actions appState cfg kmPackage =
             [ [ ( viewAction, viewActionVisible )
               , ( previewAction, previewActionVisible )
               , ( exportAction, exportActionVisible )
+              , ( compareAction, compareActionVisible )
               ]
             , [ ( createEditorAction, createEditorActionVisible )
               , ( forkAction, forkActionVisible )

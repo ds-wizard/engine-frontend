@@ -1,5 +1,6 @@
 module Wizard.Pages.KnowledgeModels.Msgs exposing (Msg(..))
 
+import Wizard.Pages.KnowledgeModels.Compare.Msgs
 import Wizard.Pages.KnowledgeModels.Detail.Msgs
 import Wizard.Pages.KnowledgeModels.Import.Msgs
 import Wizard.Pages.KnowledgeModels.Index.Msgs
@@ -13,3 +14,4 @@ type Msg
     | IndexMsg Wizard.Pages.KnowledgeModels.Index.Msgs.Msg
     | PreviewMsg Wizard.Pages.KnowledgeModels.Preview.Msgs.Msg
     | ResourcePageMsg Wizard.Pages.KnowledgeModels.ResourcePage.Msgs.Msg
+    | CompareMsg Wizard.Pages.KnowledgeModels.Compare.Msgs.Msg

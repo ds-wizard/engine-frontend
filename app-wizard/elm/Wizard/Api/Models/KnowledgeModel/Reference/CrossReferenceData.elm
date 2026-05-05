@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Reference.CrossReferenceData exposing
     ( CrossReferenceData
     , decoder
+    , equalContent
     , toLabel
     )
 
@@ -36,3 +37,9 @@ toLabel questions data =
 
         Nothing ->
             ""
+
+
+equalContent : CrossReferenceData -> CrossReferenceData -> Bool
+equalContent data1 data2 =
+    (data1.targetUuid == data2.targetUuid)
+        && (data1.description == data2.description)

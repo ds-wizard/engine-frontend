@@ -10,3 +10,4 @@ type Route
     | IndexRoute PaginationQueryString
     | PreviewRoute Uuid (Maybe String)
     | ResourcePageRoute Uuid String
+    | CompareRoute (Maybe Uuid)

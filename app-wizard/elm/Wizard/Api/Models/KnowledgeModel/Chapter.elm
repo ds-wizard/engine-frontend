@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Chapter exposing
     ( Chapter
     , addQuestionUuid
     , decoder
+    , equalContent
     , removeQuestionUuid
     )
 
@@ -37,3 +38,9 @@ addQuestionUuid questionUuid chapter =
 removeQuestionUuid : String -> Chapter -> Chapter
 removeQuestionUuid questionUuid chapter =
     { chapter | questionUuids = List.filter ((/=) questionUuid) chapter.questionUuids }
+
+
+equalContent : Chapter -> Chapter -> Bool
+equalContent chapter1 chapter2 =
+    (chapter1.title == chapter2.title)
+        && (chapter1.text == chapter2.text)

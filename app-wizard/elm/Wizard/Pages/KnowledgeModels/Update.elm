@@ -3,6 +3,7 @@ module Wizard.Pages.KnowledgeModels.Update exposing (fetchData, update)
 import Random exposing (Seed)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
+import Wizard.Pages.KnowledgeModels.Compare.Update
 import Wizard.Pages.KnowledgeModels.Detail.Update
 import Wizard.Pages.KnowledgeModels.Import.Update
 import Wizard.Pages.KnowledgeModels.Index.Update
@@ -31,6 +32,10 @@ fetchData route appState =
         ResourcePageRoute kmId _ ->
             Cmd.map ResourcePageMsg <|
                 Wizard.Pages.KnowledgeModels.ResourcePage.Update.fetchData appState kmId
+
+        CompareRoute mbLeftKmUuid ->
+            Cmd.map CompareMsg <|
+                Wizard.Pages.KnowledgeModels.Compare.Update.fetchData appState mbLeftKmUuid
 
         _ ->
             Cmd.none
@@ -73,3 +78,10 @@ update msg wrapMsg appState model =
                     Wizard.Pages.KnowledgeModels.ResourcePage.Update.update appState rpMsg model.resourcePageModel
             in
             ( appState.seed, { model | resourcePageModel = resourcePageModel }, cmd )
+
+        CompareMsg cMsg ->
+            let
+                ( compareModel, cmd ) =
+                    Wizard.Pages.KnowledgeModels.Compare.Update.update appState (wrapMsg << CompareMsg) cMsg model.compareModel
+            in
+            ( appState.seed, { model | compareModel = compareModel }, cmd )

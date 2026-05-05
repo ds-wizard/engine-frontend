@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Answer exposing
     ( Answer
     , addFollowUpUuid
     , decoder
+    , equalContent
     , removeFollowUpUuid
     )
 
@@ -40,3 +41,10 @@ addFollowUpUuid questionUuid answer =
 removeFollowUpUuid : String -> Answer -> Answer
 removeFollowUpUuid questionUuid answer =
     { answer | followUpUuids = List.filter ((/=) questionUuid) answer.followUpUuids }
+
+
+equalContent : Answer -> Answer -> Bool
+equalContent answer1 answer2 =
+    (answer1.label == answer2.label)
+        && (answer1.advice == answer2.advice)
+        && (answer1.metricMeasures == answer2.metricMeasures)
