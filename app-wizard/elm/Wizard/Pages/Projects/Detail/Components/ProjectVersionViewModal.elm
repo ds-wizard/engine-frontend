@@ -124,7 +124,12 @@ update appState msg model =
             initQuestionnaireModel <|
                 case result of
                     Ok questionnaire ->
-                        ( { model | projectQuestionnaire = Success questionnaire.data }, Cmd.none )
+                        ( { model
+                            | projectQuestionnaire = Success questionnaire.data
+                            , projectCommon = Success questionnaire.common
+                          }
+                        , Cmd.none
+                        )
 
                     Err error ->
                         ( { model | projectQuestionnaire = ApiError.toActionResult appState "Unable to fetch questionnaire." error }
