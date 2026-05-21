@@ -100,7 +100,11 @@ createMigrationView appState model project =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage project.knowledgeModelPackage))
+                    (div [ class "typehint-input" ]
+                        [ div [ class "typehint-input-value form-control cursor-default" ]
+                            [ TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage project.knowledgeModelPackage) ]
+                        ]
+                    )
                     (gettext "Original Knowledge Model" appState.locale)
                 , FormGroup.codeView (Version.toString project.knowledgeModelPackage.version) (gettext "Original Version" appState.locale)
                 , originalTagList
