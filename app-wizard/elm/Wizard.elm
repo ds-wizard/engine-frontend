@@ -16,6 +16,7 @@ import Wizard.Models exposing (Model, initLocalModel, initialModel, userLoggedIn
 import Wizard.Msgs exposing (Msg)
 import Wizard.Pages.KnowledgeModels.Routes as KnowledgeModelsRoute
 import Wizard.Pages.Projects.Routes as ProjectsRoutes
+import Wizard.Pages.Public.Routes as PublicRoutes
 import Wizard.Ports.Session as Session
 import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate, routeIfAllowed, toUrl)
@@ -94,6 +95,9 @@ decideInitialRoute model location route originalRoute =
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
+                ( _, PublicRoutes.OpenIdCallback _ _ _ _ ) ->
+                    dispatchUrlChange
+
                 ( True, _ ) ->
                     cmdNavigate model.appState Routes.DashboardRoute
 

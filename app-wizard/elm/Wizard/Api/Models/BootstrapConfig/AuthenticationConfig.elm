@@ -24,6 +24,7 @@ type alias AuthenticationConfig =
 type alias Internal =
     { registration : SimpleFeatureConfig
     , twoFactorAuth : TwoFactorAuthConfig
+    , nonAdminLoginEnabled : Bool
     }
 
 
@@ -37,6 +38,7 @@ default =
     , internal =
         { registration = SimpleFeatureConfig.init True
         , twoFactorAuth = TwoFactorAuthConfig.default
+        , nonAdminLoginEnabled = True
         }
     , external = { services = [] }
     }
@@ -55,6 +57,7 @@ internalDecoder =
     D.succeed Internal
         |> D.required "registration" SimpleFeatureConfig.decoder
         |> D.required "twoFactorAuth" TwoFactorAuthConfig.decoder
+        |> D.required "nonAdminLoginEnabled" D.bool
 
 
 externalDecoder : Decoder External

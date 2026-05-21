@@ -10,6 +10,7 @@ import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
+import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
 import Wizard.Pages.Users.Edit.Components.PluginSettings as PluginSettings
@@ -23,6 +24,7 @@ type alias Model =
     { uuidOrCurrent : UuidOrCurrent
     , profileModel : Profile.Model
     , passwordModel : Password.Model
+    , connectedAccountsModel : ConnectedAccounts.Model
     , languageModel : Language.Model
     , toursModel : Tours.Model
     , apiKeysModel : ApiKeys.Model
@@ -38,6 +40,7 @@ initialModel appState uuidOrEmpty =
     { uuidOrCurrent = uuidOrEmpty
     , profileModel = Profile.initialModel uuidOrEmpty
     , passwordModel = Password.initialModel appState uuidOrEmpty
+    , connectedAccountsModel = ConnectedAccounts.initialModel
     , languageModel = Language.initialModel
     , toursModel = Tours.initialModel
     , apiKeysModel = ApiKeys.initialModel uuidOrEmpty
@@ -58,6 +61,9 @@ initLocalModel appState userEditRoute uuidOrCurrent model =
 
                 UserEditRoute.Password ->
                     { model | passwordModel = Password.initialModel appState uuidOrCurrent }
+
+                UserEditRoute.ConnectedAccounts ->
+                    { model | connectedAccountsModel = ConnectedAccounts.initialModel }
 
                 UserEditRoute.Language ->
                     { model | languageModel = Language.initialModel }

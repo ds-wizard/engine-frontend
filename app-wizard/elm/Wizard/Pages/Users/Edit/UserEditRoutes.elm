@@ -6,6 +6,7 @@ import Uuid exposing (Uuid)
 type UserEditRoute
     = Profile
     | Password
+    | ConnectedAccounts
     | Language
     | Tours
     | ApiKeys

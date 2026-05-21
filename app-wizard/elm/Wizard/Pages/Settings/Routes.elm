@@ -10,6 +10,9 @@ import Uuid exposing (Uuid)
 type Route
     = OrganizationRoute
     | AuthenticationRoute
+    | OpenIdRoute
+    | OpenIdCreateRoute
+    | OpenIdDetailRoute Uuid
     | PrivacyAndSupportRoute
     | FeaturesRoute
     | PluginsRoute

@@ -3,6 +3,7 @@ module Wizard.Api.Models.TokenResponse exposing
     , decoder
     )
 
+import Common.Api.Models.UserFromExternal as UserFromExternal exposing (UserFromExternal)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
@@ -13,6 +14,9 @@ type TokenResponse
     = Token String Time.Posix
     | CodeRequired
     | ConsentsRequired String
+    | IdentityLinked
+    | CompleteRegistrationRequired UserFromExternal
+    | EmailVerificationRequired
 
 
 decoder : Decoder TokenResponse
@@ -32,6 +36,15 @@ decoder =
                     "ConsentsRequired" ->
                         D.succeed ConsentsRequired
                             |> D.required "hash" D.string
+
+                    "IdentityLinked" ->
+                        D.succeed IdentityLinked
+
+                    "CompleteRegistrationRequired" ->
+                        D.map CompleteRegistrationRequired UserFromExternal.decoder
+
+                    "EmailVerificationRequired" ->
+                        D.succeed EmailVerificationRequired
 
                     _ ->
                         D.fail <| "Unexpected token response type " ++ type_

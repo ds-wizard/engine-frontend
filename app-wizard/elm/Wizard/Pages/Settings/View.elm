@@ -12,6 +12,9 @@ import Wizard.Pages.Settings.Features.View
 import Wizard.Pages.Settings.LookAndFeel.View
 import Wizard.Pages.Settings.Models exposing (Model)
 import Wizard.Pages.Settings.Msgs exposing (Msg(..))
+import Wizard.Pages.Settings.OpenId.View
+import Wizard.Pages.Settings.OpenIdCreate.View
+import Wizard.Pages.Settings.OpenIdDetail.View
 import Wizard.Pages.Settings.Organization.View
 import Wizard.Pages.Settings.PluginSettings.View
 import Wizard.Pages.Settings.Plugins.View
@@ -38,6 +41,18 @@ view route appState model =
                 AuthenticationRoute ->
                     Html.map AuthenticationMsg <|
                         Wizard.Pages.Settings.Authentication.View.view appState model.authenticationModel
+
+                OpenIdRoute ->
+                    Html.map OpenIdMsg <|
+                        Wizard.Pages.Settings.OpenId.View.view appState model.openIdModel
+
+                OpenIdCreateRoute ->
+                    Html.map OpenIdCreateMsg <|
+                        Wizard.Pages.Settings.OpenIdCreate.View.view appState model.openIdCreateModel
+
+                OpenIdDetailRoute _ ->
+                    Html.map OpenIdDetailMsg <|
+                        Wizard.Pages.Settings.OpenIdDetail.View.view appState model.openIdDetailModel
 
                 PrivacyAndSupportRoute ->
                     Html.map PrivacyAndSupportMsg <|
@@ -129,6 +144,7 @@ navigationSystemLinks appState =
             else
                 [ ( OrganizationRoute, gettext "Organization" appState.locale, (==) OrganizationRoute )
                 , ( AuthenticationRoute, gettext "Authentication" appState.locale, (==) AuthenticationRoute )
+                , ( OpenIdRoute, gettext "OpenID" appState.locale, (==) OpenIdRoute )
                 , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale, (==) PrivacyAndSupportRoute )
                 , ( FeaturesRoute, gettext "Features" appState.locale, (==) FeaturesRoute )
                 ]

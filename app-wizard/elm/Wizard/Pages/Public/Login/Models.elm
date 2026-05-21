@@ -10,6 +10,7 @@ type alias Model =
     , loggingIn : ActionResult String
     , originalUrl : Maybe String
     , codeRequired : Bool
+    , adminLoginVisible : Bool
     }
 
 
@@ -21,4 +22,5 @@ initialModel mbOriginalUrl =
     , loggingIn = Unset
     , originalUrl = mbOriginalUrl
     , codeRequired = False
+    , adminLoginVisible = False
     }

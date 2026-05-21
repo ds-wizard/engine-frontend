@@ -12,7 +12,6 @@ import ActionResult exposing (ActionResult)
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (fa, faInfo)
-import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
@@ -35,7 +34,6 @@ import Maybe.Extra as Maybe
 import Wizard.Api.Models.BootstrapConfig.Admin as Admin
 import Wizard.Api.Models.User as User exposing (User)
 import Wizard.Api.Users as UsersApi
-import Wizard.Components.ExternalLoginButton as ExternalLoginButton
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Common.UserEditForm as UserEditForm exposing (UserEditForm)
 
@@ -175,7 +173,7 @@ userView appState model user =
 
             else
                 Html.map EditFormMsg <|
-                    userFormView appState model user (UuidOrCurrent.isCurrent model.uuidOrCurrent)
+                    userFormView appState model (UuidOrCurrent.isCurrent model.uuidOrCurrent)
     in
     div []
         [ Page.header (gettext "Profile" appState.locale) []
@@ -194,8 +192,8 @@ userView appState model user =
         ]
 
 
-userFormView : AppState -> Model -> User -> Bool -> Html Form.Msg
-userFormView appState model user isCurrent =
+userFormView : AppState -> Model -> Bool -> Html Form.Msg
+userFormView appState model isCurrent =
     let
         roleSelect =
             if isCurrent then
@@ -214,7 +212,6 @@ userFormView appState model user isCurrent =
     Html.form [ onSubmit Form.Submit, class "col-8" ]
         [ FormResult.view model.savingUser
         , FormGroup.input appState.locale model.userForm "email" <| gettext "Email" appState.locale
-        , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState.locale appState.config) user.sources)
         , FormGroup.input appState.locale model.userForm "firstName" <| gettext "First name" appState.locale
         , FormGroup.input appState.locale model.userForm "lastName" <| gettext "Last name" appState.locale
         , FormGroup.inputWithTypehints appState.config.organization.affiliations appState.locale model.userForm "affiliation" <| gettext "Affiliation" appState.locale
@@ -247,7 +244,6 @@ readOnlyView appState user =
     div [ class "col-8" ]
         [ readOnlyInfo
         , FormGroup.readOnlyInput user.email (gettext "Email" appState.locale)
-        , FormExtra.blockAfter (List.map (ExternalLoginButton.badgeWrapper appState.locale appState.config) user.sources)
         , FormGroup.readOnlyInput user.firstName (gettext "First name" appState.locale)
         , FormGroup.readOnlyInput user.lastName (gettext "Last name" appState.locale)
         , FormGroup.readOnlyInput (Maybe.withDefault "" user.affiliation) (gettext "Affiliation" appState.locale)
