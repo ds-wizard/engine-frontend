@@ -24,6 +24,6 @@ validation =
 encode : ForgottenTokenForm -> E.Value
 encode form =
     E.object
-        [ ( "type", E.string "ForgottenTokenActionKey" )
+        [ ( "type", E.string "ForgottenTokenUserEmailLinkType" )
         , ( "email", E.string form.email )
         ]

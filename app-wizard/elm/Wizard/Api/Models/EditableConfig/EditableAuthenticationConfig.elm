@@ -23,6 +23,8 @@ type alias Internal =
     { registration : SimpleFeatureConfig
     , twoFactorAuth : EditableTwoFactorAuthConfig
     , nonAdminLoginEnabled : Bool
+    , sessionExpiration : Int
+    , userEmailLinkExpiration : Int
     }
 
 
@@ -39,6 +41,8 @@ internalDecoder =
         |> D.required "registration" SimpleFeatureConfig.decoder
         |> D.required "twoFactorAuth" EditableTwoFactorAuthConfig.decoder
         |> D.required "nonAdminLoginEnabled" D.bool
+        |> D.required "sessionExpiration" D.int
+        |> D.required "userEmailLinkExpiration" D.int
 
 
 encode : EditableAuthenticationConfig -> E.Value
@@ -55,4 +59,6 @@ encodeInternal internal =
         [ ( "registration", SimpleFeatureConfig.encode internal.registration )
         , ( "twoFactorAuth", EditableTwoFactorAuthConfig.encode internal.twoFactorAuth )
         , ( "nonAdminLoginEnabled", E.bool internal.nonAdminLoginEnabled )
+        , ( "sessionExpiration", E.int internal.sessionExpiration )
+        , ( "userEmailLinkExpiration", E.int internal.userEmailLinkExpiration )
         ]

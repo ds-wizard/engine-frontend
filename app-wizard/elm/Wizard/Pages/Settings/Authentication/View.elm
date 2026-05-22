@@ -60,6 +60,10 @@ formView appState form =
             , FormGroup.toggle form "twoFactorAuthEnabled" (gettext "Two-Factor Authentication" appState.locale)
             , FormExtra.mdAfter (gettext "If enabled, users first enter a username and password at login, and then they receive a one-time code to confirm the login on their email." appState.locale)
             , twoFactorInputs
+            , FormGroup.hours appState.locale form "sessionExpiration" (gettext "Session expiration" appState.locale)
+            , FormExtra.mdAfter (gettext "Expiration time of the user session in **hours**." appState.locale)
+            , FormGroup.hours appState.locale form "userEmailLinkExpiration" (gettext "User email link expiration" appState.locale)
+            , FormExtra.mdAfter (gettext "Expiration time of user email links (e.g., password reset, email confirmation) in **hours**." appState.locale)
             ]
     in
     div [ class "Authentication" ]

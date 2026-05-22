@@ -409,6 +409,9 @@ messageToReadable appState message =
         "error.service.token.account_is_not_activated" ->
             Just <| gettext "The account is not activated." appState.locale
 
+        "error.service.user_email_link.expired" ->
+            Just <| gettext "The link has expired." appState.locale
+
         "error.service.user.required_admin_role_or_hash_in_query_params" ->
             Just <| gettext "A hash query param has to be provided." appState.locale
 

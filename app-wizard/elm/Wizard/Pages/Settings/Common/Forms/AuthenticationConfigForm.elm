@@ -22,6 +22,8 @@ type alias AuthenticationConfigForm =
     , twoFactorAuthEnabled : Bool
     , twoFactorAuthCodeLength : Int
     , twoFactorAuthExpiration : Int
+    , sessionExpiration : Int
+    , userEmailLinkExpiration : Int
     }
 
 
@@ -44,6 +46,8 @@ validation =
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool)
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool |> V.ifElse "twoFactorAuthCodeLength" V.int V.optionalInt)
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool |> V.ifElse "twoFactorAuthExpiration" V.int V.optionalInt)
+        |> V.andMap (V.field "sessionExpiration" V.int)
+        |> V.andMap (V.field "userEmailLinkExpiration" V.int)
 
 
 configToFormInitials : EditableAuthenticationConfig -> List ( String, Field )
@@ -54,6 +58,8 @@ configToFormInitials config =
     , ( "twoFactorAuthEnabled", Field.bool config.internal.twoFactorAuth.enabled )
     , ( "twoFactorAuthCodeLength", Field.string (String.fromInt config.internal.twoFactorAuth.codeLength) )
     , ( "twoFactorAuthExpiration", Field.string (String.fromInt config.internal.twoFactorAuth.expiration) )
+    , ( "sessionExpiration", Field.string (String.fromInt config.internal.sessionExpiration) )
+    , ( "userEmailLinkExpiration", Field.string (String.fromInt config.internal.userEmailLinkExpiration) )
     ]
 
 
@@ -68,5 +74,7 @@ toEditableAuthConfig form =
             , codeLength = form.twoFactorAuthCodeLength
             , expiration = form.twoFactorAuthExpiration
             }
+        , sessionExpiration = form.sessionExpiration
+        , userEmailLinkExpiration = form.userEmailLinkExpiration
         }
     }
