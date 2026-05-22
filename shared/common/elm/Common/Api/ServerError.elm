@@ -241,6 +241,15 @@ messageToReadable appState message =
         "error.validation.km_id_uniqueness" ->
             Just <| gettext "Knowledge model ID is already used." appState.locale
 
+        "error.validation.logo_size_limit" ->
+            Just <|
+                case List.head message.params of
+                    Just limitValue ->
+                        String.format (gettext "Logo file size cannot exceed %s." appState.locale) [ limitValue ]
+
+                    Nothing ->
+                        gettext "Logo file size exceeds the limit." appState.locale
+
         "error.validation.pkg_id_uniqueness" ->
             Just <| gettext "Knowledge model already exists." appState.locale
 
