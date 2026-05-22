@@ -29,10 +29,11 @@ import Common.Utils.ShortcutUtils as Shortcut
 import Compose exposing (compose2)
 import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, div, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class, classList)
 import Html.Attributes.Extensions exposing (dataTour)
 import Html.Extra as Html
+import Html.Keyed
 import Json.Decode as D
 import Json.Encode as E
 import List.Extra as List
@@ -65,6 +66,7 @@ import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (
 import Wizard.Api.Models.WebSockets.ProjectMessage.SetProjectData exposing (SetProjectData)
 import Wizard.Api.Projects as ProjectsApi
 import Wizard.Components.PluginModal as PluginModal
+import Wizard.Components.PluginView as PluginView
 import Wizard.Components.Questionnaire2.Components.CommentsRightPanel as CommentsRightPanel
 import Wizard.Components.Questionnaire2.Components.FileDeleteModal as FileDeleteModal
 import Wizard.Components.Questionnaire2.Components.FileUploadModal as FileUploadModal exposing (FileConfig)
@@ -1494,7 +1496,19 @@ view appState cfg model =
                         WarningsRightPanel.view appState.locale model.warnings
 
                 QuestionnaireRightPanel.PluginQuestionAction pluginAction ->
-                    div [] [ text ("Plugin Action: " ++ pluginAction.plugin.name) ]
+                    Html.Keyed.node "div"
+                        [ class "questionnaireRightPanelPlugin" ]
+                        [ ( pluginAction.questionPath
+                          , PluginView.view appState
+                                pluginAction.plugin.uuid
+                                pluginAction.connector.element
+                                [ PluginElement.projectValue (ProjectQuestionnaire.toProjectCommon model.questionnaire)
+                                , PluginElement.questionValue pluginAction.question
+                                , PluginElement.questionPathValue pluginAction.questionPath
+                                , PluginElement.onActionClose (cfg.wrapMsg (UpdateRightPanel QuestionnaireRightPanel.None))
+                                ]
+                          )
+                        ]
 
         body =
             SplitPane.view rightPanelSplitPaneConfig
