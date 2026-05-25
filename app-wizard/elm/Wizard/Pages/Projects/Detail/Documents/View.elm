@@ -317,16 +317,22 @@ viewSubmission cfg appState submission =
 
                 _ ->
                     Html.nothing
+
+        userFragment =
+            case submission.createdBy of
+                Just user ->
+                    span [ class "fragment-user" ]
+                        [ UserIcon.viewSmall { gravatarHash = user.gravatarHash, imageUrl = user.imageUrl }
+                        , text (User.fullName user)
+                        ]
+
+                Nothing ->
+                    Html.nothing
     in
     tr []
         [ td [] [ text (Submission.visibleName submission) ]
         , td [] [ viewSubmissionState submission.state ]
-        , td []
-            [ span [ class "fragment-user" ]
-                [ UserIcon.viewSmall { gravatarHash = submission.createdBy.gravatarHash, imageUrl = submission.createdBy.imageUrl }
-                , text (User.fullName submission.createdBy)
-                ]
-            ]
+        , td [] [ userFragment ]
         , td [] [ link ]
         , td [] [ span (class "timestamp" :: tooltip readableTime) [ text updatedText ] ]
         ]
