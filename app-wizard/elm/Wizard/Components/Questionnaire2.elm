@@ -148,6 +148,16 @@ init appState projectQuestionnaire mbPath mbCommentThreadUuid =
                 Nothing ->
                     Cmd.none
 
+        ( openRightPanelCmd, ignoreRightPanelLoad ) =
+            case ( mbPath, mbCommentThreadUuid ) of
+                ( Just path, Just _ ) ->
+                    ( Task.dispatch (UpdateRightPanel (QuestionnaireRightPanel.Comments path))
+                    , True
+                    )
+
+                _ ->
+                    ( Cmd.none, False )
+
         plugins =
             AppState.getPluginsByConnector appState .projectQuestionActions
                 |> Plugin.filterByKmPatterns (KnowledgeModelUtils.getPackageId projectQuestionnaire.knowledgeModelPackage)
@@ -194,9 +204,10 @@ init appState projectQuestionnaire mbPath mbCommentThreadUuid =
         |> virtualizeContent
         |> calculateUnansweredQuestions
     , Cmd.batch
-        [ QuestionnaireLocalStorage.getItems projectQuestionnaire.uuid
+        [ QuestionnaireLocalStorage.getItems projectQuestionnaire.uuid ignoreRightPanelLoad
         , Task.dispatch UpdateContentScrollTop
         , scrollCmd
+        , openRightPanelCmd
         ]
     )
 
