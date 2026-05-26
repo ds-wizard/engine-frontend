@@ -62,7 +62,7 @@
     "@tiptap/extension-table-row": "^3.22.3",
     "@tiptap/markdown": "^3.22.3",
     "@tiptap/starter-kit": "^3.22.3",
-    "axios": "1.15.0",
+    "axios": "1.16.1",
     "axios-retry": "^4.5.0",
     "bootstrap": "^5.3.8",
     "chart.js": "^4.5.1",
