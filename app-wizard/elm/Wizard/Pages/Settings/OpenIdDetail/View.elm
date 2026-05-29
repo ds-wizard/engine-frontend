@@ -21,7 +21,7 @@ import Wizard.Api.Models.OpenIdClientDetail exposing (OpenIdClientDetail)
 import Wizard.Components.CopyableCodeBlock as CopyableCodeBlock
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Common.AuthButtonFormGroup as AuthButtonFormGroup
-import Wizard.Pages.Settings.Common.Forms.OpenIdCreateForm as OpenIdClientForm exposing (OpenIdClientForm)
+import Wizard.Pages.Settings.Common.Forms.OpenIdClientForm as OpenIdClientForm exposing (OpenIdClientForm)
 import Wizard.Pages.Settings.OpenIdDetail.Models exposing (Model)
 import Wizard.Pages.Settings.OpenIdDetail.Msgs exposing (Msg(..))
 import Wizard.Utils.WizardGuideLinks as GuideLinks

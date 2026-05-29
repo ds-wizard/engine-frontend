@@ -7,7 +7,8 @@ import ActionResult exposing (ActionResult)
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Wizard.Api.Models.OpenIdClientDetail exposing (OpenIdClientDetail)
-import Wizard.Pages.Settings.Common.Forms.OpenIdCreateForm as OpenIdClientForm exposing (OpenIdClientForm)
+import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.Settings.Common.Forms.OpenIdClientForm as OpenIdClientForm exposing (OpenIdClientForm)
 
 
 type alias Model =
@@ -18,9 +19,9 @@ type alias Model =
     }
 
 
-initialModel : Model
-initialModel =
-    { form = OpenIdClientForm.initEmpty
+initialModel : AppState -> Model
+initialModel appState =
+    { form = OpenIdClientForm.initEmpty appState
     , savingForm = ActionResult.Unset
     , openIdPrefabs = ActionResult.Loading
     , advancedConfigExpanded = False

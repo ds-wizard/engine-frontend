@@ -16,7 +16,7 @@ import Uuid exposing (Uuid)
 import Wizard.Api.OpenIdClients as OpenIdClientsApi
 import Wizard.Components.CopyableCodeBlock as CopyableCodeBlock
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Settings.Common.Forms.OpenIdCreateForm as OpenIdClientForm
+import Wizard.Pages.Settings.Common.Forms.OpenIdClientForm as OpenIdClientForm
 import Wizard.Pages.Settings.OpenIdDetail.Models exposing (Model)
 import Wizard.Pages.Settings.OpenIdDetail.Msgs exposing (Msg(..))
 
@@ -40,7 +40,7 @@ update cfg appState msg model =
                 Ok openId ->
                     ( { model
                         | openIdClient = ActionResult.Success openId
-                        , form = OpenIdClientForm.init openId
+                        , form = OpenIdClientForm.init appState openId
                       }
                     , Cmd.none
                     )
@@ -92,7 +92,7 @@ update cfg appState msg model =
                                     model.formRemoved
 
                         form =
-                            Form.update OpenIdClientForm.validation formMsg model.form
+                            Form.update (OpenIdClientForm.validation appState) formMsg model.form
                     in
                     ( { model
                         | form = form

@@ -44,8 +44,8 @@ initialModel appState =
     { organizationModel = Wizard.Pages.Settings.Organization.Models.initialModel appState
     , authenticationModel = Wizard.Pages.Settings.Authentication.Models.initialModel
     , openIdModel = Wizard.Pages.Settings.OpenId.Models.initialModel
-    , openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel
-    , openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel Uuid.nil
+    , openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel appState
+    , openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel appState Uuid.nil
     , privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel
     , featuresModel = Wizard.Pages.Settings.Features.Models.initialModel
     , pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState
@@ -72,10 +72,10 @@ initLocalModel appState route model =
             { model | openIdModel = Wizard.Pages.Settings.OpenId.Models.initialModel }
 
         OpenIdCreateRoute ->
-            { model | openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel }
+            { model | openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel appState }
 
         OpenIdDetailRoute uuid ->
-            { model | openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel uuid }
+            { model | openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel appState uuid }
 
         PrivacyAndSupportRoute ->
             { model | privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel }

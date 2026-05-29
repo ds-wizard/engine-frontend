@@ -1,4 +1,4 @@
-module Wizard.Pages.Settings.Common.Forms.OpenIdCreateForm exposing
+module Wizard.Pages.Settings.Common.Forms.OpenIdClientForm exposing
     ( FormMode
     , OpenIdClientForm
     , fillFromDetail
@@ -21,6 +21,7 @@ import Form.Validate as V exposing (Validation)
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.OpenIdClientDetail as EditableOpenIDServiceConfig exposing (OpenIdClientDetail)
+import Wizard.Data.AppState exposing (AppState)
 
 
 type alias OpenIdClientForm =
@@ -77,24 +78,24 @@ isMicrosoftMode form =
         |> (\str -> str == formModeToString MicrosoftMode)
 
 
-initEmpty : Form FormError OpenIdClientForm
-initEmpty =
+initEmpty : AppState -> Form FormError OpenIdClientForm
+initEmpty appState =
     Form.initial
         [ ( "formMode", Field.string (formModeToString MicrosoftMode) )
         , ( "registrationEnabled", Field.bool True )
         , ( "scopeEmail", Field.bool True )
         , ( "scopeProfile", Field.bool True )
         ]
-        validation
+        (validation appState)
 
 
-init : OpenIdClientDetail -> Form FormError OpenIdClientForm
-init detail =
-    Form.initial (detailToFormInitials detail) validation
+init : AppState -> OpenIdClientDetail -> Form FormError OpenIdClientForm
+init appState detail =
+    Form.initial (detailToFormInitials detail) (validation appState)
 
 
-validation : Validation FormError OpenIdClientForm
-validation =
+validation : AppState -> Validation FormError OpenIdClientForm
+validation appState =
     let
         validateParameter =
             V.succeed EditableOpenIDServiceConfig.Parameter
@@ -111,13 +112,24 @@ validation =
                         else
                             V.succeed defaultValue
                     )
+
+        validateClientId =
+            V.field "formMode" V.string
+                |> V.andThen
+                    (\str ->
+                        if str == formModeToString MicrosoftMode then
+                            V.field "clientId" (V.map Uuid.toString V.uuid)
+
+                        else
+                            V.field "clientId" V.string
+                    )
     in
     V.succeed OpenIdClientForm
         |> V.andMap (V.field "name" V.string)
-        |> V.andMap (validateInMode CustomMode (V.field "url" V.string) "")
-        |> V.andMap (V.field "clientId" V.string)
+        |> V.andMap (validateInMode CustomMode (V.field "url" (V.url appState)) "")
+        |> V.andMap validateClientId
         |> V.andMap (V.field "clientSecret" V.string)
-        |> V.andMap (validateInMode MicrosoftMode (V.field "directoryId" V.string) "")
+        |> V.andMap (validateInMode MicrosoftMode (V.field "directoryId" (V.map Uuid.toString V.uuid)) "")
         |> V.andMap (V.field "parameters" (V.list validateParameter))
         |> V.andMap (V.field "registrationEnabled" V.bool)
         |> V.andMap (V.field "scopeEmail" V.bool)
@@ -246,8 +258,8 @@ isEmpty form =
         ]
 
 
-fillFromDetail : OpenIdClientDetail -> Form FormError OpenIdClientForm -> Form FormError OpenIdClientForm
-fillFromDetail openIDServiceConfig form =
+fillFromDetail : AppState -> OpenIdClientDetail -> Form FormError OpenIdClientForm -> Form FormError OpenIdClientForm
+fillFromDetail appState openIDServiceConfig form =
     let
         toFormMsg field value =
             Form.Input field Form.Text (Field.String value)
@@ -262,7 +274,7 @@ fillFromDetail openIDServiceConfig form =
             ]
 
         applyFormMsg formMsg =
-            Form.update validation formMsg
+            Form.update (validation appState) formMsg
 
         serviceMsgs =
             [ toFormMsg "name" openIDServiceConfig.name

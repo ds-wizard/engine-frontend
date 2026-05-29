@@ -16,7 +16,7 @@ import Uuid
 import Wizard.Api.OpenIdClients as OpenIdClientsApi
 import Wizard.Api.Prefabs as PrefabsApi
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Settings.Common.Forms.OpenIdCreateForm as OpenIdClientForm
+import Wizard.Pages.Settings.Common.Forms.OpenIdClientForm as OpenIdClientForm
 import Wizard.Pages.Settings.OpenIdCreate.Models exposing (Model)
 import Wizard.Pages.Settings.OpenIdCreate.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -88,14 +88,14 @@ update cfg appState msg model =
                 _ ->
                     let
                         form =
-                            Form.update OpenIdClientForm.validation formMsg model.form
+                            Form.update (OpenIdClientForm.validation appState) formMsg model.form
                     in
                     ( { model | form = form }
                     , FormUtils.scrollToInvalidField formMsg
                     )
 
         FillOpenIDServiceConfig openIDServiceConfig ->
-            ( { model | form = OpenIdClientForm.fillFromDetail openIDServiceConfig model.form }
+            ( { model | form = OpenIdClientForm.fillFromDetail appState openIDServiceConfig model.form }
             , Cmd.none
             )
 

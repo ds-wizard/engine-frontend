@@ -9,7 +9,8 @@ import Form exposing (Form)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.OpenIdClientDetail exposing (OpenIdClientDetail)
 import Wizard.Components.CopyableCodeBlock as CopyableCodeBlock
-import Wizard.Pages.Settings.Common.Forms.OpenIdCreateForm as OpenIdClientForm exposing (OpenIdClientForm)
+import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.Settings.Common.Forms.OpenIdClientForm as OpenIdClientForm exposing (OpenIdClientForm)
 
 
 type alias Model =
@@ -24,11 +25,11 @@ type alias Model =
     }
 
 
-initialModel : Uuid -> Model
-initialModel uuid =
+initialModel : AppState -> Uuid -> Model
+initialModel appState uuid =
     { uuid = uuid
     , openIdClient = ActionResult.Loading
-    , form = OpenIdClientForm.initEmpty
+    , form = OpenIdClientForm.initEmpty appState
     , formRemoved = False
     , savingOpenId = ActionResult.Unset
     , callbackUrlCodeBlockState = CopyableCodeBlock.initialModel
