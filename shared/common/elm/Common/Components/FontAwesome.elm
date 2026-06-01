@@ -26,6 +26,7 @@ module Common.Components.FontAwesome exposing
     , faExport
     , faExternalLink
     , faFw
+    , faGuide
     , faGuideLink
     , faImportFile
     , faInfo
@@ -330,6 +331,11 @@ faExport =
 faExternalLink : Html msg
 faExternalLink =
     fas "fa-external-link-alt"
+
+
+faGuide : Html msg
+faGuide =
+    far "fa-map"
 
 
 faGuideLink : Html msg
