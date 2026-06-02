@@ -12,7 +12,6 @@ import Html.Attributes exposing (class, href, src)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Wizard.Api.Models.User as User exposing (User)
-import Wizard.Components.ExternalLoginButton as ExternalLoginButton
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.View as Listing exposing (ViewConfig)
 import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingActionType(..), ListingDropdownItem)
@@ -46,7 +45,7 @@ createButton appState =
 listingConfig : AppState -> ViewConfig User Msg
 listingConfig appState =
     { title = listingTitle appState
-    , description = listingDescription appState
+    , description = listingDescription
     , itemAdditionalData = always Nothing
     , dropdownItems = listingActions appState
     , textTitle = User.fullName
@@ -110,8 +109,8 @@ roleBadge appState user =
     badge [] [ text <| Role.toReadableString appState user.role ]
 
 
-listingDescription : AppState -> User -> Html Msg
-listingDescription appState user =
+listingDescription : User -> Html Msg
+listingDescription user =
     let
         affiliationFragment =
             case user.affiliation of
@@ -120,18 +119,11 @@ listingDescription appState user =
 
                 Nothing ->
                     []
-
-        sources =
-            Html.viewIf (not (List.isEmpty user.sources)) <|
-                span [ class "fragment" ]
-                    (List.map (ExternalLoginButton.badgeWrapper appState.locale appState.config) user.sources)
     in
     span []
-        ([ a [ class "fragment", href <| "mailto:" ++ user.email ]
+        (a [ class "fragment", href <| "mailto:" ++ user.email ]
             [ text user.email ]
-         , sources
-         ]
-            ++ affiliationFragment
+            :: affiliationFragment
         )
 
 

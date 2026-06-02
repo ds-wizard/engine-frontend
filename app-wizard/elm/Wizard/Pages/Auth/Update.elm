@@ -25,7 +25,11 @@ update msg model =
                 redirectUrl =
                     case mbOriginalUrl of
                         Just originalUrl ->
-                            originalUrl
+                            if String.startsWith "/wizard/open-id" originalUrl then
+                                Routing.toUrl Routes.DashboardRoute
+
+                            else
+                                originalUrl
 
                         Nothing ->
                             Routing.toUrl Routes.DashboardRoute

@@ -23,6 +23,7 @@ import Wizard.Api.Models.Event.AddChapterEventData exposing (AddChapterEventData
 import Wizard.Api.Models.Event.AddChoiceEventData exposing (AddChoiceEventData)
 import Wizard.Api.Models.Event.AddExpertEventData exposing (AddExpertEventData)
 import Wizard.Api.Models.Event.AddIntegrationEventData as AddIntegrationEventData exposing (AddIntegrationEventData(..))
+import Wizard.Api.Models.Event.AddKnowledgeModelEventData exposing (AddKnowledgeModelEventData)
 import Wizard.Api.Models.Event.AddMetricEventData exposing (AddMetricEventData)
 import Wizard.Api.Models.Event.AddPhaseEventData exposing (AddPhaseEventData)
 import Wizard.Api.Models.Event.AddQuestionEventData as AddQuestionEventQuestionData exposing (AddQuestionEventData(..))
@@ -152,9 +153,9 @@ getEventView appState model migration event =
                 [ text (gettext "The event is not connected to any entity in the Knowledge Model." appState.locale) ]
     in
     case event.content of
-        AddKnowledgeModelEvent _ ->
-            -- AddKnowledgeModelEvent should never appear in migrations
-            Html.nothing
+        AddKnowledgeModelEvent eventData ->
+            viewAddKnowledgeModelDiff appState eventData
+                |> viewEvent appState model event (gettext "Add knowledge model" appState.locale)
 
         EditKnowledgeModelEvent eventData ->
             migration.currentKnowledgeModel
@@ -395,6 +396,15 @@ viewEvent appState model event name diffView =
                 ]
             ]
         ]
+
+
+viewAddKnowledgeModelDiff : AppState -> AddKnowledgeModelEventData -> Html Msg
+viewAddKnowledgeModelDiff appState event =
+    let
+        annotationsDiff =
+            viewAnnotationsDiff appState [] event.annotations
+    in
+    div [] [ annotationsDiff ]
 
 
 viewEditKnowledgeModelDiff : AppState -> EditKnowledgeModelEventData -> KnowledgeModel -> Html Msg

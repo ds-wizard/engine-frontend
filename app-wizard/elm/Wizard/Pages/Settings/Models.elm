@@ -6,6 +6,9 @@ import Wizard.Pages.Settings.Authentication.Models
 import Wizard.Pages.Settings.DashboardAndLoginScreen.Models
 import Wizard.Pages.Settings.Features.Models
 import Wizard.Pages.Settings.LookAndFeel.Models
+import Wizard.Pages.Settings.OpenId.Models
+import Wizard.Pages.Settings.OpenIdCreate.Models
+import Wizard.Pages.Settings.OpenIdDetail.Models
 import Wizard.Pages.Settings.Organization.Models
 import Wizard.Pages.Settings.PluginSettings.Model
 import Wizard.Pages.Settings.Plugins.Models
@@ -20,6 +23,9 @@ import Wizard.Pages.Settings.Usage.Models
 type alias Model =
     { organizationModel : Wizard.Pages.Settings.Organization.Models.Model
     , authenticationModel : Wizard.Pages.Settings.Authentication.Models.Model
+    , openIdModel : Wizard.Pages.Settings.OpenId.Models.Model
+    , openIdCreateModel : Wizard.Pages.Settings.OpenIdCreate.Models.Model
+    , openIdDetailModel : Wizard.Pages.Settings.OpenIdDetail.Models.Model
     , privacyAndSupportModel : Wizard.Pages.Settings.PrivacyAndSupport.Models.Model
     , featuresModel : Wizard.Pages.Settings.Features.Models.Model
     , pluginsModel : Wizard.Pages.Settings.Plugins.Models.Model
@@ -36,7 +42,10 @@ type alias Model =
 initialModel : AppState -> Model
 initialModel appState =
     { organizationModel = Wizard.Pages.Settings.Organization.Models.initialModel appState
-    , authenticationModel = Wizard.Pages.Settings.Authentication.Models.initialModel appState
+    , authenticationModel = Wizard.Pages.Settings.Authentication.Models.initialModel
+    , openIdModel = Wizard.Pages.Settings.OpenId.Models.initialModel
+    , openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel appState
+    , openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel appState Uuid.nil
     , privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel
     , featuresModel = Wizard.Pages.Settings.Features.Models.initialModel
     , pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState
@@ -57,7 +66,16 @@ initLocalModel appState route model =
             { model | organizationModel = Wizard.Pages.Settings.Organization.Models.initialModel appState }
 
         AuthenticationRoute ->
-            { model | authenticationModel = Wizard.Pages.Settings.Authentication.Models.initialModel appState }
+            { model | authenticationModel = Wizard.Pages.Settings.Authentication.Models.initialModel }
+
+        OpenIdRoute ->
+            { model | openIdModel = Wizard.Pages.Settings.OpenId.Models.initialModel }
+
+        OpenIdCreateRoute ->
+            { model | openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel appState }
+
+        OpenIdDetailRoute uuid ->
+            { model | openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel appState uuid }
 
         PrivacyAndSupportRoute ->
             { model | privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel }

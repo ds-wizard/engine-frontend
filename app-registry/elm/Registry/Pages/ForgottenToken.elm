@@ -8,7 +8,7 @@ import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, p, text)
 import Html.Attributes exposing (class)
-import Registry.Api.ActionKeys as ActionKeysApi
+import Registry.Api.UserEmailLinks as UserEmailLinksApi
 import Registry.Components.ActionButton as ActionButton
 import Registry.Components.FormGroup as FormGroup
 import Registry.Components.FormResult as FormResult
@@ -38,7 +38,7 @@ setSubmitting submitting model =
 
 type Msg
     = FormMsg Form.Msg
-    | PostForgottenTokenActionKeyCompleted (Result ApiError ())
+    | PostForgottenTokenUserEmailLinkCompleted (Result ApiError ())
 
 
 update : AppState -> Msg -> Model -> ( Model, Cmd Msg )
@@ -48,7 +48,7 @@ update appState msg model =
             case ( formMsg, Form.getOutput model.form ) of
                 ( Form.Submit, Just recoveryForm ) ->
                     ( { model | submitting = ActionResult.Loading }
-                    , ActionKeysApi.postForgottenTokenActionKey appState recoveryForm PostForgottenTokenActionKeyCompleted
+                    , UserEmailLinksApi.postForgottenTokenUserEmailLink appState recoveryForm PostForgottenTokenUserEmailLinkCompleted
                     )
 
                 _ ->
@@ -56,7 +56,7 @@ update appState msg model =
                     , Cmd.none
                     )
 
-        PostForgottenTokenActionKeyCompleted result ->
+        PostForgottenTokenUserEmailLinkCompleted result ->
             ( ActionResult.apply setSubmitting (ApiError.toActionResult appState "Could not recover token.") result model
             , Cmd.none
             )

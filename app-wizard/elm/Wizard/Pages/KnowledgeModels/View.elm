@@ -2,6 +2,7 @@ module Wizard.Pages.KnowledgeModels.View exposing (view)
 
 import Html exposing (Html)
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModels.Compare.View
 import Wizard.Pages.KnowledgeModels.Detail.View
 import Wizard.Pages.KnowledgeModels.Import.View
 import Wizard.Pages.KnowledgeModels.Index.View
@@ -29,3 +30,6 @@ view route appState model =
 
         ResourcePageRoute _ _ ->
             Html.map ResourcePageMsg <| Wizard.Pages.KnowledgeModels.ResourcePage.View.view appState model.resourcePageModel
+
+        CompareRoute _ ->
+            Html.map CompareMsg <| Wizard.Pages.KnowledgeModels.Compare.View.view appState model.compareModel

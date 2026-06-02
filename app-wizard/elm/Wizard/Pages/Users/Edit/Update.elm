@@ -6,6 +6,7 @@ import Wizard.Msgs
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
+import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
 import Wizard.Pages.Users.Edit.Components.PluginSettings as PluginSettings
@@ -25,6 +26,9 @@ fetchData appState uuidOrCurrent subroute =
 
         UserEditRoute.Password ->
             Cmd.none
+
+        UserEditRoute.ConnectedAccounts ->
+            Cmd.map ConnectedAccountsMsg (ConnectedAccounts.fetchData appState)
 
         UserEditRoute.Language ->
             Cmd.map LanguageMsg (Language.fetchData appState)
@@ -74,6 +78,18 @@ update msg wrapMsg appState model =
                     Password.update updateConfig appState passwordMsg model.passwordModel
             in
             ( { model | passwordModel = passwordModel }, passwordCmd )
+
+        ConnectedAccountsMsg connectedAccountsMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << ConnectedAccountsMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( connectedAccountsModel, connectedAccountsCmd ) =
+                    ConnectedAccounts.update updateConfig appState connectedAccountsMsg model.connectedAccountsModel
+            in
+            ( { model | connectedAccountsModel = connectedAccountsModel }, connectedAccountsCmd )
 
         LanguageMsg languageMsg ->
             let

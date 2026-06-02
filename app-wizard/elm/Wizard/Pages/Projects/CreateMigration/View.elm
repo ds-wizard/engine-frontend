@@ -3,21 +3,25 @@ module Wizard.Pages.Projects.CreateMigration.View exposing (view)
 import ActionResult exposing (ActionResult(..))
 import Common.Components.ActionButton as ActionResult
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (faArrowRight)
+import Common.Components.FontAwesome exposing (faArrowRight, faClose, faKmCompare)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
+import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.TypeHintInput as TypeHintInput
 import Form
 import Gettext exposing (gettext)
-import Html exposing (Html, div, label, text)
+import Html exposing (Html, button, div, hr, label, strong, text)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Uuid
 import Version
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Models.VersionUuid as VersionUuid
 import Wizard.Components.FormActions as FormActions
+import Wizard.Components.KMComparison as KMComparison
 import Wizard.Components.Tag as Tag
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
@@ -70,6 +74,23 @@ createMigrationView appState model project =
 
                 Nothing ->
                     FormGroup.textView "km" <| gettext "Select knowledge model first" appState.locale
+
+        compareButton =
+            case model.knowledgeModelPreview of
+                Success _ ->
+                    div []
+                        [ hr [] []
+                        , button
+                            [ class "btn btn-outline-secondary with-icon"
+                            , onClick CompareKnowledgeModels
+                            ]
+                            [ faKmCompare
+                            , text (gettext "Compare" appState.locale)
+                            ]
+                        ]
+
+                _ ->
+                    Html.nothing
     in
     div [ listClass "Questionnaires__CreateMigration" ]
         [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsMigration) (gettext "Create Migration" appState.locale)
@@ -79,7 +100,11 @@ createMigrationView appState model project =
         , div [ class "form" ]
             [ div []
                 [ FormGroup.plainGroup
-                    (TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage project.knowledgeModelPackage))
+                    (div [ class "typehint-input" ]
+                        [ div [ class "typehint-input-value form-control cursor-default" ]
+                            [ TypeHintInputItem.packageSuggestion False (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage project.knowledgeModelPackage) ]
+                        ]
+                    )
                     (gettext "Original Knowledge Model" appState.locale)
                 , FormGroup.codeView (Version.toString project.knowledgeModelPackage.version) (gettext "Original Version" appState.locale)
                 , originalTagList
@@ -92,12 +117,37 @@ createMigrationView appState model project =
                     ]
                 , Html.map FormMsg <| versionSelect <| gettext "New version" appState.locale
                 , tagsView appState model
+                , compareButton
                 ]
             ]
         , FormActions.view appState
             Cancel
             (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingMigration (FormMsg Form.Submit) False)
+        , compareModal appState model
         ]
+
+
+compareModal : AppState -> Model -> Html Msg
+compareModal appState model =
+    let
+        modalConfig =
+            { modalContent =
+                [ div [ class "modal-header" ]
+                    [ strong [ class "modal-title" ] [ text (gettext "Compare Knowledge Models" appState.locale) ]
+                    , button [ class "close", onClick CloseCompareModal ]
+                        [ faClose ]
+                    ]
+                , div [ class "modal-body p-0 d-flex flex-column" ]
+                    [ Html.map KMComparisonMsg <| KMComparison.view appState model.kmComparisonModel
+                    ]
+                ]
+            , visible = model.compareModalOpen
+            , enterMsg = Nothing
+            , escMsg = Just CloseCompareModal
+            , dataCy = "compare-modal"
+            }
+    in
+    Modal.simpleWithAttrs [ class "modal-full-screen" ] modalConfig
 
 
 tagsView : AppState -> Model -> Html Msg

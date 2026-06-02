@@ -54,6 +54,7 @@ module Wizard.Routes exposing
     , kmEditorMigration
     , kmEditorPublish
     , knowledgeModelSecrets
+    , knowledgeModelsCompare
     , knowledgeModelsDetail
     , knowledgeModelsImport
     , knowledgeModelsIndex
@@ -95,6 +96,9 @@ module Wizard.Routes exposing
     , settingsAuthentication
     , settingsDefault
     , settingsLookAndFeel
+    , settingsOpenId
+    , settingsOpenIdCreate
+    , settingsOpenIdDetail
     , settingsOrganization
     , settingsPluginSettings
     , settingsRegistry
@@ -107,6 +111,7 @@ module Wizard.Routes exposing
     , usersEditActiveSessions
     , usersEditApiKeys
     , usersEditAppKeys
+    , usersEditConnectedAccounts
     , usersEditCurrent
     , usersEditLanguage
     , usersEditLanguageCurrent
@@ -496,6 +501,11 @@ kmEditorPublish =
 -- Knowledge Models
 
 
+knowledgeModelsCompare : Maybe Uuid -> Route
+knowledgeModelsCompare mbLeftKmUuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.CompareRoute mbLeftKmUuid
+
+
 knowledgeModelsDetail : Uuid -> Route
 knowledgeModelsDetail =
     KnowledgeModelsRoute << Wizard.Pages.KnowledgeModels.Routes.DetailRoute
@@ -810,6 +820,21 @@ settingsLookAndFeel =
     SettingsRoute Wizard.Pages.Settings.Routes.LookAndFeelRoute
 
 
+settingsOpenId : Route
+settingsOpenId =
+    SettingsRoute Wizard.Pages.Settings.Routes.OpenIdRoute
+
+
+settingsOpenIdCreate : Route
+settingsOpenIdCreate =
+    SettingsRoute Wizard.Pages.Settings.Routes.OpenIdCreateRoute
+
+
+settingsOpenIdDetail : Uuid -> Route
+settingsOpenIdDetail =
+    SettingsRoute << Wizard.Pages.Settings.Routes.OpenIdDetailRoute
+
+
 settingsOrganization : Route
 settingsOrganization =
     SettingsRoute Wizard.Pages.Settings.Routes.OrganizationRoute
@@ -880,6 +905,11 @@ usersEdit =
 usersEditPassword : UuidOrCurrent -> Route
 usersEditPassword =
     UsersRoute << flip Wizard.Pages.Users.Routes.EditRoute UserEditRoute.Password
+
+
+usersEditConnectedAccounts : Route
+usersEditConnectedAccounts =
+    UsersRoute (Wizard.Pages.Users.Routes.EditRoute UuidOrCurrent.current UserEditRoute.ConnectedAccounts)
 
 
 usersEditLanguage : UuidOrCurrent -> Route

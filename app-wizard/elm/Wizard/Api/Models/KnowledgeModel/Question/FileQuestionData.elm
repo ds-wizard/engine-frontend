@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Question.FileQuestionData exposing
     ( FileQuestionData
     , decoder
     , encodeValues
+    , equalContent
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -28,3 +29,9 @@ encodeValues fileData =
     [ ( "maxSize", E.maybe E.int fileData.maxSize )
     , ( "fileTypes", E.maybe E.string fileData.fileTypes )
     ]
+
+
+equalContent : FileQuestionData -> FileQuestionData -> Bool
+equalContent data1 data2 =
+    (data1.maxSize == data2.maxSize)
+        && (data1.fileTypes == data2.fileTypes)

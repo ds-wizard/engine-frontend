@@ -14,6 +14,7 @@ module Common.Utils.Form.Validate exposing
     , password
     , projectTag
     , projectTags
+    , url
     , uuid
     , versionNumber
     )
@@ -117,6 +118,11 @@ uuid : Validation FormError Uuid
 uuid =
     validateRegexWithCustomError RegexPatterns.uuid InvalidUuid
         |> V.map Uuid.fromUuidString
+
+
+url : { a | locale : Gettext.Locale } -> Validation FormError String
+url appState =
+    regex RegexPatterns.url (gettext "Fill in a valid URL." appState.locale)
 
 
 organizationId : { a | locale : Gettext.Locale } -> Validation FormError String

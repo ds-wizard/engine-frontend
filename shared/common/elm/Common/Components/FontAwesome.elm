@@ -11,6 +11,7 @@ module Common.Components.FontAwesome exposing
     , faDelete
     , faDetailShowAll
     , faDisable
+    , faDisconnectAccount
     , faDocumentTemplateEditorFiles
     , faDocumentTemplateEditorPublish
     , faDocumentTemplateRestore
@@ -31,6 +32,7 @@ module Common.Components.FontAwesome exposing
     , faKmAnswer
     , faKmChapter
     , faKmChoice
+    , faKmCompare
     , faKmDetailCreateKmEditor
     , faKmDetailCreateQuestionnaire
     , faKmDetailFork
@@ -260,6 +262,11 @@ faDisable =
     fas "fa-toggle-off"
 
 
+faDisconnectAccount : Html msg
+faDisconnectAccount =
+    fas "fa-link-slash"
+
+
 faDocumentTemplateEditorFiles : Html msg
 faDocumentTemplateEditorFiles =
     far "fa-file-code"
@@ -353,6 +360,11 @@ faKmChapter =
 faKmChoice : Html msg
 faKmChoice =
     far "fa-check-square"
+
+
+faKmCompare : Html msg
+faKmCompare =
+    fas "fa-table-columns"
 
 
 faKmDetailCreateKmEditor : Html msg

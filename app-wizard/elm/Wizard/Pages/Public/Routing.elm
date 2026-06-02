@@ -22,7 +22,7 @@ parsers appState wrapRoute =
             else
                 []
     in
-    [ map (authCallback wrapRoute) (s "auth" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state")
+    [ map (openIdCallback wrapRoute) (s "open-id" </> string </> s "callback" <?> Query.string "error" <?> Query.string "code" <?> Query.string "session_state")
     , map (wrapRoute ForgottenPasswordRoute) (s "forgotten-password")
     , map (forgottenPasswordConfirmation wrapRoute) (s "forgotten-password" </> string </> string)
     , map (wrapRoute << LoginRoute) (top <?> Query.string "originalUrl")
@@ -31,9 +31,9 @@ parsers appState wrapRoute =
         ++ signUpRoutes
 
 
-authCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> Maybe String -> a
-authCallback wrapRoute id error code sessionState =
-    AuthCallback id error code sessionState |> wrapRoute
+openIdCallback : (Route -> a) -> String -> Maybe String -> Maybe String -> Maybe String -> a
+openIdCallback wrapRoute id error code sessionState =
+    OpenIdCallback id error code sessionState |> wrapRoute
 
 
 signupConfirmation : (Route -> a) -> String -> String -> a
@@ -49,8 +49,8 @@ forgottenPasswordConfirmation wrapRoute userId hash =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        AuthCallback id error code sessionState ->
-            [ "auth"
+        OpenIdCallback id error code sessionState ->
+            [ "open-id"
             , id
             , "callback"
             , "?error=" ++ Maybe.withDefault "" error ++ "&code=" ++ Maybe.withDefault "" code ++ "&session_state=" ++ Maybe.withDefault "" sessionState

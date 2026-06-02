@@ -1,9 +1,11 @@
-module Wizard.Pages.Public.Auth.View exposing (view)
+module Wizard.Pages.Public.OpenIdCallback.View exposing (view)
 
 import ActionResult
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
+import Common.Components.Undraw as Undraw
+import Common.Components.UserExternalCompletionForm as UserExternalCompletionForm
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, form, input, label, span, text)
 import Html.Attributes exposing (checked, class, disabled, href, target, type_)
@@ -13,17 +15,36 @@ import Html.Extra as Html
 import Maybe.Extra as Maybe
 import String.Format as String
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.Public.Auth.Models exposing (Model)
-import Wizard.Pages.Public.Auth.Msgs exposing (Msg(..))
+import Wizard.Pages.Public.OpenIdCallback.Models exposing (Model)
+import Wizard.Pages.Public.OpenIdCallback.Msgs exposing (Msg(..))
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    if Maybe.isJust model.hash then
+    if model.emailVerificationRequired then
+        Page.illustratedMessage
+            { illustration = Undraw.messageSent
+            , heading = gettext "Sign up was successful" appState.locale
+            , lines = [ gettext "Check your email for the activation link." appState.locale ]
+            , cy = "signup_successful"
+            }
+
+    else if Maybe.isJust model.hash then
         viewConsentForm appState model
 
     else
-        Page.actionResultView appState (\_ -> Html.nothing) model.authenticating
+        case model.completionForm of
+            Just completionFormModel ->
+                Html.map CompletionFormMsg <|
+                    UserExternalCompletionForm.view
+                        { completingRegistration = model.completingRegistration
+                        , navigator = appState.navigator
+                        , locale = appState.locale
+                        }
+                        completionFormModel
+
+            Nothing ->
+                Page.actionResultView appState (\_ -> Html.nothing) model.authenticating
 
 
 viewConsentForm : AppState -> Model -> Html Msg

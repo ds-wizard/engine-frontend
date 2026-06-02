@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.Question.ItemSelectQuestionData exposing
     ( ItemSelectQuestionData
     , decoder
     , encodeValues
+    , equalContent
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -25,3 +26,8 @@ encodeValues : ItemSelectQuestionData -> List ( String, E.Value )
 encodeValues itemSelectData =
     [ ( "listQuestionUuid", E.maybe E.string itemSelectData.listQuestionUuid )
     ]
+
+
+equalContent : ItemSelectQuestionData -> ItemSelectQuestionData -> Bool
+equalContent data1 data2 =
+    data1.listQuestionUuid == data2.listQuestionUuid

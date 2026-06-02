@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing
     ( ApiIntegrationData
     , decoder
+    , equalContent
     , getTestVariableValue
     , getUnknownVariables
     )
@@ -54,6 +55,24 @@ decoder =
         |> D.required "testVariables" (D.dict D.string)
         |> D.required "uuid" D.string
         |> D.required "variables" (D.list D.string)
+
+
+equalContent : ApiIntegrationData -> ApiIntegrationData -> Bool
+equalContent data1 data2 =
+    (data1.allowCustomReply == data2.allowCustomReply)
+        && (data1.name == data2.name)
+        && (data1.requestAllowEmptySearch == data2.requestAllowEmptySearch)
+        && (data1.requestBody == data2.requestBody)
+        && (data1.requestHeaders == data2.requestHeaders)
+        && (data1.requestMethod == data2.requestMethod)
+        && (data1.requestUrl == data2.requestUrl)
+        && (data1.responseItemTemplate == data2.responseItemTemplate)
+        && (data1.responseItemTemplateForSelection == data2.responseItemTemplateForSelection)
+        && (data1.responseListField == data2.responseListField)
+        && (data1.testQ == data2.testQ)
+        && (data1.testResponse == data2.testResponse)
+        && (data1.testVariables == data2.testVariables)
+        && (data1.variables == data2.variables)
 
 
 getTestVariableValue : String -> ApiIntegrationData -> Maybe String

@@ -2,6 +2,7 @@ module Wizard.Pages.KnowledgeModels.Models exposing (Model, initLocalModel, init
 
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModels.Compare.Models
 import Wizard.Pages.KnowledgeModels.Detail.Models
 import Wizard.Pages.KnowledgeModels.Import.Models
 import Wizard.Pages.KnowledgeModels.Index.Models
@@ -16,6 +17,7 @@ type alias Model =
     , indexModel : Wizard.Pages.KnowledgeModels.Index.Models.Model
     , previewModel : Wizard.Pages.KnowledgeModels.Preview.Models.Model
     , resourcePageModel : Wizard.Pages.KnowledgeModels.ResourcePage.Models.Model
+    , compareModel : Wizard.Pages.KnowledgeModels.Compare.Models.Model
     }
 
 
@@ -26,6 +28,7 @@ initialModel appState =
     , indexModel = Wizard.Pages.KnowledgeModels.Index.Models.initialModel PaginationQueryString.empty
     , previewModel = Wizard.Pages.KnowledgeModels.Preview.Models.initialModel Nothing
     , resourcePageModel = Wizard.Pages.KnowledgeModels.ResourcePage.Models.initialModel ""
+    , compareModel = Wizard.Pages.KnowledgeModels.Compare.Models.initialModel Nothing
     }
 
 
@@ -46,3 +49,6 @@ initLocalModel route appState model =
 
         ResourcePageRoute _ resourcePageUuid ->
             { model | resourcePageModel = Wizard.Pages.KnowledgeModels.ResourcePage.Models.initialModel resourcePageUuid }
+
+        CompareRoute mbLeftKmUuid ->
+            { model | compareModel = Wizard.Pages.KnowledgeModels.Compare.Models.initialModel mbLeftKmUuid }

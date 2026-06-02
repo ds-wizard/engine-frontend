@@ -9,6 +9,7 @@ import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeMode
 import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
 import Wizard.Api.Models.ProjectMigration exposing (ProjectMigration)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
+import Wizard.Components.KMComparison as KMComparison
 
 
 type Msg
@@ -24,3 +25,6 @@ type Msg
     | RemoveTag String
     | ChangeUseAllQuestions Bool
     | KnowledgeModelPackageTypeHintInputMsg (TypeHintInput.Msg KnowledgeModelPackageSuggestion)
+    | CompareKnowledgeModels
+    | CloseCompareModal
+    | KMComparisonMsg KMComparison.Msg

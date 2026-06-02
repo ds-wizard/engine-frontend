@@ -10,8 +10,8 @@ import Common.Api.Request as Request exposing (ToMsg)
 import Json.Decode as D
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateFormatStep as DocumentTemplateFormatStep exposing (DocumentTemplateFormatStep)
 import Wizard.Api.Models.DocumentTemplateDraft.DocumentTemplateFormatDraft as DocumentTemplateFormatDraft exposing (DocumentTemplateFormatDraft)
-import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig.EditableOpenIDServiceConfig as EditableOpenIDServiceConfig exposing (EditableOpenIDServiceConfig)
 import Wizard.Api.Models.KnowledgeModel.Integration as Integration exposing (Integration)
+import Wizard.Api.Models.OpenIdClientDetail as OpenIdClientDetail exposing (OpenIdClientDetail)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
 
@@ -20,9 +20,9 @@ getIntegrationPrefabs appState =
     Request.get (AppState.toServerInfo appState) "/prefabs?type=knowledge-model-integration" (D.list (Prefab.decoder Integration.decoder))
 
 
-getOpenIDPrefabs : AppState -> ToMsg (List (Prefab EditableOpenIDServiceConfig)) msg -> Cmd msg
+getOpenIDPrefabs : AppState -> ToMsg (List (Prefab OpenIdClientDetail)) msg -> Cmd msg
 getOpenIDPrefabs appState =
-    Request.get (AppState.toServerInfo appState) "/prefabs?type=open-id" (D.list (Prefab.decoder EditableOpenIDServiceConfig.decoder))
+    Request.get (AppState.toServerInfo appState) "/prefabs?type=open-id" (D.list (Prefab.decoder OpenIdClientDetail.prefabDecoder))
 
 
 getDocumentTemplateFormatPrefabs : AppState -> ToMsg (List (Prefab DocumentTemplateFormatDraft)) msg -> Cmd msg

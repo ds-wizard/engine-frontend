@@ -1,4 +1,4 @@
-module Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag, decoder)
+module Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag, decoder, equalContent)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -22,3 +22,9 @@ decoder =
         |> D.required "description" (D.nullable D.string)
         |> D.required "color" D.string
         |> D.required "annotations" (D.list Annotation.decoder)
+
+
+equalContent : Tag -> Tag -> Bool
+equalContent tag1 tag2 =
+    (tag1.name == tag2.name)
+        && (tag1.description == tag2.description)

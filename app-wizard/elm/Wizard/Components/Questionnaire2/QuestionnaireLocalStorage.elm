@@ -44,15 +44,20 @@ localStorageNamedOnlyKey uuid =
     "project-" ++ Uuid.toString uuid ++ "-named-only"
 
 
-getItems : Uuid -> Cmd msg
-getItems projectUuid =
-    Cmd.batch
+getItems : Uuid -> Bool -> Cmd msg
+getItems projectUuid ignoreRightPanel =
+    Cmd.batch <|
         [ LocalStorage.getItem localStorageViewSettingsKey
         , LocalStorage.getItem (localStorageCollapsedPathsKey projectUuid)
-        , LocalStorage.getItem (localStorageRightPanelKey projectUuid)
         , LocalStorage.getItem (localStorageViewResolvedKey projectUuid)
         , LocalStorage.getItem (localStorageNamedOnlyKey projectUuid)
         ]
+            ++ (if ignoreRightPanel then
+                    []
+
+                else
+                    [ LocalStorage.getItem (localStorageRightPanelKey projectUuid) ]
+               )
 
 
 updateCollapsedPaths : Uuid -> Set String -> Cmd msg

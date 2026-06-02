@@ -5,7 +5,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Utils.Form as Form
 import Form
 import Gettext exposing (gettext)
-import Wizard.Api.ActionKeys as ActionKeysApi
+import Wizard.Api.UserEmailLinks as UserEmailLinksApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.Public.Common.ForgottenPasswordForm as ForgottenPasswordForm
@@ -20,7 +20,7 @@ update msg wrapMsg appState model =
             handleForm formMsg wrapMsg appState model
 
         PostForgottenPasswordCompleted result ->
-            handlePostPasswordActionKeyCompleted appState result model
+            handlePostForgottenPasswordCompleted appState result model
 
 
 handleForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -33,7 +33,7 @@ handleForm formMsg wrapMsg appState model =
 
                 cmd =
                     Cmd.map wrapMsg <|
-                        ActionKeysApi.postActionKey appState body PostForgottenPasswordCompleted
+                        UserEmailLinksApi.postUserEmailLink appState body PostForgottenPasswordCompleted
             in
             ( { model | submitting = Loading }, cmd )
 
@@ -45,8 +45,8 @@ handleForm formMsg wrapMsg appState model =
             ( newModel, Cmd.none )
 
 
-handlePostPasswordActionKeyCompleted : AppState -> Result ApiError () -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
-handlePostPasswordActionKeyCompleted appState result model =
+handlePostForgottenPasswordCompleted : AppState -> Result ApiError () -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
+handlePostForgottenPasswordCompleted appState result model =
     case result of
         Ok _ ->
             ( { model | submitting = Success "" }, Cmd.none )

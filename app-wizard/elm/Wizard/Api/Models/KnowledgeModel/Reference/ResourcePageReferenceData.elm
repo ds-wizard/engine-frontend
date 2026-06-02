@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Reference.ResourcePageReferenceData exposing
     ( ResourcePageReferenceData
     , decoder
+    , equalContent
     , toLabel
     )
 
@@ -33,3 +34,8 @@ toLabel resourcePages data =
 
         Nothing ->
             ""
+
+
+equalContent : ResourcePageReferenceData -> ResourcePageReferenceData -> Bool
+equalContent data1 data2 =
+    data1.resourcePageUuid == data2.resourcePageUuid

@@ -241,6 +241,15 @@ messageToReadable appState message =
         "error.validation.km_id_uniqueness" ->
             Just <| gettext "Knowledge model ID is already used." appState.locale
 
+        "error.validation.logo_size_limit" ->
+            Just <|
+                case List.head message.params of
+                    Just limitValue ->
+                        String.format (gettext "Logo file size cannot exceed %s." appState.locale) [ limitValue ]
+
+                    Nothing ->
+                        gettext "Logo file size exceeds the limit." appState.locale
+
         "error.validation.pkg_id_uniqueness" ->
             Just <| gettext "Knowledge model already exists." appState.locale
 
@@ -259,6 +268,12 @@ messageToReadable appState message =
         "error.validation.qtn_migration_uniqueness" ->
             Just <| gettext "There is already an ongoing project migration." appState.locale
 
+        "error.service.openid.identity_linked_to_different_user" ->
+            Just <| gettext "This account is already linked to a different user." appState.locale
+
+        "error.service.openid.registration_disabled" ->
+            Just <| gettext "Registration of new accounts via this service is disabled." appState.locale
+
         "error.service.pkg.highest_number_in_new_version" ->
             Just <| gettext "New version has to be higher than the previous one." appState.locale
 
@@ -270,6 +285,9 @@ messageToReadable appState message =
 
         "error.service.tb.missing_asset" ->
             Just <| String.format (gettext "Asset \"%s\" was not found in archive." appState.locale) message.params
+
+        "error.service.saml.registration_disabled" ->
+            Just <| gettext "Registration of new accounts via this service is disabled." appState.locale
 
         -- Admin
         "error.validation.tenant_deal_id_uniqueness" ->
@@ -399,6 +417,9 @@ messageToReadable appState message =
 
         "error.service.token.account_is_not_activated" ->
             Just <| gettext "The account is not activated." appState.locale
+
+        "error.service.user_email_link.expired" ->
+            Just <| gettext "The link has expired." appState.locale
 
         "error.service.user.required_admin_role_or_hash_in_query_params" ->
             Just <| gettext "A hash query param has to be provided." appState.locale

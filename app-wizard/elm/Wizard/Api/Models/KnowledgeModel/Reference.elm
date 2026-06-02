@@ -1,11 +1,13 @@
 module Wizard.Api.Models.KnowledgeModel.Reference exposing
     ( Reference(..)
     , decoder
+    , equalContent
     , getAnnotations
     , getDescription
     , getLabel
     , getResourcePageUuid
     , getTargetUuid
+    , getTypeReadableString
     , getTypeString
     , getUrl
     , getUuid
@@ -13,6 +15,7 @@ module Wizard.Api.Models.KnowledgeModel.Reference exposing
     , map
     )
 
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
@@ -62,6 +65,22 @@ crossReferenceDecoder =
 -- Helpers
 
 
+equalContent : Reference -> Reference -> Bool
+equalContent reference1 reference2 =
+    case ( reference1, reference2 ) of
+        ( ResourcePageReference data1, ResourcePageReference data2 ) ->
+            ResourcePageReferenceData.equalContent data1 data2
+
+        ( URLReference data1, URLReference data2 ) ->
+            URLReferenceData.equalContent data1 data2
+
+        ( CrossReference data1, CrossReference data2 ) ->
+            CrossReferenceData.equalContent data1 data2
+
+        _ ->
+            False
+
+
 map : (ResourcePageReferenceData -> a) -> (URLReferenceData -> a) -> (CrossReferenceData -> a) -> Reference -> a
 map resourcePageReference urlReference crossReference reference =
     case reference of
@@ -78,6 +97,14 @@ map resourcePageReference urlReference crossReference reference =
 getTypeString : Reference -> String
 getTypeString =
     map (always "ResourcePage") (always "URL") (always "Cross")
+
+
+getTypeReadableString : Gettext.Locale -> Reference -> String
+getTypeReadableString locale =
+    map
+        (always <| gettext "Resource Page" locale)
+        (always <| gettext "URL" locale)
+        (always <| gettext "Cross Reference" locale)
 
 
 getUuid : Reference -> String

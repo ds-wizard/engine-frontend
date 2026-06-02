@@ -1,4 +1,4 @@
-module Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase, decoder)
+module Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase, decoder, equalContent)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -21,3 +21,9 @@ decoder =
         |> D.required "title" D.string
         |> D.required "description" (D.maybe D.string)
         |> D.required "annotations" (D.list Annotation.decoder)
+
+
+equalContent : Phase -> Phase -> Bool
+equalContent phase1 phase2 =
+    (phase1.title == phase2.title)
+        && (phase1.description == phase2.description)

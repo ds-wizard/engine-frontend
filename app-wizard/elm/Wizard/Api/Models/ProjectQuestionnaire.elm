@@ -34,6 +34,7 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , setPhaseUuid
     , setReply
     , subCommentCount
+    , toProjectCommon
     , todoUuid
     , todosLength
     , updateContent
@@ -72,6 +73,7 @@ import Wizard.Api.Models.Permission as Permission exposing (Permission)
 import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing(..))
 import Wizard.Api.Models.Project.ProjectTodo exposing (ProjectTodo)
 import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility(..))
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectContent exposing (ProjectContent)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetail.Reply as Reply exposing (Reply)
@@ -119,6 +121,20 @@ decoder =
         |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "files" (D.list ProjectFileSimple.decoder)
+
+
+toProjectCommon : ProjectQuestionnaire -> ProjectCommon
+toProjectCommon questionnaire =
+    { uuid = questionnaire.uuid
+    , name = questionnaire.name
+    , isTemplate = questionnaire.isTemplate
+    , permissions = questionnaire.permissions
+    , sharing = questionnaire.sharing
+    , visibility = questionnaire.visibility
+    , migrationUuid = questionnaire.migrationUuid
+    , knowledgeModelPackage = questionnaire.knowledgeModelPackage
+    , fileCount = List.length questionnaire.files
+    }
 
 
 addCommentCount : String -> Uuid -> ProjectQuestionnaire -> ProjectQuestionnaire

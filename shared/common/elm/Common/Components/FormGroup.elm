@@ -8,6 +8,7 @@ module Common.Components.FormGroup exposing
     , formGroupCustom
     , formatRadioGroup
     , getErrors
+    , hours
     , htmlOrMarkdownEditor
     , htmlRadioGroup
     , input
@@ -211,6 +212,35 @@ fileSize locale form fieldName labelText =
                 , span [ class "input-group-text" ]
                     [ text "≈ "
                     , text (ByteUnits.toReadable value)
+                    ]
+                ]
+    in
+    formGroup inputFn [] locale form fieldName labelText
+
+
+hours : Gettext.Locale -> Form FormError o -> String -> String -> Html Form.Msg
+hours locale form fieldName labelText =
+    let
+        inputFn field attributes =
+            let
+                value =
+                    (Form.getFieldAsString fieldName form).value
+                        |> Maybe.andThen String.toInt
+                        |> Maybe.withDefault 0
+
+                hoursToDays =
+                    String.fromFloat (toFloat (round (10 * toFloat value / 24)) / 10)
+            in
+            div [ class "input-group" ]
+                [ Input.textInput field
+                    (attributes
+                        ++ [ class "form-control"
+                           ]
+                    )
+                , span [ class "input-group-text" ]
+                    [ text "≈ "
+                    , text hoursToDays
+                    , text (gettext " days" locale)
                     ]
                 ]
     in

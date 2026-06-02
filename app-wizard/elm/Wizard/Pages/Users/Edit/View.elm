@@ -13,6 +13,7 @@ import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions
 import Wizard.Pages.Users.Edit.Components.ApiKeys as ApiKeys
 import Wizard.Pages.Users.Edit.Components.AppKeys as AppKeys
+import Wizard.Pages.Users.Edit.Components.ConnectedAccounts as ConnectedAccounts
 import Wizard.Pages.Users.Edit.Components.Language as Language
 import Wizard.Pages.Users.Edit.Components.Password as Password
 import Wizard.Pages.Users.Edit.Components.PluginSettings as PluginSettings
@@ -39,6 +40,10 @@ view appState subroute model =
                 UserEditRoutes.Password ->
                     Html.map PasswordMsg <|
                         Password.view appState model.passwordModel
+
+                UserEditRoutes.ConnectedAccounts ->
+                    Html.map ConnectedAccountsMsg <|
+                        ConnectedAccounts.view appState model.connectedAccountsModel
 
                 UserEditRoutes.Language ->
                     Html.map LanguageMsg <|
@@ -115,6 +120,15 @@ navigation appState subroute model =
                 , dataCy "user_nav_password"
                 ]
                 [ text (gettext "Password" appState.locale)
+                ]
+            )
+         , Html.viewIf (not (Admin.isEnabled appState.config.admin))
+            (linkTo Routes.usersEditConnectedAccounts
+                [ class "nav-link"
+                , classList [ ( "active", subroute == UserEditRoutes.ConnectedAccounts ) ]
+                , dataCy "user_nav_connected-accounts"
+                ]
+                [ text (gettext "Connected Accounts" appState.locale)
                 ]
             )
          , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditLanguage appState model.uuidOrCurrent)

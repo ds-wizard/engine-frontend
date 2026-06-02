@@ -5,9 +5,11 @@ module Wizard.Pages.KnowledgeModels.Routing exposing
     )
 
 import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.UrlUtils exposing (queryParamsToString)
 import Url.Parser exposing ((</>), (<?>), Parser, map, s, string)
 import Url.Parser.Extensions as Parser
 import Url.Parser.Query as Query
+import Url.Parser.Query.Extensions as Query
 import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
@@ -24,12 +26,16 @@ parsers wrapRoute =
     let
         wrapResourcePageRoute kmId resourcePageUuid =
             wrapRoute <| ResourcePageRoute kmId resourcePageUuid
+
+        wrapCompareRoute mbLeftKmPackageId =
+            wrapRoute <| CompareRoute mbLeftKmPackageId
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "knowledgeModelPackageId")
     , map (detail wrapRoute) (s moduleRoot </> Parser.uuid)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     , map (preview wrapRoute) (s moduleRoot </> Parser.uuid </> s "preview" <?> Query.string "questionUuid")
     , map wrapResourcePageRoute (s moduleRoot </> Parser.uuid </> s "resource-pages" </> string)
+    , map wrapCompareRoute (s moduleRoot </> s "compare" <?> Query.uuid "leftKnowledgeModelPackageId")
     ]
 
 
@@ -50,26 +56,33 @@ toUrl route =
             [ moduleRoot, Uuid.toString kmPackageUuid ]
 
         ImportRoute kmPackageId ->
-            case kmPackageId of
-                Just id ->
-                    [ moduleRoot, "import", "?knowledgeModelPackageId=" ++ id ]
-
-                Nothing ->
-                    [ moduleRoot, "import" ]
+            let
+                queryString =
+                    queryParamsToString [ ( "knowledgeModelPackageId", kmPackageId ) ]
+            in
+            [ moduleRoot, "import" ++ queryString ]
 
         IndexRoute paginationQueryString ->
             [ moduleRoot ++ PaginationQueryString.toUrl paginationQueryString ]
 
         PreviewRoute kmPackageUuid mbQuestionUuid ->
-            case mbQuestionUuid of
-                Just uuid ->
-                    [ moduleRoot, Uuid.toString kmPackageUuid, "preview", "?questionUuid=" ++ uuid ]
-
-                Nothing ->
-                    [ moduleRoot, Uuid.toString kmPackageUuid, "preview" ]
+            let
+                queryString =
+                    queryParamsToString [ ( "questionUuid", mbQuestionUuid ) ]
+            in
+            [ moduleRoot, Uuid.toString kmPackageUuid, "preview" ++ queryString ]
 
         ResourcePageRoute kmUuid resourcePageUuid ->
             [ moduleRoot, Uuid.toString kmUuid, "resource-pages", resourcePageUuid ]
+
+        CompareRoute mbLeftKnowledgeModelPackageId ->
+            let
+                queryString =
+                    queryParamsToString
+                        [ ( "leftKnowledgeModelPackageId", Maybe.map Uuid.toString mbLeftKnowledgeModelPackageId )
+                        ]
+            in
+            [ moduleRoot, "compare" ++ queryString ]
 
 
 isAllowed : Route -> AppState -> Bool

@@ -218,7 +218,7 @@ update wrapMsg msg appState model =
         setError result error =
             let
                 questionnaireRoute =
-                    Routing.toUrl (Routes.projectsDetail model.uuid)
+                    Routing.toUrl (Routes.projectsDetailQuestionnaire model.uuid model.mbSelectedPath model.mbCommentThreadUuid)
 
                 loginRoute =
                     Routes.publicLogin (Just questionnaireRoute)

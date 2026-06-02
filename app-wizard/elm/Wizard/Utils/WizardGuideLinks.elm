@@ -31,6 +31,7 @@ module Wizard.Utils.WizardGuideLinks exposing
     , settingsDocumentSubmission
     , settingsFeatures
     , settingsLookAndFeel
+    , settingsOpenId
     , settingsOrganization
     , settingsPlugins
     , settingsPrivacyAndSupport
@@ -76,6 +77,7 @@ default =
         , ( "settingsDocumentSubmission", "https://guide.ds-wizard.org/en/latest/application/administration/settings/content/document-submission.html" )
         , ( "settingsFeatures", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/features.html" )
         , ( "settingsLookAndFeel", "https://guide.ds-wizard.org/en/latest/application/administration/settings/user-interface/look-and-feel.html" )
+        , ( "settingsOpenId", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/openid.html" )
         , ( "settingsOrganization", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/organization.html" )
         , ( "settingsPlugins", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/plugins.html" )
         , ( "settingsPrivacyAndSupport", "https://guide.ds-wizard.org/en/latest/application/administration/settings/system/privacy-and-support.html" )
@@ -238,6 +240,11 @@ settingsFeatures =
 settingsLookAndFeel : GuideLinks -> String
 settingsLookAndFeel =
     GuideLinks.get "settingsLookAndFeel"
+
+
+settingsOpenId : GuideLinks -> String
+settingsOpenId =
+    GuideLinks.get "settingsOpenId"
 
 
 settingsOrganization : GuideLinks -> String

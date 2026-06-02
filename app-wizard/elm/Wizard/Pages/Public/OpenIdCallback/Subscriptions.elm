@@ -1,8 +1,8 @@
-module Wizard.Pages.Public.Auth.Subscriptions exposing (subscriptions)
+module Wizard.Pages.Public.OpenIdCallback.Subscriptions exposing (subscriptions)
 
 import Common.Ports.LocalStorage as LocalStorage
 import Json.Decode as D
-import Wizard.Pages.Public.Auth.Msgs exposing (Msg(..))
+import Wizard.Pages.Public.OpenIdCallback.Msgs exposing (Msg(..))
 
 
 subscriptions : Sub Msg

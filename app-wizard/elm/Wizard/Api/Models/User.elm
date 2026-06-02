@@ -25,7 +25,6 @@ type alias User =
     , role : Role
     , permissions : List String
     , active : Bool
-    , sources : List String
     }
 
 
@@ -41,7 +40,6 @@ decoder =
         |> D.required "role" Role.decoder
         |> D.required "permissions" (D.list D.string)
         |> D.required "active" D.bool
-        |> D.required "sources" (D.list D.string)
 
 
 compare : { a | firstName : String, lastName : String } -> { a | firstName : String, lastName : String } -> Order

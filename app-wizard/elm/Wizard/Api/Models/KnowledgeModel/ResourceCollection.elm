@@ -2,6 +2,7 @@ module Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing
     ( ResourceCollection
     , addResourcePageUuid
     , decoder
+    , equalContent
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -29,3 +30,8 @@ decoder =
 addResourcePageUuid : String -> ResourceCollection -> ResourceCollection
 addResourcePageUuid resourcePageUuid resourceCollection =
     { resourceCollection | resourcePageUuids = resourceCollection.resourcePageUuids ++ [ resourcePageUuid ] }
+
+
+equalContent : ResourceCollection -> ResourceCollection -> Bool
+equalContent resourceCollection1 resourceCollection2 =
+    resourceCollection1.title == resourceCollection2.title

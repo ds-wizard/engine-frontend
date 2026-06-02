@@ -1,4 +1,4 @@
-module Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert, decoder, getVisibleName)
+module Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert, decoder, equalContent, getVisibleName)
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
@@ -29,3 +29,9 @@ getVisibleName expert =
 
     else
         expert.name
+
+
+equalContent : Expert -> Expert -> Bool
+equalContent expert1 expert2 =
+    (expert1.name == expert2.name)
+        && (expert1.email == expert2.email)

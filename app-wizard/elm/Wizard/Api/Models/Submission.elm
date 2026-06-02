@@ -18,7 +18,7 @@ type alias Submission =
     , serviceId : String
     , serviceName : Maybe String
     , documentUuid : Uuid
-    , createdBy : UserSuggestion
+    , createdBy : Maybe UserSuggestion
     , createdAt : Time.Posix
     , updatedAt : Time.Posix
     }
@@ -34,7 +34,7 @@ decoder =
         |> D.required "serviceId" D.string
         |> D.required "serviceName" (D.maybe D.string)
         |> D.required "documentUuid" Uuid.decoder
-        |> D.required "createdBy" UserSuggestion.decoder
+        |> D.required "createdBy" (D.maybe UserSuggestion.decoder)
         |> D.required "createdAt" D.datetime
         |> D.required "updatedAt" D.datetime
 

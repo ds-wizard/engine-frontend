@@ -4,9 +4,11 @@ module Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing
     , default
     , encode
     , fromString
+    , toReadableString
     , toString
     )
 
+import Gettext exposing (gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Encode as E
 import Maybe.Extra as Maybe
@@ -45,6 +47,37 @@ encode =
 default : QuestionValueType
 default =
     StringQuestionValueType
+
+
+toReadableString : Gettext.Locale -> QuestionValueType -> String
+toReadableString locale questionValueType =
+    case questionValueType of
+        StringQuestionValueType ->
+            gettext "String" locale
+
+        NumberQuestionValueType ->
+            gettext "Number" locale
+
+        DateQuestionValueType ->
+            gettext "Date" locale
+
+        DateTimeQuestionValueType ->
+            gettext "Date Time" locale
+
+        TimeQuestionValueType ->
+            gettext "Time" locale
+
+        TextQuestionValueType ->
+            gettext "Text" locale
+
+        EmailQuestionValueType ->
+            gettext "Email" locale
+
+        UrlQuestionValueType ->
+            gettext "URL" locale
+
+        ColorQuestionValueType ->
+            gettext "Color" locale
 
 
 toString : QuestionValueType -> String
