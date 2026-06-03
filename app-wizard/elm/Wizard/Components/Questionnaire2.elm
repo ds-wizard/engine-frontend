@@ -629,8 +629,32 @@ update appState cfg msg model =
             in
             QuestionnaireUpdateReturnData.fromModelCmd appState newModel localStorageCmd
 
-        UpdateRightPanel rightPanel ->
+        UpdateRightPanel originalRightPanel ->
             let
+                rightPanelIfAllowed panel allowed =
+                    if allowed appState model.questionnaire then
+                        panel
+
+                    else
+                        QuestionnaireRightPanel.None
+
+                rightPanel =
+                    case originalRightPanel of
+                        QuestionnaireRightPanel.TODOs ->
+                            rightPanelIfAllowed originalRightPanel Feature.projectTodos
+
+                        QuestionnaireRightPanel.VersionHistory ->
+                            rightPanelIfAllowed originalRightPanel Feature.projectVersionHistory
+
+                        QuestionnaireRightPanel.CommentsOverview ->
+                            rightPanelIfAllowed originalRightPanel Feature.projectCommentAdd
+
+                        QuestionnaireRightPanel.Comments _ ->
+                            rightPanelIfAllowed originalRightPanel Feature.projectCommentAdd
+
+                        _ ->
+                            originalRightPanel
+
                 localStorageCmd =
                     QuestionnaireLocalStorage.updateRightPanel model.questionnaire.uuid rightPanel
 
