@@ -141,6 +141,7 @@ module Common.Components.FontAwesome exposing
     , faQuestionnaireSettingsKmFiltered
     , faQuestionnaireShrink
     , faQuestionnaireUrlReferences
+    , faReload
     , faRemove
     , faRemoveFw
     , faSearch
@@ -906,6 +907,11 @@ faQuestionnaireShrink =
 faQuestionnaireUrlReferences : Html msg
 faQuestionnaireUrlReferences =
     fas "fa-external-link-alt"
+
+
+faReload : Html msg
+faReload =
+    fas "fa-sync-alt"
 
 
 faRemove : Html msg
