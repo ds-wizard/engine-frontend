@@ -54,4 +54,4 @@ type Msg
     | OpenRevertModal ProjectEvent
     | AddToMyProjects
     | PutQuestionnaireComplete (Result ApiError ())
-    | ResetModel
+    | ResetModel Uuid
