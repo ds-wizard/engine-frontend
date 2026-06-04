@@ -236,11 +236,18 @@
                 & > span {
                     display: inline-flex;
                     align-items: center;
+                    overflow: hidden;
+                    max-width: 100%;
                 }
 
                 .fragment {
-                    display: inline-flex;
+                    display: block;
                     align-items: center;
+
+                    &:last-child {
+                        overflow: hidden;
+                        text-overflow: ellipsis;
+                    }
 
                     img {
                         margin-right: .25rem;
