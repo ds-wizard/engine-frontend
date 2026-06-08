@@ -138,7 +138,8 @@ function initPlugin(config, plugin) {
 
 async function importPlugin(plugin) {
     const file = plugin.enabled ? 'plugin.js' : 'manifest.js'
-    const url = plugin.url + file
+    const pluginUrl = plugin.url.endsWith('/') ? plugin.url : plugin.url + '/';
+    const url = pluginUrl + file
     const module = await import(/* webpackIgnore: true */ url)
     return {
         uuid: plugin.uuid,
