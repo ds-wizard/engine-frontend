@@ -2,6 +2,12 @@
 @import '../../mixins';
 
 .Markdown, .ProseMirror {
+    &--compact {
+        p {
+            margin-bottom: $spacer-2;
+        }
+    }
+
     img {
         max-width: 100%;
     }

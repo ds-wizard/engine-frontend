@@ -5,14 +5,16 @@ module Wizard.Api.Models.Project exposing
     , isOwner
     )
 
-import Common.Api.Models.UserInfo as UserInfo
+import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Time
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.KnowledgeModelPackageInfo as KnowledgeModelPackageInfo exposing (KnowledgeModelPackageInfo)
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission as Permission exposing (Permission)
@@ -41,8 +43,8 @@ type alias Project =
 isEditable : AppState -> Project -> Bool
 isEditable appState project =
     let
-        isAdmin =
-            UserInfo.isAdmin appState.config.user
+        canEditAllProjects =
+            Maybe.unwrap False (UserConfig.hasPerm RolePermission.projectsEdit) appState.config.user
 
         isReadonly =
             if project.sharing == AnyoneWithLinkEdit then
@@ -57,22 +59,22 @@ isEditable appState project =
         isMember =
             matchMember project appState.config.user
     in
-    isAdmin || not isReadonly || isMember
+    canEditAllProjects || not isReadonly || isMember
 
 
 isOwner : AppState -> Project -> Bool
 isOwner appState project =
     let
-        isAdmin =
-            UserInfo.isAdmin appState.config.user
+        canManageAllProjects =
+            Maybe.unwrap False (UserConfig.hasPerm RolePermission.projectsManage) appState.config.user
 
-        isQuestionnaireOwner =
+        isProjectOwner =
             appState.config.user
                 |> Maybe.andThen (\user -> List.find (\p -> Member.getUuid p.member == user.uuid) project.permissions)
                 |> Maybe.map (List.member ProjectPerm.admin << .perms)
                 |> Maybe.withDefault False
     in
-    isAdmin || isQuestionnaireOwner
+    canManageAllProjects || isProjectOwner
 
 
 decoder : Decoder Project

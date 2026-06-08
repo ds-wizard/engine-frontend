@@ -10,12 +10,13 @@ module Wizard.Pages.Users.Edit.Components.Profile exposing
 
 import ActionResult exposing (ActionResult)
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Api.Models.Role as Role exposing (Role)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.FontAwesome exposing (fa, faInfo)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
-import Common.Data.Role as Role
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
 import Common.Ports.Dom as Dom
 import Common.Ports.FormUtils as FormUtils
@@ -30,17 +31,18 @@ import Html exposing (Html, a, div, img, strong, text)
 import Html.Attributes exposing (class, href, src)
 import Html.Events exposing (onSubmit)
 import Html.Extra as Html
-import Maybe.Extra as Maybe
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.User as User exposing (User)
+import Wizard.Api.Roles as RolesApi
 import Wizard.Api.Users as UsersApi
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Users.Common.UserEditForm as UserEditForm exposing (UserEditForm)
 
 
 type alias Model =
     { uuidOrCurrent : UuidOrCurrent
     , user : ActionResult User
+    , roles : ActionResult (List Role)
     , savingUser : ActionResult String
     , userForm : Form FormError UserEditForm
     }
@@ -50,6 +52,7 @@ initialModel : UuidOrCurrent -> Model
 initialModel uuidOrCurrent =
     { uuidOrCurrent = uuidOrCurrent
     , user = ActionResult.Loading
+    , roles = ActionResult.Loading
     , savingUser = ActionResult.Unset
     , userForm = UserEditForm.initEmpty
     }
@@ -57,13 +60,25 @@ initialModel uuidOrCurrent =
 
 type Msg
     = GetUserCompleted (Result ApiError User)
+    | GetRolesCompleted (Result ApiError (Pagination Role))
     | EditFormMsg Form.Msg
     | PutUserCompleted (Result ApiError User)
 
 
 fetchData : AppState -> UuidOrCurrent -> Cmd Msg
 fetchData appState uuidOrCurrent =
-    UsersApi.getUser appState uuidOrCurrent GetUserCompleted
+    let
+        rolesCmd =
+            if UuidOrCurrent.isCurrent uuidOrCurrent then
+                Cmd.none
+
+            else
+                RolesApi.getRoles appState GetRolesCompleted
+    in
+    Cmd.batch
+        [ UsersApi.getUser appState uuidOrCurrent GetUserCompleted
+        , rolesCmd
+        ]
 
 
 type alias UpdateConfig msg =
@@ -80,6 +95,9 @@ update cfg appState msg model =
 
         GetUserCompleted result ->
             getUserCompleted cfg appState model result
+
+        GetRolesCompleted result ->
+            getRolesCompleted cfg appState model result
 
         PutUserCompleted result ->
             putUserCompleted cfg appState model result
@@ -128,6 +146,23 @@ getUserCompleted cfg appState model result =
     ( newModel, cmd )
 
 
+getRolesCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError (Pagination Role) -> ( Model, Cmd msg )
+getRolesCompleted cfg appState model result =
+    let
+        newModel =
+            case result of
+                Ok pagination ->
+                    { model | roles = ActionResult.Success pagination.items }
+
+                Err error ->
+                    { model | roles = ApiError.toActionResult appState (gettext "Unable to get the roles." appState.locale) error }
+
+        cmd =
+            RequestHelpers.getResultCmd cfg.logoutMsg result
+    in
+    ( newModel, cmd )
+
+
 putUserCompleted : UpdateConfig msg -> AppState -> Model -> Result ApiError User -> ( Model, Cmd msg )
 putUserCompleted cfg appState model result =
     case result of
@@ -161,11 +196,19 @@ putUserCompleted cfg appState model result =
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    Page.actionResultView appState (userView appState model) model.user
+    let
+        rolesActionResult =
+            if UuidOrCurrent.isCurrent model.uuidOrCurrent then
+                ActionResult.Success []
+
+            else
+                model.roles
+    in
+    Page.actionResultView appState (userView appState model) (ActionResult.combine model.user rolesActionResult)
 
 
-userView : AppState -> Model -> User -> Html Msg
-userView appState model user =
+userView : AppState -> Model -> ( User, List Role ) -> Html Msg
+userView appState model ( user, roles ) =
     let
         content =
             if Admin.isEnabled appState.config.admin then
@@ -173,7 +216,7 @@ userView appState model user =
 
             else
                 Html.map EditFormMsg <|
-                    userFormView appState model (UuidOrCurrent.isCurrent model.uuidOrCurrent)
+                    userFormView appState model roles (UuidOrCurrent.isCurrent model.uuidOrCurrent)
     in
     div []
         [ Page.header (gettext "Profile" appState.locale) []
@@ -192,15 +235,21 @@ userView appState model user =
         ]
 
 
-userFormView : AppState -> Model -> Bool -> Html Form.Msg
-userFormView appState model isCurrent =
+userFormView : AppState -> Model -> List Role -> Bool -> Html Form.Msg
+userFormView appState model roles isCurrent =
     let
         roleSelect =
             if isCurrent then
                 Html.nothing
 
             else
-                FormGroup.select appState.locale (Role.options appState) model.userForm "role" <| gettext "Role" appState.locale
+                let
+                    roleOptions =
+                        roles
+                            |> List.sortBy .name
+                            |> List.map Role.toFormOption
+                in
+                FormGroup.select appState.locale roleOptions model.userForm "role" <| gettext "Role" appState.locale
 
         activeToggle =
             if isCurrent then
@@ -225,8 +274,8 @@ userFormView appState model isCurrent =
 readOnlyView : AppState -> User -> Html msg
 readOnlyView appState user =
     let
-        editProfileUrl base =
-            base ++ "/users/edit/current"
+        editProfileUrl =
+            AppState.getAdminClientUrl appState ++ "/users/edit/current"
 
         readOnlyInfo =
             div [ class "alert alert-info" ]
@@ -234,7 +283,7 @@ readOnlyView appState user =
                 , text (gettext "Your profile is managed elsewhere." appState.locale)
                 , a
                     [ class "btn btn-primary ms-2"
-                    , href (Maybe.unwrap "" editProfileUrl (Admin.getClientUrl appState.config.admin))
+                    , href editProfileUrl
                     ]
                     [ text (gettext "Edit profile" appState.locale)
                     , fa "fas fa-external-link-alt ms-2"

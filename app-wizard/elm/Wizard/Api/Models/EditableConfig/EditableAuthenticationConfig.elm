@@ -5,16 +5,16 @@ module Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig exposing
     , encode
     )
 
-import Common.Data.Role as Role exposing (Role)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Json.Encode as E
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 import Wizard.Api.Models.EditableConfig.EditableTwoFactorAuthConfig as EditableTwoFactorAuthConfig exposing (EditableTwoFactorAuthConfig)
 
 
 type alias EditableAuthenticationConfig =
-    { defaultRole : Role
+    { defaultRoleUuid : Uuid
     , internal : Internal
     }
 
@@ -31,7 +31,7 @@ type alias Internal =
 decoder : Decoder EditableAuthenticationConfig
 decoder =
     D.succeed EditableAuthenticationConfig
-        |> D.required "defaultRole" Role.decoder
+        |> D.required "defaultRoleUuid" Uuid.decoder
         |> D.required "internal" internalDecoder
 
 
@@ -48,7 +48,7 @@ internalDecoder =
 encode : EditableAuthenticationConfig -> E.Value
 encode config =
     E.object
-        [ ( "defaultRole", Role.encode config.defaultRole )
+        [ ( "defaultRoleUuid", Uuid.encode config.defaultRoleUuid )
         , ( "internal", encodeInternal config.internal )
         ]
 

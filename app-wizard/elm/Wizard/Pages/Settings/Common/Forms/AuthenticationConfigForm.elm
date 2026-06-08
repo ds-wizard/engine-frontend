@@ -6,17 +6,17 @@ module Wizard.Pages.Settings.Common.Forms.AuthenticationConfigForm exposing
     , validation
     )
 
-import Common.Data.Role as Role exposing (Role)
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Form.Validate as V
 import Form exposing (Form)
 import Form.Field as Field exposing (Field)
 import Form.Validate as V exposing (Validation)
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.EditableConfig.EditableAuthenticationConfig exposing (EditableAuthenticationConfig)
 
 
 type alias AuthenticationConfigForm =
-    { defaultRole : Role
+    { defaultRoleUuid : Uuid
     , registrationEnabled : Bool
     , nonAdminLoginEnabled : Bool
     , twoFactorAuthEnabled : Bool
@@ -40,7 +40,7 @@ init config =
 validation : Validation FormError AuthenticationConfigForm
 validation =
     V.succeed AuthenticationConfigForm
-        |> V.andMap (V.field "defaultRole" Role.validation)
+        |> V.andMap (V.field "defaultRoleUuid" V.uuid)
         |> V.andMap (V.field "registrationEnabled" V.bool)
         |> V.andMap (V.field "nonAdminLoginEnabled" V.bool)
         |> V.andMap (V.field "twoFactorAuthEnabled" V.bool)
@@ -52,7 +52,7 @@ validation =
 
 configToFormInitials : EditableAuthenticationConfig -> List ( String, Field )
 configToFormInitials config =
-    [ ( "defaultRole", Field.string (Role.toString config.defaultRole) )
+    [ ( "defaultRoleUuid", Field.string (Uuid.toString config.defaultRoleUuid) )
     , ( "registrationEnabled", Field.bool config.internal.registration.enabled )
     , ( "nonAdminLoginEnabled", Field.bool config.internal.nonAdminLoginEnabled )
     , ( "twoFactorAuthEnabled", Field.bool config.internal.twoFactorAuth.enabled )
@@ -65,7 +65,7 @@ configToFormInitials config =
 
 toEditableAuthConfig : AuthenticationConfigForm -> EditableAuthenticationConfig
 toEditableAuthConfig form =
-    { defaultRole = form.defaultRole
+    { defaultRoleUuid = form.defaultRoleUuid
     , internal =
         { registration = { enabled = form.registrationEnabled }
         , nonAdminLoginEnabled = form.nonAdminLoginEnabled

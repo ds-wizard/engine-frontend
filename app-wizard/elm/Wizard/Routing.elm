@@ -85,8 +85,8 @@ isAllowed route appState =
         Routes.DocumentsRoute _ ->
             Wizard.Pages.Documents.Routing.isAllowed appState
 
-        Routes.DocumentTemplateEditorsRoute _ ->
-            Wizard.Pages.DocumentTemplateEditors.Routing.isAllowed appState
+        Routes.DocumentTemplateEditorsRoute dtEditorRoute ->
+            Wizard.Pages.DocumentTemplateEditors.Routing.isAllowed appState dtEditorRoute
 
         Routes.DocumentTemplatesRoute templatesRoute ->
             Wizard.Pages.DocumentTemplates.Routing.isAllowed templatesRoute appState

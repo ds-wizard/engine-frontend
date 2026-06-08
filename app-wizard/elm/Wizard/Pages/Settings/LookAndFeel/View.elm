@@ -16,7 +16,7 @@ import Html.Attributes exposing (attribute, class, placeholder, src)
 import Html.Events exposing (onClick)
 import Html.Extra as Html
 import String.Format as String
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.EditableConfig.EditableLookAndFeelConfig exposing (EditableLookAndFeelConfig)
 import Wizard.Data.AppState as AppState exposing (AppState)

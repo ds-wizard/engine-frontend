@@ -102,6 +102,9 @@ module Wizard.Routes exposing
     , settingsOrganization
     , settingsPluginSettings
     , settingsRegistry
+    , settingsRoleCreate
+    , settingsRoleDetail
+    , settingsRoles
     , tenantsCreate
     , tenantsDetail
     , tenantsIndex
@@ -125,11 +128,12 @@ module Wizard.Routes exposing
 
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
-import Common.Data.Role as Role
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Data.Session exposing (Session)
 import Wizard.Pages.Dev.Routes
 import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute
@@ -680,7 +684,7 @@ projectsIndex appState =
         mbUserUuid =
             case appState.config.user of
                 Just user ->
-                    if user.role == Role.admin then
+                    if UserConfig.hasPerm RolePermission.projectsView user then
                         Nothing
 
                     else
@@ -838,6 +842,21 @@ settingsOpenIdDetail =
 settingsOrganization : Route
 settingsOrganization =
     SettingsRoute Wizard.Pages.Settings.Routes.OrganizationRoute
+
+
+settingsRoleCreate : Route
+settingsRoleCreate =
+    SettingsRoute Wizard.Pages.Settings.Routes.RoleCreateRoute
+
+
+settingsRoleDetail : Uuid -> Route
+settingsRoleDetail =
+    SettingsRoute << Wizard.Pages.Settings.Routes.RoleDetailRoute
+
+
+settingsRoles : Route
+settingsRoles =
+    SettingsRoute Wizard.Pages.Settings.Routes.RolesRoute
 
 
 settingsRegistry : Route

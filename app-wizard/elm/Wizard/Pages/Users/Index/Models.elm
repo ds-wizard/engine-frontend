@@ -1,6 +1,7 @@
 module Wizard.Pages.Users.Index.Models exposing (Model, initialModel)
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.Models.Role exposing (Role)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
 import Common.Data.PaginationQueryString exposing (PaginationQueryString)
 import Wizard.Api.Models.User exposing (User)
@@ -9,7 +10,8 @@ import Wizard.Pages.Users.Routes exposing (indexRouteRoleFilterId)
 
 
 type alias Model =
-    { users : Listing.Model User
+    { roles : ActionResult (List Role)
+    , users : Listing.Model User
     , userToBeDeleted : Maybe User
     , deletingUser : ActionResult String
     }
@@ -21,7 +23,8 @@ initialModel paginationQueryString mbRoute =
         paginationQueryFilters =
             PaginationQueryFilters.fromValues [ ( indexRouteRoleFilterId, mbRoute ) ]
     in
-    { users = Listing.initialModelWithFilters paginationQueryString paginationQueryFilters
+    { roles = ActionResult.Loading
+    , users = Listing.initialModelWithFilters paginationQueryString paginationQueryFilters
     , userToBeDeleted = Nothing
     , deletingUser = Unset
     }

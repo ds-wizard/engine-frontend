@@ -10,7 +10,7 @@ import Json.Encode as E
 import Json.Encode.Extra as E
 import String.Extra as String
 import Task.Extra as Task
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.TokenResponse as TokenResponse exposing (TokenResponse)
 import Wizard.Api.OpenIdClients as OpenIdClientApi
 import Wizard.Api.Tokens as TokensApi

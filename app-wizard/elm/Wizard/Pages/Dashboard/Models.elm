@@ -4,27 +4,20 @@ module Wizard.Pages.Dashboard.Models exposing
     , initialModel
     )
 
-import Common.Data.Role as Role
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig.DashboardType as DashboardType
-import Wizard.Data.AppState as AppState exposing (AppState)
-import Wizard.Pages.Dashboard.Dashboards.AdminDashboard as AdminDashboard
-import Wizard.Pages.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
-import Wizard.Pages.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
+import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.Dashboard.Dashboards.WidgetDashboard as WidgetDashboard
 
 
 type alias Model =
     { currentDashboard : CurrentDashboard
-    , researcherDashboardModel : ResearcherDashboard.Model
-    , dataStewardDashboardModel : DataStewardDashboard.Model
-    , adminDashboardModel : AdminDashboard.Model
+    , widgetDashboardModel : WidgetDashboard.Model
     }
 
 
 type CurrentDashboard
     = WelcomeDashboard
-    | ResearcherDashboard
-    | DataStewardDashboard
-    | AdminDashboard
+    | WidgetDashboard
 
 
 initialModel : AppState -> Model
@@ -36,18 +29,8 @@ initialModel appState =
                     WelcomeDashboard
 
                 DashboardType.RoleBased ->
-                    case AppState.getUserRole appState of
-                        Just role ->
-                            Role.switch role
-                                AdminDashboard
-                                DataStewardDashboard
-                                ResearcherDashboard
-
-                        Nothing ->
-                            ResearcherDashboard
+                    WidgetDashboard
     in
     { currentDashboard = currentDashboard
-    , researcherDashboardModel = ResearcherDashboard.initialModel
-    , dataStewardDashboardModel = DataStewardDashboard.initialModel
-    , adminDashboardModel = AdminDashboard.initialModel
+    , widgetDashboardModel = WidgetDashboard.initialModel
     }

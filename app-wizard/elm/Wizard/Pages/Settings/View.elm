@@ -3,7 +3,7 @@ module Wizard.Pages.Settings.View exposing (view)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
 import Html.Attributes exposing (class, classList)
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Authentication.View
@@ -21,6 +21,9 @@ import Wizard.Pages.Settings.Plugins.View
 import Wizard.Pages.Settings.PrivacyAndSupport.View
 import Wizard.Pages.Settings.Projects.View
 import Wizard.Pages.Settings.Registry.View
+import Wizard.Pages.Settings.RoleCreate.View
+import Wizard.Pages.Settings.RoleDetail.View
+import Wizard.Pages.Settings.Roles.View
 import Wizard.Pages.Settings.Routes as SettingsRoutes exposing (Route(..))
 import Wizard.Pages.Settings.Submission.View
 import Wizard.Pages.Settings.Usage.View
@@ -53,6 +56,18 @@ view route appState model =
                 OpenIdDetailRoute _ ->
                     Html.map OpenIdDetailMsg <|
                         Wizard.Pages.Settings.OpenIdDetail.View.view appState model.openIdDetailModel
+
+                RolesRoute ->
+                    Html.map RolesMsg <|
+                        Wizard.Pages.Settings.Roles.View.view appState model.rolesModel
+
+                RoleCreateRoute ->
+                    Html.map RoleCreateMsg <|
+                        Wizard.Pages.Settings.RoleCreate.View.view appState model.roleCreateModel
+
+                RoleDetailRoute _ ->
+                    Html.map RoleDetailMsg <|
+                        Wizard.Pages.Settings.RoleDetail.View.view appState model.roleDetailModel
 
                 PrivacyAndSupportRoute ->
                     Html.map PrivacyAndSupportMsg <|
@@ -145,6 +160,7 @@ navigationSystemLinks appState =
                 [ ( OrganizationRoute, gettext "Organization" appState.locale, (==) OrganizationRoute )
                 , ( AuthenticationRoute, gettext "Authentication" appState.locale, (==) AuthenticationRoute )
                 , ( OpenIdRoute, gettext "OpenID" appState.locale, (==) OpenIdRoute )
+                , ( RolesRoute, gettext "Roles" appState.locale, (==) RolesRoute )
                 , ( PrivacyAndSupportRoute, gettext "Privacy & Support" appState.locale, (==) PrivacyAndSupportRoute )
                 , ( FeaturesRoute, gettext "Features" appState.locale, (==) FeaturesRoute )
                 ]

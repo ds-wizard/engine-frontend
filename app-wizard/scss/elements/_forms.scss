@@ -523,6 +523,14 @@ select {
             }
         }
 
+        &:disabled:checked + span {
+            &:before {
+                background-color: var(--bs-primary);
+                border-color: var(--bs-primary);
+                opacity: 0.5;
+            }
+        }
+
         &:focus + span {
             &:before {
                 border-color: var(--bs-input-focus-border-color);

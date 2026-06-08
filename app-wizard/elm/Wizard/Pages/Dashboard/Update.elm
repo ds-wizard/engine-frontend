@@ -5,12 +5,10 @@ module Wizard.Pages.Dashboard.Update exposing
 
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Gettext exposing (gettext)
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
-import Wizard.Pages.Dashboard.Dashboards.AdminDashboard as AdminDashboard
-import Wizard.Pages.Dashboard.Dashboards.DataStewardDashboard as DataStewardDashboard
-import Wizard.Pages.Dashboard.Dashboards.ResearcherDashboard as ResearcherDashboard
+import Wizard.Pages.Dashboard.Dashboards.WidgetDashboard as WidgetDashboard
 import Wizard.Pages.Dashboard.Models exposing (CurrentDashboard(..), Model)
 import Wizard.Pages.Dashboard.Msgs exposing (Msg(..))
 import Wizard.Utils.Driver as Driver
@@ -22,17 +20,9 @@ fetchData appState model =
     let
         fetchDashboarData =
             case model.currentDashboard of
-                ResearcherDashboard ->
-                    Cmd.map ResearcherDashboardMsg <|
-                        ResearcherDashboard.fetchData appState
-
-                DataStewardDashboard ->
-                    Cmd.map DataStewardDashboardMsg <|
-                        DataStewardDashboard.fetchData appState
-
-                AdminDashboard ->
-                    Cmd.map AdminDashboardMsg <|
-                        AdminDashboard.fetchData appState
+                WidgetDashboard ->
+                    Cmd.map WidgetDashboardMsg <|
+                        WidgetDashboard.fetchData appState
 
                 _ ->
                     Cmd.none
@@ -74,29 +64,16 @@ tour appState =
 update : Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg appState model =
     case msg of
-        ResearcherDashboardMsg researcherDashboardMsg ->
+        WidgetDashboardMsg widgetDashboardMsg ->
             let
-                ( researcherDashboardModel, cmd ) =
-                    ResearcherDashboard.update Wizard.Msgs.logoutMsg researcherDashboardMsg appState model.researcherDashboardModel
-            in
-            ( { model | researcherDashboardModel = researcherDashboardModel }
-            , cmd
-            )
+                updateConfig =
+                    { locale = appState.locale
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
 
-        DataStewardDashboardMsg dataStewardDashboardMsg ->
-            let
-                ( dataStewardDashboardModel, cmd ) =
-                    DataStewardDashboard.update Wizard.Msgs.logoutMsg dataStewardDashboardMsg appState model.dataStewardDashboardModel
+                ( widgetDashboardModel, cmd ) =
+                    WidgetDashboard.update updateConfig widgetDashboardMsg model.widgetDashboardModel
             in
-            ( { model | dataStewardDashboardModel = dataStewardDashboardModel }
-            , cmd
-            )
-
-        AdminDashboardMsg adminDashboardMsg ->
-            let
-                ( adminDashboardModel, cmd ) =
-                    AdminDashboard.update Wizard.Msgs.logoutMsg adminDashboardMsg appState model.adminDashboardModel
-            in
-            ( { model | adminDashboardModel = adminDashboardModel }
+            ( { model | widgetDashboardModel = widgetDashboardModel }
             , cmd
             )

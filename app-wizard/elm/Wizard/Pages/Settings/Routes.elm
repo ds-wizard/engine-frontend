@@ -13,6 +13,9 @@ type Route
     | OpenIdRoute
     | OpenIdCreateRoute
     | OpenIdDetailRoute Uuid
+    | RolesRoute
+    | RoleCreateRoute
+    | RoleDetailRoute Uuid
     | PrivacyAndSupportRoute
     | FeaturesRoute
     | PluginsRoute

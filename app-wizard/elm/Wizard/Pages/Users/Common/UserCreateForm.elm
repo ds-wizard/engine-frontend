@@ -5,7 +5,6 @@ module Wizard.Pages.Users.Common.UserCreateForm exposing
     , validation
     )
 
-import Common.Data.Role as Role exposing (Role)
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.Form.Validate as V
 import Form exposing (Form)
@@ -13,6 +12,7 @@ import Form.Field as Field
 import Form.Validate as V exposing (Validation)
 import Json.Encode as E
 import Json.Encode.Extra as E
+import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 
 
@@ -21,7 +21,7 @@ type alias UserCreateForm =
     , firstName : String
     , lastName : String
     , affiliation : Maybe String
-    , role : Role
+    , roleUuid : Uuid
     , password : String
     }
 
@@ -30,7 +30,7 @@ init : AppState -> Form FormError UserCreateForm
 init appState =
     let
         fields =
-            [ ( "role", Field.string (Role.toString appState.config.authentication.defaultRole) ) ]
+            [ ( "role", Field.string (Uuid.toString appState.config.authentication.defaultRoleUuid) ) ]
     in
     Form.initial fields (validation appState)
 
@@ -42,7 +42,7 @@ validation appState =
         |> V.andMap (V.field "firstName" V.string)
         |> V.andMap (V.field "lastName" V.string)
         |> V.andMap (V.field "affiliation" V.maybeString)
-        |> V.andMap (V.field "role" Role.validation)
+        |> V.andMap (V.field "roleUuid" V.uuid)
         |> V.andMap (V.field "password" (V.password appState))
 
 
@@ -54,6 +54,6 @@ encode uuid form =
         , ( "firstName", E.string form.firstName )
         , ( "lastName", E.string form.lastName )
         , ( "affiliation", E.maybe E.string form.affiliation )
-        , ( "role", Role.encode form.role )
+        , ( "roleUuid", Uuid.encode form.roleUuid )
         , ( "password", E.string form.password )
         ]

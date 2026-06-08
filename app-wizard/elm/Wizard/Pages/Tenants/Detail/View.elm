@@ -16,7 +16,7 @@ import Html.Extra as Html
 import Maybe.Extra as Maybe
 import String.Format as String
 import Uuid
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 import Wizard.Api.Models.TenantState as TenantState
 import Wizard.Api.Models.User as User exposing (User)

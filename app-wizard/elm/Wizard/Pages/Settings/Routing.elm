@@ -8,7 +8,7 @@ import List.Extensions as List
 import Url.Parser exposing ((</>), Parser, map, s)
 import Url.Parser.Extensions as Parser
 import Uuid
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Settings.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
@@ -34,6 +34,9 @@ parsers appState wrapRoute =
         |> List.insertIf (map (wrapRoute <| OpenIdRoute) (s moduleRoot </> s "open-id")) adminDisabled
         |> List.insertIf (map (wrapRoute <| OpenIdCreateRoute) (s moduleRoot </> s "open-id" </> s "create")) adminDisabled
         |> List.insertIf (map (wrapRoute << OpenIdDetailRoute) (s moduleRoot </> s "open-id" </> Parser.uuid)) adminDisabled
+        |> List.insertIf (map (wrapRoute <| RolesRoute) (s moduleRoot </> s "roles")) adminDisabled
+        |> List.insertIf (map (wrapRoute <| RoleCreateRoute) (s moduleRoot </> s "roles" </> s "create")) adminDisabled
+        |> List.insertIf (map (wrapRoute << RoleDetailRoute) (s moduleRoot </> s "roles" </> Parser.uuid)) adminDisabled
         |> List.insertIf (map (wrapRoute <| PrivacyAndSupportRoute) (s moduleRoot </> s "privacy-and-support")) adminDisabled
         |> List.insertIf (map (wrapRoute <| FeaturesRoute) (s moduleRoot </> s "features")) adminDisabled
         |> List.insertIf (map (wrapRoute <| PluginsRoute) (s moduleRoot </> s "plugins")) pluginsAvilable
@@ -63,6 +66,15 @@ toUrl route =
 
         OpenIdDetailRoute openIdUuid ->
             [ moduleRoot, "open-id", Uuid.toString openIdUuid ]
+
+        RolesRoute ->
+            [ moduleRoot, "roles" ]
+
+        RoleCreateRoute ->
+            [ moduleRoot, "roles", "create" ]
+
+        RoleDetailRoute roleUuid ->
+            [ moduleRoot, "roles", Uuid.toString roleUuid ]
 
         PrivacyAndSupportRoute ->
             [ moduleRoot, "privacy-and-support" ]

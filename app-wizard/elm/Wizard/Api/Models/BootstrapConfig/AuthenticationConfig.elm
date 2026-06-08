@@ -6,16 +6,16 @@ module Wizard.Api.Models.BootstrapConfig.AuthenticationConfig exposing
     , default
     )
 
-import Common.Data.Role as Role exposing (Role)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig as OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.TwoFactorAuthConfig as TwoFactorAuthConfig exposing (TwoFactorAuthConfig)
 import Wizard.Api.Models.BootstrapConfig.Partials.SimpleFeatureConfig as SimpleFeatureConfig exposing (SimpleFeatureConfig)
 
 
 type alias AuthenticationConfig =
-    { defaultRole : Role
+    { defaultRoleUuid : Uuid
     , internal : Internal
     , external : External
     }
@@ -34,7 +34,7 @@ type alias External =
 
 default : AuthenticationConfig
 default =
-    { defaultRole = Role.researcher
+    { defaultRoleUuid = Uuid.nil
     , internal =
         { registration = SimpleFeatureConfig.init True
         , twoFactorAuth = TwoFactorAuthConfig.default
@@ -47,7 +47,7 @@ default =
 decoder : Decoder AuthenticationConfig
 decoder =
     D.succeed AuthenticationConfig
-        |> D.required "defaultRole" Role.decoder
+        |> D.required "defaultRoleUuid" Uuid.decoder
         |> D.required "internal" internalDecoder
         |> D.required "external" externalDecoder
 

@@ -77,7 +77,7 @@ actions appState cfg template =
                 }
 
         createEditorActionVisible =
-            Feature.documentTemplatesView appState && not template.nonEditable
+            Feature.documentTemplateEditorsCreate appState && not template.nonEditable
 
         setDeprecatedAction =
             ListingDropdown.dropdownAction
@@ -89,7 +89,7 @@ actions appState cfg template =
                 }
 
         setDeprecatedActionVisible =
-            template.phase == DocumentTemplatePhase.Released
+            Feature.documentTemplatesView appState && template.phase == DocumentTemplatePhase.Released
 
         restoreAction =
             ListingDropdown.dropdownAction
@@ -101,7 +101,7 @@ actions appState cfg template =
                 }
 
         restoreActionVisible =
-            template.phase == DocumentTemplatePhase.Deprecated
+            Feature.documentTemplatesView appState && template.phase == DocumentTemplatePhase.Deprecated
 
         deleteAction =
             ListingDropdown.dropdownAction

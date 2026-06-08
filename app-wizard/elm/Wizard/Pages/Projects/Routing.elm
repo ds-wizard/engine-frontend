@@ -14,9 +14,9 @@ import Url.Parser.Query as Query
 import Url.Parser.Query.Extensions as Query
 import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Perm as Perm
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
 import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Utils.Feature as Feature
 
 
 moduleRoot : String
@@ -187,4 +187,4 @@ isAllowed route appState =
             True
 
         _ ->
-            Perm.hasPerm appState.config.user Perm.project
+            Feature.projectsView appState

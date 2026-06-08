@@ -1,6 +1,20 @@
-module Wizard.Pages.Dashboard.Widgets.AssignedComments exposing (view)
+module Wizard.Pages.Dashboard.Widgets.AssignedCommentsWidget exposing
+    ( Model
+    , Msg
+    , UpdateConfig
+    , fetchData
+    , initialModel
+    , update
+    , view
+    )
 
 import ActionResult exposing (ActionResult(..))
+import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Data.PaginationQueryFilters as PaginationQueryFilters
+import Common.Data.PaginationQueryString as PaginationQueryString
+import Common.Utils.RequestHelpers as RequestHelpers
+import Common.Utils.Setters exposing (setCommentThreads)
 import Common.Utils.TimeDistance exposing (locale)
 import Gettext exposing (gettext)
 import Html exposing (Html, div, h2, strong, text)
@@ -9,6 +23,7 @@ import Html.Extra as Html
 import String.Format as String
 import Time.Distance exposing (inWordsWithConfig)
 import Wizard.Api.Models.ProjectCommentThreadAssigned exposing (ProjectCommentThreadAssigned)
+import Wizard.Api.ProjectCommentThreads as ProjectCommentThreadsApi
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
@@ -16,9 +31,65 @@ import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
 
 
-view : AppState -> ActionResult (List ProjectCommentThreadAssigned) -> Html msg
-view appState commentThreads =
-    case commentThreads of
+type alias Model =
+    { commentThreads : ActionResult (List ProjectCommentThreadAssigned)
+    }
+
+
+initialModel : Model
+initialModel =
+    { commentThreads = ActionResult.Loading
+    }
+
+
+type Msg
+    = GetCommentThreadsCompleted (Result ApiError (Pagination ProjectCommentThreadAssigned))
+
+
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    let
+        pagination =
+            PaginationQueryString.empty
+                |> PaginationQueryString.withSort (Just "updatedAt") PaginationQueryString.SortDESC
+                |> PaginationQueryString.withSize (Just 3)
+
+        filters =
+            PaginationQueryFilters.create
+                [ ( "resolved", Just "false" ) ]
+                []
+    in
+    ProjectCommentThreadsApi.getCommentThreads
+        appState
+        filters
+        pagination
+        GetCommentThreadsCompleted
+
+
+type alias UpdateConfig msg =
+    { locale : Gettext.Locale
+    , logoutMsg : msg
+    }
+
+
+update : UpdateConfig msg -> Msg -> Model -> ( Model, Cmd msg )
+update cfg msg model =
+    case msg of
+        GetCommentThreadsCompleted result ->
+            RequestHelpers.applyResultTransform
+                { setResult = setCommentThreads
+                , defaultError = gettext "Unable to get assigned comments." cfg.locale
+                , model = model
+                , result = result
+                , logoutMsg = cfg.logoutMsg
+                , transform = .items
+                , locale = cfg.locale
+                }
+
+
+view : AppState -> Model -> Html msg
+view appState model =
+    case model.commentThreads of
         Unset ->
             Html.nothing
 

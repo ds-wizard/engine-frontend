@@ -13,7 +13,7 @@ import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Extra as Html
 import Html.Keyed
 import Maybe.Extra as Maybe
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Components.Announcements as Announcements
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton
 import Wizard.Components.Html exposing (linkTo)
