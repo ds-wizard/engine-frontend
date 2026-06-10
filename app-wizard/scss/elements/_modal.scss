@@ -43,6 +43,16 @@
 
         .modal-content {
             max-height: calc(100vh - 2 * $modal-dialog-margin);
+
+            &-plugin {
+                max-height: calc(100vh - 2 * $modal-dialog-margin);
+
+                & > * {
+                    max-height: calc(100vh - 2 * $modal-dialog-margin);
+                    display: flex;
+                    flex-direction: column;
+                }
+            }
         }
     }
 
