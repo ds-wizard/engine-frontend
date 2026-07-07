@@ -26,6 +26,7 @@ module Common.Components.FontAwesome exposing
     , faExport
     , faExternalLink
     , faFw
+    , faGuide
     , faGuideLink
     , faImportFile
     , faInfo
@@ -140,6 +141,7 @@ module Common.Components.FontAwesome exposing
     , faQuestionnaireSettingsKmFiltered
     , faQuestionnaireShrink
     , faQuestionnaireUrlReferences
+    , faReload
     , faRemove
     , faRemoveFw
     , faSearch
@@ -330,6 +332,11 @@ faExport =
 faExternalLink : Html msg
 faExternalLink =
     fas "fa-external-link-alt"
+
+
+faGuide : Html msg
+faGuide =
+    far "fa-map"
 
 
 faGuideLink : Html msg
@@ -900,6 +907,11 @@ faQuestionnaireShrink =
 faQuestionnaireUrlReferences : Html msg
 faQuestionnaireUrlReferences =
     fas "fa-external-link-alt"
+
+
+faReload : Html msg
+faReload =
+    fas "fa-sync-alt"
 
 
 faRemove : Html msg

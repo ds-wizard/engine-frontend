@@ -3,10 +3,13 @@ module Wizard.Api.Models.OnlineUserInfo exposing
     , LoggedData
     , OnlineUserInfo(..)
     , decoder
+    , getUuid
+    , matchUuid
     )
 
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import Uuid exposing (Uuid)
 
 
 type OnlineUserInfo
@@ -15,7 +18,8 @@ type OnlineUserInfo
 
 
 type alias LoggedData =
-    { firstName : String
+    { uuid : Uuid
+    , firstName : String
     , lastName : String
     , gravatarHash : String
     , imageUrl : Maybe String
@@ -51,6 +55,7 @@ decoderByType userType =
 loggedDecoder : Decoder OnlineUserInfo
 loggedDecoder =
     D.succeed LoggedData
+        |> D.required "uuid" Uuid.decoder
         |> D.required "firstName" D.string
         |> D.required "lastName" D.string
         |> D.required "gravatarHash" D.string
@@ -65,3 +70,23 @@ anonymousDecoder =
         |> D.required "avatarNumber" D.int
         |> D.required "colorNumber" D.int
         |> D.map Anonymous
+
+
+getUuid : OnlineUserInfo -> Maybe Uuid
+getUuid onlineUserInfo =
+    case onlineUserInfo of
+        Logged loggedData ->
+            Just loggedData.uuid
+
+        Anonymous _ ->
+            Nothing
+
+
+matchUuid : Uuid -> OnlineUserInfo -> Bool
+matchUuid uuid onlineUserInfo =
+    case onlineUserInfo of
+        Logged loggedData ->
+            loggedData.uuid == uuid
+
+        Anonymous _ ->
+            False

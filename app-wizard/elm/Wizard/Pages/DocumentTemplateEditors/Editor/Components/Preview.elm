@@ -17,7 +17,7 @@ import ActionResult exposing (ActionResult)
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UrlResponse exposing (UrlResponse)
 import Common.Api.ServerError as ServerError
-import Common.Components.FontAwesome exposing (fa, faDownload)
+import Common.Components.FontAwesome exposing (fa, faDownload, faReload)
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
 import Common.Components.TypeHintInput as TypeHintInput
@@ -296,6 +296,9 @@ type alias ViewConfig =
 view : ViewConfig -> AppState -> Model -> Html Msg
 view cfg appState model =
     let
+        isPreviewSet =
+            DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate
+
         previewSettings =
             DocumentTemplateDraftDetail.getPreviewSettings cfg.documentTemplate
 
@@ -356,7 +359,7 @@ view cfg appState model =
                     ( kmEditorTypeHintInput, kmEdtiorLink )
 
         content =
-            if DocumentTemplateDraftDetail.isPreviewSet cfg.documentTemplate then
+            if isPreviewSet then
                 Page.actionResultViewWithError appState (viewContent appState) viewError model.urlResponse
 
             else
@@ -395,6 +398,8 @@ view cfg appState model =
             , text ":"
             , select [ class "form-select", onInput FormatSelected, id "format", name "format" ]
                 (option [ value "" ] [ text "--" ] :: List.map formatOption cfg.documentTemplate.formats)
+            , Html.viewIf isPreviewSet <|
+                a (onClick LoadPreview :: tooltip (gettext "Reload preview" appState.locale)) [ faReload ]
             ]
         , div [ class "flex-grow-1" ]
             [ content ]

@@ -1,5 +1,6 @@
 module Common.Utils.UrlUtils exposing
-    ( addOptionalUrlPart
+    ( addOptionalQueryParam
+    , addOptionalUrlPart
     , addQueryParam
     , getDomain
     , queryParamsToString
@@ -44,6 +45,16 @@ addQueryParam paramName paramValue url =
                     Just paramString
     in
     { url | query = newQuery }
+
+
+addOptionalQueryParam : String -> Maybe String -> Url -> Url
+addOptionalQueryParam paramName maybeValue url =
+    case maybeValue of
+        Just value ->
+            addQueryParam paramName value url
+
+        Nothing ->
+            url
 
 
 addOptionalUrlPart : Maybe String -> List String -> List String

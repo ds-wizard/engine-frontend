@@ -187,7 +187,7 @@ onUnload nextRoute model =
         leaveCmd =
             Cmd.batch
                 [ WebSocket.close model.websocket
-                , Task.dispatch ResetModel
+                , Task.dispatch (ResetModel model.uuid)
                 ]
     in
     case nextRoute of
@@ -240,8 +240,16 @@ update wrapMsg msg appState model =
                         )
     in
     case msg of
-        ResetModel ->
-            withSeed ( { model | uuid = Uuid.nil }, Cmd.none )
+        ResetModel resetingUuid ->
+            let
+                newUuid =
+                    if resetingUuid == model.uuid then
+                        Uuid.nil
+
+                    else
+                        model.uuid
+            in
+            withSeed ( { model | uuid = newUuid }, Cmd.none )
 
         QuestionnaireMsg questionnaireMsg ->
             case ( model.questionnaireCommon, model.questionnaireModel ) of

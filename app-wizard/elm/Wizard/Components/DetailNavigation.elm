@@ -12,7 +12,9 @@ import Html exposing (Html, div, li, span, text, ul)
 import Html.Attributes exposing (attribute, class, classList)
 import Html.Attributes.Extensions exposing (dataCy, dataTour)
 import Html.Extra as Html
-import Wizard.Api.Models.OnlineUserInfo exposing (OnlineUserInfo)
+import Maybe.Extra as Maybe
+import Uuid
+import Wizard.Api.Models.OnlineUserInfo as OnlineUser exposing (OnlineUserInfo)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.OnlineUser as OnlineUser
 import Wizard.Data.AppState exposing (AppState)
@@ -41,24 +43,44 @@ sectionActions =
 
 onlineUsers : AppState -> Bool -> List OnlineUserInfo -> Html msg
 onlineUsers appState isTooltipLeft users =
-    if List.isEmpty users then
+    let
+        currentUserUuid =
+            Maybe.unwrap Uuid.nil .uuid appState.config.user
+
+        onlineUserUniqueHelp accumulator remaining =
+            case remaining of
+                [] ->
+                    List.reverse accumulator
+
+                user :: rest ->
+                    if List.any (OnlineUser.matchUuid (Maybe.withDefault Uuid.nil (OnlineUser.getUuid user))) accumulator then
+                        onlineUserUniqueHelp accumulator rest
+
+                    else
+                        onlineUserUniqueHelp (user :: accumulator) rest
+
+        filteredUsers =
+            List.filter (not << OnlineUser.matchUuid currentUserUuid) users
+                |> onlineUserUniqueHelp []
+    in
+    if List.isEmpty filteredUsers then
         Html.nothing
 
     else
         let
             extraUsers =
-                if List.length users > 10 then
+                if List.length filteredUsers > 10 then
                     div [ class "extra-users-count" ]
-                        [ text ("+" ++ String.fromInt (List.length users - 10)) ]
+                        [ text ("+" ++ String.fromInt (List.length filteredUsers - 10)) ]
 
                 else
                     Html.nothing
         in
         div
             [ class "DetailNavigation__Row__Section__Online-Users"
-            , classList [ ( "DetailNavigation__Row__Section__Online-Users--Stacked", List.length users > 5 ) ]
+            , classList [ ( "DetailNavigation__Row__Section__Online-Users--Stacked", List.length filteredUsers > 5 ) ]
             ]
-            (List.map (OnlineUser.view appState isTooltipLeft) (List.take 10 users)
+            (List.map (OnlineUser.view appState isTooltipLeft) (List.take 10 filteredUsers)
                 ++ [ extraUsers ]
             )
 

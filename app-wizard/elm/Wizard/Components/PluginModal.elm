@@ -11,6 +11,7 @@ module Wizard.Components.PluginModal exposing
 
 import Common.Components.Modal as Modal
 import Html exposing (Html)
+import Html.Attributes exposing (class)
 import Uuid exposing (Uuid)
 import Wizard.Components.PluginView as PluginView
 import Wizard.Data.AppState exposing (AppState)
@@ -71,6 +72,7 @@ view appState cfg model =
                             pluginModalState.pluginUuid
                             pluginModalState.pluginElement
                             (PluginElement.onActionClose (cfg.wrapMsg Close)
+                                :: class "modal-content-plugin"
                                 :: cfg.attributes pluginModalState.data
                             )
                       ]
