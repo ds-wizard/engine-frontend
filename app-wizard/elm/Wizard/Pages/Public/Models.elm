@@ -11,7 +11,7 @@ import Wizard.Pages.Public.SignupConfirmation.Models
 
 
 type alias Model =
-    { authModel : Wizard.Pages.Public.OpenIdCallback.Models.Model
+    { openIdCallbackModel : Wizard.Pages.Public.OpenIdCallback.Models.Model
     , forgottenPasswordModel : Wizard.Pages.Public.ForgottenPassword.Models.Model
     , forgottenPasswordConfirmationModel : Wizard.Pages.Public.ForgottenPasswordConfirmation.Models.Model
     , loginModel : Wizard.Pages.Public.Login.Models.Model
@@ -22,7 +22,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { authModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel "" Nothing
+    { openIdCallbackModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel "" Nothing Nothing
     , forgottenPasswordModel = Wizard.Pages.Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Wizard.Pages.Public.ForgottenPasswordConfirmation.Models.initialModel appState "" ""
     , loginModel = Wizard.Pages.Public.Login.Models.initialModel Nothing
@@ -34,8 +34,8 @@ initialModel appState =
 initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
-        OpenIdCallback id _ _ mbSessionState ->
-            { model | authModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel id mbSessionState }
+        OpenIdCallback id _ _ mbSessionState mbState ->
+            { model | openIdCallbackModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel id mbSessionState mbState }
 
         ForgottenPasswordRoute ->
             { model | forgottenPasswordModel = Wizard.Pages.Public.ForgottenPassword.Models.initialModel }

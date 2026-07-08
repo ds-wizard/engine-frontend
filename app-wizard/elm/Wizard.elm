@@ -95,7 +95,7 @@ decideInitialRoute model location route originalRoute =
     case route of
         Routes.PublicRoute subroute ->
             case ( userLoggedIn model, subroute ) of
-                ( _, PublicRoutes.OpenIdCallback _ _ _ _ ) ->
+                ( _, PublicRoutes.OpenIdCallback _ _ _ _ _ ) ->
                     dispatchUrlChange
 
                 ( True, _ ) ->

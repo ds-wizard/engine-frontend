@@ -20,10 +20,10 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
 
-fetchData : String -> Maybe String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
-fetchData id mbError mbCode mbSessionState appState =
+fetchData : String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
+fetchData id mbError mbCode mbSessionState mbState appState =
     Cmd.batch
-        [ OpenIdClientsApi.getToken appState id mbError mbCode mbSessionState Nothing AuthenticationCompleted
+        [ OpenIdClientsApi.getToken appState id mbError mbCode mbSessionState mbState Nothing AuthenticationCompleted
         , LocalStorage.getAndRemoveItem "wizard/originalUrl"
         ]
 

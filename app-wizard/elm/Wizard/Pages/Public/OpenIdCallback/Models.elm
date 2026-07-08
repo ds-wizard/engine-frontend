@@ -11,6 +11,7 @@ import Common.Components.UserExternalCompletionForm as UserExternalCompletionFor
 type alias Model =
     { id : String
     , sessionState : Maybe String
+    , state : Maybe String
     , consent : Bool
     , authenticating : ActionResult String
     , hash : Maybe String
@@ -23,10 +24,11 @@ type alias Model =
     }
 
 
-initialModel : String -> Maybe String -> Model
-initialModel id sessionState =
+initialModel : String -> Maybe String -> Maybe String -> Model
+initialModel id sessionState state =
     { id = id
     , sessionState = sessionState
+    , state = state
     , consent = False
     , authenticating = ActionResult.Loading
     , hash = Nothing

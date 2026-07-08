@@ -8,8 +8,8 @@ import Wizard.Pages.Public.Routes exposing (Route(..))
 subscriptions : Route -> Sub Msg
 subscriptions route =
     case route of
-        OpenIdCallback _ _ _ _ ->
-            Sub.map AuthMsg <|
+        OpenIdCallback _ _ _ _ _ ->
+            Sub.map OpenIdCallbackMsg <|
                 Wizard.Pages.Public.OpenIdCallback.Subscriptions.subscriptions
 
         _ ->

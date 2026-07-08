@@ -56,14 +56,15 @@ requestUrl appState config =
     appState.apiUrl ++ "/open-id-clients/" ++ Uuid.toString config.uuid ++ "/request"
 
 
-getToken : AppState -> String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> ToMsg TokenResponse msg -> Cmd msg
-getToken appState id mbError mbCode mbSessionState mbClientId =
+getToken : AppState -> String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> ToMsg TokenResponse msg -> Cmd msg
+getToken appState id mbError mbCode mbSessionState mbState mbClientId =
     let
         queryParams =
             UrlUtils.queryParamsToString
                 [ ( "error", mbError )
                 , ( "code", mbCode )
                 , ( "session_state", mbSessionState )
+                , ( "state", mbState )
                 , ( "clientId", mbClientId )
                 , ( "nonce", Just "FtEIbRdfFc7z2bNjCTaZKDcWNeUKUelvs13K21VL" )
                 ]

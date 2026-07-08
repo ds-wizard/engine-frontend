@@ -9,7 +9,7 @@ import Wizard.Pages.Public.SignupConfirmation.Msgs
 
 
 type Msg
-    = AuthMsg Wizard.Pages.Public.OpenIdCallback.Msgs.Msg
+    = OpenIdCallbackMsg Wizard.Pages.Public.OpenIdCallback.Msgs.Msg
     | ForgottenPasswordMsg Wizard.Pages.Public.ForgottenPassword.Msgs.Msg
     | ForgottenPasswordConfirmationMsg Wizard.Pages.Public.ForgottenPasswordConfirmation.Msgs.Msg
     | LoginMsg Wizard.Pages.Public.Login.Msgs.Msg

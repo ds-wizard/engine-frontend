@@ -17,9 +17,9 @@ import Wizard.Pages.Public.SignupConfirmation.View
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        OpenIdCallback _ _ _ _ ->
-            Html.map AuthMsg <|
-                Wizard.Pages.Public.OpenIdCallback.View.view appState model.authModel
+        OpenIdCallback _ _ _ _ _ ->
+            Html.map OpenIdCallbackMsg <|
+                Wizard.Pages.Public.OpenIdCallback.View.view appState model.openIdCallbackModel
 
         ForgottenPasswordRoute ->
             Html.map ForgottenPasswordMsg <|
