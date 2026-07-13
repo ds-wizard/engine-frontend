@@ -240,7 +240,8 @@ hours locale form fieldName labelText =
                 , span [ class "input-group-text" ]
                     [ text "≈ "
                     , text hoursToDays
-                    , text (gettext " days" locale)
+                    , text " "
+                    , text (gettext "days" locale)
                     ]
                 ]
     in
