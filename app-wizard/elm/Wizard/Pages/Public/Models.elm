@@ -22,7 +22,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { openIdCallbackModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel "" Nothing Nothing
+    { openIdCallbackModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel "" Nothing Nothing Nothing Nothing
     , forgottenPasswordModel = Wizard.Pages.Public.ForgottenPassword.Models.initialModel
     , forgottenPasswordConfirmationModel = Wizard.Pages.Public.ForgottenPasswordConfirmation.Models.initialModel appState "" ""
     , loginModel = Wizard.Pages.Public.Login.Models.initialModel Nothing
@@ -34,8 +34,8 @@ initialModel appState =
 initLocalModel : AppState -> Route -> Model -> Model
 initLocalModel appState route model =
     case route of
-        OpenIdCallback id _ _ mbSessionState mbState ->
-            { model | openIdCallbackModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel id mbSessionState mbState }
+        OpenIdCallback id error code mbSessionState mbState ->
+            { model | openIdCallbackModel = Wizard.Pages.Public.OpenIdCallback.Models.initialModel id error code mbSessionState mbState }
 
         ForgottenPasswordRoute ->
             { model | forgottenPasswordModel = Wizard.Pages.Public.ForgottenPassword.Models.initialModel }

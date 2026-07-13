@@ -10,6 +10,8 @@ import Common.Components.UserExternalCompletionForm as UserExternalCompletionFor
 
 type alias Model =
     { id : String
+    , error : Maybe String
+    , code : Maybe String
     , sessionState : Maybe String
     , state : Maybe String
     , consent : Bool
@@ -17,6 +19,7 @@ type alias Model =
     , hash : Maybe String
     , submittingConsent : ActionResult String
     , originalUrl : ActionResult (Maybe String)
+    , originalState : ActionResult (Maybe String)
     , token : ActionResult Token
     , completionForm : Maybe UserExternalCompletionForm.Model
     , completingRegistration : ActionResult String
@@ -24,9 +27,11 @@ type alias Model =
     }
 
 
-initialModel : String -> Maybe String -> Maybe String -> Model
-initialModel id sessionState state =
+initialModel : String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> Model
+initialModel id error code sessionState state =
     { id = id
+    , error = error
+    , code = code
     , sessionState = sessionState
     , state = state
     , consent = False
@@ -34,6 +39,7 @@ initialModel id sessionState state =
     , hash = Nothing
     , submittingConsent = ActionResult.Unset
     , originalUrl = ActionResult.Loading
+    , originalState = ActionResult.Loading
     , token = ActionResult.Loading
     , completionForm = Nothing
     , completingRegistration = ActionResult.Unset

@@ -24,18 +24,15 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
-fetchData : AppState -> Maybe String -> Cmd msg
-fetchData appState mbOriginalUrl =
+fetchData : AppState -> Cmd Msg
+fetchData appState =
     if Session.exists appState.session && not (Session.expired appState.currentTime appState.session) then
         cmdNavigate appState Routes.appHome
 
     else if Admin.isEnabled appState.config.admin then
         case List.head appState.config.authentication.external.services of
             Just service ->
-                Cmd.batch
-                    [ Navigation.load (OpenIdClientApi.requestUrl appState service)
-                    , saveOriginalUrlCmd mbOriginalUrl
-                    ]
+                OpenIdClientApi.request appState service ExternalLoginOpenIdCompleted
 
             Nothing ->
                 Cmd.none
@@ -74,11 +71,22 @@ update msg wrapMsg appState model =
 
         ExternalLoginOpenId openIdServiceConfig ->
             ( model
-            , Cmd.batch
-                [ Navigation.load (OpenIdClientApi.requestUrl appState openIdServiceConfig)
-                , saveOriginalUrlCmd model.originalUrl
-                ]
+            , OpenIdClientApi.request appState openIdServiceConfig (wrapMsg << ExternalLoginOpenIdCompleted)
             )
+
+        ExternalLoginOpenIdCompleted result ->
+            case result of
+                Ok openIdRequestResponse ->
+                    ( model
+                    , Cmd.batch
+                        [ Navigation.load openIdRequestResponse.url
+                        , saveOriginalUrlCmd model.originalUrl
+                        , saveStateCmd openIdRequestResponse.state
+                        ]
+                    )
+
+                Err error ->
+                    ( { model | loggingIn = ApiError.toActionResult appState (gettext "External login failed." appState.locale) error }, Cmd.none )
 
         ShowAdminLogin ->
             ( { model | adminLoginVisible = True }, Cmd.none )
@@ -110,9 +118,19 @@ loginCompleted appState model result =
 
 saveOriginalUrlCmd : Maybe String -> Cmd msg
 saveOriginalUrlCmd originalUrl =
-    case originalUrl of
-        Just url ->
-            LocalStorage.setItem "wizard/originalUrl" (E.string url)
+    saveLocalStorageOptionalItem "wizard/originalUrl" originalUrl
+
+
+saveStateCmd : String -> Cmd msg
+saveStateCmd state =
+    saveLocalStorageOptionalItem "wizard/state" (Just state)
+
+
+saveLocalStorageOptionalItem : String -> Maybe String -> Cmd msg
+saveLocalStorageOptionalItem key mbValue =
+    case mbValue of
+        Just value ->
+            LocalStorage.setItem key (E.string value)
 
         Nothing ->
             Cmd.none

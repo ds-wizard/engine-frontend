@@ -17,12 +17,12 @@ import Wizard.Pages.Public.SignupConfirmation.Update
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        OpenIdCallback id error code sessionState state ->
-            Cmd.map OpenIdCallbackMsg <|
-                Wizard.Pages.Public.OpenIdCallback.Update.fetchData id error code sessionState state appState
+        OpenIdCallback _ _ _ _ _ ->
+            Cmd.map OpenIdCallbackMsg Wizard.Pages.Public.OpenIdCallback.Update.fetchData
 
-        LoginRoute mbOriginalUrl ->
-            Wizard.Pages.Public.Login.Update.fetchData appState mbOriginalUrl
+        LoginRoute _ ->
+            Cmd.map LoginMsg <|
+                Wizard.Pages.Public.Login.Update.fetchData appState
 
         LogoutSuccessful ->
             Wizard.Pages.Public.LogoutSuccessful.Update.fetchData appState

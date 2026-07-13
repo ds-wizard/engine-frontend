@@ -20,17 +20,33 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing
 
 
-fetchData : String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> AppState -> Cmd Msg
-fetchData id mbError mbCode mbSessionState mbState appState =
+fetchData : Cmd Msg
+fetchData =
     Cmd.batch
-        [ OpenIdClientsApi.getToken appState id mbError mbCode mbSessionState mbState Nothing AuthenticationCompleted
-        , LocalStorage.getAndRemoveItem "wizard/originalUrl"
+        [ LocalStorage.getAndRemoveItem "wizard/originalUrl"
+        , LocalStorage.getAndRemoveItem "wizard/state"
         ]
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     let
+        requestState newModel =
+            case newModel.originalState of
+                ActionResult.Success originalState ->
+                    if newModel.state /= originalState then
+                        ( { newModel | authenticating = ActionResult.Error (gettext "Your sign-in attempt has expired or was started in a different window. Please try signing in again." appState.locale) }
+                        , Cmd.none
+                        )
+
+                    else
+                        ( newModel
+                        , OpenIdClientsApi.getToken appState newModel.id model.error model.code newModel.sessionState newModel.state (wrapMsg << AuthenticationCompleted)
+                        )
+
+                _ ->
+                    ( newModel, Cmd.none )
+
         dispatchToken newModel =
             case ActionResult.combine newModel.token newModel.originalUrl of
                 ActionResult.Success ( token, originalUrl ) ->
@@ -78,6 +94,9 @@ update msg wrapMsg appState model =
                 Ok localStorageData ->
                     if localStorageData.key == "wizard/originalUrl" then
                         dispatchToken { model | originalUrl = ActionResult.Success localStorageData.value }
+
+                    else if localStorageData.key == "wizard/state" then
+                        requestState { model | originalState = ActionResult.Success localStorageData.value }
 
                     else
                         ( model, Cmd.none )

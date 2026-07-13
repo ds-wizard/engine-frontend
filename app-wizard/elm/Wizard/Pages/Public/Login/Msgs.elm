@@ -1,6 +1,7 @@
 module Wizard.Pages.Public.Login.Msgs exposing (Msg(..))
 
 import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.OpenIdRequest exposing (OpenIdRequestResponse)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig.OpenIDServiceConfig exposing (OpenIDServiceConfig)
 import Wizard.Api.Models.TokenResponse exposing (TokenResponse)
 
@@ -12,4 +13,5 @@ type Msg
     | DoLogin
     | LoginCompleted (Result ApiError TokenResponse)
     | ExternalLoginOpenId OpenIDServiceConfig
+    | ExternalLoginOpenIdCompleted (Result ApiError OpenIdRequestResponse)
     | ShowAdminLogin
