@@ -89,7 +89,7 @@ listingDescription commentThread =
         userFragment =
             case commentThread.createdBy of
                 Just createdBy ->
-                    span [ class "fragment" ]
+                    span [ class "fragment d-flex" ]
                         [ UserIcon.viewSmall createdBy
                         , text (User.fullName createdBy)
                         ]
