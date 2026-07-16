@@ -208,7 +208,7 @@ viewEditLimitsModal appState model =
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "knowledgeModels" "Knowledge Models"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documentTemplateDrafts" "Document Template Editors"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documentTemplates" "Document Templates"
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "questionnaires" "Projects"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "projects" "Projects"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documents" "Documents"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "locales" "Locales"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.fileSize appState.locale form "storage" "Storage"

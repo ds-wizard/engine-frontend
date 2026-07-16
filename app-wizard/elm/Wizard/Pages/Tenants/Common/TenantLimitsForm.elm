@@ -21,7 +21,7 @@ type alias TenantLimitsForm =
     , knowledgeModelEditors : Int
     , knowledgeModels : Int
     , locales : Int
-    , questionnaires : Int
+    , projects : Int
     , storage : Int
     , users : Int
     }
@@ -38,7 +38,7 @@ init tenantDetail =
             , ( "knowledgeModelEditors", Field.int tenantDetail.usage.knowledgeModelEditors.max )
             , ( "knowledgeModels", Field.int tenantDetail.usage.knowledgeModels.max )
             , ( "locales", Field.int tenantDetail.usage.locales.max )
-            , ( "questionnaires", Field.int tenantDetail.usage.projects.max )
+            , ( "projects", Field.int tenantDetail.usage.projects.max )
             , ( "storage", Field.int tenantDetail.usage.storage.max )
             , ( "users", Field.int tenantDetail.usage.users.max )
             ]
@@ -56,7 +56,7 @@ validation =
         |> V.andMap (V.field "knowledgeModelEditors" V.int)
         |> V.andMap (V.field "knowledgeModels" V.int)
         |> V.andMap (V.field "locales" V.int)
-        |> V.andMap (V.field "questionnaires" V.int)
+        |> V.andMap (V.field "projects" V.int)
         |> V.andMap (V.field "storage" V.int)
         |> V.andMap (V.field "users" V.int)
 
@@ -71,7 +71,7 @@ encode form =
         , ( "knowledgeModelEditors", E.int form.knowledgeModelEditors )
         , ( "knowledgeModels", E.int form.knowledgeModels )
         , ( "locales", E.int form.locales )
-        , ( "questionnaires", E.int form.questionnaires )
+        , ( "projects", E.int form.projects )
         , ( "storage", E.int form.storage )
         , ( "users", E.int form.users )
         ]
