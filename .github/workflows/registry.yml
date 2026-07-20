@@ -2,41 +2,50 @@ name: Registry Client CI
 
 on:
   push:
+    branches:
+      - '**'
+    tags:
+      - 'v*'
   pull_request:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: registry-client-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
 
 jobs:
   btp:
     name: Build-Tag-Push
     runs-on: ubuntu-latest
 
-    strategy:
-      matrix:
-        node-version: [ 24 ]
-
     env:
       COMPONENT: registry
       IMAGE_NAME: registry-client
-      PUBLIC_IMAGE_PREFIX: datastewardshipwizard
+
+      # Frequent internal and branch builds.
+      INTERNAL_IMAGE: ghcr.io/ds-wizard/registry-client
+
+      # Public Docker Hub image.
+      PUBLIC_IMAGE: datastewardshipwizard/registry-client
+
       DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+
       DOCKER_META_CONTEXT: '.'
       DOCKER_META_FILE: './app-registry/docker/Dockerfile'
       DOCKER_META_PLATFORMS: 'linux/amd64,linux/arm64'
 
     steps:
       - name: '[setup] Checkout Project'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
-      - name: '[setup] QEMU'
-        uses: docker/setup-qemu-action@v4
-
-      - name: '[setup] Docker Buildx'
-        id: buildx
-        uses: docker/setup-buildx-action@v4
-
-      - name: '[setup] Node.js ${{ matrix.node-version }}'
+      - name: '[setup] Node.js 24'
         uses: actions/setup-node@v6
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 24
+          cache: npm
 
       - name: '[app] Elm Kernel Replacements'
         run: npm run replace-kernel-packages
@@ -45,85 +54,141 @@ jobs:
         run: npm ci
 
       - name: '[app] Test'
-        run: |
-          npm run test:$COMPONENT
+        run: npm run test:${COMPONENT}
 
       - name: '[app] Build'
-        run: |
-          npm run build:$COMPONENT
+        run: npm run build:${COMPONENT}
 
-      - name: '[docker] Meta'
-        id: meta
+      - name: '[setup] QEMU'
+        uses: docker/setup-qemu-action@v4
+
+      - name: '[setup] Docker Buildx'
+        uses: docker/setup-buildx-action@v4
+
+      # Branch builds are published to GHCR.
+      - name: '[docker] Login to GHCR'
+        if: >-
+          github.event_name == 'push' &&
+          startsWith(github.ref, 'refs/heads/')
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Docker Hub is only needed for main and release tags.
+      - name: '[docker] Login to Docker Hub'
+        if: >-
+          github.event_name == 'push' &&
+          env.DOCKER_HUB_USERNAME != '' &&
+          (
+            github.ref == 'refs/heads/main' ||
+            startsWith(github.ref, 'refs/tags/v')
+          )
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+
+      # Internal GHCR tags.
+      #
+      # Examples:
+      #   ghcr.io/ds-wizard/registry-client:develop
+      #   ghcr.io/ds-wizard/registry-client:main
+      #   ghcr.io/ds-wizard/registry-client:feature-example
+      #   ghcr.io/ds-wizard/registry-client:sha-abcdef1
+      - name: '[docker-internal] Metadata'
+        id: meta-internal
+        if: >-
+          github.event_name == 'push' &&
+          startsWith(github.ref, 'refs/heads/')
         uses: docker/metadata-action@v6
         with:
           images: |
-            ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
+            ${{ env.INTERNAL_IMAGE }}
           tags: |
+            type=ref,event=branch
             type=sha
+          flavor: |
+            latest=false
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
 
-      - name: '[docker] Build'
+      # Public Docker Hub tags.
+      #
+      # main:
+      #   datastewardshipwizard/registry-client:latest
+      #
+      # tag v4.20.1:
+      #   datastewardshipwizard/registry-client:4.20.1
+      #   datastewardshipwizard/registry-client:4.20
+      #   datastewardshipwizard/registry-client:4
+      - name: '[docker-public] Metadata'
+        id: meta-public
+        if: >-
+          github.event_name == 'push' &&
+          env.DOCKER_HUB_USERNAME != '' &&
+          (
+            github.ref == 'refs/heads/main' ||
+            startsWith(github.ref, 'refs/tags/v')
+          )
+        uses: docker/metadata-action@v6
+        with:
+          images: |
+            ${{ env.PUBLIC_IMAGE }}
+          tags: |
+            type=raw,value=latest,enable=${{ github.ref == 'refs/heads/main' }}
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
+          flavor: |
+            latest=false
+          labels: |
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+
+      # Pull requests are built and validated but never published.
+      - name: '[docker] Build pull request'
+        if: github.event_name == 'pull_request'
         uses: docker/build-push-action@v7
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE }}
           platforms: ${{ env.DOCKER_META_PLATFORMS }}
           push: false
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+          cache-from: type=gha,scope=${{ env.IMAGE_NAME }}
+          cache-to: type=gha,mode=max,scope=${{ env.IMAGE_NAME }}
 
-      - name: '[docker] Login'
-        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/login-action@v4
-        with:
-          username: ${{ secrets.DOCKER_HUB_USERNAME }}
-          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
-
-      - name: '[docker-dev] Meta'
-        id: meta-dev
-        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/metadata-action@v6
-        with:
-          images: |
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-          flavor: |
-            suffix=${{ env.DOCKER_META_SUFFIX }}
-
-      - name: '[docker-dev] Build + Push'
+      # Build once and push all generated tags.
+      #
+      # Regular branch:
+      #   pushes only to GHCR
+      #
+      # main:
+      #   pushes branch and SHA tags to GHCR
+      #   pushes latest to Docker Hub
+      #
+      # version tag:
+      #   pushes semantic-version tags only to Docker Hub
+      - name: '[docker] Build and push'
+        if: >-
+          github.event_name == 'push' &&
+          (
+            startsWith(github.ref, 'refs/heads/') ||
+            (
+              env.DOCKER_HUB_USERNAME != '' &&
+              startsWith(github.ref, 'refs/tags/v')
+            )
+          )
         uses: docker/build-push-action@v7
-        if: github.event_name != 'pull_request' && steps.meta-dev.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
         with:
           context: ${{ env.DOCKER_META_CONTEXT }}
           file: ${{ env.DOCKER_META_FILE }}
           platforms: ${{ env.DOCKER_META_PLATFORMS }}
           push: true
-          tags: ${{ steps.meta-dev.outputs.tags }}
-          labels: ${{ steps.meta-dev.outputs.labels }}
-
-      - name: '[docker-public] Meta'
-        id: meta-public
-        if: github.event_name != 'pull_request' && env.DOCKER_HUB_USERNAME != ''
-        uses: docker/metadata-action@v6
-        with:
-          images: |
-            ${{ env.PUBLIC_IMAGE_PREFIX }}/${{ env.IMAGE_NAME }}
-            ${{ secrets.DOCKER_HUB_USERNAME }}/${{ env.IMAGE_NAME }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=semver,pattern={{major}},enable=${{ !startsWith(github.ref, 'refs/tags/v0.') }}
-          flavor: |
-            suffix=${{ env.DOCKER_META_SUFFIX }}
-
-      - name: '[docker-public] Build + Push'
-        uses: docker/build-push-action@v7
-        if: github.event_name != 'pull_request' && steps.meta-public.outputs.tags != '' && env.DOCKER_HUB_USERNAME != ''
-        with:
-          context: ${{ env.DOCKER_META_CONTEXT }}
-          file: ${{ env.DOCKER_META_FILE }}
-          platforms: ${{ env.DOCKER_META_PLATFORMS }}
-          push: true
-          tags: ${{ steps.meta-public.outputs.tags }}
-          labels: ${{ steps.meta-public.outputs.labels }}
+            ${{ steps.meta-internal.outputs.tags }}
+            ${{ steps.meta-public.outputs.tags }}
+          labels: |
+            ${{ steps.meta-public.outputs.labels || steps.meta-internal.outputs.labels }}
+          cache-from: type=gha,scope=${{ env.IMAGE_NAME }}
+          cache-to: type=gha,mode=max,scope=${{ env.IMAGE_NAME }}

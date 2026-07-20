@@ -122,7 +122,7 @@ navigation appState subroute model =
                 [ text (gettext "Password" appState.locale)
                 ]
             )
-         , Html.viewIf (not (Admin.isEnabled appState.config.admin))
+         , Html.viewIf (not (Admin.isEnabled appState.config.admin) && Feature.userEditConnectedAccounts appState model.uuidOrCurrent)
             (linkTo Routes.usersEditConnectedAccounts
                 [ class "nav-link"
                 , classList [ ( "active", subroute == UserEditRoutes.ConnectedAccounts ) ]
