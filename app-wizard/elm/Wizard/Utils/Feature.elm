@@ -85,6 +85,7 @@ module Wizard.Utils.Feature exposing
     , userEditActiveSessions
     , userEditApiKeys
     , userEditAppKeys
+    , userEditConnectedAccounts
     , userEditLanguage
     , userEditPlugins
     , userEditSubmissionSettings
@@ -549,6 +550,15 @@ usersManage =
 usersView : AppState -> Bool
 usersView =
     hasPerm RolePermission.usersManage
+
+
+userEditConnectedAccounts : AppState -> UuidOrCurrent -> Bool
+userEditConnectedAccounts appState uuidOrCurrent =
+    let
+        anyExternalServices =
+            not (List.isEmpty appState.config.authentication.external.services)
+    in
+    anyExternalServices && (UuidOrCurrent.isCurrent uuidOrCurrent || UuidOrCurrent.matchUuid uuidOrCurrent (Maybe.unwrap Uuid.nil .uuid appState.config.user))
 
 
 userEditLanguage : AppState -> UuidOrCurrent -> Bool
