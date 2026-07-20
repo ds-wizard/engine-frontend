@@ -118,6 +118,15 @@ isAllowed route appState =
 
             else
                 case subroute of
+                    UserEditRoute.Profile ->
+                        Feature.userEdit appState uuidOrCurrent
+
+                    UserEditRoute.Password ->
+                        Feature.userEdit appState uuidOrCurrent
+
+                    UserEditRoute.ConnectedAccounts ->
+                        Feature.userEditConnectedAccounts appState uuidOrCurrent
+
                     UserEditRoute.Language ->
                         Feature.userEditLanguage appState uuidOrCurrent
 
@@ -136,8 +145,8 @@ isAllowed route appState =
                     UserEditRoute.SubmissionSettings ->
                         Feature.userEditSubmissionSettings appState uuidOrCurrent
 
-                    _ ->
-                        Feature.userEdit appState uuidOrCurrent
+                    UserEditRoute.PluginSettings _ ->
+                        Feature.userEditPlugins appState uuidOrCurrent
 
         IndexRoute _ _ ->
             Feature.usersView appState
