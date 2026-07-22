@@ -241,6 +241,21 @@ messageToReadable appState message =
         "error.validation.km_id_uniqueness" ->
             Just <| gettext "Knowledge model ID is already used." appState.locale
 
+        "error.validation.km_locale_invalid_po" ->
+            Just <| String.format (gettext "Unable to parse the PO file: %s" appState.locale) message.params
+
+        "error.validation.km_locale_missing_language" ->
+            Just <| gettext "The PO file has no 'Language' header field." appState.locale
+
+        "error.validation.km_locale_invalid_json" ->
+            Just <| String.format (gettext "Unable to parse the JSON translation file: %s" appState.locale) message.params
+
+        "error.validation.km_locale_code_uniqueness" ->
+            Just <| String.format (gettext "Translation for language '%s' already exists." appState.locale) message.params
+
+        "error.validation.km_locale_not_reusable" ->
+            Just <| gettext "Selected locales cannot be reused from the previous package version." appState.locale
+
         "error.validation.logo_size_limit" ->
             Just <|
                 case List.head message.params of

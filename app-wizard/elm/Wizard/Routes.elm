@@ -56,6 +56,7 @@ module Wizard.Routes exposing
     , knowledgeModelSecrets
     , knowledgeModelsCompare
     , knowledgeModelsDetail
+    , knowledgeModelsDetailLocales
     , knowledgeModelsImport
     , knowledgeModelsIndex
     , knowledgeModelsIndexWithFilters
@@ -145,6 +146,7 @@ import Wizard.Pages.KMEditor.Routes
 import Wizard.Pages.KnowledgeModels.Routes
 import Wizard.Pages.Locales.Routes
 import Wizard.Pages.ProjectFiles.Routes
+import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
 import Wizard.Pages.Projects.Routes
 import Wizard.Pages.Public.Routes
@@ -213,6 +215,22 @@ isSameListingRoute originalRoute nextRoute =
             matcher originalRoute && matcher nextRoute
     in
     List.any checkRoute listingRouteMatchers
+        || isSameKnowledgeModelDetail originalRoute nextRoute
+
+
+{-| The knowledge model detail page keeps its data in the page model and switches
+between tabs (readme, locales) only by changing the route. Two detail routes for
+the same knowledge model are therefore treated as the same context, so switching
+tabs does not reload the whole page.
+-}
+isSameKnowledgeModelDetail : Route -> Route -> Bool
+isSameKnowledgeModelDetail originalRoute nextRoute =
+    case ( originalRoute, nextRoute ) of
+        ( KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.DetailRoute uuid1 _), KnowledgeModelsRoute (Wizard.Pages.KnowledgeModels.Routes.DetailRoute uuid2 _) ) ->
+            uuid1 == uuid2
+
+        _ ->
+            False
 
 
 listingRouteMatchers : List (Route -> Bool)
@@ -511,8 +529,13 @@ knowledgeModelsCompare mbLeftKmUuid =
 
 
 knowledgeModelsDetail : Uuid -> Route
-knowledgeModelsDetail =
-    KnowledgeModelsRoute << Wizard.Pages.KnowledgeModels.Routes.DetailRoute
+knowledgeModelsDetail uuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.DetailRoute uuid Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute.Readme
+
+
+knowledgeModelsDetailLocales : Uuid -> Route
+knowledgeModelsDetailLocales uuid =
+    KnowledgeModelsRoute <| Wizard.Pages.KnowledgeModels.Routes.DetailRoute uuid Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute.Locales
 
 
 knowledgeModelsImport : Maybe String -> Route

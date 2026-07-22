@@ -110,7 +110,7 @@ decideInitialRoute model location route originalRoute =
         Routes.ProjectsRoute (ProjectsRoutes.FileDownloadRoute _ _) ->
             dispatchUrlChange
 
-        Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute _) ->
+        Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.DetailRoute _ _) ->
             dispatchUrlChange
 
         Routes.KnowledgeModelsRoute (KnowledgeModelsRoute.PreviewRoute _ _) ->

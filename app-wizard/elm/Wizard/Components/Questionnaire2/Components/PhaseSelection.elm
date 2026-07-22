@@ -62,16 +62,17 @@ update cfg msg model =
 
 viewPhaseSelection : AppState -> ProjectQuestionnaire -> Bool -> Html Msg
 viewPhaseSelection appState questionnaire readonly =
-    Lazy.lazy5 viewPhaseSelectionLazy
+    Lazy.lazy6 viewPhaseSelectionLazy
         appState.locale
+        questionnaire.locale
         questionnaire.knowledgeModel
         readonly
         questionnaire.phaseUuid
         (ProjectQuestionnaire.getCurrentPhaseIndex questionnaire)
 
 
-viewPhaseSelectionLazy : Gettext.Locale -> KnowledgeModel -> Bool -> Maybe Uuid -> Int -> Html Msg
-viewPhaseSelectionLazy locale knowledgeModel readonly mbPhaseUuid currentPhaseIndex =
+viewPhaseSelectionLazy : Gettext.Locale -> Maybe Gettext.Locale -> KnowledgeModel -> Bool -> Maybe Uuid -> Int -> Html Msg
+viewPhaseSelectionLazy locale mbKmLocale knowledgeModel readonly mbPhaseUuid currentPhaseIndex =
     let
         phases =
             KnowledgeModel.getPhases knowledgeModel
@@ -79,7 +80,7 @@ viewPhaseSelectionLazy locale knowledgeModel readonly mbPhaseUuid currentPhaseIn
         selectedPhaseTitle =
             List.find ((==) (Maybe.map Uuid.toString mbPhaseUuid) << Just << .uuid) phases
                 |> Maybe.orElse (List.head phases)
-                |> Maybe.unwrap "" .title
+                |> Maybe.unwrap "" (localize mbKmLocale << .title)
 
         phaseButtonOnClick =
             if readonly then
@@ -136,15 +137,16 @@ viewPhaseSelectionLazy locale knowledgeModel readonly mbPhaseUuid currentPhaseIn
 
 viewPhaseModal : AppState -> ProjectQuestionnaire -> Model -> Html Msg
 viewPhaseModal appState questionnaire model =
-    Lazy.lazy4 viewPhaseModalLazy
+    Lazy.lazy5 viewPhaseModalLazy
         appState.locale
+        questionnaire.locale
         questionnaire.knowledgeModel
         (ProjectQuestionnaire.getCurrentPhaseIndex questionnaire)
         model.phaseModalOpen
 
 
-viewPhaseModalLazy : Gettext.Locale -> KnowledgeModel -> Int -> Bool -> Html Msg
-viewPhaseModalLazy locale knowledgeModel currentPhaseIndex phaseModalOpen =
+viewPhaseModalLazy : Gettext.Locale -> Maybe Gettext.Locale -> KnowledgeModel -> Int -> Bool -> Html Msg
+viewPhaseModalLazy locale mbKmLocale knowledgeModel currentPhaseIndex phaseModalOpen =
     let
         phases =
             KnowledgeModel.getPhases knowledgeModel
@@ -155,7 +157,7 @@ viewPhaseModalLazy locale knowledgeModel currentPhaseIndex phaseModalOpen =
                 descriptionElement =
                     case phase.description of
                         Just description ->
-                            small [ class "d-block text-secondary mt-1" ] [ text description ]
+                            small [ class "d-block text-secondary mt-1" ] [ text (localize mbKmLocale description) ]
 
                         Nothing ->
                             Html.nothing
@@ -177,7 +179,7 @@ viewPhaseModalLazy locale knowledgeModel currentPhaseIndex phaseModalOpen =
                  ]
                     ++ clickAttribute
                 )
-                [ div [ class "fw-bold" ] [ text phase.title ]
+                [ div [ class "fw-bold" ] [ text (localize mbKmLocale phase.title) ]
                 , descriptionElement
                 ]
     in
@@ -200,3 +202,8 @@ viewPhaseModalLazy locale knowledgeModel currentPhaseIndex phaseModalOpen =
         , visible = phaseModalOpen
         , dataCy = "phase-selection"
         }
+
+
+localize : Maybe Gettext.Locale -> String -> String
+localize mbKmLocale key =
+    gettext key (Maybe.withDefault Gettext.defaultLocale mbKmLocale)

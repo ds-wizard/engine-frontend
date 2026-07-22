@@ -22,6 +22,7 @@ type alias KnowledgeModelPackage =
     , kmId : String
     , version : Version
     , description : String
+    , language : String
     , organization : Maybe OrganizationInfo
     , remoteLatestVersion : Maybe Version
     , phase : KnowledgeModelPackagePhase
@@ -40,6 +41,7 @@ decoder =
         |> D.required "kmId" D.string
         |> D.required "version" Version.decoder
         |> D.required "description" D.string
+        |> D.required "language" D.string
         |> D.required "organization" (D.maybe OrganizationInfo.decoder)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "phase" KnowledgeModelPackagePhase.decoder
@@ -56,6 +58,7 @@ dummy =
     , kmId = ""
     , version = Version.create 0 0 0
     , description = ""
+    , language = ""
     , organization = Nothing
     , remoteLatestVersion = Nothing
     , phase = KnowledgeModelPackagePhase.Released

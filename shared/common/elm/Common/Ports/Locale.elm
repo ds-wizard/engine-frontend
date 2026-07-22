@@ -1,5 +1,6 @@
 port module Common.Ports.Locale exposing
     ( convertLocaleFile
+    , localeConversionFailed
     , localeConverted
     )
 
@@ -11,3 +12,6 @@ port convertLocaleFile : E.Value -> Cmd msg
 
 
 port localeConverted : (D.Value -> msg) -> Sub msg
+
+
+port localeConversionFailed : (D.Value -> msg) -> Sub msg

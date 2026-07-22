@@ -1,5 +1,7 @@
 module Wizard.Api.KnowledgeModelPackages exposing
     ( deleteKnowledgeModelPackage
+    , deleteLocale
+    , exportKnowledgeModelPackagePotUrl
     , exportKnowledgeModelPackageUrl
     , getKnowledgeModelPackage
     , getKnowledgeModelPackageDependents
@@ -10,6 +12,7 @@ module Wizard.Api.KnowledgeModelPackages exposing
     , getOutdatedKnowledgeModelPackages
     , importFromOwl
     , importKnowledgeModelPackage
+    , importLocale
     , postFromKnowledgeModelEditor
     , postFromMigration
     , pullKnowledgeModelPackage
@@ -26,8 +29,10 @@ import File exposing (File)
 import Http
 import Json.Decode as D
 import Json.Encode as E
+import Json.Encode.Extra as E
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.KnowledgeModelLocale as KnowledgeModelLocale exposing (KnowledgeModelLocale)
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.KnowledgeModelPackageDeletionImpact as KnowledgeModelPackageDeletionImpact exposing (KnowledgeModelPackageDeletionImpact)
@@ -120,11 +125,14 @@ getKnowledgeModelPackageDependents appState kmPackageUuid allVersions =
     Request.get (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/dependents?allVersions=" ++ Bool.toString allVersions) (D.list KnowledgeModelPackageDeletionImpact.decoder)
 
 
-postFromKnowledgeModelEditor : AppState -> Uuid -> ToMsg KnowledgeModelPackage msg -> Cmd msg
-postFromKnowledgeModelEditor appState uuid =
+postFromKnowledgeModelEditor : AppState -> Uuid -> Maybe (List Uuid) -> ToMsg KnowledgeModelPackage msg -> Cmd msg
+postFromKnowledgeModelEditor appState uuid mbLocaleUuids =
     let
         body =
-            E.object [ ( "editorUuid", Uuid.encode uuid ) ]
+            E.object
+                [ ( "editorUuid", Uuid.encode uuid )
+                , ( "localeUuids", E.maybe (E.list Uuid.encode) mbLocaleUuids )
+                ]
     in
     Request.post (AppState.toServerInfo appState) "/knowledge-model-packages/from-editor" KnowledgeModelPackage.decoder body
 
@@ -170,3 +178,25 @@ importFromOwl appState params file =
 exportKnowledgeModelPackageUrl : Uuid -> String
 exportKnowledgeModelPackageUrl kmPackageUuid =
     "/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/bundle"
+
+
+exportKnowledgeModelPackagePotUrl : Uuid -> String
+exportKnowledgeModelPackagePotUrl kmPackageUuid =
+    "/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/locales/template"
+
+
+deleteLocale : AppState -> Uuid -> Uuid -> ToMsg () msg -> Cmd msg
+deleteLocale appState kmPackageUuid localeUuid =
+    Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/locales/" ++ Uuid.toString localeUuid)
+
+
+importLocale : AppState -> Uuid -> String -> File -> File -> ToMsg KnowledgeModelLocale msg -> Cmd msg
+importLocale appState kmPackageUuid name poContent jsonContent =
+    let
+        parts =
+            [ Http.stringPart "name" name
+            , Http.filePart "poContent" poContent
+            , Http.filePart "jsonContent" jsonContent
+            ]
+    in
+    Request.postMultiPartWithData (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/locales") parts KnowledgeModelLocale.decoder

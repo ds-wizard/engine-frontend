@@ -1,6 +1,7 @@
 module Wizard.Pages.Tenants.Detail.View exposing (view)
 
 import Common.Components.Badge as Badge
+import Common.Components.DetailPage as DetailPage
 import Common.Components.FontAwesome exposing (faEdit, faWarning, fas)
 import Common.Components.FormGroup as FormGroup
 import Common.Components.Modal as Modal
@@ -20,7 +21,6 @@ import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.TenantDetail exposing (TenantDetail)
 import Wizard.Api.Models.TenantState as TenantState
 import Wizard.Api.Models.User as User exposing (User)
-import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.TenantIcon as TenantIcon
 import Wizard.Components.UsageTable as UsageTable
 import Wizard.Components.UserIcon as UserIcon
@@ -38,8 +38,10 @@ viewApp : AppState -> Model -> TenantDetail -> Html Msg
 viewApp appState model app =
     DetailPage.container
         [ header appState app
-        , content appState app
-        , sidePanel appState app
+        , DetailPage.content
+            { body = content appState app
+            , sidePanel = sidePanel appState app
+            }
         , viewEditModal appState model
         , viewEditLimitsModal appState model
         ]
@@ -69,7 +71,7 @@ header appState tenantDetail =
                 [ editAction, editLimitsAction ]
 
         title =
-            span [ class "top-header-title-with-icon" ]
+            span [ class "d-flex align-items-center" ]
                 [ TenantIcon.view tenantDetail
                 , text tenantDetail.name
                 ]
@@ -77,7 +79,7 @@ header appState tenantDetail =
     DetailPage.header title actions
 
 
-content : AppState -> TenantDetail -> Html Msg
+content : AppState -> TenantDetail -> List (Html Msg)
 content appState tenantDetail =
     let
         editWarning =
@@ -87,16 +89,15 @@ content appState tenantDetail =
                     , Markdown.toHtml [] (String.format "Do not edit the tenant here. Go to [Admin Center](%s)." [ "/admin/tenants/" ++ Uuid.toString tenantDetail.uuid ])
                     ]
     in
-    DetailPage.content
-        [ editWarning
-        , div [ DetailPage.contentInnerClass ]
-            [ h3 [] [ text "Usage" ]
-            , UsageTable.view appState True tenantDetail.usage
-            ]
+    [ editWarning
+    , DetailPage.contentBodyNarrow
+        [ h3 [] [ text "Usage" ]
+        , UsageTable.view appState True tenantDetail.usage
         ]
+    ]
 
 
-sidePanel : AppState -> TenantDetail -> Html Msg
+sidePanel : AppState -> TenantDetail -> List (Html Msg)
 sidePanel appState tenantDetail =
     let
         sections =
@@ -105,8 +106,7 @@ sidePanel appState tenantDetail =
             , sidePanelAdmins tenantDetail
             ]
     in
-    DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
+    [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
 sidePanelInfo : AppState -> TenantDetail -> Maybe ( String, String, Html msg )
@@ -208,7 +208,7 @@ viewEditLimitsModal appState model =
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "knowledgeModels" "Knowledge Models"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documentTemplateDrafts" "Document Template Editors"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documentTemplates" "Document Templates"
-                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "projects" "Projects"
+                    , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "questionnaires" "Projects"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "documents" "Documents"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.input appState.locale form "locales" "Locales"
                     , Html.map EditLimitsModalFormMsg <| FormGroup.fileSize appState.locale form "storage" "Storage"

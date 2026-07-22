@@ -12,7 +12,7 @@ import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 subscriptions : Route -> Model -> Sub Msg
 subscriptions route model =
     case route of
-        DetailRoute _ ->
+        DetailRoute _ _ ->
             Sub.map DetailMsg <| Wizard.Pages.KnowledgeModels.Detail.Subscriptions.subscriptions model.detailModel
 
         ImportRoute _ ->

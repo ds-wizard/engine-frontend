@@ -3,6 +3,7 @@ module Wizard.Pages.Dev.PersistentCommandsDetail.View exposing (view)
 import Common.Api.Models.PersistentCommand as PersistentCommand
 import Common.Api.Models.PersistentCommandDetail exposing (PersistentCommandDetail)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
+import Common.Components.DetailPage as DetailPage
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.PersistentCommandBadge as PersistentCommandBadge
@@ -14,7 +15,6 @@ import Json.Print
 import SyntaxHighlight
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User
-import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.TenantIcon as TenantIcon
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState exposing (AppState)
@@ -22,6 +22,7 @@ import Wizard.Pages.Dev.Common.PersistentCommandActionsDropdown as PersistentCom
 import Wizard.Pages.Dev.PersistentCommandsDetail.Models exposing (Model)
 import Wizard.Pages.Dev.PersistentCommandsDetail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 
 
 view : AppState -> Model -> Html Msg
@@ -33,8 +34,10 @@ viewPersistentCommand : AppState -> Model -> PersistentCommandDetail -> Html Msg
 viewPersistentCommand appState model persistentCommand =
     DetailPage.container
         [ header model persistentCommand
-        , content model persistentCommand
-        , sidePanel appState persistentCommand
+        , DetailPage.content
+            { body = content model persistentCommand
+            , sidePanel = sidePanel appState persistentCommand
+            }
         ]
 
 
@@ -61,7 +64,7 @@ header model persistentCommand =
     DetailPage.header title [ dropdownActions ]
 
 
-content : Model -> PersistentCommandDetail -> Html msg
+content : Model -> PersistentCommandDetail -> List (Html msg)
 content model persistentCommand =
     let
         defaultContent =
@@ -100,14 +103,12 @@ content model persistentCommand =
                 Nothing ->
                     []
     in
-    DetailPage.content
-        [ FormResult.view model.updating
-        , div [ DetailPage.contentInnerFullClass ]
-            (error ++ body)
-        ]
+    [ FormResult.view model.updating
+    , div [] (error ++ body)
+    ]
 
 
-sidePanel : AppState -> PersistentCommandDetail -> Html msg
+sidePanel : AppState -> PersistentCommandDetail -> List (Html msg)
 sidePanel appState persistentCommand =
     let
         sections =
@@ -131,8 +132,7 @@ sidePanel appState persistentCommand =
                 Nothing ->
                     []
     in
-    DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 (sections ++ lastTraceUuidSection ++ createdBySection) ]
+    [ DetailPage.sidePanelList 12 12 (sections ++ lastTraceUuidSection ++ createdBySection) ]
 
 
 sidePanelPersistentCommandInfo : AppState -> PersistentCommandDetail -> ( String, String, Html msg )
@@ -159,7 +159,7 @@ sidePanelAppInfo persistentCommand =
 
         tenantView =
             DetailPage.sidePanelItemWithIconWithLink
-                (Routes.tenantsDetail persistentCommand.tenant.uuid)
+                (Routing.toUrl (Routes.tenantsDetail persistentCommand.tenant.uuid))
                 persistentCommand.tenant.name
                 (text tenantUrl)
                 (TenantIcon.view persistentCommand.tenant)

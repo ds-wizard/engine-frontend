@@ -4,6 +4,8 @@ module Wizard.Pages.KnowledgeModels.Detail.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
+import Browser.Navigation as Navigation
+import Common.Api.ApiError as ApiError
 import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setKnowledgeModelPackage)
@@ -14,10 +16,12 @@ import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase exposi
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KnowledgeModels.Common.DeleteModal as DeleteModal
+import Wizard.Pages.KnowledgeModels.Detail.ImportLocaleModal as ImportLocaleModal
+import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute as KnowledgeModelDetailRoute exposing (KnowledgeModelDetailRoute)
 import Wizard.Pages.KnowledgeModels.Detail.Models exposing (Model)
 import Wizard.Pages.KnowledgeModels.Detail.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
-import Wizard.Routing exposing (cmdNavigate)
+import Wizard.Routing exposing (cmdNavigate, toUrl)
 
 
 fetchData : Uuid -> AppState -> Cmd Msg
@@ -37,6 +41,77 @@ update msg wrapMsg appState model =
                 , logoutMsg = Wizard.Msgs.logoutMsg
                 , locale = appState.locale
                 }
+
+        OpenDetailRoute detailRoute ->
+            let
+                replaceUrlCmd =
+                    ActionResult.unwrap Cmd.none
+                        (\kmPackage -> Navigation.replaceUrl appState.key (toUrl (detailRouteToRoute detailRoute kmPackage.uuid)))
+                        model.knowledgeModelPackage
+            in
+            ( { model | detailRoute = detailRoute }, replaceUrlCmd )
+
+        OpenImportLocaleModal ->
+            case model.knowledgeModelPackage of
+                Success kmPackage ->
+                    ( { model | importLocaleModal = ImportLocaleModal.open kmPackage.uuid }, Cmd.none )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        ImportLocaleModalMsg importLocaleModalMsg ->
+            let
+                ( importLocaleModal, importLocaleModalCmd, mbImportedLocale ) =
+                    ImportLocaleModal.update appState importLocaleModalMsg model.importLocaleModal
+
+                knowledgeModelPackage =
+                    case mbImportedLocale of
+                        Just locale ->
+                            ActionResult.map (\kmPackage -> { kmPackage | locales = kmPackage.locales ++ [ locale ] }) model.knowledgeModelPackage
+
+                        Nothing ->
+                            model.knowledgeModelPackage
+            in
+            ( { model | importLocaleModal = importLocaleModal, knowledgeModelPackage = knowledgeModelPackage }
+            , Cmd.map (wrapMsg << ImportLocaleModalMsg) importLocaleModalCmd
+            )
+
+        ShowDeleteLocale locale ->
+            ( { model | localeToDelete = Just locale, deletingLocale = Unset }, Cmd.none )
+
+        HideDeleteLocale ->
+            ( { model | localeToDelete = Nothing }, Cmd.none )
+
+        DeleteLocale ->
+            case ( model.knowledgeModelPackage, model.localeToDelete ) of
+                ( Success kmPackage, Just locale ) ->
+                    ( { model | deletingLocale = Loading }
+                    , Cmd.map wrapMsg (KnowledgeModelPackagesApi.deleteLocale appState kmPackage.uuid locale.uuid DeleteLocaleCompleted)
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        DeleteLocaleCompleted result ->
+            case result of
+                Ok _ ->
+                    let
+                        knowledgeModelPackage =
+                            case model.localeToDelete of
+                                Just locale ->
+                                    ActionResult.map (\kmPackage -> { kmPackage | locales = List.filter (\l -> l.uuid /= locale.uuid) kmPackage.locales }) model.knowledgeModelPackage
+
+                                Nothing ->
+                                    model.knowledgeModelPackage
+                    in
+                    ( { model | localeToDelete = Nothing, deletingLocale = Success "", knowledgeModelPackage = knowledgeModelPackage }
+                    , Cmd.none
+                    )
+
+                Err error ->
+                    ( { model | deletingLocale = ApiError.toActionResult appState (gettext "Deleting the locale failed." appState.locale) error }
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
+                    )
 
         DropdownMsg state ->
             ( { model | dropdownState = state }, Cmd.none )
@@ -96,11 +171,24 @@ update msg wrapMsg appState model =
         ExportKnowledgeModelPackage kmPackage ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackageUrl kmPackage.uuid)) )
 
+        ExportKnowledgeModelPackagePot kmPackage ->
+            ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.fetchFile (AppState.toServerInfo appState) (KnowledgeModelPackagesApi.exportKnowledgeModelPackagePotUrl kmPackage.uuid)) )
+
         FileDownloaderMsg fileDownloaderMsg ->
             ( model, Cmd.map (wrapMsg << FileDownloaderMsg) (FileDownloader.update fileDownloaderMsg) )
 
         ShowAllVersions ->
             ( { model | showAllVersions = True }, Cmd.none )
+
+
+detailRouteToRoute : KnowledgeModelDetailRoute -> Uuid -> Routes.Route
+detailRouteToRoute detailRoute uuid =
+    case detailRoute of
+        KnowledgeModelDetailRoute.Readme ->
+            Routes.knowledgeModelsDetail uuid
+
+        KnowledgeModelDetailRoute.Locales ->
+            Routes.knowledgeModelsDetailLocales uuid
 
 
 handleSetUpdatePhase : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> KnowledgeModelPackagePhase -> ( Model, Cmd Wizard.Msgs.Msg )

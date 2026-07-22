@@ -35,7 +35,6 @@ import Wizard.Components.ListingDropdown as ListingDropdown exposing (ListingAct
 import Wizard.Components.MemberIcon as MemberIcon
 import Wizard.Components.UserIcon as UserIcon
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Pages.KnowledgeModels.Routes
 import Wizard.Pages.Projects.Common.CloneProjectModal.Msgs as CloneProjectModalMsg
 import Wizard.Pages.Projects.Common.CloneProjectModal.View as CloneProjectModal
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModalMsg
@@ -574,8 +573,7 @@ listingDescription appState project =
                     span [ class "fragment" ] (users ++ [ extraUsers ])
 
         kmRoute =
-            Routes.KnowledgeModelsRoute <|
-                Wizard.Pages.KnowledgeModels.Routes.DetailRoute project.knowledgeModelPackage.uuid
+            Routes.knowledgeModelsDetail project.knowledgeModelPackage.uuid
 
         kmLink =
             linkTo kmRoute

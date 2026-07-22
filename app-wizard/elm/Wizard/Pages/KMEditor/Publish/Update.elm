@@ -20,6 +20,7 @@ import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPac
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm as KnowledgeModelEditorPublishForm
+import Wizard.Pages.KMEditor.Common.PublishLocaleSelection as PublishLocaleSelection
 import Wizard.Pages.KMEditor.Publish.Models exposing (Model)
 import Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
@@ -28,7 +29,10 @@ import Wizard.Routing as Routing exposing (cmdNavigate)
 
 fetchData : Uuid -> AppState -> Cmd Msg
 fetchData uuid appState =
-    KnowledgeModelEditorsApi.getKnowledgeModelEditor appState uuid GetKnowledgeModelEditorCompleted
+    Cmd.batch
+        [ KnowledgeModelEditorsApi.getKnowledgeModelEditor appState uuid GetKnowledgeModelEditorCompleted
+        , Cmd.map PublishLocaleSelectionMsg (PublishLocaleSelection.fetchLocales appState uuid)
+        ]
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
@@ -51,6 +55,9 @@ update msg wrapMsg appState model =
 
         PutKnowledgeModelEditorCompleted result ->
             handlePutKnowledgeModelEditorCompleted appState model result
+
+        PublishLocaleSelectionMsg subMsg ->
+            ( { model | localeSelection = PublishLocaleSelection.update appState subMsg model.localeSelection }, Cmd.none )
 
 
 
@@ -109,7 +116,7 @@ handleFormMsg formMsg wrapMsg appState model =
         ( Form.Submit, Just form, Success kmEditor ) ->
             let
                 body =
-                    KnowledgeModelEditorPublishForm.encode kmEditor.uuid form
+                    KnowledgeModelEditorPublishForm.encode kmEditor.uuid (PublishLocaleSelection.selectedLocaleUuids model.localeSelection) form
 
                 cmd =
                     Cmd.map wrapMsg <|

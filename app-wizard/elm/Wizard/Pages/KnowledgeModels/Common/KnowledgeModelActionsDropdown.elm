@@ -7,7 +7,7 @@ module Wizard.Pages.KnowledgeModels.Common.KnowledgeModelActionsDropdown exposin
     )
 
 import Bootstrap.Dropdown as Dropdown
-import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmCompare, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faKmSetPrivate, faKmSetPublic, faOpen, faPreview)
+import Common.Components.FontAwesome exposing (faDelete, faDocumentTemplateRestore, faDocumentTemplateSetDeprecated, faExport, faKmCompare, faKmDetailCreateKmEditor, faKmDetailCreateQuestionnaire, faKmDetailFork, faKmSetPrivate, faKmSetPublic, faLocale, faOpen, faPreview)
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import Uuid exposing (Uuid)
@@ -36,6 +36,7 @@ type alias DropdownConfig msg =
 
 type alias ActionsConfig a msg =
     { exportMsg : KnowledgeModelPackageLike a -> msg
+    , exportPotMsg : KnowledgeModelPackageLike a -> msg
     , updatePhaseMsg : KnowledgeModelPackageLike a -> KnowledgeModelPackagePhase -> msg
     , updatePublicMsg : KnowledgeModelPackageLike a -> Bool -> msg
     , deleteMsg : KnowledgeModelPackageLike a -> msg
@@ -81,6 +82,18 @@ actions appState cfg kmPackage =
 
         exportActionVisible =
             Feature.knowledgeModelsExport appState && not kmPackage.nonEditable
+
+        exportPotAction =
+            ListingDropdown.dropdownAction
+                { extraClass = Nothing
+                , icon = faLocale
+                , label = gettext "Export .pot file" appState.locale
+                , msg = ListingActionMsg (cfg.exportPotMsg kmPackage)
+                , dataCy = "export-pot"
+                }
+
+        exportPotActionVisible =
+            Feature.knowledgeModelsExportPot appState && not kmPackage.nonEditable
 
         compareAction =
             ListingDropdown.dropdownAction
@@ -193,8 +206,10 @@ actions appState cfg kmPackage =
         groups =
             [ [ ( viewAction, viewActionVisible )
               , ( previewAction, previewActionVisible )
-              , ( exportAction, exportActionVisible )
               , ( compareAction, compareActionVisible )
+              ]
+            , [ ( exportAction, exportActionVisible )
+              , ( exportPotAction, exportPotActionVisible )
               ]
             , [ ( createEditorAction, createEditorActionVisible )
               , ( forkAction, forkActionVisible )

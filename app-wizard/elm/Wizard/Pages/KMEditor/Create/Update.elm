@@ -64,11 +64,28 @@ update msg wrapMsg appState model =
         KnowledgeModelPackageTypeHintInputMsg typeHintInputMsg ->
             handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model
 
+        SelectPreviousPackage mbUuid ->
+            let
+                form =
+                    setKmEditorCreateFormValue appState "previousPackageUuid" (Maybe.unwrap "" Uuid.toString mbUuid) model.form
+
+                ( kmPackage, fetchCmd ) =
+                    case mbUuid of
+                        Just uuid ->
+                            ( Loading
+                            , Cmd.map wrapMsg <| KnowledgeModelPackagesApi.getKnowledgeModelPackage appState uuid GetPackageCompleted
+                            )
+
+                        Nothing ->
+                            ( model.kmPackage, Cmd.none )
+            in
+            ( { model | form = form, kmPackage = kmPackage }, fetchCmd )
+
         GetPackageCompleted result ->
             case result of
                 Ok kmPackage ->
                     let
-                        form =
+                        formWithNameAndKmId =
                             if model.edit then
                                 model.form
                                     |> setKmEditorCreateFormValue appState "name" kmPackage.name
@@ -76,6 +93,9 @@ update msg wrapMsg appState model =
 
                             else
                                 model.form
+
+                        form =
+                            setKmEditorCreateFormValue appState "language" kmPackage.language formWithNameAndKmId
                     in
                     ( { model | kmPackage = Success kmPackage, form = form }, Cmd.none )
 
@@ -155,15 +175,12 @@ handlePostKmEditorCompleted appState model result =
 handlePackageTypeHintInputMsg : (Msg -> Wizard.Msgs.Msg) -> TypeHintInput.Msg KnowledgeModelPackageSuggestion -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 handlePackageTypeHintInputMsg wrapMsg typeHintInputMsg appState model =
     let
-        formMsg =
-            wrapMsg << FormMsg << Form.Input "previousPackageUuid" Form.Select << Field.String
-
         cfg =
             { wrapMsg = wrapMsg << KnowledgeModelPackageTypeHintInputMsg
             , getTypeHints = KnowledgeModelPackagesApi.getKnowledgeModelPackagesSuggestions appState (Just False)
             , getError = gettext "Unable to get Knowledge Models." appState.locale
-            , setReply = formMsg << Uuid.toString << .uuid
-            , clearReply = Just <| formMsg ""
+            , setReply = wrapMsg << SelectPreviousPackage << Just << .uuid
+            , clearReply = Just <| wrapMsg (SelectPreviousPackage Nothing)
             , filterResults = Nothing
             }
 

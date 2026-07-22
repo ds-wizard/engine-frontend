@@ -21,6 +21,7 @@ type alias KnowledgeModelEditorCreateForm =
     , versionMajor : Int
     , versionMinor : Int
     , versionPatch : Int
+    , language : String
     , previousPackageUuid : Maybe String
     }
 
@@ -29,12 +30,14 @@ init : AppState -> Maybe String -> Form FormError KnowledgeModelEditorCreateForm
 init appState selectedKnowledgeModelPackage =
     let
         initials =
-            case selectedKnowledgeModelPackage of
-                Just kmPackageUuid ->
-                    [ ( "previousPackageUuid", Field.string kmPackageUuid ) ]
+            ( "language", Field.string "en" )
+                :: (case selectedKnowledgeModelPackage of
+                        Just kmPackageUuid ->
+                            [ ( "previousPackageUuid", Field.string kmPackageUuid ) ]
 
-                _ ->
-                    []
+                        _ ->
+                            []
+                   )
     in
     Form.initial initials (validation appState)
 
@@ -47,6 +50,7 @@ validation appState =
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)
+        |> V.andMap (V.field "language" V.string)
         |> V.andMap (V.field "previousPackageUuid" V.maybeString)
 
 
@@ -63,5 +67,6 @@ encode form =
         [ ( "name", E.string form.name )
         , ( "kmId", E.string form.kmId )
         , ( "version", E.string version )
+        , ( "language", E.string form.language )
         , ( "previousPackageUuid", parentPackage )
         ]

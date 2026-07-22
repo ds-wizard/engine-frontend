@@ -29,22 +29,25 @@ import CharIdentifier
 import Dict
 import Dict.Extra as Dict
 import Flip exposing (flip)
+import Gettext
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Roman
 import Set exposing (Set)
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
-import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
-import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Answer as Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter as Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice as Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
 import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
 import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing (QuestionValidation)
-import Wizard.Api.Models.KnowledgeModel.Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.ResourceCollection as ResourceCollection
+import Wizard.Api.Models.KnowledgeModel.ResourcePage as ResourcePage
 import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
@@ -197,6 +200,7 @@ type alias VirtualizeContext =
     , collapsedPaths : Set String
     , resourcePageToUrl : String -> Wizard.Routes.Route
     , viewSettings : QuestionnaireViewSettings
+    , locale : Gettext.Locale
     }
 
 
@@ -245,7 +249,7 @@ virtualizeChapter ctx =
 
                 chapterNode =
                     ChapterNode
-                        { chapter = chapter
+                        { chapter = Chapter.localize ctx.locale chapter
                         , chapterNumber = chapterNumber
                         }
 
@@ -273,8 +277,8 @@ virtualizeChapter ctx =
                 chapterLinksNode =
                     ChapterLinksNode
                         { chapterUuid = chapter.uuid
-                        , previousChapter = previousChapter
-                        , nextChapter = nextChapter
+                        , previousChapter = Maybe.map (Chapter.localize ctx.locale) previousChapter
+                        , nextChapter = Maybe.map (Chapter.localize ctx.locale) nextChapter
                         }
             in
             chapterNode :: emptyChapterNodes ++ questionNodes ++ [ chapterLinksNode ]
@@ -312,7 +316,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                             { humanIdentifier = questionHumanIdentifier
                             , isDesirable = isDesirable
                             , pluginOpen = Nothing
-                            , question = question
+                            , question = Question.localize ctx.locale question
                             , questionExtraData = createQuestionExtraData ctx question
                             , questionPath = questionPath
                             , nestingType = createNestingType ContentNesting
@@ -326,7 +330,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 let
                                     answers =
                                         KnowledgeModel.getQuestionAnswers questionUuid ctx.questionnaire.knowledgeModel
-                                            |> List.map cleanFollowUpUuids
+                                            |> List.map (cleanFollowUpUuids >> Answer.localize ctx.locale)
 
                                     followUpExists followUpUuid =
                                         Dict.get followUpUuid ctx.questionnaire.knowledgeModel.entities.questions
@@ -414,6 +418,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 let
                                     choices =
                                         KnowledgeModel.getQuestionChoices questionUuid ctx.questionnaire.knowledgeModel
+                                            |> List.map (Choice.localize ctx.locale)
                                 in
                                 ( MultiChoiceQuestionSpecificNodeData { choices = choices }
                                 , []
@@ -422,12 +427,14 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                             Question.ItemSelectQuestion _ itemSelectQuestionData ->
                                 let
                                     itemTemplateQuestions =
-                                        case itemSelectQuestionData.listQuestionUuid of
+                                        (case itemSelectQuestionData.listQuestionUuid of
                                             Just listQuestionUuid ->
                                                 KnowledgeModel.getQuestionItemTemplateQuestions listQuestionUuid ctx.questionnaire.knowledgeModel
 
                                             Nothing ->
                                                 []
+                                        )
+                                            |> List.map (Question.localize ctx.locale)
                                 in
                                 ( ItemSelectQuestionSpecificNodeData { itemTemplateQuestions = itemTemplateQuestions }
                                 , []
@@ -476,12 +483,15 @@ createQuestionExtraData ctx question =
                             ( rpr, ur, cr ++ [ data ] )
                 )
                 ( [], [], [] )
-                (KnowledgeModel.getQuestionReferences (Question.getUuid question) ctx.questionnaire.knowledgeModel)
+                (KnowledgeModel.getQuestionReferences (Question.getUuid question) ctx.questionnaire.knowledgeModel
+                    |> List.map (Reference.localize ctx.locale)
+                )
 
         toResourceCollection ( resourceCollectionUuid, collectionResourcePageReferences ) =
             let
                 resourceCollection =
                     KnowledgeModel.getResourceCollection resourceCollectionUuid ctx.questionnaire.knowledgeModel
+                        |> Maybe.map (ResourceCollection.localize ctx.locale)
             in
             case resourceCollection of
                 Just rc ->
@@ -494,6 +504,7 @@ createQuestionExtraData ctx question =
                                         mbResourcePage =
                                             resourcePageReference.resourcePageUuid
                                                 |> Maybe.andThen (flip KnowledgeModel.getResourcePage ctx.questionnaire.knowledgeModel)
+                                                |> Maybe.map (ResourcePage.localize ctx.locale)
                                     in
                                     case mbResourcePage of
                                         Just resourcePage ->
@@ -536,6 +547,7 @@ createQuestionExtraData ctx question =
                     { targetQuestionUuid = data.targetUuid
                     , targetQuestionTitle =
                         KnowledgeModel.getQuestion data.targetUuid ctx.questionnaire.knowledgeModel
+                            |> Maybe.map (Question.localize ctx.locale)
                             |> Maybe.unwrap "" Question.getTitle
                     , description = data.description
                     }
