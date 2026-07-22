@@ -109,6 +109,7 @@ formContentSelectedKnowledgeModel appState model =
         viewFormContent ( packageDetail, _ ) =
             div []
                 [ FormGroup.plainGroup (viewKnowledgeModel packageDetail) (gettext "Knowledge Model" appState.locale)
+                , languageView appState model
                 , tagsView appState model
                 ]
     in
@@ -220,8 +221,28 @@ knowledgeModelFormFields appState model =
     in
     div []
         [ knowledgeModelInput
+        , languageView appState model
         , tagsView appState model
         ]
+
+
+languageView : AppState -> Model -> Html Msg
+languageView appState model =
+    case model.selectedKnowledgeModel of
+        ActionResult.Success kmDetail ->
+            if List.isEmpty kmDetail.locales then
+                Html.nothing
+
+            else
+                let
+                    options =
+                        ( kmDetail.language, kmDetail.language )
+                            :: List.map (\locale -> ( locale.code, locale.code )) (List.sortBy .code kmDetail.locales)
+                in
+                Html.map FormMsg <| FormGroup.select appState.locale options model.form "language" (gettext "Project Language" appState.locale)
+
+        _ ->
+            Html.nothing
 
 
 tagsView : AppState -> Model -> Html Msg

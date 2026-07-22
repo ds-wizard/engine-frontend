@@ -11,6 +11,7 @@ import Common.Components.TypeHintInput as TypeHintInput
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, div, text)
+import LanguageCodes
 import Wizard.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Create.Models exposing (Model)
@@ -105,6 +106,7 @@ formView appState model =
         , Html.map FormMsg <| FormGroup.input appState.locale model.form "kmId" <| gettext "Knowledge Model ID" appState.locale
         , FormExtra.textAfter <| gettext "Knowledge model ID can only contain alphanumeric characters, hyphens, underscores, and dots." appState.locale
         , FormGroup.version appState.locale versionInputConfig model.form
+        , Html.map FormMsg <| FormGroup.select appState.locale LanguageCodes.options model.form "language" <| gettext "Language" appState.locale
         , parentInput
         , FormExtra.textAfter <| gettext "You can create a new knowledge model based on the existing one or start from scratch." appState.locale
         ]

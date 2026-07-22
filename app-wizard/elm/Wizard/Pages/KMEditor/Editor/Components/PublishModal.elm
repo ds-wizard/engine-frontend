@@ -12,11 +12,10 @@ module Wizard.Pages.KMEditor.Editor.Components.PublishModal exposing
 import ActionResult exposing (ActionResult)
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Components.FontAwesome exposing (faSettings)
-import Common.Components.FormGroup as FormGroup
 import Common.Components.Modal as Modal
 import Common.Utils.Markdown as Markdown
 import Gettext exposing (gettext)
-import Html exposing (Html, div, text)
+import Html exposing (Html, code, dd, div, dl, dt, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import String.Format as String
@@ -27,6 +26,7 @@ import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEdit
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
+import Wizard.Pages.KMEditor.Common.PublishLocaleSelection as PublishLocaleSelection
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
@@ -39,6 +39,7 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 type alias Model =
     { open : Bool
     , publishing : ActionResult String
+    , localeSelection : PublishLocaleSelection.Model
     }
 
 
@@ -46,6 +47,7 @@ initialModel : Model
 initialModel =
     { open = False
     , publishing = ActionResult.Unset
+    , localeSelection = PublishLocaleSelection.initialModel
     }
 
 
@@ -57,6 +59,7 @@ type Msg
     = SetOpen Bool
     | Publish
     | PublishCompleted (Result ApiError KnowledgeModelPackage)
+    | PublishLocaleSelectionMsg PublishLocaleSelection.Msg
 
 
 openMsg : Msg
@@ -78,12 +81,21 @@ update : UpdateConfig msg -> AppState -> Msg -> Model -> ( Model, Cmd msg )
 update cfg appState msg model =
     case msg of
         SetOpen open ->
-            ( { model | open = open }, Cmd.none )
+            if open then
+                ( { model | open = True, localeSelection = PublishLocaleSelection.initialModel }
+                , Cmd.map (cfg.wrapMsg << PublishLocaleSelectionMsg) (PublishLocaleSelection.fetchLocales appState cfg.kmEditorUuid)
+                )
+
+            else
+                ( { model | open = False }, Cmd.none )
 
         Publish ->
             ( { model | publishing = ActionResult.Loading }
-            , KnowledgeModelPackagesApi.postFromKnowledgeModelEditor appState cfg.kmEditorUuid (cfg.wrapMsg << PublishCompleted)
+            , KnowledgeModelPackagesApi.postFromKnowledgeModelEditor appState cfg.kmEditorUuid (PublishLocaleSelection.selectedLocaleUuids model.localeSelection) (cfg.wrapMsg << PublishCompleted)
             )
+
+        PublishLocaleSelectionMsg subMsg ->
+            ( { model | localeSelection = PublishLocaleSelection.update appState subMsg model.localeSelection }, Cmd.none )
 
         PublishCompleted result ->
             case result of
@@ -120,12 +132,9 @@ view cfg appState model =
 
         modalContent =
             [ info
-            , FormGroup.readOnlyInput cfg.kmEditor.name (gettext "Name" appState.locale)
-            , FormGroup.readOnlyInput cfg.kmEditor.description (gettext "Description" appState.locale)
-            , FormGroup.readOnlyInput cfg.kmEditor.kmId (gettext "Knowledge Model ID" appState.locale)
-            , FormGroup.readOnlyInput (Version.toString cfg.kmEditor.version) (gettext "Version" appState.locale)
-            , FormGroup.readOnlyInput cfg.kmEditor.license (gettext "License" appState.locale)
-            , FormGroup.plainGroup (Markdown.toHtml [ class "form-control disabled" ] cfg.kmEditor.readme) (gettext "Readme" appState.locale)
+            , Html.map PublishLocaleSelectionMsg (PublishLocaleSelection.view appState model.localeSelection)
+            , viewMetadata appState cfg.kmEditor
+            , Markdown.toHtml [ class "form-control disabled cursor-default" ] cfg.kmEditor.readme
             ]
 
         modalConfig =
@@ -134,9 +143,31 @@ view cfg appState model =
                 |> Modal.confirmConfigVisible model.open
                 |> Modal.confirmConfigActionResult model.publishing
                 |> Modal.confirmConfigAction (gettext "Publish" appState.locale) Publish
+                |> Modal.confirmConfigActionEnabled (PublishLocaleSelection.ready model.localeSelection)
                 |> Modal.confirmConfigCancelMsg (SetOpen False)
                 |> Modal.confirmConfigExtraClass "modal-wide"
                 |> Modal.confirmConfigGuideLinkConfig (AppState.toGuideLinkConfig appState WizardGuideLinks.kmEditorPublish)
                 |> Modal.confirmConfigDataCy "km-editor_publish"
     in
     Modal.confirm appState modalConfig
+
+
+viewMetadata : AppState -> KnowledgeModelEditorDetail -> Html msg
+viewMetadata appState kmEditor =
+    let
+        row label value =
+            [ dt [ class "col-sm-3" ] [ text label ]
+            , dd [ class "col-sm-9" ] [ value ]
+            ]
+    in
+    div [ class "card bg-light mb-2" ]
+        [ div [ class "card-body" ]
+            [ dl [ class "row mb-0" ]
+                (row (gettext "Name" appState.locale) (text kmEditor.name)
+                    ++ row (gettext "Description" appState.locale) (text kmEditor.description)
+                    ++ row (gettext "Knowledge Model ID" appState.locale) (code [] [ text kmEditor.kmId ])
+                    ++ row (gettext "Version" appState.locale) (text (Version.toString kmEditor.version))
+                    ++ row (gettext "License" appState.locale) (text kmEditor.license)
+                )
+            ]
+        ]

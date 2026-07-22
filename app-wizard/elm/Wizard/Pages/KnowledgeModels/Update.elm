@@ -17,7 +17,7 @@ import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        DetailRoute kmPackageId ->
+        DetailRoute kmPackageId _ ->
             Cmd.map DetailMsg <|
                 Wizard.Pages.KnowledgeModels.Detail.Update.fetchData kmPackageId appState
 

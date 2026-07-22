@@ -10,6 +10,7 @@ import Common.Utils.Form.Validate as Validate
 import Form exposing (Form)
 import Form.Validate as Validate exposing (Validation)
 import Json.Encode as E
+import Json.Encode.Extra as E
 import String exposing (fromInt)
 import Uuid exposing (Uuid)
 
@@ -38,8 +39,8 @@ validation =
         (Validate.field "readme" Validate.string)
 
 
-encode : Uuid -> KnowledgeModelEditorPublishForm -> E.Value
-encode kmEditorUuid form =
+encode : Uuid -> Maybe (List Uuid) -> KnowledgeModelEditorPublishForm -> E.Value
+encode kmEditorUuid mbLocaleUuids form =
     let
         version =
             String.join "." <| List.map fromInt [ form.major, form.minor, form.patch ]
@@ -49,4 +50,5 @@ encode kmEditorUuid form =
         , ( "version", E.string version )
         , ( "description", E.string form.description )
         , ( "readme", E.string form.readme )
+        , ( "localeUuids", E.maybe (E.list Uuid.encode) mbLocaleUuids )
         ]

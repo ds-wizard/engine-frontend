@@ -3,9 +3,11 @@ module Wizard.Api.Models.KnowledgeModel.Chapter exposing
     , addQuestionUuid
     , decoder
     , equalContent
+    , localize
     , removeQuestionUuid
     )
 
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -44,3 +46,11 @@ equalContent : Chapter -> Chapter -> Bool
 equalContent chapter1 chapter2 =
     (chapter1.title == chapter2.title)
         && (chapter1.text == chapter2.text)
+
+
+localize : Locale -> Chapter -> Chapter
+localize locale chapter =
+    { chapter
+        | title = gettext chapter.title locale
+        , text = Maybe.map (\text -> gettext text locale) chapter.text
+    }

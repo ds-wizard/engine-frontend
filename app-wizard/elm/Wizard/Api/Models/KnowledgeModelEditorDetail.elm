@@ -21,6 +21,7 @@ type alias KnowledgeModelEditorDetail =
     , name : String
     , description : String
     , kmId : String
+    , language : String
     , license : String
     , readme : String
     , version : Version
@@ -40,6 +41,7 @@ decoder =
         |> D.required "name" D.string
         |> D.required "description" D.string
         |> D.required "kmId" D.string
+        |> D.required "language" D.string
         |> D.required "license" D.string
         |> D.required "readme" D.string
         |> D.required "version" Version.decoder

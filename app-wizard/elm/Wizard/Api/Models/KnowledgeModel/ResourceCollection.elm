@@ -3,8 +3,10 @@ module Wizard.Api.Models.KnowledgeModel.ResourceCollection exposing
     , addResourcePageUuid
     , decoder
     , equalContent
+    , localize
     )
 
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -35,3 +37,8 @@ addResourcePageUuid resourcePageUuid resourceCollection =
 equalContent : ResourceCollection -> ResourceCollection -> Bool
 equalContent resourceCollection1 resourceCollection2 =
     resourceCollection1.title == resourceCollection2.title
+
+
+localize : Locale -> ResourceCollection -> ResourceCollection
+localize locale resourceCollection =
+    { resourceCollection | title = gettext resourceCollection.title locale }

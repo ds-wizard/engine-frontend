@@ -152,7 +152,7 @@ viewChapter props order chapter =
             , onClick (OpenChapter chapter.uuid)
             ]
             [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
-            , span [ class "chapter-name" ] [ text chapter.title ]
+            , span [ class "chapter-name" ] [ text (localize chapter.title props.questionnaire) ]
             , viewChapterIndication props.unansweredQuestions chapter
             ]
         , questionList
@@ -235,7 +235,7 @@ viewQuestion props path question =
         [ caret
         , a [ onClick (ScrollToPath (pathToString currentPath)) ]
             [ faKmQuestion
-            , text (Question.getTitle question)
+            , text (localize (Question.getTitle question) props.questionnaire)
             ]
         , Maybe.withDefault Html.nothing nestedList
         ]
@@ -370,3 +370,8 @@ isQuestionDesirable props =
 isOpen : List String -> Set String -> Bool
 isOpen path collapsedItems =
     not (Set.member (pathToString path) collapsedItems)
+
+
+localize : String -> ProjectQuestionnaire -> String
+localize key questionnaire =
+    gettext key (Maybe.withDefault Gettext.defaultLocale questionnaire.locale)

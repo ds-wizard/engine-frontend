@@ -32,6 +32,7 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     , isList
     , isMultiChoice
     , isOptions
+    , localize
     , removeAnswerUuid
     , removeChoiceUuid
     , removeExpertUuid
@@ -40,6 +41,7 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     )
 
 import Dict exposing (Dict)
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Json.Encode as E
@@ -293,6 +295,17 @@ removeChoiceUuid choiceUuid question =
 
         _ ->
             question
+
+
+localize : Locale -> Question -> Question
+localize locale =
+    mapCommonQuestionData
+        (\commonData ->
+            { commonData
+                | title = gettext commonData.title locale
+                , text = Maybe.map (\text -> gettext text locale) commonData.text
+            }
+        )
 
 
 mapCommonQuestionData : (CommonQuestionData -> CommonQuestionData) -> Question -> Question

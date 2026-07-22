@@ -12,10 +12,11 @@ module Wizard.Api.Models.KnowledgeModel.Reference exposing
     , getUrl
     , getUuid
     , getVisibleName
+    , localize
     , map
     )
 
-import Gettext exposing (gettext)
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extra as D
 import Wizard.Api.Models.KnowledgeModel.Annotation exposing (Annotation)
@@ -79,6 +80,19 @@ equalContent reference1 reference2 =
 
         _ ->
             False
+
+
+localize : Locale -> Reference -> Reference
+localize locale reference =
+    case reference of
+        ResourcePageReference data ->
+            ResourcePageReference data
+
+        URLReference data ->
+            URLReference { data | label = gettext data.label locale }
+
+        CrossReference data ->
+            CrossReference { data | description = gettext data.description locale }
 
 
 map : (ResourcePageReferenceData -> a) -> (URLReferenceData -> a) -> (CrossReferenceData -> a) -> Reference -> a

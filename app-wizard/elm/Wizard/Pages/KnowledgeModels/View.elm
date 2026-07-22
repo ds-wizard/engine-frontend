@@ -16,7 +16,7 @@ import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 view : Route -> AppState -> Model -> Html Msg
 view route appState model =
     case route of
-        DetailRoute _ ->
+        DetailRoute _ _ ->
             Html.map DetailMsg <| Wizard.Pages.KnowledgeModels.Detail.View.view appState model.detailModel
 
         ImportRoute _ ->

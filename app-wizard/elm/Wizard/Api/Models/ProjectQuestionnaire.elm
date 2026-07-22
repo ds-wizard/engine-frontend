@@ -99,6 +99,7 @@ type alias ProjectQuestionnaire =
     , resolvedCommentCounts : Dict String (Dict String Int)
     , selectedQuestionTagUuids : List String
     , files : List ProjectFileSimple
+    , locale : Maybe Gettext.Locale
     }
 
 
@@ -121,6 +122,7 @@ decoder =
         |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
         |> D.required "files" (D.list ProjectFileSimple.decoder)
+        |> D.required "locale" (D.maybe Gettext.localeDecoder)
 
 
 toProjectCommon : ProjectQuestionnaire -> ProjectCommon
@@ -253,6 +255,7 @@ createQuestionnaireDetail kmPackage km =
     , migrationUuid = Nothing
     , selectedQuestionTagUuids = []
     , files = []
+    , locale = Nothing
     }
 
 

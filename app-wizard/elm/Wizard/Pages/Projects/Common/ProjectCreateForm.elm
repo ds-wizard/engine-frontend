@@ -8,6 +8,7 @@ module Wizard.Pages.Projects.Common.ProjectCreateForm exposing
     )
 
 import Common.Utils.Form.FormError exposing (FormError)
+import Common.Utils.Form.Validate as V
 import Form exposing (Form)
 import Form.Field as Field
 import Form.Validate as V exposing (Validation)
@@ -28,6 +29,7 @@ type alias ProjectCreateForm =
     , sharingPermission : ProjectPermission
     , knowledgeModelPackageUuid : String
     , projectUuid : String
+    , language : String
     }
 
 
@@ -53,6 +55,7 @@ init appState validationMode selectedTemplateUuid selectedPackageUuid =
             , ( "visibilityPermission", ProjectPermission.field visibilityPermission )
             , ( "sharingEnabled", Field.bool sharingEnabled )
             , ( "sharingPermission", ProjectPermission.field sharingPermission )
+            , ( "language", Field.string "" )
             ]
                 ++ toField "projectUuid" (Maybe.map Uuid.toString selectedTemplateUuid)
                 ++ toField "knowledgeModelPackageUuid" (Maybe.map Uuid.toString selectedPackageUuid)
@@ -81,11 +84,13 @@ validation validationMode =
             validationBase
                 |> V.andMap (V.succeed "")
                 |> V.andMap (V.field "projectUuid" V.string)
+                |> V.andMap (V.field "language" V.optionalString)
 
         PackageValidationMode ->
             validationBase
                 |> V.andMap (V.field "knowledgeModelPackageUuid" V.string)
                 |> V.andMap (V.succeed "")
+                |> V.andMap (V.field "language" V.optionalString)
 
 
 encodeFromPackage : List String -> ProjectCreateForm -> E.Value
@@ -97,6 +102,7 @@ encodeFromPackage questionTagUuids form =
         , ( "sharing", ProjectSharing.encode (ProjectSharing.fromFormValues form.sharingEnabled form.sharingPermission) )
         , ( "questionTagUuids", E.list E.string questionTagUuids )
         , ( "projectUuid", E.maybe E.string Nothing )
+        , ( "language", E.string form.language )
         ]
 
 

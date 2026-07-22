@@ -3,6 +3,7 @@ module Wizard.Pages.KnowledgeModels.Models exposing (Model, initLocalModel, init
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Compare.Models
+import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute as KnowledgeModelDetailRoute
 import Wizard.Pages.KnowledgeModels.Detail.Models
 import Wizard.Pages.KnowledgeModels.Import.Models
 import Wizard.Pages.KnowledgeModels.Index.Models
@@ -23,7 +24,7 @@ type alias Model =
 
 initialModel : AppState -> Model
 initialModel appState =
-    { detailModel = Wizard.Pages.KnowledgeModels.Detail.Models.initialModel
+    { detailModel = Wizard.Pages.KnowledgeModels.Detail.Models.initialModel KnowledgeModelDetailRoute.Readme
     , importModel = Wizard.Pages.KnowledgeModels.Import.Models.initialModel appState Nothing
     , indexModel = Wizard.Pages.KnowledgeModels.Index.Models.initialModel PaginationQueryString.empty
     , previewModel = Wizard.Pages.KnowledgeModels.Preview.Models.initialModel Nothing
@@ -35,8 +36,8 @@ initialModel appState =
 initLocalModel : Route -> AppState -> Model -> Model
 initLocalModel route appState model =
     case route of
-        DetailRoute _ ->
-            { model | detailModel = Wizard.Pages.KnowledgeModels.Detail.Models.initialModel }
+        DetailRoute _ kmDetailRoute ->
+            { model | detailModel = Wizard.Pages.KnowledgeModels.Detail.Models.initialModel kmDetailRoute }
 
         ImportRoute kmPackageId ->
             { model | importModel = Wizard.Pages.KnowledgeModels.Import.Models.initialModel appState kmPackageId }

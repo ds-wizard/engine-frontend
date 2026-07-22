@@ -3,9 +3,11 @@ module Wizard.Api.Models.KnowledgeModel.Answer exposing
     , addFollowUpUuid
     , decoder
     , equalContent
+    , localize
     , removeFollowUpUuid
     )
 
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -48,3 +50,11 @@ equalContent answer1 answer2 =
     (answer1.label == answer2.label)
         && (answer1.advice == answer2.advice)
         && (answer1.metricMeasures == answer2.metricMeasures)
+
+
+localize : Locale -> Answer -> Answer
+localize locale answer =
+    { answer
+        | label = gettext answer.label locale
+        , advice = Maybe.map (\advice -> gettext advice locale) answer.advice
+    }

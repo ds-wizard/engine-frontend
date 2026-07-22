@@ -1,11 +1,11 @@
 module Wizard.Pages.KnowledgeModels.Compare.View exposing (view)
 
+import Common.Components.DetailPage as DetailPage
 import Common.Components.Page as Page
 import Gettext exposing (gettext)
 import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
-import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.KMComparison as KMComparison
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KnowledgeModels.Common.CompareSelectModal as CompareSelectModal
@@ -29,7 +29,8 @@ viewComparison appState model _ =
                 [ text (gettext "Select Knowledge Models" appState.locale) ]
             ]
         , DetailPage.content
-            [ Html.map KMComparisonMsg <| KMComparison.view appState model.kmComparisonModel
-            ]
+            { body = [ Html.map KMComparisonMsg <| KMComparison.view appState model.kmComparisonModel ]
+            , sidePanel = []
+            }
         , Html.map CompareSelectModalMsg <| CompareSelectModal.view appState model.compareSelectModalModel
         ]

@@ -6,6 +6,7 @@ import Version exposing (Version)
 import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
+import Wizard.Pages.KMEditor.Common.PublishLocaleSelection as PublishLocaleSelection
 
 
 type Msg
@@ -15,3 +16,4 @@ type Msg
     | FormMsg Form.Msg
     | FormSetVersion Version
     | PutKnowledgeModelEditorCompleted (Result ApiError KnowledgeModelPackage)
+    | PublishLocaleSelectionMsg PublishLocaleSelection.Msg

@@ -388,6 +388,18 @@ formView appState settings model =
             else
                 Html.nothing
 
+        languageInput =
+            if List.isEmpty settings.availableLocales then
+                Html.nothing
+
+            else
+                let
+                    localeOptions =
+                        ( settings.knowledgeModelPackage.language, settings.knowledgeModelPackage.language )
+                            :: List.map (\locale -> ( locale.code, locale.code )) (List.sortBy .code settings.availableLocales)
+                in
+                Html.map FormMsg <| FormGroup.select appState.locale localeOptions model.form "language" (gettext "Language" appState.locale)
+
         originalTagCount =
             List.length settings.projectTags
 
@@ -413,6 +425,7 @@ formView appState settings model =
                  , Html.map FormMsg <| FormGroup.input appState.locale model.form "name" <| gettext "Name" appState.locale
                  , Html.map FormMsg <| FormGroup.input appState.locale model.form "description" <| gettext "Description" appState.locale
                  , Html.map FormMsg <| projectTagsInput
+                 , languageInput
                  , hr [] []
                  , FormGroup.formGroupCustom typeHintInput appState.locale model.form "documentTemplateUuid" <| gettext "Default document template" appState.locale
                  , Html.map FormMsg <| formatInput
