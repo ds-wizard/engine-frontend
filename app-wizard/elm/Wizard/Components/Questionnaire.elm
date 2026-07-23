@@ -4115,7 +4115,7 @@ viewQuestionItemSelect appState cfg model path question =
 
                         itemOptions =
                             model.questionnaire.replies
-                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key && ProjectQuestionnaire.isPathVisible model.questionnaire key)
                                 |> Dict.toList
                                 |> List.concatMap itemsToOptions
 

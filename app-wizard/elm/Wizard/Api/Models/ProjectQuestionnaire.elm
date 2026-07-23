@@ -467,7 +467,7 @@ itemSelectQuestionItemMissing questionnaire itemSelectQuestionListQuestionUuid p
                             let
                                 itemExists =
                                     questionnaire.replies
-                                        |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                        |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key && isPathVisible questionnaire key)
                                         |> Dict.values
                                         |> List.any (List.member itemUuid << ReplyValue.getItemUuids << .value)
                             in
@@ -498,7 +498,7 @@ itemSelectQuestionItemPath questionnaire itemSelectQuestionListQuestionUuid path
                     case mbItemQuestionUuid of
                         Just itemQuestionUuid ->
                             questionnaire.replies
-                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key && isPathVisible questionnaire key)
                                 |> Dict.toList
                                 |> List.find (List.member itemUuid << ReplyValue.getItemUuids << .value << Tuple.second)
                                 |> Maybe.map (\( key, _ ) -> key ++ "." ++ itemUuid)

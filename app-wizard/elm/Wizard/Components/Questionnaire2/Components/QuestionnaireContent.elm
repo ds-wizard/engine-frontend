@@ -1892,7 +1892,7 @@ viewQuestionItemSelect appState model cfg questionViewFlags questionNodeData mbR
                                             )
                             in
                             cfg.questionnaire.replies
-                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key && ProjectQuestionnaire.isPathVisible cfg.questionnaire key)
                                 |> Dict.toList
                                 |> List.concatMap itemsToOptions
 
