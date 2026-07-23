@@ -980,92 +980,59 @@ validationOptions : AppState -> List ValidationOption
 validationOptions appState =
     [ { value = "MinLength"
       , label = gettext "Min Length" appState.locale
-      , questionTypes =
-            [ QuestionValueType.StringQuestionValueType
-            , QuestionValueType.TextQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.minLength
       }
     , { value = "MaxLength"
       , label = gettext "Max Length" appState.locale
-      , questionTypes =
-            [ QuestionValueType.StringQuestionValueType
-            , QuestionValueType.TextQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.maxLength
       }
     , { value = "Regex"
       , label = gettext "Regex" appState.locale
-      , questionTypes =
-            [ QuestionValueType.StringQuestionValueType
-            , QuestionValueType.TextQuestionValueType
-            , QuestionValueType.EmailQuestionValueType
-            , QuestionValueType.UrlQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.regex
       }
     , { value = "Orcid"
       , label = gettext "ORCID" appState.locale
-      , questionTypes =
-            [ QuestionValueType.StringQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.orcid
       }
     , { value = "Doi"
       , label = gettext "DOI" appState.locale
-      , questionTypes =
-            [ QuestionValueType.StringQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.doi
       }
     , { value = "MinNumber"
       , label = gettext "Min Number" appState.locale
-      , questionTypes =
-            [ QuestionValueType.NumberQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.minNumber
       }
     , { value = "MaxNumber"
       , label = gettext "Max Number" appState.locale
-      , questionTypes =
-            [ QuestionValueType.NumberQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.maxNumber
       }
     , { value = "FromDate"
       , label = gettext "From Date" appState.locale
-      , questionTypes =
-            [ QuestionValueType.DateQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.fromDate
       }
     , { value = "ToDate"
       , label = gettext "To Date" appState.locale
-      , questionTypes =
-            [ QuestionValueType.DateQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.toDate
       }
     , { value = "FromDateTime"
       , label = gettext "From Date Time" appState.locale
-      , questionTypes =
-            [ QuestionValueType.DateTimeQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.fromDateTime
       }
     , { value = "ToDateTime"
       , label = gettext "To Date Time" appState.locale
-      , questionTypes =
-            [ QuestionValueType.DateTimeQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.toDateTime
       }
     , { value = "FromTime"
       , label = gettext "From Time" appState.locale
-      , questionTypes =
-            [ QuestionValueType.TimeQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.fromTime
       }
     , { value = "ToTime"
       , label = gettext "To Time" appState.locale
-      , questionTypes =
-            [ QuestionValueType.TimeQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.toTime
       }
     , { value = "Domain"
       , label = gettext "Domain" appState.locale
-      , questionTypes =
-            [ QuestionValueType.EmailQuestionValueType
-            ]
+      , questionTypes = QuestionValidation.validValueTypes QuestionValidation.domain
       }
     ]
 

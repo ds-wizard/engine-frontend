@@ -449,8 +449,8 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 , []
                                 )
 
-                            Question.ValueQuestion _ valueQuestionData ->
-                                ( ValueQuestionSpecificNodeData { validations = valueQuestionData.validations }
+                            Question.ValueQuestion _ _ ->
+                                ( ValueQuestionSpecificNodeData { validations = Question.getAppliedValidations question }
                                 , []
                                 )
 

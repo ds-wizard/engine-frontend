@@ -3950,11 +3950,11 @@ viewQuestionValue appState cfg model path question =
                     Flash.warning error
 
         validationWarnings =
-            case ( Question.getValidations question, mbAnswer ) of
-                ( Just validations, Just _ ) ->
-                    List.map validationWarning validations
+            case mbAnswer of
+                Just _ ->
+                    List.map validationWarning (Question.getAppliedValidations question)
 
-                _ ->
+                Nothing ->
                     []
 
         clearReplyButton =

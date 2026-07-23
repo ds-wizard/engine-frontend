@@ -669,7 +669,7 @@ getWarnings questionnaire =
                                                 value
 
                                         anyValidationWarning =
-                                            questionData.validations
+                                            Question.getAppliedValidations question
                                                 |> List.map validate
                                                 |> List.any Result.isErr
 

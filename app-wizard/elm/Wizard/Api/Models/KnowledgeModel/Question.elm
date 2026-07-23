@@ -10,6 +10,7 @@ module Wizard.Api.Models.KnowledgeModel.Question exposing
     , equalContent
     , getAnnotations
     , getAnswerUuids
+    , getAppliedValidations
     , getChoiceUuids
     , getExpertUuids
     , getFileTypes
@@ -55,7 +56,7 @@ import Wizard.Api.Models.KnowledgeModel.Question.ListQuestionData as ListQuestio
 import Wizard.Api.Models.KnowledgeModel.Question.MultiChoiceQuestionData as MultiChoiceQuestionData exposing (MultiChoiceQuestionData)
 import Wizard.Api.Models.KnowledgeModel.Question.OptionsQuestionData as OptionsQuestionData exposing (OptionsQuestionData)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionType as QuestionType exposing (QuestionType(..))
-import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing (QuestionValidation)
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation as QuestionValidation exposing (QuestionValidation)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType exposing (QuestionValueType)
 import Wizard.Api.Models.KnowledgeModel.Question.ValueQuestionData as ValueQuestionData exposing (ValueQuestionData)
 
@@ -471,6 +472,21 @@ getValidations question =
 
         _ ->
             Nothing
+
+
+{-| The validations that actually apply to the question's current value type.
+A value question keeps validations of previously-selected value types stored
+(so switching the value type back and forth does not lose them), but only the
+applicable ones should be used when evaluating the questionnaire.
+-}
+getAppliedValidations : Question -> List QuestionValidation
+getAppliedValidations question =
+    case question of
+        ValueQuestion _ data ->
+            List.filter (QuestionValidation.appliesToValueType data.valueType) data.validations
+
+        _ ->
+            []
 
 
 getIntegrationUuid : Question -> Maybe String
