@@ -13,7 +13,6 @@
             "Gizra/elm-debouncer": "2.0.0",
             "NoRedInk/elm-json-decode-pipeline": "1.0.1",
             "SiriusStarr/elm-password-strength": "1.0.2",
-            "ThinkAlexandria/elm-pretty-print-json": "1.0.1",
             "avh4/elm-color": "1.0.0",
             "dillonkearns/elm-markdown": "7.0.1",
             "elm/browser": "1.0.2",
@@ -58,7 +57,6 @@
             "fredcy/elm-parseint": "2.0.1",
             "justinmimbs/date": "4.0.1",
             "rtfeldman/elm-hex": "1.0.0",
-            "the-sett/elm-pretty-printer": "2.2.3",
             "zwilias/elm-utf-tools": "2.0.1"
         }
     },

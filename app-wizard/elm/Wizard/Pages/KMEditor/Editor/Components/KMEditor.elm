@@ -30,6 +30,7 @@ import Common.Ports.Dom as Dom
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.CurlUtils as CurlUtils
 import Common.Utils.GuideLinks exposing (GuideLinks)
+import Common.Utils.JsonUtils as JsonUtils
 import Common.Utils.HttpStatus as HttpStatus
 import Common.Utils.Markdown as Markdown
 import Compose exposing (compose2, compose3)
@@ -43,7 +44,6 @@ import Html.Events exposing (onClick, onInput, onMouseLeave)
 import Html.Extra as Html
 import Html.Keyed
 import Html.Lazy as Lazy
-import Json.Print
 import Json.Value as JsonValue
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -2285,13 +2285,13 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                                     pre [ class "default-content" ] [ code [] [ text responseData.body ] ]
 
                                                 ( responseBody, responseFlash ) =
-                                                    if String.length responseData.body > 10000 then
+                                                    if String.length responseData.body > 20000 then
                                                         ( defaultContent
                                                         , Flash.info (gettext "The response body is too large to display with syntax highlight." appState.locale)
                                                         )
 
                                                     else
-                                                        case Json.Print.prettyString { indent = 4, columns = 100 } responseData.body of
+                                                        case JsonUtils.prettyString 4 responseData.body of
                                                             Ok jsonResult ->
                                                                 ( div []
                                                                     [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub

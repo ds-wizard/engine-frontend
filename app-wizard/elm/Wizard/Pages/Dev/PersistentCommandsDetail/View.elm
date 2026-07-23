@@ -7,11 +7,11 @@ import Common.Components.DetailPage as DetailPage
 import Common.Components.FormResult as FormResult
 import Common.Components.Page as Page
 import Common.Components.PersistentCommandBadge as PersistentCommandBadge
+import Common.Utils.JsonUtils as JsonUtils
 import Common.Utils.TimeUtils as TimeUtils
 import Html exposing (Html, code, div, h3, pre, span, text)
 import Html.Attributes exposing (class)
 import Html.Extra as Html
-import Json.Print
 import SyntaxHighlight
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.User as User
@@ -71,7 +71,7 @@ content model persistentCommand =
             pre [] [ code [] [ text persistentCommand.body ] ]
 
         bodyContent =
-            case Json.Print.prettyString { indent = 4, columns = 100 } persistentCommand.body of
+            case JsonUtils.prettyString 4 persistentCommand.body of
                 Ok jsonResult ->
                     div []
                         [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub
