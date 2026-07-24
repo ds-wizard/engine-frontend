@@ -19,8 +19,9 @@ import Browser.Events
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionResultBlock as ActionResultBlock
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (fa, faListingActions, faQuestionnaireComments, faQuestionnaireCommentsResolve)
+import Common.Components.FontAwesome exposing (fa, faListingActions, faQuestionnaireComments, faQuestionnaireCommentsResolve, faQuestionnaireCopyLink)
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
+import Common.Ports.Copy as Copy
 import Common.Utils.Markdown as Markdown
 import Common.Utils.ShortcutUtils as Shortcut
 import Common.Utils.TimeUtils as TimeUtils
@@ -29,7 +30,7 @@ import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, i, input, label, li, p, small, span, strong, text, ul)
 import Html.Attributes exposing (attribute, checked, class, classList, disabled, placeholder, type_)
 import Html.Attributes.Extensions exposing (dataCy)
-import Html.Events exposing (onCheck, onClick, onInput)
+import Html.Events exposing (onCheck, onClick, onInput, onMouseOut)
 import Html.Extra as Html
 import Json.Decode as D
 import List.Extensions as List
@@ -50,7 +51,9 @@ import Wizard.Components.Html exposing (resizableTextarea)
 import Wizard.Components.Questionnaire.UserSuggestionDropdown as UserSuggestionDropdown
 import Wizard.Components.Questionnaire2.QuestionnaireUpdateReturnData as QuestionnaireUpdateReturnData exposing (QuestionnaireUpdateReturnData)
 import Wizard.Components.UserIcon as UserIcon
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
+import Wizard.Routes as Routes
+import Wizard.Routing as Routing
 import Wizard.Utils.Feature as Feature
 
 
@@ -64,6 +67,7 @@ type alias Model =
     , commentsViewResolved : Bool
     , commentDropdownStates : Dict String Dropdown.State
     , userSuggestionDropdownModels : Dict String UserSuggestionDropdown.Model
+    , commentThreadLinkCopied : Maybe Uuid
     }
 
 
@@ -78,6 +82,7 @@ init uuid =
     , commentsViewResolved = False
     , commentDropdownStates = Dict.empty
     , userSuggestionDropdownModels = Dict.empty
+    , commentThreadLinkCopied = Nothing
     }
 
 
@@ -107,6 +112,8 @@ type Msg
     | CommentThreadAssign String CommentThread (Maybe UserSuggestion)
     | CommentDropdownMsg String Dropdown.State
     | UserSuggestionDropdownMsg String Uuid Bool UserSuggestionDropdown.Msg
+    | CommentThreadCopyLink Uuid String
+    | CommentThreadClearCopiedLink
 
 
 update : AppState -> Msg -> Model -> QuestionnaireUpdateReturnData Model Msg
@@ -342,6 +349,15 @@ update appState msg model =
             , cmd = Cmd.none
             , event = Just event
             }
+
+        CommentThreadCopyLink threadUuid link ->
+            QuestionnaireUpdateReturnData.fromModelCmd appState
+                { model | commentThreadLinkCopied = Just threadUuid }
+                (Copy.copyToClipboard link)
+
+        CommentThreadClearCopiedLink ->
+            QuestionnaireUpdateReturnData.fromModel appState
+                { model | commentThreadLinkCopied = Nothing }
 
 
 subscriptions : Model -> Sub Msg
@@ -884,6 +900,37 @@ viewComment appState props model path commentThread index comment =
 viewCommentHeader : AppState -> ViewQuestionCommentsProps msg -> Model -> String -> CommentThread -> Int -> Comment -> Html Msg
 viewCommentHeader appState props model path commentThread index comment =
     let
+        copyLinkAction =
+            if index == 0 then
+                let
+                    copied =
+                        model.commentThreadLinkCopied == Just commentThread.uuid
+
+                    link =
+                        Routes.projectsDetailQuestionnaire props.questionnaire.uuid (Just path) (Just commentThread.uuid)
+                            |> Routing.toUrl
+                            |> (++) (AppState.getClientUrlRoot appState)
+
+                    copyLinkTooltip =
+                        if copied then
+                            gettext "Copied!" appState.locale
+
+                        else
+                            gettext "Copy link to comment thread" appState.locale
+                in
+                a
+                    ([ class "ms-2 questionnaireComments__copyLink"
+                     , onClick (CommentThreadCopyLink commentThread.uuid link)
+                     , onMouseOut CommentThreadClearCopiedLink
+                     , dataCy "comments_comment_copy-link"
+                     ]
+                        ++ tooltipLeft copyLinkTooltip
+                    )
+                    [ faQuestionnaireCopyLink ]
+
+            else
+                Html.nothing
+
         resolveAction =
             if index == 0 && Feature.projectCommentThreadResolve appState props.questionnaire commentThread then
                 a
@@ -1010,6 +1057,7 @@ viewCommentHeader appState props model path commentThread index comment =
             ]
         , resolveAction
         , assignAction
+        , copyLinkAction
         , dropdown
         ]
 

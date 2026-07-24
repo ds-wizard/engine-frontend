@@ -146,6 +146,15 @@
         display: none;
       }
     }
+
+    .questionnaireComments__copyLink {
+      color: $gray-600;
+      transition: color 0.15s ease-in-out;
+
+      &:hover {
+        color: $body-color;
+      }
+    }
   }
 
   &__commentText {
