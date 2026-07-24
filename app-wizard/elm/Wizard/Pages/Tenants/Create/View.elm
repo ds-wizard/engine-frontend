@@ -32,8 +32,8 @@ view appState model =
 formView : AppState -> Form FormError TenantCreateForm -> Html Form.Msg
 formView appState form =
     div []
-        [ FormGroup.input appState.locale form "tenantId" "Tenant ID"
-        , FormGroup.input appState.locale form "tenantName" "Name"
+        [ FormGroup.input appState.locale form "tenantName" "Name"
+        , FormGroup.input appState.locale form "tenantId" "Tenant ID"
         , FormGroup.input appState.locale form "email" "Email"
         , FormGroup.input appState.locale form "firstName" "First name"
         , FormGroup.input appState.locale form "lastName" "Last name"
