@@ -1351,22 +1351,27 @@ computeIntegrationWarnings appState secrets integration =
 
                                 else
                                     []
-
-                            unknownVariableWarning =
-                                if not (List.isEmpty unknownVariables.variables) then
-                                    createError (String.format (gettext "Unknown variable in request URL for integration: %s" appState.locale) [ String.join ", " unknownVariables.variables ])
-
-                                else
-                                    []
-
-                            unknownSecretWarning =
-                                if not (List.isEmpty unknownVariables.secrets) then
-                                    createError (String.format (gettext "Unknown secret in request URL for integration: %s" appState.locale) [ String.join ", " unknownVariables.secrets ])
-
-                                else
-                                    []
                         in
-                        missingQWarning ++ unknownPropertyWarning ++ unknownVariableWarning ++ unknownSecretWarning
+                        missingQWarning ++ unknownPropertyWarning
+
+                unknownConfigReferences =
+                    ApiIntegrationData.getUnknownConfigReferences secrets data
+
+                unknownVariableWarning =
+                    case unknownConfigReferences.variables of
+                        [] ->
+                            []
+
+                        unknownVariables ->
+                            createError (String.format (gettext "Unknown variable in request configuration for integration: %s" appState.locale) [ String.join ", " unknownVariables ])
+
+                secretWarning =
+                    case unknownConfigReferences.secrets of
+                        [] ->
+                            []
+
+                        unknownSecrets ->
+                            createError (String.format (gettext "Unknown secret in request configuration for integration: %s" appState.locale) [ String.join ", " unknownSecrets ])
 
                 ( testDataLoaded, testDataWarning ) =
                     case data.testResponse of
@@ -1405,7 +1410,7 @@ computeIntegrationWarnings appState secrets integration =
                     else
                         []
             in
-            nameWarning ++ variablesWarning ++ urlWarning ++ testDataWarning ++ itemTemplateWarning
+            nameWarning ++ variablesWarning ++ urlWarning ++ unknownVariableWarning ++ secretWarning ++ testDataWarning ++ itemTemplateWarning
 
         Integration.PluginIntegration data ->
             let
