@@ -1061,17 +1061,20 @@ generateReplies currentTime seed questionUuid km questionnaireDetail =
         parentMap =
             KnowledgeModel.createParentMap km
 
-        ( newSeed, mbChapterUuid, replies ) =
-            foldReplies currentTime km parentMap seed questionUuid Dict.empty
-
         cleanedReplies =
             cleanReplies km questionnaireDetail.replies
 
+        chain =
+            buildReplyChain km parentMap questionUuid []
+
+        ( newSeed, finalPrefix, generatedReplies ) =
+            descendReplyChain currentTime cleanedReplies seed chain [] Dict.empty
+
         newReplies =
-            Dict.union replies cleanedReplies
+            Dict.union generatedReplies cleanedReplies
     in
     ( newSeed
-    , mbChapterUuid
+    , List.head finalPrefix
     , { questionnaireDetail | replies = newReplies }
     )
 
@@ -1141,17 +1144,23 @@ cleanReplies km replies =
         |> List.foldl Dict.union Dict.empty
 
 
-foldReplies : Time.Posix -> KnowledgeModel -> KnowledgeModel.ParentMap -> Seed -> String -> Dict String Reply -> ( Seed, Maybe String, Dict String Reply )
-foldReplies currentTime km parentMap seed questionUuid replies =
+{-| A single step on the path from a chapter down to the target question, used
+to reconstruct the minimal replies needed to make the target question visible.
+-}
+type ReplyChainStep
+    = ChapterStep String
+    | AnswerStep String String
+    | ListStep String
+
+
+{-| Walk from the target question up to its chapter, collecting the path steps
+top-down (chapter first).
+-}
+buildReplyChain : KnowledgeModel -> KnowledgeModel.ParentMap -> String -> List ReplyChainStep -> List ReplyChainStep
+buildReplyChain km parentMap questionUuid acc =
     let
         parentUuid =
             KnowledgeModel.getParent parentMap questionUuid
-
-        prefixPaths prefix repliesDict =
-            Dict.mapKeys (\k -> prefix ++ "." ++ k) repliesDict
-
-        foldReplies_ =
-            foldReplies currentTime km parentMap
     in
     case
         ( KnowledgeModel.getChapter parentUuid km
@@ -1160,57 +1169,108 @@ foldReplies currentTime km parentMap seed questionUuid replies =
         )
     of
         ( Just chapter, Nothing, Nothing ) ->
-            -- just prefix replies with chapter uuid
-            ( seed, Just chapter.uuid, prefixPaths chapter.uuid replies )
+            ChapterStep chapter.uuid :: acc
 
         ( Nothing, Just question, Nothing ) ->
-            -- add item to question, get parent question and continue
             let
-                ( itemUuid, newSeed ) =
-                    Uuid.stepString seed
-
-                reply =
-                    { value = ReplyValue.ItemListReply [ itemUuid ]
-                    , createdAt = currentTime
-                    , createdBy = Nothing
-                    }
-
                 listQuestionUuid =
                     Question.getUuid question
             in
-            foldReplies_ newSeed
-                listQuestionUuid
-                (Dict.insert listQuestionUuid reply (prefixPaths listQuestionUuid (prefixPaths itemUuid replies)))
+            buildReplyChain km parentMap listQuestionUuid (ListStep listQuestionUuid :: acc)
 
         ( Nothing, Nothing, Just answer ) ->
-            -- select answer, get parent question and continue
             let
                 answerParentQuestionUuid =
                     KnowledgeModel.getParent parentMap answer.uuid
             in
             case KnowledgeModel.getQuestion answerParentQuestionUuid km of
                 Just question ->
-                    let
-                        reply =
-                            { value = ReplyValue.AnswerReply answer.uuid
-                            , createdAt = currentTime
-                            , createdBy = Nothing
-                            }
-
-                        answerQuestionUuid =
-                            Question.getUuid question
-                    in
-                    foldReplies_ seed
-                        answerQuestionUuid
-                        (Dict.insert answerQuestionUuid reply (prefixPaths answerQuestionUuid (prefixPaths answer.uuid replies)))
+                    buildReplyChain km parentMap (Question.getUuid question) (AnswerStep (Question.getUuid question) answer.uuid :: acc)
 
                 Nothing ->
                     -- should not happen
-                    ( seed, Nothing, replies )
+                    acc
 
         _ ->
             -- should not happen
-            ( seed, Nothing, replies )
+            acc
+
+
+{-| Walk the path steps top-down, building the full reply path prefix and only
+generating the replies that are actually missing from the saved replies. Answers
+already selected and list items already present are reused so that the minimal
+subset of the saved preview values is changed. Returns the final path prefix
+(its head is the chapter uuid) together with the generated replies.
+-}
+descendReplyChain :
+    Time.Posix
+    -> Dict String Reply
+    -> Seed
+    -> List ReplyChainStep
+    -> List String
+    -> Dict String Reply
+    -> ( Seed, List String, Dict String Reply )
+descendReplyChain currentTime savedReplies seed steps prefix generated =
+    case steps of
+        [] ->
+            ( seed, prefix, generated )
+
+        (ChapterStep chapterUuid) :: rest ->
+            descendReplyChain currentTime savedReplies seed rest [ chapterUuid ] generated
+
+        (AnswerStep optionsQuestionUuid answerUuid) :: rest ->
+            let
+                key =
+                    pathToString (prefix ++ [ optionsQuestionUuid ])
+
+                alreadySelected =
+                    Dict.get key savedReplies
+                        |> Maybe.map (\reply -> ReplyValue.getAnswerUuid reply.value == answerUuid)
+                        |> Maybe.withDefault False
+
+                newGenerated =
+                    if alreadySelected then
+                        generated
+
+                    else
+                        Dict.insert key
+                            { value = ReplyValue.AnswerReply answerUuid
+                            , createdAt = currentTime
+                            , createdBy = Nothing
+                            }
+                            generated
+            in
+            descendReplyChain currentTime savedReplies seed rest (prefix ++ [ optionsQuestionUuid, answerUuid ]) newGenerated
+
+        (ListStep listQuestionUuid) :: rest ->
+            let
+                key =
+                    pathToString (prefix ++ [ listQuestionUuid ])
+
+                mbExistingItemUuid =
+                    Dict.get key savedReplies
+                        |> Maybe.map (.value >> ReplyValue.getItemUuids)
+                        |> Maybe.andThen List.head
+            in
+            case mbExistingItemUuid of
+                Just itemUuid ->
+                    -- reuse an already saved item so its nested replies stay visible
+                    descendReplyChain currentTime savedReplies seed rest (prefix ++ [ listQuestionUuid, itemUuid ]) generated
+
+                Nothing ->
+                    let
+                        ( itemUuid, newSeed ) =
+                            Uuid.stepString seed
+
+                        newGenerated =
+                            Dict.insert key
+                                { value = ReplyValue.ItemListReply [ itemUuid ]
+                                , createdAt = currentTime
+                                , createdBy = Nothing
+                                }
+                                generated
+                    in
+                    descendReplyChain currentTime savedReplies newSeed rest (prefix ++ [ listQuestionUuid, itemUuid ]) newGenerated
 
 
 
