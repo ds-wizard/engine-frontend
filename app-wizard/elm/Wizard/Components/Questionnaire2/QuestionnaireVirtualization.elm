@@ -3,6 +3,7 @@ module Wizard.Components.Questionnaire2.QuestionnaireVirtualization exposing
     , ChapterNodeData
     , ContentNode(..)
     , IntegrationQuestionNodeData
+    , ItemEmptyNodeData
     , ItemFooterNodeData
     , ItemHeaderNodeData
     , ItemSelectQuestionNodedata
@@ -65,6 +66,7 @@ type ContentNode
     | ChapterLinksNode ChapterLinksNodeData
     | QuestionNode QuestionNodeData
     | ItemHeaderNode ItemHeaderNodeData
+    | ItemEmptyNode ItemEmptyNodeData
     | ItemFooterNode ItemFooterNodeData
     | ItemsEndNode ItemsEndNodeData
 
@@ -179,6 +181,13 @@ type alias ItemHeaderNodeData =
 type alias ItemFooterNodeData =
     { itemPath : String
     , nestingType : NestingType
+    }
+
+
+type alias ItemEmptyNodeData =
+    { itemPath : String
+    , nestingType : NestingType
+    , hiddenByViewOptions : Bool
     }
 
 
@@ -606,8 +615,24 @@ virtualizeItem ctx createNestingType path humanIdentifier parentQuestionUuid ite
             questionNodes =
                 List.indexedMap (virtualizeQuestion ctx (createNestingType << ItemNesting) (path ++ [ itemUuid ]) itemHumanIdentifier) questions
                     |> List.concat
+
+            itemContentNodes =
+                if List.isEmpty questionNodes then
+                    -- The item shows no questions. It either genuinely has none (or
+                    -- they were filtered out by question tags, which looks the same) or
+                    -- every question is currently hidden by the view options. Surface a
+                    -- flash so an empty item does not look broken.
+                    [ ItemEmptyNode
+                        { itemPath = itemPath
+                        , nestingType = createNestingType (ItemNesting ContentNesting)
+                        , hiddenByViewOptions = not (List.isEmpty questions)
+                        }
+                    ]
+
+                else
+                    questionNodes
         in
-        itemHeaderNode :: questionNodes ++ [ itemFooterNode ]
+        itemHeaderNode :: itemContentNodes ++ [ itemFooterNode ]
 
 
 needVirtualization : ProjectEvent -> Bool
