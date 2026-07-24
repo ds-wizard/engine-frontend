@@ -73,6 +73,22 @@
         overflow: hidden;
         text-overflow: ellipsis;
       }
+
+      .chapter-caret {
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+
+        &:hover {
+          color: var(--bs-primary);
+        }
+      }
     }
   }
 
@@ -111,7 +127,7 @@
       position: absolute;
       top: .2rem;
       left: 0;
-      width: 25px;
+      width: 1.5rem;
       text-align: center;
     }
   }
