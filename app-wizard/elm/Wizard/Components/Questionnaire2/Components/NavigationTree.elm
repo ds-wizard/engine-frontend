@@ -17,7 +17,6 @@ import Html.Lazy as Lazy
 import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Roman
 import Set exposing (Set)
 import String.Format as String
 import Uuid exposing (Uuid)
@@ -169,7 +168,7 @@ viewChapter props order chapter =
             , onClick (OpenChapter chapter.uuid)
             ]
             [ chapterCaret
-            , span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
+            , span [ class "chapter-number" ] [ text (String.fromInt (order + 1) ++ ". ") ]
             , span [ class "chapter-name" ] [ text (localize chapter.title props.questionnaire) ]
             , viewChapterIndication props.unansweredQuestions chapter
             ]

@@ -13,7 +13,6 @@ import Html.Events exposing (onClick)
 import Html.Extra as Html
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Roman
 import Set exposing (Set)
 import String.Format as String
 import Uuid
@@ -77,7 +76,7 @@ viewChapter appState cfg order chapter =
                 ]
             , onClick (cfg.openChapter chapter.uuid)
             ]
-            [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
+            [ span [ class "chapter-number" ] [ text (String.fromInt (order + 1) ++ ". ") ]
             , span [ class "chapter-name" ] [ text chapter.title ]
             , viewChapterIndication cfg.questionnaire chapter
             ]

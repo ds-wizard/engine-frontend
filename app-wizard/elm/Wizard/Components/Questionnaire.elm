@@ -80,7 +80,6 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
-import Roman
 import Set exposing (Set)
 import Shortcut
 import SplitPane
@@ -3241,7 +3240,7 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
         chapterNumber =
             chapters
                 |> List.findIndex (.uuid >> (==) chapter.uuid)
-                |> Maybe.unwrap "I" ((+) 1 >> Roman.toRomanNumber)
+                |> Maybe.unwrap "1" ((+) 1 >> String.fromInt)
 
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid model.questionnaire.knowledgeModel

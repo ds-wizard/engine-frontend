@@ -33,7 +33,6 @@ import Flip exposing (flip)
 import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Roman
 import Set exposing (Set)
 import String.Format as String
 import Uuid exposing (Uuid)
@@ -256,7 +255,7 @@ virtualizeChapter ctx =
                         |> Maybe.withDefault 0
 
                 chapterNumber =
-                    Roman.toRomanNumber (chapterIndex + 1)
+                    String.fromInt (chapterIndex + 1)
 
                 chapterNode =
                     ChapterNode
