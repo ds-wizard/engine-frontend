@@ -345,7 +345,7 @@ viewCrossReferences appState cfg crossReferences =
         , label = gettext "Related questions" appState.locale
         , viewItem = viewCrossReference cfg.knowledgeModel
         }
-        crossReferences
+        (List.filter (\data -> KnowledgeModel.getQuestion data.targetUuid cfg.knowledgeModel /= Nothing) crossReferences)
 
 
 viewCrossReference : KnowledgeModel -> CrossReferenceData -> Html Questionnaire.Msg

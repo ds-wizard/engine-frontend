@@ -542,15 +542,16 @@ createQuestionExtraData ctx question =
                 urlReferencesData
 
         crossReferences =
-            List.map
+            List.filterMap
                 (\data ->
-                    { targetQuestionUuid = data.targetUuid
-                    , targetQuestionTitle =
-                        KnowledgeModel.getQuestion data.targetUuid ctx.questionnaire.knowledgeModel
-                            |> Maybe.map (Question.localize ctx.locale)
-                            |> Maybe.unwrap "" Question.getTitle
-                    , description = data.description
-                    }
+                    KnowledgeModel.getQuestion data.targetUuid ctx.questionnaire.knowledgeModel
+                        |> Maybe.map
+                            (\targetQuestion ->
+                                { targetQuestionUuid = data.targetUuid
+                                , targetQuestionTitle = Question.getTitle (Question.localize ctx.locale targetQuestion)
+                                , description = data.description
+                                }
+                            )
                 )
                 crossReferencesData
     in
