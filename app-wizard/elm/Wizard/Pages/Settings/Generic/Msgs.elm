@@ -9,3 +9,5 @@ type Msg
     = GetConfigCompleted (Result ApiError EditableConfig)
     | PutConfigCompleted (Result ApiError ())
     | FormMsg Form.Msg
+    | FormMoveItemUp String (List String) Int
+    | FormMoveItemDown String (List String) Int

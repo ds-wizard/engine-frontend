@@ -1,6 +1,6 @@
 module Wizard.Pages.Settings.LookAndFeel.View exposing (view)
 
-import Common.Components.FontAwesome exposing (faDelete)
+import Common.Components.FontAwesome exposing (faDelete, fas)
 import Common.Components.Form as Form
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
@@ -57,15 +57,15 @@ viewForm appState model _ =
 formView : AppState -> Form FormError EditableLookAndFeelConfig -> Html Msg
 formView appState form =
     let
-        formWrap =
-            Html.map GenericMsgs.FormMsg
-
         appTitleSettings =
             if Admin.isEnabled appState.config.admin then
                 []
 
             else
                 let
+                    formWrap =
+                        Html.map GenericMsgs.FormMsg
+
                     appTitleGroup =
                         div [ class "row" ]
                             [ div [ class "col-8" ]
@@ -112,7 +112,7 @@ formView appState form =
                     , div [ class "row mt-3" ]
                         [ div [ class "col" ]
                             [ customMenuLinksHeader appState form
-                            , formWrap <| FormGroup.list appState.locale (customMenuLinkItemView appState) form "customMenuLinks" "" (gettext "Add link" appState.locale)
+                            , FormGroup.listWithCustomMsg appState.locale GenericMsgs.FormMsg (customMenuLinkItemView appState) form "customMenuLinks" "" (gettext "Add link" appState.locale)
                             ]
                         ]
                     ]
@@ -135,16 +135,27 @@ customMenuLinksHeader appState form =
                 [ text (gettext "Icon" appState.locale) ]
             , div [ class "col-3" ]
                 [ text (gettext "Title" appState.locale) ]
-            , div [ class "col-4" ]
-                [ text (gettext "URL" appState.locale) ]
             , div [ class "col-3" ]
+                [ text (gettext "URL" appState.locale) ]
+            , div [ class "col-2" ]
                 [ text (gettext "New window" appState.locale) ]
             ]
 
 
-customMenuLinkItemView : AppState -> Form FormError EditableLookAndFeelConfig -> Int -> Html Form.Msg
+customMenuLinkFields : List String
+customMenuLinkFields =
+    [ "icon", "title", "url", "newWindow" ]
+
+
+customMenuLinkItemView : AppState -> Form FormError EditableLookAndFeelConfig -> Int -> Html Msg
 customMenuLinkItemView appState form i =
     let
+        wrapForm =
+            Html.map GenericMsgs.FormMsg
+
+        count =
+            List.length (Form.getListIndexes "customMenuLinks" form)
+
         iconField =
             Form.getFieldAsString ("customMenuLinks." ++ String.fromInt i ++ ".icon") form
 
@@ -165,23 +176,38 @@ customMenuLinkItemView appState form i =
 
         ( urlError, urlErrorClass ) =
             FormGroup.getErrors appState.locale urlField (gettext "URL" appState.locale)
+
+        moveButton visible msg icon cy =
+            if visible then
+                a [ class "btn btn-link", onClick msg, attribute "data-cy" cy ] [ fas icon ]
+
+            else
+                Html.nothing
     in
     div [ class "row" ]
-        [ div [ class "col-2" ]
-            [ Input.textInput iconField [ class <| "form-control " ++ iconErrorClass, attribute "data-cy" "input-icon" ] ]
-        , div [ class "col-3" ]
-            [ Input.textInput titleField [ class <| "form-control " ++ titleErrorClass, attribute "data-cy" "input-title" ] ]
-        , div [ class "col-4" ]
-            [ Input.textInput urlField [ class <| " form-control " ++ urlErrorClass, attribute "data-cy" "input-url" ] ]
-        , div [ class "col-2" ]
-            [ label [ class "checkbox-label form-check-label form-check-toggle" ]
-                [ Input.checkboxInput newWindowField [ class "form-check-input", attribute "data-cy" "input-new-window" ]
-                , span [] []
+        [ wrapForm <|
+            div [ class "col-2" ]
+                [ Input.textInput iconField [ class <| "form-control " ++ iconErrorClass, attribute "data-cy" "input-icon" ] ]
+        , wrapForm <|
+            div [ class "col-3" ]
+                [ Input.textInput titleField [ class <| "form-control " ++ titleErrorClass, attribute "data-cy" "input-title" ] ]
+        , wrapForm <|
+            div [ class "col-3" ]
+                [ Input.textInput urlField [ class <| " form-control " ++ urlErrorClass, attribute "data-cy" "input-url" ] ]
+        , wrapForm <|
+            div [ class "col-2" ]
+                [ label [ class "checkbox-label form-check-label form-check-toggle" ]
+                    [ Input.checkboxInput newWindowField [ class "form-check-input", attribute "data-cy" "input-new-window" ]
+                    , span [] []
+                    ]
                 ]
-            ]
-        , div [ class "col-1 text-end" ]
-            [ a [ class "btn btn-link text-danger", onClick (Form.RemoveItem "customMenuLinks" i), attribute "data-cy" "button-remove" ]
-                [ faDelete ]
+        , div [ class "col-2 text-end" ]
+            [ div [ class "d-flex justify-content-end" ]
+                [ moveButton (i > 0) (GenericMsgs.FormMoveItemUp "customMenuLinks" customMenuLinkFields i) "fa-arrow-up" "button-move-up"
+                , moveButton (i < count - 1) (GenericMsgs.FormMoveItemDown "customMenuLinks" customMenuLinkFields i) "fa-arrow-down" "button-move-down"
+                , a [ class "btn btn-link text-danger", onClick (GenericMsgs.FormMsg (Form.RemoveItem "customMenuLinks" i)), attribute "data-cy" "button-remove" ]
+                    [ faDelete ]
+                ]
             ]
         , iconError
         , titleError

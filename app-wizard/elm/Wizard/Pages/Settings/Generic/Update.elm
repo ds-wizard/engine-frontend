@@ -9,6 +9,7 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Ports.Dom as Dom
 import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
+import Common.Utils.Form as FormUtils
 import Common.Utils.Form.FormError exposing (FormError)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Form exposing (Form)
@@ -51,6 +52,25 @@ update props wrapMsg msg appState model =
 
         FormMsg formMsg ->
             handleForm props formMsg wrapMsg appState model
+
+        FormMoveItemUp listName fields index ->
+            ( moveFormListItem props listName fields index (index - 1) model, Cmd.none )
+
+        FormMoveItemDown listName fields index ->
+            ( moveFormListItem props listName fields index (index + 1) model, Cmd.none )
+
+
+moveFormListItem : UpdateProps form -> String -> List String -> Int -> Int -> Model form -> Model form
+moveFormListItem props listName fields fromIndex toIndex model =
+    let
+        count =
+            List.length (Form.getListIndexes listName model.form)
+    in
+    if toIndex >= 0 && toIndex < count then
+        { model | form = FormUtils.moveListItem props.formValidation listName fields fromIndex toIndex model.form }
+
+    else
+        model
 
 
 handleGetConfigCompleted :
