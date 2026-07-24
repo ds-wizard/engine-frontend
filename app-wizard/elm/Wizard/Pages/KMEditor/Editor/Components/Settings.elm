@@ -185,7 +185,7 @@ view appState kmEditorDetail model =
                  , FormGroup.version appState.locale versionInputConfig model.form
                  , Html.map FormMsg <| FormGroup.select appState.locale LanguageCodes.options model.form "language" <| gettext "Language" appState.locale
                  , Html.map FormMsg <| FormGroup.input appState.locale model.form "license" <| gettext "License" appState.locale
-                 , Html.map FormMsg <| FormGroup.markdownEditor appState.locale (WizardGuideLinks.markdownCheatsheet appState.guideLinks) model.form "readme" <| gettext "Readme" appState.locale
+                 , Html.map FormMsg <| FormGroup.richMarkdownEditor appState.locale model.form "readme" <| gettext "Readme" appState.locale
                  ]
                     ++ parentKnowledgeModelView
                     ++ [ hr [ class "separator" ] []

@@ -24,6 +24,7 @@ module Common.Components.FormGroup exposing
     , plainGroup
     , readOnlyInput
     , resizableTextarea
+    , richMarkdownEditor
     , richRadioGroup
     , secret
     , select
@@ -38,6 +39,7 @@ module Common.Components.FormGroup exposing
 import Common.Components.DatePicker as DatePicker
 import Common.Components.FontAwesome exposing (fa, faAdd, faSecretHide, faSecretShow)
 import Common.Components.FormExtra as FormExtra
+import Common.Components.MarkdownEditor as MarkdownEditor
 import Common.Components.PasswordBar as PasswordBar
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.Form as Form
@@ -529,6 +531,27 @@ markdownEditor locale markdownGuideLink =
         , markdownGuideLink = markdownGuideLink
         }
         locale
+
+
+richMarkdownEditor : Gettext.Locale -> Form FormError o -> String -> String -> Html Form.Msg
+richMarkdownEditor locale form fieldName labelText =
+    let
+        field =
+            Form.getFieldAsString fieldName form
+
+        ( error, _ ) =
+            getErrors locale field labelText
+    in
+    div [ class "form-group form-group-markup-editor" ]
+        [ label [ for fieldName ] [ text labelText ]
+        , MarkdownEditor.markdownEditor
+            [ id fieldName
+            , MarkdownEditor.value (Maybe.withDefault "" field.value)
+            , MarkdownEditor.onChange (Form.Input fieldName Form.Text << Field.String)
+            , MarkdownEditor.labels locale
+            ]
+        , error
+        ]
 
 
 htmlOrMarkdownEditor : Gettext.Locale -> String -> Form FormError o -> String -> String -> Html Form.Msg
