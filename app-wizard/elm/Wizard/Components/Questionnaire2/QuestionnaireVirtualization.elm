@@ -30,11 +30,12 @@ import CharIdentifier
 import Dict
 import Dict.Extra as Dict
 import Flip exposing (flip)
-import Gettext
+import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Roman
 import Set exposing (Set)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Answer as Answer exposing (Answer)
@@ -210,6 +211,7 @@ type alias VirtualizeContext =
     , resourcePageToUrl : String -> Wizard.Routes.Route
     , viewSettings : QuestionnaireViewSettings
     , locale : Gettext.Locale
+    , knowledgeModelParentMap : KnowledgeModel.ParentMap
     }
 
 
@@ -557,7 +559,7 @@ createQuestionExtraData ctx question =
                         |> Maybe.map
                             (\targetQuestion ->
                                 { targetQuestionUuid = data.targetUuid
-                                , targetQuestionTitle = Question.getTitle (Question.localize ctx.locale targetQuestion)
+                                , targetQuestionTitle = crossReferenceTitle ctx data.targetUuid (Question.getTitle (Question.localize ctx.locale targetQuestion))
                                 , description = data.description
                                 }
                             )
@@ -572,6 +574,44 @@ createQuestionExtraData ctx question =
         Question.getRequiredPhaseUuid question
             |> Maybe.andThen (flip KnowledgeModel.getPhase ctx.questionnaire.knowledgeModel)
     }
+
+
+{-| Prefix a cross-referenced question title with the number of the chapter it
+belongs to, e.g. "Ch. 1: Question title".
+-}
+crossReferenceTitle : VirtualizeContext -> String -> String -> String
+crossReferenceTitle ctx targetQuestionUuid title =
+    case getQuestionChapterNumber ctx.knowledgeModelParentMap targetQuestionUuid ctx.questionnaire.knowledgeModel of
+        Just chapterNumber ->
+            String.format (gettext "Ch. %s: " ctx.locale) [ String.fromInt chapterNumber ] ++ title
+
+        Nothing ->
+            title
+
+
+getQuestionChapterNumber : KnowledgeModel.ParentMap -> String -> KnowledgeModel.KnowledgeModel -> Maybe Int
+getQuestionChapterNumber parentMap questionUuid km =
+    getQuestionChapter parentMap questionUuid km
+        |> Maybe.andThen (\chapter -> List.findIndex ((==) chapter.uuid << .uuid) (KnowledgeModel.getChapters km))
+        |> Maybe.map ((+) 1)
+
+
+getQuestionChapter : KnowledgeModel.ParentMap -> String -> KnowledgeModel.KnowledgeModel -> Maybe Chapter
+getQuestionChapter parentMap questionUuid km =
+    let
+        parentUuid =
+            KnowledgeModel.getParent parentMap questionUuid
+    in
+    if parentUuid == Uuid.toString Uuid.nil then
+        Nothing
+
+    else
+        case KnowledgeModel.getChapter parentUuid km of
+            Just chapter ->
+                Just chapter
+
+            Nothing ->
+                getQuestionChapter parentMap parentUuid km
 
 
 virtualizeItem : VirtualizeContext -> (NestingType -> NestingType) -> List String -> List String -> String -> Int -> String -> List ContentNode

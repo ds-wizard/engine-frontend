@@ -45,6 +45,7 @@ virtualize knowledgeModel replies viewSettings =
             , resourcePageToUrl = always Wizard.Routes.dashboard
             , viewSettings = viewSettings
             , locale = Gettext.defaultLocale
+            , knowledgeModelParentMap = KnowledgeModel.createParentMap knowledgeModel
             }
     in
     QuestionnaireVirtualization.virtualizeChapter ctx
@@ -189,6 +190,11 @@ crossReferencesTest =
                 crossReferencesOf questionWithReferencesUuid
                     |> List.any (\ref -> ref.targetQuestionUuid == missingTargetUuid)
                     |> Expect.equal False
+        , test "prefixes the cross reference title with the target question's chapter number" <|
+            \_ ->
+                crossReferencesOf questionWithReferencesUuid
+                    |> List.map .targetQuestionTitle
+                    |> Expect.equal [ "Ch. 1: Existing target question" ]
         ]
 
 
