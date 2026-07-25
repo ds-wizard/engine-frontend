@@ -40,7 +40,7 @@
     "uglify-js": "^3.19.3",
     "webpack": "^5.108.4",
     "webpack-cli": "^7.0.2",
-    "webpack-dev-server": "^5.2.6"
+    "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
     "@codemirror/commands": "^6.10.4",
