@@ -71,7 +71,7 @@ header appState tenantDetail =
                 [ editAction, editLimitsAction ]
 
         title =
-            span [ class "d-flex align-items-center" ]
+            span [ class "d-flex align-items-center gap-2" ]
                 [ TenantIcon.view tenantDetail
                 , text tenantDetail.name
                 ]
@@ -146,7 +146,6 @@ sidePanelAdmins tenantDetail =
     let
         users =
             tenantDetail.users
-                --|> List.filter .active
                 |> List.sortWith User.compare
                 |> List.map viewUser
     in

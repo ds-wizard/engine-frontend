@@ -36,6 +36,19 @@
     &-title {
       font-weight: bold;
     }
+
+    &-actions {
+      display: flex;
+      justify-content: center;
+      align-items: flex-end;
+      gap: $spacer-3;
+
+      a {
+        .fa, .fas, .far {
+          margin-right: $spacer-1;
+        }
+      }
+    }
   }
 
   &-content {
@@ -108,7 +121,7 @@
         margin-top: $spacer-1;
         margin-bottom: $spacer-2;
 
-        .item-icon {
+        .item-icon, .ItemIcon {
           margin-right: $spacer-2;
         }
       }
