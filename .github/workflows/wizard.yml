@@ -58,7 +58,7 @@ jobs:
         run: npm ci
 
       - name: '[app] Test'
-        run: npm run test:${COMPONENT}
+        run: npm run test
 
       - name: '[app] Build'
         run: npm run build:${COMPONENT}

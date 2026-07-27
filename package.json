@@ -12,13 +12,13 @@
     "pot": "mkdir -p locale && npm run pot:registry && npm run pot:wizard",
     "pot:registry": "COMPONENT=registry node scripts/create-pot-file.js",
     "pot:wizard": "COMPONENT=wizard node scripts/create-pot-file.js",
-    "review": "elm-review",
+    "review": "ELM_HOME=$PWD/elm-stuff/elm-home elm-review",
     "replace-kernel-packages": "ELM_HOME=$PWD/elm-stuff/elm-home node elm-kernel-replacements/replace-kernel-packages.mjs",
     "start": "npm run start:wizard",
     "start:registry": "ELM_HOME=$PWD/elm-stuff/elm-home COMPONENT=registry webpack serve",
     "start:wizard": "ELM_HOME=$PWD/elm-stuff/elm-home COMPONENT=wizard webpack serve",
-    "test": "npm run test:elm && npm run test:guide-links",
-    "test:elm": "elm-test && elm-review",
+    "test": "npm run test:elm && npm run review && npm run test:guide-links",
+    "test:elm": "ELM_HOME=$PWD/elm-stuff/elm-home elm-test",
     "test:guide-links": "node scripts/test-guide-links.js",
     "test:registry": "npm run test:elm",
     "test:wizard": "npm run test:elm"
@@ -39,7 +39,7 @@
     "terser-webpack-plugin": "^5.6.1",
     "uglify-js": "^3.19.3",
     "webpack": "^5.108.4",
-    "webpack-cli": "^7.0.2",
+    "webpack-cli": "^7.2.1",
     "webpack-dev-server": "^6.0.0"
   },
   "dependencies": {
