@@ -35,6 +35,10 @@
 
     &-title {
       font-weight: bold;
+
+      .badge {
+        margin-left: $spacer-2;
+      }
     }
 
     &-actions {
