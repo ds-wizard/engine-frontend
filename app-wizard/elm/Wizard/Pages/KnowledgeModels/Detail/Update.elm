@@ -9,6 +9,7 @@ import Common.Api.ApiError as ApiError
 import Common.Components.FileDownloader as FileDownloader
 import Common.Utils.RequestHelpers as RequestHelpers
 import Common.Utils.Setters exposing (setKnowledgeModelPackage)
+import File.Download as Download
 import Gettext exposing (gettext)
 import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
@@ -112,6 +113,24 @@ update msg wrapMsg appState model =
                     ( { model | deletingLocale = ApiError.toActionResult appState (gettext "Deleting the locale failed." appState.locale) error }
                     , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
                     )
+
+        DownloadLocale locale ->
+            case model.knowledgeModelPackage of
+                Success kmPackage ->
+                    ( model
+                    , Cmd.map wrapMsg (KnowledgeModelPackagesApi.getLocaleContent appState kmPackage.uuid locale.uuid (DownloadLocaleCompleted locale))
+                    )
+
+                _ ->
+                    ( model, Cmd.none )
+
+        DownloadLocaleCompleted locale result ->
+            case result of
+                Ok content ->
+                    ( model, Download.string (locale.code ++ ".po") "text/x-gettext-translation" content )
+
+                Err _ ->
+                    ( model, RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result )
 
         DropdownMsg state ->
             ( { model | dropdownState = state }, Cmd.none )

@@ -9,6 +9,7 @@ module Wizard.Api.KnowledgeModelPackages exposing
     , getKnowledgeModelPackages
     , getKnowledgeModelPackagesSuggestions
     , getKnowledgeModelPackagesSuggestionsWithOptions
+    , getLocaleContent
     , getOutdatedKnowledgeModelPackages
     , importFromOwl
     , importKnowledgeModelPackage
@@ -188,6 +189,11 @@ exportKnowledgeModelPackagePotUrl kmPackageUuid =
 deleteLocale : AppState -> Uuid -> Uuid -> ToMsg () msg -> Cmd msg
 deleteLocale appState kmPackageUuid localeUuid =
     Request.delete (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/locales/" ++ Uuid.toString localeUuid)
+
+
+getLocaleContent : AppState -> Uuid -> Uuid -> ToMsg String msg -> Cmd msg
+getLocaleContent appState kmPackageUuid localeUuid =
+    Request.getString (AppState.toServerInfo appState) ("/knowledge-model-packages/" ++ Uuid.toString kmPackageUuid ++ "/locales/" ++ Uuid.toString localeUuid ++ "/content")
 
 
 importLocale : AppState -> Uuid -> String -> File -> File -> ToMsg KnowledgeModelLocale msg -> Cmd msg

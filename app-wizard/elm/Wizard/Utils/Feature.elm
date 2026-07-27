@@ -35,6 +35,7 @@ module Wizard.Utils.Feature exposing
     , knowledgeModelsDelete
     , knowledgeModelsDeleteLocale
     , knowledgeModelsExport
+    , knowledgeModelsExportLocale
     , knowledgeModelsExportPot
     , knowledgeModelsImport
     , knowledgeModelsImportLocale
@@ -210,6 +211,11 @@ knowledgeModelsImportLocale =
 
 knowledgeModelsExport : AppState -> Bool
 knowledgeModelsExport =
+    hasPerm RolePermission.knowledgeModelsManage
+
+
+knowledgeModelsExportLocale : AppState -> Bool
+knowledgeModelsExportLocale =
     hasPerm RolePermission.knowledgeModelsManage
 
 

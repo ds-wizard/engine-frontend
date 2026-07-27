@@ -20,6 +20,8 @@ type Msg
     | HideDeleteLocale
     | DeleteLocale
     | DeleteLocaleCompleted (Result ApiError ())
+    | DownloadLocale KnowledgeModelLocale
+    | DownloadLocaleCompleted KnowledgeModelLocale (Result ApiError String)
     | DropdownMsg Dropdown.State
     | DeleteModalMsg DeleteModal.Msg
     | UpdatePhase KnowledgeModelPackagePhase

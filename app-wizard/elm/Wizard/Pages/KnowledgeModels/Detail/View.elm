@@ -2,10 +2,10 @@ module Wizard.Pages.KnowledgeModels.Detail.View exposing (view)
 
 import Common.Components.Badge as Badge
 import Common.Components.DetailPage as DetailPage
-import Common.Components.FontAwesome exposing (faDelete, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faLocaleImport, faWarning)
+import Common.Components.FontAwesome exposing (faDelete, faDetailShowAll, faDownload, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faLocaleImport, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
-import Common.Components.Tooltip exposing (tooltipLeft)
+import Common.Components.Tooltip exposing (tooltip)
 import Common.Components.Undraw as Undraw
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
@@ -194,13 +194,26 @@ locales appState kmPackage =
 viewLocale : AppState -> KnowledgeModelLocale -> Html Msg
 viewLocale appState locale =
     let
+        downloadButton =
+            if Feature.knowledgeModelsExportLocale appState then
+                a
+                    (class "text-primary me-3"
+                        :: onClick (DownloadLocale locale)
+                        :: dataCy "km-detail_locale-download"
+                        :: tooltip (gettext "Download" appState.locale)
+                    )
+                    [ faDownload ]
+
+            else
+                Html.nothing
+
         deleteButton =
             if Feature.knowledgeModelsDeleteLocale appState then
                 a
                     (class "text-danger"
                         :: onClick (ShowDeleteLocale locale)
                         :: dataCy "km-detail_locale-delete"
-                        :: tooltipLeft (gettext "Delete" appState.locale)
+                        :: tooltip (gettext "Delete" appState.locale)
                     )
                     [ faDelete ]
 
@@ -210,7 +223,7 @@ viewLocale appState locale =
     tr []
         [ td [] [ text locale.name ]
         , td [] [ text locale.code ]
-        , td [ class "text-end" ] [ deleteButton ]
+        , td [ class "text-end" ] [ downloadButton, deleteButton ]
         ]
 
 
