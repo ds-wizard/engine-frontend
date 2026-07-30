@@ -641,48 +641,48 @@ isDefaultLanguage locale =
 
 localeView : AppState -> Bool
 localeView =
-    hasPerm RolePermission.localesManage
+    hasPerm RolePermission.settingsManage
 
 
 localeCreate : AppState -> Bool
 localeCreate =
-    hasPerm RolePermission.localesManage
+    hasPerm RolePermission.settingsManage
 
 
 localeImport : AppState -> Bool
 localeImport =
-    hasPerm RolePermission.localesManage
+    hasPerm RolePermission.settingsManage
 
 
 localeExport : AppState -> LocaleLike a -> Bool
 localeExport appState locale =
-    hasPerm RolePermission.localesManage appState
+    hasPerm RolePermission.settingsManage appState
         && not (isDefaultLanguage locale)
 
 
 localeSetDefault : AppState -> LocaleLike a -> Bool
 localeSetDefault appState locale =
-    hasPerm RolePermission.localesManage appState
+    hasPerm RolePermission.settingsManage appState
         && locale.enabled
         && not locale.defaultLocale
 
 
 localeChangeEnabled : AppState -> LocaleLike a -> Bool
 localeChangeEnabled appState locale =
-    hasPerm RolePermission.localesManage appState
+    hasPerm RolePermission.settingsManage appState
         && not locale.defaultLocale
 
 
 localeDelete : AppState -> LocaleLike a -> Bool
 localeDelete appState locale =
-    hasPerm RolePermission.localesManage appState
+    hasPerm RolePermission.settingsManage appState
         && not (isDefaultLanguage locale)
         && not locale.defaultLocale
 
 
 localesManage : AppState -> Bool
 localesManage =
-    hasPerm RolePermission.localesManage
+    hasPerm RolePermission.settingsManage
 
 
 

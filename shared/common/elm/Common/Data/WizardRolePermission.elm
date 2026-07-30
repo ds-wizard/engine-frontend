@@ -12,8 +12,6 @@ module Common.Data.WizardRolePermission exposing
     , knowledgeModelsManage
     , knowledgeModelsManageDescriptor
     , knowledgeModelsPermissionsGroup
-    , localesManage
-    , localesManageDescriptor
     , projectPermissionsGroup
     , projectTemplatesManage
     , projectTemplatesManageDescriptor
@@ -48,7 +46,6 @@ all =
     , knowledgeModelsManageDescriptor
     , documentTemplateEditorUseDescriptor
     , documentTemplatesManageDescriptor
-    , localesManageDescriptor
     , usersManageDescriptor
     , settingsManageDescriptor
     ]
@@ -100,8 +97,7 @@ settingsPermissionsGroup : PermissionGroup
 settingsPermissionsGroup =
     { label = gettext "Settings Permissions"
     , permissions =
-        [ localesManageDescriptor
-        , usersManageDescriptor
+        [ usersManageDescriptor
         , settingsManageDescriptor
         ]
     }
@@ -180,24 +176,6 @@ knowledgeModelsManageDescriptor =
     { permission = knowledgeModelsManage
     , label = gettext "Manage Knowledge Models"
     , description = gettext "Allows users to import, export, and delete Knowledge Models, as well as set them as deprecated, restore them, or set them as public.\n\nThis permission also allows users to manage Knowledge Model Secrets."
-    , impliedPermissions = []
-    }
-
-
-
---
-
-
-localesManage : RolePermission
-localesManage =
-    RolePermission.fromString "LocalesManageRolePermission"
-
-
-localesManageDescriptor : PermissionDescriptor
-localesManageDescriptor =
-    { permission = localesManage
-    , label = gettext "Manage Locales"
-    , description = gettext "Allows users to create, import, export, and delete Locales, as well as set a Locale as the default and enable or disable Locales."
     , impliedPermissions = []
     }
 
