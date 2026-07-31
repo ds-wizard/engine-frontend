@@ -38,7 +38,7 @@ validation appState =
     V.succeed OrganizationConfigForm
         |> V.andMap (V.field "name" V.string)
         |> V.andMap (V.field "organizationId" (V.organizationId appState))
-        |> V.andMap (V.field "description" V.string)
+        |> V.andMap (V.field "description" V.optionalString)
         |> V.andMap (V.field "affiliations" V.maybeString)
 
 
