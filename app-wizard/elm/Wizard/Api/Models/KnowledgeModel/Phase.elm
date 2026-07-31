@@ -1,5 +1,6 @@
-module Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase, decoder, equalContent)
+module Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase, decoder, equalContent, localize)
 
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Uuid
@@ -27,3 +28,11 @@ equalContent : Phase -> Phase -> Bool
 equalContent phase1 phase2 =
     (phase1.title == phase2.title)
         && (phase1.description == phase2.description)
+
+
+localize : Locale -> Phase -> Phase
+localize locale phase =
+    { phase
+        | title = gettext phase.title locale
+        , description = Maybe.map (\description -> gettext description locale) phase.description
+    }

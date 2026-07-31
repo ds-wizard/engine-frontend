@@ -42,14 +42,14 @@ import Wizard.Api.Models.KnowledgeModel.Chapter as Chapter exposing (Chapter)
 import Wizard.Api.Models.KnowledgeModel.Choice as Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
-import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
-import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Metric as Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.Phase as Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing (QuestionValidation)
 import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference(..))
 import Wizard.Api.Models.KnowledgeModel.ResourceCollection as ResourceCollection
 import Wizard.Api.Models.KnowledgeModel.ResourcePage as ResourcePage
-import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
+import Wizard.Api.Models.KnowledgeModel.Tag as Tag exposing (Tag)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
 import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
@@ -319,6 +319,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                     tags =
                         Question.getTagUuids question
                             |> List.filterMap (flip KnowledgeModel.getTag ctx.questionnaire.knowledgeModel)
+                            |> List.map (Tag.localize ctx.locale)
                             |> List.sortBy .name
 
                     questionNode specific =
@@ -399,7 +400,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                     { answers = answers
                                     , followUpsCount = followUpsCount
                                     , followUpsCollapsed = isPathCollapsed selectedAnswerPath ctx
-                                    , metrics = KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+                                    , metrics = List.map (Metric.localize ctx.locale) (KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel)
                                     }
                                 , followUpQuestions
                                 )
@@ -572,6 +573,7 @@ createQuestionExtraData ctx question =
     , requiredPhase =
         Question.getRequiredPhaseUuid question
             |> Maybe.andThen (flip KnowledgeModel.getPhase ctx.questionnaire.knowledgeModel)
+            |> Maybe.map (Phase.localize ctx.locale)
     }
 
 

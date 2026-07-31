@@ -1,5 +1,6 @@
-module Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric, decoder, equalContent)
+module Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric, decoder, equalContent, localize)
 
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -29,3 +30,11 @@ equalContent metric1 metric2 =
     (metric1.title == metric2.title)
         && (metric1.abbreviation == metric2.abbreviation)
         && (metric1.description == metric2.description)
+
+
+localize : Locale -> Metric -> Metric
+localize locale metric =
+    { metric
+        | title = gettext metric.title locale
+        , description = Maybe.map (\description -> gettext description locale) metric.description
+    }
