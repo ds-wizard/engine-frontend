@@ -539,15 +539,17 @@ richMarkdownEditor locale form fieldName labelText =
         field =
             Form.getFieldAsString fieldName form
 
-        ( error, _ ) =
+        ( error, errorClass ) =
             getErrors locale field labelText
     in
-    div [ class "form-group form-group-markup-editor" ]
+    div [ class <| "form-group form-group-markup-editor " ++ errorClass ]
         [ label [ for fieldName ] [ text labelText ]
         , MarkdownEditor.markdownEditor
             [ id fieldName
+            , class errorClass
             , MarkdownEditor.value (Maybe.withDefault "" field.value)
             , MarkdownEditor.onChange (Form.Input fieldName Form.Text << Field.String)
+            , MarkdownEditor.onBlur (Form.Blur fieldName)
             , MarkdownEditor.labels locale
             ]
         , error

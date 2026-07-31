@@ -302,6 +302,7 @@ class MarkdownEditorElement extends HTMLElement {
         })
 
         this.textarea.addEventListener('blur', () => {
+            this.dispatchEvent(new Event('blur', {bubbles: true}))
             if (!this.editor) return
             try {
                 this._syncingFromEditor = true
@@ -370,6 +371,8 @@ class MarkdownEditorElement extends HTMLElement {
             onBlur: ({editor}) => {
                 // Refresh toolbar state on blur so active indicators are removed
                 try { this.updateToolbarState() } catch (e) {}
+                // Notify consumers so they can run validation on blur.
+                try { this.dispatchEvent(new Event('blur', {bubbles: true})) } catch (e) {}
             },
             onSelectionUpdate: () => {
                 this.updateToolbarState()
