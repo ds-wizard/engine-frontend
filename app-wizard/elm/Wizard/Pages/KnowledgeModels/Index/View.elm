@@ -55,6 +55,7 @@ listingConfig appState =
     , dropdownItems =
         KnowledgeModelActionsDropdown.actions appState
             { exportMsg = ExportKnowledgeModelPackage
+            , exportPotMsg = ExportKnowledgeModelPackagePot
             , updatePhaseMsg = UpdatePhase
             , updatePublicMsg = UpdatePublic
             , deleteMsg = DeleteModalMsg << DeleteModal.open

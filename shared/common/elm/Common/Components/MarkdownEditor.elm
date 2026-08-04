@@ -2,6 +2,7 @@ module Common.Components.MarkdownEditor exposing
     ( labels
     , markdownEditor
     , mode
+    , onBlur
     , onChange
     , onFocus
     , onModeChange
@@ -68,4 +69,10 @@ onModeChange toMsg =
 onFocus : msg -> Html.Attribute msg
 onFocus toMsg =
     Html.Events.on "focus" <|
+        D.succeed toMsg
+
+
+onBlur : msg -> Html.Attribute msg
+onBlur toMsg =
+    Html.Events.on "blur" <|
         D.succeed toMsg

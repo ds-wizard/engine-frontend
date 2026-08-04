@@ -1,10 +1,18 @@
-module Wizard.Pages.Dashboard.Widgets.ConnectRegistryWidget exposing (view)
+module Wizard.Pages.Dashboard.Widgets.ConnectRegistryWidget exposing (enabled, view)
 
+import Common.Data.WizardRolePermission as RolePermission
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Api.Models.BootstrapConfig.RegistryConfig as RegistryConfig
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
+
+
+enabled : AppState -> Bool
+enabled appState =
+    AppState.userHasPerm RolePermission.settingsManage appState
+        && not (RegistryConfig.isEnabled appState.config.registry)
 
 
 view : AppState -> Html msg

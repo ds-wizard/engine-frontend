@@ -1,7 +1,9 @@
-module Wizard.Pages.Users.Create.Update exposing (update)
+module Wizard.Pages.Users.Create.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Api.Models.Role exposing (Role)
 import Common.Ports.Dom as Dom
 import Common.Ports.FormUtils as FormUtils
 import Common.Ports.Window as Window
@@ -12,6 +14,7 @@ import Gettext exposing (gettext)
 import Random exposing (Seed, step)
 import Tuple.Extensions as Tuple
 import Uuid
+import Wizard.Api.Roles as RolesApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Msgs
@@ -22,9 +25,17 @@ import Wizard.Routes as Routes
 import Wizard.Routing as Routing exposing (cmdNavigate)
 
 
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    RolesApi.getRoles appState GetRolesCompleted
+
+
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        GetRolesCompleted result ->
+            getRolesCompleted appState model result |> Tuple.prepend appState.seed
+
         Cancel ->
             ( appState.seed, model, Window.historyBack (Routing.toUrl Routes.usersIndex) )
 
@@ -33,6 +44,20 @@ update msg wrapMsg appState model =
 
         PostUserCompleted result ->
             postUserCompleted appState model result |> Tuple.prepend appState.seed
+
+
+getRolesCompleted : AppState -> Model -> Result ApiError (Pagination Role) -> ( Model, Cmd msg )
+getRolesCompleted appState model result =
+    let
+        newModel =
+            case result of
+                Ok pagination ->
+                    { model | roles = ActionResult.Success pagination.items }
+
+                Err error ->
+                    { model | roles = ApiError.toActionResult appState (gettext "Unable to get the roles." appState.locale) error }
+    in
+    ( newModel, Cmd.none )
 
 
 handleForm : Form.Msg -> (Msg -> Wizard.Msgs.Msg) -> Seed -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

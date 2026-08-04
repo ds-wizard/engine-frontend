@@ -2,6 +2,7 @@ module Wizard.Api.KnowledgeModelEditors exposing
     ( deleteKnowledgeModelEditor
     , deleteMigration
     , getKnowledgeModelEditor
+    , getKnowledgeModelEditorLocales
     , getKnowledgeModelEditorSuggestions
     , getKnowledgeModelEditors
     , getMigration
@@ -19,11 +20,13 @@ import Common.Api.Request as Request exposing (ToMsg)
 import Common.Api.WebSocket as WebSocket
 import Common.Data.PaginationQueryFilters exposing (PaginationQueryFilters)
 import Common.Data.PaginationQueryString as PaginationQueryString exposing (PaginationQueryString)
+import Json.Decode as D
 import Json.Encode as E
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelEditor as KnowledgeModelEditor exposing (KnowledgeModelEditor)
 import Wizard.Api.Models.KnowledgeModelEditorDetail as KnowledgeModelEditorDetail exposing (KnowledgeModelEditorDetail)
 import Wizard.Api.Models.KnowledgeModelEditorSuggestion as KnowledgeModelEditorSuggestion exposing (KnowledgeModelEditorSuggestion)
+import Wizard.Api.Models.KnowledgeModelLocale as KnowledgeModelLocale exposing (KnowledgeModelLocale)
 import Wizard.Api.Models.KnowledgeModelMigration as Migration exposing (KnowledgeModelMigration)
 import Wizard.Data.AppState as AppState exposing (AppState)
 
@@ -55,6 +58,11 @@ getKnowledgeModelEditorSuggestions appState qs =
 getKnowledgeModelEditor : AppState -> Uuid -> ToMsg KnowledgeModelEditorDetail msg -> Cmd msg
 getKnowledgeModelEditor appState uuid =
     Request.get (AppState.toServerInfo appState) ("/knowledge-model-editors/" ++ Uuid.toString uuid) KnowledgeModelEditorDetail.decoder
+
+
+getKnowledgeModelEditorLocales : AppState -> Uuid -> ToMsg (List KnowledgeModelLocale) msg -> Cmd msg
+getKnowledgeModelEditorLocales appState uuid =
+    Request.get (AppState.toServerInfo appState) ("/knowledge-model-editors/" ++ Uuid.toString uuid ++ "/locales") (D.list KnowledgeModelLocale.decoder)
 
 
 postKnowledgeModelEditor : AppState -> E.Value -> ToMsg UuidResponse msg -> Cmd msg

@@ -4,13 +4,17 @@ module Wizard.Utils.Feature exposing
     , documentDelete
     , documentDownload
     , documentSubmit
+    , documentTemplateEditorsCreate
+    , documentTemplateEditorsDelete
+    , documentTemplateEditorsEdit
+    , documentTemplateEditorsPublish
+    , documentTemplateEditorsView
     , documentTemplatesDelete
     , documentTemplatesExport
     , documentTemplatesImport
+    , documentTemplatesManage
     , documentTemplatesView
     , documentsView
-    , isAdmin
-    , isDataSteward
     , isDefaultLanguage
     , knowledgeModelEditorCancelMigration
     , knowledgeModelEditorContinueMigration
@@ -29,8 +33,13 @@ module Wizard.Utils.Feature exposing
     , knowledgeModelSetPrivate
     , knowledgeModelSetPublic
     , knowledgeModelsDelete
+    , knowledgeModelsDeleteLocale
     , knowledgeModelsExport
+    , knowledgeModelsExportLocale
+    , knowledgeModelsExportPot
     , knowledgeModelsImport
+    , knowledgeModelsImportLocale
+    , knowledgeModelsManage
     , knowledgeModelsPreview
     , knowledgeModelsView
     , localeChangeEnabled
@@ -40,6 +49,7 @@ module Wizard.Utils.Feature exposing
     , localeImport
     , localeSetDefault
     , localeView
+    , localesManage
     , newsModal
     , projectCancelMigration
     , projectClone
@@ -85,14 +95,17 @@ module Wizard.Utils.Feature exposing
     , userEditSubmissionSettings
     , userEditTours
     , usersCreate
+    , usersManage
     , usersView
     )
 
-import Common.Api.Models.UserInfo as UserInfo
+import Common.Api.Models.RolePermission exposing (RolePermission)
 import Common.Data.UuidOrCurrent as UuidOrCurrent exposing (UuidOrCurrent)
+import Common.Data.WizardRolePermission as RolePermission
 import Maybe.Extra as Maybe
 import Uuid
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Document as Document exposing (Document)
 import Wizard.Api.Models.Document.DocumentState exposing (DocumentState(..))
 import Wizard.Api.Models.KnowledgeModelEditor as KnowledgeModelEditor exposing (KnowledgeModelEditor)
@@ -104,7 +117,6 @@ import Wizard.Api.Models.Project.ProjectState as ProjectState
 import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
 import Wizard.Data.AppState exposing (AppState)
-import Wizard.Data.Perm as Perm
 import Wizard.Data.Session as Session
 import Wizard.Utils.ProjectUtils as ProjectUtils exposing (ProjectLike)
 
@@ -115,62 +127,62 @@ import Wizard.Utils.ProjectUtils as ProjectUtils exposing (ProjectLike)
 
 knowledgeModelEditorsView : AppState -> Bool
 knowledgeModelEditorsView =
-    adminOr Perm.knowledgeModel
+    hasPerm RolePermission.knowledgeModelEditorsUse
 
 
 knowledgeModelEditorsCreate : AppState -> Bool
 knowledgeModelEditorsCreate =
-    adminOr Perm.knowledgeModel
+    hasPerm RolePermission.knowledgeModelEditorsUse
 
 
 knowledgeModelEditorsEdit : AppState -> Bool
 knowledgeModelEditorsEdit =
-    adminOr Perm.knowledgeModel
+    hasPerm RolePermission.knowledgeModelEditorsUse
 
 
 knowledgeModelEditorsUpgrade : AppState -> Bool
 knowledgeModelEditorsUpgrade =
-    adminOr Perm.knowledgeModelUpgrade
+    hasPerm RolePermission.knowledgeModelEditorsUse
 
 
 knowledgeModelEditorsPublish : AppState -> Bool
 knowledgeModelEditorsPublish =
-    adminOr Perm.knowledgeModelPublish
+    hasPerm RolePermission.knowledgeModelEditorsUse
 
 
 knowledgeModelEditorOpen : AppState -> KnowledgeModelEditor -> Bool
 knowledgeModelEditorOpen appState knowledgeModelEditor =
-    adminOr Perm.knowledgeModel appState
+    hasPerm RolePermission.knowledgeModelEditorsUse appState
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Default, KnowledgeModelEditorState.Edited, KnowledgeModelEditorState.Outdated ] knowledgeModelEditor
 
 
 knowledgeModelEditorPublish : AppState -> KnowledgeModelEditor -> Bool
 knowledgeModelEditorPublish appState knowledgeModelEditor =
-    adminOr Perm.knowledgeModelPublish appState
+    hasPerm RolePermission.knowledgeModelEditorsUse appState
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Edited, KnowledgeModelEditorState.Migrated ] knowledgeModelEditor
 
 
 knowledgeModelEditorUpgrade : AppState -> KnowledgeModelEditor -> Bool
 knowledgeModelEditorUpgrade appState knowledgeModelEditor =
-    adminOr Perm.knowledgeModelUpgrade appState
+    hasPerm RolePermission.knowledgeModelEditorsUse appState
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Outdated ] knowledgeModelEditor
 
 
 knowledgeModelEditorContinueMigration : AppState -> KnowledgeModelEditor -> Bool
 knowledgeModelEditorContinueMigration appState knowledgeModelEditor =
-    adminOr Perm.knowledgeModelUpgrade appState
+    hasPerm RolePermission.knowledgeModelEditorsUse appState
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Migrating ] knowledgeModelEditor
 
 
 knowledgeModelEditorCancelMigration : AppState -> KnowledgeModelEditor -> Bool
 knowledgeModelEditorCancelMigration appState knowledgeModelEditor =
-    adminOr Perm.knowledgeModelUpgrade appState
+    hasPerm RolePermission.knowledgeModelEditorsUse appState
         && KnowledgeModelEditor.matchState [ KnowledgeModelEditorState.Migrating, KnowledgeModelEditorState.Migrated ] knowledgeModelEditor
 
 
 knowledgeModelEditorDelete : AppState -> Bool
-knowledgeModelEditorDelete appState =
-    adminOr Perm.knowledgeModel appState
+knowledgeModelEditorDelete =
+    hasPerm RolePermission.knowledgeModelEditorsUse
 
 
 
@@ -179,22 +191,47 @@ knowledgeModelEditorDelete appState =
 
 knowledgeModelsView : AppState -> Bool
 knowledgeModelsView =
-    adminOr Perm.packageManagementRead
+    isLoggedIn
+
+
+knowledgeModelsManage : AppState -> Bool
+knowledgeModelsManage =
+    hasPerm RolePermission.knowledgeModelsManage
 
 
 knowledgeModelsImport : AppState -> Bool
 knowledgeModelsImport =
-    adminOr Perm.packageManagementWrite
+    hasPerm RolePermission.knowledgeModelsManage
+
+
+knowledgeModelsImportLocale : AppState -> Bool
+knowledgeModelsImportLocale =
+    hasPerm RolePermission.knowledgeModelsManage
 
 
 knowledgeModelsExport : AppState -> Bool
 knowledgeModelsExport =
-    adminOr Perm.packageManagementWrite
+    hasPerm RolePermission.knowledgeModelsManage
+
+
+knowledgeModelsExportLocale : AppState -> Bool
+knowledgeModelsExportLocale =
+    hasPerm RolePermission.knowledgeModelsManage
+
+
+knowledgeModelsExportPot : AppState -> Bool
+knowledgeModelsExportPot =
+    hasPerm RolePermission.knowledgeModelsManage
 
 
 knowledgeModelsDelete : AppState -> Bool
 knowledgeModelsDelete =
-    adminOr Perm.packageManagementWrite
+    hasPerm RolePermission.knowledgeModelsManage
+
+
+knowledgeModelsDeleteLocale : AppState -> Bool
+knowledgeModelsDeleteLocale =
+    hasPerm RolePermission.knowledgeModelsManage
 
 
 knowledgeModelsPreview : Bool
@@ -204,25 +241,25 @@ knowledgeModelsPreview =
 
 knowledgeModelSetDeprecated : AppState -> { a | phase : KnowledgeModelPackagePhase } -> Bool
 knowledgeModelSetDeprecated appState kmPackage =
-    adminOr Perm.packageManagementWrite appState
+    hasPerm RolePermission.knowledgeModelsManage appState
         && (kmPackage.phase == KnowledgeModelPackagePhase.Released)
 
 
 knowledgeModelRestore : AppState -> { a | phase : KnowledgeModelPackagePhase } -> Bool
 knowledgeModelRestore appState kmPackage =
-    adminOr Perm.packageManagementWrite appState
+    hasPerm RolePermission.knowledgeModelsManage appState
         && (kmPackage.phase == KnowledgeModelPackagePhase.Deprecated)
 
 
 knowledgeModelSetPublic : AppState -> { a | public : Bool } -> Bool
 knowledgeModelSetPublic appState kmPackage =
-    adminOr Perm.packageManagementWrite appState
+    hasPerm RolePermission.knowledgeModelsManage appState
         && not kmPackage.public
 
 
 knowledgeModelSetPrivate : AppState -> { a | public : Bool } -> Bool
 knowledgeModelSetPrivate appState kmPackage =
-    adminOr Perm.packageManagementWrite appState
+    hasPerm RolePermission.knowledgeModelsManage appState
         && kmPackage.public
 
 
@@ -231,8 +268,8 @@ knowledgeModelSetPrivate appState kmPackage =
 
 
 knowledgeModelSecrets : AppState -> Bool
-knowledgeModelSecrets appState =
-    adminOr Perm.knowledgeModel appState
+knowledgeModelSecrets =
+    hasPerm RolePermission.knowledgeModelsManage
 
 
 
@@ -241,22 +278,56 @@ knowledgeModelSecrets appState =
 
 documentTemplatesView : AppState -> Bool
 documentTemplatesView =
-    adminOr Perm.documentTemplates
+    isLoggedIn
 
 
 documentTemplatesImport : AppState -> Bool
 documentTemplatesImport =
-    adminOr Perm.packageManagementWrite
+    hasPerm RolePermission.documentTemplatesManage
 
 
 documentTemplatesExport : AppState -> Bool
 documentTemplatesExport =
-    adminOr Perm.documentTemplates
+    hasPerm RolePermission.documentTemplatesManage
 
 
 documentTemplatesDelete : AppState -> Bool
 documentTemplatesDelete =
-    adminOr Perm.packageManagementWrite
+    hasPerm RolePermission.documentTemplatesManage
+
+
+
+-- Document Template Editors
+
+
+documentTemplateEditorsView : AppState -> Bool
+documentTemplateEditorsView =
+    hasPerm RolePermission.documentTemplateEditorsUse
+
+
+documentTemplatesManage : AppState -> Bool
+documentTemplatesManage =
+    hasPerm RolePermission.documentTemplatesManage
+
+
+documentTemplateEditorsCreate : AppState -> Bool
+documentTemplateEditorsCreate =
+    hasPerm RolePermission.documentTemplateEditorsUse
+
+
+documentTemplateEditorsEdit : AppState -> Bool
+documentTemplateEditorsEdit =
+    hasPerm RolePermission.documentTemplateEditorsUse
+
+
+documentTemplateEditorsPublish : AppState -> Bool
+documentTemplateEditorsPublish =
+    hasPerm RolePermission.documentTemplateEditorsUse
+
+
+documentTemplateEditorsDelete : AppState -> Bool
+documentTemplateEditorsDelete =
+    hasPerm RolePermission.documentTemplateEditorsUse
 
 
 
@@ -265,7 +336,8 @@ documentTemplatesDelete =
 
 newsModal : AppState -> Bool
 newsModal appState =
-    isAdmin appState || isDataSteward appState
+    hasPerm RolePermission.knowledgeModelEditorsUse appState
+        || hasPerm RolePermission.settingsManage appState
 
 
 
@@ -274,7 +346,7 @@ newsModal appState =
 
 projectsView : AppState -> Bool
 projectsView =
-    adminOr Perm.project
+    always True
 
 
 projectsCreateCustom : AppState -> Bool
@@ -284,12 +356,12 @@ projectsCreateCustom appState =
             ProjectCreation.customEnabled appState.config.project.projectCreation
 
         canCreateProjectTemplates =
-            adminOr Perm.projectTemplate appState
+            hasPerm RolePermission.projectTemplatesManage appState
 
         canCreateAnonymousProjects =
             appState.config.project.projectSharing.anonymousEnabled
     in
-    (canCreateAnonymousProjects || adminOr Perm.project appState) && (canCreateCustomProjects || canCreateProjectTemplates)
+    (canCreateAnonymousProjects || isLoggedIn appState) && (canCreateCustomProjects || canCreateProjectTemplates)
 
 
 projectsCreateFromTemplate : AppState -> Bool
@@ -298,12 +370,12 @@ projectsCreateFromTemplate appState =
         canCreateFromTemplates =
             ProjectCreation.fromTemplateEnabled appState.config.project.projectCreation
     in
-    adminOr Perm.project appState && canCreateFromTemplates
+    isLoggedIn appState && canCreateFromTemplates
 
 
 projectTemplatesCreate : AppState -> Bool
 projectTemplatesCreate =
-    adminOr Perm.projectTemplate
+    hasPerm RolePermission.projectTemplatesManage
 
 
 projectOpen : Project -> Bool
@@ -437,7 +509,7 @@ projectCommentPrivate appState project =
 
 projectFiles : AppState -> Bool
 projectFiles =
-    adminOr Perm.projectFile
+    hasPerm RolePermission.projectsEdit
 
 
 
@@ -446,12 +518,12 @@ projectFiles =
 
 documentsView : AppState -> Bool
 documentsView =
-    isAdmin
+    hasPerm RolePermission.projectsEdit
 
 
 documentDelete : AppState -> Document -> Bool
 documentDelete appState document =
-    isAdmin appState || Document.isOwner appState document
+    hasPerm RolePermission.projectsEdit appState || Document.isOwner appState document
 
 
 documentDownload : Document -> Bool
@@ -463,7 +535,7 @@ documentSubmit : AppState -> Document -> Bool
 documentSubmit appState document =
     (document.state == DoneDocumentState)
         && appState.config.submission.enabled
-        && adminOr Perm.submission appState
+        && hasPerm RolePermission.projectsEdit appState
 
 
 
@@ -472,7 +544,7 @@ documentSubmit appState document =
 
 settings : AppState -> Bool
 settings =
-    adminOr Perm.settings
+    hasPerm RolePermission.settingsManage
 
 
 registry : AppState -> Bool
@@ -484,19 +556,24 @@ registry appState =
 -- Users
 
 
-usersView : AppState -> Bool
-usersView =
-    adminOr Perm.userManagement
-
-
 usersCreate : AppState -> Bool
 usersCreate =
-    adminOr Perm.userManagement
+    hasPerm RolePermission.usersManage
 
 
 userEdit : AppState -> UuidOrCurrent -> Bool
 userEdit appState uuidOrCurrent =
-    UuidOrCurrent.isCurrent uuidOrCurrent || adminOr Perm.userManagement appState
+    UuidOrCurrent.isCurrent uuidOrCurrent || hasPerm RolePermission.usersManage appState
+
+
+usersManage : AppState -> Bool
+usersManage =
+    hasPerm RolePermission.usersManage
+
+
+usersView : AppState -> Bool
+usersView =
+    hasPerm RolePermission.usersManage
 
 
 userEditConnectedAccounts : AppState -> UuidOrCurrent -> Bool
@@ -564,43 +641,48 @@ isDefaultLanguage locale =
 
 localeView : AppState -> Bool
 localeView =
-    adminOr Perm.locale
+    hasPerm RolePermission.settingsManage
 
 
 localeCreate : AppState -> Bool
 localeCreate =
-    adminOr Perm.locale
+    hasPerm RolePermission.settingsManage
 
 
 localeImport : AppState -> Bool
 localeImport =
-    adminOr Perm.locale
+    hasPerm RolePermission.settingsManage
 
 
 localeExport : AppState -> LocaleLike a -> Bool
 localeExport appState locale =
-    adminOr Perm.locale appState
+    hasPerm RolePermission.settingsManage appState
         && not (isDefaultLanguage locale)
 
 
 localeSetDefault : AppState -> LocaleLike a -> Bool
 localeSetDefault appState locale =
-    adminOr Perm.locale appState
+    hasPerm RolePermission.settingsManage appState
         && locale.enabled
         && not locale.defaultLocale
 
 
 localeChangeEnabled : AppState -> LocaleLike a -> Bool
 localeChangeEnabled appState locale =
-    adminOr Perm.locale appState
+    hasPerm RolePermission.settingsManage appState
         && not locale.defaultLocale
 
 
 localeDelete : AppState -> LocaleLike a -> Bool
 localeDelete appState locale =
-    adminOr Perm.locale appState
+    hasPerm RolePermission.settingsManage appState
         && not (isDefaultLanguage locale)
         && not locale.defaultLocale
+
+
+localesManage : AppState -> Bool
+localesManage =
+    hasPerm RolePermission.settingsManage
 
 
 
@@ -608,8 +690,8 @@ localeDelete appState locale =
 
 
 tenants : AppState -> Bool
-tenants appState =
-    Perm.hasPerm appState.config.user Perm.tenants
+tenants =
+    hasPerm RolePermission.tenantsManage
 
 
 
@@ -626,24 +708,19 @@ urlChecker appState =
 
 
 dev : AppState -> Bool
-dev appState =
-    Perm.hasPerm appState.config.user Perm.dev
+dev =
+    hasPerm RolePermission.devUse
 
 
 
 -- Helpers
 
 
-isDataSteward : AppState -> Bool
-isDataSteward appState =
-    UserInfo.isDataSteward appState.config.user
+hasPerm : RolePermission -> AppState -> Bool
+hasPerm perm appState =
+    Maybe.unwrap False (UserConfig.hasPerm perm) appState.config.user
 
 
-isAdmin : AppState -> Bool
-isAdmin appState =
-    UserInfo.isAdmin appState.config.user
-
-
-adminOr : String -> AppState -> Bool
-adminOr perm appState =
-    isAdmin appState || Perm.hasPerm appState.config.user perm
+isLoggedIn : AppState -> Bool
+isLoggedIn appState =
+    Maybe.isJust appState.config.user

@@ -8,7 +8,6 @@ import Common.Components.Modal as Modal
 import Common.Components.NewsModal as NewsModal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltip)
-import Common.Data.Role as Role
 import Common.Utils.TimeUtils as TimeUtils
 import Dict
 import Gettext exposing (gettext)
@@ -19,10 +18,11 @@ import Html.Events exposing (onClick, onMouseEnter, onMouseLeave)
 import Html.Extra as Html
 import Json.Decode as D
 import Json.Decode.Extra as D
+import List.Extensions as List
 import Maybe.Extra as Maybe
 import String.Format as String
 import Version
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig.CustomMenuLink exposing (CustomMenuLink)
 import Wizard.Api.Models.BootstrapConfig.PrivacyAndSupportConfig as PrivacyAndSupportConfig
@@ -39,19 +39,8 @@ import Wizard.Utils.Feature as Feature
 
 
 type MenuItem
-    = MenuGroup MenuGroupData
-    | MenuItem MenuItemData
-
-
-type alias MenuGroupData =
-    { title : String
-    , icon : Html Wizard.Msgs.Msg
-    , id : String
-    , route : Route
-    , isActive : Route -> Bool
-    , isVisible : AppState -> Bool
-    , items : List GroupItemData
-    }
+    = MenuItem MenuItemData
+    | MenuGroup MenuGroupData
 
 
 type alias MenuItemData =
@@ -64,8 +53,18 @@ type alias MenuItemData =
     }
 
 
-type alias GroupItemData =
+type alias MenuGroupData =
     { title : String
+    , icon : Html Wizard.Msgs.Msg
+    , id : String
+    , isActive : Route -> Bool
+    , items : List MenuGroupItem
+    }
+
+
+type alias MenuGroupItem =
+    { title : String
+    , soloTitle : Maybe String
     , id : String
     , route : Route
     , isActive : Route -> Bool
@@ -95,23 +94,24 @@ menuItems appState =
         { title = gettext "Knowledge Models" appState.locale
         , icon = faMenuKnowledgeModels
         , id = "knowledge-models"
-        , route = Routes.knowledgeModelsIndex
         , isActive = Routes.isKnowledgeModelsSubroute
-        , isVisible = Feature.knowledgeModelsImport
         , items =
             [ { title = gettext "List" appState.locale
+              , soloTitle = Just (gettext "Knowledge Models" appState.locale)
               , id = "knowledge-models-list"
               , route = Routes.knowledgeModelsIndex
               , isActive = Routes.isKnowledgeModelsIndex
-              , isVisible = always True
+              , isVisible = Feature.knowledgeModelsManage
               }
             , { title = gettext "Editors" appState.locale
+              , soloTitle = Just (gettext "Knowledge Model Editors" appState.locale)
               , id = "knowledge-models-editors"
               , route = Routes.kmEditorIndex
               , isActive = Routes.isKmEditorIndex
-              , isVisible = always True
+              , isVisible = Feature.knowledgeModelEditorsView
               }
             , { title = gettext "Secrets" appState.locale
+              , soloTitle = Just (gettext "Knowledge Model Secrets" appState.locale)
               , id = "knowledge-model-secrets"
               , route = Routes.knowledgeModelSecrets
               , isActive = Routes.isKnowledgeModelSecrets
@@ -123,53 +123,46 @@ menuItems appState =
         { title = gettext "Document Templates" appState.locale
         , icon = faMenuTemplates
         , id = "document-templates"
-        , route = Routes.documentTemplatesIndex
         , isActive = Routes.isDocumentTemplatesSubroute
-        , isVisible = Feature.documentTemplatesView
         , items =
             [ { title = gettext "List" appState.locale
+              , soloTitle = Just (gettext "Document Templates" appState.locale)
               , id = "documents-list"
               , route = Routes.documentTemplatesIndex
               , isActive = Routes.isDocumentTemplatesIndex
-              , isVisible = always True
+              , isVisible = Feature.documentTemplatesManage
               }
             , { title = gettext "Editors" appState.locale
+              , soloTitle = Just (gettext "Document Template Editors" appState.locale)
               , id = "document-editors"
               , route = Routes.documentTemplateEditorsIndex
               , isActive = Routes.isDocumentTemplateEditorsIndex
-              , isVisible = always True
+              , isVisible = Feature.documentTemplateEditorsView
               }
             ]
-        }
-    , MenuItem
-        { title = gettext "Projects" appState.locale
-        , icon = faMenuProjects
-        , id = "projects"
-        , route = Routes.projectsIndex appState
-        , isActive = Routes.isProjectsIndex
-        , isVisible = \a -> not (Feature.isDataSteward a || Feature.isAdmin a)
         }
     , MenuGroup
         { title = gettext "Projects" appState.locale
         , icon = faMenuProjects
         , id = "projects"
-        , route = Routes.projectsIndex appState
         , isActive = Routes.isProjectSubroute
-        , isVisible = \a -> Feature.isDataSteward a || Feature.isAdmin a
         , items =
             [ { title = gettext "List" appState.locale
+              , soloTitle = Just (gettext "Projects" appState.locale)
               , id = "projects-list"
               , route = Routes.projectsIndex appState
               , isActive = Routes.isProjectsIndex
               , isVisible = Feature.projectsView
               }
             , { title = gettext "Files" appState.locale
+              , soloTitle = Just (gettext "Project Files" appState.locale)
               , id = "projects-files"
               , route = Routes.projectFilesIndex
               , isActive = Routes.isProjectFilesIndex
               , isVisible = Feature.projectFiles
               }
             , { title = gettext "Documents" appState.locale
+              , soloTitle = Nothing
               , id = "documents"
               , route = Routes.documentsIndex
               , isActive = Routes.isDocumentsIndex
@@ -181,65 +174,58 @@ menuItems appState =
         { title = "Dev"
         , icon = faMenuDev
         , id = "dev"
-        , route = Routes.devOperations
         , isActive = Routes.isDevSubroute
-        , isVisible = Feature.dev
         , items =
             [ { title = "Operations"
+              , soloTitle = Just "Dev Operations"
               , id = "dev-operations"
               , route = Routes.devOperations
               , isActive = Routes.isDevOperations
-              , isVisible = always True
+              , isVisible = Feature.dev
               }
             , { title = "Persistent Commands"
+              , soloTitle = Nothing
               , id = "dev-persistent-commands"
               , route = Routes.persistentCommandsIndex
               , isActive = Routes.isPersistentCommandsIndex
-              , isVisible = always True
+              , isVisible = Feature.dev
               }
             ]
-        }
-    , MenuItem
-        { title = gettext "Settings" appState.locale
-        , icon = faMenuAdministration
-        , id = "settings"
-        , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin) (AppState.anyPluginsAvailable appState)
-        , isActive = Routes.isSettingsRoute
-        , isVisible = \a -> Admin.isEnabled a.config.admin && Feature.isAdmin a
         }
     , MenuGroup
         { title = gettext "Administration" appState.locale
         , icon = faMenuAdministration
         , id = "administration"
-        , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin) (AppState.anyPluginsAvailable appState)
         , isActive = Routes.isSettingsSubroute
-        , isVisible = \a -> not (Admin.isEnabled a.config.admin) && Feature.settings a
         , items =
-            { title = gettext "Settings" appState.locale
-            , id = "system-settings"
-            , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin) (AppState.anyPluginsAvailable appState)
-            , isActive = Routes.isSettingsRoute
-            , isVisible = always True
-            }
-                :: (if Admin.isEnabled appState.config.admin then
-                        []
-
-                    else
-                        [ { title = gettext "Users" appState.locale
-                          , id = "users"
-                          , route = Routes.usersIndex
-                          , isActive = Routes.isUsersIndex
-                          , isVisible = always True
-                          }
-                        ]
-                   )
-                ++ [ { title = gettext "Locales" appState.locale
-                     , id = "system-locales"
-                     , route = Routes.localesIndex
-                     , isActive = Routes.isLocalesRoute
-                     , isVisible = always True
-                     }
-                   ]
+            []
+                |> List.insertIf
+                    { title = gettext "Settings" appState.locale
+                    , soloTitle = Nothing
+                    , id = "system-settings"
+                    , route = Routes.settingsDefault (Admin.isEnabled appState.config.admin) (AppState.anyPluginsAvailable appState)
+                    , isActive = Routes.isSettingsRoute
+                    , isVisible = Feature.settings
+                    }
+                    True
+                |> List.insertIf
+                    { title = gettext "Users" appState.locale
+                    , soloTitle = Nothing
+                    , id = "users"
+                    , route = Routes.usersIndex
+                    , isActive = Routes.isUsersIndex
+                    , isVisible = Feature.usersManage
+                    }
+                    (not (Admin.isEnabled appState.config.admin))
+                |> List.insertIf
+                    { title = gettext "Locales" appState.locale
+                    , soloTitle = Nothing
+                    , id = "system-locales"
+                    , route = Routes.localesIndex
+                    , isActive = Routes.isLocalesRoute
+                    , isVisible = Feature.localesManage
+                    }
+                    (not (Admin.isEnabled appState.config.admin))
         }
     ]
 
@@ -404,14 +390,40 @@ viewMenu model =
         filterMenuItem menuItem =
             case menuItem of
                 MenuGroup group ->
-                    group.isVisible model.appState
+                    let
+                        groupItems =
+                            List.filter (\g -> g.isVisible model.appState) group.items
+                    in
+                    case groupItems of
+                        [] ->
+                            Nothing
+
+                        item :: [] ->
+                            Just <|
+                                MenuItem
+                                    { title = Maybe.withDefault item.title item.soloTitle
+                                    , icon = group.icon
+                                    , id = item.id
+                                    , route = item.route
+                                    , isActive = item.isActive
+                                    , isVisible = item.isVisible
+                                    }
+
+                        items ->
+                            Just <|
+                                MenuGroup
+                                    { group | items = items }
 
                 MenuItem item ->
-                    item.isVisible model.appState
+                    if item.isVisible model.appState then
+                        Just (MenuItem item)
+
+                    else
+                        Nothing
 
         defaultMenuItems =
             menuItems model.appState
-                |> List.filter filterMenuItem
+                |> List.filterMap filterMenuItem
                 |> List.map (defaultMenuItem model)
 
         customMenuItems =
@@ -475,9 +487,14 @@ defaultMenuItem model item =
 
                     else
                         Html.nothing
+
+                groupLink =
+                    List.head menuGroup.items
+                        |> Maybe.map (\i -> linkTo i.route)
+                        |> Maybe.withDefault span
             in
             li [ id menuItemId, classList [ ( "active", menuGroup.isActive model.appState.route ) ], mouseenter, mouseleave ]
-                [ linkTo menuGroup.route
+                [ groupLink
                     []
                     [ menuGroup.icon
                     , span [ class "sidebar-link" ] [ text menuGroup.title ]
@@ -660,7 +677,7 @@ viewProfileMenu model =
         ( name, role, imageUrl ) =
             case model.appState.config.user of
                 Just user ->
-                    ( User.fullName user, Role.toReadableString model.appState user.role, User.imageUrl user )
+                    ( User.fullName user, gettext user.role.name model.appState.locale, User.imageUrl user )
 
                 Nothing ->
                     ( "", "", "" )

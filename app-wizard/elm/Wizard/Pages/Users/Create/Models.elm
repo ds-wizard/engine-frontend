@@ -3,7 +3,8 @@ module Wizard.Pages.Users.Create.Models exposing
     , initialModel
     )
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
+import Common.Api.Models.Role exposing (Role)
 import Common.Utils.Form.FormError exposing (FormError)
 import Form exposing (Form)
 import Wizard.Data.AppState exposing (AppState)
@@ -11,13 +12,15 @@ import Wizard.Pages.Users.Common.UserCreateForm as UserCreateForm exposing (User
 
 
 type alias Model =
-    { savingUser : ActionResult String
+    { roles : ActionResult (List Role)
+    , savingUser : ActionResult String
     , form : Form FormError UserCreateForm
     }
 
 
 initialModel : AppState -> Model
 initialModel appState =
-    { savingUser = Unset
+    { roles = ActionResult.Loading
+    , savingUser = ActionResult.Unset
     , form = UserCreateForm.init appState
     }

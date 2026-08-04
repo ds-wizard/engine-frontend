@@ -17,7 +17,8 @@ import Maybe.Extra as Maybe
 import Round
 import String exposing (fromFloat, fromInt)
 import String.Format as String
-import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.Chapter as Chapter
+import Wizard.Api.Models.KnowledgeModel.Metric as Metric exposing (Metric)
 import Wizard.Api.Models.SummaryReport exposing (ChapterReport, IndicationReport(..), MetricReport, SummaryReport, TotalReport)
 import Wizard.Api.Models.SummaryReport.AnsweredIndicationData exposing (AnsweredIndicationData)
 import Wizard.Data.AppState exposing (AppState)
@@ -41,8 +42,24 @@ update msg =
 view : AppState -> SummaryReport -> Html Msg
 view appState summaryReport =
     div [ class "Projects__Detail__Content Projects__Detail__Content--Metrics" ]
-        [ viewContent appState summaryReport
+        [ viewContent appState (localize summaryReport)
         ]
+
+
+{-| Chapter and metric names come from the knowledge model, so they are stored
+in its original language and have to be translated with the knowledge model
+locale before they are rendered.
+-}
+localize : SummaryReport -> SummaryReport
+localize summaryReport =
+    let
+        knowledgeModelLocale =
+            Maybe.withDefault Gettext.defaultLocale summaryReport.locale
+    in
+    { summaryReport
+        | chapters = List.map (Chapter.localize knowledgeModelLocale) summaryReport.chapters
+        , metrics = List.map (Metric.localize knowledgeModelLocale) summaryReport.metrics
+    }
 
 
 viewContent : AppState -> SummaryReport -> Html Msg

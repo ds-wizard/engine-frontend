@@ -4,6 +4,7 @@ module Common.Utils.UrlUtils exposing
     , addQueryParam
     , getDomain
     , queryParamsToString
+    , stripQueryParams
     )
 
 import Url exposing (Url)
@@ -70,3 +71,10 @@ addOptionalUrlPart maybePart parts =
 getDomain : String -> Maybe String
 getDomain urlString =
     Maybe.map .host (Url.fromString urlString)
+
+
+stripQueryParams : String -> String
+stripQueryParams urlString =
+    String.split "?" urlString
+        |> List.head
+        |> Maybe.withDefault urlString

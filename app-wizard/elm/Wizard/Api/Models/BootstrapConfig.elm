@@ -10,7 +10,7 @@ import Dict exposing (Dict)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Extensions as D
 import Json.Decode.Pipeline as D
-import Wizard.Api.Models.BootstrapConfig.Admin as AdminConfig exposing (Admin)
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as AdminConfig exposing (AdminConfig)
 import Wizard.Api.Models.BootstrapConfig.AuthenticationConfig as AuthenticationConfig exposing (AuthenticationConfig)
 import Wizard.Api.Models.BootstrapConfig.CloudConfig as CloudConfig exposing (CloudConfig)
 import Wizard.Api.Models.BootstrapConfig.DashboardAndLoginScreenConfig as DashboardAndLoginScreenConfig exposing (DashboardAndLoginScreenConfig)
@@ -28,7 +28,7 @@ import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig exposing (User
 
 
 type alias BootstrapConfig =
-    { admin : Admin
+    { admin : AdminConfig
     , features : FeaturesConfig
     , authentication : AuthenticationConfig
     , dashboardAndLoginScreen : DashboardAndLoginScreenConfig
@@ -82,9 +82,8 @@ decoder =
         |> D.required "registry" RegistryConfig.decoder
         |> D.required "lookAndFeel" LookAndFeelConfig.decoder
         |> D.required "organization" OrganizationConfig.decoder
-        -- TODO remove optional
-        |> D.optional "pluginSettings" (D.dict D.valueAsString) Dict.empty
-        |> D.optional "plugins" (D.list PluginInfo.decoder) []
+        |> D.required "pluginSettings" (D.dict D.valueAsString)
+        |> D.required "plugins" (D.list PluginInfo.decoder)
         |> D.required "privacyAndSupport" PrivacyAndSupportConfig.decoder
         |> D.required "project" ProjectConfig.decoder
         |> D.required "submission" SubmissionConfig.decoder

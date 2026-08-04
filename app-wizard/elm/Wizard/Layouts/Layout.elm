@@ -15,7 +15,7 @@ import Html exposing (Html, div, img, li, nav, text, ul)
 import Html.Attributes exposing (class, classList, src)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
 import Wizard.Components.CookieConsent as CookieConsent
 import Wizard.Components.Html exposing (linkTo)

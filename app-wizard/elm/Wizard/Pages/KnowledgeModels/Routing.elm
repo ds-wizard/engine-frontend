@@ -12,6 +12,7 @@ import Url.Parser.Query as Query
 import Url.Parser.Query.Extensions as Query
 import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
+import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute as KnowledgeModelDetailRoute
 import Wizard.Pages.KnowledgeModels.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature
 
@@ -31,6 +32,7 @@ parsers wrapRoute =
             wrapRoute <| CompareRoute mbLeftKmPackageId
     in
     [ map (wrapRoute << ImportRoute) (s moduleRoot </> s "import" <?> Query.string "knowledgeModelPackageId")
+    , map (detailLocales wrapRoute) (s moduleRoot </> Parser.uuid </> s "locales")
     , map (detail wrapRoute) (s moduleRoot </> Parser.uuid)
     , map (PaginationQueryString.wrapRoute (wrapRoute << IndexRoute) (Just "name")) (PaginationQueryString.parser (s moduleRoot))
     , map (preview wrapRoute) (s moduleRoot </> Parser.uuid </> s "preview" <?> Query.string "questionUuid")
@@ -41,7 +43,12 @@ parsers wrapRoute =
 
 detail : (Route -> a) -> Uuid -> a
 detail wrapRoute kmPackageUuid =
-    wrapRoute <| DetailRoute kmPackageUuid
+    wrapRoute <| DetailRoute kmPackageUuid KnowledgeModelDetailRoute.Readme
+
+
+detailLocales : (Route -> a) -> Uuid -> a
+detailLocales wrapRoute kmPackageUuid =
+    wrapRoute <| DetailRoute kmPackageUuid KnowledgeModelDetailRoute.Locales
 
 
 preview : (Route -> a) -> Uuid -> Maybe String -> a
@@ -52,8 +59,13 @@ preview wrapRoute kmPackageUuid mbQuestionUuid =
 toUrl : Route -> List String
 toUrl route =
     case route of
-        DetailRoute kmPackageUuid ->
-            [ moduleRoot, Uuid.toString kmPackageUuid ]
+        DetailRoute kmPackageUuid kmDetailRoute ->
+            case kmDetailRoute of
+                KnowledgeModelDetailRoute.Readme ->
+                    [ moduleRoot, Uuid.toString kmPackageUuid ]
+
+                KnowledgeModelDetailRoute.Locales ->
+                    [ moduleRoot, Uuid.toString kmPackageUuid, "locales" ]
 
         ImportRoute kmPackageId ->
             let
@@ -88,7 +100,7 @@ toUrl route =
 isAllowed : Route -> AppState -> Bool
 isAllowed route appState =
     case route of
-        DetailRoute _ ->
+        DetailRoute _ _ ->
             True
 
         ImportRoute _ ->

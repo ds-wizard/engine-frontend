@@ -6,6 +6,6 @@ type Route
     | ForgottenPasswordConfirmationRoute String String
     | LoginRoute (Maybe String)
     | LogoutSuccessful
-    | OpenIdCallback String (Maybe String) (Maybe String) (Maybe String)
+    | OpenIdCallback String (Maybe String) (Maybe String) (Maybe String) (Maybe String)
     | SignupRoute
     | SignupConfirmationRoute String String

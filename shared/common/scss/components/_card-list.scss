@@ -1,0 +1,10 @@
+.card-list {
+  a.card {
+    transition: background 0.15s ease-in-out;
+    text-decoration: none !important;
+
+    &:hover {
+      background: $gray-200 !important;
+    }
+  }
+}

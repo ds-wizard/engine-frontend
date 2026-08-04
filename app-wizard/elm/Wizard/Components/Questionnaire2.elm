@@ -1224,6 +1224,8 @@ virtualizeContent model =
                 , collapsedPaths = model.collapsedPaths
                 , resourcePageToUrl = Wizard.Routes.knowledgeModelsResourcePage model.questionnaire.knowledgeModelPackage.uuid
                 , viewSettings = model.viewSettings
+                , locale = Maybe.withDefault Gettext.defaultLocale model.questionnaire.locale
+                , knowledgeModelParentMap = model.knowledgeModelParentMap
                 }
     }
 

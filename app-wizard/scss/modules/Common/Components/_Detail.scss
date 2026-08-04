@@ -1,0 +1,11 @@
+@import '../../../variables';
+
+// The wizard has no `.app-navbar`; instead the public-facing app renders an
+// extra header banner above the content. The shared `.detail` component
+// (shared/common/scss/components/_detail.scss) defaults to full viewport
+// height, so reduce it by the public header height in that case.
+.public--app {
+  .detail {
+    height: calc(100vh - #{$public-header-height});
+  }
+}

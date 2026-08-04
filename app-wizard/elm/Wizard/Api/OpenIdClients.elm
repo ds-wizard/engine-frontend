@@ -5,10 +5,11 @@ module Wizard.Api.OpenIdClients exposing
     , getToken
     , postOpenIdClient
     , putOpenIdClient
-    , requestUrl
+    , request
     )
 
 import Common.Api.Models.OpenIdClient as OpenIdClient exposing (OpenIdClient)
+import Common.Api.Models.OpenIdRequest as OpenIdRequestResponse exposing (OpenIdRequestResponse)
 import Common.Api.Request as Request exposing (ToMsg)
 import Common.Utils.UrlUtils as UrlUtils
 import Json.Decode as D
@@ -51,21 +52,20 @@ deleteOpenIdClient appState uuid =
     Request.delete (AppState.toServerInfo appState) ("/open-id-clients/" ++ Uuid.toString uuid)
 
 
-requestUrl : AppState -> OpenIdClient -> String
-requestUrl appState config =
-    appState.apiUrl ++ "/open-id-clients/" ++ Uuid.toString config.uuid ++ "/request"
+request : AppState -> OpenIdClient -> ToMsg OpenIdRequestResponse msg -> Cmd msg
+request appState config =
+    Request.get (AppState.toServerInfo appState) ("/open-id-clients/" ++ Uuid.toString config.uuid ++ "/request") OpenIdRequestResponse.decoder
 
 
 getToken : AppState -> String -> Maybe String -> Maybe String -> Maybe String -> Maybe String -> ToMsg TokenResponse msg -> Cmd msg
-getToken appState id mbError mbCode mbSessionState mbClientId =
+getToken appState id mbError mbCode mbSessionState mbState =
     let
         queryParams =
             UrlUtils.queryParamsToString
                 [ ( "error", mbError )
                 , ( "code", mbCode )
                 , ( "session_state", mbSessionState )
-                , ( "clientId", mbClientId )
-                , ( "nonce", Just "FtEIbRdfFc7z2bNjCTaZKDcWNeUKUelvs13K21VL" )
+                , ( "state", mbState )
                 ]
 
         url =

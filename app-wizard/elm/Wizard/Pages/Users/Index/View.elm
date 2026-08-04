@@ -1,10 +1,10 @@
 module Wizard.Pages.Users.Index.View exposing (view)
 
+import Common.Api.Models.Role as Role exposing (Role)
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faDelete, faEdit)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
-import Common.Data.Role as Role
 import Common.Data.UuidOrCurrent as UuidOrCurrent
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, img, p, span, strong, text)
@@ -26,9 +26,14 @@ import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
 
 view : AppState -> Model -> Html Msg
 view appState model =
+    Page.actionResultView appState (viewList appState model) model.roles
+
+
+viewList : AppState -> Model -> List Role -> Html Msg
+viewList appState model roles =
     div [ listClass "Users__Index" ]
         [ Page.header (gettext "Users" appState.locale) []
-        , Listing.view appState (listingConfig appState) model.users
+        , Listing.view appState (listingConfig appState roles) model.users
         , deleteModal appState model
         ]
 
@@ -42,8 +47,8 @@ createButton appState =
         [ text (gettext "Create" appState.locale) ]
 
 
-listingConfig : AppState -> ViewConfig User Msg
-listingConfig appState =
+listingConfig : AppState -> List Role -> ViewConfig User Msg
+listingConfig appState roles =
     { title = listingTitle appState
     , description = listingDescription
     , itemAdditionalData = always Nothing
@@ -64,7 +69,7 @@ listingConfig appState =
     , filters =
         [ Listing.SimpleFilter indexRouteRoleFilterId
             { name = gettext "Role" appState.locale
-            , options = Role.options appState
+            , options = List.map Role.toFormOption roles
             }
         ]
     , toRoute = Routes.usersIndexWithFilters
@@ -98,15 +103,7 @@ listingTitleBadge appState user =
 
 roleBadge : AppState -> User -> Html msg
 roleBadge appState user =
-    let
-        badge =
-            if Role.isAdmin user.role then
-                Badge.dark
-
-            else
-                Badge.light
-    in
-    badge [] [ text <| Role.toReadableString appState user.role ]
+    Badge.light [] [ text <| gettext user.role.name appState.locale ]
 
 
 listingDescription : User -> Html Msg

@@ -92,7 +92,7 @@ listingActions appState template =
                 }
 
         viewActionVisible =
-            Feature.documentTemplatesView appState
+            Feature.documentTemplateEditorsView appState
 
         deleteAction =
             ListingDropdown.dropdownAction
@@ -104,7 +104,7 @@ listingActions appState template =
                 }
 
         deleteActionVisible =
-            Feature.documentTemplatesDelete appState
+            Feature.documentTemplateEditorsDelete appState
 
         groups =
             [ [ ( viewAction, viewActionVisible ) ]

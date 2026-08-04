@@ -82,7 +82,7 @@ import Wizard.Components.Questionnaire2.QuestionViewFlags as QuestionViewFlags
 import Wizard.Components.Questionnaire2.QuestionnaireRightPanel as QuestionnaireRightPanel exposing (PluginQuestionActionData, QuestionnaireRightPanel)
 import Wizard.Components.Questionnaire2.QuestionnaireUpdateReturnData as QuestionnaireUpdateReturnData exposing (QuestionnaireUpdateReturnData)
 import Wizard.Components.Questionnaire2.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
-import Wizard.Components.Questionnaire2.QuestionnaireVirtualization exposing (ChapterLinksNodeData, ChapterNodeData, ContentNode(..), ItemFooterNodeData, ItemHeaderNodeData, ItemsEndNodeData, NestingType(..), QuestionExtraCrossReference, QuestionExtraData, QuestionExtraResourceCollection, QuestionExtraResourcePage, QuestionExtraUrlReference, QuestionNodeData, QuestionSpecificNodeData(..))
+import Wizard.Components.Questionnaire2.QuestionnaireVirtualization exposing (ChapterLinksNodeData, ChapterNodeData, ContentNode(..), ItemEmptyNodeData, ItemFooterNodeData, ItemHeaderNodeData, ItemsEndNodeData, NestingType(..), QuestionExtraCrossReference, QuestionExtraData, QuestionExtraResourceCollection, QuestionExtraResourcePage, QuestionExtraUrlReference, QuestionNodeData, QuestionSpecificNodeData(..))
 import Wizard.Components.Tag as Tag
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Plugins.Plugin exposing (Plugin, ProjectQuestionActionConnector, ProjectQuestionActionConnectorType(..))
@@ -655,6 +655,9 @@ viewNode appState cfg model questionViewFlags contentNode =
 
         ItemHeaderNode itemData ->
             viewItemHeaderNode appState cfg questionViewFlags itemData
+
+        ItemEmptyNode itemData ->
+            viewItemEmptyNode appState itemData
 
         ItemFooterNode itemData ->
             viewItemFooterNode appState itemData
@@ -1892,7 +1895,7 @@ viewQuestionItemSelect appState model cfg questionViewFlags questionNodeData mbR
                                             )
                             in
                             cfg.questionnaire.replies
-                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key && ProjectQuestionnaire.isPathVisible cfg.questionnaire key)
                                 |> Dict.toList
                                 |> List.concatMap itemsToOptions
 
@@ -2752,6 +2755,27 @@ viewItemHeaderNodeLazy locale { isCollapsed, itemIndex, itemPath, itemUuid, nest
             , buttons
             ]
         ]
+
+
+viewItemEmptyNode : AppState -> ItemEmptyNodeData -> ( String, Html Msg )
+viewItemEmptyNode appState itemEmptyNodeData =
+    ( itemEmptyNodeData.itemPath ++ "-empty"
+    , Lazy.lazy3 viewItemEmptyNodeLazy appState.locale itemEmptyNodeData.nestingType itemEmptyNodeData.hiddenByViewOptions
+    )
+
+
+viewItemEmptyNodeLazy : Gettext.Locale -> NestingType -> Bool -> Html Msg
+viewItemEmptyNodeLazy locale nestingType hiddenByViewOptions =
+    let
+        message =
+            if hiddenByViewOptions then
+                gettext "All questions in this item are hidden by the current view settings." locale
+
+            else
+                gettext "This item contains no questions." locale
+    in
+    wrapNestingType nestingType
+        [ div [ class "mt-3" ] [ Flash.info message ] ]
 
 
 viewItemFooterNode : AppState -> ItemFooterNodeData -> ( String, Html Msg )

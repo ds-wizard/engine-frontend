@@ -1,6 +1,7 @@
 module Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing
     ( QuestionValidation(..)
     , QuestionValidationData
+    , appliesToValueType
     , decoder
     , doi
     , domain
@@ -19,6 +20,7 @@ module Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing
     , toOptionString
     , toTime
     , validate
+    , validValueTypes
     )
 
 import Common.Data.DateTimeString as DateTimeString
@@ -30,6 +32,7 @@ import Json.Encode as E
 import List.Extra as List
 import Regex
 import String.Format as String
+import Wizard.Api.Models.KnowledgeModel.Question.QuestionValueType as QuestionValueType exposing (QuestionValueType)
 
 
 type QuestionValidation
@@ -47,6 +50,65 @@ type QuestionValidation
     | FromTime (QuestionValidationData String)
     | ToTime (QuestionValidationData String)
     | Domain (QuestionValidationData String)
+
+
+{-| Whether this validation is applicable to the given question value type. Only
+applicable validations should be used when evaluating a questionnaire (a value
+question keeps validations of previously-used value types stored in the editor,
+but they must not be applied once the value type changes).
+
+The mapping mirrors `validationOptions` in the knowledge model editor input.
+
+-}
+appliesToValueType : QuestionValueType -> QuestionValidation -> Bool
+appliesToValueType valueType validation =
+    List.member valueType (validValueTypes validation)
+
+
+validValueTypes : QuestionValidation -> List QuestionValueType
+validValueTypes validation =
+    case validation of
+        MinLength _ ->
+            [ QuestionValueType.StringQuestionValueType, QuestionValueType.TextQuestionValueType ]
+
+        MaxLength _ ->
+            [ QuestionValueType.StringQuestionValueType, QuestionValueType.TextQuestionValueType ]
+
+        Regex _ ->
+            [ QuestionValueType.StringQuestionValueType, QuestionValueType.TextQuestionValueType, QuestionValueType.EmailQuestionValueType, QuestionValueType.UrlQuestionValueType ]
+
+        Orcid ->
+            [ QuestionValueType.StringQuestionValueType ]
+
+        Doi ->
+            [ QuestionValueType.StringQuestionValueType ]
+
+        MinNumber _ ->
+            [ QuestionValueType.NumberQuestionValueType ]
+
+        MaxNumber _ ->
+            [ QuestionValueType.NumberQuestionValueType ]
+
+        FromDate _ ->
+            [ QuestionValueType.DateQuestionValueType ]
+
+        ToDate _ ->
+            [ QuestionValueType.DateQuestionValueType ]
+
+        FromDateTime _ ->
+            [ QuestionValueType.DateTimeQuestionValueType ]
+
+        ToDateTime _ ->
+            [ QuestionValueType.DateTimeQuestionValueType ]
+
+        FromTime _ ->
+            [ QuestionValueType.TimeQuestionValueType ]
+
+        ToTime _ ->
+            [ QuestionValueType.TimeQuestionValueType ]
+
+        Domain _ ->
+            [ QuestionValueType.EmailQuestionValueType ]
 
 
 minLength : QuestionValidation

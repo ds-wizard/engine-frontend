@@ -24,6 +24,7 @@ type alias KnowledgeModelEditorEditForm =
     , versionMajor : Int
     , versionMinor : Int
     , versionPatch : Int
+    , language : String
     , license : String
     , readme : String
     }
@@ -39,6 +40,7 @@ init appState kmEditor =
             , ( "versionMajor", Field.string (String.fromInt (Version.getMajor kmEditor.version)) )
             , ( "versionMinor", Field.string (String.fromInt (Version.getMinor kmEditor.version)) )
             , ( "versionPatch", Field.string (String.fromInt (Version.getPatch kmEditor.version)) )
+            , ( "language", Field.string kmEditor.language )
             , ( "license", Field.string kmEditor.license )
             , ( "readme", Field.string kmEditor.readme )
             ]
@@ -60,6 +62,7 @@ validation appState =
         |> V.andMap (V.field "versionMajor" V.versionNumber)
         |> V.andMap (V.field "versionMinor" V.versionNumber)
         |> V.andMap (V.field "versionPatch" V.versionNumber)
+        |> V.andMap (V.field "language" V.string)
         |> V.andMap (V.field "license" V.string)
         |> V.andMap (V.field "readme" V.string)
 
@@ -75,6 +78,7 @@ encode form =
         , ( "description", E.string form.description )
         , ( "kmId", E.string form.kmId )
         , ( "version", E.string version )
+        , ( "language", E.string form.language )
         , ( "license", E.string form.license )
         , ( "readme", E.string form.readme )
         ]

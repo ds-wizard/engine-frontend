@@ -2,11 +2,14 @@ module Wizard.Pages.Users.Index.Update exposing (fetchData, update)
 
 import ActionResult exposing (ActionResult(..))
 import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.Models.Pagination exposing (Pagination)
+import Common.Api.Models.Role exposing (Role)
 import Common.Utils.RequestHelpers as RequestHelpers
 import Gettext exposing (gettext)
 import Task.Extra as Task
 import Uuid
 import Wizard.Api.Models.User exposing (User)
+import Wizard.Api.Roles as RolesApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
@@ -17,14 +20,20 @@ import Wizard.Pages.Users.Index.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
 
 
-fetchData : Cmd Msg
-fetchData =
-    Cmd.map ListingMsg Listing.fetchData
+fetchData : AppState -> Cmd Msg
+fetchData appState =
+    Cmd.batch
+        [ Cmd.map ListingMsg Listing.fetchData
+        , RolesApi.getRoles appState GetRolesCompleted
+        ]
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
+        GetRolesCompleted result ->
+            getRolesCompleted appState model result
+
         ShowHideDeleteUser user ->
             ( { model | userToBeDeleted = user, deletingUser = Unset }, Cmd.none )
 
@@ -36,6 +45,20 @@ update msg wrapMsg appState model =
 
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
+
+
+getRolesCompleted : AppState -> Model -> Result ApiError (Pagination Role) -> ( Model, Cmd msg )
+getRolesCompleted appState model result =
+    let
+        newModel =
+            case result of
+                Ok pagination ->
+                    { model | roles = ActionResult.Success pagination.items }
+
+                Err error ->
+                    { model | roles = ApiError.toActionResult appState (gettext "Unable to get the roles." appState.locale) error }
+    in
+    ( newModel, Cmd.none )
 
 
 handleDeleteUser : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

@@ -18,6 +18,15 @@ markdown-editor {
   box-shadow: 0 0 0 .25rem rgba(var(--bs-focus-ring-color), 0.25);
 }
 
+markdown-editor.is-invalid .md-editor {
+  border-color: var(--bs-form-invalid-border-color);
+}
+
+markdown-editor.is-invalid .md-editor:focus-within {
+  border-color: var(--bs-form-invalid-border-color);
+  box-shadow: 0 0 0 .25rem rgba(var(--bs-danger-rgb), 0.25);
+}
+
 .md-editor__toolbar {
   display: flex;
   align-items: flex-start;

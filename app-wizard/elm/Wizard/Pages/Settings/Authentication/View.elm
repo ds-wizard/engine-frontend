@@ -1,8 +1,10 @@
 module Wizard.Pages.Settings.Authentication.View exposing (view)
 
+import ActionResult
+import Common.Api.Models.Role as Role exposing (Role)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
-import Common.Data.Role as Role
+import Common.Components.Page as Page
 import Common.Utils.Form.FormError exposing (FormError)
 import Compose exposing (compose2)
 import Form exposing (Form)
@@ -12,29 +14,37 @@ import Html.Attributes exposing (class)
 import Html.Extra as Html
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Authentication.Models exposing (Model)
+import Wizard.Pages.Settings.Authentication.Msgs exposing (Msg(..))
 import Wizard.Pages.Settings.Common.Forms.AuthenticationConfigForm exposing (AuthenticationConfigForm)
-import Wizard.Pages.Settings.Generic.Msgs exposing (Msg(..))
+import Wizard.Pages.Settings.Generic.Msgs as GenericMsgs
 import Wizard.Pages.Settings.Generic.View as GenericView
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 
 
 view : AppState -> Model -> Html Msg
 view appState model =
-    GenericView.view viewProps appState model
+    Page.actionResultView appState
+        (viewForm appState model)
+        (ActionResult.combine model.roles model.genericModel.config)
 
 
-viewProps : GenericView.ViewProps AuthenticationConfigForm Msg
-viewProps =
+viewForm : AppState -> Model -> ( List Role, config ) -> Html Msg
+viewForm appState model ( roles, _ ) =
+    GenericView.view (viewProps roles) appState model.genericModel
+
+
+viewProps : List Role -> GenericView.ViewProps AuthenticationConfigForm Msg
+viewProps roles =
     { locTitle = gettext "Authentication"
     , locSave = gettext "Save"
-    , formView = compose2 (Html.map FormMsg) formView
+    , formView = compose2 (Html.map (GenericMsg << GenericMsgs.FormMsg)) (formView roles)
     , guideLink = WizardGuideLinks.settingsAuthentication
-    , wrapMsg = FormMsg
+    , wrapMsg = GenericMsg << GenericMsgs.FormMsg
     }
 
 
-formView : AppState -> Form FormError AuthenticationConfigForm -> Html Form.Msg
-formView appState form =
+formView : List Role -> AppState -> Form FormError AuthenticationConfigForm -> Html Form.Msg
+formView roles appState form =
     let
         internalAuthentication =
             let
@@ -65,9 +75,12 @@ formView appState form =
             , FormGroup.hours appState.locale form "userEmailLinkExpiration" (gettext "User Email Link Expiration" appState.locale)
             , FormExtra.mdAfter (gettext "Expiration time of user email links (e.g., password reset, email confirmation) in **hours**." appState.locale)
             ]
+
+        roleOptions =
+            List.map Role.toFormOption roles
     in
     div [ class "Authentication" ]
-        ([ FormGroup.select appState.locale (Role.options appState) form "defaultRole" (gettext "Default role" appState.locale)
+        ([ FormGroup.select appState.locale roleOptions form "defaultRoleUuid" (gettext "Default role" appState.locale)
          , FormExtra.mdAfter (gettext "Define the role that is assigned to new users." appState.locale)
          ]
             ++ internalAuthentication

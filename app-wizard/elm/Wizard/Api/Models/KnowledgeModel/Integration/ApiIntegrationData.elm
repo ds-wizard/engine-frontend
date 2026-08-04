@@ -3,14 +3,16 @@ module Wizard.Api.Models.KnowledgeModel.Integration.ApiIntegrationData exposing
     , decoder
     , equalContent
     , getTestVariableValue
+    , getUnknownConfigReferences
     , getUnknownVariables
     )
 
-import Common.Utils.JinjaUtils exposing (JinjaParseResult)
+import Common.Utils.JinjaUtils as JinjaUtils exposing (JinjaParseResult)
 import Dict exposing (Dict)
 import Flip exposing (flip)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
+import List.Extra as List
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
 import Wizard.Api.Models.KnowledgeModel.Integration.KeyValuePair as KeyValuePair exposing (KeyValuePair)
 import Wizard.Api.Models.TypeHintTestResponse as TypeHintTestResponse exposing (TypeHintTestResponse)
@@ -78,6 +80,43 @@ equalContent data1 data2 =
 getTestVariableValue : String -> ApiIntegrationData -> Maybe String
 getTestVariableValue variableName data =
     Dict.get variableName data.testVariables
+
+
+{-| Collect the variable and secret names referenced via `{{ variables.X }}` and
+`{{ secrets.X }}` anywhere in the request configuration (URL, header keys/values
+and body) that are not available — variables not declared in `variables` and
+secrets not present in the list of available secret names.
+-}
+getUnknownConfigReferences :
+    List String
+    -> ApiIntegrationData
+    ->
+        { variables : List String
+        , secrets : List String
+        }
+getUnknownConfigReferences availableSecrets data =
+    let
+        parsed =
+            List.map JinjaUtils.parseJinja (requestConfigStrings data)
+    in
+    { variables =
+        parsed
+            |> List.concatMap .variablesNested
+            |> List.unique
+            |> List.filter (not << flip List.member data.variables)
+    , secrets =
+        parsed
+            |> List.concatMap .secretsNested
+            |> List.unique
+            |> List.filter (not << flip List.member availableSecrets)
+    }
+
+
+requestConfigStrings : ApiIntegrationData -> List String
+requestConfigStrings data =
+    data.requestUrl
+        :: Maybe.withDefault "" data.requestBody
+        :: List.concatMap (\keyValuePair -> [ keyValuePair.key, keyValuePair.value ]) data.requestHeaders
 
 
 getUnknownVariables :

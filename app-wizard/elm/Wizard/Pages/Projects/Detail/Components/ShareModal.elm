@@ -42,7 +42,7 @@ import Time
 import Tuple.Extensions as Tuple
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)

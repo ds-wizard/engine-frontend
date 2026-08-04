@@ -1,6 +1,7 @@
 module Wizard.Pages.Locales.Detail.View exposing (view)
 
 import Common.Components.Badge as Badge
+import Common.Components.DetailPage as DetailPage
 import Common.Components.FontAwesome exposing (faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
@@ -16,7 +17,6 @@ import Wizard.Api.Models.Locale as Locale
 import Wizard.Api.Models.LocaleDetail as LocaleDetail exposing (LocaleDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Api.Models.VersionUuid as VersionUuid
-import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
@@ -36,8 +36,10 @@ viewLocale : AppState -> Model -> LocaleDetail -> Html Msg
 viewLocale appState model locale =
     DetailPage.container
         [ header appState model locale
-        , readme appState locale
-        , sidePanel appState locale
+        , DetailPage.content
+            { body = readme appState locale
+            , sidePanel = sidePanel appState locale
+            }
         , deleteVersionModal appState model locale
         ]
 
@@ -47,7 +49,7 @@ header appState model locale =
     let
         defaultBadge =
             if locale.defaultLocale then
-                Badge.info [] [ text (gettext "default" appState.locale) ]
+                Badge.info [ class "ms-2" ] [ text (gettext "default" appState.locale) ]
 
             else
                 Html.nothing
@@ -74,7 +76,7 @@ header appState model locale =
     DetailPage.header headerText [ dropdownActions ]
 
 
-readme : AppState -> LocaleDetail -> Html msg
+readme : AppState -> LocaleDetail -> List (Html msg)
 readme appState locale =
     let
         containsNewerVersions =
@@ -90,10 +92,9 @@ readme appState locale =
             else
                 newVersionInRegistryWarning appState locale
     in
-    DetailPage.content
-        [ warning
-        , Markdown.toHtml [ DetailPage.contentInnerClass ] locale.readme
-        ]
+    [ warning
+    , DetailPage.contentBodyNarrow [ Markdown.toHtml [] locale.readme ]
+    ]
 
 
 newVersionInRegistryWarning : AppState -> LocaleDetail -> Html msg
@@ -127,7 +128,7 @@ newVersionInRegistryWarning appState locale =
             Html.nothing
 
 
-sidePanel : AppState -> LocaleDetail -> Html msg
+sidePanel : AppState -> LocaleDetail -> List (Html msg)
 sidePanel appState locale =
     let
         sections =
@@ -137,8 +138,7 @@ sidePanel appState locale =
             , sidePanelRegistryLink appState locale
             ]
     in
-    DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
+    [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
 sidePanelLocaleInfo : AppState -> LocaleDetail -> Maybe ( String, String, Html msg )

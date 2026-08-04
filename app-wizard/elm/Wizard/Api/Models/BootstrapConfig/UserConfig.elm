@@ -1,11 +1,13 @@
 module Wizard.Api.Models.BootstrapConfig.UserConfig exposing
     ( UserConfig
     , decoder
+    , hasPerm
     , toUserSuggestion
     )
 
+import Common.Api.Models.RoleInfo as RoleInfo exposing (RoleInfo)
+import Common.Api.Models.RolePermission exposing (RolePermission)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
-import Common.Data.Role as Role exposing (Role)
 import Dict exposing (Dict)
 import Gravatar
 import Json.Decode as D exposing (Decoder)
@@ -19,8 +21,7 @@ type alias UserConfig =
     , email : String
     , firstName : String
     , lastName : String
-    , role : Role
-    , permissions : List String
+    , role : RoleInfo
     , imageUrl : Maybe String
     , userGroupUuids : List Uuid
     , lastSeenNewsId : Maybe String
@@ -35,8 +36,7 @@ decoder =
         |> D.required "email" D.string
         |> D.required "firstName" D.string
         |> D.required "lastName" D.string
-        |> D.required "role" Role.decoder
-        |> D.required "permissions" (D.list D.string)
+        |> D.required "role" RoleInfo.decoder
         |> D.required "imageUrl" (D.maybe D.string)
         |> D.required "userGroupUuids" (D.list Uuid.decoder)
         |> D.required "lastSeenNewsId" (D.maybe D.string)
@@ -51,3 +51,8 @@ toUserSuggestion userInfo =
     , gravatarHash = Gravatar.hashEmail userInfo.email
     , imageUrl = userInfo.imageUrl
     }
+
+
+hasPerm : RolePermission -> UserConfig -> Bool
+hasPerm perm user =
+    List.member perm user.role.permissions

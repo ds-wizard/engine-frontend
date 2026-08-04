@@ -30,6 +30,7 @@ import Common.Ports.Dom as Dom
 import Common.Utils.ByteUnits as ByteUnits
 import Common.Utils.CurlUtils as CurlUtils
 import Common.Utils.GuideLinks exposing (GuideLinks)
+import Common.Utils.JsonUtils as JsonUtils
 import Common.Utils.HttpStatus as HttpStatus
 import Common.Utils.Markdown as Markdown
 import Compose exposing (compose2, compose3)
@@ -43,7 +44,6 @@ import Html.Events exposing (onClick, onInput, onMouseLeave)
 import Html.Extra as Html
 import Html.Keyed
 import Html.Lazy as Lazy
-import Json.Print
 import Json.Value as JsonValue
 import List.Extra as List
 import Maybe.Extra as Maybe
@@ -1564,25 +1564,8 @@ viewQuestionEditor { appState, wrapMsg, eventMsg, model, editorContext } questio
                                 |> EditQuestionEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just questionUuid)
 
-                        listQuestionUuidOptgroup ( chapter, questions ) =
-                            let
-                                filteredQuestions =
-                                    questions
-                                        |> EditorContext.filterDeletedWith Question.getUuid editorContext
-                                        |> List.filter Question.isList
-                                        |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
-                            in
-                            if List.isEmpty filteredQuestions then
-                                Nothing
-
-                            else
-                                Just
-                                    ( chapter.title, filteredQuestions )
-
                         listQuestionUuidOptions =
-                            KnowledgeModel.getAllNestedQuestionsByChapter editorContext.kmEditor.knowledgeModel
-                                |> List.filter (not << flip EditorContext.isDeleted editorContext << .uuid << Tuple.first)
-                                |> List.filterMap listQuestionUuidOptgroup
+                            chapterQuestionOptions appState editorContext Question.isList
 
                         listQuestionUuidInput =
                             Input.selectWithGroups
@@ -2285,13 +2268,13 @@ viewIntegrationEditorApi config parentUuid integrationUuid integration data =
                                                     pre [ class "default-content" ] [ code [] [ text responseData.body ] ]
 
                                                 ( responseBody, responseFlash ) =
-                                                    if String.length responseData.body > 10000 then
+                                                    if String.length responseData.body > 20000 then
                                                         ( defaultContent
                                                         , Flash.info (gettext "The response body is too large to display with syntax highlight." appState.locale)
                                                         )
 
                                                     else
-                                                        case Json.Print.prettyString { indent = 4, columns = 100 } responseData.body of
+                                                        case JsonUtils.prettyString 4 responseData.body of
                                                             Ok jsonResult ->
                                                                 ( div []
                                                                     [ SyntaxHighlight.useTheme SyntaxHighlight.gitHub
@@ -2946,25 +2929,8 @@ viewReferenceEditor { appState, model, wrapMsg, eventMsg, editorContext } refere
                                 |> EditReferenceEvent
                                 |> eventMsg False Nothing Nothing parentUuid (Just referenceUuid)
 
-                        targetQuestionUuidOptgroup ( chapter, questions ) =
-                            let
-                                filteredQuestions =
-                                    questions
-                                        |> EditorContext.filterDeletedWith Question.getUuid editorContext
-                                        |> List.filter (\q -> Question.getUuid q /= parentUuid)
-                                        |> List.map (\q -> ( Question.getUuid q, Question.getTitle q ))
-                            in
-                            if List.isEmpty filteredQuestions then
-                                Nothing
-
-                            else
-                                Just
-                                    ( chapter.title, filteredQuestions )
-
                         targetQuestionUuidOptions =
-                            KnowledgeModel.getAllNestedQuestionsByChapter editorContext.kmEditor.knowledgeModel
-                                |> List.filter (not << flip EditorContext.isDeleted editorContext << .uuid << Tuple.first)
-                                |> List.filterMap targetQuestionUuidOptgroup
+                            chapterQuestionOptions appState editorContext (\q -> Question.getUuid q /= parentUuid)
 
                         targetQuestionUuidInput =
                             Input.selectWithGroups
@@ -3345,6 +3311,53 @@ viewQuestionLink appState editorContext question =
             []
             [ questionTitleNode ]
         ]
+
+
+{-| Build the option groups for a select where questions are grouped by the
+chapter they belong to. Chapters are numbered the same way they are when the
+questionnaire is rendered, e.g. "1. Administrative information".
+
+The numbers are assigned after chapters deleted in this editor are dropped, but
+before chapters without any matching question are dropped, so that a chapter
+keeps its number even when the one above it contributes no options.
+
+-}
+chapterQuestionOptions : AppState -> EditorContext -> (Question -> Bool) -> List ( String, List ( String, String ) )
+chapterQuestionOptions appState editorContext questionFilter =
+    let
+        questionTitle question =
+            if String.isEmpty (Question.getTitle question) then
+                gettext "Untitled question" appState.locale
+
+            else
+                Question.getTitle question
+
+        chapterOptgroup chapterIndex ( chapter, questions ) =
+            let
+                filteredQuestions =
+                    questions
+                        |> EditorContext.filterDeletedWith Question.getUuid editorContext
+                        |> List.filter questionFilter
+                        |> List.map (\q -> ( Question.getUuid q, questionTitle q ))
+            in
+            if List.isEmpty filteredQuestions then
+                Nothing
+
+            else
+                let
+                    chapterTitle =
+                        if String.isEmpty chapter.title then
+                            gettext "Untitled chapter" appState.locale
+
+                        else
+                            chapter.title
+                in
+                Just ( String.fromInt (chapterIndex + 1) ++ ". " ++ chapterTitle, filteredQuestions )
+    in
+    KnowledgeModel.getAllNestedQuestionsByChapter editorContext.kmEditor.knowledgeModel
+        |> List.filter (not << flip EditorContext.isDeleted editorContext << .uuid << Tuple.first)
+        |> List.indexedMap chapterOptgroup
+        |> Maybe.values
 
 
 

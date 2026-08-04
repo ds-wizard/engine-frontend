@@ -26,6 +26,7 @@ type alias ProjectSettingsForm =
     , isTemplate : Bool
     , documentTemplateUuid : Maybe String
     , formatUuid : Maybe String
+    , language : String
     }
 
 
@@ -44,6 +45,7 @@ init appState project =
             , ( "isTemplate", Field.bool project.isTemplate )
             , ( "documentTemplateUuid", Field.string (Maybe.unwrap "" (Uuid.toString << .uuid) project.documentTemplate) )
             , ( "formatUuid", Field.string (Maybe.unwrap "" Uuid.toString project.formatUuid) )
+            , ( "language", Field.string (Maybe.withDefault "" project.language) )
             ]
     in
     Form.initial initials (validation appState)
@@ -58,6 +60,7 @@ validation appState =
         |> V.andMap (V.field "isTemplate" V.bool)
         |> V.andMap (V.field "documentTemplateUuid" (V.maybe V.string))
         |> V.andMap (V.field "formatUuid" (V.maybe V.string))
+        |> V.andMap (V.field "language" (V.oneOf [ V.emptyString, V.string ]))
 
 
 encode : ProjectSettingsForm -> E.Value
@@ -78,4 +81,5 @@ encode form =
         , ( "isTemplate", E.bool form.isTemplate )
         , ( "documentTemplateUuid", E.maybe E.string form.documentTemplateUuid )
         , ( "formatUuid", E.maybe E.string formatUuid )
+        , ( "language", E.string form.language )
         ]

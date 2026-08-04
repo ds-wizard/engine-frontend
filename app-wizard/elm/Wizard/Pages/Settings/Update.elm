@@ -21,6 +21,9 @@ import Wizard.Pages.Settings.Plugins.Update
 import Wizard.Pages.Settings.PrivacyAndSupport.Update
 import Wizard.Pages.Settings.Projects.Update
 import Wizard.Pages.Settings.Registry.Update
+import Wizard.Pages.Settings.RoleCreate.Update
+import Wizard.Pages.Settings.RoleDetail.Update
+import Wizard.Pages.Settings.Roles.Update
 import Wizard.Pages.Settings.Routes exposing (Route(..))
 import Wizard.Pages.Settings.Submission.Update
 import Wizard.Pages.Settings.Usage.Update
@@ -38,7 +41,8 @@ fetchData route appState =
             genericFetch OrganizationMsg
 
         AuthenticationRoute ->
-            genericFetch AuthenticationMsg
+            Cmd.map AuthenticationMsg <|
+                Wizard.Pages.Settings.Authentication.Update.fetchData appState
 
         OpenIdRoute ->
             Cmd.map OpenIdMsg <|
@@ -51,6 +55,18 @@ fetchData route appState =
         OpenIdDetailRoute uuid ->
             Cmd.map OpenIdDetailMsg <|
                 Wizard.Pages.Settings.OpenIdDetail.Update.fetchData appState uuid
+
+        RolesRoute ->
+            Cmd.map RolesMsg <|
+                Wizard.Pages.Settings.Roles.Update.fetchData appState
+
+        RoleCreateRoute ->
+            Cmd.map RoleCreateMsg <|
+                Wizard.Pages.Settings.RoleCreate.Update.fetchData
+
+        RoleDetailRoute uuid ->
+            Cmd.map RoleDetailMsg <|
+                Wizard.Pages.Settings.RoleDetail.Update.fetchData appState uuid
 
         PrivacyAndSupportRoute ->
             genericFetch PrivacyAndSupportMsg
@@ -139,6 +155,42 @@ update wrapMsg msg appState model =
                     Wizard.Pages.Settings.OpenIdDetail.Update.update updateConfig appState openIdDetailMsg model.openIdDetailModel
             in
             ( { model | openIdDetailModel = openIdDetailModel }, cmd )
+
+        RolesMsg rolesMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << RolesMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( rolesModel, cmd ) =
+                    Wizard.Pages.Settings.Roles.Update.update updateConfig appState rolesMsg model.rolesModel
+            in
+            ( { model | rolesModel = rolesModel }, cmd )
+
+        RoleCreateMsg roleCreateMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << RoleCreateMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( roleCreateModel, cmd ) =
+                    Wizard.Pages.Settings.RoleCreate.Update.update updateConfig appState roleCreateMsg model.roleCreateModel
+            in
+            ( { model | roleCreateModel = roleCreateModel }, cmd )
+
+        RoleDetailMsg roleDetailMsg ->
+            let
+                updateConfig =
+                    { wrapMsg = wrapMsg << RoleDetailMsg
+                    , logoutMsg = Wizard.Msgs.logoutMsg
+                    }
+
+                ( roleDetailModel, cmd ) =
+                    Wizard.Pages.Settings.RoleDetail.Update.update updateConfig appState roleDetailMsg model.roleDetailModel
+            in
+            ( { model | roleDetailModel = roleDetailModel }, cmd )
 
         PrivacyAndSupportMsg privacyAndSupportMsg ->
             let

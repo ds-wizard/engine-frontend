@@ -15,6 +15,7 @@ import List.Extra as List
 import Time
 import Uuid exposing (Uuid)
 import Version exposing (Version)
+import Wizard.Api.Models.KnowledgeModelLocale as KnowledgeModelLocale exposing (KnowledgeModelLocale)
 import Wizard.Api.Models.KnowledgeModelPackage exposing (KnowledgeModelPackage)
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnoweldgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
@@ -31,6 +32,8 @@ type alias KnowledgeModelPackageDetail =
     , description : String
     , readme : String
     , license : String
+    , language : String
+    , locales : List KnowledgeModelLocale
     , metamodelVersion : Int
     , forkOfPackageId : Maybe String
     , previousPackageUuid : Maybe Uuid
@@ -55,6 +58,8 @@ decoder =
         |> D.required "description" D.string
         |> D.required "readme" D.string
         |> D.required "license" D.string
+        |> D.required "language" D.string
+        |> D.required "locales" (D.list KnowledgeModelLocale.decoder)
         |> D.required "metamodelVersion" D.int
         |> D.required "forkOfPackageId" (D.maybe D.string)
         |> D.required "previousPackageUuid" (D.maybe Uuid.decoder)
@@ -83,6 +88,7 @@ toPackage kmPackage =
     , kmId = kmPackage.kmId
     , version = kmPackage.version
     , description = kmPackage.description
+    , language = kmPackage.language
     , organization = kmPackage.organization
     , remoteLatestVersion = kmPackage.remoteLatestVersion
     , phase = kmPackage.phase

@@ -1,10 +1,16 @@
-module Wizard.Pages.Dashboard.Widgets.CreateKnowledgeModelWidget exposing (view)
+module Wizard.Pages.Dashboard.Widgets.CreateKnowledgeModelWidget exposing (enabled, view)
 
+import Common.Data.WizardRolePermission as RolePermission
 import Gettext exposing (gettext)
 import Html exposing (Html)
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
+
+
+enabled : AppState -> Bool
+enabled appState =
+    AppState.userHasPerm RolePermission.knowledgeModelEditorsUse appState
 
 
 view : AppState -> Html msg

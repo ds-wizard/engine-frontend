@@ -14,16 +14,17 @@ import Wizard.Pages.Users.Routes exposing (Route(..))
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
+        CreateRoute ->
+            Cmd.map CreateMsg <|
+                Wizard.Pages.Users.Create.Update.fetchData appState
+
         EditRoute uuidOrCurrent subroute ->
             Cmd.map EditMsg <|
                 Wizard.Pages.Users.Edit.Update.fetchData appState uuidOrCurrent subroute
 
         IndexRoute _ _ ->
             Cmd.map IndexMsg <|
-                Wizard.Pages.Users.Index.Update.fetchData
-
-        _ ->
-            Cmd.none
+                Wizard.Pages.Users.Index.Update.fetchData appState
 
 
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Seed, Model, Cmd Wizard.Msgs.Msg )

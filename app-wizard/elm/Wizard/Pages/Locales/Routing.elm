@@ -9,7 +9,7 @@ import Url.Parser exposing ((</>), (<?>), Parser, map, s)
 import Url.Parser.Extensions exposing (uuid)
 import Url.Parser.Query as Query
 import Uuid exposing (Uuid)
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Locales.Routes exposing (Route(..))
 import Wizard.Utils.Feature as Feature

@@ -7,7 +7,7 @@ import Compose exposing (compose2)
 import Form exposing (Form)
 import Gettext exposing (gettext)
 import Html exposing (Html, div)
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Settings.Common.Forms.OrganizationConfigForm exposing (OrganizationConfigForm)
 import Wizard.Pages.Settings.Generic.Msgs exposing (Msg(..))

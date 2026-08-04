@@ -2,6 +2,7 @@ module Common.Utils.Form exposing
     ( containsChanges
     , errorToString
     , isValid
+    , moveListItem
     , reset
     , setFormErrors
     )
@@ -12,6 +13,7 @@ import Common.Utils.Form.FormError exposing (FormError(..))
 import Dict
 import Form exposing (Form)
 import Form.Error exposing (ErrorValue(..))
+import Form.Field as Field
 import Form.Validate as V exposing (Validation, customError)
 import Gettext exposing (gettext)
 import Maybe.Extra as Maybe
@@ -105,3 +107,57 @@ isValid =
 reset : (a -> Form e a) -> Form e a -> Form e a
 reset initForm form =
     Maybe.unwrap form initForm (Form.getOutput form)
+
+
+{-| Move an item in a form list field by swapping the values of all its fields
+with the item at the target index. The `enbala/elm-form` library has no move
+message, so the reorder is done by swapping each field value (which correctly
+marks the form as changed, unlike `Form.Reset`). Each field is swapped as a
+boolean when it holds a boolean value, otherwise as a string.
+-}
+moveListItem : Validation FormError a -> String -> List String -> Int -> Int -> Form FormError a -> Form FormError a
+moveListItem validation listName fields fromIndex toIndex form =
+    List.foldl (swapListItemField validation listName fromIndex toIndex form) form fields
+
+
+swapListItemField : Validation FormError a -> String -> Int -> Int -> Form FormError a -> String -> Form FormError a -> Form FormError a
+swapListItemField validation listName fromIndex toIndex originalForm fieldName accForm =
+    let
+        pathAt index =
+            listName ++ "." ++ String.fromInt index ++ "." ++ fieldName
+
+        pathFrom =
+            pathAt fromIndex
+
+        pathTo =
+            pathAt toIndex
+
+        isBool =
+            (Form.getFieldAsBool pathFrom originalForm).value
+                /= Nothing
+                || (Form.getFieldAsBool pathTo originalForm).value
+                /= Nothing
+    in
+    if isBool then
+        let
+            fromValue =
+                Maybe.withDefault False (Form.getFieldAsBool pathFrom originalForm).value
+
+            toValue =
+                Maybe.withDefault False (Form.getFieldAsBool pathTo originalForm).value
+        in
+        accForm
+            |> Form.update validation (Form.Input pathFrom Form.Checkbox (Field.Bool toValue))
+            |> Form.update validation (Form.Input pathTo Form.Checkbox (Field.Bool fromValue))
+
+    else
+        let
+            fromValue =
+                Maybe.withDefault "" (Form.getFieldAsString pathFrom originalForm).value
+
+            toValue =
+                Maybe.withDefault "" (Form.getFieldAsString pathTo originalForm).value
+        in
+        accForm
+            |> Form.update validation (Form.Input pathFrom Form.Text (Field.String toValue))
+            |> Form.update validation (Form.Input pathTo Form.Text (Field.String fromValue))

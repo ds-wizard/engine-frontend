@@ -80,7 +80,6 @@ import List.Extra as List
 import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import Regex
-import Roman
 import Set exposing (Set)
 import Shortcut
 import SplitPane
@@ -3241,7 +3240,7 @@ viewQuestionnaireContentChapter appState cfg ctx model chapter =
         chapterNumber =
             chapters
                 |> List.findIndex (.uuid >> (==) chapter.uuid)
-                |> Maybe.unwrap "I" ((+) 1 >> Roman.toRomanNumber)
+                |> Maybe.unwrap "1" ((+) 1 >> String.fromInt)
 
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid model.questionnaire.knowledgeModel
@@ -3950,11 +3949,11 @@ viewQuestionValue appState cfg model path question =
                     Flash.warning error
 
         validationWarnings =
-            case ( Question.getValidations question, mbAnswer ) of
-                ( Just validations, Just _ ) ->
-                    List.map validationWarning validations
+            case mbAnswer of
+                Just _ ->
+                    List.map validationWarning (Question.getAppliedValidations question)
 
-                _ ->
+                Nothing ->
                     []
 
         clearReplyButton =
@@ -4115,7 +4114,7 @@ viewQuestionItemSelect appState cfg model path question =
 
                         itemOptions =
                             model.questionnaire.replies
-                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key)
+                                |> Dict.filter (\key _ -> String.endsWith itemQuestionUuid key && ProjectQuestionnaire.isPathVisible model.questionnaire key)
                                 |> Dict.toList
                                 |> List.concatMap itemsToOptions
 

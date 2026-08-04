@@ -7,7 +7,7 @@ import Html exposing (Html, a, div, span, text)
 import Html.Attributes exposing (class, href, target)
 import Html.Extra as Html
 import String.Format as String
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.Tenant exposing (Tenant)
 import Wizard.Api.Models.TenantState as TenantState
 import Wizard.Components.Html exposing (linkTo)

@@ -11,12 +11,12 @@ import Dict exposing (Dict)
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, i, li, span, strong, text, ul)
 import Html.Attributes exposing (class, classList)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onClick, stopPropagationOn)
 import Html.Extra as Html
 import Html.Lazy as Lazy
+import Json.Decode as D
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Roman
 import Set exposing (Set)
 import String.Format as String
 import Uuid exposing (Uuid)
@@ -127,8 +127,24 @@ viewChapter props order chapter =
             KnowledgeModel.getChapterQuestions chapter.uuid props.questionnaire.knowledgeModel
                 |> List.filter props.isQuestionDesirable
 
+        isActive =
+            props.activeChapterUuid == chapter.uuid
+
+        hasQuestions =
+            not (List.isEmpty chapterQuestions)
+
+        isChapterOpen =
+            isOpen [ chapter.uuid ] props.collapsedPaths
+
+        chapterCaret =
+            if isActive && hasQuestions then
+                viewChapterCaret props.collapsedPaths chapter.uuid isChapterOpen
+
+            else
+                Html.nothing
+
         questionList =
-            if List.isEmpty chapterQuestions || chapter.uuid /= props.activeChapterUuid then
+            if not hasQuestions || not isActive || not isChapterOpen then
                 Html.nothing
 
             else
@@ -147,15 +163,38 @@ viewChapter props order chapter =
         [ a
             [ class "nav-link"
             , classList
-                [ ( "active", props.activeChapterUuid == chapter.uuid )
+                [ ( "active", isActive )
                 ]
             , onClick (OpenChapter chapter.uuid)
             ]
-            [ span [ class "chapter-number" ] [ text (Roman.toRomanNumber (order + 1) ++ ". ") ]
-            , span [ class "chapter-name" ] [ text chapter.title ]
+            [ chapterCaret
+            , span [ class "chapter-number" ] [ text (String.fromInt (order + 1) ++ ". ") ]
+            , span [ class "chapter-name" ] [ text (localize chapter.title props.questionnaire) ]
             , viewChapterIndication props.unansweredQuestions chapter
             ]
         , questionList
+        ]
+
+
+viewChapterCaret : Set String -> String -> Bool -> Html Msg
+viewChapterCaret collapsedPaths chapterUuid isChapterOpen =
+    let
+        newCollapsedPaths =
+            if isChapterOpen then
+                Set.insert chapterUuid collapsedPaths
+
+            else
+                Set.remove chapterUuid collapsedPaths
+    in
+    span
+        [ class "chapter-caret"
+        , stopPropagationOn "click" (D.succeed ( UpdateCollapsedPaths newCollapsedPaths, True ))
+        ]
+        [ if isChapterOpen then
+            faKmEditorTreeOpened
+
+          else
+            faKmEditorTreeClosed
         ]
 
 
@@ -235,7 +274,7 @@ viewQuestion props path question =
         [ caret
         , a [ onClick (ScrollToPath (pathToString currentPath)) ]
             [ faKmQuestion
-            , text (Question.getTitle question)
+            , text (localize (Question.getTitle question) props.questionnaire)
             ]
         , Maybe.withDefault Html.nothing nestedList
         ]
@@ -370,3 +409,8 @@ isQuestionDesirable props =
 isOpen : List String -> Set String -> Bool
 isOpen path collapsedItems =
     not (Set.member (pathToString path) collapsedItems)
+
+
+localize : String -> ProjectQuestionnaire -> String
+localize key questionnaire =
+    gettext key (Maybe.withDefault Gettext.defaultLocale questionnaire.locale)

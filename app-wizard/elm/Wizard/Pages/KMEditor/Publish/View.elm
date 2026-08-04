@@ -18,6 +18,7 @@ import Wizard.Api.Models.KnowledgeModelEditorDetail exposing (KnowledgeModelEdit
 import Wizard.Components.FormActions as FormActions
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.KMEditor.Common.KnowledgeModelEditorPublishForm exposing (KnowledgeModelEditorPublishForm)
+import Wizard.Pages.KMEditor.Common.PublishLocaleSelection as PublishLocaleSelection
 import Wizard.Pages.KMEditor.Publish.Models exposing (Model)
 import Wizard.Pages.KMEditor.Publish.Msgs exposing (Msg(..))
 import Wizard.Utils.HtmlAttributesUtils exposing (wideDetailClass)
@@ -36,6 +37,7 @@ contentView appState model kmEditor =
         , div []
             [ FormResult.view model.publishingKnowledgeModelEditor
             , formView appState model.form kmEditor
+            , Html.map PublishLocaleSelectionMsg (PublishLocaleSelection.view appState model.localeSelection)
             , FormActions.viewCustomButton appState
                 Cancel
                 (ActionButton.buttonWithAttrs

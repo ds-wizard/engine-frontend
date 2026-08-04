@@ -7,7 +7,7 @@ import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
 import Maybe.Extra as Maybe
 import Uuid
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.Components.ActiveSessions as ActiveSessions

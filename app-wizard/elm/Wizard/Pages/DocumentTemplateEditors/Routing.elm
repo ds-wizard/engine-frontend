@@ -83,6 +83,14 @@ toUrl route =
                     base ++ [ "settings" ]
 
 
-isAllowed : AppState -> Bool
-isAllowed appState =
-    Feature.documentTemplatesView appState
+isAllowed : AppState -> Route -> Bool
+isAllowed appState route =
+    case route of
+        CreateRoute _ _ ->
+            Feature.documentTemplateEditorsCreate appState
+
+        IndexRoute _ ->
+            Feature.documentTemplateEditorsView appState
+
+        EditorRoute _ _ ->
+            Feature.documentTemplateEditorsEdit appState

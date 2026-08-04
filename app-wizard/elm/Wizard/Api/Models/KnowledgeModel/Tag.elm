@@ -1,5 +1,6 @@
-module Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag, decoder, equalContent)
+module Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag, decoder, equalContent, localize)
 
+import Gettext exposing (Locale, gettext)
 import Json.Decode as D exposing (Decoder)
 import Json.Decode.Pipeline as D
 import Wizard.Api.Models.KnowledgeModel.Annotation as Annotation exposing (Annotation)
@@ -28,3 +29,11 @@ equalContent : Tag -> Tag -> Bool
 equalContent tag1 tag2 =
     (tag1.name == tag2.name)
         && (tag1.description == tag2.description)
+
+
+localize : Locale -> Tag -> Tag
+localize locale tag =
+    { tag
+        | name = gettext tag.name locale
+        , description = Maybe.map (\description -> gettext description locale) tag.description
+    }

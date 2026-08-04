@@ -1,6 +1,7 @@
 module Wizard.Pages.DocumentTemplates.Detail.View exposing (view)
 
 import Common.Components.Badge as Badge
+import Common.Components.DetailPage as DetailPage
 import Common.Components.FontAwesome exposing (fa, faDetailShowAll, faInfo, faKmDetailRegistryLink, faKmImportFromRegistry, faWarning)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
@@ -23,7 +24,6 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTempl
 import Wizard.Api.Models.DocumentTemplateDetail as DocumentTemplateDetail exposing (DocumentTemplateDetail)
 import Wizard.Api.Models.OrganizationInfo exposing (OrganizationInfo)
 import Wizard.Api.Models.VersionUuid as VersionUuid
-import Wizard.Components.DetailPage as DetailPage
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.ItemIcon as ItemIcon
 import Wizard.Data.AppState exposing (AppState)
@@ -44,8 +44,10 @@ viewDocumentTemplate : AppState -> Model -> DocumentTemplateDetail -> Html Msg
 viewDocumentTemplate appState model template =
     DetailPage.container
         [ header appState model template
-        , readme appState template
-        , sidePanel appState model template
+        , DetailPage.content
+            { body = readme appState template
+            , sidePanel = sidePanel appState model template
+            }
         , deleteVersionModal appState model template
         ]
 
@@ -82,7 +84,7 @@ header appState model template =
     DetailPage.header (span [] [ text template.name, nonEditableBadge, deprecatedBadge ]) [ dropdownActions ]
 
 
-readme : AppState -> DocumentTemplateDetail -> Html msg
+readme : AppState -> DocumentTemplateDetail -> List (Html msg)
 readme appState template =
     let
         containsNewerVersions =
@@ -108,12 +110,11 @@ readme appState template =
             else
                 newVersionInRegistryWarning appState template
     in
-    DetailPage.content
-        [ nonEditableInfo
-        , warning
-        , unsupportedMetamodelVersionWarning appState template
-        , Markdown.toHtml [ DetailPage.contentInnerClass ] template.readme
-        ]
+    [ nonEditableInfo
+    , warning
+    , unsupportedMetamodelVersionWarning appState template
+    , DetailPage.contentBodyNarrow [ Markdown.toHtml [] template.readme ]
+    ]
 
 
 newVersionInRegistryWarning : AppState -> DocumentTemplateDetail -> Html msg
@@ -206,7 +207,7 @@ unsupportedMetamodelVersionWarning appState template =
         Html.nothing
 
 
-sidePanel : AppState -> Model -> DocumentTemplateDetail -> Html Msg
+sidePanel : AppState -> Model -> DocumentTemplateDetail -> List (Html Msg)
 sidePanel appState model template =
     let
         sections =
@@ -218,8 +219,7 @@ sidePanel appState model template =
             , sidePanelUsableWith appState model template
             ]
     in
-    DetailPage.sidePanel
-        [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
+    [ DetailPage.sidePanelList 12 12 <| List.filterMap identity sections ]
 
 
 sidePanelKmInfo : AppState -> DocumentTemplateDetail -> Maybe ( String, String, Html msg )

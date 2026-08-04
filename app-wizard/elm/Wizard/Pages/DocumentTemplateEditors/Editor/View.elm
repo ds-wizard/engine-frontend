@@ -23,6 +23,7 @@ import Wizard.Pages.DocumentTemplateEditors.Editor.DTEditorRoute as DTEditorRout
 import Wizard.Pages.DocumentTemplateEditors.Editor.Models exposing (CurrentEditor(..), Model, containsChanges)
 import Wizard.Pages.DocumentTemplateEditors.Editor.Msgs exposing (Msg(..))
 import Wizard.Routes as Routes
+import Wizard.Utils.Feature as Feature
 
 
 view : AppState -> DTEditorRoute -> Model -> Html Msg
@@ -114,7 +115,7 @@ viewEditorNavigation appState route model =
                 , discardButton
                 ]
 
-            else
+            else if Feature.documentTemplateEditorsPublish appState then
                 [ button
                     [ class "btn btn-primary with-icon"
                     , onClick (PublishModalMsg PublishModal.openMsg)
@@ -124,6 +125,9 @@ viewEditorNavigation appState route model =
                     , text (gettext "Publish" appState.locale)
                     ]
                 ]
+
+            else
+                []
 
         templateName =
             ActionResult.unwrap "" .name model.documentTemplate

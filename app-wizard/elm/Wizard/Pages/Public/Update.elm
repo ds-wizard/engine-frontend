@@ -17,12 +17,12 @@ import Wizard.Pages.Public.SignupConfirmation.Update
 fetchData : Route -> AppState -> Cmd Msg
 fetchData route appState =
     case route of
-        OpenIdCallback id error code sessionState ->
-            Cmd.map AuthMsg <|
-                Wizard.Pages.Public.OpenIdCallback.Update.fetchData id error code sessionState appState
+        OpenIdCallback _ _ _ _ _ ->
+            Cmd.map OpenIdCallbackMsg Wizard.Pages.Public.OpenIdCallback.Update.fetchData
 
-        LoginRoute mbOriginalUrl ->
-            Wizard.Pages.Public.Login.Update.fetchData appState mbOriginalUrl
+        LoginRoute _ ->
+            Cmd.map LoginMsg <|
+                Wizard.Pages.Public.Login.Update.fetchData appState
 
         LogoutSuccessful ->
             Wizard.Pages.Public.LogoutSuccessful.Update.fetchData appState
@@ -38,12 +38,12 @@ fetchData route appState =
 update : Msg -> (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update msg wrapMsg appState model =
     case msg of
-        AuthMsg authMsg ->
+        OpenIdCallbackMsg authMsg ->
             let
                 ( authModel, cmd ) =
-                    Wizard.Pages.Public.OpenIdCallback.Update.update authMsg (wrapMsg << AuthMsg) appState model.authModel
+                    Wizard.Pages.Public.OpenIdCallback.Update.update authMsg (wrapMsg << OpenIdCallbackMsg) appState model.openIdCallbackModel
             in
-            ( { model | authModel = authModel }, cmd )
+            ( { model | openIdCallbackModel = authModel }, cmd )
 
         ForgottenPasswordMsg fpMsg ->
             let

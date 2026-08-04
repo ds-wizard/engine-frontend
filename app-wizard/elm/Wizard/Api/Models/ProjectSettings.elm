@@ -10,6 +10,7 @@ import Wizard.Api.Models.DocumentTemplate.DocumentTemplatePhase as DocumentTempl
 import Wizard.Api.Models.DocumentTemplate.DocumentTemplateState as DocumentTemplateState exposing (DocumentTemplateState)
 import Wizard.Api.Models.DocumentTemplateSuggestion as DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.KnowledgeModel.Tag as Tag exposing (Tag)
+import Wizard.Api.Models.KnowledgeModelLocale as KnowledgeModelLocale exposing (KnowledgeModelLocale)
 import Wizard.Api.Models.KnowledgeModelPackage as KnowledgeModelPackage exposing (KnowledgeModelPackage)
 
 
@@ -26,6 +27,8 @@ type alias ProjectSettings =
     , formatUuid : Maybe Uuid
     , isTemplate : Bool
     , knowledgeModelTags : List Tag
+    , language : Maybe String
+    , availableLocales : List KnowledgeModelLocale
     }
 
 
@@ -44,3 +47,5 @@ decoder =
         |> D.required "formatUuid" (D.maybe Uuid.decoder)
         |> D.required "isTemplate" D.bool
         |> D.required "knowledgeModelTags" (D.list Tag.decoder)
+        |> D.required "language" (D.maybe D.string)
+        |> D.required "availableLocales" (D.list KnowledgeModelLocale.decoder)

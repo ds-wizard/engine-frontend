@@ -15,6 +15,9 @@ import Wizard.Pages.Settings.Plugins.Models
 import Wizard.Pages.Settings.PrivacyAndSupport.Models
 import Wizard.Pages.Settings.Projects.Models
 import Wizard.Pages.Settings.Registry.Models
+import Wizard.Pages.Settings.RoleCreate.Models
+import Wizard.Pages.Settings.RoleDetail.Models
+import Wizard.Pages.Settings.Roles.Models
 import Wizard.Pages.Settings.Routes exposing (Route(..))
 import Wizard.Pages.Settings.Submission.Models
 import Wizard.Pages.Settings.Usage.Models
@@ -26,6 +29,9 @@ type alias Model =
     , openIdModel : Wizard.Pages.Settings.OpenId.Models.Model
     , openIdCreateModel : Wizard.Pages.Settings.OpenIdCreate.Models.Model
     , openIdDetailModel : Wizard.Pages.Settings.OpenIdDetail.Models.Model
+    , rolesModel : Wizard.Pages.Settings.Roles.Models.Model
+    , roleCreateModel : Wizard.Pages.Settings.RoleCreate.Models.Model
+    , roleDetailModel : Wizard.Pages.Settings.RoleDetail.Models.Model
     , privacyAndSupportModel : Wizard.Pages.Settings.PrivacyAndSupport.Models.Model
     , featuresModel : Wizard.Pages.Settings.Features.Models.Model
     , pluginsModel : Wizard.Pages.Settings.Plugins.Models.Model
@@ -46,6 +52,9 @@ initialModel appState =
     , openIdModel = Wizard.Pages.Settings.OpenId.Models.initialModel
     , openIdCreateModel = Wizard.Pages.Settings.OpenIdCreate.Models.initialModel appState
     , openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel appState Uuid.nil
+    , rolesModel = Wizard.Pages.Settings.Roles.Models.initialModel
+    , roleCreateModel = Wizard.Pages.Settings.RoleCreate.Models.initialModel
+    , roleDetailModel = Wizard.Pages.Settings.RoleDetail.Models.initialModel Uuid.nil
     , privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel
     , featuresModel = Wizard.Pages.Settings.Features.Models.initialModel
     , pluginsModel = Wizard.Pages.Settings.Plugins.Models.initialModel appState
@@ -76,6 +85,15 @@ initLocalModel appState route model =
 
         OpenIdDetailRoute uuid ->
             { model | openIdDetailModel = Wizard.Pages.Settings.OpenIdDetail.Models.initialModel appState uuid }
+
+        RolesRoute ->
+            { model | rolesModel = Wizard.Pages.Settings.Roles.Models.initialModel }
+
+        RoleCreateRoute ->
+            { model | roleCreateModel = Wizard.Pages.Settings.RoleCreate.Models.initialModel }
+
+        RoleDetailRoute uuid ->
+            { model | roleDetailModel = Wizard.Pages.Settings.RoleDetail.Models.initialModel uuid }
 
         PrivacyAndSupportRoute ->
             { model | privacyAndSupportModel = Wizard.Pages.Settings.PrivacyAndSupport.Models.initialModel }

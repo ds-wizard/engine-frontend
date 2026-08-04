@@ -75,6 +75,7 @@ module Common.Components.FontAwesome exposing
     , faListingFilterMultiSelected
     , faListingFilterSingleNotSelected
     , faListingFilterSingleSelected
+    , faLocale
     , faLocaleCreate
     , faLocaleDefault
     , faLocaleImport
@@ -577,6 +578,11 @@ faListingFilterSingleNotSelected =
 faListingFilterSingleSelected : Html msg
 faListingFilterSingleSelected =
     fas "fa-check-circle"
+
+
+faLocale : Html msg
+faLocale =
+    fas "fa-language"
 
 
 faLocaleCreate : Html msg

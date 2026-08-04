@@ -3,6 +3,7 @@ module Wizard.Components.Questionnaire2.QuestionnaireVirtualization exposing
     , ChapterNodeData
     , ContentNode(..)
     , IntegrationQuestionNodeData
+    , ItemEmptyNodeData
     , ItemFooterNodeData
     , ItemHeaderNodeData
     , ItemSelectQuestionNodedata
@@ -29,23 +30,26 @@ import CharIdentifier
 import Dict
 import Dict.Extra as Dict
 import Flip exposing (flip)
+import Gettext exposing (gettext)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Roman
 import Set exposing (Set)
+import String.Format as String
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
-import Wizard.Api.Models.KnowledgeModel.Answer exposing (Answer)
-import Wizard.Api.Models.KnowledgeModel.Chapter exposing (Chapter)
-import Wizard.Api.Models.KnowledgeModel.Choice exposing (Choice)
+import Wizard.Api.Models.KnowledgeModel.Answer as Answer exposing (Answer)
+import Wizard.Api.Models.KnowledgeModel.Chapter as Chapter exposing (Chapter)
+import Wizard.Api.Models.KnowledgeModel.Choice as Choice exposing (Choice)
 import Wizard.Api.Models.KnowledgeModel.Expert exposing (Expert)
 import Wizard.Api.Models.KnowledgeModel.Integration exposing (Integration)
-import Wizard.Api.Models.KnowledgeModel.Metric exposing (Metric)
-import Wizard.Api.Models.KnowledgeModel.Phase exposing (Phase)
+import Wizard.Api.Models.KnowledgeModel.Metric as Metric exposing (Metric)
+import Wizard.Api.Models.KnowledgeModel.Phase as Phase exposing (Phase)
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
 import Wizard.Api.Models.KnowledgeModel.Question.QuestionValidation exposing (QuestionValidation)
-import Wizard.Api.Models.KnowledgeModel.Reference exposing (Reference(..))
-import Wizard.Api.Models.KnowledgeModel.Tag exposing (Tag)
+import Wizard.Api.Models.KnowledgeModel.Reference as Reference exposing (Reference(..))
+import Wizard.Api.Models.KnowledgeModel.ResourceCollection as ResourceCollection
+import Wizard.Api.Models.KnowledgeModel.ResourcePage as ResourcePage
+import Wizard.Api.Models.KnowledgeModel.Tag as Tag exposing (Tag)
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetail.Reply.ReplyValue as ReplyValue
 import Wizard.Api.Models.ProjectQuestionnaire exposing (ProjectQuestionnaire)
@@ -62,6 +66,7 @@ type ContentNode
     | ChapterLinksNode ChapterLinksNodeData
     | QuestionNode QuestionNodeData
     | ItemHeaderNode ItemHeaderNodeData
+    | ItemEmptyNode ItemEmptyNodeData
     | ItemFooterNode ItemFooterNodeData
     | ItemsEndNode ItemsEndNodeData
 
@@ -179,6 +184,13 @@ type alias ItemFooterNodeData =
     }
 
 
+type alias ItemEmptyNodeData =
+    { itemPath : String
+    , nestingType : NestingType
+    , hiddenByViewOptions : Bool
+    }
+
+
 type alias ItemsEndNodeData =
     { questionPath : String
     , nestingType : NestingType
@@ -197,6 +209,8 @@ type alias VirtualizeContext =
     , collapsedPaths : Set String
     , resourcePageToUrl : String -> Wizard.Routes.Route
     , viewSettings : QuestionnaireViewSettings
+    , locale : Gettext.Locale
+    , knowledgeModelParentMap : KnowledgeModel.ParentMap
     }
 
 
@@ -241,11 +255,11 @@ virtualizeChapter ctx =
                         |> Maybe.withDefault 0
 
                 chapterNumber =
-                    Roman.toRomanNumber (chapterIndex + 1)
+                    String.fromInt (chapterIndex + 1)
 
                 chapterNode =
                     ChapterNode
-                        { chapter = chapter
+                        { chapter = Chapter.localize ctx.locale chapter
                         , chapterNumber = chapterNumber
                         }
 
@@ -273,8 +287,8 @@ virtualizeChapter ctx =
                 chapterLinksNode =
                     ChapterLinksNode
                         { chapterUuid = chapter.uuid
-                        , previousChapter = previousChapter
-                        , nextChapter = nextChapter
+                        , previousChapter = Maybe.map (Chapter.localize ctx.locale) previousChapter
+                        , nextChapter = Maybe.map (Chapter.localize ctx.locale) nextChapter
                         }
             in
             chapterNode :: emptyChapterNodes ++ questionNodes ++ [ chapterLinksNode ]
@@ -305,6 +319,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                     tags =
                         Question.getTagUuids question
                             |> List.filterMap (flip KnowledgeModel.getTag ctx.questionnaire.knowledgeModel)
+                            |> List.map (Tag.localize ctx.locale)
                             |> List.sortBy .name
 
                     questionNode specific =
@@ -312,7 +327,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                             { humanIdentifier = questionHumanIdentifier
                             , isDesirable = isDesirable
                             , pluginOpen = Nothing
-                            , question = question
+                            , question = Question.localize ctx.locale question
                             , questionExtraData = createQuestionExtraData ctx question
                             , questionPath = questionPath
                             , nestingType = createNestingType ContentNesting
@@ -326,7 +341,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 let
                                     answers =
                                         KnowledgeModel.getQuestionAnswers questionUuid ctx.questionnaire.knowledgeModel
-                                            |> List.map cleanFollowUpUuids
+                                            |> List.map (cleanFollowUpUuids >> Answer.localize ctx.locale)
 
                                     followUpExists followUpUuid =
                                         Dict.get followUpUuid ctx.questionnaire.knowledgeModel.entities.questions
@@ -385,7 +400,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                     { answers = answers
                                     , followUpsCount = followUpsCount
                                     , followUpsCollapsed = isPathCollapsed selectedAnswerPath ctx
-                                    , metrics = KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel
+                                    , metrics = List.map (Metric.localize ctx.locale) (KnowledgeModel.getMetrics ctx.questionnaire.knowledgeModel)
                                     }
                                 , followUpQuestions
                                 )
@@ -414,6 +429,7 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 let
                                     choices =
                                         KnowledgeModel.getQuestionChoices questionUuid ctx.questionnaire.knowledgeModel
+                                            |> List.map (Choice.localize ctx.locale)
                                 in
                                 ( MultiChoiceQuestionSpecificNodeData { choices = choices }
                                 , []
@@ -422,12 +438,14 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                             Question.ItemSelectQuestion _ itemSelectQuestionData ->
                                 let
                                     itemTemplateQuestions =
-                                        case itemSelectQuestionData.listQuestionUuid of
+                                        (case itemSelectQuestionData.listQuestionUuid of
                                             Just listQuestionUuid ->
                                                 KnowledgeModel.getQuestionItemTemplateQuestions listQuestionUuid ctx.questionnaire.knowledgeModel
 
                                             Nothing ->
                                                 []
+                                        )
+                                            |> List.map (Question.localize ctx.locale)
                                 in
                                 ( ItemSelectQuestionSpecificNodeData { itemTemplateQuestions = itemTemplateQuestions }
                                 , []
@@ -442,8 +460,8 @@ virtualizeQuestion ctx createNestingType path humanIdentifier order questionUuid
                                 , []
                                 )
 
-                            Question.ValueQuestion _ valueQuestionData ->
-                                ( ValueQuestionSpecificNodeData { validations = valueQuestionData.validations }
+                            Question.ValueQuestion _ _ ->
+                                ( ValueQuestionSpecificNodeData { validations = Question.getAppliedValidations question }
                                 , []
                                 )
 
@@ -476,12 +494,15 @@ createQuestionExtraData ctx question =
                             ( rpr, ur, cr ++ [ data ] )
                 )
                 ( [], [], [] )
-                (KnowledgeModel.getQuestionReferences (Question.getUuid question) ctx.questionnaire.knowledgeModel)
+                (KnowledgeModel.getQuestionReferences (Question.getUuid question) ctx.questionnaire.knowledgeModel
+                    |> List.map (Reference.localize ctx.locale)
+                )
 
         toResourceCollection ( resourceCollectionUuid, collectionResourcePageReferences ) =
             let
                 resourceCollection =
                     KnowledgeModel.getResourceCollection resourceCollectionUuid ctx.questionnaire.knowledgeModel
+                        |> Maybe.map (ResourceCollection.localize ctx.locale)
             in
             case resourceCollection of
                 Just rc ->
@@ -494,6 +515,7 @@ createQuestionExtraData ctx question =
                                         mbResourcePage =
                                             resourcePageReference.resourcePageUuid
                                                 |> Maybe.andThen (flip KnowledgeModel.getResourcePage ctx.questionnaire.knowledgeModel)
+                                                |> Maybe.map (ResourcePage.localize ctx.locale)
                                     in
                                     case mbResourcePage of
                                         Just resourcePage ->
@@ -531,14 +553,16 @@ createQuestionExtraData ctx question =
                 urlReferencesData
 
         crossReferences =
-            List.map
+            List.filterMap
                 (\data ->
-                    { targetQuestionUuid = data.targetUuid
-                    , targetQuestionTitle =
-                        KnowledgeModel.getQuestion data.targetUuid ctx.questionnaire.knowledgeModel
-                            |> Maybe.unwrap "" Question.getTitle
-                    , description = data.description
-                    }
+                    KnowledgeModel.getQuestion data.targetUuid ctx.questionnaire.knowledgeModel
+                        |> Maybe.map
+                            (\targetQuestion ->
+                                { targetQuestionUuid = data.targetUuid
+                                , targetQuestionTitle = crossReferenceTitle ctx data.targetUuid (Question.getTitle (Question.localize ctx.locale targetQuestion))
+                                , description = data.description
+                                }
+                            )
                 )
                 crossReferencesData
     in
@@ -549,7 +573,46 @@ createQuestionExtraData ctx question =
     , requiredPhase =
         Question.getRequiredPhaseUuid question
             |> Maybe.andThen (flip KnowledgeModel.getPhase ctx.questionnaire.knowledgeModel)
+            |> Maybe.map (Phase.localize ctx.locale)
     }
+
+
+{-| Prefix a cross-referenced question title with the number of the chapter it
+belongs to, e.g. "Ch. 1: Question title".
+-}
+crossReferenceTitle : VirtualizeContext -> String -> String -> String
+crossReferenceTitle ctx targetQuestionUuid title =
+    case getQuestionChapterNumber ctx.knowledgeModelParentMap targetQuestionUuid ctx.questionnaire.knowledgeModel of
+        Just chapterNumber ->
+            String.format (gettext "Ch. %s: " ctx.locale) [ String.fromInt chapterNumber ] ++ title
+
+        Nothing ->
+            title
+
+
+getQuestionChapterNumber : KnowledgeModel.ParentMap -> String -> KnowledgeModel.KnowledgeModel -> Maybe Int
+getQuestionChapterNumber parentMap questionUuid km =
+    getQuestionChapter parentMap questionUuid km
+        |> Maybe.andThen (\chapter -> List.findIndex ((==) chapter.uuid << .uuid) (KnowledgeModel.getChapters km))
+        |> Maybe.map ((+) 1)
+
+
+getQuestionChapter : KnowledgeModel.ParentMap -> String -> KnowledgeModel.KnowledgeModel -> Maybe Chapter
+getQuestionChapter parentMap questionUuid km =
+    let
+        parentUuid =
+            KnowledgeModel.getParent parentMap questionUuid
+    in
+    if parentUuid == Uuid.toString Uuid.nil then
+        Nothing
+
+    else
+        case KnowledgeModel.getChapter parentUuid km of
+            Just chapter ->
+                Just chapter
+
+            Nothing ->
+                getQuestionChapter parentMap parentUuid km
 
 
 virtualizeItem : VirtualizeContext -> (NestingType -> NestingType) -> List String -> List String -> String -> Int -> String -> List ContentNode
@@ -593,8 +656,24 @@ virtualizeItem ctx createNestingType path humanIdentifier parentQuestionUuid ite
             questionNodes =
                 List.indexedMap (virtualizeQuestion ctx (createNestingType << ItemNesting) (path ++ [ itemUuid ]) itemHumanIdentifier) questions
                     |> List.concat
+
+            itemContentNodes =
+                if List.isEmpty questionNodes then
+                    -- The item shows no questions. It either genuinely has none (or
+                    -- they were filtered out by question tags, which looks the same) or
+                    -- every question is currently hidden by the view options. Surface a
+                    -- flash so an empty item does not look broken.
+                    [ ItemEmptyNode
+                        { itemPath = itemPath
+                        , nestingType = createNestingType (ItemNesting ContentNesting)
+                        , hiddenByViewOptions = not (List.isEmpty questions)
+                        }
+                    ]
+
+                else
+                    questionNodes
         in
-        itemHeaderNode :: questionNodes ++ [ itemFooterNode ]
+        itemHeaderNode :: itemContentNodes ++ [ itemFooterNode ]
 
 
 needVirtualization : ProjectEvent -> Bool

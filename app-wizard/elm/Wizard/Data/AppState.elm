@@ -3,13 +3,13 @@ module Wizard.Data.AppState exposing
     , acceptCookies
     , aiAssistantEnabled
     , anyPluginsAvailable
+    , getAdminClientUrl
     , getClientUrlRoot
     , getPlugin
     , getPluginSettings
     , getPluginUserSettings
     , getPlugins
     , getPluginsByConnector
-    , getUserRole
     , init
     , isFullscreen
     , sessionExpired
@@ -20,25 +20,28 @@ module Wizard.Data.AppState exposing
     , toAIAssistantServerInfo
     , toGuideLinkConfig
     , toServerInfo
+    , userHasPerm
     )
 
 import Browser.Navigation as Navigation exposing (Key)
+import Common.Api.Models.RolePermission exposing (RolePermission)
 import Common.Api.Request exposing (ServerInfo)
 import Common.Components.GuideLink as GuideLink
 import Common.Data.Navigator exposing (Navigator)
-import Common.Data.Role exposing (Role)
 import Common.Utils.GuideLinks as GuideLinks exposing (GuideLinks)
 import Common.Utils.Theme exposing (Theme)
 import Dict
 import Gettext
 import Json.Decode as D exposing (Error(..))
 import List.Extra as List
+import Maybe.Extra as Maybe
 import Random exposing (Seed)
 import String.Extra as String
 import Time
 import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig exposing (BootstrapConfig)
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Data.Flags as Flags
 import Wizard.Data.Session as Session exposing (Session)
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute
@@ -166,9 +169,9 @@ toGuideLinkConfig appState getLink =
     }
 
 
-getUserRole : AppState -> Maybe Role
-getUserRole =
-    Maybe.map .role << .user << .config
+userHasPerm : RolePermission -> AppState -> Bool
+userHasPerm perm appState =
+    Maybe.unwrap False (UserConfig.hasPerm perm) appState.config.user
 
 
 getClientUrlRoot : AppState -> String
@@ -251,6 +254,11 @@ aiAssistantEnabled appState =
 getAIAssistantApiUrl : AppState -> String
 getAIAssistantApiUrl appState =
     String.replace "/wizard" "/ai-assistant" appState.apiUrl
+
+
+getAdminClientUrl : AppState -> String
+getAdminClientUrl appState =
+    String.replace "/wizard" "/admin" appState.clientUrl
 
 
 anyPluginsAvailable : AppState -> Bool

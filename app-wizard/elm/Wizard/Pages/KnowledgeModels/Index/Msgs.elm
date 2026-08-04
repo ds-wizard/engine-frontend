@@ -16,4 +16,5 @@ type Msg
     | UpdatePublic KnowledgeModelPackage Bool
     | UpdatePublicCompleted (Result ApiError ())
     | ExportKnowledgeModelPackage KnowledgeModelPackage
+    | ExportKnowledgeModelPackagePot KnowledgeModelPackage
     | FileDownloaderMsg FileDownloader.Msg

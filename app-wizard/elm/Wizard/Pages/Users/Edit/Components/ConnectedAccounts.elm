@@ -12,22 +12,25 @@ import ActionResult exposing (ActionResult)
 import Browser.Navigation as Navigation
 import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.OpenIdClient exposing (OpenIdClient)
+import Common.Api.Models.OpenIdRequest exposing (OpenIdRequestResponse)
 import Common.Api.Models.UserIdentity as UserIdentity exposing (UserIdentity)
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (faDisconnectAccount)
+import Common.Components.FontAwesome exposing (faDisconnectAccount, faSpinner)
 import Common.Components.Modal as Modal
 import Common.Components.Page as Page
 import Common.Components.Tooltip exposing (tooltipLeft)
 import Common.Ports.LocalStorage as LocalStorage
 import Common.Utils.RequestHelpers as RequestHelpers
+import Dict exposing (Dict)
 import Gettext exposing (gettext)
-import Html exposing (Html, a, div, p, strong, table, tbody, td, text, th, thead, tr)
+import Html exposing (Html, a, div, p, span, strong, table, tbody, td, text, th, thead, tr)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
+import Html.Extra as Html
 import Json.Encode as E
 import Maybe.Extra as Maybe
 import String.Format as String
-import Uuid
+import Uuid exposing (Uuid)
 import Wizard.Api.OpenIdClients as OpenIdClientsApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.ExternalLoginButton as ExternalLoginButton
@@ -40,6 +43,7 @@ type alias Model =
     { userIdentities : ActionResult (List UserIdentity)
     , userIdentityToDisconnect : Maybe UserIdentity
     , disconnectingIdentity : ActionResult String
+    , connectingEntities : Dict String (ActionResult ())
     }
 
 
@@ -48,12 +52,14 @@ initialModel =
     { userIdentities = ActionResult.Loading
     , userIdentityToDisconnect = Nothing
     , disconnectingIdentity = ActionResult.Unset
+    , connectingEntities = Dict.empty
     }
 
 
 type Msg
     = GetUserIdentitiesCompleted (Result ApiError (List UserIdentity))
     | ExternalLoginOpenId OpenIdClient
+    | ExternalLoginOpenIdCompleted Uuid (Result ApiError OpenIdRequestResponse)
     | ShowHideDisconnectUserIdentity (Maybe UserIdentity)
     | DisconnectUserIdentity
     | DisconnectUserIdentityCompleted (Result ApiError ())
@@ -86,14 +92,32 @@ update cfg appState msg model =
                     )
 
         ExternalLoginOpenId openIdServiceConfig ->
-            let
-                saveCmd =
-                    saveOriginalUrlCmd (Just (Routing.toUrl Routes.usersEditConnectedAccounts))
+            case Dict.get (Uuid.toString openIdServiceConfig.uuid) model.connectingEntities of
+                Just ActionResult.Loading ->
+                    ( model, Cmd.none )
 
-                redirectCmd =
-                    Navigation.load (OpenIdClientsApi.requestUrl appState openIdServiceConfig)
-            in
-            ( model, Cmd.batch [ saveCmd, redirectCmd ] )
+                _ ->
+                    ( { model | connectingEntities = Dict.insert (Uuid.toString openIdServiceConfig.uuid) ActionResult.Loading model.connectingEntities }
+                    , OpenIdClientsApi.request appState openIdServiceConfig (cfg.wrapMsg << ExternalLoginOpenIdCompleted openIdServiceConfig.uuid)
+                    )
+
+        ExternalLoginOpenIdCompleted uuid result ->
+            case result of
+                Ok openIdRequestResponse ->
+                    let
+                        originalUrlCmd =
+                            saveOriginalUrlCmd (Just (Routing.toUrl Routes.usersEditConnectedAccounts))
+
+                        stateCmd =
+                            saveStateCmd openIdRequestResponse.state
+
+                        redirectCmd =
+                            Navigation.load openIdRequestResponse.url
+                    in
+                    ( model, Cmd.batch [ originalUrlCmd, stateCmd, redirectCmd ] )
+
+                Err error ->
+                    ( { model | connectingEntities = Dict.insert (Uuid.toString uuid) (ApiError.toActionResult appState (gettext "External login failed." appState.locale) error) model.connectingEntities }, Cmd.none )
 
         ShowHideDisconnectUserIdentity mbUserIdentity ->
             ( { model | userIdentityToDisconnect = mbUserIdentity }
@@ -140,9 +164,19 @@ update cfg appState msg model =
 
 saveOriginalUrlCmd : Maybe String -> Cmd msg
 saveOriginalUrlCmd originalUrl =
-    case originalUrl of
-        Just url ->
-            LocalStorage.setItem "wizard/originalUrl" (E.string url)
+    saveLocalStorageOptionalItem "wizard/originalUrl" originalUrl
+
+
+saveStateCmd : String -> Cmd msg
+saveStateCmd state =
+    saveLocalStorageOptionalItem "wizard/state" (Just state)
+
+
+saveLocalStorageOptionalItem : String -> Maybe String -> Cmd msg
+saveLocalStorageOptionalItem key mbValue =
+    case mbValue of
+        Just value ->
+            LocalStorage.setItem key (E.string value)
 
         Nothing ->
             Cmd.none
@@ -164,7 +198,7 @@ connectedAccountsView appState model userIdentities =
         , div [ class "row" ]
             [ div [ class "col-8" ]
                 [ viewConnectedAccounts appState userIdentities
-                , viewExternalLoginButtons appState
+                , viewExternalLoginButtons appState model
                 ]
             ]
         , viewDisconnectUserIdentityModal appState model
@@ -212,14 +246,31 @@ viewConnectedAccount appState userIdentity =
         ]
 
 
-viewExternalLoginButtons : AppState -> Html Msg
-viewExternalLoginButtons appState =
+viewExternalLoginButtons : AppState -> Model -> Html Msg
+viewExternalLoginButtons appState model =
     let
+        viewExternalLoginButtonActionResult result =
+            case result of
+                ActionResult.Loading ->
+                    span [ class "text-muted mb-2 ms-2 fade-in" ]
+                        [ faSpinner
+                        , span [ class "ms-1" ] [ text (gettext "Loading..." appState.locale) ]
+                        ]
+
+                ActionResult.Error err ->
+                    span [ class "text-danger mb-2 ms-2" ] [ text err ]
+
+                _ ->
+                    Html.nothing
+
         viewExternalLoginButtonOpenId openIdService =
-            ExternalLoginButton.view
-                { onClick = ExternalLoginOpenId openIdService
-                , service = openIdService
-                }
+            div [ class "d-flex align-items-center" ]
+                [ ExternalLoginButton.view
+                    { onClick = ExternalLoginOpenId openIdService
+                    , service = openIdService
+                    }
+                , viewExternalLoginButtonActionResult (Maybe.withDefault ActionResult.Unset (Dict.get (Uuid.toString openIdService.uuid) model.connectingEntities))
+                ]
 
         externalLoginButtons =
             List.map viewExternalLoginButtonOpenId appState.config.authentication.external.services

@@ -7,11 +7,12 @@ module Wizard.Utils.ProjectUtils exposing
     , isOwner
     )
 
-import Common.Api.Models.UserInfo as UserInfo
+import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Uuid exposing (Uuid)
+import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
 import Wizard.Api.Models.Project.ProjectSharing exposing (ProjectSharing(..))
@@ -64,9 +65,21 @@ hasPerm appState project role =
         isAuthenticated =
             Session.exists appState.session
 
+        hasRolePerm perm =
+            Maybe.unwrap False (UserConfig.hasPerm perm) appState.config.user
+
         globalPerms =
-            if UserInfo.isAdmin mbUser then
+            if hasRolePerm RolePermission.projectsManage then
                 ProjectPerm.all
+
+            else if hasRolePerm RolePermission.projectsEdit then
+                [ ProjectPerm.view, ProjectPerm.comment, ProjectPerm.edit ]
+
+            else if hasRolePerm RolePermission.projectsComment then
+                [ ProjectPerm.view, ProjectPerm.comment ]
+
+            else if hasRolePerm RolePermission.projectsView then
+                [ ProjectPerm.view ]
 
             else
                 []

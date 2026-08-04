@@ -169,14 +169,25 @@ update wrapMsg msg appState model =
                 }
 
         GetSelectedKnowledgeModelCompleted result ->
-            RequestHelpers.applyResult
-                { setResult = \value record -> { record | selectedKnowledgeModel = value }
-                , defaultError = gettext "Unable to get selected knowledge model." appState.locale
-                , model = model
-                , result = result
-                , logoutMsg = Wizard.Msgs.logoutMsg
-                , locale = appState.locale
-                }
+            case result of
+                Ok kmDetail ->
+                    let
+                        validationMode =
+                            mapMode model
+                                ProjectCreateForm.TemplateValidationMode
+                                ProjectCreateForm.PackageValidationMode
+
+                        form =
+                            Form.update (ProjectCreateForm.validation validationMode)
+                                (Form.Input "language" Form.Text (Field.String kmDetail.language))
+                                model.form
+                    in
+                    ( { model | selectedKnowledgeModel = ActionResult.Success kmDetail, form = form }, Cmd.none )
+
+                Err error ->
+                    ( { model | selectedKnowledgeModel = ApiError.toActionResult appState (gettext "Unable to get selected knowledge model." appState.locale) error }
+                    , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
+                    )
 
         GetProjectTemplatesCountCompleted result ->
             RequestHelpers.applyResultTransform
@@ -258,10 +269,14 @@ update wrapMsg msg appState model =
                                 ( { newModel
                                     | lastFetchedPreview = Just kmPackageUuid
                                     , knowledgeModelPreview = ActionResult.Loading
+                                    , selectedKnowledgeModel = ActionResult.Loading
                                     , selectedTags = []
                                   }
                                 , Cmd.map wrapMsg <|
-                                    KnowledgeModelsApi.fetchPreview appState (Just (Uuid.fromUuidString kmPackageUuid)) [] [] GetKnowledgeModelPreviewCompleted
+                                    Cmd.batch
+                                        [ KnowledgeModelsApi.fetchPreview appState (Just (Uuid.fromUuidString kmPackageUuid)) [] [] GetKnowledgeModelPreviewCompleted
+                                        , KnowledgeModelPackagesApi.getKnowledgeModelPackage appState (Uuid.fromUuidString kmPackageUuid) GetSelectedKnowledgeModelCompleted
+                                        ]
                                 )
 
                             else
@@ -271,6 +286,7 @@ update wrapMsg msg appState model =
                             ( { newModel
                                 | lastFetchedPreview = Nothing
                                 , knowledgeModelPreview = ActionResult.Unset
+                                , selectedKnowledgeModel = ActionResult.Unset
                                 , selectedTags = []
                               }
                             , FormUtils.scrollToInvalidField formMsg

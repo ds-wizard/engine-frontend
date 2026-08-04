@@ -1,13 +1,19 @@
-module Wizard.Pages.Dashboard.Widgets.ImportDocumentTemplateWidget exposing (view)
+module Wizard.Pages.Dashboard.Widgets.ImportDocumentTemplateWidget exposing (enabled, view)
 
+import Common.Data.WizardRolePermission as RolePermission
 import Gettext exposing (gettext)
 import Html exposing (Html)
 import String.Format as String
 import Wizard.Api.Models.BootstrapConfig.LookAndFeelConfig as LookAndFeelConfig
-import Wizard.Data.AppState exposing (AppState)
+import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Dashboard.Widgets.WidgetHelpers as WidgetHelpers
 import Wizard.Routes as Routes
 import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
+
+
+enabled : AppState -> Bool
+enabled appState =
+    AppState.userHasPerm RolePermission.documentTemplatesManage appState
 
 
 view : AppState -> Html msg

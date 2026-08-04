@@ -12,7 +12,7 @@ import Url.Parser exposing ((</>), Parser, map, s)
 import Url.Parser.Extensions exposing (uuid)
 import Url.Parser.Query as Query
 import Uuid
-import Wizard.Api.Models.BootstrapConfig.Admin as Admin
+import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Users.Edit.UserEditRoutes as UserEditRoute
 import Wizard.Pages.Users.Routes exposing (Route(..), indexRouteRoleFilterId)

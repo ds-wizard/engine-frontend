@@ -18,10 +18,10 @@ jobs:
 
     steps:
       - name: '[setup] Checkout Project'
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: '[setup] Node.js ${{ matrix.node-version }}'
-        uses: actions/setup-node@v6
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -31,8 +31,8 @@ jobs:
       - name: '[app] Install'
         run: npm ci
 
-      - name: '[app] Review'
-        run: npm run review
+      - name: '[app] Test'
+        run: npm run test
 
       - name: '[app] Build'
         run: npm run build:${{ matrix.component }}

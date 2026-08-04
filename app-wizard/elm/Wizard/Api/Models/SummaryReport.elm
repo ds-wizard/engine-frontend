@@ -7,6 +7,7 @@ module Wizard.Api.Models.SummaryReport exposing
     , decoder
     )
 
+import Gettext
 import Json.Decode as Decode exposing (Decoder)
 import Json.Decode.Extra exposing (when)
 import Json.Decode.Pipeline exposing (required)
@@ -20,6 +21,7 @@ type alias SummaryReport =
     , chapterReports : List ChapterReport
     , chapters : List Chapter
     , metrics : List Metric
+    , locale : Maybe Gettext.Locale
     }
 
 
@@ -54,6 +56,7 @@ decoder =
         |> required "chapterReports" (Decode.list chapterReportDecoder)
         |> required "chapters" (Decode.list Chapter.decoder)
         |> required "metrics" (Decode.list Metric.decoder)
+        |> required "locale" (Decode.maybe Gettext.localeDecoder)
 
 
 totalReportDecoder : Decoder TotalReport

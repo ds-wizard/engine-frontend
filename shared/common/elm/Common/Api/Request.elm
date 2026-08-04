@@ -18,6 +18,7 @@ module Common.Api.Request exposing
     , postFileWithData
     , postFileWithDataWhatever
     , postMultiPart
+    , postMultiPartWithData
     , postWhatever
     , put
     , putEmpty
@@ -121,6 +122,16 @@ postMultiPart serverInfo url data toMsg =
         { url = url
         , body = Http.multipartBody data
         , expect = expectWhatever toMsg
+        }
+
+
+postMultiPartWithData : ServerInfo -> String -> List Http.Part -> Decoder a -> ToMsg a msg -> Cmd msg
+postMultiPartWithData serverInfo url data decoder toMsg =
+    createRequest "POST"
+        serverInfo
+        { url = url
+        , body = Http.multipartBody data
+        , expect = expectJson toMsg decoder
         }
 
 
