@@ -4,9 +4,9 @@ import ActionResult
 import Bootstrap.Dropdown as Dropdown
 import Common.Api.Models.Pagination as Pagination
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faCancel, faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
-import Common.Components.FormResult as FormResult
+import Common.Components.FontAwesome exposing (faDelete, faListingFilterMultiNotSelected, faListingFilterMultiSelected, faOpen, faQuestionnaireListClone, faQuestionnaireListCreateMigration, faQuestionnaireListCreateProjectFromTemplate)
 import Common.Components.Page as Page
+import Common.Components.Tooltip exposing (tooltip)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilter
 import Common.Data.PaginationQueryFilters.FilterOperator as FilterOperator
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
@@ -26,7 +26,8 @@ import Version
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Project exposing (Project)
-import Wizard.Api.Models.Project.ProjectState exposing (ProjectState(..))
+import Wizard.Api.Models.Project.DocumentTemplateProjectState as DocumentTemplateProjectState
+import Wizard.Api.Models.Project.KnowledgeModelProjectState as KnowledgeModelProjectState
 import Wizard.Api.Models.User as User
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.Listing.Msgs as ListingMsgs
@@ -65,7 +66,6 @@ view appState model =
         content _ =
             div [ listClass "Questionnaires__Index" ]
                 [ Page.header (gettext "Projects" appState.locale) []
-                , FormResult.view model.deletingMigration
                 , Listing.view appState (listingConfig appState model) model.questionnaires
                 , Html.map DeleteQuestionnaireModalMsg <| DeleteProjectModal.view appState model.deleteModalModel
                 , Html.map CloneQuestionnaireModalMsg <| CloneProjectModal.view appState model.cloneModalModel
@@ -524,19 +524,12 @@ filterBadge items =
 
 listingTitle : AppState -> Project -> Html Msg
 listingTitle appState project =
-    let
-        linkRoute =
-            if project.state == Migrating then
-                Routes.projectsMigration
-
-            else
-                Routes.projectsDetail
-    in
     span []
-        [ linkTo (linkRoute project.uuid) [] [ text project.name ]
+        [ linkTo (Routes.projectsDetail project.uuid) [] [ text project.name ]
         , templateBadge appState project
         , visibilityIcon appState project
-        , stateBadge appState project
+        , knowledgeModelStateBadge appState project
+        , documentTemplateStateBadge appState project
         ]
 
 
@@ -598,9 +591,6 @@ listingActions appState project =
                 , dataCy = "open"
                 }
 
-        openProjectVisible =
-            Features.projectOpen project
-
         createProjectFromTemplate =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
@@ -627,9 +617,6 @@ listingActions appState project =
                 , dataCy = "clone"
                 }
 
-        cloneVisible =
-            Features.projectClone project
-
         createMigration =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
@@ -641,30 +628,6 @@ listingActions appState project =
 
         createMigrationVisible =
             Features.projectCreateMigration appState project
-
-        continueMigration =
-            ListingDropdown.dropdownAction
-                { extraClass = Nothing
-                , icon = faQuestionnaireListCreateMigration
-                , label = gettext "Continue migration" appState.locale
-                , msg = ListingActionLink (Routes.ProjectsRoute <| MigrationRoute project.uuid)
-                , dataCy = "continue-migration"
-                }
-
-        continueMigrationVisible =
-            Features.projectContinueMigration appState project
-
-        cancelMigration =
-            ListingDropdown.dropdownAction
-                { extraClass = Just "text-danger"
-                , icon = faCancel
-                , label = gettext "Cancel migration" appState.locale
-                , msg = ListingActionMsg (DeleteQuestionnaireMigration project.uuid)
-                , dataCy = "cancel-migration"
-                }
-
-        cancelMigrationVisible =
-            Features.projectCancelMigration appState project
 
         delete =
             ListingDropdown.dropdownAction
@@ -684,11 +647,9 @@ listingActions appState project =
             Features.projectDelete appState project
 
         groups =
-            [ [ ( openProject, openProjectVisible ) ]
+            [ [ ( openProject, True ) ]
             , [ ( createProjectFromTemplate, createProjectFromTemplateVisible ) ]
-            , [ ( clone, cloneVisible )
-              , ( continueMigration, continueMigrationVisible )
-              , ( cancelMigration, cancelMigrationVisible )
+            , [ ( clone, True )
               , ( createMigration, createMigrationVisible )
               ]
             , [ ( delete, deleteVisible ) ]
@@ -697,22 +658,33 @@ listingActions appState project =
     ListingDropdown.itemsFromGroups groups
 
 
-stateBadge : AppState -> Project -> Html msg
-stateBadge appState project =
-    case project.state of
-        Migrating ->
-            linkTo (Routes.projectsMigration project.uuid)
-                [ class Badge.infoClass, dataCy "badge_project_migrating" ]
-                [ faQuestionnaireListCreateMigration
-                , text (gettext "migrating" appState.locale)
-                ]
-
-        Outdated ->
+knowledgeModelStateBadge : AppState -> Project -> Html msg
+knowledgeModelStateBadge appState project =
+    case project.knowledgeModelState of
+        KnowledgeModelProjectState.Outdated ->
             linkTo (Routes.projectsCreateMigration project.uuid)
-                [ class Badge.warningClass, dataCy "badge_project_update-available" ]
-                [ text (gettext "update available" appState.locale) ]
+                (class Badge.warningClass
+                    :: dataCy "badge_project_knowledge-model-update-available"
+                    :: tooltip (gettext "Knowledge model update available" appState.locale)
+                )
+                [ text (gettext "Outdated KM" appState.locale) ]
 
-        Default ->
+        KnowledgeModelProjectState.UpToDate ->
+            Html.nothing
+
+
+documentTemplateStateBadge : AppState -> Project -> Html msg
+documentTemplateStateBadge appState project =
+    case project.documentTemplateState of
+        Just DocumentTemplateProjectState.Outdated ->
+            linkTo (Routes.projectsDetailSettings project.uuid)
+                (class Badge.warningClass
+                    :: dataCy "badge_project_document-template-update-available"
+                    :: tooltip (gettext "Document template update available" appState.locale)
+                )
+                [ text (gettext "Outdated DT" appState.locale) ]
+
+        _ ->
             Html.nothing
 
 

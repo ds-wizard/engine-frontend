@@ -51,8 +51,6 @@ module Wizard.Utils.Feature exposing
     , localeView
     , localesManage
     , newsModal
-    , projectCancelMigration
-    , projectClone
     , projectCommentAdd
     , projectCommentDelete
     , projectCommentEdit
@@ -62,14 +60,12 @@ module Wizard.Utils.Feature exposing
     , projectCommentThreadRemoveAssign
     , projectCommentThreadReopen
     , projectCommentThreadResolve
-    , projectContinueMigration
     , projectCreateFromTemplate
     , projectCreateMigration
     , projectDelete
     , projectDocumentsView
     , projectFiles
     , projectMetrics
-    , projectOpen
     , projectPreview
     , projectSearch
     , projectSettings
@@ -113,7 +109,6 @@ import Wizard.Api.Models.KnowledgeModelEditor.KnowledgeModelEditorState as Knowl
 import Wizard.Api.Models.KnowledgeModelPackage.KnowledgeModelPackagePhase as KnowledgeModelPackagePhase exposing (KnowledgeModelPackagePhase)
 import Wizard.Api.Models.Project as Project exposing (Project)
 import Wizard.Api.Models.Project.ProjectCreation as ProjectCreation
-import Wizard.Api.Models.Project.ProjectState as ProjectState
 import Wizard.Api.Models.ProjectDetail.Comment as Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (CommentThread)
 import Wizard.Data.AppState exposing (AppState)
@@ -378,34 +373,14 @@ projectTemplatesCreate =
     hasPerm RolePermission.projectTemplatesManage
 
 
-projectOpen : Project -> Bool
-projectOpen project =
-    project.state /= ProjectState.Migrating
-
-
 projectCreateFromTemplate : AppState -> Project -> Bool
 projectCreateFromTemplate appState project =
-    projectsCreateFromTemplate appState && project.isTemplate && project.state /= ProjectState.Migrating
-
-
-projectClone : Project -> Bool
-projectClone project =
-    project.state /= ProjectState.Migrating
+    projectsCreateFromTemplate appState && project.isTemplate
 
 
 projectCreateMigration : AppState -> Project -> Bool
-projectCreateMigration appState project =
-    Project.isEditable appState project && project.state /= ProjectState.Migrating
-
-
-projectContinueMigration : AppState -> Project -> Bool
-projectContinueMigration appState project =
-    Project.isEditable appState project && project.state == ProjectState.Migrating
-
-
-projectCancelMigration : AppState -> Project -> Bool
-projectCancelMigration appState project =
-    Project.isEditable appState project && project.state == ProjectState.Migrating
+projectCreateMigration =
+    Project.isEditable
 
 
 projectDelete : AppState -> Project -> Bool
@@ -433,24 +408,24 @@ projectDocumentsView =
     True
 
 
-projectSearch : ProjectLike q -> Bool
-projectSearch project =
-    not (ProjectUtils.isMigrating project)
+projectSearch : Bool
+projectSearch =
+    True
 
 
 projectTodos : AppState -> ProjectLike q -> Bool
 projectTodos appState project =
-    ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
+    ProjectUtils.isEditor appState project
 
 
 projectToolbarImporters : AppState -> ProjectLike q -> Bool
 projectToolbarImporters appState project =
-    Session.exists appState.session && ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
+    Session.exists appState.session && ProjectUtils.isEditor appState project
 
 
 projectVersionHistory : AppState -> ProjectLike q -> Bool
 projectVersionHistory appState project =
-    ProjectUtils.isEditor appState project && not (ProjectUtils.isMigrating project)
+    ProjectUtils.isEditor appState project
 
 
 projectSettings : AppState -> ProjectLike q -> Bool

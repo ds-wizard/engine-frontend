@@ -3,7 +3,7 @@ module Wizard.Pages.Projects.Index.Models exposing
     , initialModel
     )
 
-import ActionResult exposing (ActionResult(..))
+import ActionResult exposing (ActionResult)
 import Common.Api.Models.Pagination as Pagination exposing (Pagination)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Data.PaginationQueryFilters as PaginationQueryFilters
@@ -21,7 +21,6 @@ import Wizard.Pages.Projects.Routes exposing (indexRouteIsTemplateFilterId, inde
 
 type alias Model =
     { questionnaires : Listing.Model Project
-    , deletingMigration : ActionResult String
     , deleteModalModel : DeleteProjectModal.Model
     , cloneModalModel : CloneProjectModal.Model
     , debouncer : Debouncer Msg
@@ -74,7 +73,6 @@ initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mb
                 ActionResult.Success Pagination.empty
     in
     { questionnaires = Listing.initialModelWithFiltersAndStates paginationQueryString paginationQueryFilters (Maybe.map .questionnaires mbOldModel)
-    , deletingMigration = Unset
     , deleteModalModel = DeleteProjectModal.initialModel
     , cloneModalModel = CloneProjectModal.initialModel
     , debouncer = Debounce.toDebouncer <| Debounce.debounce 500

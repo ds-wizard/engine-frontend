@@ -105,7 +105,6 @@ getProjectTemplates appState pqs =
         filters =
             PaginationQueryFilters.create
                 [ ( "isTemplate", Just (Bool.toString True) )
-                , ( "isMigrating", Just (Bool.toString False) )
                 ]
                 []
     in

@@ -18,8 +18,9 @@ import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.KnowledgeModelPackageInfo as KnowledgeModelPackageInfo exposing (KnowledgeModelPackageInfo)
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission as Permission exposing (Permission)
+import Wizard.Api.Models.Project.DocumentTemplateProjectState as DocumentTemplateProjectState exposing (DocumentTemplateProjectState)
+import Wizard.Api.Models.Project.KnowledgeModelProjectState as KnowledgeModelProjectState exposing (KnowledgeModelProjectState)
 import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing(..))
-import Wizard.Api.Models.Project.ProjectState as ProjectState exposing (ProjectState)
 import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility(..))
 import Wizard.Api.Models.ProjectPerm as ProjectPerm
 import Wizard.Data.AppState exposing (AppState)
@@ -35,7 +36,8 @@ type alias Project =
     , visibility : ProjectVisibility
     , sharing : ProjectSharing
     , permissions : List Permission
-    , state : ProjectState
+    , knowledgeModelState : KnowledgeModelProjectState
+    , documentTemplateState : Maybe DocumentTemplateProjectState
     , updatedAt : Time.Posix
     }
 
@@ -88,7 +90,8 @@ decoder =
         |> D.required "visibility" ProjectVisibility.decoder
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
-        |> D.required "state" ProjectState.decoder
+        |> D.required "knowledgeModelState" KnowledgeModelProjectState.decoder
+        |> D.required "documentTemplateState" (D.maybe DocumentTemplateProjectState.decoder)
         |> D.required "updatedAt" D.datetime
 
 

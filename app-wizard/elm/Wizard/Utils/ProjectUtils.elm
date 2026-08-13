@@ -3,7 +3,6 @@ module Wizard.Utils.ProjectUtils exposing
     , canComment
     , isAnonymousProject
     , isEditor
-    , isMigrating
     , isOwner
     )
 
@@ -11,7 +10,6 @@ import Common.Data.WizardRolePermission as RolePermission
 import Flip exposing (flip)
 import List.Extra as List
 import Maybe.Extra as Maybe
-import Uuid exposing (Uuid)
 import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
@@ -27,13 +25,7 @@ type alias ProjectLike q =
         | permissions : List Permission
         , sharing : ProjectSharing
         , visibility : ProjectVisibility
-        , migrationUuid : Maybe Uuid
     }
-
-
-isMigrating : { q | migrationUuid : Maybe Uuid } -> Bool
-isMigrating =
-    Maybe.isJust << .migrationUuid
 
 
 isEditor : AppState -> ProjectLike q -> Bool
@@ -53,7 +45,7 @@ isAnonymousProject project =
 
 canComment : AppState -> ProjectLike q -> Bool
 canComment appState project =
-    hasPerm appState project ProjectPerm.comment && not (isMigrating project)
+    hasPerm appState project ProjectPerm.comment
 
 
 hasPerm : AppState -> ProjectLike q -> String -> Bool

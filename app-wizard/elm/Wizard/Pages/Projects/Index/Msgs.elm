@@ -4,7 +4,6 @@ import Common.Api.ApiError exposing (ApiError)
 import Common.Api.Models.Pagination exposing (Pagination)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Debouncer.Extra as Debouncer
-import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.Project exposing (Project)
 import Wizard.Components.Listing.Msgs as Listing
@@ -13,9 +12,7 @@ import Wizard.Pages.Projects.Common.DeleteProjectModal.Msgs as DeleteProjectModa
 
 
 type Msg
-    = DeleteQuestionnaireMigration Uuid
-    | DeleteQuestionnaireMigrationCompleted (Result ApiError ())
-    | ListingMsg (Listing.Msg Project)
+    = ListingMsg (Listing.Msg Project)
     | ListingFilterAddSelectedPackage KnowledgeModelPackageSuggestion (Listing.Msg Project)
     | ListingFilterAddSelectedUser UserSuggestion (Listing.Msg Project)
     | DeleteQuestionnaireModalMsg DeleteProjectModal.Msg

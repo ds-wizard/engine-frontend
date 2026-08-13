@@ -4,7 +4,7 @@ module Wizard.Pages.Projects.Index.Update exposing
     )
 
 import ActionResult exposing (ActionResult(..))
-import Common.Api.ApiError as ApiError exposing (ApiError)
+import Common.Api.ApiError as ApiError
 import Common.Data.PaginationQueryString as PaginationQueryString
 import Common.Utils.Driver as Driver exposing (TourConfig)
 import Common.Utils.RequestHelpers as RequestHelpers
@@ -16,7 +16,6 @@ import Html.Attributes.Extensions exposing (selectDataTour)
 import List.Extra as List
 import Maybe.Extra as Maybe
 import Task.Extra as Task
-import Uuid exposing (Uuid)
 import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Project exposing (Project)
@@ -97,12 +96,6 @@ tour appState =
 update : (Msg -> Wizard.Msgs.Msg) -> Msg -> AppState -> Model -> ( Model, Cmd Wizard.Msgs.Msg )
 update wrapMsg msg appState model =
     case msg of
-        DeleteQuestionnaireMigration uuid ->
-            handleDeleteMigration wrapMsg appState model uuid
-
-        DeleteQuestionnaireMigrationCompleted result ->
-            handleDeleteMigrationCompleted wrapMsg appState model result
-
         ListingMsg listingMsg ->
             handleListingMsg wrapMsg appState listingMsg model
 
@@ -301,34 +294,6 @@ update wrapMsg msg appState model =
                     update wrapMsg updateMsg appState updateModel
             in
             Debouncer.update update_ updateConfig debounceMsg model
-
-
-handleDeleteMigration : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Uuid -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteMigration wrapMsg appState model uuid =
-    ( { model | deletingMigration = Loading }
-    , ProjectsApi.deleteMigration appState uuid (wrapMsg << DeleteQuestionnaireMigrationCompleted)
-    )
-
-
-handleDeleteMigrationCompleted : (Msg -> Wizard.Msgs.Msg) -> AppState -> Model -> Result ApiError () -> ( Model, Cmd Wizard.Msgs.Msg )
-handleDeleteMigrationCompleted wrapMsg appState model result =
-    case result of
-        Ok _ ->
-            let
-                ( questionnaires, cmd ) =
-                    Listing.update (listingUpdateConfig wrapMsg appState) appState ListingMsgs.Reload model.questionnaires
-            in
-            ( { model
-                | deletingMigration = Success <| gettext "Project migration was successfully canceled." appState.locale
-                , questionnaires = questionnaires
-              }
-            , cmd
-            )
-
-        Err error ->
-            ( { model | deletingMigration = ApiError.toActionResult appState (gettext "Project migration could not be deleted." appState.locale) error }
-            , RequestHelpers.getResultCmd Wizard.Msgs.logoutMsg result
-            )
 
 
 handleListingMsg : (Msg -> Wizard.Msgs.Msg) -> AppState -> ListingMsgs.Msg Project -> Model -> ( Model, Cmd Wizard.Msgs.Msg )

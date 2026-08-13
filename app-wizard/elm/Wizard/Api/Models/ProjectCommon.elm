@@ -25,7 +25,6 @@ type alias ProjectCommon =
     , permissions : List Permission
     , sharing : ProjectSharing
     , visibility : ProjectVisibility
-    , migrationUuid : Maybe Uuid
     , knowledgeModelPackage : KnowledgeModelPackageSuggestion
     , fileCount : Int
     }
@@ -40,7 +39,6 @@ decoder =
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "visibility" ProjectVisibility.decoder
-        |> D.required "migrationUuid" (D.nullable Uuid.decoder)
         |> D.required "knowledgeModelPackage" KnowledgeModelPackageSuggestion.decoder
         |> D.required "fileCount" D.int
 
@@ -74,7 +72,6 @@ dummy =
     , permissions = []
     , sharing = ProjectSharing.Restricted
     , visibility = ProjectVisibility.Private
-    , migrationUuid = Nothing
     , knowledgeModelPackage = KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage KnowledgeModelPackage.dummy
     , fileCount = 0
     }

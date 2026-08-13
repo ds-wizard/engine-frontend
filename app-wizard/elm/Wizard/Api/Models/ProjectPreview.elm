@@ -21,7 +21,6 @@ type alias ProjectPreview =
     , permissions : List Permission
     , sharing : ProjectSharing
     , visibility : ProjectVisibility
-    , migrationUuid : Maybe Uuid
     }
 
 
@@ -34,7 +33,6 @@ decoder =
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "visibility" ProjectVisibility.decoder
-        |> D.required "migrationUuid" (D.maybe Uuid.decoder)
 
 
 hasTemplateSet : ProjectPreview -> Bool

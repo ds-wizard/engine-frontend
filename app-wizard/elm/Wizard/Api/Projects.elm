@@ -1,7 +1,6 @@
 module Wizard.Api.Projects exposing
     ( clone
     , delete
-    , deleteMigration
     , deleteVersion
     , fetchMigration
     , fetchPreview
@@ -101,7 +100,6 @@ createListExtraParams : PaginationQueryFilters -> List ( String, String )
 createListExtraParams filters =
     PaginationQueryString.filterParams
         [ ( "isTemplate", PaginationQueryFilters.getValue "isTemplate" filters )
-        , ( "isMigrating", PaginationQueryFilters.getValue "isMigrating" filters )
         , ( "userUuids", PaginationQueryFilters.getValue "userUuids" filters )
         , ( "userUuidsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "userUuids" filters) )
         , ( "projectTags", PaginationQueryFilters.getValue "projectTags" filters )
@@ -220,11 +218,6 @@ putMigration appState uuid body =
 postMigrationCompletion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
 postMigrationCompletion appState uuid =
     Request.postEmpty (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations/current/completion")
-
-
-deleteMigration : AppState -> Uuid -> ToMsg () msg -> Cmd msg
-deleteMigration appState uuid =
-    Request.delete (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations/current")
 
 
 delete : AppState -> Uuid -> ToMsg () msg -> Cmd msg

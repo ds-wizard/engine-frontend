@@ -94,7 +94,6 @@ type alias ProjectQuestionnaire =
     , sharing : ProjectSharing
     , permissions : List Permission
     , labels : Dict String (List String)
-    , migrationUuid : Maybe Uuid
     , unresolvedCommentCounts : Dict String (Dict String Int)
     , resolvedCommentCounts : Dict String (Dict String Int)
     , selectedQuestionTagUuids : List String
@@ -117,7 +116,6 @@ decoder =
         |> D.required "sharing" ProjectSharing.decoder
         |> D.required "permissions" (D.list Permission.decoder)
         |> D.required "labels" (D.dict (D.list D.string))
-        |> D.required "migrationUuid" (D.maybe Uuid.decoder)
         |> D.required "unresolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "resolvedCommentCounts" (D.dict (D.dict D.int))
         |> D.required "selectedQuestionTagUuids" (D.list D.string)
@@ -133,7 +131,6 @@ toProjectCommon questionnaire =
     , permissions = questionnaire.permissions
     , sharing = questionnaire.sharing
     , visibility = questionnaire.visibility
-    , migrationUuid = questionnaire.migrationUuid
     , knowledgeModelPackage = questionnaire.knowledgeModelPackage
     , fileCount = List.length questionnaire.files
     }
@@ -252,7 +249,6 @@ createQuestionnaireDetail kmPackage km =
     , resolvedCommentCounts = Dict.empty
     , phaseUuid = Maybe.andThen Uuid.fromString (List.head km.phaseUuids)
     , labels = Dict.empty
-    , migrationUuid = Nothing
     , selectedQuestionTagUuids = []
     , files = []
     , locale = Nothing

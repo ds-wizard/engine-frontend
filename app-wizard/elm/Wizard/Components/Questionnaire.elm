@@ -743,7 +743,7 @@ update msg wrapMsg mbSetFullscreenMsg appState ctx model =
 
                         RightPanel.Search ->
                             showRightPanel
-                                (Feature.projectSearch model.questionnaire)
+                                Feature.projectSearch
                                 RightPanel.Search
 
                         RightPanel.TODOs ->
@@ -2086,7 +2086,7 @@ viewQuestionnaireToolbar appState cfg model =
                     ( RightPanel.Warnings, False )
 
         searchButtonVisible =
-            Feature.projectSearch model.questionnaire
+            Feature.projectSearch
 
         searchButton =
             div [ class "item-group" ]
@@ -2392,7 +2392,7 @@ viewQuestionnaireRightPanel appState cfg model =
                     , wrapMsg = cfg.wrapMsg << SearchPanelMsg
                     }
             in
-            Html.viewIf (Feature.projectSearch model.questionnaire) <|
+            Html.viewIf Feature.projectSearch <|
                 wrapPanel [ SearchPanel.view appState viewConfig model.searchPanelModel ]
 
         RightPanel.TODOs ->
