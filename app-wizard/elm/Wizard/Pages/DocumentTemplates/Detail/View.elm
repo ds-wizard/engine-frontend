@@ -8,6 +8,7 @@ import Common.Components.Page as Page
 import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
 import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Common.Utils.Markdown as Markdown
+import Common.Utils.TimeUtils as TimeUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, a, div, li, p, span, strong, text, ul)
 import Html.Attributes exposing (class, href, target)
@@ -230,6 +231,7 @@ sidePanelKmInfo appState template =
             , ( gettext "Version" appState.locale, "version", text <| Version.toString template.version )
             , ( gettext "Metamodel" appState.locale, "metamodel", text <| Version.toStringMinor template.metamodelVersion )
             , ( gettext "License" appState.locale, "license", text template.license )
+            , ( gettext "Created at" appState.locale, "created-at", text <| TimeUtils.toReadableDateTime appState.timeZone template.createdAt )
             ]
     in
     Just ( gettext "Document Template" appState.locale, "template", DetailPage.sidePanelList 4 8 templateInfoList )

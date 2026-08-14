@@ -9,6 +9,7 @@ module Wizard.Api.Models.KnowledgeModelPackageDetail exposing
     )
 
 import Json.Decode as D exposing (Decoder)
+import Json.Decode.Extra as D
 import Json.Decode.Pipeline as D
 import Json.Encode as E
 import List.Extra as List
@@ -42,6 +43,7 @@ type alias KnowledgeModelPackageDetail =
     , registryLink : Maybe String
     , remoteLatestVersion : Maybe Version
     , phase : KnowledgeModelPackagePhase
+    , createdAt : Time.Posix
     , nonEditable : Bool
     , public : Bool
     }
@@ -68,6 +70,7 @@ decoder =
         |> D.required "registryLink" (D.maybe D.string)
         |> D.required "remoteLatestVersion" (D.maybe Version.decoder)
         |> D.required "phase" KnoweldgeModelPackagePhase.decoder
+        |> D.required "createdAt" D.datetime
         |> D.required "nonEditable" D.bool
         |> D.required "public" D.bool
 
@@ -92,7 +95,7 @@ toPackage kmPackage =
     , organization = kmPackage.organization
     , remoteLatestVersion = kmPackage.remoteLatestVersion
     , phase = kmPackage.phase
-    , createdAt = Time.millisToPosix 0
+    , createdAt = kmPackage.createdAt
     , nonEditable = True
     , public = kmPackage.public
     }
