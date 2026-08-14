@@ -6,8 +6,8 @@ import Form
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
+import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetailWrapper exposing (ProjectDetailWrapper)
-import Wizard.Api.Models.ProjectMigration exposing (ProjectMigration)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Components.KMComparison as KMComparison
 
@@ -17,7 +17,7 @@ type Msg
     | Cancel
     | FormMsg Form.Msg
     | SelectKnowledgeModelPackage KnowledgeModelPackageSuggestion
-    | PostMigrationCompleted (Result ApiError ProjectMigration)
+    | PostMigrationCompleted (Result ApiError ProjectCommon)
     | GetKnowledgeModelPreviewCompleted (Result ApiError KnowledgeModel)
     | GetCurrentKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)
     | GetSelectedKnowledgeModelPackageCompleted (Result ApiError KnowledgeModelPackageDetail)

@@ -5,13 +5,13 @@ import Uuid exposing (Uuid)
 import Wizard.Api.Models.KnowledgeModel exposing (KnowledgeModel)
 import Wizard.Api.Models.KnowledgeModelPackageDetail exposing (KnowledgeModelPackageDetail)
 import Wizard.Api.Models.Project exposing (Project)
-import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire as Questionnaire
 
 
 type Msg
     = FetchPreviewComplete (Result ApiError KnowledgeModel)
     | GetPackageComplete (Result ApiError KnowledgeModelPackageDetail)
-    | QuestionnaireMsg Questionnaire2.Msg
+    | QuestionnaireMsg Questionnaire.Msg
     | CreateProjectMsg
     | PostQuestionnaireCompleted (Result ApiError Project)
     | PutQuestionnaireContentComplete Uuid (Result ApiError ())

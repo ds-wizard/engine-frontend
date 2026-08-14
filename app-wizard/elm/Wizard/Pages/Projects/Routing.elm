@@ -74,7 +74,6 @@ parsers wrapRoute =
     , map (detailFilesRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "files"))
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
     , map (PaginationQueryString.wrapRoute7 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
-    , map (wrapRoute << MigrationRoute) (s moduleRoot </> s "migration" </> uuid)
     , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
     , map documentDownloadRoute (s moduleRoot </> uuid </> s "documents" </> uuid </> s "download")
     , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
@@ -160,9 +159,6 @@ toUrl route =
                         ]
             in
             [ moduleRoot ++ PaginationQueryString.toUrlWith params paginationQueryString ]
-
-        MigrationRoute uuid ->
-            [ moduleRoot, "migration", Uuid.toString uuid ]
 
         ImportRoute uuid importerUrl ->
             [ moduleRoot, "import", Uuid.toString uuid, importerUrl ]

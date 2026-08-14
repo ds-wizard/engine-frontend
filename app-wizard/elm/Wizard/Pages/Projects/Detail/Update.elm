@@ -30,7 +30,7 @@ import Wizard.Api.Models.ProjectPreview as ProjectPreview
 import Wizard.Api.Models.WebSockets.ClientProjectMessage as ClientProjectMessage
 import Wizard.Api.Models.WebSockets.ServerProjectMessage as ServerProjectMessage
 import Wizard.Api.Projects as ProjectsApi
-import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Data.Session as Session
@@ -94,7 +94,7 @@ fetchSubrouteData appState model =
                         ProjectsApi.getQuestionnaire appState uuid GetQuestionnaireDetailCompleted
 
                     else
-                        Task.dispatch (QuestionnaireMsg Questionnaire2.updateContentScrollTopMsg)
+                        Task.dispatch (QuestionnaireMsg Questionnaire.updateContentScrollTopMsg)
 
                 ProjectDetailRoute.Preview ->
                     ProjectsApi.getPreview appState uuid GetQuestionnairePreviewCompleted
@@ -256,7 +256,7 @@ update wrapMsg msg appState model =
                 ( Success questionnaireCommon, Success questionnaireModel ) ->
                     let
                         questionnaireUpdateReturnData =
-                            Questionnaire2.update appState
+                            Questionnaire.update appState
                                 { wrapMsg = wrapMsg << QuestionnaireMsg
                                 , mbKmEditorUuid = Nothing
                                 , mbSetFullScreenMsg = Just Wizard.Msgs.SetFullscreen
@@ -446,7 +446,7 @@ update wrapMsg msg appState model =
                 Ok data ->
                     let
                         ( questionnaireModel, questionnaireCmd ) =
-                            Questionnaire2.init appState data.data model.mbSelectedPath model.mbCommentThreadUuid
+                            Questionnaire.init appState data.data model.mbSelectedPath model.mbCommentThreadUuid
 
                         newModel =
                             { model
@@ -563,7 +563,7 @@ update wrapMsg msg appState model =
             ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
 
         ShareModalCloseMsg ->
-            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire2.resetUserSuggestionDropdownModels model.questionnaireModel }, Cmd.none )
+            withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire.resetUserSuggestionDropdownModels model.questionnaireModel }, Cmd.none )
 
         ShareDropdownMsg dropdownState ->
             withSeed ( { model | shareDropdownState = dropdownState }, Cmd.none )
@@ -701,7 +701,7 @@ handleWebsocketMsg websocketMsg appState model =
 
                 newModel2 =
                     if not removed then
-                        { newModel | questionnaireModel = ActionResult.map (Questionnaire2.applyProjectEvent event) newModel.questionnaireModel }
+                        { newModel | questionnaireModel = ActionResult.map (Questionnaire.applyProjectEvent event) newModel.questionnaireModel }
 
                     else
                         newModel
@@ -722,7 +722,7 @@ handleWebsocketMsg websocketMsg appState model =
             ( appState.seed
             , { model
                 | questionnaireCommon = ActionResult.map (ProjectCommon.updateWithQuestionnaireData data) model.questionnaireCommon
-                , questionnaireModel = ActionResult.map (Questionnaire2.updateWithQuestionnaireData appState data) model.questionnaireModel
+                , questionnaireModel = ActionResult.map (Questionnaire.updateWithQuestionnaireData appState data) model.questionnaireModel
               }
             , Cmd.none
             )
@@ -743,7 +743,7 @@ handleWebsocketMsg websocketMsg appState model =
 
                         ServerProjectMessage.AddFile file ->
                             ( appState.seed
-                            , { model | questionnaireModel = ActionResult.map (Questionnaire2.addFile file) model.questionnaireModel }
+                            , { model | questionnaireModel = ActionResult.map (Questionnaire.addFile file) model.questionnaireModel }
                             , Cmd.none
                             )
 

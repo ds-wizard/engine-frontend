@@ -67,7 +67,6 @@ module Wizard.Utils.Feature exposing
     , projectFiles
     , projectMetrics
     , projectPreview
-    , projectSearch
     , projectSettings
     , projectTagging
     , projectTemplatesCreate
@@ -405,11 +404,6 @@ projectPreview =
 
 projectDocumentsView : Bool
 projectDocumentsView =
-    True
-
-
-projectSearch : Bool
-projectSearch =
     True
 
 

@@ -11,7 +11,6 @@ import Wizard.Pages.Projects.DocumentDownload.Models
 import Wizard.Pages.Projects.FileDownload.Models
 import Wizard.Pages.Projects.Import.Models
 import Wizard.Pages.Projects.Index.Models
-import Wizard.Pages.Projects.Migration.Models
 import Wizard.Pages.Projects.Routes exposing (Route(..))
 
 
@@ -20,7 +19,6 @@ type alias Model =
     , createMigrationModel : Wizard.Pages.Projects.CreateMigration.Models.Model
     , detailModel : Detail.Model
     , indexModel : Wizard.Pages.Projects.Index.Models.Model
-    , migrationModel : Wizard.Pages.Projects.Migration.Models.Model
     , importModel : Wizard.Pages.Projects.Import.Models.Model
     , documentDownload : Wizard.Pages.Projects.DocumentDownload.Models.Model
     , fileDownload : Wizard.Pages.Projects.FileDownload.Models.Model
@@ -33,7 +31,6 @@ initialModel appState =
     , createMigrationModel = Wizard.Pages.Projects.CreateMigration.Models.initialModel Uuid.nil
     , detailModel = Detail.init appState Uuid.nil Nothing Nothing
     , indexModel = Wizard.Pages.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
-    , migrationModel = Wizard.Pages.Projects.Migration.Models.initialModel Uuid.nil
     , importModel = Wizard.Pages.Projects.Import.Models.initialModel Uuid.nil ""
     , documentDownload = Wizard.Pages.Projects.DocumentDownload.Models.initialModel Uuid.nil Uuid.nil
     , fileDownload = Wizard.Pages.Projects.FileDownload.Models.initialModel Uuid.nil Uuid.nil
@@ -67,9 +64,6 @@ initLocalModel appState route model =
 
         IndexRoute paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
             { model | indexModel = Wizard.Pages.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp (Just model.indexModel) }
-
-        MigrationRoute uuid ->
-            { model | migrationModel = Wizard.Pages.Projects.Migration.Models.initialModel uuid }
 
         ImportRoute uuid importerUrl ->
             { model | importModel = Wizard.Pages.Projects.Import.Models.initialModel uuid importerUrl }

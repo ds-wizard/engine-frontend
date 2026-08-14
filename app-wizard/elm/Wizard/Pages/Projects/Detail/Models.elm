@@ -20,7 +20,7 @@ import Wizard.Api.Models.ProjectPreview exposing (ProjectPreview)
 import Wizard.Api.Models.ProjectSettings exposing (ProjectSettings)
 import Wizard.Api.Models.SummaryReport exposing (SummaryReport)
 import Wizard.Api.Projects as QuestionnaireApi
-import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Projects.Detail.Components.NewDocument as NewDocument
 import Wizard.Pages.Projects.Detail.Components.Preview as Preview
@@ -48,7 +48,7 @@ type alias Model =
     , shareModalModel : ShareModal.Model
     , shareDropdownState : Dropdown.State
     , previewModel : Preview.Model
-    , questionnaireModel : ActionResult Questionnaire2.Model
+    , questionnaireModel : ActionResult Questionnaire.Model
     , questionnaireSummaryReport : ActionResult SummaryReport
     , questionnairePreview : ActionResult ProjectPreview
     , questionnaireSettings : ActionResult ProjectSettings

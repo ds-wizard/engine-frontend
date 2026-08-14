@@ -88,7 +88,6 @@ module Wizard.Routes exposing
     , projectsImport
     , projectsIndex
     , projectsIndexWithFilters
-    , projectsMigration
     , publicForgottenPassword
     , publicHome
     , publicLogin
@@ -143,10 +142,10 @@ import Wizard.Pages.DocumentTemplates.Routes
 import Wizard.Pages.Documents.Routes
 import Wizard.Pages.KMEditor.Editor.KMEditorRoute
 import Wizard.Pages.KMEditor.Routes
+import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute
 import Wizard.Pages.KnowledgeModels.Routes
 import Wizard.Pages.Locales.Routes
 import Wizard.Pages.ProjectFiles.Routes
-import Wizard.Pages.KnowledgeModels.Detail.KnowledgeModelDetailRoute
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute
 import Wizard.Pages.Projects.Routes
 import Wizard.Pages.Public.Routes
@@ -741,11 +740,6 @@ isProjectsIndex route =
 
         _ ->
             False
-
-
-projectsMigration : Uuid -> Route
-projectsMigration =
-    ProjectsRoute << Wizard.Pages.Projects.Routes.MigrationRoute
 
 
 projectsImport : Uuid -> String -> Route

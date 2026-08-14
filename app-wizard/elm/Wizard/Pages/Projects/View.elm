@@ -9,7 +9,6 @@ import Wizard.Pages.Projects.DocumentDownload.View
 import Wizard.Pages.Projects.FileDownload.View
 import Wizard.Pages.Projects.Import.View
 import Wizard.Pages.Projects.Index.View
-import Wizard.Pages.Projects.Migration.View
 import Wizard.Pages.Projects.Models exposing (Model)
 import Wizard.Pages.Projects.Msgs exposing (Msg(..))
 import Wizard.Pages.Projects.Routes exposing (Route(..))
@@ -33,10 +32,6 @@ view route appState model =
         IndexRoute _ _ _ _ _ _ _ _ ->
             Html.map IndexMsg <|
                 Wizard.Pages.Projects.Index.View.view appState model.indexModel
-
-        MigrationRoute _ ->
-            Html.map MigrationMsg <|
-                Wizard.Pages.Projects.Migration.View.view appState model.migrationModel
 
         ImportRoute _ _ ->
             Html.map ImportMsg <|

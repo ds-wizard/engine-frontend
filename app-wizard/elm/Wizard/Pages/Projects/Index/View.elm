@@ -621,7 +621,7 @@ listingActions appState project =
             ListingDropdown.dropdownAction
                 { extraClass = Nothing
                 , icon = faQuestionnaireListCreateMigration
-                , label = gettext "Create migration" appState.locale
+                , label = gettext "Migrate" appState.locale
                 , msg = ListingActionLink (Routes.ProjectsRoute <| CreateMigrationRoute project.uuid)
                 , dataCy = "create-migration"
                 }

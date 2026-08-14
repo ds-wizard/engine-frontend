@@ -22,7 +22,7 @@ import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Components.ActionResultView as ActionResultView
 import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Components.PluginView as PluginView
-import Wizard.Components.Questionnaire2 as Questionnaire2
+import Wizard.Components.Questionnaire as Questionnaire
 import Wizard.Components.SummaryReport as SummaryReport
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Data.Session as Session
@@ -401,7 +401,7 @@ viewProjectContent appState route model projectCommon =
         ProjectDetailRoute.Questionnaire _ _ ->
             let
                 viewContent qm =
-                    Questionnaire2.view appState
+                    Questionnaire.view appState
                         { wrapMsg = QuestionnaireMsg
                         , readonly = not isEditable
                         , toolbarEnabled = True

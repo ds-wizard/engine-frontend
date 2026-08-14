@@ -93,8 +93,8 @@ createMigrationView appState model project =
                     Html.nothing
     in
     div [ listClass "Questionnaires__CreateMigration" ]
-        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsMigration) (gettext "Create Migration" appState.locale)
-        , Flash.info <| gettext "A new project is created for the migration. The original will remain unchanged until the migration is finished." appState.locale
+        [ Page.headerWithGuideLink (AppState.toGuideLinkConfig appState WizardGuideLinks.projectsMigration) (gettext "Migrate Project" appState.locale)
+        , Flash.info <| gettext "This will update the project’s knowledge model. Replies associated with questions that aren’t included in the new knowledge model may not be carried over." appState.locale
         , FormResult.view model.savingMigration
         , FormGroup.textView "project" project.name <| gettext "Project" appState.locale
         , div [ class "form" ]
@@ -122,7 +122,7 @@ createMigrationView appState model project =
             ]
         , FormActions.view appState
             Cancel
-            (ActionResult.ButtonConfig (gettext "Create" appState.locale) model.savingMigration (FormMsg Form.Submit) False)
+            (ActionResult.ButtonConfig (gettext "Migrate" appState.locale) model.savingMigration (FormMsg Form.Submit) False)
         , compareModal appState model
         ]
 

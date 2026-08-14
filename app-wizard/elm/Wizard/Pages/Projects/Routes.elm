@@ -17,7 +17,6 @@ type Route
     | CreateMigrationRoute Uuid
     | DetailRoute Uuid ProjectDetailRoute
     | IndexRoute PaginationQueryString (Maybe String) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator) (Maybe String) (Maybe FilterOperator)
-    | MigrationRoute Uuid
     | ImportRoute Uuid String
     | DocumentDownloadRoute Uuid Uuid
     | FileDownloadRoute Uuid Uuid

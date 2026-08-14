@@ -23,7 +23,6 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , getTodos
     , getUnresolvedCommentCount
     , getWarnings
-    , hasReply
     , hasTodo
     , isCurrentVersion
     , isPathVisible
@@ -36,10 +35,8 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , subCommentCount
     , toProjectCommon
     , todoUuid
-    , todosLength
     , updateContent
     , updateWithQuestionnaireData
-    , warningsLength
     )
 
 import Common.Utils.Bool as Bool
@@ -314,11 +311,6 @@ getResolvedCommentCount path questionnaire =
     Dict.get path questionnaire.resolvedCommentCounts
         |> Maybe.unwrap [] Dict.values
         |> List.sum
-
-
-todosLength : ProjectQuestionnaire -> Int
-todosLength =
-    List.length << getTodos
 
 
 getTodos : ProjectQuestionnaire -> List ProjectTodo
@@ -604,11 +596,6 @@ type alias QuestionnaireWarning =
     }
 
 
-warningsLength : ProjectQuestionnaire -> Int
-warningsLength =
-    List.length << getWarnings
-
-
 getWarnings : ProjectQuestionnaire -> List QuestionnaireWarning
 getWarnings questionnaire =
     let
@@ -792,11 +779,6 @@ pathToString =
 todoUuid : String
 todoUuid =
     "615b9028-5e3f-414f-b245-12d2ae2eeb20"
-
-
-hasReply : String -> ProjectQuestionnaire -> Bool
-hasReply path questionnaire =
-    Maybe.unwrap False (not << ReplyValue.isEmpty) (getReplyValue questionnaire path)
 
 
 lastVisibleEvent : List ProjectEvent -> Maybe ProjectEvent

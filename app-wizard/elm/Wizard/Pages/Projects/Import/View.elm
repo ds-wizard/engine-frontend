@@ -27,7 +27,6 @@ import Wizard.Components.DetailNavigation as DetailNavigation
 import Wizard.Components.Html exposing (linkTo)
 import Wizard.Components.PluginView as PluginView
 import Wizard.Components.Questionnaire as Questionnaire
-import Wizard.Components.Questionnaire.DefaultQuestionnaireRenderer as DefaultQuestionnaireRenderer
 import Wizard.Components.Questionnaire.Importer exposing (ImporterResult)
 import Wizard.Data.AppState as AppState exposing (AppState)
 import Wizard.Pages.Projects.Import.Models exposing (Model, SidePanel(..))
@@ -169,26 +168,12 @@ viewQuestionnairePreview appState model questionnaire questionnaireModel importR
     div [ class "Projects__Import__Content__Questionnaire" ]
         [ viewImportResults appState model questionnaire importResult
         , Questionnaire.view appState
-            { features =
-                { feedbackEnabled = False
-                , todosEnabled = False
-                , commentsEnabled = False
-                , pluginsEnabled = False
-                , readonly = True
-                , toolbarEnabled = False
-                , questionLinksEnabled = False
-                }
-            , renderer =
-                DefaultQuestionnaireRenderer.create appState
-                    (DefaultQuestionnaireRenderer.config questionnaire)
-            , wrapMsg = QuestionnaireMsg
+            { wrapMsg = QuestionnaireMsg
+            , readonly = True
+            , actionsEnabled = False
+            , toolbarEnabled = False
             , previewQuestionnaireEventMsg = Nothing
             , revertQuestionnaireMsg = Nothing
-            , isKmEditor = False
-            , projectCommon = Nothing
-            }
-            { events = []
-            , kmEditorUuid = Nothing
             }
             questionnaireModel
         ]
@@ -248,7 +233,7 @@ viewReply appState questionnaire question data =
     let
         eventView replies =
             div [ class "EventDetail" ]
-                [ a [ class "question-link", onClick (QuestionnaireMsg (Questionnaire.ScrollToPath path)) ]
+                [ a [ class "question-link", onClick (QuestionnaireMsg (Questionnaire.scrollToPathMsg False path)) ]
                     [ text (Question.getTitle question) ]
                 , ul [ class "fa-ul" ]
                     (List.map replyView replies)

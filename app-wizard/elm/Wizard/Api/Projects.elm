@@ -12,7 +12,6 @@ module Wizard.Api.Projects exposing
     , getEvents
     , getFiles
     , getList
-    , getMigration
     , getPreview
     , getProjectTagsSuggestions
     , getQuestionnaire
@@ -23,11 +22,9 @@ module Wizard.Api.Projects exposing
     , getVersions
     , post
     , postFromTemplate
-    , postMigrationCompletion
     , postRevert
     , postVersion
     , putContent
-    , putMigration
     , putSettings
     , putShare
     , putVersion
@@ -56,7 +53,6 @@ import Wizard.Api.Models.ProjectDetail.CommentThread as CommentThread exposing (
 import Wizard.Api.Models.ProjectDetail.ProjectEvent as ProjectEvent exposing (ProjectEvent)
 import Wizard.Api.Models.ProjectDetailWrapper as ProjectDetailWrapper exposing (ProjectDetailWrapper)
 import Wizard.Api.Models.ProjectFile as ProjectFile exposing (ProjectFile)
-import Wizard.Api.Models.ProjectMigration as ProjectMigration exposing (ProjectMigration)
 import Wizard.Api.Models.ProjectPreview as ProjectPreview exposing (ProjectPreview)
 import Wizard.Api.Models.ProjectQuestionnaire as ProjectQuestionnaire exposing (ProjectQuestionnaire)
 import Wizard.Api.Models.ProjectSettings as ProjectSettings exposing (ProjectSettings)
@@ -158,11 +154,6 @@ getUserSuggestions appState projectUuid editor query =
     Request.get (AppState.toServerInfo appState) url (Pagination.decoder "users" UserSuggestion.decoder)
 
 
-getMigration : AppState -> Uuid -> ToMsg ProjectMigration msg -> Cmd msg
-getMigration appState uuid =
-    Request.get (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations/current") ProjectMigration.decoder
-
-
 getVersions : AppState -> Uuid -> ToMsg (List ProjectVersion) msg -> Cmd msg
 getVersions appState uuid =
     Request.get (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/versions") (D.list ProjectVersion.decoder)
@@ -195,9 +186,9 @@ clone appState uuid =
     Request.postEmptyBody (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/clone") Project.decoder
 
 
-fetchMigration : AppState -> Uuid -> Value -> ToMsg ProjectMigration msg -> Cmd msg
+fetchMigration : AppState -> Uuid -> Value -> ToMsg ProjectCommon msg -> Cmd msg
 fetchMigration appState uuid body =
-    Request.post (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations") ProjectMigration.decoder body
+    Request.post (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations") ProjectCommon.decoder body
 
 
 putContent : AppState -> Uuid -> List ProjectEvent -> ToMsg () msg -> Cmd msg
@@ -208,16 +199,6 @@ putContent appState uuid events =
                 [ ( "events", E.list ProjectEvent.encode events ) ]
     in
     Request.putWhatever (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/content") body
-
-
-putMigration : AppState -> Uuid -> Value -> ToMsg () msg -> Cmd msg
-putMigration appState uuid body =
-    Request.putWhatever (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations/current") body
-
-
-postMigrationCompletion : AppState -> Uuid -> ToMsg () msg -> Cmd msg
-postMigrationCompletion appState uuid =
-    Request.postEmpty (AppState.toServerInfo appState) ("/projects/" ++ Uuid.toString uuid ++ "/migrations/current/completion")
 
 
 delete : AppState -> Uuid -> ToMsg () msg -> Cmd msg
