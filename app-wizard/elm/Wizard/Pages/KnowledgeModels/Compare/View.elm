@@ -28,9 +28,10 @@ viewComparison appState model _ =
                 ]
                 [ text (gettext "Select Knowledge Models" appState.locale) ]
             ]
-        , DetailPage.content
+        , DetailPage.contentAttrs
             { body = [ Html.map KMComparisonMsg <| KMComparison.view appState model.kmComparisonModel ]
             , sidePanel = []
+            , bodyAttrs = [ class "p-0" ]
             }
         , Html.map CompareSelectModalMsg <| CompareSelectModal.view appState model.compareSelectModalModel
         ]

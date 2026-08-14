@@ -13,6 +13,7 @@ import Common.Api.ApiError exposing (ApiError)
 import Common.Components.Badge as Badge
 import Common.Components.FontAwesome exposing (faKmAnswer, faKmChapter, faKmChoice, faKmIntegration, faKmMetric, faKmPhase, faKmQuestion, faKmReference, faKmResourceCollection, faKmTag, fas)
 import Common.Components.Page as Page
+import Common.Ports.Copy as Copy
 import Common.Utils.RequestHelpers as RequestHelpers
 import Flip exposing (flip)
 import Gettext exposing (gettext)
@@ -56,6 +57,7 @@ type alias Model =
     , rightKm : ActionResult KnowledgeModel
     , collapsedUuids : Set String
     , sidePanel : Maybe SidePanel.SidePanelState
+    , copiedUuid : Maybe String
     }
 
 
@@ -65,6 +67,8 @@ type Msg
     | FetchRightKmCompleted (Result ApiError KnowledgeModel)
     | ToggleCollapse String
     | SetSidePanel (Maybe SidePanel.SidePanelState)
+    | CopyUuid String
+    | ClearCopiedUuid
 
 
 compare : CompareInput -> Msg
@@ -81,6 +85,7 @@ initialModel =
     , rightKm = ActionResult.Unset
     , collapsedUuids = Set.empty
     , sidePanel = Nothing
+    , copiedUuid = Nothing
     }
 
 
@@ -143,7 +148,13 @@ update appState cfg msg model =
             ( { model | collapsedUuids = newCollapsedUuids }, Cmd.none )
 
         SetSidePanel maybeSidePanel ->
-            ( { model | sidePanel = maybeSidePanel }, Cmd.none )
+            ( { model | sidePanel = maybeSidePanel, copiedUuid = Nothing }, Cmd.none )
+
+        CopyUuid uuid ->
+            ( { model | copiedUuid = Just uuid }, Copy.copyToClipboard uuid )
+
+        ClearCopiedUuid ->
+            ( { model | copiedUuid = Nothing }, Cmd.none )
 
 
 view : AppState -> Model -> Html Msg
@@ -200,6 +211,9 @@ viewComparison locale model leftKm rightKM =
                             , leftKm = leftKm
                             , rightKm = rightKM
                             , closeMsg = SetSidePanel Nothing
+                            , copyUuidMsg = CopyUuid
+                            , clearCopiedUuidMsg = ClearCopiedUuid
+                            , copiedUuid = model.copiedUuid
                             }
                     in
                     SidePanel.viewSidePanel sidePanelProps sidePanel
