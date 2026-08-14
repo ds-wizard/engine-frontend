@@ -20,6 +20,7 @@ import Wizard.Api.KnowledgeModelPackages as KnowledgeModelPackagesApi
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion as KnowledgeModelPackageSuggestion
 import Wizard.Api.Models.Project exposing (Project)
 import Wizard.Api.Projects as ProjectsApi
+import Wizard.Api.UserGroups as UserGroupsApi
 import Wizard.Api.Users as UsersApi
 import Wizard.Components.Listing.Msgs as ListingMsgs
 import Wizard.Components.Listing.Update as Listing
@@ -29,10 +30,11 @@ import Wizard.Pages.Projects.Common.CloneProjectModal.Update as CloneProjectModa
 import Wizard.Pages.Projects.Common.DeleteProjectModal.Update as DeleteProjectModal
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUserGroupsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Routing exposing (cmdNavigate)
 import Wizard.Utils.Driver as Driver
+import Wizard.Utils.Feature as Feature
 import Wizard.Utils.TourId as TourId
 
 
@@ -50,6 +52,29 @@ fetchData appState model =
 
                 Nothing ->
                     Cmd.none
+
+        userGroupsCmd =
+            if Feature.projectsFilterUserGroups appState then
+                let
+                    selectedUserGroupsCmd =
+                        case Dict.get indexRouteUserGroupsFilterId model.questionnaires.filters.values of
+                            Just userGroupUuids ->
+                                UserGroupsApi.getUserGroupsSuggestionsWithOptions appState
+                                    PaginationQueryString.empty
+                                    (String.split "," userGroupUuids)
+                                    []
+                                    UserGroupsFilterGetValuesComplete
+
+                            Nothing ->
+                                Cmd.none
+                in
+                Cmd.batch
+                    [ Task.dispatch (UserGroupsFilterSearch "")
+                    , selectedUserGroupsCmd
+                    ]
+
+            else
+                Cmd.none
 
         selectedPackagesCmd =
             case Dict.get indexRouteKnowledgeModelPackagesFilterId model.questionnaires.filters.values of
@@ -70,6 +95,7 @@ fetchData appState model =
         , Task.dispatch (PackagesFilterSearch "")
         , selectedUsersCmd
         , selectedPackagesCmd
+        , userGroupsCmd
         , Driver.init (tour appState)
         ]
 
@@ -116,6 +142,16 @@ update wrapMsg msg appState model =
 
                 newModel =
                     { model | userFilterSelectedUsers = ActionResult.map updateUsers model.userFilterSelectedUsers }
+            in
+            handleListingMsg wrapMsg appState listingMsg newModel
+
+        ListingFilterAddSelectedUserGroup userGroup listingMsg ->
+            let
+                updateUserGroups userGroups =
+                    { userGroups | items = List.uniqueBy .uuid (userGroup :: userGroups.items) }
+
+                newModel =
+                    { model | userGroupFilterSelectedUserGroups = ActionResult.map updateUserGroups model.userGroupFilterSelectedUserGroups }
             in
             handleListingMsg wrapMsg appState listingMsg newModel
 
@@ -234,6 +270,48 @@ update wrapMsg msg appState model =
             RequestHelpers.applyResult
                 { setResult = \r m -> { m | userFilterUsers = r }
                 , defaultError = gettext "Unable to get users." appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
+                }
+
+        UserGroupsFilterGetValuesComplete result ->
+            RequestHelpers.applyResult
+                { setResult = \r m -> { m | userGroupFilterSelectedUserGroups = r }
+                , defaultError = gettext "Unable to get user groups." appState.locale
+                , model = model
+                , result = result
+                , logoutMsg = Wizard.Msgs.logoutMsg
+                , locale = appState.locale
+                }
+
+        UserGroupsFilterInput value ->
+            ( { model | userGroupFilterSearchValue = value }
+            , Task.dispatch (wrapMsg <| DebouncerMsg <| Debouncer.provideInput <| UserGroupsFilterSearch value)
+            )
+
+        UserGroupsFilterSearch value ->
+            let
+                queryString =
+                    PaginationQueryString.fromQ value
+                        |> PaginationQueryString.withSize (Just 10)
+
+                selectedUserGroups =
+                    model.questionnaires.filters.values
+                        |> Dict.get indexRouteUserGroupsFilterId
+                        |> Maybe.unwrap [] (String.split ",")
+
+                cmd =
+                    Cmd.map wrapMsg <|
+                        UserGroupsApi.getUserGroupsSuggestionsWithOptions appState queryString [] selectedUserGroups UserGroupsFilterSearchComplete
+            in
+            ( model, cmd )
+
+        UserGroupsFilterSearchComplete result ->
+            RequestHelpers.applyResult
+                { setResult = \r m -> { m | userGroupFilterUserGroups = r }
+                , defaultError = gettext "Unable to get user groups." appState.locale
                 , model = model
                 , result = result
                 , logoutMsg = Wizard.Msgs.logoutMsg

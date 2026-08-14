@@ -15,7 +15,7 @@ import Url.Parser.Query.Extensions as Query
 import Uuid exposing (Uuid)
 import Wizard.Data.AppState exposing (AppState)
 import Wizard.Pages.Projects.Detail.ProjectDetailRoute as ProjectDetailRoute
-import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUserGroupsFilterId, indexRouteUsersFilterId)
 import Wizard.Utils.Feature as Feature
 
 
@@ -36,14 +36,16 @@ parsers wrapRoute =
             wrapRoute (CreateRoute selectedProjectTemplate selectedKnowledgeModel)
 
         -- Project index
-        wrappedIndexRoute pqs mbTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp =
-            wrapRoute <| IndexRoute pqs mbTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp
+        wrappedIndexRoute pqs mbTemplate mbUser mbUserOp mbUserGroups mbUserGroupsOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp =
+            wrapRoute <| IndexRoute pqs mbTemplate mbUser mbUserOp mbUserGroups mbUserGroupsOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp
 
         indexRouteParser =
-            PaginationQueryString.parser7 (s moduleRoot)
+            PaginationQueryString.parser9 (s moduleRoot)
                 (Query.string indexRouteIsTemplateFilterId)
                 (Query.string indexRouteUsersFilterId)
                 (FilterOperator.queryParser indexRouteUsersFilterId)
+                (Query.string indexRouteUserGroupsFilterId)
+                (FilterOperator.queryParser indexRouteUserGroupsFilterId)
                 (Query.string indexRouteProjectTagsFilterId)
                 (FilterOperator.queryParser indexRouteProjectTagsFilterId)
                 (Query.string indexRouteKnowledgeModelPackagesFilterId)
@@ -73,7 +75,7 @@ parsers wrapRoute =
     , map newDocumentRoute (s moduleRoot </> uuid </> s "documents" </> s "new" <?> Query.uuid "eventUuid")
     , map (detailFilesRoute wrapRoute) (PaginationQueryString.parser (s moduleRoot </> uuid </> s "files"))
     , map (wrapRoute << flip DetailRoute ProjectDetailRoute.Settings) (s moduleRoot </> uuid </> s "settings")
-    , map (PaginationQueryString.wrapRoute7 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
+    , map (PaginationQueryString.wrapRoute9 wrappedIndexRoute (Just "updatedAt,desc")) indexRouteParser
     , map projectImportRoute (s moduleRoot </> s "import" </> uuid </> string)
     , map documentDownloadRoute (s moduleRoot </> uuid </> s "documents" </> uuid </> s "download")
     , map fileDownloadRoute (s moduleRoot </> uuid </> s "files" </> uuid </> s "download")
@@ -145,13 +147,15 @@ toUrl route =
                 ProjectDetailRoute.Plugin pluginTabId ->
                     [ moduleRoot, Uuid.toString uuid, "plugin", pluginTabId ]
 
-        IndexRoute paginationQueryString mbIsTemplate mbUserUuid mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
+        IndexRoute paginationQueryString mbIsTemplate mbUserUuid mbUserOp mbUserGroupUuid mbUserGroupOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
             let
                 params =
                     PaginationQueryString.filterParams
                         [ ( indexRouteIsTemplateFilterId, mbIsTemplate )
                         , ( indexRouteUsersFilterId, mbUserUuid )
                         , FilterOperator.toUrlParam indexRouteUsersFilterId mbUserOp
+                        , ( indexRouteUserGroupsFilterId, mbUserGroupUuid )
+                        , FilterOperator.toUrlParam indexRouteUserGroupsFilterId mbUserGroupOp
                         , ( indexRouteProjectTagsFilterId, mbProjectTags )
                         , FilterOperator.toUrlParam indexRouteProjectTagsFilterId mbProjectTagsOp
                         , ( indexRouteKnowledgeModelPackagesFilterId, mbPackages )

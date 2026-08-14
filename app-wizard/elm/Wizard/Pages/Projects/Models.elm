@@ -30,7 +30,7 @@ initialModel appState =
     { createModel = Wizard.Pages.Projects.Create.Models.initialModel appState Nothing Nothing
     , createMigrationModel = Wizard.Pages.Projects.CreateMigration.Models.initialModel Uuid.nil
     , detailModel = Detail.init appState Uuid.nil Nothing Nothing
-    , indexModel = Wizard.Pages.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
+    , indexModel = Wizard.Pages.Projects.Index.Models.initialModel PaginationQueryString.empty Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing Nothing
     , importModel = Wizard.Pages.Projects.Import.Models.initialModel Uuid.nil ""
     , documentDownload = Wizard.Pages.Projects.DocumentDownload.Models.initialModel Uuid.nil Uuid.nil
     , fileDownload = Wizard.Pages.Projects.FileDownload.Models.initialModel Uuid.nil Uuid.nil
@@ -62,8 +62,8 @@ initLocalModel appState route model =
                 in
                 { model | detailModel = Detail.initPageModel appState subroute <| Detail.init appState uuid mbSelectedPath mbCommentThreadUuid }
 
-        IndexRoute paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
-            { model | indexModel = Wizard.Pages.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp (Just model.indexModel) }
+        IndexRoute paginationQueryString mbIsTemplate mbUser mbUserOp mbUserGroups mbUserGroupsOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp ->
+            { model | indexModel = Wizard.Pages.Projects.Index.Models.initialModel paginationQueryString mbIsTemplate mbUser mbUserOp mbUserGroups mbUserGroupsOp mbProjectTags mbProjectTagsOp mbPackages mbPackagesOp (Just model.indexModel) }
 
         ImportRoute uuid importerUrl ->
             { model | importModel = Wizard.Pages.Projects.Import.Models.initialModel uuid importerUrl }

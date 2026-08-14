@@ -36,7 +36,7 @@ fetchData route appState model =
             Cmd.map DetailMsg <|
                 Wizard.Pages.Projects.Detail.Update.fetchData appState uuid model.detailModel
 
-        IndexRoute _ _ _ _ _ _ _ _ ->
+        IndexRoute _ _ _ _ _ _ _ _ _ _ ->
             Cmd.map IndexMsg <|
                 Wizard.Pages.Projects.Index.Update.fetchData appState model.indexModel
 

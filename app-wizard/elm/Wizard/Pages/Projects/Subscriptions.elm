@@ -24,7 +24,7 @@ subscriptions route model =
             Sub.map DetailMsg <|
                 Wizard.Pages.Projects.Detail.Subscriptions.subscriptions subroute model.detailModel
 
-        IndexRoute _ _ _ _ _ _ _ _ ->
+        IndexRoute _ _ _ _ _ _ _ _ _ _ ->
             Sub.map IndexMsg <| Wizard.Pages.Projects.Index.Subscriptions.subscriptions model.indexModel
 
         _ ->

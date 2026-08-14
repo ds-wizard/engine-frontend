@@ -44,7 +44,7 @@ import Wizard.Pages.Projects.Common.ProjectDescriptor as ProjectDescriptor
 import Wizard.Pages.Projects.Common.View exposing (visibilityIcon)
 import Wizard.Pages.Projects.Index.Models exposing (Model)
 import Wizard.Pages.Projects.Index.Msgs exposing (Msg(..))
-import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUsersFilterId)
+import Wizard.Pages.Projects.Routes exposing (Route(..), indexRouteIsTemplateFilterId, indexRouteKnowledgeModelPackagesFilterId, indexRouteProjectTagsFilterId, indexRouteUserGroupsFilterId, indexRouteUsersFilterId)
 import Wizard.Routes as Routes
 import Wizard.Utils.Feature as Features
 import Wizard.Utils.HtmlAttributesUtils exposing (listClass)
@@ -60,8 +60,28 @@ view appState model =
             else
                 ActionResult.Success Pagination.empty
 
+        userGroupFilterUserGroupsActionResult =
+            if Features.projectsFilterUserGroups appState then
+                model.userGroupFilterUserGroups
+
+            else
+                ActionResult.Success Pagination.empty
+
+        userGroupFilterSelectedUserGroupsActionResult =
+            if Features.projectsFilterUserGroups appState && PaginationQueryFilter.isFilterActive indexRouteUserGroupsFilterId model.questionnaires.filters then
+                model.userGroupFilterSelectedUserGroups
+
+            else
+                ActionResult.Success Pagination.empty
+
         actionResult =
-            ActionResult.combine3 model.projectTagsFilterTags model.userFilterUsers userFilterSelectedUsersActionResult
+            [ ActionResult.map (always True) model.projectTagsFilterTags
+            , ActionResult.map (always True) model.userFilterUsers
+            , ActionResult.map (always True) userFilterSelectedUsersActionResult
+            , ActionResult.map (always True) userGroupFilterUserGroupsActionResult
+            , ActionResult.map (always True) userGroupFilterSelectedUserGroupsActionResult
+            ]
+                |> ActionResult.all
 
         content _ =
             div [ listClass "Questionnaires__Index" ]
@@ -109,12 +129,16 @@ listingConfig appState model =
         usersFilter =
             listingUsersFilter appState model
 
+        userGroupsFilter =
+            listingUserGroupsFilter appState model
+
         listingFilters =
             []
                 |> List.insertIf templateFilter (Features.projectTemplatesCreate appState)
                 |> List.insertIf tagsFilter (Features.projectTagging appState && tagsFilterVisible)
                 |> List.insertIf kmsFilter True
                 |> List.insertIf usersFilter True
+                |> List.insertIf userGroupsFilter (Features.projectsFilterUserGroups appState)
     in
     { title = listingTitle appState
     , description = listingDescription appState
@@ -509,6 +533,137 @@ listingUsersFilter appState model =
         }
 
 
+listingUserGroupsFilter : AppState -> Model -> Listing.Filter Msg
+listingUserGroupsFilter appState model =
+    let
+        filterMsg =
+            ListingMsgs.UpdatePaginationQueryFilters (Just indexRouteUserGroupsFilterId)
+
+        updateUserGroupMsg userGroupUuids =
+            if List.isEmpty userGroupUuids then
+                filterMsg (PaginationQueryFilter.removeFilter indexRouteUserGroupsFilterId model.questionnaires.filters)
+
+            else
+                filterMsg (PaginationQueryFilter.insertValue indexRouteUserGroupsFilterId (String.join "," (List.unique userGroupUuids)) model.questionnaires.filters)
+
+        filtersWithOp op =
+            PaginationQueryFilter.insertOp indexRouteUserGroupsFilterId op model.questionnaires.filters
+
+        removeUserGroupMsg userGroup =
+            List.filter ((/=) (Uuid.toString userGroup.uuid)) selectedUserGroupUuids
+                |> updateUserGroupMsg
+                |> ListingMsg
+
+        addUserGroupMsg userGroup =
+            ListingFilterAddSelectedUserGroup userGroup
+                (updateUserGroupMsg (Uuid.toString userGroup.uuid :: selectedUserGroupUuids))
+
+        viewUserGroupItem updateMsg icon userGroup =
+            Dropdown.buttonItem
+                [ onClick (updateMsg userGroup)
+                , class "dropdown-item-icon"
+                , dataCy "project_filter_user-groups_option"
+                ]
+                [ icon
+                , text userGroup.name
+                ]
+
+        selectedUserGroupItem =
+            viewUserGroupItem removeUserGroupMsg faListingFilterMultiSelected
+
+        foundSelectedUserGroups =
+            ActionResult.unwrap [] .items model.userGroupFilterSelectedUserGroups
+                |> List.sortBy .name
+
+        selectedUserGroupUuids =
+            model.questionnaires.filters
+                |> PaginationQueryFilter.getValue indexRouteUserGroupsFilterId
+                |> Maybe.unwrap [] (String.split ",")
+
+        selectedUserGroups =
+            selectedUserGroupUuids
+                |> List.filterMap (\a -> List.find (\ug -> Uuid.toString ug.uuid == a) foundSelectedUserGroups)
+                |> List.sortBy .name
+
+        filterUserGroups =
+            List.filter (not << flip List.member selectedUserGroupUuids << Uuid.toString << .uuid)
+
+        foundUserGroups =
+            model.userGroupFilterUserGroups
+                |> ActionResult.unwrap [] (List.sortBy .name << filterUserGroups << .items)
+
+        badge =
+            filterBadge selectedUserGroups
+
+        filterOperator =
+            Maybe.withDefault FilterOperator.OR <| PaginationQueryFilter.getOp indexRouteUserGroupsFilterId model.questionnaires.filters
+
+        searchInputItem =
+            [ Dropdown.customItem <|
+                div [ class "dropdown-item-search" ]
+                    [ input
+                        [ type_ "text"
+                        , class "form-control"
+                        , placeholder (gettext "Search user groups..." appState.locale)
+                        , onClickStopPropagation (UserGroupsFilterInput model.userGroupFilterSearchValue)
+                        , onInput UserGroupsFilterInput
+                        , value model.userGroupFilterSearchValue
+                        ]
+                        []
+                    ]
+            , Dropdown.divider
+            , Dropdown.customItem <|
+                div [ class "dropdown-item-operator" ]
+                    [ a
+                        [ classList [ ( "active", filterOperator == FilterOperator.OR ) ]
+                        , dataCy "filter_user-groups_operator_OR"
+                        , onClickStopPropagation (ListingMsg (filterMsg (filtersWithOp FilterOperator.OR)))
+                        ]
+                        [ text (gettext "OR" appState.locale) ]
+                    , a
+                        [ classList [ ( "active", filterOperator == FilterOperator.AND ) ]
+                        , dataCy "filter_user-groups_operator_AND"
+                        , onClickStopPropagation (ListingMsg (filterMsg (filtersWithOp FilterOperator.AND)))
+                        ]
+                        [ text (gettext "AND" appState.locale) ]
+                    ]
+            , Dropdown.divider
+            ]
+
+        selectedUserGroupsItems =
+            List.map selectedUserGroupItem selectedUserGroups
+
+        foundUserGroupsItems =
+            if not (List.isEmpty foundUserGroups) then
+                let
+                    addUserGroupItem =
+                        viewUserGroupItem addUserGroupMsg faListingFilterMultiNotSelected
+                in
+                List.map addUserGroupItem foundUserGroups
+
+            else if not (String.isEmpty model.userGroupFilterSearchValue) || List.isEmpty selectedUserGroups then
+                [ Dropdown.customItem <|
+                    div [ class "dropdown-item-empty" ]
+                        [ text (gettext "No user groups found" appState.locale) ]
+                ]
+
+            else
+                []
+
+        label =
+            case List.head selectedUserGroups of
+                Just selectedUserGroup ->
+                    selectedUserGroup.name
+
+                Nothing ->
+                    gettext "User Groups" appState.locale
+    in
+    Listing.CustomFilter indexRouteUserGroupsFilterId
+        { label = [ span [ class "filter-text-label" ] [ text label ], badge ]
+        , items = searchInputItem ++ selectedUserGroupsItems ++ foundUserGroupsItems
+        }
+
+
 filterBadge : List a -> Html msg
 filterBadge items =
     case List.length items of
@@ -542,7 +697,7 @@ listingDescription appState project =
                     Html.nothing
 
                 perm :: [] ->
-                    span [ class "fragment" ]
+                    span [ class "fragment d-flex" ]
                         [ MemberIcon.view perm.member
                         , text <| Member.visibleName perm.member
                         ]
@@ -563,7 +718,7 @@ listingDescription appState project =
                             else
                                 Html.nothing
                     in
-                    span [ class "fragment" ] (users ++ [ extraUsers ])
+                    span [ class "fragment d-flex" ] (users ++ [ extraUsers ])
 
         kmRoute =
             Routes.knowledgeModelsDetail project.knowledgeModelPackage.uuid

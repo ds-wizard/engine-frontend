@@ -75,6 +75,7 @@ module Wizard.Utils.Feature exposing
     , projectVersionHistory
     , projectsCreateCustom
     , projectsCreateFromTemplate
+    , projectsFilterUserGroups
     , projectsView
     , registry
     , settings
@@ -341,6 +342,11 @@ newsModal appState =
 projectsView : AppState -> Bool
 projectsView =
     always True
+
+
+projectsFilterUserGroups : AppState -> Bool
+projectsFilterUserGroups appState =
+    Admin.isEnabled appState.config.admin
 
 
 projectsCreateCustom : AppState -> Bool

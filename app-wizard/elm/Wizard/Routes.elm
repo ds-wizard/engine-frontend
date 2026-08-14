@@ -715,7 +715,7 @@ projectsIndex appState =
                 Nothing ->
                     Nothing
     in
-    ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing)
+    ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute PaginationQueryString.empty Nothing mbUserUuid Nothing Nothing Nothing Nothing Nothing Nothing Nothing)
 
 
 projectsIndexWithFilters : PaginationQueryFilters -> PaginationQueryString -> Route
@@ -725,6 +725,8 @@ projectsIndexWithFilters filters pagination =
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteIsTemplateFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
             (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteUsersFilterId filters)
+            (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteUserGroupsFilterId filters)
+            (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteUserGroupsFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
             (PaginationQueryFilters.getOp Wizard.Pages.Projects.Routes.indexRouteProjectTagsFilterId filters)
             (PaginationQueryFilters.getValue Wizard.Pages.Projects.Routes.indexRouteKnowledgeModelPackagesFilterId filters)
@@ -735,7 +737,7 @@ projectsIndexWithFilters filters pagination =
 isProjectsIndex : Route -> Bool
 isProjectsIndex route =
     case route of
-        ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _) ->
+        ProjectsRoute (Wizard.Pages.Projects.Routes.IndexRoute _ _ _ _ _ _ _ _ _ _) ->
             True
 
         _ ->

@@ -98,6 +98,8 @@ createListExtraParams filters =
         [ ( "isTemplate", PaginationQueryFilters.getValue "isTemplate" filters )
         , ( "userUuids", PaginationQueryFilters.getValue "userUuids" filters )
         , ( "userUuidsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "userUuids" filters) )
+        , ( "userGroupUuids", PaginationQueryFilters.getValue "userGroupUuids" filters )
+        , ( "userGroupUuidsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "userGroupUuids" filters) )
         , ( "projectTags", PaginationQueryFilters.getValue "projectTags" filters )
         , ( "projectTagsOp", Maybe.map FilterOperator.toString (PaginationQueryFilters.getOp "projectTags" filters) )
         , ( "knowledgeModelPackageIds", PaginationQueryFilters.getValue "knowledgeModelPackages" filters )

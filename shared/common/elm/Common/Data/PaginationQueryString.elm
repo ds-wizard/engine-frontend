@@ -9,7 +9,7 @@ module Common.Data.PaginationQueryString exposing
     , parser1
     , parser2
     , parser3
-    , parser7
+    , parser9
     , resetPage
     , setPage
     , sortDirectionToString
@@ -23,7 +23,7 @@ module Common.Data.PaginationQueryString exposing
     , wrapRoute1
     , wrapRoute2
     , wrapRoute3
-    , wrapRoute7
+    , wrapRoute9
     )
 
 import List.Extra as List
@@ -117,8 +117,8 @@ wrapRoute3 route defaultSortBy page q sort =
     route (PaginationQueryString page q sortBy sortDirection (Just defaultPageSize))
 
 
-wrapRoute7 : (PaginationQueryString -> h -> g -> f -> e -> d -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (h -> g -> f -> e -> d -> c -> b -> a)
-wrapRoute7 route defaultSortBy page q sort =
+wrapRoute9 : (PaginationQueryString -> j -> i -> h -> g -> f -> e -> d -> c -> b -> a) -> Maybe String -> Maybe Int -> Maybe String -> Maybe String -> (j -> i -> h -> g -> f -> e -> d -> c -> b -> a)
+wrapRoute9 route defaultSortBy page q sort =
     let
         ( sortBy, sortDirection ) =
             parseSort defaultSortBy sort
@@ -146,8 +146,10 @@ parser3 p qs1 qs2 qs3 =
     p <?> Query.int "page" <?> Query.string "q" <?> Query.string "sort" <?> qs1 <?> qs2 <?> qs3
 
 
-parser7 :
-    Parser a (Maybe Int -> Maybe String -> Maybe String -> i -> h -> g -> f -> e -> d -> c -> b)
+parser9 :
+    Parser a (Maybe Int -> Maybe String -> Maybe String -> k -> j -> i -> h -> g -> f -> e -> d -> c -> b)
+    -> Query.Parser k
+    -> Query.Parser j
     -> Query.Parser i
     -> Query.Parser h
     -> Query.Parser g
@@ -156,7 +158,7 @@ parser7 :
     -> Query.Parser d
     -> Query.Parser c
     -> Parser a b
-parser7 p qs1 qs2 qs3 qs4 qs5 qs6 qs7 =
+parser9 p qs1 qs2 qs3 qs4 qs5 qs6 qs7 qs8 qs9 =
     p
         <?> Query.int "page"
         <?> Query.string "q"
@@ -168,6 +170,8 @@ parser7 p qs1 qs2 qs3 qs4 qs5 qs6 qs7 =
         <?> qs5
         <?> qs6
         <?> qs7
+        <?> qs8
+        <?> qs9
 
 
 toUrl : PaginationQueryString -> String

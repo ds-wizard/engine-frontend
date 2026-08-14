@@ -29,7 +29,7 @@ view route appState model =
             Html.map DetailMsg <|
                 Detail.view subroute appState model.detailModel
 
-        IndexRoute _ _ _ _ _ _ _ _ ->
+        IndexRoute _ _ _ _ _ _ _ _ _ _ ->
             Html.map IndexMsg <|
                 Wizard.Pages.Projects.Index.View.view appState model.indexModel
 
