@@ -4,6 +4,7 @@ module Wizard.Pages.KMEditor.Editor.Common.EditorContext exposing
     , applyEvent
     , computeWarnings
     , editorRoute
+    , filterAddedAndDeleted
     , filterDeleted
     , filterDeletedWith
     , filterExistingAnswers
@@ -175,6 +176,11 @@ getParentUuid uuid editorContext =
 editorRoute : EditorContext -> String -> Routes.Route
 editorRoute editorContext entityUuidString =
     Routes.kmEditorEditor editorContext.kmEditor.uuid (getEditUuid entityUuidString editorContext)
+
+
+filterAddedAndDeleted : (a -> String) -> EditorContext -> List a -> List a
+filterAddedAndDeleted toUuid editorContext =
+    List.filter (not << flip isAddedAndDeleted editorContext << toUuid)
 
 
 filterDeleted : EditorContext -> List String -> List String
@@ -691,6 +697,14 @@ setAdded uuid editorContext =
 isAdded : String -> EditorContext -> Bool
 isAdded uuid editorContext =
     List.member uuid editorContext.addedUuids && not (isDeleted uuid editorContext)
+
+
+{-| Entity added and deleted again before publishing, i.e. it is not part of the
+knowledge model at all, so there is no reason to show it anywhere.
+-}
+isAddedAndDeleted : String -> EditorContext -> Bool
+isAddedAndDeleted uuid editorContext =
+    List.member uuid editorContext.addedUuids && isDeleted uuid editorContext
 
 
 addEmptyIntegrationEditorUuid : String -> EditorContext -> EditorContext

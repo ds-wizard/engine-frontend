@@ -56,6 +56,15 @@ type alias CreateEvents msg =
     }
 
 
+{-| Entities added and deleted again before publishing are not shown at all, the
+rest is sorted so that the deleted ones are at the end.
+-}
+treeEntities : (a -> String) -> EditorContext -> List a -> List a
+treeEntities toUuid editorContext =
+    EditorContext.sortDeleted toUuid editorContext
+        << EditorContext.filterAddedAndDeleted toUuid editorContext
+
+
 view : ViewProps msg -> AppState -> EditorContext -> Html msg
 view props appState editorContext =
     div [ class "tree-col" ]
@@ -88,7 +97,7 @@ treeNodeKM props appState editorContext =
 
         chapters =
             KnowledgeModel.getChapters knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         chapterNodes =
             List.map (treeNodeChapter props appState editorContext) chapters
@@ -100,7 +109,7 @@ treeNodeKM props appState editorContext =
 
         metrics =
             KnowledgeModel.getMetrics knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         metricNodes =
             List.map (treeNodeMetric props appState editorContext) metrics
@@ -112,7 +121,7 @@ treeNodeKM props appState editorContext =
 
         phases =
             KnowledgeModel.getPhases knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         phaseNodes =
             List.map (treeNodePhase props appState editorContext) phases
@@ -124,7 +133,7 @@ treeNodeKM props appState editorContext =
 
         tags =
             KnowledgeModel.getTags knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         tagNodes =
             List.map (treeNodeTag props appState editorContext) tags
@@ -136,7 +145,7 @@ treeNodeKM props appState editorContext =
 
         integrations =
             KnowledgeModel.getIntegrations knowledgeModel
-                |> EditorContext.sortDeleted Integration.getUuid editorContext
+                |> treeEntities Integration.getUuid editorContext
 
         integrationNodes =
             List.map (treeNodeIntegration props appState editorContext) integrations
@@ -148,7 +157,7 @@ treeNodeKM props appState editorContext =
 
         resourceCollections =
             KnowledgeModel.getResourceCollections knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         resourceCollectionNodes =
             List.map (treeNodeResourceCollection props appState editorContext) resourceCollections
@@ -188,7 +197,7 @@ treeNodeChapter props appState editorContext chapter =
     let
         questions =
             KnowledgeModel.getChapterQuestions chapter.uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted Question.getUuid editorContext
+                |> treeEntities Question.getUuid editorContext
 
         questionNodes =
             List.map (treeNodeQuestion props appState editorContext) questions
@@ -273,7 +282,7 @@ treeNodeQuestion props appState editorContext question =
 
         answers =
             KnowledgeModel.getQuestionAnswers uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         answerNodes =
             List.map (treeNodeAnswer props appState editorContext) answers
@@ -285,7 +294,7 @@ treeNodeQuestion props appState editorContext question =
 
         itemTemplateQuestions =
             KnowledgeModel.getQuestionItemTemplateQuestions uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted Question.getUuid editorContext
+                |> treeEntities Question.getUuid editorContext
 
         itemTemplateQuestionNodes =
             List.map (treeNodeQuestion props appState editorContext) itemTemplateQuestions
@@ -297,7 +306,7 @@ treeNodeQuestion props appState editorContext question =
 
         choices =
             KnowledgeModel.getQuestionChoices uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         choiceNodes =
             List.map (treeNodeChoice props appState editorContext) choices
@@ -309,7 +318,7 @@ treeNodeQuestion props appState editorContext question =
 
         references =
             KnowledgeModel.getQuestionReferences uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted Reference.getUuid editorContext
+                |> treeEntities Reference.getUuid editorContext
 
         referenceNodes =
             List.map (treeNodeReference props appState editorContext) references
@@ -321,7 +330,7 @@ treeNodeQuestion props appState editorContext question =
 
         experts =
             KnowledgeModel.getQuestionExperts uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         expertNodes =
             List.map (treeNodeExperts props appState editorContext) experts
@@ -359,7 +368,7 @@ treeNodeAnswer props appState editorContext answer =
     let
         followupQuestions =
             KnowledgeModel.getAnswerFollowupQuestions answer.uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted Question.getUuid editorContext
+                |> treeEntities Question.getUuid editorContext
 
         followupQuestionNodes =
             List.map (treeNodeQuestion props appState editorContext) followupQuestions
@@ -427,7 +436,7 @@ treeNodeResourceCollection props appState editorContext resourceCollection =
     let
         resourcePages =
             KnowledgeModel.getResourceCollectionResourcePages resourceCollection.uuid editorContext.kmEditor.knowledgeModel
-                |> EditorContext.sortDeleted .uuid editorContext
+                |> treeEntities .uuid editorContext
 
         resourcePageNodes =
             List.map (treeNodeResourcePage props appState editorContext) resourcePages
