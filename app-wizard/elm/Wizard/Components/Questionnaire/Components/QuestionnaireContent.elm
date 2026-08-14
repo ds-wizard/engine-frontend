@@ -18,7 +18,7 @@ import Common.Components.Badge as Badge
 import Common.Components.DatePicker as DatePicker
 import Common.Components.FileDownloader as FileDownloader
 import Common.Components.Flash as Flash
-import Common.Components.FontAwesome exposing (fa, faAdd, faDelete, faError, faInfo, faKmQuestion, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCopyLink, faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences, faRemove, faSearch, faSpinner)
+import Common.Components.FontAwesome exposing (fa, faAdd, faDelete, faError, faInfo, faKmQuestion, faNext, faPrev, faQuestionnaireClearAnswer, faQuestionnaireComments, faQuestionnaireCopyLink, faQuestionnaireCustomIntegrationReply, faQuestionnaireDesirable, faQuestionnaireExperts, faQuestionnaireFollowUpsIndication, faQuestionnaireItemCollapse, faQuestionnaireItemCollapseAll, faQuestionnaireItemExpand, faQuestionnaireItemExpandAll, faQuestionnaireItemMoveDown, faQuestionnaireItemMoveUp, faQuestionnaireResourcePageReferences, faQuestionnaireUrlReferences, faRemove, faSearch, faSpinner)
 import Common.Components.MarkdownEditor as MarkdownEditor
 import Common.Components.Modal as Modal
 import Common.Components.Tooltip exposing (tooltip, tooltipLeft, tooltipRight)
@@ -2394,7 +2394,22 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
 
         viewInput currentValue =
             if allowCustomReply then
-                input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
+                let
+                    customReplyIndicator =
+                        if String.isEmpty currentValue then
+                            Html.nothing
+
+                        else
+                            span
+                                (class "input-group-text"
+                                    :: tooltipLeft (gettext "Custom answer, not selected from the integration" locale)
+                                )
+                                [ faQuestionnaireCustomIntegrationReply ]
+                in
+                div [ class "input-group" ]
+                    [ input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
+                    , customReplyIndicator
+                    ]
 
             else
                 div [ class "input-group" ]

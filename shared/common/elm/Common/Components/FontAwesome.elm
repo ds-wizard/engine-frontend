@@ -117,6 +117,7 @@ module Common.Components.FontAwesome exposing
     , faQuestionnaireCopyLink
     , faQuestionnaireCopyLinkCopiedFw
     , faQuestionnaireCopyLinkFw
+    , faQuestionnaireCustomIntegrationReply
     , faQuestionnaireDesirable
     , faQuestionnaireExpand
     , faQuestionnaireExperts
@@ -784,6 +785,11 @@ faQuestionnaireCopyLink =
 faQuestionnaireCopyLinkFw : Html msg
 faQuestionnaireCopyLinkFw =
     fas "fa-fw fa-link"
+
+
+faQuestionnaireCustomIntegrationReply : Html msg
+faQuestionnaireCustomIntegrationReply =
+    fas "fa-pen"
 
 
 faQuestionnaireCopyLinkCopiedFw : Html msg
