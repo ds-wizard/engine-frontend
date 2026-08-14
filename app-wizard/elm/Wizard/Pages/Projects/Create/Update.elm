@@ -111,6 +111,13 @@ getProjectTemplates appState pqs =
     QuestionnaireApi.getList appState filters pqs
 
 
+projectTemplatesTypeHintsQueryString : PaginationQueryString -> PaginationQueryString
+projectTemplatesTypeHintsQueryString pqs =
+    pqs
+        |> PaginationQueryString.withSort (Just "name") PaginationQueryString.SortASC
+        |> PaginationQueryString.withSize (Just 50)
+
+
 tour : AppState -> Bool -> Bool -> TourConfig
 tour appState createFromTemplate createCustom =
     let
@@ -337,7 +344,7 @@ update wrapMsg msg appState model =
 
                 cfg =
                     { wrapMsg = wrapMsg << ProjectTemplateTypeHintInputMsg
-                    , getTypeHints = getProjectTemplates appState
+                    , getTypeHints = getProjectTemplates appState << projectTemplatesTypeHintsQueryString
                     , getError = gettext "Unable to get project templates." appState.locale
                     , setReply = formMsg << Uuid.toString << .uuid
                     , clearReply = Just <| formMsg ""
