@@ -14,12 +14,12 @@ import Common.Api.ApiError as ApiError exposing (ApiError)
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.ActionButton as ActionButton
 import Common.Components.Badge as Badge
-import Common.Components.FontAwesome exposing (faQuestionnaireCopyLink, faQuestionnaireCopyLinkCopied, faRemove, faRemoveFw, fas)
+import Common.Components.FontAwesome exposing (faQuestionnaireCopyLinkCopiedFw, faQuestionnaireCopyLinkFw, faRemove, faRemoveFw, fas)
 import Common.Components.FormExtra as FormExtra
 import Common.Components.FormGroup as FormGroup
 import Common.Components.FormResult as FormResult
 import Common.Components.GuideLink as GuideLink
-import Common.Components.Tooltip exposing (tooltip, tooltipLeft)
+import Common.Components.Tooltip exposing (tooltipLeft)
 import Common.Components.TypeHintInput as TypeHintInput
 import Common.Ports.Copy as Copy
 import Common.Utils.CmdUtils exposing (withNoCmd)
@@ -29,7 +29,7 @@ import Form exposing (Form)
 import Form.Field as Field
 import Gettext exposing (gettext)
 import Html exposing (Html, a, button, div, h5, hr, span, strong, text)
-import Html.Attributes exposing (class, classList, title)
+import Html.Attributes exposing (class, classList, disabled, title)
 import Html.Attributes.Extensions exposing (dataCy, dataTour, selectDataTour)
 import Html.Events exposing (onClick, onMouseOut)
 import Html.Extra as Html
@@ -38,7 +38,6 @@ import Random exposing (Seed)
 import Shortcut
 import String.Format as String
 import Task.Extra as Task
-import Time
 import Tuple.Extensions as Tuple
 import Uuid exposing (Uuid)
 import Uuid.Extra as Uuid
@@ -74,7 +73,6 @@ import Wizard.Utils.WizardGuideLinks as WizardGuideLinks
 type alias Model =
     { visible : Bool
     , savingSharing : ActionResult String
-    , lastSavingSharing : Time.Posix
     , projectShareForm : Form FormError ProjectShareForm
     , projectUuid : Uuid
     , userTypeHintInputModel : TypeHintInput.Model UserSuggestion
@@ -89,7 +87,6 @@ init : Model
 init =
     { visible = False
     , savingSharing = Unset
-    , lastSavingSharing = Time.millisToPosix 0
     , projectShareForm = ProjectShareForm.initEmpty
     , projectUuid = Uuid.nil
     , userTypeHintInputModel = TypeHintInput.init "memberId"
@@ -117,12 +114,13 @@ setProject project model =
 type Msg
     = Open ProjectCommon
     | Close
+    | Save
     | UserTypeHintInputMsg (TypeHintInput.Msg UserSuggestion)
     | UserGroupTypeHintInputMsg (TypeHintInput.Msg UserGroupSuggestion)
     | AddUser UserSuggestion
     | AddUserGroup UserGroupSuggestion
     | FormMsg Form.Msg
-    | PutQuestionnaireShareComplete Time.Posix (Result ApiError ())
+    | PutQuestionnaireShareComplete (Result ApiError ())
     | CopyLink String
     | ClearCopiedLink
 
@@ -170,9 +168,15 @@ update cfg msg appState model =
             )
 
         Close ->
-            ( { model | visible = False }
-            , Task.dispatch cfg.onCloseMsg
-            )
+            closeModal cfg model
+                |> Tuple.prepend appState.seed
+
+        Save ->
+            let
+                newModel =
+                    { model | projectShareForm = Form.update ProjectShareForm.validation Form.Submit model.projectShareForm }
+            in
+            saveSharing appState cfg newModel
                 |> Tuple.prepend appState.seed
 
         UserTypeHintInputMsg typeHintInputMsg ->
@@ -184,18 +188,17 @@ update cfg msg appState model =
                 |> Tuple.prepend appState.seed
 
         AddUser user ->
-            handleAddUser appState cfg model user
+            handleAddUser appState model user
 
         AddUserGroup userGroup ->
-            handleAddUserGroup appState cfg model userGroup
+            handleAddUserGroup appState model userGroup
 
         FormMsg formMsg ->
-            handleFormMsg cfg formMsg appState model
+            handleFormMsg formMsg model
                 |> Tuple.prepend appState.seed
 
-        PutQuestionnaireShareComplete time result ->
-            handlePutQuestionnaireComplete appState model time result
-                |> withNoCmd
+        PutQuestionnaireShareComplete result ->
+            handlePutQuestionnaireComplete appState cfg model result
                 |> Tuple.prepend appState.seed
 
         CopyLink link ->
@@ -256,8 +259,8 @@ handleUserGroupTypeHintInputMsg cfg typeHintInputMsg appState model =
     ( { model | userGroupTypeHintInputModel = userGroupTypeHintInputModel }, cmd )
 
 
-handleAddUser : AppState -> UpdateConfig msg -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
-handleAddUser appState cfg model user =
+handleAddUser : AppState -> Model -> UserSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUser appState model user =
     let
         userTypeHintInputModel =
             TypeHintInput.clear model.userTypeHintInputModel
@@ -293,12 +296,12 @@ handleAddUser appState cfg model user =
             }
     in
     newModel
-        |> saveSharing appState cfg
+        |> withNoCmd
         |> Tuple.prepend newSeed
 
 
-handleAddUserGroup : AppState -> UpdateConfig msg -> Model -> UserGroupSuggestion -> ( Seed, Model, Cmd msg )
-handleAddUserGroup appState cfg model userGroup =
+handleAddUserGroup : AppState -> Model -> UserGroupSuggestion -> ( Seed, Model, Cmd msg )
+handleAddUserGroup appState model userGroup =
     let
         userGroupTypeHintInputModel =
             TypeHintInput.clear model.userGroupTypeHintInputModel
@@ -334,46 +337,25 @@ handleAddUserGroup appState cfg model userGroup =
             }
     in
     newModel
-        |> saveSharing appState cfg
+        |> withNoCmd
         |> Tuple.prepend newSeed
 
 
-handleFormMsg : UpdateConfig msg -> Form.Msg -> AppState -> Model -> ( Model, Cmd msg )
-handleFormMsg cfg formMsg appState model =
-    let
-        newModel =
-            { model | projectShareForm = Form.update ProjectShareForm.validation formMsg model.projectShareForm }
-
-        shouldSave =
-            case formMsg of
-                Form.Input _ _ _ ->
-                    True
-
-                Form.RemoveItem _ _ ->
-                    True
-
-                _ ->
-                    False
-    in
-    if shouldSave then
-        saveSharing appState cfg newModel
-
-    else
-        ( newModel, Cmd.none )
+handleFormMsg : Form.Msg -> Model -> ( Model, Cmd msg )
+handleFormMsg formMsg model =
+    { model | projectShareForm = Form.update ProjectShareForm.validation formMsg model.projectShareForm }
+        |> withNoCmd
 
 
-handlePutQuestionnaireComplete : AppState -> Model -> Time.Posix -> Result ApiError () -> Model
-handlePutQuestionnaireComplete appState model time result =
+handlePutQuestionnaireComplete : AppState -> UpdateConfig msg -> Model -> Result ApiError () -> ( Model, Cmd msg )
+handlePutQuestionnaireComplete appState cfg model result =
     case result of
         Ok _ ->
-            if model.lastSavingSharing == time then
-                { model | savingSharing = Unset }
-
-            else
-                model
+            closeModal cfg model
 
         Err error ->
             { model | savingSharing = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
+                |> withNoCmd
 
 
 saveSharing : AppState -> UpdateConfig msg -> Model -> ( Model, Cmd msg )
@@ -384,15 +366,19 @@ saveSharing appState cfg model =
                 body =
                     ProjectShareForm.encode form
             in
-            ( { model
-                | savingSharing = Loading
-                , lastSavingSharing = appState.currentTime
-              }
-            , ProjectsApi.putShare appState cfg.projectUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete appState.currentTime)
+            ( { model | savingSharing = Loading }
+            , ProjectsApi.putShare appState cfg.projectUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete)
             )
 
         Nothing ->
             ( model, Cmd.none )
+
+
+closeModal : UpdateConfig msg -> Model -> ( Model, Cmd msg )
+closeModal cfg model =
+    ( { model | visible = False, savingSharing = Unset, copiedLink = False }
+    , Task.dispatch cfg.onCloseMsg
+    )
 
 
 
@@ -424,7 +410,7 @@ view appState model =
             [ FormResult.view model.savingSharing
             , Html.viewIf (Admin.isEnabled appState.config.admin) <| userGroupsView appState model
             , usersView appState model
-            , formView appState model.projectShareForm
+            , formView appState model
             ]
 
         shortcuts =
@@ -432,7 +418,7 @@ view appState model =
                 []
 
             else
-                [ Shortcut.simpleShortcut Shortcut.Enter Close
+                [ Shortcut.simpleShortcut Shortcut.Enter Save
                 , Shortcut.simpleShortcut Shortcut.Escape Close
                 ]
     in
@@ -447,13 +433,19 @@ view appState model =
                 , div [ class "modal-body" ] modalContent
                 , div [ class "modal-footer" ]
                     [ ActionButton.buttonWithAttrs
-                        { label = gettext "Done" appState.locale
+                        { label = gettext "Save" appState.locale
                         , result = model.savingSharing
-                        , msg = Close
+                        , msg = Save
                         , dangerous = False
                         , attrs = [ dataCy "modal_action-button" ]
                         }
-                    , copyLinkButton appState model
+                    , button
+                        [ onClick Close
+                        , disabled (ActionResult.isLoading model.savingSharing)
+                        , class "btn btn-secondary"
+                        , dataCy "modal_cancel-button"
+                        ]
+                        [ text (gettext "Cancel" appState.locale) ]
                     ]
                 ]
             ]
@@ -463,31 +455,25 @@ view appState model =
 copyLinkButton : AppState -> Model -> Html Msg
 copyLinkButton appState model =
     let
-        copyLinkTooltip =
-            if model.copiedLink then
-                tooltip (gettext "Copied!" appState.locale)
-
-            else
-                []
-
         publicLink =
             appState.clientUrl ++ String.replace "/wizard" "" (Routing.toUrl (Routes.ProjectsRoute (ProjectsRoutes.DetailRoute model.projectUuid (ProjectDetailRoute.Questionnaire Nothing Nothing))))
 
-        copyLinkIcon =
+        ( copyLinkIcon, copyLinkLabel ) =
             if model.copiedLink then
-                faQuestionnaireCopyLinkCopied
+                ( faQuestionnaireCopyLinkCopiedFw, gettext "Copied" appState.locale )
 
             else
-                faQuestionnaireCopyLink
+                ( faQuestionnaireCopyLinkFw, gettext "Copy link" appState.locale )
     in
-    button
-        (class "btn btn-outline-primary with-icon"
-            :: onClick (CopyLink publicLink)
-            :: onMouseOut ClearCopiedLink
-            :: copyLinkTooltip
-        )
-        [ copyLinkIcon
-        , text (gettext "Copy link" appState.locale)
+    div []
+        [ button
+            [ class "btn btn-link btn-sm with-icon px-0"
+            , onClick (CopyLink publicLink)
+            , onMouseOut ClearCopiedLink
+            ]
+            [ copyLinkIcon
+            , text copyLinkLabel
+            ]
         ]
 
 
@@ -656,9 +642,12 @@ userView appState users form i =
             Html.nothing
 
 
-formView : AppState -> Form FormError ProjectShareForm -> Html Msg
-formView appState form =
+formView : AppState -> Model -> Html Msg
+formView appState model =
     let
+        form =
+            model.projectShareForm
+
         sharingEnabled =
             Maybe.withDefault False (Form.getFieldAsBool "sharingEnabled" form).value
 
@@ -707,19 +696,22 @@ formView appState form =
 
                     sharingPermissionInput =
                         div
-                            [ class "form-group form-group-toggle-extra"
+                            [ class "form-group form-group-toggle-extra ShareModal__PublicLink"
                             , classList [ ( "visible", sharingEnabled ) ]
                             ]
-                            (String.formatHtml
-                                (gettext "Anyone with the link can %s the project." appState.locale)
-                                [ sharingSelect ]
+                            (List.map (Html.map FormMsg)
+                                (String.formatHtml
+                                    (gettext "Anyone with the link can %s the project." appState.locale)
+                                    [ sharingSelect ]
+                                )
+                                ++ [ copyLinkButton appState model ]
                             )
 
                     sharingEnabledInput =
                         FormGroup.toggle form "sharingEnabled" (gettext "Public link" appState.locale)
                 in
                 [ Html.map FormMsg sharingEnabledInput
-                , Html.map FormMsg sharingPermissionInput
+                , sharingPermissionInput
                 ]
 
             else

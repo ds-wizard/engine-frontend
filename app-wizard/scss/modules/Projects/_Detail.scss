@@ -211,6 +211,11 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
         height: $content-height;
     }
 
+    .ShareModal__PublicLink.visible {
+        // the row also contains the copy link button, so it needs more space
+        max-height: 6rem;
+    }
+
     .ShareModal__Users {
         .form-group {
             margin-top: 0.75rem;
