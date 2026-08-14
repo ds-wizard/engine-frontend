@@ -1,7 +1,7 @@
 module Wizard.Components.TypeHintInput.TypeHintInputItem exposing
     ( memberSuggestion
     , packageSuggestion
-    , packageSuggestionWithVersion
+    , packageSuggestionWithId
     , projectSuggestion
     , templateSuggestion
     , userGroupSuggestion
@@ -10,11 +10,13 @@ module Wizard.Components.TypeHintInput.TypeHintInputItem exposing
 import Common.Api.Models.UserSuggestion exposing (UserSuggestion)
 import Common.Components.Badge as Badge
 import Common.Components.TypeHintInput.TypeHintInputItem as TypeHintInputItem
+import Common.Utils.DocumentTemplateUtils as DocumentTemplateUtils
+import Common.Utils.KnowledgeModelUtils as KnowledgeModelUtils
 import Gettext exposing (gettext)
 import Html exposing (Html, div, strong, text)
+import Html.Attributes exposing (class)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Extra as Html
-import Version
 import Wizard.Api.Models.DocumentTemplateSuggestion exposing (DocumentTemplateSuggestion)
 import Wizard.Api.Models.KnowledgeModelPackageSuggestion exposing (KnowledgeModelPackageSuggestion)
 import Wizard.Api.Models.User as User
@@ -45,17 +47,17 @@ projectSuggestion project =
         ]
 
 
-packageSuggestionWithVersion : KnowledgeModelPackageSuggestion -> Html msg
-packageSuggestionWithVersion =
+packageSuggestionWithId : KnowledgeModelPackageSuggestion -> Html msg
+packageSuggestionWithId =
     packageSuggestion True
 
 
 packageSuggestion : Bool -> KnowledgeModelPackageSuggestion -> Html msg
-packageSuggestion withVersion pkg =
+packageSuggestion withPackageId pkg =
     let
-        version =
-            if withVersion then
-                Badge.light [ dataCy "typehint-item_package_version" ] [ text <| Version.toString pkg.version ]
+        packageIdBadge =
+            if withPackageId then
+                div [] [ Badge.light [ class "ms-0 border", dataCy "typehint-item_package_version" ] [ text (KnowledgeModelUtils.getPackageId pkg) ] ]
 
             else
                 Html.nothing
@@ -63,10 +65,8 @@ packageSuggestion withVersion pkg =
     TypeHintInputItem.complex
         [ div [] [ ItemIcon.view { text = pkg.name, image = Nothing } ]
         , div []
-            [ div []
-                [ strong [] [ text pkg.name ]
-                , version
-                ]
+            [ div [] [ strong [] [ text pkg.name ] ]
+            , packageIdBadge
             , div [] [ text pkg.description ]
             ]
         ]
@@ -77,10 +77,8 @@ templateSuggestion template =
     TypeHintInputItem.complex
         [ div [] [ ItemIcon.view { text = template.name, image = Nothing } ]
         , div []
-            [ div []
-                [ strong [] [ text template.name ]
-                , Badge.light [] [ text <| Version.toString template.version ]
-                ]
+            [ div [] [ strong [] [ text template.name ] ]
+            , div [] [ Badge.light [ class "ms-0 border" ] [ text (DocumentTemplateUtils.getId template) ] ]
             , div [] [ text template.description ]
             ]
         ]

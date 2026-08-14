@@ -231,7 +231,7 @@ parentKnowledgeModel appState kmEditorState forkOfPackage kmEditorDetail =
         [ h2 [] [ text (gettext "Parent Knowledge Model" appState.locale) ]
         , linkTo (Routes.knowledgeModelsDetail forkOfPackage.uuid)
             [ class "package-link" ]
-            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage forkOfPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithId (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage forkOfPackage) ]
         , outdatedWarning
         ]
 

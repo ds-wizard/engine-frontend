@@ -103,7 +103,7 @@ formContentSelectedKnowledgeModel appState model =
         viewKnowledgeModel packageDetail =
             div [ class "typehint-input" ]
                 [ div [ class "typehint-input-value form-control bg-light cursor-default" ]
-                    [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageDetail.toPackageSuggestion packageDetail) ]
+                    [ TypeHintInputItem.packageSuggestionWithId (KnowledgeModelPackageDetail.toPackageSuggestion packageDetail) ]
                 ]
 
         viewFormContent ( packageDetail, _ ) =
@@ -207,7 +207,7 @@ knowledgeModelFormFields appState model =
         knowledgeModelInput =
             let
                 cfg =
-                    { viewItem = TypeHintInputItem.packageSuggestionWithVersion
+                    { viewItem = TypeHintInputItem.packageSuggestionWithId
                     , wrapMsg = KnowledgeModelTypeHintInputMsg
                     , nothingSelectedItem = text "--"
                     , clearEnabled = True

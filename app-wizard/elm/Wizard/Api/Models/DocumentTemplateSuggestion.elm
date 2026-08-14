@@ -14,6 +14,8 @@ type alias DocumentTemplateSuggestion =
     { uuid : Uuid
     , name : String
     , description : String
+    , organizationId : String
+    , templateId : String
     , version : Version
     , formats : List DocumentTemplateFormatSimple
     }
@@ -25,5 +27,7 @@ decoder =
         |> D.required "uuid" Uuid.decoder
         |> D.required "name" D.string
         |> D.required "description" D.string
+        |> D.required "organizationId" D.string
+        |> D.required "templateId" D.string
         |> D.required "version" Version.decoder
         |> D.required "formats" (D.list DocumentTemplateFormatSimple.decoder)

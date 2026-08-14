@@ -578,7 +578,7 @@ knowledgeModel appState settings =
         , knowledgeModelFlash
         , linkTo (Routes.knowledgeModelsDetail settings.knowledgeModelPackage.uuid)
             [ class "package-link mb-2" ]
-            [ TypeHintInputItem.packageSuggestionWithVersion (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage settings.knowledgeModelPackage) ]
+            [ TypeHintInputItem.packageSuggestionWithId (KnowledgeModelPackageSuggestion.fromKnowledgeModelPackage settings.knowledgeModelPackage) ]
         , tagList
         , div [ class "mt-3" ]
             [ linkTo (Routes.projectsCreateMigration settings.uuid)
