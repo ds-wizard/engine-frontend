@@ -11,6 +11,7 @@ module Common.Components.NewsModal exposing
 
 import ActionResult exposing (ActionResult)
 import Common.Api.ApiError exposing (ApiError)
+import Common.Api.Models.RolePermission exposing (RolePermission)
 import Common.Components.FontAwesome exposing (faNext, faPrev)
 import Common.Components.Modal as Modal
 import Common.Components.NewsModal.Api as NewsModalApi
@@ -43,14 +44,14 @@ initialModel =
     }
 
 
-init : Maybe String -> String -> ( Model, Cmd Msg )
-init mbNewsUrl version =
+init : Maybe String -> String -> List RolePermission -> ( Model, Cmd Msg )
+init mbNewsUrl version permissions =
     case mbNewsUrl of
         Just newsUrl ->
             ( { initialModel
                 | news = ActionResult.Loading
               }
-            , NewsModalApi.getNews newsUrl version GetNewsComplete
+            , NewsModalApi.getNews newsUrl version permissions GetNewsComplete
             )
 
         Nothing ->

@@ -34,7 +34,7 @@ init flags location key =
 
         ( newsModalModel, newsModalCmd ) =
             if Feature.newsModal appState then
-                NewsModal.init appState.newsUrl BuildInfo.client.version
+                NewsModal.init appState.newsUrl BuildInfo.client.version (AppState.userPermissions appState)
 
             else
                 ( NewsModal.initialModel, Cmd.none )

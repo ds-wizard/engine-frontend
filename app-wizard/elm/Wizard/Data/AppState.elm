@@ -21,6 +21,7 @@ module Wizard.Data.AppState exposing
     , toGuideLinkConfig
     , toServerInfo
     , userHasPerm
+    , userPermissions
     )
 
 import Browser.Navigation as Navigation exposing (Key)
@@ -172,6 +173,11 @@ toGuideLinkConfig appState getLink =
 userHasPerm : RolePermission -> AppState -> Bool
 userHasPerm perm appState =
     Maybe.unwrap False (UserConfig.hasPerm perm) appState.config.user
+
+
+userPermissions : AppState -> List RolePermission
+userPermissions appState =
+    Maybe.unwrap [] (.permissions << .role) appState.config.user
 
 
 getClientUrlRoot : AppState -> String
