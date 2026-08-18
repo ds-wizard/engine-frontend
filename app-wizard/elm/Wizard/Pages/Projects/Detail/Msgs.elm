@@ -43,6 +43,7 @@ type Msg
     | NewDocumentMsg NewDocument.Msg
     | FilesMsg Files.Msg
     | ShareModalMsg ShareModal.Msg
+    | ShareModalSaveMsg ShareModal.ShareData
     | ShareModalCloseMsg
     | ShareDropdownMsg Dropdown.State
     | ShareDropdownCopyLink

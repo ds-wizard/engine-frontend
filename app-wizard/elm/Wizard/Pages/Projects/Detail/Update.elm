@@ -553,7 +553,7 @@ update wrapMsg msg appState model =
                 updateConfig =
                     { wrapMsg = wrapMsg << ShareModalMsg
                     , projectUuid = model.uuid
-                    , permissions = ActionResult.unwrap [] (.questionnaire >> .permissions) model.questionnaireModel
+                    , onSaveMsg = wrapMsg << ShareModalSaveMsg
                     , onCloseMsg = wrapMsg ShareModalCloseMsg
                     }
 
@@ -561,6 +561,15 @@ update wrapMsg msg appState model =
                     ShareModal.update updateConfig shareModalMsg appState model.shareModalModel
             in
             ( newSeed, { model | shareModalModel = shareModalModel }, cmd )
+
+        ShareModalSaveMsg shareData ->
+            withSeed
+                ( { model
+                    | questionnaireCommon = ActionResult.map (ProjectCommon.updateWithShareData shareData) model.questionnaireCommon
+                    , questionnaireModel = ActionResult.map (Questionnaire.updateWithShareData appState shareData) model.questionnaireModel
+                  }
+                , Cmd.none
+                )
 
         ShareModalCloseMsg ->
             withSeed ( { model | questionnaireModel = ActionResult.map Questionnaire.resetUserSuggestionDropdownModels model.questionnaireModel }, Cmd.none )

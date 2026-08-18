@@ -3,6 +3,7 @@ module Wizard.Pages.Projects.Common.ProjectShareFormMemberPermType exposing
     , encode
     , formOptions
     , initFromPerms
+    , toPerms
     , toString
     , validation
     )
@@ -88,18 +89,22 @@ validation =
             )
 
 
+toPerms : ProjectShareFormMemberPermType -> List String
+toPerms perms =
+    case perms of
+        Owner ->
+            [ ProjectPerm.view, ProjectPerm.comment, ProjectPerm.edit, ProjectPerm.admin ]
+
+        Editor ->
+            [ ProjectPerm.view, ProjectPerm.comment, ProjectPerm.edit ]
+
+        Commenter ->
+            [ ProjectPerm.view, ProjectPerm.comment ]
+
+        Viewer ->
+            [ ProjectPerm.view ]
+
+
 encode : ProjectShareFormMemberPermType -> E.Value
-encode perms =
-    E.list E.string <|
-        case perms of
-            Owner ->
-                [ ProjectPerm.view, ProjectPerm.comment, ProjectPerm.edit, ProjectPerm.admin ]
-
-            Editor ->
-                [ ProjectPerm.view, ProjectPerm.comment, ProjectPerm.edit ]
-
-            Commenter ->
-                [ ProjectPerm.view, ProjectPerm.comment ]
-
-            Viewer ->
-                [ ProjectPerm.view ]
+encode =
+    E.list E.string << toPerms

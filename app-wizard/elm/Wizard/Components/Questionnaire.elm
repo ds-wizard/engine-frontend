@@ -16,6 +16,7 @@ module Wizard.Components.Questionnaire exposing
     , update
     , updateContentScrollTopMsg
     , updateWithQuestionnaireData
+    , updateWithShareData
     , view
     , virtualizeContent
     )
@@ -48,7 +49,10 @@ import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.UserConfig as UserConfig
 import Wizard.Api.Models.KnowledgeModel as KnowledgeModel
 import Wizard.Api.Models.KnowledgeModel.Question as Question exposing (Question)
+import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.Project.ProjectSharing exposing (ProjectSharing)
 import Wizard.Api.Models.Project.ProjectTodo exposing (ProjectTodo)
+import Wizard.Api.Models.Project.ProjectVisibility exposing (ProjectVisibility)
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectDetail.Comment exposing (Comment)
 import Wizard.Api.Models.ProjectDetail.CommentThread exposing (CommentThread)
@@ -219,10 +223,20 @@ addFile file model =
 
 
 updateWithQuestionnaireData : AppState -> SetProjectData -> Model -> Model
-updateWithQuestionnaireData appState data model =
+updateWithQuestionnaireData appState data =
+    updateQuestionnaireAndRightPanel appState (ProjectQuestionnaire.updateWithQuestionnaireData data)
+
+
+updateWithShareData : AppState -> { a | permissions : List Permission, sharing : ProjectSharing, visibility : ProjectVisibility } -> Model -> Model
+updateWithShareData appState data =
+    updateQuestionnaireAndRightPanel appState (ProjectQuestionnaire.updateWithShareData data)
+
+
+updateQuestionnaireAndRightPanel : AppState -> (ProjectQuestionnaire -> ProjectQuestionnaire) -> Model -> Model
+updateQuestionnaireAndRightPanel appState updateFn model =
     let
         updatedQuestionnaire =
-            ProjectQuestionnaire.updateWithQuestionnaireData data model.questionnaire
+            updateFn model.questionnaire
 
         setNewPanel panel allowed =
             if allowed then

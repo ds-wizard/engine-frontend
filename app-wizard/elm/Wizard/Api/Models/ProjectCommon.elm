@@ -4,6 +4,7 @@ module Wizard.Api.Models.ProjectCommon exposing
     , dummy
     , encode
     , updateWithQuestionnaireData
+    , updateWithShareData
     )
 
 import Json.Decode as D exposing (Decoder)
@@ -59,6 +60,15 @@ updateWithQuestionnaireData data project =
         | name = data.name
         , isTemplate = data.isTemplate
         , permissions = data.permissions
+        , sharing = data.sharing
+        , visibility = data.visibility
+    }
+
+
+updateWithShareData : { a | permissions : List Permission, sharing : ProjectSharing, visibility : ProjectVisibility } -> ProjectCommon -> ProjectCommon
+updateWithShareData data project =
+    { project
+        | permissions = data.permissions
         , sharing = data.sharing
         , visibility = data.visibility
     }

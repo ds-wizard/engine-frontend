@@ -1,6 +1,7 @@
 module Wizard.Pages.Projects.Detail.Components.ShareModal exposing
     ( Model
     , Msg
+    , ShareData
     , UpdateConfig
     , init
     , openMsg
@@ -44,6 +45,8 @@ import Uuid.Extra as Uuid
 import Wizard.Api.Models.BootstrapConfig.AdminConfig as Admin
 import Wizard.Api.Models.Member as Member
 import Wizard.Api.Models.Permission exposing (Permission)
+import Wizard.Api.Models.Project.ProjectSharing as ProjectSharing exposing (ProjectSharing)
+import Wizard.Api.Models.Project.ProjectVisibility as ProjectVisibility exposing (ProjectVisibility)
 import Wizard.Api.Models.ProjectCommon exposing (ProjectCommon)
 import Wizard.Api.Models.ProjectPermission as ProjectPermission
 import Wizard.Api.Models.User as User
@@ -120,7 +123,7 @@ type Msg
     | AddUser UserSuggestion
     | AddUserGroup UserGroupSuggestion
     | FormMsg Form.Msg
-    | PutQuestionnaireShareComplete (Result ApiError ())
+    | PutQuestionnaireShareComplete ShareData (Result ApiError ())
     | CopyLink String
     | ClearCopiedLink
 
@@ -153,8 +156,15 @@ tour appState =
 type alias UpdateConfig msg =
     { wrapMsg : Msg -> msg
     , projectUuid : Uuid
-    , permissions : List Permission
+    , onSaveMsg : ShareData -> msg
     , onCloseMsg : msg
+    }
+
+
+type alias ShareData =
+    { permissions : List Permission
+    , sharing : ProjectSharing
+    , visibility : ProjectVisibility
     }
 
 
@@ -197,8 +207,8 @@ update cfg msg appState model =
             handleFormMsg formMsg model
                 |> Tuple.prepend appState.seed
 
-        PutQuestionnaireShareComplete result ->
-            handlePutQuestionnaireComplete appState cfg model result
+        PutQuestionnaireShareComplete shareData result ->
+            handlePutQuestionnaireComplete appState cfg model shareData result
                 |> Tuple.prepend appState.seed
 
         CopyLink link ->
@@ -347,11 +357,15 @@ handleFormMsg formMsg model =
         |> withNoCmd
 
 
-handlePutQuestionnaireComplete : AppState -> UpdateConfig msg -> Model -> Result ApiError () -> ( Model, Cmd msg )
-handlePutQuestionnaireComplete appState cfg model result =
+handlePutQuestionnaireComplete : AppState -> UpdateConfig msg -> Model -> ShareData -> Result ApiError () -> ( Model, Cmd msg )
+handlePutQuestionnaireComplete appState cfg model shareData result =
     case result of
         Ok _ ->
-            closeModal cfg model
+            let
+                ( newModel, closeCmd ) =
+                    closeModal cfg model
+            in
+            ( newModel, Cmd.batch [ Task.dispatch (cfg.onSaveMsg shareData), closeCmd ] )
 
         Err error ->
             { model | savingSharing = ApiError.toActionResult appState (gettext "Questionnaire could not be saved." appState.locale) error }
@@ -367,11 +381,39 @@ saveSharing appState cfg model =
                     ProjectShareForm.encode form
             in
             ( { model | savingSharing = Loading }
-            , ProjectsApi.putShare appState cfg.projectUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete)
+            , ProjectsApi.putShare appState cfg.projectUuid body (cfg.wrapMsg << PutQuestionnaireShareComplete (toShareData model form))
             )
 
         Nothing ->
             ( model, Cmd.none )
+
+
+toShareData : Model -> ProjectShareForm -> ShareData
+toShareData model form =
+    let
+        toMember formPermission =
+            case formPermission.memberType of
+                UserProjectPermType ->
+                    Maybe.map Member.userMember <|
+                        List.find (.uuid >> (==) formPermission.memberUuid) model.users
+
+                UserGroupProjectPermType ->
+                    Maybe.map Member.userGroupMember <|
+                        List.find (.uuid >> (==) formPermission.memberUuid) model.userGroups
+
+        toPermission formPermission =
+            Maybe.map
+                (\member ->
+                    { member = member
+                    , perms = QuestionnaireEditFormMemberPerms.toPerms formPermission.perms
+                    }
+                )
+                (toMember formPermission)
+    in
+    { permissions = List.filterMap toPermission form.permissions
+    , sharing = ProjectSharing.fromFormValues form.sharingEnabled form.sharingPermission
+    , visibility = ProjectVisibility.fromFormValues form.visibilityEnabled form.visibilityPermission form.sharingEnabled form.sharingPermission
+    }
 
 
 closeModal : UpdateConfig msg -> Model -> ( Model, Cmd msg )

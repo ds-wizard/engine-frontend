@@ -37,6 +37,7 @@ module Wizard.Api.Models.ProjectQuestionnaire exposing
     , todoUuid
     , updateContent
     , updateWithQuestionnaireData
+    , updateWithShareData
     )
 
 import Common.Utils.Bool as Bool
@@ -263,6 +264,15 @@ updateWithQuestionnaireData data detail =
         , labels = data.labels
         , unresolvedCommentCounts = data.unresolvedCommentCounts
         , resolvedCommentCounts = data.resolvedCommentCounts
+    }
+
+
+updateWithShareData : { a | permissions : List Permission, sharing : ProjectSharing, visibility : ProjectVisibility } -> ProjectQuestionnaire -> ProjectQuestionnaire
+updateWithShareData data detail =
+    { detail
+        | permissions = data.permissions
+        , sharing = data.sharing
+        , visibility = data.visibility
     }
 
 
