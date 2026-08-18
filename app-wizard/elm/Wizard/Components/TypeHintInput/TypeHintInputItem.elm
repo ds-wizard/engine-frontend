@@ -28,9 +28,21 @@ import Wizard.Data.AppState exposing (AppState)
 
 memberSuggestion : UserSuggestion -> Html msg
 memberSuggestion user =
+    let
+        affiliationBadge =
+            case user.affiliation of
+                Just affiliation ->
+                    Badge.badge [ class "d-block px-0 fw-normal text-wrap text-start text-secondary ms-0 me-2" ] [ text affiliation ]
+
+                Nothing ->
+                    Html.nothing
+    in
     TypeHintInputItem.complex
         [ div [] [ UserIcon.viewSmall user ]
-        , div [] [ text <| User.fullName user ]
+        , div []
+            [ text <| User.fullName user
+            , affiliationBadge
+            ]
         ]
 
 

@@ -231,13 +231,16 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-left: 0.5rem;
-            padding: 0.25rem 1rem 0.25rem 0.5rem;
-            border-top-left-radius: 5rem;
-            border-bottom-left-radius: 5rem;
+            margin-left: $spacer-3;
+            margin-right: $spacer-3;
+            padding: $spacer-2;
 
             &:hover {
-                background: $gray-200;
+                background: $gray-200 !important;
+            }
+
+            &:not(:first-child) {
+                margin-top: $spacer-1;
             }
 
             & > div {
@@ -251,6 +254,10 @@ $public-content-with-warning-height: calc(100vh - #{$header-height + $warning-he
 
             .fas, .far, .fab{
                 margin-left: 0.5rem;
+            }
+
+            &-name {
+                font-weight: 500;
             }
         }
 

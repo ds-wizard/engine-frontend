@@ -526,10 +526,10 @@ userGroupView appState userGroups form i =
                     else
                         Html.nothing
             in
-            div [ class "user-row" ]
+            userRow
                 [ div []
                     [ MemberIcon.viewCustom { text = userGroup.name, image = Nothing }
-                    , text userGroup.name
+                    , span [ class "user-row-name" ] [ text userGroup.name ]
                     , privateBadge
                     ]
                 , div []
@@ -626,11 +626,22 @@ userView appState users form i =
                             , title (gettext "Remove" appState.locale)
                             ]
                             [ faRemoveFw ]
+
+                affiliationBadge =
+                    case user.affiliation of
+                        Just affiliation ->
+                            Badge.badge [ class "d-block px-0 fw-normal text-wrap text-start text-secondary ms-0 me-2" ] [ text affiliation ]
+
+                        Nothing ->
+                            Html.nothing
             in
-            div [ class "user-row" ]
-                [ div []
+            userRow
+                [ div [ class "align-items-start" ]
                     [ MemberIcon.viewCustom { text = User.fullName user, image = Just (User.imageUrlOrGravatar user) }
-                    , text <| User.fullName user
+                    , div []
+                        [ span [ class "user-row-name" ] [ text <| User.fullName user ]
+                        , affiliationBadge
+                        ]
                     ]
                 , div []
                     [ roleSelect
@@ -640,6 +651,11 @@ userView appState users form i =
 
         Nothing ->
             Html.nothing
+
+
+userRow : List (Html msg) -> Html msg
+userRow =
+    div [ class "user-row bg-light rounded" ]
 
 
 formView : AppState -> Model -> Html Msg

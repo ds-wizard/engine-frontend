@@ -18,6 +18,7 @@ type alias UserSuggestion =
     , lastName : String
     , gravatarHash : String
     , imageUrl : Maybe String
+    , affiliation : Maybe String
     }
 
 
@@ -29,6 +30,7 @@ decoder =
         |> D.required "lastName" D.string
         |> D.required "gravatarHash" D.string
         |> D.required "imageUrl" (D.maybe D.string)
+        |> D.required "affiliation" (D.maybe D.string)
 
 
 encode : UserSuggestion -> E.Value
@@ -39,6 +41,7 @@ encode userSuggestion =
         , ( "lastName", E.string userSuggestion.lastName )
         , ( "gravatarHash", E.string userSuggestion.gravatarHash )
         , ( "imageUrl", E.maybe E.string userSuggestion.imageUrl )
+        , ( "affiliation", E.maybe E.string userSuggestion.affiliation )
         ]
 
 

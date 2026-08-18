@@ -649,6 +649,7 @@ update wrapMsg msg appState model =
                                 , lastName = ""
                                 , gravatarHash = ""
                                 , imageUrl = Nothing
+                                , affiliation = Nothing
                                 }
 
                         permission =

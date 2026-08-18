@@ -26,6 +26,7 @@ type alias UserConfig =
     , userGroupUuids : List Uuid
     , lastSeenNewsId : Maybe String
     , pluginSettings : Dict String String
+    , affiliation : Maybe String
     }
 
 
@@ -41,6 +42,7 @@ decoder =
         |> D.required "userGroupUuids" (D.list Uuid.decoder)
         |> D.required "lastSeenNewsId" (D.maybe D.string)
         |> D.required "pluginSettings" (D.dict D.valueAsString)
+        |> D.optional "affiliation" (D.maybe D.string) Nothing
 
 
 toUserSuggestion : UserConfig -> UserSuggestion
@@ -50,6 +52,7 @@ toUserSuggestion userInfo =
     , lastName = userInfo.lastName
     , gravatarHash = Gravatar.hashEmail userInfo.email
     , imageUrl = userInfo.imageUrl
+    , affiliation = userInfo.affiliation
     }
 
 
