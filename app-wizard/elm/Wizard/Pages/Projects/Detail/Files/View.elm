@@ -85,7 +85,7 @@ listingDescription : AppState -> ProjectFile -> Html Msg
 listingDescription appState projectFile =
     let
         userFragment =
-            span [ class "fragment" ] <|
+            span [ class "fragment d-flex" ] <|
                 case projectFile.createdBy of
                     Just user ->
                         [ UserIcon.viewSmall user
