@@ -228,7 +228,7 @@ viewDynamic (DynamicFormConfig cfg) =
     in
     Shortcut.shortcutElement shortcuts
         [ class (Maybe.withDefault "" cfg.class)
-        , class "pb-6"
+        , class "pb-6 d-block"
         ]
         [ FormResult.errorOnlyView cfg.formResult
         , cfg.formView
