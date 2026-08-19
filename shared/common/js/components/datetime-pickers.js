@@ -6,6 +6,7 @@ class DatePicker extends HTMLElement {
         super()
         this._options = options
         this._datePickerValue = ''
+        this._input = null
     }
 
     get datePickerValue() {
@@ -19,10 +20,22 @@ class DatePicker extends HTMLElement {
         this._instance.setDate(dateValue)
     }
 
+    static get observedAttributes() {
+        return ['input-id']
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'input-id' && oldValue !== newValue) {
+            this._syncInputId()
+        }
+    }
+
     connectedCallback() {
         const wrapper = document.createElement('div')
         wrapper.innerHTML = '<input type="text" class="form-control form-control-flatpickr" data-input>'
         this.appendChild(wrapper)
+        this._input = wrapper.querySelector('input')
+        this._syncInputId()
 
         this._options.wrap = true
         this._options.onChange = (selectedDates, dateStr) => {
@@ -44,6 +57,19 @@ class DatePicker extends HTMLElement {
 
         this._instance = flatpickr(wrapper, this._options)
         this._instance.setDate(this._datePickerValue)
+    }
+
+    _syncInputId() {
+        if (!this._input) return
+
+        const id = this.getAttribute('input-id')
+        if (id) {
+            this._input.id = id
+            this._input.name = id
+        } else {
+            this._input.removeAttribute('id')
+            this._input.removeAttribute('name')
+        }
     }
 
     _removeErrorElement() {

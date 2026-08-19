@@ -1,5 +1,6 @@
 module Common.Components.MarkdownEditor exposing
-    ( labels
+    ( inputId
+    , labels
     , markdownEditor
     , mode
     , onBlur
@@ -30,6 +31,13 @@ value =
 mode : String -> Html.Attribute msg
 mode =
     Html.Attributes.property "editorMode" << E.string
+
+
+{-| Set the id (and name) of the textarea element rendered inside the editor.
+-}
+inputId : String -> Html.Attribute msg
+inputId =
+    Html.Attributes.attribute "input-id"
 
 
 labels : Gettext.Locale -> Html.Attribute msg

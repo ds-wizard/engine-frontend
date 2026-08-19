@@ -86,10 +86,14 @@ class MarkdownEditorElement extends HTMLElement {
     }
 
     static get observedAttributes() {
-        return ['labels']
+        return ['labels', 'input-id']
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'input-id' && oldValue !== newValue) {
+            this.syncInputIdIntoUi()
+        }
+
         if (name === 'labels' && oldValue !== newValue) {
             try {
                 this.labels = newValue ? JSON.parse(newValue) : {}
@@ -171,6 +175,20 @@ class MarkdownEditorElement extends HTMLElement {
         this.renderToolbar()
         this.syncValueIntoUi()
         this.syncModeIntoUi()
+        this.syncInputIdIntoUi()
+    }
+
+    syncInputIdIntoUi() {
+        if (!this.textarea) return
+
+        const id = this.getAttribute('input-id')
+        if (id) {
+            this.textarea.id = id
+            this.textarea.name = id
+        } else {
+            this.textarea.removeAttribute('id')
+            this.textarea.removeAttribute('name')
+        }
     }
 
     disconnectedCallback() {

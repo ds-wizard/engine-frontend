@@ -34,7 +34,7 @@ import Debounce exposing (Debounce)
 import Dict
 import Gettext exposing (gettext, ngettext)
 import Html exposing (Html, a, button, div, h2, i, input, label, li, option, p, select, span, strong, text, ul)
-import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, selected, target, type_, value)
+import Html.Attributes exposing (attribute, checked, class, classList, disabled, href, id, name, selected, target, type_, value)
 import Html.Attributes.Extensions exposing (dataCy)
 import Html.Events exposing (onBlur, onClick, onFocus, onInput, onMouseDown, onMouseOut)
 import Html.Events.Extra exposing (onChange)
@@ -81,6 +81,7 @@ import Wizard.Components.Questionnaire.Components.FileUploadModal as FileUploadM
 import Wizard.Components.Questionnaire.QuestionViewFlags as QuestionViewFlags
 import Wizard.Components.Questionnaire.QuestionnaireRightPanel as QuestionnaireRightPanel exposing (PluginQuestionActionData, QuestionnaireRightPanel)
 import Wizard.Components.Questionnaire.QuestionnaireUpdateReturnData as QuestionnaireUpdateReturnData exposing (QuestionnaireUpdateReturnData)
+import Wizard.Components.Questionnaire.QuestionnaireUtils as QuestionnaireUtils
 import Wizard.Components.Questionnaire.QuestionnaireViewSettings exposing (QuestionnaireViewSettings)
 import Wizard.Components.Questionnaire.QuestionnaireVirtualization exposing (ChapterLinksNodeData, ChapterNodeData, ContentNode(..), ItemEmptyNodeData, ItemFooterNodeData, ItemHeaderNodeData, ItemsEndNodeData, NestingType(..), QuestionExtraCrossReference, QuestionExtraData, QuestionExtraResourceCollection, QuestionExtraResourcePage, QuestionExtraUrlReference, QuestionNodeData, QuestionSpecificNodeData(..))
 import Wizard.Components.Tag as Tag
@@ -1394,6 +1395,9 @@ viewAnswer props order answer =
 
         setReply =
             SetReply props.questionPath (ReplyValue.AnswerReply answer.uuid)
+
+        fieldName =
+            QuestionnaireUtils.pathToFieldId props.questionPath
     in
     div
         [ class "questionnaireContent__option"
@@ -1405,6 +1409,8 @@ viewAnswer props order answer =
         [ label []
             [ input
                 [ type_ "radio"
+                , id (fieldName ++ "_" ++ answer.uuid)
+                , name fieldName
                 , checked isSelected
                 , disabled isDisabled
                 , onClick setReply
@@ -1597,8 +1603,11 @@ viewQuestionValueLazy locale pluginActions questionNodeData questionViewFlags re
         replyValue =
             Maybe.unwrap defaultValue (ReplyValue.getStringReply << .value) mbReply
 
+        fieldId =
+            QuestionnaireUtils.pathToFieldId questionPath
+
         defaultAttrs =
-            [ class "form-control", value replyValue ]
+            [ class "form-control", value replyValue, id fieldId, name fieldId ]
 
         toMsg =
             SetReply questionPath << ReplyValue.StringReply
@@ -1652,13 +1661,13 @@ viewQuestionValueLazy locale pluginActions questionNodeData questionViewFlags re
                     [ input (type_ "number" :: defaultAttrs ++ extraAttrs) [] ]
 
                 Just QuestionValueType.DateQuestionValueType ->
-                    readonlyOr [ DatePicker.datePicker [ DatePicker.onChange toMsg, DatePicker.value replyValue ] ]
+                    readonlyOr [ DatePicker.datePicker [ DatePicker.onChange toMsg, DatePicker.value replyValue, DatePicker.inputId fieldId ] ]
 
                 Just QuestionValueType.DateTimeQuestionValueType ->
-                    readonlyOr [ DatePicker.dateTimePicker [ DatePicker.onChange toMsg, DatePicker.value replyValue ] ]
+                    readonlyOr [ DatePicker.dateTimePicker [ DatePicker.onChange toMsg, DatePicker.value replyValue, DatePicker.inputId fieldId ] ]
 
                 Just QuestionValueType.TimeQuestionValueType ->
-                    readonlyOr [ DatePicker.timePicker [ DatePicker.onChange toMsg, DatePicker.value replyValue ] ]
+                    readonlyOr [ DatePicker.timePicker [ DatePicker.onChange toMsg, DatePicker.value replyValue, DatePicker.inputId fieldId ] ]
 
                 Just QuestionValueType.EmailQuestionValueType ->
                     [ input (type_ "email" :: defaultAttrs ++ extraAttrs) []
@@ -1679,6 +1688,7 @@ viewQuestionValueLazy locale pluginActions questionNodeData questionViewFlags re
                             [ MarkdownEditor.value replyValue
                             , MarkdownEditor.onChange toMsg
                             , MarkdownEditor.labels locale
+                            , MarkdownEditor.inputId fieldId
                             ]
                         ]
 
@@ -1836,6 +1846,9 @@ viewChoice props order choice =
                         choice.uuid :: selectedChoiceUuids
             in
             SetReply props.questionPath (ReplyValue.MultiChoiceReply newSelectedChoices)
+
+        fieldName =
+            QuestionnaireUtils.pathToFieldId props.questionPath
     in
     div
         [ class "questionnaireContent__option"
@@ -1847,6 +1860,8 @@ viewChoice props order choice =
         [ label []
             [ input
                 [ type_ "checkbox"
+                , id (fieldName ++ "_" ++ choice.uuid)
+                , name fieldName
                 , checked isSelected
                 , disabled isDisabled
                 , onClick toggleChoiceMsg
@@ -2013,6 +2028,9 @@ viewQuestionItemSelectLazy locale pluginActions questionNodeData questionViewFla
         mbSelectedItem =
             Maybe.map (ReplyValue.getSelectedItemUuid << .value) mbReply
 
+        fieldId =
+            QuestionnaireUtils.pathToFieldId questionPath
+
         extraAttrs =
             if QuestionViewFlags.isReadOnly questionViewFlags then
                 [ disabled True ]
@@ -2099,7 +2117,7 @@ viewQuestionItemSelectLazy locale pluginActions questionNodeData questionViewFla
         , questionViewFlags = questionViewFlags
         }
         [ div [ class "questionnaireContent__value questionnaireContent__itemSelect" ]
-            [ select (class "form-control" :: extraAttrs) optionsWithSelect
+            [ select (class "form-control" :: id fieldId :: name fieldId :: extraAttrs) optionsWithSelect
             , itemLink
             , warning
             , missingItemWarning
@@ -2363,6 +2381,9 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
         allowCustomReply =
             Maybe.unwrap False .allowCustomReply apiIntegrationData
 
+        fieldId =
+            QuestionnaireUtils.pathToFieldId questionPath
+
         mbReply =
             replyFromString replyString
 
@@ -2407,7 +2428,7 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
                                 [ faQuestionnaireCustomIntegrationReply ]
                 in
                 div [ class "input-group" ]
-                    [ input ([ class "form-control", type_ "text", value currentValue ] ++ extraArgs) []
+                    [ input ([ class "form-control", type_ "text", value currentValue, id fieldId, name fieldId ] ++ extraArgs) []
                     , customReplyIndicator
                     ]
 
@@ -2415,7 +2436,7 @@ viewQuestionIntegrationApiLazy locale pluginActions questionNodeData questionVie
                 div [ class "input-group" ]
                     [ span [ class "input-group-text" ]
                         [ faSearch ]
-                    , input ([ class "form-control", type_ "text" ] ++ extraArgs) []
+                    , input ([ class "form-control", type_ "text", id fieldId, name fieldId ] ++ extraArgs) []
                     ]
 
         questionInput =

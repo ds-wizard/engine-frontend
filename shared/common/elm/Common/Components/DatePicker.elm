@@ -2,6 +2,7 @@ module Common.Components.DatePicker exposing
     ( datePicker
     , datePickerUtc
     , dateTimePicker
+    , inputId
     , invalid
     , onChange
     , timePicker
@@ -33,6 +34,13 @@ dateTimePicker attributes =
 timePicker : List (Html.Attribute msg) -> Html msg
 timePicker attributes =
     Html.node "time-picker" attributes []
+
+
+{-| Set the id (and name) of the input element rendered inside the picker.
+-}
+inputId : String -> Html.Attribute msg
+inputId =
+    Html.Attributes.attribute "input-id"
 
 
 invalid : Bool -> Html.Attribute msg
