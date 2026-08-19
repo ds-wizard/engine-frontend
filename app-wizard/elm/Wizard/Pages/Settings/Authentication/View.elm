@@ -66,7 +66,7 @@ formView roles appState form =
             , FormGroup.toggle form "registrationEnabled" (gettext "Registration" appState.locale)
             , FormExtra.mdAfter (gettext "If enabled, users can create new internal accounts directly in the instance." appState.locale)
             , FormGroup.toggle form "nonAdminLoginEnabled" (gettext "Non-Admin Login" appState.locale)
-            , FormExtra.mdAfter (gettext "If enabled, all users can use internal login using username and password. Otherwise, only admin users can use internal login, and other users must use an external identity provider." appState.locale)
+            , FormExtra.mdAfter (gettext "If enabled, all users can use internal login using email address and password. Otherwise, only admin users can use internal login, and other users must use an external identity provider." appState.locale)
             , FormGroup.toggle form "twoFactorAuthEnabled" (gettext "Two-Factor Authentication" appState.locale)
             , FormExtra.mdAfter (gettext "If enabled, users first enter a username and password at login, and then they receive a one-time code to confirm the login on their email." appState.locale)
             , twoFactorInputs
