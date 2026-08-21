@@ -18,6 +18,7 @@ module Wizard.Plugins.PluginElement exposing
     , questionValue
     , settingValue
     , userSettingsValue
+    , userValue
     )
 
 import Html exposing (Attribute, Html, node)
@@ -101,6 +102,11 @@ settingValue =
 userSettingsValue : String -> Html.Attribute msg
 userSettingsValue =
     Html.Attributes.attribute "user-settings-value"
+
+
+userValue : String -> Html.Attribute msg
+userValue =
+    Html.Attributes.attribute "user-value"
 
 
 

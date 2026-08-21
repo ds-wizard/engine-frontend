@@ -58,6 +58,7 @@ viewPluginSettings appState model plugin settingsConnector pluginSettings =
         [ Page.header plugin.name []
         , PluginElement.element settingsConnector.element
             [ PluginElement.settingValue pluginSettings
+            , PluginElement.userValue (AppState.getPluginUser appState)
             , PluginElement.onSettingsValueChange UpdatePluginSettings
             ]
         , formActions

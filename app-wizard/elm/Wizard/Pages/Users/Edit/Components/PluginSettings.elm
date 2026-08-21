@@ -139,6 +139,7 @@ pluginSettingsView appState model plugin userSettingsConnector pluginSettings =
             PluginElement.element userSettingsConnector.element
                 [ PluginElement.settingValue (AppState.getPluginSettings appState plugin.uuid)
                 , PluginElement.userSettingsValue pluginSettings
+                , PluginElement.userValue (AppState.getPluginUser appState)
                 , PluginElement.onUserSettingsValueChange UpdatePluginSettings
                 ]
 

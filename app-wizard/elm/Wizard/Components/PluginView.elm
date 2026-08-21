@@ -11,5 +11,6 @@ view appState pluginUuid pluginElement attributes =
     PluginElement.element pluginElement
         (PluginElement.settingValue (AppState.getPluginSettings appState pluginUuid)
             :: PluginElement.userSettingsValue (AppState.getPluginUserSettings appState pluginUuid)
+            :: PluginElement.userValue (AppState.getPluginUser appState)
             :: attributes
         )

@@ -2313,6 +2313,7 @@ viewQuestionIntegration appState model questionViewFlags questionNodeData mbRepl
                             , rendersReply = connector.rendersReply
                             , userSettings = AppState.getPluginUserSettings appState plugin.uuid
                             , settings = AppState.getPluginSettings appState plugin.uuid
+                            , user = AppState.getPluginUser appState
                             }
                                 |> encodeIntegrationPluginData
                                 |> E.encode 0
@@ -2539,6 +2540,7 @@ viewQuestionIntegrationPluginLazy locale pluginActions questionNodeData question
                         PluginElement.element pluginData.pluginElement
                             [ PluginElement.settingValue pluginData.settings
                             , PluginElement.userSettingsValue pluginData.userSettings
+                            , PluginElement.userValue pluginData.user
                             , PluginElement.pluginIntegrationSettingsValue pluginData.integrationSettings
                             , PluginElement.integrationReplyValue replyValue
                             , PluginElement.onReplyValueChange (SetPluginReply questionNodeData.questionPath)
@@ -2578,6 +2580,7 @@ type alias IntegrationPluginData =
     , rendersReply : Bool
     , settings : String
     , userSettings : String
+    , user : String
     }
 
 
@@ -2589,6 +2592,7 @@ encodeIntegrationPluginData data =
         , ( "rendersReply", E.bool data.rendersReply )
         , ( "settings", E.string data.settings )
         , ( "userSettings", E.string data.userSettings )
+        , ( "user", E.string data.user )
         ]
 
 
@@ -2600,6 +2604,7 @@ decodeIntegrationPluginData =
         |> D.required "rendersReply" D.bool
         |> D.required "settings" D.string
         |> D.required "userSettings" D.string
+        |> D.required "user" D.string
 
 
 type alias ViewQuestionIntegrationTypeHintsProps =
