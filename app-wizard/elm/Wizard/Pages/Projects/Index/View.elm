@@ -817,7 +817,7 @@ knowledgeModelStateBadge : AppState -> Project -> Html msg
 knowledgeModelStateBadge appState project =
     case project.knowledgeModelState of
         KnowledgeModelProjectState.Outdated ->
-            linkTo (Routes.projectsCreateMigration project.uuid)
+            linkTo (Routes.projectsDetailSettings project.uuid)
                 (class Badge.warningClass
                     :: dataCy "badge_project_knowledge-model-update-available"
                     :: tooltip (gettext "Knowledge model update available" appState.locale)
