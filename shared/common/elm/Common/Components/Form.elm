@@ -11,6 +11,7 @@ module Common.Components.Form exposing
     , setClass
     , setFormChanged
     , setFormView
+    , setNoPaddingBottom
     , setWide
     , viewDynamic
     , viewSimple
@@ -172,6 +173,7 @@ type alias DynamicFormConfigData a msg =
     , isMac : Bool
     , locale : Gettext.Locale
     , class : Maybe String
+    , paddingBottom : Bool
     }
 
 
@@ -193,6 +195,7 @@ initDynamic appState submitMsg actionResult =
         , isMac = appState.navigator.isMac
         , locale = appState.locale
         , class = Nothing
+        , paddingBottom = True
         }
 
 
@@ -209,6 +212,11 @@ setFormChanged changed (DynamicFormConfig cfg) =
 setWide : DynamicFormConfig a msg -> DynamicFormConfig a msg
 setWide (DynamicFormConfig cfg) =
     DynamicFormConfig { cfg | wide = True }
+
+
+setNoPaddingBottom : DynamicFormConfig a msg -> DynamicFormConfig a msg
+setNoPaddingBottom (DynamicFormConfig cfg) =
+    DynamicFormConfig { cfg | paddingBottom = False }
 
 
 setClass : String -> DynamicFormConfig a msg -> DynamicFormConfig a msg
@@ -228,7 +236,8 @@ viewDynamic (DynamicFormConfig cfg) =
     in
     Shortcut.shortcutElement shortcuts
         [ class (Maybe.withDefault "" cfg.class)
-        , class "pb-6 d-block"
+        , class "d-block"
+        , classList [ ( "pb-6", cfg.paddingBottom ) ]
         ]
         [ FormResult.errorOnlyView cfg.formResult
         , cfg.formView
